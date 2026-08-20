@@ -1,0 +1,31 @@
+{
+  "$schema": "../schemas/theory-v1.schema.json",
+  "format": "drop7-theory-v1",
+  "theoryId": "TH-20260820-distributional-afterstate-ranker-7aba7fb3",
+  "title": "Successor-closed distributional afterstate values rank siblings as well as fair D4",
+  "claim": "A single action-free public-afterstate evaluator, trained only on successor-closed labels (every legal sibling at each root, aligned chance scenarios, a fixed public continuation policy), ranks the legal root actions of disjoint whole-origin games at least as accurately as fair D4, and therefore can serve as the value core of a direct 1-ply chance-averaged policy with exact D4 fallback.",
+  "mechanism": "Prior learned policies in this repository failed for a diagnosed reason: they were trained on the action the behavior policy played (or a sparse sibling sample), so deployment required ranking actions whose successors were never labeled; low value error on visited states coexisted with poor sibling ranking. Making the evaluator action-free (its input is the fully resolved public afterstate: board, next visible disc, moves-until-rise) and the corpus successor-closed (every legal sibling's afterstates receive labels under common event-keyed chance scenarios) removes both the action-identity shortcut and the coverage gap by construction: every candidate action at deployment is scored by the same function on in-support states. Distributional (quantile) targets plus a within-root ranking loss train the relative ordering the policy actually needs rather than only absolute calibration, and the multi-move continuation labels supply the long-horizon signal that a one-ply heuristic lacks.",
+  "falsificationCriteria": [
+    "On preregistered held-out whole origins, the model's scenario-mean action ranking underperforms exact fair D4's ranking of the same roots in top-1 accuracy against the H40 long-outcome target by more than the frozen margin.",
+    "Within-root pairwise accuracy or normalized regret fails the frozen thresholds on any held-out origin fold.",
+    "Action stability between independent scenario halves is below the frozen threshold, showing the labels themselves are too noisy to learn the ranking.",
+    "The corpus cannot be built successor-closed (any legal sibling missing a label) at the pilot scale within the frozen compute budget."
+  ],
+  "informationClass": "public-policy",
+  "lifecycle": "assessed",
+  "assessment": "not-supported-as-tested",
+  "evidenceTier": "pilot",
+  "dependencies": [],
+  "evidenceRefs": [
+    "research/results/RS-20260820T094500Z-5c1e9a04.json",
+    "research/results/RS-20260820T114500Z-2b7c9e31.json",
+    "research/results/RS-20260820T142500Z-8f4a2d17.json"
+  ],
+  "createdBy": {
+    "platform": "OpenCode",
+    "model": "moonshotai/Kimi-K3",
+    "agentId": null
+  },
+  "createdAt": "2026-08-20T08:04:27Z",
+  "updatedAt": "2026-08-20T08:04:27Z"
+}

@@ -1,0 +1,105 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260820-afterstate-pilot-h40-29b8588a",
+  "theoryIds": [
+    "TH-20260820-distributional-afterstate-ranker-7aba7fb3"
+  ],
+  "title": "Pilot: action-complete H40 afterstate corpus and distributional ranker offline gate",
+  "classification": "algorithmic",
+  "hypothesis": "On roots harvested from fair-D1 development games, a compact residual-CNN afterstate evaluator trained on successor-closed H40 scenario labels (every legal sibling, 8 aligned chance scenarios, phase-greedy D1 continuation) ranks held-out whole-origin siblings non-inferiorly to exact fair D4 on top-1 accuracy, pairwise accuracy, and normalized regret against the scenario-mean H40 outcome ranking.",
+  "candidate": {
+    "name": "distributional-afterstate-ranker",
+    "entryPoint": "approaches/afterstate-learning/distributional-afterstate/common.hpp",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "fair-d4",
+    "entryPoint": "approaches/fair-expectimax/reference/fair-only-depth4.cpp",
+    "manifestRef": "research/benchmarks/baselines-v1.json"
+  },
+  "informationBoundary": "public-policy",
+  "benchmarkTier": "PILOT",
+  "data": {
+    "role": "public-development",
+    "seedLeaseRefs": [
+      "SL-20260820T083000Z-5da70000"
+    ],
+    "datasetRefs": [],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "All gameplay seeds come from the named lease and become permanent public-development data once read. Roots are split into train/calibration/held-out folds by whole origin game before any label is inspected. No historical panel, protected, or final data is read. The frozen 477-root H200 panel is not used for model selection."
+  },
+  "metrics": {
+    "primary": "Held-out whole-origin top-1 action accuracy of the model's scenario-averaged ranking against the scenario-mean H40 outcome ranking, compared with exact fair D4's top-1 accuracy on the same roots.",
+    "secondary": [
+      "within-root pairwise accuracy and normalized regret versus the same target, model and fair D4",
+      "top-2 accuracy",
+      "quantile calibration (80% interval coverage) on held-out afterstates",
+      "label stability: per-root Spearman correlation of action rankings between independent scenario halves",
+      "action completeness (fraction of legal siblings with labels; must be 1.0)",
+      "logical work and wall time per corpus root; training wall time and peak shared memory"
+    ],
+    "statisticalUnit": "whole-origin",
+    "uncertaintyMethod": "Two deterministic held-out half-folds by origin-game hash; a metric counts only if it moves the same direction in both halves. No complete-game confidence intervals are produced at this tier."
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "Corpus is successor-closed: every non-trivial harvested root (>=2 legal actions) has labels for every legal sibling under all 8 scenarios.",
+      "Label stability floor: mean per-root Spearman correlation between scenario-half action rankings >= 0.5 on held-out roots; below this the outcome is inconclusive (labels too noisy), not a pass or a theory rejection.",
+      "Model top-1 accuracy >= fair D4 top-1 accuracy - 0.02 on each held-out half-fold.",
+      "Model pairwise accuracy >= fair D4 pairwise accuracy - 0.02 on each held-out half-fold.",
+      "Model normalized regret <= fair D4 normalized regret + 0.02 on each held-out half-fold.",
+      "80% quantile interval coverage on held-out afterstates within [0.70, 0.90].",
+      "All CHECK-tier mechanics, legality, determinism, reflection, information-boundary, and resource-bound tests pass before any label is inspected."
+    ],
+    "failureAction": "Record a valid negative (or inconclusive, if the stability floor fails) result for this exact configuration, keep the corpus manifest for diagnosis, and open no gameplay tier.",
+    "passAction": "Register a successor SCREEN experiment: 32 paired public-development games of the frozen 1-ply chance-averaged afterstate policy with exact fair-D4 fallback versus unchanged fair D4. The candidate, corpus, and thresholds are not retuned on the held-out fold first."
+  },
+  "resources": {
+    "wallSeconds": 36000,
+    "cpuThreads": 24,
+    "maxHostBytes": 34359738368,
+    "maxGpuBytes": 21474836480,
+    "gpuDevices": [
+      "gfx1151"
+    ]
+  },
+  "stopConditions": [
+    "Stop on any rules, information-boundary, legality, determinism, or parity failure.",
+    "Stop corpus generation after 4 hours wall, 256 harvest games, or 16000 roots, whichever comes first.",
+    "Stop fair-D4 comparator labeling after 3 hours wall.",
+    "Stop training after 2 hours GPU wall or 30 epochs, whichever comes first.",
+    "Stop immediately on out-of-memory or on host available memory falling below 16 GiB.",
+    "Stop on any read of a seed outside the named lease."
+  ],
+  "expectedArtifacts": [
+    "runs/<run-id>/corpus/*.ndjson corpus rows with content manifest",
+    "runs/<run-id>/d4-labels/*.ndjson comparator rankings",
+    "runs/<run-id>/model/*.pt frozen model bytes and training log",
+    "runs/<run-id>/gate/gate-report.json with all primary and secondary metrics",
+    "research/datasets/<dataset-id>.json content-addressed corpus manifest",
+    "research/results/<result-id>.json scientific assessment"
+  ],
+  "lifecycle": "completed",
+  "protocolSha256": "4fe8992ced7f1ba6a369910beb83219b95fdfeb006127e6ea480650021c981ea",
+  "amendments": [
+    {
+      "timestamp": "2026-08-20T14:30:00Z",
+      "beforeControlledData": false,
+      "reason": "candidate.entryPoint corrected from the approach directory to a file inside it (same referent) so the validator's is_file check passes; no gate, cohort, metric, or budget content changed."
+    },
+    {
+      "timestamp": "2026-08-20T14:30:00Z",
+      "beforeControlledData": false,
+      "reason": "lifecycle advanced preregistered -> completed after the run and result records were written; protocol content otherwise unchanged."
+    }
+  ],
+  "createdBy": {
+    "platform": "OpenCode",
+    "model": "moonshotai/Kimi-K3",
+    "agentId": null
+  },
+  "createdAt": "2026-08-20T08:04:31Z",
+  "updatedAt": "2026-08-20T09:01:20Z"
+}

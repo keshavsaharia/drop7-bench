@@ -1,0 +1,46 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260820T100252Z-b44eed8d",
+  "actor": {
+    "kind": "model",
+    "platform": "claude-code",
+    "model": "claude-opus-5[1m]",
+    "agentId": "delegated/claim-arithmetic-audit"
+  },
+  "level": "L2",
+  "roles": [
+    {
+      "role": "validation",
+      "degree": "lead"
+    },
+    {
+      "role": "formal-analysis",
+      "degree": "lead"
+    },
+    {
+      "role": "data-curation",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Recomputed every numeric claim in the historical ledger using an exact paired-rescoring identity, classified all 203 score-and-move pairs into their scoring mode, found a permanently unsatisfiable frozen protocol gate, identified two preregistered rejections that reverse sign under corrected scoring, and produced the seed-range import table the benchmark contract requires.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "docs/exploratory/audit-03-claim-arithmetic.md"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "Classified all 203 (score, moves) pairs; corroborated independently against 26 sources carrying 7,000-point build assertions.",
+    "Calibrated the rescoring constant against a replay whose move counts are byte-identical across scoring modes."
+  ],
+  "limitations": [
+    "Not yet independently reviewed.",
+    "Recorded by the coordinator on the delegated agent's behalf; the agent had no write access to research/ and did not review this transcription.",
+    "Read-only audit; recomputation from documented figures, not a rerun of the original experiments."
+  ],
+  "selfReported": false,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-20T10:02:52Z"
+}

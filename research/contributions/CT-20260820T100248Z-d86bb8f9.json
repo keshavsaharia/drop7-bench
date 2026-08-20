@@ -1,0 +1,48 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260820T100248Z-d86bb8f9",
+  "actor": {
+    "kind": "model",
+    "platform": "claude-code",
+    "model": "claude-opus-5[1m]",
+    "agentId": "coordinator"
+  },
+  "level": "L4",
+  "roles": [
+    {
+      "role": "orchestration",
+      "degree": "lead"
+    },
+    {
+      "role": "methodology",
+      "degree": "lead"
+    },
+    {
+      "role": "review",
+      "degree": "lead"
+    }
+  ],
+  "summary": "Coordinated a combined audit and exploratory research session: selected and scoped eight delegated work packages, owned the SEEDLEASE-A51D seed lease and its sub-leases, defined the exploratory namespace and isolation rules, integrated audit findings against fresh measurements, and wrote the benchmark-suite design and the exploratory index.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "docs/exploratory/README.md",
+    "docs/exploratory/design-01-benchmark-suite.md"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "Verified make research-validate passes after adding these records.",
+    "Selected the exploratory seed lease by extracting every eight-hex-digit constant from docs/research/history.md, approaches/, src/, research/ and artifacts/ and choosing an unused prefix; historical gameplay seeds cluster in 0x3d000000-0x3ea00000 and the 0xa51d prefix appears nowhere."
+  ],
+  "limitations": [
+    "Not yet independently reviewed.",
+    "All output is exploratory and lives in a separate namespace; it does not upgrade docs/research/ or any frozen protocol.",
+    "No protected or final seed was opened and no qualification claim is made.",
+    "Coordination and integration only; the delegated implementations and audits are attributed to their own records."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-20T10:02:48Z"
+}

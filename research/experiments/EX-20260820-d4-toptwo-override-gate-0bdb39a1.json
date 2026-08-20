@@ -1,0 +1,96 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260820-d4-toptwo-override-gate-0bdb39a1",
+  "theoryIds": [
+    "TH-20260820-distributional-afterstate-ranker-7aba7fb3"
+  ],
+  "title": "Offline gate: calibrated top-two near-tie override of fair D4 by the frozen afterstate model",
+  "classification": "algorithmic",
+  "hypothesis": "At roots where fair D4's top two actions are near-tied (Q gap <= 500 points, the bottom ~37% of the top-two gap distribution measured on already-read development labels), the frozen iteration-3 distributional afterstate model can identify the better action more reliably than D4's own ordering, because near-ties are where D4's 4-ply estimates are most noise-sensitive while the model's calibrated H40 outcome distributions carry independent long-horizon information. The override policy (D4, plus swapping to the second action only when the model's paired 256-scenario advantage has a positive 95% bootstrap lower bound) will show lower mean normalized regret than unchanged D4 on eligible fresh held-out roots.",
+  "candidate": {
+    "name": "d4-toptwo-override",
+    "entryPoint": "approaches/afterstate-learning/distributional-afterstate/override-gate.py",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "fair-d4",
+    "entryPoint": "approaches/fair-expectimax/reference/fair-only-depth4.cpp",
+    "manifestRef": "research/benchmarks/baselines-v1.json"
+  },
+  "informationBoundary": "public-policy",
+  "benchmarkTier": "PILOT",
+  "data": {
+    "role": "public-development",
+    "seedLeaseRefs": [
+      "SL-20260820T083000Z-5da70000"
+    ],
+    "datasetRefs": [
+      "DS-20260820-afterstate-h40-k256-9d31c47a"
+    ],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "The model is the frozen iteration-3 checkpoint (trained only on seeds 0x5da70000-0x5da700ff, training-role). The near-tie threshold 500 was fixed from already-read iteration-2/3 comparator labels before this experiment's data existed. Evaluation roots come from fresh seeds 0x5da70300-0x5da7033f (64 origins), read for the first time by this experiment's single gate evaluation. No protected or final data is read."
+  },
+  "metrics": {
+    "primary": "Mean normalized regret of the override policy versus unchanged fair D4 on override-eligible fresh held-out roots, against the scenario-mean H40 outcome ranking (K=256, phase-greedy D1 continuation), reported per origin-hash half-fold.",
+    "secondary": [
+      "override rate among eligible roots (coverage)",
+      "eligible-root count and near-tie rate",
+      "whole-set mean normalized regret, top-1, and pairwise accuracy of the override policy versus D4",
+      "the same metrics conditioned on decisive roots (spread > 20,000)",
+      "label stability: decisive-root scenario-half (128 vs 128) Spearman",
+      "quantile calibration of the frozen model on the fresh afterstates",
+      "determinism: two identical gate runs must produce byte-identical reports"
+    ],
+    "statisticalUnit": "whole-origin",
+    "uncertaintyMethod": "Two deterministic held-out half-folds by origin-game hash (mix32 of the origin seed); the primary comparison must move the same direction in both halves. The override confidence rule itself is a paired bootstrap over the 256 aligned scenarios (1000 resamples, deterministic domain 0x4f565252 keyed on the public root hash only)."
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "Corpus is successor-closed: every non-trivial harvested root has labels for every legal sibling under all 256 scenarios.",
+      "Label stability floor: decisive-root scenario-half Spearman >= 0.5; below this the outcome is inconclusive.",
+      "On eligible roots, override-policy mean normalized regret <= D4 mean normalized regret - 0.01 in EACH half-fold.",
+      "Override rate >= 5% of eligible roots (a rule that never fires proves nothing).",
+      "Nominal 76.5% quantile interval coverage of the frozen model on fresh afterstates within [0.66, 0.87] (sanity that the model is in-support).",
+      "The gate script is deterministic: two runs produce byte-identical reports.",
+      "All existing CHECK-tier self-tests pass before any label is inspected."
+    ],
+    "failureAction": "Record a valid negative (or inconclusive) result. A failure here closes the direct-override use of this model: no further override variants of the same checkpoint without new evidence.",
+    "passAction": "Preregister a SCREEN gameplay experiment: 32 paired public-development games, native fair D4 with the frozen override rule (model inference over stratified afterstate samples at near-tied roots only) versus unchanged fair D4, with per-game result rows and the standard cohort summary."
+  },
+  "resources": {
+    "wallSeconds": 10800,
+    "cpuThreads": 24,
+    "maxHostBytes": 34359738368,
+    "maxGpuBytes": 21474836480,
+    "gpuDevices": [
+      "gfx1151"
+    ]
+  },
+  "stopConditions": [
+    "Stop on any rules, information-boundary, legality, determinism, or parity failure.",
+    "Stop corpus generation after 1 hour wall.",
+    "Stop fair-D4 comparator labeling after 1 hour wall.",
+    "Stop gate evaluation after 1 hour wall.",
+    "Stop immediately on out-of-memory or on host available memory falling below 16 GiB.",
+    "Stop on any read of a seed outside the named lease."
+  ],
+  "expectedArtifacts": [
+    "runs/<run-id>/corpus-d/*.ndjson K=256 fresh held-out corpus with content manifest",
+    "runs/<run-id>/d4-labels-d/*.tsv comparator rankings",
+    "runs/<run-id>/gate/override-gate-report.json (two byte-identical copies from repeated runs)",
+    "research/datasets/<dataset-id>.json content-addressed corpus manifest",
+    "research/results/<result-id>.json scientific assessment"
+  ],
+  "lifecycle": "preregistered",
+  "protocolSha256": "bf42e557e99f2e3db61153cd027fe7738b6511af474bf67009f4117337326c5b",
+  "amendments": [],
+  "createdBy": {
+    "platform": "OpenCode",
+    "model": "moonshotai/Kimi-K3",
+    "agentId": null
+  },
+  "createdAt": "2026-08-20T14:50:00Z",
+  "updatedAt": "2026-08-20T17:57:26Z"
+}

@@ -1,0 +1,95 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260820T142500Z-8f4a2d17",
+  "theoryIds": [
+    "TH-20260820-distributional-afterstate-ranker-7aba7fb3"
+  ],
+  "experimentId": "EX-20260820-afterstate-pilot-h40-k256-65a05477",
+  "runIds": [
+    "RUN-20260820T111656Z-f771f173"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "fail",
+  "assessment": "not-supported-as-tested",
+  "evidenceTier": "pilot",
+  "summary": "With K=256 aligned scenarios the label-stability floor passed decisively (decisive-root split-half Spearman 0.818, unconditioned 0.638, both >= 0.5), so for the first time in this line the ranking target is stable enough to certify a verdict. The verdict is a valid negative for the direct-play configuration: the distributional afterstate ranker trailed exact fair D4 on every preregistered comparison in both fresh held-out half-folds (pooled top-1 0.424 vs 0.499; pairwise 0.685 vs 0.737; regret 0.241 vs 0.178). On the 411 decisive roots (spread > 20k) the gap narrowed but persisted (top-1 0.526 vs 0.584; regret 0.082 vs 0.064). The model clearly beat its D1 continuation teacher (top-1 0.424 vs 0.319) and its quantile head is calibrated (0.864 coverage). Conclusion: a compact action-free afterstate network trained on successor-closed H40 D1-continuation labels is a viable, calibrated long-horizon evaluator, but it is NOT a viable direct replacement for 4-ply expectimax; any future use must be as a companion signal inside search, and the same ranking gate applies. No gameplay tier was opened.",
+  "metrics": {
+    "corpusARows": 19713536,
+    "corpusCRows": 4557056,
+    "heldoutRoots": 2523,
+    "decisiveRoots": 411,
+    "labelStabilityMeanSpearman": 0.6379,
+    "labelStabilityDecisiveSpearman": 0.8181,
+    "quantileIntervalCoverage": 0.8635,
+    "modelTop1Pooled": 0.4245,
+    "d4Top1Pooled": 0.4986,
+    "d1Top1Pooled": 0.3191,
+    "modelPairwisePooled": 0.6851,
+    "d4PairwisePooled": 0.7366,
+    "modelRegretPooled": 0.2408,
+    "d4RegretPooled": 0.1784,
+    "modelTop1Decisive": 0.5255,
+    "d4Top1Decisive": 0.5839,
+    "modelRegretDecisive": 0.082,
+    "d4RegretDecisive": 0.0643,
+    "epochsCompleted": 11
+  },
+  "gateChecks": [
+    {
+      "criterion": "Successor-closed corpus (all legal siblings x 256 scenarios)",
+      "passed": true,
+      "observed": "24,270,592 rows over 14,009 roots across both corpora; completeness 1.0"
+    },
+    {
+      "criterion": "Label stability floor: decisive-root scenario-half (128 vs 128) Spearman >= 0.5",
+      "passed": true,
+      "observed": "0.8181 on 411 decisive roots; unconditioned 0.6379 on 2,523 roots"
+    },
+    {
+      "criterion": "Model top-1 >= D4 top-1 - 0.02 on each half-fold",
+      "passed": false,
+      "observed": "half1 0.3981 vs 0.4776; half2 0.4439 vs 0.5141"
+    },
+    {
+      "criterion": "Model pairwise >= D4 pairwise - 0.02 on each half-fold",
+      "passed": false,
+      "observed": "half1 0.6828 vs 0.7280; half2 0.6868 vs 0.7429"
+    },
+    {
+      "criterion": "Model regret <= D4 regret + 0.02 on each half-fold",
+      "passed": false,
+      "observed": "half1 0.2496 vs 0.1870; half2 0.2344 vs 0.1720"
+    },
+    {
+      "criterion": "Nominal 76.5% quantile interval coverage within [0.66, 0.87]",
+      "passed": true,
+      "observed": "0.8635"
+    },
+    {
+      "criterion": "All CHECK-tier tests pass before any label is inspected",
+      "passed": true,
+      "observed": "SELFTEST OK (9 checks)"
+    }
+  ],
+  "perGameArtifact": {
+    "path": null,
+    "sha256": null,
+    "recordCount": null
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260820T080056Z-376ada90.json"
+  ],
+  "artifactManifestRef": null,
+  "limitations": [
+    "Labels are H40 returns under a phase-greedy D1 continuation (a weak fixed teacher); a stronger-teacher corpus was not tested and might shift the verdict.",
+    "Model undertrained: 11 of 20 epochs at the 2h GPU budget stop; ranking loss was still decreasing.",
+    "Compact 3.4M-parameter ResNet; capacity and input resolution (single afterstate, no root context) were not scaled.",
+    "Roots are harvested from fair-D1 games; deployment-distribution roots were not represented.",
+    "Single machine profile; FP32 on the shared-memory iGPU."
+  ],
+  "contributionIds": [
+    "CT-20260820T140540Z-f8458dc0"
+  ],
+  "recordedAt": "2026-08-20T14:25:00Z"
+}

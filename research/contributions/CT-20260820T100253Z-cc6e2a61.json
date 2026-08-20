@@ -1,0 +1,42 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260820T100253Z-cc6e2a61",
+  "actor": {
+    "kind": "model",
+    "platform": "claude-code",
+    "model": "claude-opus-5[1m]",
+    "agentId": "delegated/blind-spot-analysis"
+  },
+  "level": "L2",
+  "roles": [
+    {
+      "role": "investigation",
+      "degree": "lead"
+    },
+    {
+      "role": "formal-analysis",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Classified every recorded rejection as clean or confounded, compiled the approach sources with no recorded outcome, and established that sibling-ranking experiments uniformly targeted score while state-value experiments uniformly targeted lifetime, with the two never crossed.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "docs/exploratory/audit-04-blind-spots.md"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "Compiled all 26 sources hard-locked at 7,000 points and confirmed none builds today.",
+    "Commissioned and spot-verified a classification pass over all 139 approach sources."
+  ],
+  "limitations": [
+    "Not yet independently reviewed.",
+    "Recorded by the coordinator on the delegated agent's behalf; the agent had no write access to research/ and did not review this transcription.",
+    "Read-only analysis; the objective classification counts are a sampled verification, not an exhaustive re-read of every file by the author."
+  ],
+  "selfReported": false,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-20T10:02:53Z"
+}

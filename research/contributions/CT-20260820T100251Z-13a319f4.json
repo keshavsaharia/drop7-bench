@@ -1,0 +1,43 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260820T100251Z-13a319f4",
+  "actor": {
+    "kind": "model",
+    "platform": "claude-code",
+    "model": "claude-opus-5[1m]",
+    "agentId": "delegated/fair-d4-audit"
+  },
+  "level": "L2",
+  "roles": [
+    {
+      "role": "validation",
+      "degree": "lead"
+    },
+    {
+      "role": "formal-analysis",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Independently audited the fair-D4 reference policy: verified full-width four-ply search, determinism, reflection safety, public-state-only inputs and provably non-binding work and cache bounds, and identified an uncalibrated terminal utility, a five-stratum estimator that cannot represent the seven-atom disc distribution, a manifest provenance gap, and a horizon that misses the row rise on a fifth of decisions.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "docs/exploratory/audit-02-fair-d4.md"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "Rebuilt the reference with the Makefile's exact flags and confirmed the binary is byte-identical to the committed one.",
+    "Confirmed all four audited source hashes match research/benchmarks/baselines-v1.json.",
+    "Measured stratum coverage over 4M draws and re-derived the worst-case work and cache bounds by hand."
+  ],
+  "limitations": [
+    "Not yet independently reviewed.",
+    "Recorded by the coordinator on the delegated agent's behalf; the agent had no write access to research/ and did not review this transcription.",
+    "Read-only audit; strength numbers remain ledger-recorded and not independently replicated."
+  ],
+  "selfReported": false,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-20T10:02:51Z"
+}

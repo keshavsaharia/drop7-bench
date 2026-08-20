@@ -1,0 +1,42 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260820T100254Z-b6d81852",
+  "actor": {
+    "kind": "model",
+    "platform": "claude-code",
+    "model": "claude-opus-5[1m]",
+    "agentId": "delegated/optimistic-curriculum-audit"
+  },
+  "level": "L2",
+  "roles": [
+    {
+      "role": "investigation",
+      "degree": "lead"
+    },
+    {
+      "role": "validation",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Determined that training order and curriculum schedule were never ablated in any experiment in the repository, classified seventeen distillation failures by mechanism, and assessed an owner-proposed optimistic-teacher curriculum hypothesis against that classification, separating optimism in the state distribution from optimism in the label.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "docs/exploratory/audit-05-optimistic-curriculum.md"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "Read the actual trainer sources rather than the documentation summaries and cited the shuffling call site in each.",
+    "Verified the engine scoring constants and the survival-share arithmetic independently."
+  ],
+  "limitations": [
+    "Not yet independently reviewed.",
+    "Recorded by the coordinator on the delegated agent's behalf; the agent had no write access to research/ and did not review this transcription.",
+    "Read-only analysis; the proposed experiment was designed but not run."
+  ],
+  "selfReported": false,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-20T10:02:54Z"
+}

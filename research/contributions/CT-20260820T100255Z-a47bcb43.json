@@ -1,0 +1,49 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260820T100255Z-a47bcb43",
+  "actor": {
+    "kind": "model",
+    "platform": "claude-code",
+    "model": "claude-opus-5[1m]",
+    "agentId": "delegated/scenario-engine"
+  },
+  "level": "L3",
+  "roles": [
+    {
+      "role": "software",
+      "degree": "lead"
+    },
+    {
+      "role": "methodology",
+      "degree": "substantial"
+    },
+    {
+      "role": "investigation",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Built a deterministic fully-specified scenario engine with latent covered-disc values, proved it trajectory-identical to the base engine over 218,470 moves, implemented an exact clairvoyant solver with a transposition table, minted a labelled 128-scenario suite and a 256-position sparse probe, and produced the first measurement of whether a board clear is reachable at all under perfect knowledge.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "approaches/lifetime-objective/scenario/",
+    "docs/exploratory/finding-02-scenario-benchmark.md"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "Parity gate: 4,096 seeds by 2 deterministic policies, 218,470 moves, 0 mismatches on boards, scores, wave lists and terminal flags, plus 20,000 random-board checks of the paired gravity and rise transforms.",
+    "Solver self-tested on hand-constructed positions; all 128 suite scenarios solved exactly at horizon 9 and re-solving reproduced every optimum bit-for-bit."
+  ],
+  "limitations": [
+    "Not yet independently reviewed.",
+    "Recorded by the coordinator on the delegated agent's behalf; the agent had no write access to research/ and did not review this transcription.",
+    "The latent reveal source has different dynamics from the base engine by design, so its scores are not bit-comparable to base-engine runs.",
+    "Horizon 9 is itself binding, so the zero board-clear rate on realistic boards is partly a horizon statement.",
+    "The suite is not yet validated as a predictor of whole-game strength and cannot be cited as strength evidence."
+  ],
+  "selfReported": false,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-20T10:02:55Z"
+}

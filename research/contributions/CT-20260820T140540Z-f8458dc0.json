@@ -1,0 +1,37 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260820T140540Z-f8458dc0",
+  "actor": {
+    "kind": "model",
+    "platform": "OpenCode",
+    "model": "moonshotai/Kimi-K3",
+    "agentId": null
+  },
+  "level": "L3",
+  "roles": [
+    {
+      "role": "investigation",
+      "degree": "lead"
+    }
+  ],
+  "summary": "Designed, implemented, and evaluated the distributional afterstate ranker pilot line: successor-closed action-complete corpus generator (aligned chance scenarios, common random numbers, whole-origin folds, cross-fold dedup), exact fair-D4 comparator labeler reusing the pinned reference byte-identically, seed-free CHECK self-test, and a ROCm PyTorch trainer (quantile + within-root ranking losses, GPU-resident batches). Ran three preregistered iterations (K=8 inconclusive, K=64 inconclusive, K=256 valid negative): the calibrated model beats its D1 teacher but trails fair D4 at held-out sibling ranking, so the direct-play configuration is not supported as tested. Wrote theory, experiment, lease, run, dataset, and result records.",
+  "theoryIds": [
+    "TH-20260820-distributional-afterstate-ranker-7aba7fb3"
+  ],
+  "experimentIds": [
+    "EX-20260820-afterstate-pilot-h40-k256-65a05477"
+  ],
+  "runIds": [],
+  "artifactPaths": [],
+  "commitShas": [],
+  "validationPerformed": [
+    "make test; make research-validate; build/afterstate/self-test (9 checks)"
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-20T14:05:40Z"
+}

@@ -1,0 +1,103 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260820-afterstate-pilot-h40-k64-d7a9faf5",
+  "theoryIds": [
+    "TH-20260820-distributional-afterstate-ranker-7aba7fb3"
+  ],
+  "title": "Pilot iteration 2: K=64-scenario action-complete H40 corpus with fresh held-out origins",
+  "classification": "algorithmic",
+  "hypothesis": "Raising aligned chance scenarios from K=8 to K=64 (the only change from EX-20260820-afterstate-pilot-h40-29b8588a) lifts scenario-half label stability above the frozen 0.5 Spearman floor, and the unchanged distributional afterstate ranker then ranks fresh held-out whole-origin siblings non-inferiorly to exact fair D4 on top-1 accuracy, pairwise accuracy, and normalized regret against the scenario-mean H40 outcome ranking.",
+  "candidate": {
+    "name": "distributional-afterstate-ranker",
+    "entryPoint": "approaches/afterstate-learning/distributional-afterstate/common.hpp",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "fair-d4",
+    "entryPoint": "approaches/fair-expectimax/reference/fair-only-depth4.cpp",
+    "manifestRef": "research/benchmarks/baselines-v1.json"
+  },
+  "informationBoundary": "public-policy",
+  "benchmarkTier": "PILOT",
+  "data": {
+    "role": "public-development",
+    "seedLeaseRefs": [
+      "SL-20260820T083000Z-5da70000"
+    ],
+    "datasetRefs": [
+      "DS-20260820-afterstate-h40-k8-3f2f6d29"
+    ],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "Training corpus: seeds 0x5da70000-0x5da700ff (the same 256 origins as iteration 1, including its former held-out roots, which are now training-only and are never evaluated again). Evaluation corpus: fresh seeds 0x5da70100-0x5da7013f (64 origins), all held-out, read for the first time by this experiment's single gate evaluation. Iteration 1's gate outcome was inconclusive on label stability; this experiment changes only the scenario count and the held-out origins. No protected or final data is read."
+  },
+  "metrics": {
+    "primary": "Fresh held-out whole-origin top-1 action accuracy of the model's scenario-averaged ranking against the scenario-mean H40 outcome ranking, compared with exact fair D4's top-1 accuracy on the same roots.",
+    "secondary": [
+      "within-root pairwise accuracy and normalized regret versus the same target, model and fair D4 and fair D1",
+      "top-2 accuracy",
+      "quantile calibration (nominal 76.5% outer-interval coverage) on held-out afterstates",
+      "label stability: per-root Spearman correlation of action rankings between independent scenario halves (32 vs 32)",
+      "action completeness (fraction of legal siblings with labels; must be 1.0)",
+      "logical work and wall time per corpus root; training wall time and peak shared memory"
+    ],
+    "statisticalUnit": "whole-origin",
+    "uncertaintyMethod": "Two deterministic held-out half-folds by origin-game hash (mix32 of the origin seed); a metric counts only if it moves the same direction in both halves. No complete-game confidence intervals are produced at this tier."
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "Corpus is successor-closed: every non-trivial harvested root (>=2 legal actions) has labels for every legal sibling under all 64 scenarios.",
+      "Label stability floor: mean per-root Spearman correlation between scenario-half (32 vs 32) action rankings >= 0.5 on held-out roots; below this the outcome is inconclusive (labels too noisy), not a pass or a theory rejection.",
+      "Model top-1 accuracy >= fair D4 top-1 accuracy - 0.02 on each held-out half-fold.",
+      "Model pairwise accuracy >= fair D4 pairwise accuracy - 0.02 on each held-out half-fold.",
+      "Model normalized regret <= fair D4 normalized regret + 0.02 on each held-out half-fold.",
+      "Nominal 76.5% quantile interval coverage on held-out afterstates within [0.66, 0.87].",
+      "All CHECK-tier mechanics, legality, determinism, reflection, information-boundary, and resource-bound tests pass before any label is inspected."
+    ],
+    "failureAction": "Record a valid negative (or inconclusive, if the stability floor fails again) result for this exact configuration. If stability passes but the model trails D4, the theory is not supported as tested; keep both corpus manifests for diagnosis and open no gameplay tier.",
+    "passAction": "Register a successor SCREEN experiment: 32 paired public-development games of the frozen 1-ply chance-averaged afterstate policy with exact fair-D4 fallback versus unchanged fair D4. The candidate, corpus, and thresholds are not retuned on the held-out fold first."
+  },
+  "resources": {
+    "wallSeconds": 36000,
+    "cpuThreads": 24,
+    "maxHostBytes": 34359738368,
+    "maxGpuBytes": 21474836480,
+    "gpuDevices": [
+      "gfx1151"
+    ]
+  },
+  "stopConditions": [
+    "Stop on any rules, information-boundary, legality, determinism, or parity failure.",
+    "Stop corpus generation after 2 hours wall or 320 harvest games, whichever comes first.",
+    "Stop fair-D4 comparator labeling after 3 hours wall.",
+    "Stop training after 2 hours GPU wall or 20 epochs, whichever comes first.",
+    "Stop immediately on out-of-memory or on host available memory falling below 16 GiB.",
+    "Stop on any read of a seed outside the named lease."
+  ],
+  "expectedArtifacts": [
+    "runs/<run-id>/corpus-a/*.ndjson K=64 training corpus with content manifest",
+    "runs/<run-id>/corpus-b/*.ndjson K=64 fresh held-out corpus with content manifest",
+    "runs/<run-id>/d4-labels-b/*.tsv comparator rankings for held-out roots",
+    "runs/<run-id>/model/*.pt frozen model bytes and training log",
+    "runs/<run-id>/gate/gate-report.json with all primary and secondary metrics",
+    "research/datasets/<dataset-id>.json content-addressed corpus manifests",
+    "research/results/<result-id>.json scientific assessment"
+  ],
+  "lifecycle": "completed",
+  "protocolSha256": "769e418bc91f4d5e6a9ae96f04da80bdbad3ef32142b56e86f128fec50105d5b",
+  "amendments": [
+    {
+      "timestamp": "2026-08-20T14:30:00Z",
+      "beforeControlledData": false,
+      "reason": "lifecycle advanced preregistered -> completed after the run and result records were written; protocol content otherwise unchanged."
+    }
+  ],
+  "createdBy": {
+    "platform": "OpenCode",
+    "model": "moonshotai/Kimi-K3",
+    "agentId": null
+  },
+  "createdAt": "2026-08-20T09:50:00Z",
+  "updatedAt": "2026-08-20T09:04:08Z"
+}

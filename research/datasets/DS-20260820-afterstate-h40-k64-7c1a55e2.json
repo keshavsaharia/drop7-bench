@@ -1,0 +1,32 @@
+{
+  "$schema": "../schemas/dataset-v1.schema.json",
+  "format": "drop7-dataset-v1",
+  "datasetId": "DS-20260820-afterstate-h40-k64-7c1a55e2",
+  "title": "Action-complete H40 afterstate corpus, K=64 aligned scenarios, phase-greedy D1 continuation (pilot iteration 2; training seeds 0x5da70000-0x5da700ff plus held-out seeds 0x5da70100-0x5da7013f)",
+  "dataRole": "public-development",
+  "informationClass": "public-only",
+  "originUnit": "whole-game",
+  "originCount": 320,
+  "rowCount": 6167936,
+  "wholeOriginSplit": true,
+  "seedLeaseRefs": [
+    "SL-20260820T083000Z-5da70000"
+  ],
+  "parentDatasetRefs": [],
+  "fields": [
+    "identical schema to DS-20260820-afterstate-h40-k8-3f2f6d29; corpus-a (4,928,384 rows, training-role) and corpus-b (1,239,552 rows, held-out) are separate artifacts under runs/RUN-20260820T090411Z-73e93859/"
+  ],
+  "privilegedFields": [
+    "originSeed",
+    "moveIndex"
+  ],
+  "allowedConsumers": [
+    "afterstate-ranker training and offline ranking evaluation"
+  ],
+  "artifact": {
+    "path": "runs/RUN-20260820T090411Z-73e93859/corpus-b/corpus.ndjson",
+    "sha256": "b34b047004493c444bd85b0dfbdac573f1019a3b86471507a19d3c8464de3e7e",
+    "bytes": 520063027
+  },
+  "createdAt": "2026-08-20T11:40:00Z"
+}

@@ -1,0 +1,48 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260820T100914Z-27d66f30",
+  "actor": {
+    "kind": "model",
+    "platform": "claude-code",
+    "model": "claude-opus-5[1m]",
+    "agentId": "gpu-rocm-enablement"
+  },
+  "level": "L2",
+  "roles": [
+    { "role": "software", "degree": "lead" },
+    { "role": "validation", "degree": "lead" },
+    { "role": "investigation", "degree": "substantial" },
+    { "role": "compute", "degree": "substantial" },
+    { "role": "writing", "degree": "substantial" }
+  ],
+  "summary": "Bounded work package: made PyTorch/ROCm training work on the gfx1151 integrated GPU and measured it. Installed torch 2.13.0+rocm7.1 into .venv-rocm and AMD's gfx1151-specific torch 2.9.1+rocm7.13.0a into .venv-rocm-therock; diagnosed two defects in the pytorch.org wheel on this host (bundled ROCr segfaults on first HSA queue creation, fixed by LD_PRELOAD of the system ROCr; bundled MIOpen cannot assemble its BatchNorm training kernel on gfx1151, worked around with GroupNorm) and rejected the seemingly obvious MIOpen LD_PRELOAD fix after showing it loads a second HIP runtime and corrupts the heap. Wrote a correctness-and-throughput harness (bench.py), an environment helper (activate.sh) and a standalone bug reproducer, and produced the GPU enablement report. Incidentally found and characterised a multithreaded OpenBLAS SGEMM data race on this Zen 5 host that silently corrupts numpy float32 linear algebra.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "approaches/lifetime-objective/gpu/bench.py",
+    "approaches/lifetime-objective/gpu/activate.sh",
+    "approaches/lifetime-objective/gpu/openblas_sgemm_race.py",
+    "docs/exploratory/gpu-01-rocm-enablement.md",
+    "docs/exploratory/gpu-02-openblas-sgemm-race.md"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "GPU numerical correctness scored against float64 references rather than CPU fp32: 4096x4096 fp32 matmul relative error 3.45e-06, bf16 matmul 3.03e-03, MLP gradients 1.65e-08, Drop7 residual-CNN forward 1.13e-06 and gradients 3.28e-07.",
+    "200-step GPU training soak at batch 1024 with GroupNorm: all parameters finite, loss fell from 2.95 to 0.003 on a fixed batch.",
+    "Native HIP vector-add compiled with system hipcc for gfx1151 returned exact results, isolating the segfault to the wheel's bundled ROCr rather than the driver or hardware.",
+    "OpenBLAS SGEMM race established as software, not silicon, by a same-process control arm: numpy/OpenBLAS 40/40 runs corrupt at 32 threads while torch/oneDNN was 0/40 on identical data.",
+    "Did NOT run make research-validate: this package created no theory, experiment, dataset, result or seed-lease record, and the repository tree was concurrently being written by other agents."
+  ],
+  "limitations": [
+    "All throughput numbers were measured on a heavily contended host (mean 1-minute load 20-41 on 32 logical CPUs) because other agents held the machine for the whole session. They are reported as best-of-N, which bounds contention but does not eliminate it, and every table carries its observed load. They are lower bounds and should be re-measured on an idle host before any performance claim is promoted.",
+    "No gameplay was run, no seed was opened, and no policy or scientific conclusion is claimed.",
+    "BatchNorm training is unusable on the pytorch.org wheel on this target; the GroupNorm workaround is a model-architecture change that has not been evaluated for effect on learning quality.",
+    "The OpenBLAS finding is characterised but not reported upstream, and has not been tested against a distribution build, a from-source build, a newer OpenBLAS, or genuine SkylakeX hardware.",
+    "Not independently reviewed."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-20T10:09:14Z"
+}

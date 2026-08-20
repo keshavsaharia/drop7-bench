@@ -1,0 +1,104 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260820-afterstate-pilot-h40-k256-65a05477",
+  "theoryIds": [
+    "TH-20260820-distributional-afterstate-ranker-7aba7fb3"
+  ],
+  "title": "Pilot iteration 3: K=256-scenario corpus, fresh held-out origins, full training",
+  "classification": "algorithmic",
+  "hypothesis": "With K=256 aligned scenarios (per-action standard error ~1.3k points against a ~7k median sibling gap), the scenario-half label stability on decisive roots passes the 0.5 floor, and a fully trained distributional afterstate ranker ranks fresh held-out whole-origin siblings non-inferiorly to exact fair D4. Iterations 1-2 showed K=8/K=64 stability of 0.246/0.446 and an undertrained model; this iteration changes scenario count and training completeness, and refines only the stability diagnostic to condition on decisive roots.",
+  "candidate": {
+    "name": "distributional-afterstate-ranker",
+    "entryPoint": "approaches/afterstate-learning/distributional-afterstate/common.hpp",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "fair-d4",
+    "entryPoint": "approaches/fair-expectimax/reference/fair-only-depth4.cpp",
+    "manifestRef": "research/benchmarks/baselines-v1.json"
+  },
+  "informationBoundary": "public-policy",
+  "benchmarkTier": "PILOT",
+  "data": {
+    "role": "public-development",
+    "seedLeaseRefs": [
+      "SL-20260820T083000Z-5da70000"
+    ],
+    "datasetRefs": [
+      "DS-20260820-afterstate-h40-k8-3f2f6d29"
+    ],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "Training corpus: seeds 0x5da70000-0x5da700ff (the same 256 origins as iterations 1-2; all folds are training-role and are never evaluated again). Evaluation corpus: fresh seeds 0x5da70200-0x5da7023f (64 origins), all held-out, read for the first time by this experiment's single gate evaluation; the 0x5da70100-0x5da7013f block was read by iteration 2 and is not reused here. No protected or final data is read."
+  },
+  "metrics": {
+    "primary": "Fresh held-out whole-origin top-1 action accuracy of the model's scenario-averaged ranking against the scenario-mean H40 outcome ranking, compared with exact fair D4's top-1 accuracy on the same roots.",
+    "secondary": [
+      "within-root pairwise accuracy and normalized regret versus the same target, model and fair D4 and fair D1",
+      "top-2 accuracy",
+      "quantile calibration (nominal 76.5% outer-interval coverage) on held-out afterstates",
+      "label stability: per-root Spearman correlation of action rankings between independent scenario halves (128 vs 128), reported unconditioned and conditioned on decisive roots (full-K scenario-mean spread > 20,000 points; the 20,000 threshold was fixed from iteration-1 training-role data before this experiment's data was read)",
+      "the same ranking metrics conditioned on decisive roots, as secondary diagnostics",
+      "action completeness (fraction of legal siblings with labels; must be 1.0)",
+      "logical work and wall time per corpus root; training wall time and peak shared memory"
+    ],
+    "statisticalUnit": "whole-origin",
+    "uncertaintyMethod": "Two deterministic held-out half-folds by origin-game hash (mix32 of the origin seed); a metric counts only if it moves the same direction in both halves. No complete-game confidence intervals are produced at this tier."
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "Corpus is successor-closed: every non-trivial harvested root (>=2 legal actions) has labels for every legal sibling under all 256 scenarios.",
+      "Label stability floor: mean per-root Spearman correlation between scenario-half (128 vs 128) action rankings >= 0.5 on decisive held-out roots (spread > 20,000); below this the outcome is inconclusive, not a pass or a theory rejection.",
+      "Model top-1 accuracy >= fair D4 top-1 accuracy - 0.02 on each held-out half-fold (all roots).",
+      "Model pairwise accuracy >= fair D4 pairwise accuracy - 0.02 on each held-out half-fold (all roots).",
+      "Model normalized regret <= fair D4 normalized regret + 0.02 on each held-out half-fold (all roots).",
+      "Nominal 76.5% quantile interval coverage on held-out afterstates within [0.66, 0.87].",
+      "All CHECK-tier mechanics, legality, determinism, reflection, information-boundary, and resource-bound tests pass before any label is inspected."
+    ],
+    "failureAction": "Record a valid negative (or inconclusive, if the stability floor fails) result for this exact configuration. If stability passes but the model trails D4, the theory is not supported as tested for the direct-play configuration, and the appropriate conclusion is that the afterstate model may serve only as a companion signal inside a search, not as a D4 replacement. Open no gameplay tier.",
+    "passAction": "Register a successor SCREEN experiment: 32 paired public-development games of the frozen 1-ply chance-averaged afterstate policy with exact fair-D4 fallback versus unchanged fair D4. The candidate, corpus, and thresholds are not retuned on the held-out fold first."
+  },
+  "resources": {
+    "wallSeconds": 21600,
+    "cpuThreads": 24,
+    "maxHostBytes": 34359738368,
+    "maxGpuBytes": 21474836480,
+    "gpuDevices": [
+      "gfx1151"
+    ]
+  },
+  "stopConditions": [
+    "Stop on any rules, information-boundary, legality, determinism, or parity failure.",
+    "Stop corpus generation after 3 hours wall or 320 harvest games, whichever comes first.",
+    "Stop fair-D4 comparator labeling after 3 hours wall.",
+    "Stop training after 2 hours GPU wall or 20 epochs, whichever comes first.",
+    "Stop immediately on out-of-memory or on host available memory falling below 16 GiB.",
+    "Stop on any read of a seed outside the named lease."
+  ],
+  "expectedArtifacts": [
+    "runs/<run-id>/corpus-a/*.ndjson K=256 training corpus with content manifest",
+    "runs/<run-id>/corpus-c/*.ndjson K=256 fresh held-out corpus with content manifest",
+    "runs/<run-id>/d4-labels-c/*.tsv comparator rankings for held-out roots",
+    "runs/<run-id>/model/*.pt frozen model bytes and training log",
+    "runs/<run-id>/gate/gate-report.json with all primary and secondary metrics",
+    "research/datasets/<dataset-id>.json content-addressed corpus manifests",
+    "research/results/<result-id>.json scientific assessment"
+  ],
+  "lifecycle": "completed",
+  "protocolSha256": "325a96f742382e18dcee7d105d343f56047b98948ee8adaba19469b1ddd29efa",
+  "amendments": [
+    {
+      "timestamp": "2026-08-20T14:30:00Z",
+      "beforeControlledData": false,
+      "reason": "lifecycle advanced preregistered -> completed after the run and result records were written; protocol content otherwise unchanged."
+    }
+  ],
+  "createdBy": {
+    "platform": "OpenCode",
+    "model": "moonshotai/Kimi-K3",
+    "agentId": null
+  },
+  "createdAt": "2026-08-20T10:05:00Z",
+  "updatedAt": "2026-08-20T11:16:52Z"
+}

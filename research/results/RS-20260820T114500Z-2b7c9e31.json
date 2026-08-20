@@ -1,0 +1,88 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260820T114500Z-2b7c9e31",
+  "theoryIds": [
+    "TH-20260820-distributional-afterstate-ranker-7aba7fb3"
+  ],
+  "experimentId": "EX-20260820-afterstate-pilot-h40-k64-d7a9faf5",
+  "runIds": [
+    "RUN-20260820T090411Z-73e93859"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "inconclusive",
+  "assessment": "superseded",
+  "evidenceTier": "pilot",
+  "summary": "K=64 improved label stability from 0.246 to 0.446 mean split-half Spearman on fresh held-out origins, but still below the frozen 0.5 floor, so the preregistered verdict is again inconclusive. Quantile calibration passed (0.807 coverage of the nominal 76.5% interval). Against the still-noisy target the model trailed fair D4 consistently in both half-folds (pooled top-1 0.342 vs 0.433; pairwise 0.637 vs 0.697; regret 0.303 vs 0.232) while beating its D1 continuation teacher (top-1 0.342 vs 0.299). Training stopped at epoch 15 of 20 on the GPU time budget with the ranking loss still decreasing. No gameplay tier was opened.",
+  "metrics": {
+    "corpusARows": 4928384,
+    "corpusBRows": 1239552,
+    "heldoutRoots": 2750,
+    "labelStabilityMeanSpearman": 0.4462,
+    "quantileIntervalCoverage": 0.8069,
+    "modelTop1Pooled": 0.3422,
+    "d4Top1Pooled": 0.4331,
+    "d1Top1Pooled": 0.2985,
+    "modelPairwisePooled": 0.6367,
+    "d4PairwisePooled": 0.6972,
+    "modelRegretPooled": 0.3029,
+    "d4RegretPooled": 0.2315,
+    "epochsCompleted": 15
+  },
+  "gateChecks": [
+    {
+      "criterion": "Successor-closed corpus (all legal siblings x 64 scenarios)",
+      "passed": true,
+      "observed": "6,167,936 rows over 14,228 roots across both corpora; completeness 1.0"
+    },
+    {
+      "criterion": "Label stability floor: mean scenario-half (32 vs 32) Spearman >= 0.5",
+      "passed": false,
+      "observed": "0.4462 on 2,750 fresh held-out roots; inconclusive per the frozen rule"
+    },
+    {
+      "criterion": "Model top-1 >= D4 top-1 - 0.02 on each half-fold",
+      "passed": false,
+      "observed": "half1 0.3401 vs 0.4365; half2 0.3442 vs 0.4299 (moot given the stability failure)"
+    },
+    {
+      "criterion": "Model pairwise >= D4 pairwise - 0.02 on each half-fold",
+      "passed": false,
+      "observed": "half1 0.6341 vs 0.6970; half2 0.6391 vs 0.6974 (moot)"
+    },
+    {
+      "criterion": "Model regret <= D4 regret + 0.02 on each half-fold",
+      "passed": false,
+      "observed": "half1 0.3031 vs 0.2388; half2 0.3028 vs 0.2247 (moot)"
+    },
+    {
+      "criterion": "Nominal 76.5% quantile interval coverage within [0.66, 0.87]",
+      "passed": true,
+      "observed": "0.8069"
+    },
+    {
+      "criterion": "All CHECK-tier tests pass before any label is inspected",
+      "passed": true,
+      "observed": "SELFTEST OK (9 checks) after the K-parameterization change"
+    }
+  ],
+  "perGameArtifact": {
+    "path": null,
+    "sha256": null,
+    "recordCount": null
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260820T080056Z-376ada90.json"
+  ],
+  "artifactManifestRef": null,
+  "limitations": [
+    "Labels remain H40 returns under a phase-greedy D1 continuation (a weak fixed teacher).",
+    "Model undertrained: 15 of 20 epochs at the GPU budget stop.",
+    "Iteration-1 held-out roots were folded into training data here; the gate read only fresh origins 0x5da70100-0x5da7013f.",
+    "Single machine profile; FP32 on the shared-memory iGPU."
+  ],
+  "contributionIds": [
+    "CT-20260820T140540Z-f8458dc0"
+  ],
+  "recordedAt": "2026-08-20T11:45:00Z"
+}

@@ -1,0 +1,27 @@
+{
+  "$schema": "../schemas/seed-lease-v1.schema.json",
+  "format": "drop7-seed-lease-v1",
+  "seedLeaseId": "SL-20260820T083000Z-5da70000",
+  "experimentId": "EX-20260820-afterstate-pilot-h40-29b8588a",
+  "rngAlgorithm": "mulberry32 with mix32 domain separation (src/core/native/engine.hpp); headless disc stream kNextDiscDomain, reveal stream kRevealDomain",
+  "domain": "environment",
+  "role": "public-development",
+  "rangeStartHex": "0x5da70000",
+  "rangeEndExclusiveHex": "0x5da71000",
+  "cohortManifestSha256": null,
+  "state": "opened",
+  "reservedAt": "2026-08-20T08:35:00Z",
+  "openedAt": "2026-08-20T08:45:00Z",
+  "closedAt": null,
+  "protocolSha256": null,
+  "runIds": [
+    "RUN-20260820T082542Z-7866d15c",
+    "RUN-20260820T090411Z-73e93859",
+    "RUN-20260820T111656Z-f771f173"
+  ],
+  "notes": [
+    "Conservative import before proposing this range: every 8-hex-digit constant in docs/, approaches/, src/, research/, artifacts/, and runs/ was enumerated. Historical gameplay seeds cluster in 0x3d000000-0x3ebfffff with additional blocks at 0x3f******, 0x4d******, 0x6d000000, 0x6e000000-0x6e000100, and 0xa5700000; protected is 0x7d000000-0x7d00ffff; final is 0xd7000000-0xd70000ff; the concurrent exploratory workspace holds 0xa51d0000-0xa51dffff. The prefix 0x5da7 appears nowhere in the repository.",
+    "Role is public-development: once read, these seeds are development data forever and can never become confirmation evidence. The pilot opens at most the first 256 seeds for corpus harvesting; any later stage names its subrange in its own run record before opening it.",
+    "Draft pending owner/coordinator authorization. Not opened."
+  ]
+}

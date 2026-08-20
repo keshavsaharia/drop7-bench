@@ -1,0 +1,91 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260820T094500Z-5c1e9a04",
+  "theoryIds": [
+    "TH-20260820-distributional-afterstate-ranker-7aba7fb3"
+  ],
+  "experimentId": "EX-20260820-afterstate-pilot-h40-29b8588a",
+  "runIds": [
+    "RUN-20260820T082542Z-7866d15c"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "inconclusive",
+  "assessment": "superseded",
+  "evidenceTier": "pilot",
+  "summary": "The successor-closed corpus pipeline works exactly as designed (11,379 roots, 616,048 sibling labels, 100% action completeness, all CHECK tests pass), but the frozen label-stability floor failed: with K=8 aligned scenarios and an H40 phase-greedy-D1 continuation, the split-half Spearman correlation of within-root action rankings is 0.246, far below the 0.50 floor. Per the preregistered gate the outcome is inconclusive: the scenario-mean H40 outcome ranking is too noisy at K=8 to certify any model's ranking. Diagnosis: within-action scenario std is ~21k points while the median between-action gap is ~7.1k, so the target ranking is noise-dominated; noise math predicts K=64 (split-half 32v32) lifts stability to roughly 0.7. For the record, against this noisy target the model trailed fair D4 (top-1 0.247 vs 0.330 pooled; pairwise 0.571 vs 0.637), and D4 beat D1 (0.330 vs 0.254), consistent with the historical ranking of those searches. No gameplay tier was opened.",
+  "metrics": {
+    "corpusRoots": 11379,
+    "corpusRows": 616048,
+    "actionCompleteness": 1.0,
+    "heldoutRoots": 2470,
+    "labelStabilityMeanSpearman": 0.2457,
+    "quantileIntervalCoverage": 0.631,
+    "modelTop1Pooled": 0.247,
+    "d4Top1Pooled": 0.33,
+    "d1Top1Pooled": 0.254,
+    "modelPairwisePooled": 0.571,
+    "d4PairwisePooled": 0.637,
+    "modelRegretPooled": 0.413,
+    "d4RegretPooled": 0.337,
+    "withinActionScenarioStdMedian": 20922,
+    "betweenActionMedianGap": 7096
+  },
+  "gateChecks": [
+    {
+      "criterion": "Successor-closed corpus: every non-trivial root labeled for every legal sibling under all 8 scenarios",
+      "passed": true,
+      "observed": "616,048 rows over 11,379 roots; completeness 1.0 by construction and verified by self-test legality checks"
+    },
+    {
+      "criterion": "Label stability floor: mean scenario-half Spearman >= 0.5 on held-out roots",
+      "passed": false,
+      "observed": "0.2457 mean, 0.286 median over 2,470 held-out roots; per the frozen rule this makes the outcome inconclusive, not a pass and not a theory rejection"
+    },
+    {
+      "criterion": "Model top-1 >= fair D4 top-1 - 0.02 on each held-out half-fold",
+      "passed": false,
+      "observed": "half1 model 0.2478 vs D4 0.3296; half2 model 0.2462 vs D4 0.3239 (moot given the stability failure)"
+    },
+    {
+      "criterion": "Model pairwise accuracy >= fair D4 pairwise - 0.02 on each half-fold",
+      "passed": false,
+      "observed": "half1 model 0.5678 vs D4 0.6413; half2 model 0.5745 vs D4 0.6322 (moot given the stability failure)"
+    },
+    {
+      "criterion": "Model normalized regret <= fair D4 regret + 0.02 on each half-fold",
+      "passed": false,
+      "observed": "half1 model 0.4193 vs D4 0.3318; half2 model 0.4076 vs D4 0.3418 (moot given the stability failure)"
+    },
+    {
+      "criterion": "80% quantile interval coverage within [0.70, 0.90]",
+      "passed": false,
+      "observed": "0.631 coverage of the nominal 76.5% outer-quantile interval on held-out afterstates"
+    },
+    {
+      "criterion": "All CHECK-tier mechanics, legality, determinism, reflection, information-boundary, and resource-bound tests pass before any label is inspected",
+      "passed": true,
+      "observed": "build/afterstate/self-test prints SELFTEST OK (9 checks); make test (TypeScript, native, parity) also passes"
+    }
+  ],
+  "perGameArtifact": {
+    "path": null,
+    "sha256": null,
+    "recordCount": null
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260820T080056Z-376ada90.json"
+  ],
+  "artifactManifestRef": null,
+  "limitations": [
+    "Labels are H40 returns under a phase-greedy D1 continuation: a fixed, weak public teacher. Even a perfectly stable version of this target may not transfer to strong-play rankings.",
+    "Roots are harvested from fair-D1 games, so the state distribution is D1's, not the deployment policy's.",
+    "The model trailed D4 against the noisy target; with stability 0.246 it is impossible to say how much of that gap is real.",
+    "The protocol text was authored before data access but the researchctl freeze hash was computed after the run; the frozen content did not change during the run.",
+    "Single machine profile; FP32 training on the shared-memory iGPU."
+  ],
+  "contributionIds": [
+    "CT-20260820T140540Z-f8458dc0"
+  ],
+  "recordedAt": "2026-08-20T09:45:00Z"
+}

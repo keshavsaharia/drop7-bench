@@ -254,6 +254,12 @@ public-information policies.
 | Martingale-dual ranker: [martingale-dual-b0.cpp](../../approaches/terminal-policy-iteration/deployment-panel/martingale-dual-b0.cpp) | Charges a bounded hindsight beam for future-information advantage on the locked H200 panel. | **Rejected — ledger-recorded;** it ranked siblings materially worse than fair D4. |
 | Public regenerative B0: [public-regenerative-policy-iteration-b0.cpp](../../approaches/terminal-policy-iteration/public-regenerative-b0/public-regenerative-policy-iteration-b0.cpp) | Evaluates every sibling through staged H25/H50/H75 panels with exact D4 fallback. | **Rejected — ledger-recorded;** it was effectively tied in mean proxy return but lacked coverage, precision, and stability. |
 
+## Afterstate learning
+
+| Approach and sources | Purpose | Status and evidence |
+| --- | --- | --- |
+| Distributional afterstate ranker: [common.hpp](../../approaches/afterstate-learning/distributional-afterstate/common.hpp), [generate-corpus.cpp](../../approaches/afterstate-learning/distributional-afterstate/generate-corpus.cpp), [label-d4.cpp](../../approaches/afterstate-learning/distributional-afterstate/label-d4.cpp), [self-test.cpp](../../approaches/afterstate-learning/distributional-afterstate/self-test.cpp), [train.py](../../approaches/afterstate-learning/distributional-afterstate/train.py) | Trains one action-free distributional evaluator of the public afterstate on a successor-closed corpus (every legal sibling, K aligned chance scenarios, H40 phase-greedy-D1 continuation), then gates held-out whole-origin sibling ranking against exact fair D4. | **Rejected — machine-readable records;** three preregistered pilots on lease [SL-20260820T083000Z-5da70000](../../research/seeds/leases/SL-20260820T083000Z-5da70000.json): K=8 and K=64 were inconclusive on label stability (split-half Spearman 0.246/0.446 vs the 0.5 floor); K=256 passed stability (0.818 decisive) and produced a valid negative — the calibrated model (0.86 quantile coverage) beat its D1 teacher (top-1 0.424 vs 0.319) but trailed D4 (top-1 0.424 vs 0.499, regret 0.241 vs 0.178) in both fresh held-out half-folds. See [theory](../../research/theories/TH-20260820-distributional-afterstate-ranker-7aba7fb3.json) and results [K=8](../../research/results/RS-20260820T094500Z-5c1e9a04.json), [K=64](../../research/results/RS-20260820T114500Z-2b7c9e31.json), [K=256](../../research/results/RS-20260820T142500Z-8f4a2d17.json). |
+
 ## What remains genuinely open
 
 The source inventory shows that the research has already tested more depth,

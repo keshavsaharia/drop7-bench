@@ -668,7 +668,10 @@ def validate_markdown_links(root: Path) -> list[str]:
     paths = [
         path
         for path in root.rglob("*.md")
-        if not any(part in excluded for part in path.relative_to(root).parts)
+        if not any(
+            part in excluded or part.startswith(".venv")
+            for part in path.relative_to(root).parts
+        )
     ]
     for path in sorted(paths):
         if not path.is_file():

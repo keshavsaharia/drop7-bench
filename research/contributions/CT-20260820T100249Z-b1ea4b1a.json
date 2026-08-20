@@ -1,0 +1,60 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260820T100249Z-b1ea4b1a",
+  "actor": {
+    "kind": "model",
+    "platform": "claude-code",
+    "model": "claude-opus-5[1m]",
+    "agentId": "coordinator"
+  },
+  "level": "L3",
+  "roles": [
+    {
+      "role": "software",
+      "degree": "lead"
+    },
+    {
+      "role": "investigation",
+      "degree": "lead"
+    },
+    {
+      "role": "formal-analysis",
+      "degree": "lead"
+    },
+    {
+      "role": "writing",
+      "degree": "lead"
+    }
+  ],
+  "summary": "Authored the exploratory lifetime-objective namespace: an instrumented whole-game harness with an enforced score-decomposition identity, a parameterized fair search proved decision-identical to the frozen reference, a survival-labelled corpus generator with all-legal-sibling panels, and a GPU training pipeline targeting survival hazard rather than score. Measured the score decomposition of fair D4 on fresh seeds and established the disc-conservation flow-balance requirement. Ran and reported the terminal-utility and chance-strata sweeps.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "approaches/lifetime-objective/common/harness.hpp",
+    "approaches/lifetime-objective/score-decomposition/",
+    "approaches/lifetime-objective/risk-calibration/",
+    "approaches/lifetime-objective/sibling-corpus/",
+    "approaches/lifetime-objective/afterstate-net/",
+    "docs/exploratory/finding-01-score-is-survival.md",
+    "docs/exploratory/finding-04-terminal-utility-saturated.md"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "CHECK gate: the parameterized depth-4 search reproduced chooseDepth4Action exactly, 50 moves compared, 0 mismatches.",
+    "Score-decomposition identity score == 17000*rises + 70000*clears + sum(waveDepthPoints) asserted per game and held for 64/64 fair-D4 games and 192/192 trivial-policy games.",
+    "Dataset reader validated against a real generated corpus: record layout matches the C++ packed struct at 72 bytes, chosen column always legal, movesToDeath strictly decrements within a game, one-hot planes sum to one, whole-origin splits disjoint."
+  ],
+  "limitations": [
+    "Not yet independently reviewed.",
+    "All output is exploratory and lives in a separate namespace; it does not upgrade docs/research/ or any frozen protocol.",
+    "64 paired games per arm on one exploratory lease; the score standard deviation is 58 percent of the mean, so single-cohort deltas are weak evidence.",
+    "The 7-strata arm required raising the frozen 3,200,000 work bound to 16,000,000 because worst-case depth-4 work at seven strata is 11,892,398; results at the frozen bound would silently be a completed depth-3 search.",
+    "Figures describe this repository's simulator, including the two rise-boundary scoring discrepancies recorded in docs/exploratory/audit-01-engine-fidelity.md.",
+    "The training pipeline is written and layout-validated but has not yet been trained or evaluated."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-20T10:02:49Z"
+}
