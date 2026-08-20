@@ -1,0 +1,66 @@
+{
+  "format": "drop7-benchmark-tiers-v1",
+  "rules": {
+    "variant": "Hardcore",
+    "movesPerRise": 5,
+    "levelBonus": 17000,
+    "defaultMaximumMoves": 2000,
+    "statisticalUnit": "whole-game",
+    "primaryComparator": "fair-d4"
+  },
+  "tiers": [
+    {
+      "name": "CHECK",
+      "gamesMinimum": 0,
+      "gamesMaximum": 0,
+      "dataRole": "no-gameplay",
+      "claim": "mechanics-only"
+    },
+    {
+      "name": "PILOT",
+      "gamesMinimum": 1,
+      "gamesMaximum": 8,
+      "dataRole": "previously-evaluated-or-leased-development",
+      "claim": "runtime-and-failure-discovery-only"
+    },
+    {
+      "name": "SCREEN",
+      "gamesMinimum": 32,
+      "gamesMaximum": 32,
+      "dataRole": "public-development",
+      "claim": "cheap-rejection-or-diagnostic"
+    },
+    {
+      "name": "STANDARD",
+      "gamesMinimum": 64,
+      "gamesMaximum": 64,
+      "dataRole": "fixed-reusable-development",
+      "claim": "development-leaderboard-only"
+    },
+    {
+      "name": "QUALIFY",
+      "gamesMinimum": 256,
+      "gamesMaximum": 256,
+      "dataRole": "fresh-development",
+      "claim": "candidate-freeze-gate"
+    },
+    {
+      "name": "PROTECTED",
+      "gamesMinimum": 256,
+      "gamesMaximum": 256,
+      "dataRole": "protected",
+      "claim": "protected-validation"
+    },
+    {
+      "name": "FINAL",
+      "gamesMinimum": 256,
+      "gamesMaximum": 256,
+      "dataRole": "final",
+      "claim": "final-confirmation"
+    }
+  ],
+  "cohortAssignmentStatus": {
+    "standardManifestExists": false,
+    "reason": "Historical seed usage must be imported conservatively before assigning a shared standard cohort."
+  }
+}

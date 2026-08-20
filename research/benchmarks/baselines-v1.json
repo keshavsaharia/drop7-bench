@@ -1,0 +1,74 @@
+{
+  "format": "drop7-baselines-v1",
+  "manifestVersion": 1,
+  "createdAt": "2026-08-20T07:24:59Z",
+  "primaryComparator": {
+    "baselineId": "fair-d4-current-source-v1",
+    "name": "Completed full-width fair depth 4",
+    "informationBoundary": "public-policy",
+    "mode": {
+      "variant": "Hardcore",
+      "movesPerRise": 5,
+      "levelBonus": 17000,
+      "screenClearBonus": 70000
+    },
+    "algorithm": {
+      "decisionDepth": 4,
+      "referenceDepth": 3,
+      "chanceSamples": 5,
+      "maximumLogicalWork": 3200000,
+      "maximumCacheEntries": 60000,
+      "terminalUtility": -1000000,
+      "policySeedHex": "0xd7075eed",
+      "historicalParallelism": 4,
+      "historicalMaximumMoves": 1000
+    },
+    "sourceClosure": [
+      {
+        "path": "approaches/fair-expectimax/reference/fair-only-depth4.cpp",
+        "sha256": "45e7c223d8349eecda4499607b7532545bb74448769e02caf448802cd96f97cf"
+      },
+      {
+        "path": "approaches/fair-expectimax/reference/fair-only-horizon.cpp",
+        "sha256": "8828379bf6fc586acaa28331ef1d3b95c907fe66a30083b87a82d3177affee1a"
+      },
+      {
+        "path": "src/core/native/public-behavior.hpp",
+        "sha256": "8b4267af2aede869820821301fe80014ab8eafa1215eec33b7f824213268c89e"
+      },
+      {
+        "path": "src/core/native/engine.hpp",
+        "sha256": "b6dcde5f40dc39c6931b9a88e42bb351acd6fadaddd1e07691c41a82e44f3090"
+      }
+    ],
+    "build": {
+      "makeTarget": "native",
+      "binaryPath": "build/fair-depth4",
+      "requiredStandard": "C++20",
+      "exactCompilerAndBinaryHashBelongInRunRecord": true
+    },
+    "currentVerification": {
+      "command": "make test",
+      "executedAt": "2026-08-20",
+      "selfTestPassed": true,
+      "nativeTypescriptParitySeeds": 256,
+      "nativeTypescriptParityMoves": 6852,
+      "exactTrajectoryParity": true,
+      "completeGameStrengthRunRepeated": false
+    },
+    "strengthEvidence": {
+      "origin": "ledger-recorded",
+      "broadDevelopmentGames": 64,
+      "broadMeanScore": 308295.578,
+      "smallCorrectedGames": 8,
+      "smallCorrectedMeanScore": 400675.25,
+      "protectedValidated": false
+    },
+    "limitations": [
+      "Historical source hashes in frozen v1 protocols do not authenticate the relocated current source tree.",
+      "The current self-test and parity run do not reproduce the complete-game score means.",
+      "The executable still hardcodes historical cohorts, four-way parallelism, and a 1000-move experiment cap; a standard adapter must parameterize these without changing decision semantics.",
+      "This manifest assigns no STANDARD, QUALIFY, PROTECTED, or FINAL seed cohort."
+    ]
+  }
+}

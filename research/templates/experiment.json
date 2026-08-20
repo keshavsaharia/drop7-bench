@@ -1,0 +1,67 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260820-replace-slug-00000000",
+  "theoryIds": [
+    "TH-20260820-replace-theory-00000000"
+  ],
+  "title": "REPLACE_TITLE",
+  "classification": "algorithmic",
+  "hypothesis": "REPLACE_WITH_THE_EXACT_CONFIGURATION_LEVEL_HYPOTHESIS",
+  "candidate": {
+    "name": "REPLACE_CANDIDATE",
+    "entryPoint": "REPLACE_APPROACH_PATH",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "fair-d4",
+    "entryPoint": "approaches/fair-expectimax/reference/fair-only-depth4.cpp",
+    "manifestRef": null
+  },
+  "informationBoundary": "public-policy",
+  "benchmarkTier": "CHECK",
+  "data": {
+    "role": "no-gameplay",
+    "seedLeaseRefs": [],
+    "datasetRefs": [],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "No gameplay data is read by this draft."
+  },
+  "metrics": {
+    "primary": "REPLACE_PRIMARY_METRIC",
+    "secondary": [],
+    "statisticalUnit": "not-applicable",
+    "uncertaintyMethod": "not-applicable"
+  },
+  "gate": {
+    "fixedBeforeControlledData": false,
+    "passCriteria": [
+      "REPLACE_PASS_CRITERION"
+    ],
+    "failureAction": "Record the exact configuration as not supported and open no later cohort.",
+    "passAction": "Advance only to the named next tier without changing the candidate."
+  },
+  "resources": {
+    "wallSeconds": null,
+    "cpuThreads": null,
+    "maxHostBytes": null,
+    "maxGpuBytes": null,
+    "gpuDevices": []
+  },
+  "stopConditions": [
+    "Stop on any rules, information-boundary, legality, determinism, or parity failure."
+  ],
+  "expectedArtifacts": [
+    "REPLACE_EXPECTED_ARTIFACT"
+  ],
+  "lifecycle": "draft",
+  "protocolSha256": null,
+  "amendments": [],
+  "createdBy": {
+    "platform": "unknown",
+    "model": "unknown",
+    "agentId": null
+  },
+  "createdAt": "2026-08-20T00:00:00Z",
+  "updatedAt": "2026-08-20T00:00:00Z"
+}

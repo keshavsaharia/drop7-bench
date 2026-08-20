@@ -1,0 +1,52 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260820T071600Z-bb076293",
+  "actor": {
+    "kind": "model",
+    "platform": "codex",
+    "model": "GPT-5",
+    "agentId": "/root/benchmark_governance"
+  },
+  "level": "L2",
+  "roles": [
+    {
+      "role": "methodology",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Performed a read-only audit of Drop7 experiment governance and benchmark comparability, then supplied platform-neutral recommendations for record IDs, evidence lifecycle, model attribution, commit labels, benchmark tiers, result schemas, seed and dataset isolation, resource accounting, and concurrent-run safety; no implementation, gameplay run, or scientific result was claimed.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "AGENTS.md",
+    "docs/agents/contributions-and-commits.md",
+    "docs/agents/orchestration.md",
+    "docs/benchmarks.md",
+    "docs/hardware/amd-ryzen-halo.md",
+    "docs/methodology.md",
+    "research/README.md",
+    "research/benchmarks/tiers-v1.json",
+    "research/schemas/theory-v1.schema.json",
+    "research/schemas/experiment-v1.schema.json",
+    "research/schemas/run-v1.schema.json",
+    "research/schemas/result-v1.schema.json",
+    "research/schemas/game-result-v1.schema.json",
+    "research/schemas/contribution-v1.schema.json",
+    "research/schemas/dataset-v1.schema.json",
+    "research/schemas/seed-lease-v1.schema.json",
+    "research/schemas/machine-v1.schema.json"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "Read-only audit inspected existing methodology, reproducibility guidance, frozen protocols, seed roles, benchmark runners, result writers, resource instrumentation, Git state, and shared temporary-path usage; it opened no gameplay cohort and executed no strength benchmark.",
+    "make research-validate passed before this contribution record was created."
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-20T07:16:00Z"
+}

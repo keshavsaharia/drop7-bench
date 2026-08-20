@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://drop7-research.invalid/schemas/theory-v1.schema.json",
+  "title": "Drop7 research theory v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "format",
+    "theoryId",
+    "title",
+    "claim",
+    "mechanism",
+    "falsificationCriteria",
+    "informationClass",
+    "lifecycle",
+    "assessment",
+    "evidenceTier",
+    "dependencies",
+    "evidenceRefs",
+    "createdBy",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "format": { "const": "drop7-theory-v1" },
+    "theoryId": {
+      "type": "string",
+      "pattern": "^TH-[0-9]{8}-[a-z0-9]+(?:-[a-z0-9]+)*-[a-f0-9]{8}$"
+    },
+    "title": { "type": "string", "minLength": 1 },
+    "claim": { "type": "string", "minLength": 1 },
+    "mechanism": { "type": "string", "minLength": 1 },
+    "falsificationCriteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "informationClass": {
+      "enum": [
+        "public-policy",
+        "privileged-teacher",
+        "diagnostic",
+        "engineering",
+        "infrastructure"
+      ]
+    },
+    "lifecycle": {
+      "enum": [
+        "draft",
+        "proposed",
+        "feasibility-checked",
+        "implemented",
+        "tested",
+        "assessed",
+        "superseded",
+        "abandoned"
+      ]
+    },
+    "assessment": {
+      "enum": [
+        "untested",
+        "supported-as-tested",
+        "not-supported-as-tested",
+        "mixed",
+        "superseded",
+        "invalidated-by-methodological-error"
+      ]
+    },
+    "evidenceTier": {
+      "enum": [
+        "proposal",
+        "mechanics-only",
+        "pilot",
+        "public-development",
+        "fresh-development",
+        "replicated-development",
+        "protected-validation",
+        "final-confirmation"
+      ]
+    },
+    "dependencies": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "evidenceRefs": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "createdBy": { "$ref": "#/$defs/actor" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["platform", "model"],
+      "properties": {
+        "platform": { "type": "string", "minLength": 1 },
+        "model": { "type": "string", "minLength": 1 },
+        "agentId": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

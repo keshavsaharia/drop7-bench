@@ -1,0 +1,53 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260820T071605Z-c91d8606",
+  "actor": {
+    "kind": "model",
+    "platform": "codex",
+    "model": "unknown",
+    "agentId": "/root/agent_platforms"
+  },
+  "level": "L2",
+  "roles": [
+    {
+      "role": "methodology",
+      "degree": "substantial"
+    },
+    {
+      "role": "investigation",
+      "degree": "substantial"
+    },
+    {
+      "role": "validation",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Researched and validated current official Codex, Claude Code, OpenCode, and Agent Skills discovery conventions; proposed the single-source AGENTS.md and CLAUDE.md import arrangement, portable .agents skill layout, and duplicate-skill and Git-root caveats that materially informed the cross-platform agent handbook.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "docs/agents/README.md",
+    "docs/agents/orchestration.md",
+    "docs/agents/contributions-and-commits.md"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "Verified Codex AGENTS.md hierarchy and .agents/skills discovery against https://developers.openai.com/codex/guides/agents-md/ and https://developers.openai.com/codex/skills/.",
+    "Verified Claude Code CLAUDE.md importing AGENTS.md and project skill discovery against https://code.claude.com/docs/en/memory and https://code.claude.com/docs/en/skills.",
+    "Verified OpenCode AGENTS.md precedence, .agents and .claude skill discovery, and permission.skill deny behavior against https://opencode.ai/docs/rules/, https://opencode.ai/docs/skills, https://opencode.ai/docs/permissions, and https://opencode.ai/config.json.",
+    "Verified portable SKILL.md naming, frontmatter, progressive disclosure, and relative file-reference conventions against https://agentskills.io/specification.",
+    "Locally resolved the proposed Claude adapter relative path to the canonical .agents skill and JSON-parsed the narrow OpenCode permission object; the OpenCode executable was unavailable, so runtime discovery was not exercised.",
+    "The record validator passed with four live records after this contribution was created; the enclosing make research-validate command then failed in an unrelated temporary-path normalization unit test because Python compared /private/var with /var."
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed.",
+    "This contribution was analysis and recommendation only; it did not author or edit the listed documentation files.",
+    "No live OpenCode or Claude Code discovery session was available, so host behavior was validated from primary documentation, the current OpenCode schema, and local syntax and path checks.",
+    "No Drop7 strategy theory, implementation, experiment, benchmark, or scientific result is attributed to this contribution."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-20T07:16:05Z"
+}

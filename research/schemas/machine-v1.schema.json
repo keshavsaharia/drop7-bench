@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://drop7-research.invalid/schemas/machine-v1.schema.json",
+  "title": "Drop7 machine profile v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "format",
+    "machineProfileId",
+    "capturedAt",
+    "operatingSystem",
+    "cpu",
+    "memory",
+    "limits",
+    "gpu",
+    "toolchain",
+    "profilers",
+    "notes"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "format": { "const": "drop7-machine-v1" },
+    "machineProfileId": {
+      "type": "string",
+      "pattern": "^MACH-[0-9]{8}T[0-9]{6}Z-[a-f0-9]{8}$"
+    },
+    "capturedAt": { "type": "string", "format": "date-time" },
+    "operatingSystem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["system", "release", "version", "architecture", "distribution", "container"],
+      "properties": {
+        "system": { "type": "string" },
+        "release": { "type": "string" },
+        "version": { "type": "string" },
+        "architecture": { "type": "string" },
+        "distribution": { "type": ["string", "null"] },
+        "container": { "type": ["string", "null"] }
+      }
+    },
+    "cpu": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["model", "physicalCores", "logicalCpus", "affinityLogicalCpus", "numaNodes", "governor"],
+      "properties": {
+        "model": { "type": ["string", "null"] },
+        "physicalCores": { "type": ["integer", "null"], "minimum": 1 },
+        "logicalCpus": { "type": "integer", "minimum": 1 },
+        "affinityLogicalCpus": { "type": ["integer", "null"], "minimum": 1 },
+        "numaNodes": { "type": ["integer", "null"], "minimum": 1 },
+        "governor": { "type": ["string", "null"] }
+      }
+    },
+    "memory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["totalBytes", "availableBytes", "swapTotalBytes", "pageSizeBytes"],
+      "properties": {
+        "totalBytes": { "type": ["integer", "null"], "minimum": 0 },
+        "availableBytes": { "type": ["integer", "null"], "minimum": 0 },
+        "swapTotalBytes": { "type": ["integer", "null"], "minimum": 0 },
+        "pageSizeBytes": { "type": ["integer", "null"], "minimum": 1 }
+      }
+    },
+    "limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cgroupVersion", "memoryMaxBytes", "cpuQuota", "cpuAffinity"],
+      "properties": {
+        "cgroupVersion": { "type": ["string", "null"] },
+        "memoryMaxBytes": { "type": ["integer", "null"], "minimum": 0 },
+        "cpuQuota": { "type": ["string", "null"] },
+        "cpuAffinity": { "type": ["string", "null"] }
+      }
+    },
+    "gpu": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["devices", "rocmVersion", "hipVersion", "sharedSystemMemory", "detectionNotes"],
+      "properties": {
+        "devices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "target", "memoryBytes"],
+            "properties": {
+              "name": { "type": "string" },
+              "target": { "type": ["string", "null"] },
+              "memoryBytes": { "type": ["integer", "null"], "minimum": 0 }
+            }
+          }
+        },
+        "rocmVersion": { "type": ["string", "null"] },
+        "hipVersion": { "type": ["string", "null"] },
+        "sharedSystemMemory": { "type": ["boolean", "null"] },
+        "detectionNotes": { "type": "string" }
+      }
+    },
+    "toolchain": {
+      "type": "object",
+      "additionalProperties": { "type": ["string", "null"] }
+    },
+    "profilers": {
+      "type": "object",
+      "additionalProperties": { "type": "boolean" }
+    },
+    "notes": { "type": "array", "items": { "type": "string" } }
+  }
+}

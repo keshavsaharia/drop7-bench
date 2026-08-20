@@ -1,0 +1,204 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://drop7-research.invalid/schemas/experiment-v1.schema.json",
+  "title": "Drop7 preregistered experiment v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "format",
+    "experimentId",
+    "theoryIds",
+    "title",
+    "classification",
+    "hypothesis",
+    "candidate",
+    "comparator",
+    "informationBoundary",
+    "benchmarkTier",
+    "data",
+    "metrics",
+    "gate",
+    "resources",
+    "stopConditions",
+    "expectedArtifacts",
+    "lifecycle",
+    "amendments",
+    "createdBy",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "format": { "const": "drop7-experiment-v1" },
+    "experimentId": {
+      "type": "string",
+      "pattern": "^EX-[0-9]{8}-[a-z0-9]+(?:-[a-z0-9]+)*-[a-f0-9]{8}$"
+    },
+    "theoryIds": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^TH-[0-9]{8}-[a-z0-9]+(?:-[a-z0-9]+)*-[a-f0-9]{8}$"
+      },
+      "uniqueItems": true
+    },
+    "title": { "type": "string", "minLength": 1 },
+    "classification": {
+      "enum": ["engineering", "diagnostic", "algorithmic", "validation", "infrastructure"]
+    },
+    "hypothesis": { "type": "string", "minLength": 1 },
+    "candidate": { "$ref": "#/$defs/policy" },
+    "comparator": { "$ref": "#/$defs/policy" },
+    "informationBoundary": {
+      "enum": ["public-policy", "privileged-teacher", "seed-free", "not-applicable"]
+    },
+    "benchmarkTier": {
+      "enum": ["CHECK", "PILOT", "SCREEN", "STANDARD", "QUALIFY", "PROTECTED", "FINAL"]
+    },
+    "data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "seedLeaseRefs", "datasetRefs", "wholeOriginSplit", "reuseDisclosure"],
+      "properties": {
+        "role": {
+          "enum": [
+            "no-gameplay",
+            "previously-evaluated-development",
+            "public-development",
+            "fresh-development",
+            "protected",
+            "final"
+          ]
+        },
+        "seedLeaseRefs": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "datasetRefs": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "wholeOriginSplit": { "type": "boolean" },
+        "reuseDisclosure": { "type": "string", "minLength": 1 }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["primary", "secondary", "statisticalUnit", "uncertaintyMethod"],
+      "properties": {
+        "primary": { "type": "string", "minLength": 1 },
+        "secondary": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "statisticalUnit": { "enum": ["whole-game", "whole-origin", "root", "transition", "not-applicable"] },
+        "uncertaintyMethod": { "type": "string", "minLength": 1 }
+      }
+    },
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fixedBeforeControlledData", "passCriteria", "failureAction", "passAction"],
+      "properties": {
+        "fixedBeforeControlledData": { "type": "boolean" },
+        "passCriteria": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "failureAction": { "type": "string", "minLength": 1 },
+        "passAction": { "type": "string", "minLength": 1 }
+      }
+    },
+    "resources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["wallSeconds", "cpuThreads", "maxHostBytes", "maxGpuBytes", "gpuDevices"],
+      "properties": {
+        "wallSeconds": { "type": ["number", "null"], "exclusiveMinimum": 0 },
+        "cpuThreads": { "type": ["integer", "null"], "minimum": 1 },
+        "maxHostBytes": { "type": ["integer", "null"], "minimum": 1 },
+        "maxGpuBytes": { "type": ["integer", "null"], "minimum": 1 },
+        "gpuDevices": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        }
+      }
+    },
+    "stopConditions": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "expectedArtifacts": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "lifecycle": {
+      "enum": ["draft", "preregistered", "running", "completed", "paused", "abandoned", "superseded"]
+    },
+    "protocolSha256": {
+      "type": ["string", "null"],
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "amendments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["timestamp", "beforeControlledData", "reason"],
+        "properties": {
+          "timestamp": { "type": "string", "format": "date-time" },
+          "beforeControlledData": { "type": "boolean" },
+          "reason": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "createdBy": { "$ref": "#/$defs/actor" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "lifecycle": { "enum": ["preregistered", "running", "completed"] } } },
+      "then": {
+        "required": ["protocolSha256"],
+        "properties": {
+          "protocolSha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "entryPoint", "manifestRef"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "entryPoint": { "type": ["string", "null"] },
+        "manifestRef": { "type": ["string", "null"] }
+      }
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["platform", "model"],
+      "properties": {
+        "platform": { "type": "string", "minLength": 1 },
+        "model": { "type": "string", "minLength": 1 },
+        "agentId": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

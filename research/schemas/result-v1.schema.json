@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://drop7-research.invalid/schemas/result-v1.schema.json",
+  "title": "Drop7 scientific result v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "format",
+    "resultId",
+    "theoryIds",
+    "experimentId",
+    "runIds",
+    "runValidity",
+    "scientificOutcome",
+    "assessment",
+    "evidenceTier",
+    "summary",
+    "metrics",
+    "gateChecks",
+    "perGameArtifact",
+    "machineProfileRefs",
+    "artifactManifestRef",
+    "limitations",
+    "contributionIds",
+    "recordedAt"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "format": { "const": "drop7-result-v1" },
+    "resultId": {
+      "type": "string",
+      "pattern": "^RS-[0-9]{8}T[0-9]{6}Z-[a-f0-9]{8}$"
+    },
+    "theoryIds": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^TH-[0-9]{8}-[a-z0-9]+(?:-[a-z0-9]+)*-[a-f0-9]{8}$"
+      },
+      "uniqueItems": true
+    },
+    "experimentId": {
+      "type": "string",
+      "pattern": "^EX-[0-9]{8}-[a-z0-9]+(?:-[a-z0-9]+)*-[a-f0-9]{8}$"
+    },
+    "runIds": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^RUN-[0-9]{8}T[0-9]{6}Z-[a-f0-9]{8}$"
+      },
+      "uniqueItems": true
+    },
+    "runValidity": { "enum": ["valid", "partial", "invalid"] },
+    "scientificOutcome": { "enum": ["pass", "fail", "inconclusive", "not-applicable"] },
+    "assessment": {
+      "enum": [
+        "supported-as-tested",
+        "not-supported-as-tested",
+        "mixed",
+        "superseded",
+        "invalidated-by-methodological-error"
+      ]
+    },
+    "evidenceTier": {
+      "enum": [
+        "mechanics-only",
+        "pilot",
+        "public-development",
+        "fresh-development",
+        "replicated-development",
+        "protected-validation",
+        "final-confirmation"
+      ]
+    },
+    "summary": { "type": "string", "minLength": 1 },
+    "metrics": { "type": "object" },
+    "gateChecks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["criterion", "passed", "observed"],
+        "properties": {
+          "criterion": { "type": "string", "minLength": 1 },
+          "passed": { "type": ["boolean", "null"] },
+          "observed": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "perGameArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "recordCount"],
+      "properties": {
+        "path": { "type": ["string", "null"] },
+        "sha256": { "type": ["string", "null"], "pattern": "^[a-f0-9]{64}$" },
+        "recordCount": { "type": ["integer", "null"], "minimum": 0 }
+      }
+    },
+    "machineProfileRefs": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "artifactManifestRef": { "type": ["string", "null"] },
+    "limitations": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "contributionIds": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^CT-[0-9]{8}T[0-9]{6}Z-[a-f0-9]{8}$"
+      },
+      "uniqueItems": true
+    },
+    "recordedAt": { "type": "string", "format": "date-time" }
+  }
+}

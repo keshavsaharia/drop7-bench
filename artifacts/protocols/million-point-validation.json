@@ -1,0 +1,110 @@
+{
+  "format": "drop7-million-point-validation-protocol-v1",
+  "frozenAtUtc": "2026-08-16T15:05:57Z",
+  "objective": "Demonstrate that one frozen public-information Drop7 policy has an average final score above 1000000 points per game and deploy that same policy in the TypeScript component.",
+  "engine": {
+    "variant": "Hardcore",
+    "board": "7x7",
+    "movesPerRise": 5,
+    "levelBonus": 17000,
+    "screenClearBonus": 70000,
+    "waveScore": "floor(7 * depth^2.5) per numbered disc",
+    "nativeSha256": "b6dcde5f40dc39c6931b9a88e42bb351acd6fadaddd1e07691c41a82e44f3090",
+    "typescriptSha256": "78d27393b925afb7f8dfa77f075f1641d12e38d6f10ad9031ec5f0186112a97f",
+    "requiredBeforeProtectedRun": "Reverify exact native/TypeScript trajectory parity if either engine hash changes."
+  },
+  "informationBoundary": {
+    "allowed": [
+      "visible 49-cell board",
+      "visible next numbered disc",
+      "moves remaining before the next row rise",
+      "terminal state"
+    ],
+    "forbidden": [
+      "origin game seed",
+      "future numbered discs",
+      "future covered-disc reveals",
+      "future random tape",
+      "oracle actions",
+      "accumulated score",
+      "level",
+      "absolute move number",
+      "history not represented by the public state"
+    ]
+  },
+  "candidateFreeze": {
+    "developmentRequirement": {
+      "games": 256,
+      "maximumMovesPerGame": 2000,
+      "observedMeanScoreGreaterThan": 1050000,
+      "wholeGameBootstrapOneSidedLower95GreaterThan": 1000000
+    },
+    "requiredArtifacts": [
+      "policy/model bytes",
+      "policy/search source SHA-256",
+      "model SHA-256",
+      "complete development result SHA-256",
+      "compiler and command",
+      "fixed search-work configuration"
+    ],
+    "rule": "No policy, model, search, or hyperparameter change is allowed between freezing and its protected validation run."
+  },
+  "protectedValidation": {
+    "seedBank": "0x7d000000...0x7d00ffff",
+    "cohortSize": 256,
+    "cohortRule": "Use the first never-read aligned block of 256 seeds in ascending order. Never reuse a failed block for selection, training, calibration, or another candidate.",
+    "maximumMovesPerGame": 2000,
+    "candidateRunsBeforeComparator": true,
+    "pass": {
+      "gamesWithAResult": 256,
+      "observedMeanScoreGreaterThan": 1000000,
+      "wholeGameBootstrapOneSidedLower95GreaterThan": 1000000,
+      "studentTOneSidedLower95GreaterThan": 1000000,
+      "illegalMoves": 0,
+      "runnerFailures": 0
+    },
+    "failure": "Reject the frozen candidate. A later materially new candidate must use the next never-read 256-seed block."
+  },
+  "finalConfirmation": {
+    "seeds": "0xd7000000...0xd70000ff",
+    "games": 256,
+    "maximumMovesPerGame": 2000,
+    "openAtMostOnce": true,
+    "prerequisites": [
+      "The frozen native candidate passed protected validation.",
+      "The TypeScript evaluator/search passed exact or explicitly tolerance-bounded native parity on non-protected fixtures.",
+      "The policy/model/search artifacts and fixed work configuration remain unchanged."
+    ],
+    "pass": {
+      "gamesWithAResult": 256,
+      "observedMeanScoreGreaterThan": 1000000,
+      "wholeGameBootstrapOneSidedLower95GreaterThan": 1000000,
+      "studentTOneSidedLower95GreaterThan": 1000000,
+      "illegalMoves": 0,
+      "runnerFailures": 0
+    }
+  },
+  "statistics": {
+    "unit": "whole game",
+    "bootstrapReplicates": 100000,
+    "bootstrapRandomSeed": "0xd7b0057a",
+    "bootstrapLowerQuantile": 0.05,
+    "studentTCriticalValueFor255DegreesOfFreedom": 1.650851,
+    "censoring": "At 2000 moves, retain only the score already earned. Because game score is monotone, it is a conservative lower bound on that game's final score; do not extrapolate it.",
+    "requiredReporting": [
+      "arithmetic mean, median, lower quartile, and minimum observed score",
+      "mean and lower-quartile moves",
+      "censored-game count",
+      "numbered clears per move",
+      "covered reveals per move",
+      "mean and maximum chain depth",
+      "bootstrap and Student-t lower confidence bounds",
+      "per-game seed, observed score, moves, censor flag, and result checksum"
+    ]
+  },
+  "statusAtFreeze": {
+    "qualifiedCandidateExists": false,
+    "protectedSeedBankOpened": false,
+    "finalSeedsOpened": false
+  }
+}

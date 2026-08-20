@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://drop7-research.invalid/schemas/dataset-v1.schema.json",
+  "title": "Drop7 dataset manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "format",
+    "datasetId",
+    "title",
+    "dataRole",
+    "informationClass",
+    "originUnit",
+    "originCount",
+    "rowCount",
+    "wholeOriginSplit",
+    "seedLeaseRefs",
+    "parentDatasetRefs",
+    "fields",
+    "privilegedFields",
+    "allowedConsumers",
+    "artifact",
+    "createdAt"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "format": { "const": "drop7-dataset-v1" },
+    "datasetId": {
+      "type": "string",
+      "pattern": "^DS-[0-9]{8}-[a-z0-9]+(?:-[a-z0-9]+)*-[a-f0-9]{8}$"
+    },
+    "title": { "type": "string", "minLength": 1 },
+    "dataRole": {
+      "enum": ["training", "public-development", "fresh-development", "protected", "final", "diagnostic"]
+    },
+    "informationClass": { "enum": ["public-only", "privileged-teacher", "mixed"] },
+    "originUnit": { "type": "string", "minLength": 1 },
+    "originCount": { "type": "integer", "minimum": 0 },
+    "rowCount": { "type": "integer", "minimum": 0 },
+    "wholeOriginSplit": { "type": "boolean" },
+    "seedLeaseRefs": { "$ref": "#/$defs/stringSet" },
+    "parentDatasetRefs": { "$ref": "#/$defs/stringSet" },
+    "fields": { "$ref": "#/$defs/stringSet" },
+    "privilegedFields": { "$ref": "#/$defs/stringSet" },
+    "allowedConsumers": { "$ref": "#/$defs/stringSet" },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "bytes"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "bytes": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "createdAt": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "stringSet": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    }
+  }
+}

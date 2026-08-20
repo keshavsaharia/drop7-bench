@@ -1,0 +1,128 @@
+{
+  "format": "drop7-optimistic-phase-ntuple-protocol-v1",
+  "frozenAtUtc": "2026-08-16T18:38:33Z",
+  "hypothesis": "An optimistic, phase-conditioned n-tuple public-state value function, trained on-policy with a three-delta forward view and used by a bounded two-rise representative-outcome rollout, can learn survival and chain-building structure that a depth-4 handcrafted evaluator misses.",
+  "statusAtFreeze": {
+    "trainingStarted": false,
+    "burnedStageAOpened": false,
+    "developmentOpened": false,
+    "protectedOpened": false,
+    "finalOpened": false
+  },
+  "provenance": {
+    "sourceSha256": "7906961c43012f76076c22efa156150423beedc3cd0fbdd43b7a50a57d63044c",
+    "engineSha256": "b6dcde5f40dc39c6931b9a88e42bb351acd6fadaddd1e07691c41a82e44f3090",
+    "correctedD4SourceSha256": "1cb42629db07b17850045bf3e5678c1fed5b58c73ab38bcfb699c94ee34fe6aa",
+    "correctedD4LeafSourceSha256": "f9d4ea210e282ce5cc22894c17b5be92efb12029242aa5c3c6dc6412b383f42b",
+    "cfpiBehaviorSha256": "e5e81fa103589a9a911b6019a15aa48339c78ae2460ea0b0df4b0f66d59f27df",
+    "trainingLaneManifestSha256": "01cc9d694a0e8422cb4b63951c52748dbe08d2f0c2e154af8854f2f4bc5d583c",
+    "developmentLaneManifestSha256": "2862af3c129741735fe9d30165806a5620849b0b8c65dcb26879256ccc4afbde"
+  },
+  "informationBoundary": {
+    "valueInputs": [
+      "visible 49-cell board",
+      "moves remaining before the next row rise",
+      "terminal state"
+    ],
+    "actionEvaluatorAlsoUses": [
+      "visible next numbered disc"
+    ],
+    "forbidden": [
+      "origin game seed",
+      "future numbered discs",
+      "future covered-disc reveals",
+      "future random tape",
+      "accumulated score",
+      "level",
+      "absolute move number",
+      "history not represented by the public state"
+    ]
+  },
+  "model": {
+    "tupleAlphabet": 10,
+    "tupleLength": 4,
+    "activeOccurrences": 184,
+    "pooledParameters": 1090000,
+    "phaseConditionedParameters": 5450000,
+    "movesToRisePhases": 5,
+    "optimisticInitialReturn": 60.0,
+    "scoreScale": 17000.0,
+    "gamma": 1.0,
+    "lambda": 0.5,
+    "forwardViewDeltas": 3,
+    "reflectionCanonical": true
+  },
+  "training": {
+    "seedBegin": "0x6d000000",
+    "seedEndExclusive": "0x6e000000",
+    "maximumMovesPerGame": 2000,
+    "visibleRevealSamplesPerLegalAction": 7,
+    "frozenMaximumTransitions": 100000000,
+    "stageATransitions": 50000000,
+    "phasePromotionTransition": 20000000,
+    "learningRateSchedule": [
+      {"begin": 0, "rate": 0.1, "rule": "fixed"},
+      {"begin": 50000000, "rate": 0.01, "rule": "fixed"},
+      {"begin": 75000000, "rate": 0.001, "rule": "fixed"},
+      {"begin": 90000000, "rate": 1.0, "rule": "temporal-coherence"}
+    ],
+    "selection": "No intermediate checkpoint selection. Stop exactly at 50m for the mandatory continuation gate; if it passes, resume the same checkpoint to exactly 100m.",
+    "resume": "Checkpoint v3 preserves the active game, pending forward views, model, temporal-coherence accumulators, transition cursor, and full compile-time training contract."
+  },
+  "search": {
+    "description": "Deterministic bounded representative-outcome rollout; this is an approximation, not exact expectiminimax.",
+    "eventBoundaries": 2,
+    "rootActionWidth": "all legal actions",
+    "internalActionWidth": 2,
+    "strataPerActionBundle": 7,
+    "maximumWorkPerDecision": 100000,
+    "iterativeDeepening": true,
+    "incompleteDecisionPolicy": "Evaluation fails; no partial or fallback decision is accepted."
+  },
+  "burnedStageA": {
+    "seeds": "0x3d200000...0x3d20003f",
+    "games": 64,
+    "maximumMovesPerGame": 2000,
+    "at50000000Transitions": {
+      "continueOnlyIf": [
+        "search mean score >= 300000",
+        "search mean moves >= 90",
+        "search mean score is strictly greater than direct policy on each ordered 32-game half",
+        "search mean moves is strictly greater than direct policy on each ordered 32-game half"
+      ],
+      "failure": "Reject the model family and do not train to 100m transitions."
+    },
+    "at100000000Transitions": {
+      "qualificationRequires": [
+        "all 50m absolute and ordered-half conditions",
+        "search aggregate score and moves are each >= corrected D4 on identical seeds",
+        "paired one-sided Student-t lower-95 candidate-minus-D4 score >= 0",
+        "paired one-sided Student-t lower-95 candidate-minus-D4 moves >= 0",
+        "corrected D4 reproduces frozen means 176925.25 score and 116.375 moves"
+      ],
+      "failure": "Reject the model family and keep the development capability closed.",
+      "success": "Write one atomic qualification artifact bound to the exact 100m checkpoint and model."
+    }
+  },
+  "development": {
+    "seedBegin": "0x6e000000",
+    "seedEndExclusive": "0x6e000100",
+    "games": 256,
+    "maximumMovesPerGame": 2000,
+    "capability": "Closed until a new binary is compiled with the exact Stage-A qualification artifact SHA-256.",
+    "pass": {
+      "observedMeanScoreGreaterThan": 1050000,
+      "wholeGameBootstrapOneSidedLower95GreaterThan": 1000000,
+      "illegalMoves": 0,
+      "runnerFailures": 0,
+      "incompleteDecisions": 0
+    },
+    "failure": "Reject the candidate; do not open a protected cohort."
+  },
+  "downstreamValidation": {
+    "protocol": "drop7_million_validation_protocol.json",
+    "protectedBank": "0x7d000000...0x7d00ffff",
+    "finalCohort": "0xd7000000...0xd70000ff",
+    "rule": "Neither bank may be opened unless this exact candidate first passes development and is frozen without policy, model, search, or hyperparameter changes."
+  }
+}

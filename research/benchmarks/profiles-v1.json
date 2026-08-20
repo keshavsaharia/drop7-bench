@@ -1,0 +1,59 @@
+{
+  "format": "drop7-benchmark-profiles-v1",
+  "profiles": [
+    {
+      "name": "correctness",
+      "purpose": "Prove mechanics and policy-boundary invariants without gameplay.",
+      "fixedWork": true,
+      "exclusiveResources": false,
+      "minimumRepeats": 1,
+      "requiredPreflight": []
+    },
+    {
+      "name": "fixed-work-strength",
+      "purpose": "Compare policy quality at an exact algorithmic configuration.",
+      "fixedWork": true,
+      "exclusiveResources": false,
+      "minimumRepeats": 1,
+      "requiredPreflight": [
+        "correctness",
+        "machine-profile"
+      ]
+    },
+    {
+      "name": "machine-max-throughput",
+      "purpose": "Find the fastest stable end-to-end configuration inside explicit CPU, shared-memory, GPU, and thermal limits.",
+      "fixedWork": true,
+      "exclusiveResources": true,
+      "minimumRepeats": 3,
+      "requiredPreflight": [
+        "correctness",
+        "machine-profile",
+        "physical-core-and-smt-sweep",
+        "game-versus-decision-parallelism-sweep",
+        "cache-size-sweep",
+        "gpu-batch-sweep-when-available",
+        "memory-safety-margin",
+        "thermal-stability"
+      ]
+    },
+    {
+      "name": "resource-frontier",
+      "purpose": "Report quality and throughput across latency, CPU, host/shared memory, GPU memory, and energy budgets.",
+      "fixedWork": false,
+      "exclusiveResources": true,
+      "minimumRepeats": 3,
+      "requiredPreflight": [
+        "correctness",
+        "machine-profile",
+        "explicit-budget-grid"
+      ]
+    }
+  ],
+  "rules": [
+    "A fixed-time configuration is a distinct algorithmic candidate when hardware changes completed work or actions.",
+    "CPU and integrated-GPU memory are overlapping capacity and are never summed.",
+    "Thread, batch, cache, and memory choices are frozen before controlled policy-quality data is read.",
+    "Unavailable resource measurements are explicit nulls with a reason."
+  ]
+}

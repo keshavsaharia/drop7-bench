@@ -1,0 +1,140 @@
+# Research Status
+
+## Bottom line
+
+The simulator and reference searches are mature enough to support reproducible
+research, but the strategy problem is unsolved. Corrected-score fair depth-4
+expectimax is the strongest dependable reference found so far. Its broader
+64-game recorded mean is about 308,296 points, far below the required
+one-million-point average.
+
+No candidate has qualified for the protected validation protocol. The frozen
+record marks both the protected and one-shot final cohorts as unopened.
+
+## Evidence snapshot
+
+| Finding | Evidence | Status |
+| --- | --- | --- |
+| TypeScript rules engine | 122 local tests | Reproduced in this checkout |
+| Native engine and n-tuple checks | Gradient and self-tests | Reproduced in this checkout |
+| Native/TypeScript trajectory agreement | Deterministic parity sweep | Reproduced; see reproducibility notes |
+| Fair D4 vs D3: 400,675.25/116.375 vs 235,071.25/71 over 8 games | Detailed ledger | Recorded, small confirmation cohort |
+| Fair D4: 308,295.578 points and 90.031 moves over 64 games | Detailed ledger | Recorded broader reference cohort |
+| One D4 game scored 1,246,684 | Task-record only | Anecdote; not an average or qualification |
+| Million-point candidate exists | Frozen validation protocol | No |
+| AFBR-40 afterstate idea | Task-record only | Proposal; no source, checkpoint, or result |
+
+The cleanup reproduced engine behavior and buildability, not the long and
+expensive training/evaluation runs in the historical ledger.
+
+## How the research progressed
+
+### 1. Establishing a trustworthy simulator
+
+The work first aligned TypeScript and native Hardcore rules, chain scoring,
+gray-disc reveals, row rises, and deterministic seed behavior. A scoring audit
+corrected the five-move mode's level award from 7,000 to 17,000. Results made
+with 7,000-point scoring remain historical Sequence-scored evidence and are not
+used for the Hardcore million-point claim.
+
+### 2. Hand-written policies and shallow lookahead
+
+Feature-weighted heuristics, open-loop beams, risk penalties, tunneling,
+ignition, evolutionary search, and shallow fair lookahead provided fast
+baselines. They showed that immediate score alone is a poor guide: a policy
+must keep revealing covered numbers and preserve future chain structure.
+
+### 3. Fair expectimax as the reference
+
+Completed fair D4 consistently improved on D3 in the corrected-score small
+cohorts and became the reference for later experiments. Going deeper was not
+automatically better. Selective D5, full D5, and cycle-boundary variants often
+spent much more work, sampled chance outcomes too noisily, or overrode good D4
+actions on unstable estimates.
+
+### 4. Learning public-state values
+
+N-tuples, Monte Carlo values, NNUE-style networks, DQN variants, phase students,
+PPO, and fitted-policy methods explored longer horizons. A repeated problem was
+**sibling extrapolation**: a model learned the outcome of the action that was
+played, then deployment asked it to choose among several actions it had not
+observed equally well. Low value error on visited states did not guarantee good
+root-action ranking.
+
+### 5. Oracle and long-outcome teachers
+
+Privileged future-aware planners, D4 distillation, 25-move outcomes, rollout
+vetoes, and curriculum data were used to build better labels. They found
+predictive signal, but students usually lacked enough diverse successor data,
+failed held-out sibling ranking, or were too slow to improve complete games.
+Oracle strength is an upper-bound teaching signal, not a legal policy result.
+
+### 6. Constructive cycles and explicit reservoirs
+
+Reservoir, viability-controller, constructive-spectrum, and tail-survival
+experiments tried to build chain structures deliberately across row rises. A
+12-move constructive horizon improved over a 7-move version in one development
+comparison, but longer horizons were not monotonic and the policies did not
+displace D4. The idea still appears useful as a feature or option, but not yet
+as a standalone controller.
+
+### 7. Offline policy improvement around D4
+
+The latest completed work evaluated every legal sibling on a locked panel of
+477 public roots. A martingale-dual H12 ranker underperformed D4: 28.93% vs
+38.16% top-1 accuracy, 59.85% vs 66.82% pairwise accuracy, and higher normalized
+regret. A regenerative policy-iteration variant was nearly identical to D4 but
+overrode only 11 roots; six overrides helped, confidence bounds were negative,
+and only five of eight origins did not regress. Neither justified a gameplay
+run.
+
+## Most useful conclusions so far
+
+- **Fair chance handling matters.** Optimistic, worst-case, or tiny reused
+  reveal samples can rank moves incorrectly.
+- **More depth is not automatically more strength.** Horizon, continuation
+  quality, chance variance, and work budget interact.
+- **Flow matters before spectacular chains.** The task record repeatedly used
+  roughly 2.4 numbered clears and 1.4 reveals per move as the region associated
+  with stable long games. Treat these as diagnostic targets from limited runs,
+  not proven universal thresholds.
+- **Static board potential is insufficient.** Similar-looking boards can have
+  very different futures depending on how reachable triggers and covered discs
+  evolve across rises.
+- **State-value accuracy is not action-ranking accuracy.** Training data must
+  cover legal siblings or use an objective designed for relative action value.
+- **Score is heavy-tailed.** One million-point game can coexist with a much
+  lower average; paired whole-game cohorts and confidence bounds are essential.
+- **D4 is useful but not the answer.** It is a strong tactical fallback and
+  teacher, yet its average is not close enough to qualify.
+
+## Open work
+
+The next research step should be evidence-driven rather than another broad
+architecture sweep:
+
+1. Re-register any resumed SHA-locked experiment against the reorganized source
+   tree and rerun cross-engine parity.
+2. Determine whether the existing public-root data can form a truly
+   successor-closed, action-balanced training set without reading new gameplay
+   seeds.
+3. Only if that audit passes, implement the proposed action-free afterstate
+   value model (AFBR-40) with D4 as a conservative fallback.
+4. If closure is impossible, collect a new, explicitly partitioned corpus that
+   evaluates every legal sibling and records successor states under common
+   random scenarios.
+5. Test long-cycle features as bounded corrections to D4 before allowing them
+   to control an entire game.
+
+AFBR-40 was interrupted at the data-feasibility stage. It has no implementation,
+protocol, model, or measurements in this repository and must not appear in a
+list of attempted results.
+
+For configurations and every retained entry point, use the
+[experiment index](experiment-index.md). For the unabridged chronological
+record, use the [experiment history](history.md). For alternatives and research
+priority, use the [strategy landscape](../strategies.md) and the staged
+[research roadmap](roadmap.md). Future agents must use the standard
+[benchmark contract](../benchmarks.md) and machine-readable records under
+[`research/`](../../research/README.md); these do not retroactively upgrade the
+historical evidence above.

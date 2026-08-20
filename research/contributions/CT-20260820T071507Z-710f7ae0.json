@@ -1,0 +1,61 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260820T071507Z-710f7ae0",
+  "actor": {
+    "kind": "model",
+    "platform": "codex",
+    "model": "GPT-5",
+    "agentId": null
+  },
+  "level": "L4",
+  "roles": [
+    {
+      "role": "orchestration",
+      "degree": "lead"
+    },
+    {
+      "role": "methodology",
+      "degree": "lead"
+    },
+    {
+      "role": "software",
+      "degree": "lead"
+    },
+    {
+      "role": "writing",
+      "degree": "lead"
+    }
+  ],
+  "summary": "Designed and integrated the portable agent contract, research skills, orchestration handbook, benchmark standard, machine-readable record schemas, validation tooling, and repository documentation for continued Drop7 research.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "AGENTS.md",
+    "CLAUDE.md",
+    ".agents/skills/million-point-research/SKILL.md",
+    ".agents/skills/audit-drop7-experiment/SKILL.md",
+    "docs/agents",
+    "docs/benchmarks.md",
+    "docs/hardware/amd-ryzen-halo.md",
+    "docs/research/roadmap.md",
+    "research"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "Integrated three independent research audits and one separate forward test of both portable skills.",
+    "Validated both skill packages with the skill-creator quick validator.",
+    "Ran make test successfully: research schemas and links, six research-tool unit tests, 122 TypeScript tests, native self-tests, and exact native/TypeScript parity across 256 seeds and 6852 moves.",
+    "Ran the read-only machine doctor locally and verified that it reports unavailable AMD/ROCm facts instead of treating the non-target Darwin host as the requested Linux machine."
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed.",
+    "The runtime identifies the model family as GPT-5 but exposes no more specific deployment identifier.",
+    "No Git metadata was available, no commit was created, and no gameplay or protected/final seed was run.",
+    "AMD and ROCm recommendations were researched from official sources but were not executed on the target Linux machine."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-20T07:15:07Z"
+}

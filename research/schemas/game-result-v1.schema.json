@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://drop7-research.invalid/schemas/game-result-v1.schema.json",
+  "title": "Drop7 per-game benchmark row v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "experimentId",
+    "runId",
+    "policyId",
+    "cohortId",
+    "seedLeaseId",
+    "cohortOrdinal",
+    "seedHex",
+    "score",
+    "moves",
+    "censored",
+    "numberedClears",
+    "coveredReveals",
+    "meanChainDepth",
+    "maximumChainDepth",
+    "illegalDecisions",
+    "incompleteDecisions",
+    "runnerFailures",
+    "logicalWork",
+    "nodesOrTransitions",
+    "modelInferences",
+    "wallSeconds",
+    "trajectoryChecksum"
+  ],
+  "properties": {
+    "format": { "const": "drop7-game-result-v1" },
+    "experimentId": {
+      "type": "string",
+      "pattern": "^EX-[0-9]{8}-[a-z0-9]+(?:-[a-z0-9]+)*-[a-f0-9]{8}$"
+    },
+    "runId": {
+      "type": "string",
+      "pattern": "^RUN-[0-9]{8}T[0-9]{6}Z-[a-f0-9]{8}$"
+    },
+    "policyId": { "type": "string", "minLength": 1 },
+    "cohortId": { "type": "string", "minLength": 1 },
+    "seedLeaseId": { "type": "string", "minLength": 1 },
+    "cohortOrdinal": { "type": "integer", "minimum": 0 },
+    "seedHex": { "type": ["string", "null"], "pattern": "^0x[a-fA-F0-9]{1,16}$" },
+    "score": { "type": "integer", "minimum": 0 },
+    "moves": { "type": "integer", "minimum": 0 },
+    "censored": { "type": "boolean" },
+    "numberedClears": { "type": "integer", "minimum": 0 },
+    "coveredReveals": { "type": "integer", "minimum": 0 },
+    "meanChainDepth": { "type": "number", "minimum": 0 },
+    "maximumChainDepth": { "type": "integer", "minimum": 0 },
+    "illegalDecisions": { "type": "integer", "minimum": 0 },
+    "incompleteDecisions": { "type": "integer", "minimum": 0 },
+    "runnerFailures": { "type": "integer", "minimum": 0 },
+    "logicalWork": { "type": ["integer", "null"], "minimum": 0 },
+    "nodesOrTransitions": { "type": ["integer", "null"], "minimum": 0 },
+    "modelInferences": { "type": ["integer", "null"], "minimum": 0 },
+    "wallSeconds": { "type": ["number", "null"], "minimum": 0 },
+    "trajectoryChecksum": { "type": "string", "minLength": 1 }
+  }
+}

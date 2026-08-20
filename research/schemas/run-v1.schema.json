@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://drop7-research.invalid/schemas/run-v1.schema.json",
+  "title": "Drop7 execution run v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "format",
+    "runId",
+    "experimentId",
+    "lifecycle",
+    "runValidity",
+    "startedAt",
+    "endedAt",
+    "protocolSha256",
+    "machineProfileRef",
+    "sourceState",
+    "command",
+    "seedLeaseRefs",
+    "resourceLimits",
+    "resourceObserved",
+    "exitCode",
+    "stopReason",
+    "artifactRefs",
+    "contributionIds"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "format": { "const": "drop7-run-v1" },
+    "runId": {
+      "type": "string",
+      "pattern": "^RUN-[0-9]{8}T[0-9]{6}Z-[a-f0-9]{8}$"
+    },
+    "experimentId": {
+      "type": "string",
+      "pattern": "^EX-[0-9]{8}-[a-z0-9]+(?:-[a-z0-9]+)*-[a-f0-9]{8}$"
+    },
+    "lifecycle": { "enum": ["planned", "running", "completed", "interrupted"] },
+    "runValidity": { "enum": ["pending", "valid", "partial", "invalid"] },
+    "startedAt": { "type": ["string", "null"], "format": "date-time" },
+    "endedAt": { "type": ["string", "null"], "format": "date-time" },
+    "protocolSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "machineProfileRef": { "type": "string", "minLength": 1 },
+    "sourceState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["gitCommit", "dirty", "diffSha256", "sourceArchiveSha256"],
+      "properties": {
+        "gitCommit": { "type": ["string", "null"], "pattern": "^[a-f0-9]{40,64}$" },
+        "dirty": { "type": ["boolean", "null"] },
+        "diffSha256": { "type": ["string", "null"], "pattern": "^[a-f0-9]{64}$" },
+        "sourceArchiveSha256": { "type": ["string", "null"], "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "command": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" }
+    },
+    "seedLeaseRefs": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "resourceLimits": { "$ref": "#/$defs/resources" },
+    "resourceObserved": { "$ref": "#/$defs/resourcesObserved" },
+    "exitCode": { "type": ["integer", "null"] },
+    "stopReason": { "type": ["string", "null"] },
+    "artifactRefs": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "contributionIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^CT-[0-9]{8}T[0-9]{6}Z-[a-f0-9]{8}$"
+      },
+      "uniqueItems": true
+    }
+  },
+  "$defs": {
+    "resources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["wallSeconds", "cpuThreads", "maxHostBytes", "maxGpuBytes"],
+      "properties": {
+        "wallSeconds": { "type": ["number", "null"], "exclusiveMinimum": 0 },
+        "cpuThreads": { "type": ["integer", "null"], "minimum": 1 },
+        "maxHostBytes": { "type": ["integer", "null"], "minimum": 1 },
+        "maxGpuBytes": { "type": ["integer", "null"], "minimum": 1 }
+      }
+    },
+    "resourcesObserved": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["wallSeconds", "cpuSeconds", "peakHostBytes", "peakGpuBytes", "measurementNotes"],
+      "properties": {
+        "wallSeconds": { "type": ["number", "null"], "minimum": 0 },
+        "cpuSeconds": { "type": ["number", "null"], "minimum": 0 },
+        "peakHostBytes": { "type": ["integer", "null"], "minimum": 0 },
+        "peakGpuBytes": { "type": ["integer", "null"], "minimum": 0 },
+        "measurementNotes": { "type": "string" }
+      }
+    }
+  }
+}

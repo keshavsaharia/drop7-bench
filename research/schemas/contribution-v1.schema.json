@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://drop7-research.invalid/schemas/contribution-v1.schema.json",
+  "title": "Drop7 contributor event v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "format",
+    "contributionId",
+    "actor",
+    "level",
+    "roles",
+    "summary",
+    "theoryIds",
+    "experimentIds",
+    "runIds",
+    "artifactPaths",
+    "commitShas",
+    "validationPerformed",
+    "limitations",
+    "selfReported",
+    "reviewedBy",
+    "recordedAt"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "format": { "const": "drop7-contribution-v1" },
+    "contributionId": {
+      "type": "string",
+      "pattern": "^CT-[0-9]{8}T[0-9]{6}Z-[a-f0-9]{8}$"
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "platform", "model", "agentId"],
+      "properties": {
+        "kind": { "enum": ["model", "human", "tool", "mixed"] },
+        "platform": { "type": "string", "minLength": 1 },
+        "model": { "type": "string", "minLength": 1 },
+        "agentId": { "type": ["string", "null"] }
+      }
+    },
+    "level": { "enum": ["L0", "L1", "L2", "L3", "L4"] },
+    "roles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["role", "degree"],
+        "properties": {
+          "role": {
+            "enum": [
+              "conceptualization",
+              "methodology",
+              "software",
+              "validation",
+              "investigation",
+              "formal-analysis",
+              "data-curation",
+              "compute",
+              "visualization",
+              "writing",
+              "review",
+              "orchestration"
+            ]
+          },
+          "degree": { "enum": ["supporting", "substantial", "lead"] }
+        }
+      }
+    },
+    "summary": { "type": "string", "minLength": 1 },
+    "theoryIds": { "$ref": "#/$defs/stringSet" },
+    "experimentIds": { "$ref": "#/$defs/stringSet" },
+    "runIds": { "$ref": "#/$defs/stringSet" },
+    "artifactPaths": { "$ref": "#/$defs/stringSet" },
+    "commitShas": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
+      "uniqueItems": true
+    },
+    "validationPerformed": { "$ref": "#/$defs/stringSet" },
+    "limitations": { "$ref": "#/$defs/stringSet" },
+    "selfReported": { "type": "boolean" },
+    "reviewedBy": { "type": ["string", "null"] },
+    "recordedAt": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "stringSet": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    }
+  }
+}

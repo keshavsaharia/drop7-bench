@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://drop7-research.invalid/schemas/seed-lease-v1.schema.json",
+  "title": "Drop7 seed lease v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "format",
+    "seedLeaseId",
+    "experimentId",
+    "rngAlgorithm",
+    "domain",
+    "role",
+    "rangeStartHex",
+    "rangeEndExclusiveHex",
+    "cohortManifestSha256",
+    "state",
+    "reservedAt",
+    "openedAt",
+    "closedAt",
+    "protocolSha256",
+    "runIds",
+    "notes"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "format": { "const": "drop7-seed-lease-v1" },
+    "seedLeaseId": {
+      "type": "string",
+      "pattern": "^SL-[0-9]{8}T[0-9]{6}Z-[a-f0-9]{8}$"
+    },
+    "experimentId": {
+      "type": "string",
+      "pattern": "^EX-[0-9]{8}-[a-z0-9]+(?:-[a-z0-9]+)*-[a-f0-9]{8}$"
+    },
+    "rngAlgorithm": { "type": "string", "minLength": 1 },
+    "domain": {
+      "enum": [
+        "environment",
+        "teacher-future",
+        "chance-estimator",
+        "model-initialization",
+        "minibatch-shuffle",
+        "policy-sampling",
+        "bootstrap",
+        "job-scheduling"
+      ]
+    },
+    "role": {
+      "enum": ["training", "public-development", "fresh-development", "protected", "final", "diagnostic"]
+    },
+    "rangeStartHex": { "type": ["string", "null"], "pattern": "^0x[a-fA-F0-9]{1,16}$" },
+    "rangeEndExclusiveHex": { "type": ["string", "null"], "pattern": "^0x[a-fA-F0-9]{1,16}$" },
+    "cohortManifestSha256": { "type": ["string", "null"], "pattern": "^[a-f0-9]{64}$" },
+    "state": { "enum": ["draft", "reserved", "opened", "burned", "cancelled-unopened"] },
+    "reservedAt": { "type": ["string", "null"], "format": "date-time" },
+    "openedAt": { "type": ["string", "null"], "format": "date-time" },
+    "closedAt": { "type": ["string", "null"], "format": "date-time" },
+    "protocolSha256": { "type": ["string", "null"], "pattern": "^[a-f0-9]{64}$" },
+    "runIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^RUN-[0-9]{8}T[0-9]{6}Z-[a-f0-9]{8}$"
+      },
+      "uniqueItems": true
+    },
+    "notes": { "type": "array", "items": { "type": "string" } }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "state": { "enum": ["opened", "burned"] } } },
+      "then": {
+        "properties": { "openedAt": { "type": "string", "format": "date-time" } }
+      }
+    }
+  ]
+}

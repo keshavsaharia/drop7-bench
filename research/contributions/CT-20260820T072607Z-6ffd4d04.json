@@ -1,0 +1,37 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260820T072607Z-6ffd4d04",
+  "actor": {
+    "kind": "model",
+    "platform": "codex",
+    "model": "gpt-5.6-terra",
+    "agentId": "/root/forward_skill_test"
+  },
+  "level": "L2",
+  "roles": [
+    {
+      "role": "validation",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Independently forward-tested the current portable Drop7 research and audit skills for a read-only no-seed first-work-package scenario; identified the bootstrap absence of live strategy records and the already-running session skill-discovery cache caveat during the coordinated rename.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "AGENTS.md",
+    ".agents/skills/million-point-research/SKILL.md",
+    ".agents/skills/audit-drop7-experiment/SKILL.md"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "Ran make research-validate successfully; ran make research-doctor read-only on the local non-target host; verified the current AGENTS.md and Makefile skill path wiring."
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-20T07:26:07Z"
+}
