@@ -222,6 +222,72 @@ export function ResultSummary({ id }: { id: string }) {
   );
 }
 
+/** Display a recorded JSON value. Nested objects are listed, never rendered as React children. */
+export function RecordedValue({ value }: { value: unknown }) {
+  if (typeof value === "number") {
+    if (!Number.isFinite(value)) return String(value);
+    return Number.isInteger(value) ? value.toLocaleString() : value.toFixed(4);
+  }
+  if (typeof value === "string") return value;
+  if (typeof value === "boolean") return value ? "true" : "false";
+  if (value === null || value === undefined) return null;
+  if (Array.isArray(value)) {
+    if (value.length === 0) return "[]";
+    return (
+      <ol className="list-decimal pl-4 font-normal">
+        {value.map((item, index) => (
+          <li key={index}>
+            <RecordedValue value={item} />
+          </li>
+        ))}
+      </ol>
+    );
+  }
+  if (typeof value === "object") {
+    const entries = Object.entries(value as Record<string, unknown>);
+    if (entries.length === 0) return "{}";
+    return (
+      <dl className="space-y-0.5 font-normal">
+        {entries.map(([key, nested]) => (
+          <div key={key} className="flex flex-wrap gap-x-2">
+            <dt className="text-[10px] text-zinc-500">{key}</dt>
+            <dd className="text-xs text-zinc-200">
+              <RecordedValue value={nested} />
+            </dd>
+          </div>
+        ))}
+      </dl>
+    );
+  }
+  return String(value);
+}
+
+function isNestedRecordedValue(value: unknown): boolean {
+  return value !== null && typeof value === "object";
+}
+
+export function RecordedMetrics({ metrics }: { metrics: Record<string, unknown> }) {
+  const entries = Object.entries(metrics ?? {});
+  if (entries.length === 0) return null;
+  return (
+    <div className="mt-2 grid grid-cols-2 gap-1 sm:grid-cols-3 lg:grid-cols-4">
+      {entries.map(([key, value]) => (
+        <div
+          key={key}
+          className={`rounded bg-zinc-900/70 px-2 py-1 ${isNestedRecordedValue(value) ? "col-span-full" : ""}`}
+        >
+          <div className="truncate text-[10px] text-zinc-500" title={key}>
+            {key}
+          </div>
+          <div className="text-xs font-semibold text-zinc-200">
+            <RecordedValue value={value} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function Missing({ kind, id }: { kind: string; id: string }) {
   return (
     <div className="my-4 rounded-xl border border-zinc-800 bg-zinc-950/40 p-3 text-xs text-zinc-500">
@@ -267,16 +333,7 @@ export function ResultNarrative({ result }: { result: ResultRecord }) {
       {Object.keys(result.metrics ?? {}).length > 0 && (
         <details className="mt-3">
           <summary className="cursor-pointer text-xs text-zinc-500">Recorded metrics</summary>
-          <table className="mt-1 text-xs">
-            <tbody>
-              {Object.entries(result.metrics).map(([k, v]) => (
-                <tr key={k}>
-                  <td className="pr-4 text-zinc-500">{k}</td>
-                  <td className="text-zinc-200">{String(v)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <RecordedMetrics metrics={result.metrics} />
         </details>
       )}
       {result.limitations?.length > 0 && (

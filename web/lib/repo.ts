@@ -77,7 +77,7 @@ export interface ResultRecord {
   assessment: string;
   evidenceTier: string;
   summary: string;
-  metrics: Record<string, number | string>;
+  metrics: Record<string, unknown>;
   gateChecks: { criterion: string; passed: boolean | null; observed: string }[];
   limitations: string[];
   contributionIds: string[];

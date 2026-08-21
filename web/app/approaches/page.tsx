@@ -23,7 +23,10 @@ export default function ApproachesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-black text-zinc-50">Approaches</h1>
+        <Link href="/research" className="text-sm text-sky-400 hover:text-sky-300">
+          ← Research
+        </Link>
+        <h1 className="mt-1 text-2xl font-black text-zinc-50">Approaches</h1>
         <p className="mt-1 max-w-3xl text-sm text-zinc-400">
           Every strategy family and approach directory in the repository, with
           its documentation. Each approach page renders the MDX notes stored in

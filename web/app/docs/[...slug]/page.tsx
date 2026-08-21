@@ -22,9 +22,14 @@ export default async function RepoDocPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h1 className="text-2xl font-black text-zinc-50">{title}</h1>
-        <span className="text-xs text-zinc-600">docs/{relative}</span>
+      <div>
+        <Link href="/docs" className="text-sm text-sky-400 hover:text-sky-300">
+          ← Docs
+        </Link>
+        <div className="mt-1 flex flex-wrap items-baseline justify-between gap-2">
+          <h1 className="text-2xl font-black text-zinc-50">{title}</h1>
+          <span className="text-xs text-zinc-600">docs/{relative}</span>
+        </div>
       </div>
       <Markdown source={source} />
       <div className="mt-6 rounded-xl border border-sky-900/60 bg-sky-950/20 p-4 text-sm text-zinc-300">

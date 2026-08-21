@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Badge } from "@/components/Badge";
+import { RecordedMetrics } from "@/components/Research";
 import { getExperiments, getResults } from "@/lib/repo";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +19,10 @@ export default function ExperimentsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-black text-zinc-50">Experiments</h1>
+        <Link href="/research" className="text-sm text-sky-400 hover:text-sky-300">
+          ← Research
+        </Link>
+        <h1 className="mt-1 text-2xl font-black text-zinc-50">Experiments</h1>
         <p className="mt-1 max-w-3xl text-sm text-zinc-400">
           Preregistered experiment protocols from{" "}
           <code className="text-xs">research/experiments/</code> and their
@@ -121,22 +125,7 @@ export default function ExperimentsPage() {
                     <summary className="cursor-pointer text-xs text-zinc-500 hover:text-zinc-300">
                       Raw metrics ({Object.keys(result.metrics).length})
                     </summary>
-                    <div className="mt-2 grid grid-cols-2 gap-1 sm:grid-cols-3 lg:grid-cols-4">
-                      {Object.entries(result.metrics).map(([key, value]) => (
-                        <div key={key} className="rounded bg-zinc-900/70 px-2 py-1">
-                          <div className="truncate text-[10px] text-zinc-500" title={key}>
-                            {key}
-                          </div>
-                          <div className="text-xs font-semibold text-zinc-200">
-                            {typeof value === "number"
-                              ? Number.isInteger(value)
-                                ? value.toLocaleString()
-                                : value.toFixed(4)
-                              : value}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                    <RecordedMetrics metrics={result.metrics} />
                   </details>
                 )}
               </div>

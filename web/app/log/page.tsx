@@ -15,7 +15,10 @@ export default function LogIndexPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-black text-zinc-50">Research log</h1>
+        <Link href="/research" className="text-sm text-sky-400 hover:text-sky-300">
+          ← Research
+        </Link>
+        <h1 className="mt-1 text-2xl font-black text-zinc-50">Research log</h1>
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-zinc-400">
           A dated account of what was actually tried, by whom, and what came of
           it. Most days end with more rejected ideas than accepted ones, and

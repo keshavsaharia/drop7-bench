@@ -21,7 +21,10 @@ export default function TheoriesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-black text-zinc-50">Theories</h1>
+        <Link href="/research" className="text-sm text-sky-400 hover:text-sky-300">
+          ← Research
+        </Link>
+        <h1 className="mt-1 text-2xl font-black text-zinc-50">Theories</h1>
         <p className="mt-1 max-w-3xl text-sm text-zinc-400">
           Registered falsifiable claims from{" "}
           <code className="text-xs">research/theories/</code>. Each theory names
