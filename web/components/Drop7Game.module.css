@@ -1,0 +1,157 @@
+/* Presentation-only motion for Drop7Game. Each class matches one
+   MoveAnimationFrame kind from the engine; the engine's rules are unchanged.
+   --drop7-rows is the number of rows the incoming disc falls through; a cell
+   pitch is 122% of the disc (9% padding each side) plus the 1px grid gap. */
+
+.drop {
+  position: relative;
+  z-index: 4;
+  animation: drop7-drop 380ms cubic-bezier(0.22, 0.78, 0.28, 1) both;
+  will-change: transform;
+}
+
+.burst {
+  position: relative;
+  z-index: 5;
+  animation: drop7-burst 175ms ease-out both;
+  will-change: filter, opacity, transform;
+}
+
+.burst::after {
+  position: absolute;
+  inset: -18%;
+  border: 2px solid rgb(255 255 255 / 78%);
+  border-radius: 9999px;
+  content: "";
+  animation: drop7-ring 175ms ease-out both;
+  pointer-events: none;
+}
+
+.impact {
+  animation: drop7-impact 130ms ease-out both;
+  will-change: filter, transform;
+}
+
+.settle {
+  animation: drop7-settle 210ms cubic-bezier(0.2, 0.85, 0.3, 1) both;
+  will-change: transform;
+}
+
+.rise {
+  animation: drop7-rise 280ms cubic-bezier(0.22, 0.72, 0.24, 1) both;
+  will-change: transform;
+}
+
+.numberInput {
+  appearance: textfield;
+}
+
+.numberInput::-webkit-inner-spin-button,
+.numberInput::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+.caret {
+  animation: drop7-caret 1s steps(2, start) infinite;
+}
+
+@keyframes drop7-drop {
+  0% {
+    transform: translateY(calc(-1 * var(--drop7-rows) * (122% + 1px)));
+  }
+  72% {
+    transform: translateY(8%);
+  }
+  88% {
+    transform: translateY(-3%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes drop7-burst {
+  0% {
+    filter: brightness(1);
+    opacity: 1;
+    transform: scale(1);
+  }
+  42% {
+    filter: brightness(1.55);
+    opacity: 1;
+    transform: scale(1.24);
+  }
+  100% {
+    filter: brightness(1.8);
+    opacity: 0;
+    transform: scale(1.55);
+  }
+}
+
+@keyframes drop7-ring {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  35% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+@keyframes drop7-impact {
+  0% {
+    filter: brightness(2);
+    transform: scale(1.16) rotate(-2deg);
+  }
+  55% {
+    transform: scale(0.94) rotate(2deg);
+  }
+  100% {
+    filter: brightness(1);
+    transform: scale(1) rotate(0);
+  }
+}
+
+@keyframes drop7-settle {
+  0% {
+    transform: translateY(-38%);
+  }
+  72% {
+    transform: translateY(5%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes drop7-rise {
+  0% {
+    transform: translateY(calc(122% + 1px));
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes drop7-caret {
+  to {
+    visibility: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drop,
+  .burst,
+  .burst::after,
+  .impact,
+  .settle,
+  .rise,
+  .caret {
+    animation: none;
+  }
+}

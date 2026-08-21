@@ -14,7 +14,8 @@
     "figures:cohort": "node --experimental-strip-types scripts/extract-d4-cohort.ts",
     "figures:oracle": "node --experimental-strip-types scripts/generate-oracle-scenario.ts",
     "figures:heuristic": "node --experimental-strip-types scripts/generate-heuristic-figures.ts",
-    "check:mdx": "node scripts/check-mdx.mjs ../approaches ./content"
+    "check:mdx": "node scripts/check-mdx.mjs ../approaches ./content",
+    "test": "node --experimental-strip-types --test lib/play/*.test.ts"
   },
   "dependencies": {
     "gray-matter": "^4.0.3",

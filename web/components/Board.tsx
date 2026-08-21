@@ -1,103 +1,15 @@
 /**
  * Visual Drop7 components used by both the app pages and MDX documentation.
+ * The position renderer is `Drop7Board`; the components here are the
+ * long-standing MDX shorthands built on it, plus small layout helpers.
  * Board encoding follows the engine's serializeBoard format: one character per
  * cell, row-major from the top: "0" empty, "1"-"7" numbered, "8" solid gray,
  * "9" cracked gray.
  */
+import { Drop7Board } from "./Drop7Board";
+import { CellGlyph, DISC_COLORS, DiscFace, cellLabel, parseBoard } from "./discs";
 
-export const DISC_COLORS: Record<number, string> = {
-  1: "#f97316",
-  2: "#eab308",
-  3: "#22c55e",
-  4: "#06b6d4",
-  5: "#3b82f6",
-  6: "#a855f7",
-  7: "#ec4899",
-};
-
-export function parseBoard(cells: string | readonly number[]): number[] {
-  if (Array.isArray(cells)) return [...cells] as number[];
-  return [...cells].map((char) => Number(char));
-}
-
-export function CellGlyph({ cell, x, y, s }: { cell: number; x: number; y: number; s: number }) {
-  const pad = s * 0.08;
-  if (cell === 0) {
-    return (
-      <rect
-        x={x + pad}
-        y={y + pad}
-        width={s - pad * 2}
-        height={s - pad * 2}
-        rx={s * 0.12}
-        fill="#111827"
-      />
-    );
-  }
-  if (cell === 8 || cell === 9) {
-    const cracked = cell === 9;
-    return (
-      <g>
-        <rect
-          x={x + pad}
-          y={y + pad}
-          width={s - pad * 2}
-          height={s - pad * 2}
-          rx={s * 0.12}
-          fill={cracked ? "#6b7280" : "#4b5563"}
-          stroke="#9ca3af"
-          strokeWidth={cracked ? 2 : 1}
-        />
-        {cracked && (
-          <path
-            d={`M ${x + s * 0.25} ${y + s * 0.2} L ${x + s * 0.5} ${y + s * 0.45} L ${x + s * 0.35} ${y + s * 0.6} L ${x + s * 0.6} ${y + s * 0.85}`}
-            stroke="#d1d5db"
-            strokeWidth={s * 0.04}
-            fill="none"
-            strokeLinecap="round"
-          />
-        )}
-        {!cracked && (
-          <text
-            x={x + s / 2}
-            y={y + s / 2}
-            textAnchor="middle"
-            dominantBaseline="central"
-            fill="#9ca3af"
-            fontSize={s * 0.4}
-            fontWeight={700}
-          >
-            ?
-          </text>
-        )}
-      </g>
-    );
-  }
-  const color = DISC_COLORS[cell] ?? "#e5e7eb";
-  return (
-    <g>
-      <circle cx={x + s / 2} cy={y + s / 2} r={s * 0.42} fill={color} />
-      <circle
-        cx={x + s / 2}
-        cy={y + s / 2 - s * 0.06}
-        r={s * 0.3}
-        fill="#ffffff"
-        opacity={0.18}
-      />
-      <text
-        x={x + s / 2}
-        y={y + s / 2}
-        textAnchor="middle"
-        dominantBaseline="central"
-        fill="#ffffff"
-        fontSize={s * 0.44}
-        fontWeight={800}
-      >
-        {cell}
-      </text>
-    </g>
-  );
-}
+export { CellGlyph, DISC_COLORS, parseBoard };
 
 export function Board({
   cells,
@@ -111,50 +23,10 @@ export function Board({
   size?: number;
   caption?: string;
 }) {
-  const board = parseBoard(cells);
-  const s = 100;
-  return (
-    <figure className="inline-flex flex-col items-center gap-1">
-      <svg
-        width={size}
-        height={size}
-        viewBox={`0 0 ${7 * s} ${7 * s}`}
-        role="img"
-        aria-label={caption ?? "Drop7 board"}
-        className="rounded-lg"
-      >
-        <rect x={0} y={0} width={7 * s} height={7 * s} fill="#030712" rx={12} />
-        {board.map((cell, index) => {
-          const x = (index % 7) * s;
-          const y = Math.floor(index / 7) * s;
-          return (
-            <g key={index}>
-              <CellGlyph cell={cell} x={x} y={y} s={s} />
-              {highlight.includes(index) && (
-                <rect
-                  x={x + 4}
-                  y={y + 4}
-                  width={s - 8}
-                  height={s - 8}
-                  rx={10}
-                  fill="none"
-                  stroke="#facc15"
-                  strokeWidth={5}
-                />
-              )}
-            </g>
-          );
-        })}
-      </svg>
-      {caption && (
-        <figcaption className="max-w-52 text-center text-xs text-zinc-400">
-          {caption}
-        </figcaption>
-      )}
-    </figure>
-  );
+  return <Drop7Board cells={cells} highlight={highlight} size={size} caption={caption} className="items-center text-center" />;
 }
 
+/** An inline disc for prose: `<Disc n={3} />`, `<Disc solid />`, `<Disc cracked />`. */
 export function Disc({
   n,
   solid,
@@ -168,16 +40,14 @@ export function Disc({
 }) {
   const cell = solid ? 8 : cracked ? 9 : (n ?? 1);
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 100 100"
-      className="inline-block align-[-0.35em]"
+    <span
       role="img"
-      aria-label={solid ? "solid gray disc" : cracked ? "cracked gray disc" : `disc ${n}`}
+      aria-label={cellLabel(cell)}
+      className="inline-flex shrink-0 align-[-0.35em]"
+      style={{ width: size, height: size, fontSize: size * 0.55 }}
     >
-      <CellGlyph cell={cell} x={0} y={0} s={100} />
-    </svg>
+      <DiscFace cell={cell} />
+    </span>
   );
 }
 
@@ -203,17 +73,17 @@ export function BoardCompare({
   return (
     <div className="my-4 flex flex-wrap items-center justify-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
       <div className="flex flex-col items-center gap-1">
-        <Board cells={before} highlight={highlightBefore} size={size} />
-        <span className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+        <Drop7Board cells={before} highlight={highlightBefore} size={size} />
+        <span className="max-w-52 text-center text-xs font-medium uppercase tracking-wide text-zinc-500">
           {beforeLabel}
         </span>
       </div>
-      <svg width="34" height="24" viewBox="0 0 34 24" className="shrink-0 text-zinc-500">
+      <svg width="34" height="24" viewBox="0 0 34 24" className="shrink-0 text-zinc-500" aria-hidden="true">
         <path d="M2 12h26m0 0-8-8m8 8-8 8" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
       <div className="flex flex-col items-center gap-1">
-        <Board cells={after} highlight={highlightAfter} size={size} />
-        <span className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+        <Drop7Board cells={after} highlight={highlightAfter} size={size} />
+        <span className="max-w-52 text-center text-xs font-medium uppercase tracking-wide text-zinc-500">
           {afterLabel}
         </span>
       </div>
