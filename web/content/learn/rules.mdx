@@ -4,22 +4,20 @@ summary: Every rule of five-move Hardcore Drop7, animated move by move with fram
 order: 1
 ---
 
-Drop7 is a one-player puzzle on a 7×7 grid. Each turn you are handed one disc
-and you choose a **column**; the disc falls, matching discs vanish, everything
-above them drops, and the fall can set off a chain. Every five turns the whole
-board is pushed up one row by a fresh row of gray discs. Keep the board from
+Drop7 is a one-player puzzle on a 7 by 7 grid. Each turn you are handed a numbered disc
+to drop in an available column. The disc falls, can explode based on rules described below,
+and can set off a chain reaction of explosions as falling discs rearrange themselves. Every 
+five turns, the whole board is pushed up one row by a fresh row of gray "hidden discs".
+Creating explosions near the hidden discs cracks and reveals a number. Keep the board from
 overflowing for as long as you can, and score as much as you can on the way.
 
-That is the entire game. The rest of this page makes each of those sentences
-precise — and every board you see below was produced by the repository's rules
-engine, not drawn by hand.
+The rest of this page makes that short description more precise.
 
 <Callout title="How to read the animations" tone="info">
-Each animation steps through the engine's own sequence for one move: the
-incoming disc hovers over the chosen column, drops, and then every wave of the
-result plays out. Below each animation the same frames are laid out as a
-filmstrip, so nothing depends on motion. The panel on the right shows the rise
-clock and the points the move has earned so far.
+Each animation steps through a single move of the game: the user chooses a column to drop
+a particular incoming disc, and then the result plays out. Below each animation, each step
+of a multi-stage explosion might also be laid out as a filmstrip. The panels on the right
+show the score earned from the move.
 </Callout>
 
 ## 1. The board and the pieces
@@ -28,8 +26,7 @@ There are only three kinds of thing on the board, plus empty space:
 
 <DiscLegend />
 
-What the player sees is also exactly what a legal strategy in this repository
-is allowed to see:
+This is what the player sees when playing the game.
 
 <PlayerView caption="The visible board, the next disc, and the rise clock are public. What is under a gray disc is unknowable until it is opened, and nobody knows which discs are coming after the next one." />
 
@@ -174,6 +171,22 @@ two clearing neighbours in the same wave opens immediately.
   caption="Two hits open a gray disc. Revealing is how the board gets new numbers — and how it gets new problems."
 />
 
+Those two hits do not have to come on different turns. Place a 3 on each side of a solid gray disc and both numbered discs sit in a row-run of three — so they both clear, and the gray disc is hit from left and right at once:
+
+<RulesScenario
+  id="both-sides"
+  notes={[
+    "A 3 sits immediately left of a solid gray disc.",
+    "A second 3 drops on the gray disc's right: the row is now 3, gray, 3.",
+    "Each 3 is in a row-run of three occupied cells, so both clear in the same wave. 2 × 7 = 14 points.",
+    "The gray disc had a clearing neighbour on both sides. Two hits in one wave open it straight to its number — here a 4.",
+    "Settled. The 4 sits alone and stays.",
+  ]}
+  caption="Two neighbours clearing in the same wave skip the cracked state. The gray disc never exists as a cracked disc on this board."
+/>
+
+The same counting works when the two hits are not on opposite sides:
+
 <RulesScenario
   id="double-hit"
   notes={[
@@ -191,16 +204,16 @@ changes the odds — you only control *when* and *whether* it is exposed.
 
 <Callout title="One place where this simulator differs from the original game" tone="warn">
 In the original Drop7 the hidden number is decided when the gray disc is
-created, and stays with that disc. **This repository's engine draws it at the
-moment of reveal instead**, in row-major order. To a player the two are
-indistinguishable — either way the number you see is uniform on 1–7 and
-unknowable in advance — but they are not the same thing for research: it means
-there is no persistent "answer key" underneath the board unless the engine's
-optional **latent mode** is switched on, which is exactly what the scripted
-benchmark rounds and the hidden-board research tools do. In latent mode the
-values are written down in advance, so every policy that opens the same disc
-finds the same number. This divergence is measured and recorded in the
-repository's engine-fidelity audit.
+created, and stays with that disc. **This project's engine draws it at the
+moment of reveal instead**, in row-major order. To a player, the two methods are
+indistinguishable — the number you see is uniformly chosen from 1 to 7, and
+unknowable in advance. For researching optimal strategy, it means there can be a
+persistent "answer key" underneath the board that is turned on with an optional
+**latent mode**. This is exactly what all the scripted benchmark rounds and 
+the hidden-board research tools do. 
+
+In latent mode, the values are written down in advance, so every legal policy 
+that opens the same disc finds the same number.
 </Callout>
 
 ## 5. Gravity and chain reactions
@@ -253,10 +266,6 @@ Two bonuses sit on top of the wave points:
   ]}
   caption="Clearing the last discs. The 70,000 is awarded at the end of the move, after every wave has resolved."
 />
-
-This is the corrected five-move **Hardcore** scoring used everywhere in this
-repository: a 17,000-point rise bonus. Older records made with a 7,000-point
-rise bonus are archival only and are labelled as such.
 
 ## 7. Every fifth drop, the board rises
 

@@ -1,0 +1,43 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260821T191758Z-68b0899d",
+  "actor": {
+    "kind": "model",
+    "platform": "Cursor",
+    "model": "Cursor Grok 4.6",
+    "agentId": null
+  },
+  "level": "L1",
+  "roles": [
+    {
+      "role": "visualization",
+      "degree": "substantial"
+    },
+    {
+      "role": "writing",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Added a both-sides gray-disc animation to the How Drop7 works learn page: a 3 left of a solid gray disc, a 3 dropped on its right, both 3s clear in one wave and the gray opens immediately (two orthogonal hits). Registered the scenario in generate-rules-scenarios.ts (latent 4 at index 44), regenerated rules-scenarios.json from the TypeScript engine, and inserted the RulesScenario with frame notes between the sequential reveal and the more complex L-shaped double-hit. Also rewrote the page intro, animation callout, player-view copy, and latent-mode note into plainer English, and clarified the rise-clock caption in PlayerView.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "web/content/learn/rules.mdx",
+    "web/scripts/generate-rules-scenarios.ts",
+    "web/content/learn/rules-scenarios.json",
+    "web/components/Rules.tsx"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "cd web && npm run figures:rules: both-sides start → drop → wave1 → covers1 → end, Δ 14 (2 discs × 7, 1 revealed)",
+    "cd web && node scripts/check-mdx.mjs content/learn/rules.mdx: 1 MDX files checked, 0 with problems"
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-21T19:17:58Z"
+}

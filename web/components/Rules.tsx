@@ -716,7 +716,7 @@ export function PlayerView({ caption }: { caption?: string }) {
   const items = [
     { label: "the board", detail: "every visible disc, including which grays are cracked", ok: true },
     { label: "the next disc", detail: "shown before you choose a column", ok: true },
-    { label: "drops until the rise", detail: "the five-step clock", ok: true },
+    { label: "drops until the rise", detail: "a new row of hidden gray discs pushes up the board", ok: true },
     { label: "hidden gray values", detail: "fixed when the row appeared, unknown until revealed", ok: false },
     { label: "future discs", detail: "the random sequence is not knowable", ok: false },
   ];
