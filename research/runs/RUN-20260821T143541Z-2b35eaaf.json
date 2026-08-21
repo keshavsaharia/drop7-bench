@@ -1,0 +1,57 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260821T143541Z-2b35eaaf",
+  "experimentId": "EX-20260821-reveal-sampling-unfinished-arms-470677b5",
+  "lifecycle": "completed",
+  "runValidity": "valid",
+  "startedAt": "2026-08-21T14:35:41Z",
+  "endedAt": "2026-08-21T19:10:11Z",
+  "protocolSha256": "d00f6f55d52ad77dc22268bf901b0d635f17e1f79533717b598bfe0733c6f6a8",
+  "machineProfileRef": "research/system-profiles/MACH-20260820T080056Z-376ada90.json",
+  "sourceState": {
+    "gitCommit": null,
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": "d81af1acc5f11c060ce88b9940308f40a1299785a5fb947851dd1baa5c26e9c8"
+  },
+  "command": [
+    "approaches/lifetime-objective/reveal-sampling/run-arms.sh arm2",
+    "build/reveal-sampling/reveal-sampling --depth 3 --disc-samples 7 --reveal-samples 12 --max-work 407634528 --auto-cache --seed-start 0xa51d1000|0xa51d1010|0xa51d1020|0xa51d1030 --games 16 --threads 12 --output runs/RUN-A525-reveal/d3-n7-m12-c{0,1,2,3}.json",
+    "python3 approaches/lifetime-objective/reveal-sampling/pool.py runs/RUN-A525-reveal/d3-n7-m12-pooled.json runs/RUN-A525-reveal/d3-n7-m12-c0.json runs/RUN-A525-reveal/d3-n7-m12-c1.json runs/RUN-A525-reveal/d3-n7-m12-c2.json runs/RUN-A525-reveal/d3-n7-m12-c3.json",
+    "bash approaches/lifetime-objective/reveal-sampling/finish.sh"
+  ],
+  "seedLeaseRefs": [
+    "SEEDLEASE-A51D confirm (0xa51d1000-0xa51d103f; docs/exploratory/lease-map.md)"
+  ],
+  "resourceLimits": {
+    "wallSeconds": 172800,
+    "cpuThreads": 12,
+    "maxHostBytes": 34359738368,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": 16470.3,
+    "cpuSeconds": null,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "The complete four-chunk execution of arm 2, 64 of 64 games. This record covers the same execution that RUN-20260821T143541Z-4c4370b6 recorded as a partial two-chunk snapshot; that record is committed history and is left unchanged, and this one supersedes it for the completed cohort. Chunk boundaries from the driver log: 14:35:41Z start, chunks finishing 16:03:50Z, 17:27:03Z, 18:42:43Z and 19:10:11Z. 6,523 decisions, 0 below target depth, 0 work-limit events, minimum completed depth 3, busiest decision 190,214,472 of a declared 407,634,528 bound (2.14x headroom), work/move 13,506,434 at an auto-sized 346,921-entry cache. Not a timing-grade measurement: shared machine throughout. gitCommit is null because the arm ran from an uncommitted working tree and the commit cannot be reconstructed; the source-closure hash is recorded instead and is listed file-by-file in this run's manifest.json."
+  },
+  "exitCode": 0,
+  "stopReason": null,
+  "artifactRefs": [
+    "runs/RUN-A525-reveal/d3-n7-m12.json",
+    "runs/RUN-A525-reveal/d3-n7-m12-pooled.json",
+    "runs/RUN-A525-reveal/d3-n7-m12-c0.json",
+    "runs/RUN-A525-reveal/d3-n7-m12-c1.json",
+    "runs/RUN-A525-reveal/d3-n7-m12-c2.json",
+    "runs/RUN-A525-reveal/d3-n7-m12-c3.json",
+    "runs/RUN-A525-reveal/cont-arm2-driver.log",
+    "runs/RUN-20260821T143541Z-2b35eaaf/reveal-report-complete.txt",
+    "runs/RUN-20260821T143541Z-2b35eaaf/manifest.json"
+  ],
+  "contributionIds": [
+    "CT-20260821T181919Z-05882e86",
+    "CT-20260821T192141Z-cba34d68"
+  ]
+}

@@ -129,7 +129,7 @@ gray-disc reveals are sampled.
     { arm: "d3 · M=3", score: "337,306", work: "1,045,719", note: "" },
     { arm: "d3 · M=6", score: "376,442", work: "4,244,020", note: "" },
     { arm: "d4 · M=1", score: "398,498", work: "4,956,614", note: "reference", highlight: true },
-    { arm: "d3 · M=12", score: "356,890", work: "13,575,768", note: "32 games, partial" },
+    { arm: "d3 · M=12", score: "349,345", work: "13,506,434", note: "" },
     { arm: "d4 · M=2", score: "356,548", work: "20,178,327", note: "" },
     { arm: "d5 · M=1", score: "383,691", work: "170,131,134", note: "16 games, partial" }
   ]}
@@ -153,7 +153,7 @@ distinct reveal outcomes the planner samples at each chance node — `M=1` is a
 single guess, and at depth 3 twelve samples is full joint coverage.
 
 <ArmTable
-  caption="The reveal-sample ladder at depth 3, seven strata. Paired against M=1 on the same seeds."
+  caption="The reveal-sample ladder at depth 3, seven strata. 64 games per arm, paired against M=1 on the same seeds."
   columns={[
     { key: "arm", label: "Arm" },
     { key: "cov", label: "Joint coverage", numeric: true },
@@ -166,7 +166,7 @@ single guess, and at depth 3 twelve samples is full joint coverage.
     { arm: "M=1", cov: "8.3%", score: "312,327", delta: "—", bound: "—", wtl: "—" },
     { arm: "M=3", cov: "42.9%", score: "337,306", delta: "+24,980", bound: "−23,451", wtl: "32–0–32" },
     { arm: "M=6", cov: "85.7%", score: "376,442", delta: "+64,116", bound: "+7,475", wtl: "36–0–28", highlight: true },
-    { arm: "M=12", cov: "100%", score: "356,890", delta: "+31,413", bound: "−70,729", wtl: "15–0–17" }
+    { arm: "M=12", cov: "100%", score: "349,345", delta: "+37,019", bound: "−25,076", wtl: "30–0–34" }
   ]}
 />
 
@@ -174,8 +174,13 @@ single guess, and at depth 3 twelve samples is full joint coverage.
 `M=6` is worth **+64,116** points with a 95% lower bound of **+7,475** — one of
 the few statistically significant positives this project has. Going all the way
 to complete joint coverage at `M=12` does not extend the gain: measured directly
-against `M=6` on their shared seeds it is **−4,495** (15–0–17). The benefit
-saturates somewhere below full coverage.
+against `M=6` it is **−27,097** (95% bounds −83,807 to +31,209, W–T–L 28–0–36).
+
+Because that step sits inside noise, this is **saturation, not regression** —
+the honest claim is that the reveal axis is exhausted by about `M=6`, not that
+full coverage is actively worse. But the turnover is visible in four separate
+quantities at once: score, moves, clears per move and reveals per move all peak
+at `M=6`. Only mean occupancy keeps improving all the way to full coverage.
 </Finding>
 
 The obvious next question is whether the same refinement stacks on top of the

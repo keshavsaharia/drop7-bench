@@ -28,18 +28,32 @@ def load(path):
         return json.load(handle)
 
 
-def bootstrap_lower(values, alpha=0.05, draws=20000, seed=0xB0075EED):
+def bootstrap_means(values, draws=20000, seed=0xB0075EED):
     rng = random.Random(seed)
     n = len(values)
     means = []
     for _ in range(draws):
         means.append(sum(values[rng.randrange(n)] for _ in range(n)) / n)
     means.sort()
-    pos = alpha * (len(means) - 1)
+    return means
+
+
+def _pct(means, q):
+    pos = q * (len(means) - 1)
     low = int(pos)
     high = min(low + 1, len(means) - 1)
     w = pos - low
     return means[low] * (1 - w) + means[high] * w
+
+
+def bootstrap_lower(values, alpha=0.05, draws=20000, seed=0xB0075EED):
+    return _pct(bootstrap_means(values, draws, seed), alpha)
+
+
+def bootstrap_upper(values, alpha=0.05, draws=20000, seed=0xB0075EED):
+    """One-sided upper bound.  For a negative or null result this is the
+    informative direction: it bounds how large the gain could plausibly be."""
+    return _pct(bootstrap_means(values, draws, seed), 1.0 - alpha)
 
 
 def rows(specs):
@@ -77,9 +91,9 @@ def rows(specs):
 
 
 def delta(specs):
-    print("| comparison | d score | 95% lower bound | d moves | d clears/move | "
-          "d reveals/move | d occupied | W-T-L |")
-    print("| --- |" + " ---: |" * 6 + " :---: |")
+    print("| comparison | d score | 95% lower bound | 95% upper bound | d moves | "
+          "d clears/move | d reveals/move | d occupied | W-T-L |")
+    print("| --- |" + " ---: |" * 7 + " :---: |")
     for i in range(0, len(specs), 2):
         alabel, apath = specs[i].split("=", 1)
         blabel, bpath = specs[i + 1].split("=", 1)
@@ -94,7 +108,8 @@ def delta(specs):
         t = sum(1 for x in diffs if x == 0)
         l = sum(1 for x in diffs if x < 0)
         print(f"| {alabel} - {blabel} (n={len(seeds)}) | {sum(diffs)/len(diffs):+,.0f} | "
-              f"{bootstrap_lower(diffs):+,.0f} | {sum(mdiffs)/len(mdiffs):+.2f} | "
+              f"{bootstrap_lower(diffs):+,.0f} | {bootstrap_upper(diffs):+,.0f} | "
+              f"{sum(mdiffs)/len(mdiffs):+.2f} | "
               f"{a['numberedClearsPerMove']-b['numberedClearsPerMove']:+.4f} | "
               f"{a['coverRevealsPerMove']-b['coverRevealsPerMove']:+.4f} | "
               f"{a['meanOccupiedCells']-b['meanOccupiedCells']:+.2f} | {w}-{t}-{l} |")
@@ -133,8 +148,33 @@ def partial(specs):
               f"{sum(mdiffs)/len(mdiffs):+.2f} | {w}-{t}-{l} | {ma:,.0f} | {mb:,.0f} |")
 
 
+def halves(specs):
+    """Post-hoc split of each paired delta into the two 32-seed halves of the
+    shared cohort.  No fold was preregistered, so this is a stability
+    diagnostic, not a gate."""
+    print("| comparison | half | n | d score | 95% lower bound | W-T-L |")
+    print("| --- | --- |" + " ---: |" * 3 + " :---: |")
+    for i in range(0, len(specs), 2):
+        alabel, apath = specs[i].split("=", 1)
+        blabel, bpath = specs[i + 1].split("=", 1)
+        a, b = load(apath), load(bpath)
+        sa = {x["seedHex"]: x["score"] for x in a["gamesDetail"]}
+        sb = {x["seedHex"]: x["score"] for x in b["gamesDetail"]}
+        seeds = sorted(set(sa) & set(sb), key=lambda s: int(s, 16))
+        mid = len(seeds) // 2
+        for name, block in (("first 32", seeds[:mid]), ("last 32", seeds[mid:])):
+            diffs = [sa[s] - sb[s] for s in block]
+            w = sum(1 for x in diffs if x > 0)
+            t = sum(1 for x in diffs if x == 0)
+            l = sum(1 for x in diffs if x < 0)
+            print(f"| {alabel} - {blabel} | {name} | {len(block)} | "
+                  f"{sum(diffs)/len(diffs):+,.0f} | {bootstrap_lower(diffs):+,.0f} | {w}-{t}-{l} |")
+
+
 if __name__ == "__main__":
-    if sys.argv[1] == "rows":
+    if sys.argv[1] == "halves":
+        halves(sys.argv[2:])
+    elif sys.argv[1] == "rows":
         rows(sys.argv[2:])
     elif sys.argv[1] == "delta":
         delta(sys.argv[2:])

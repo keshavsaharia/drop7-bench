@@ -1,0 +1,83 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260821T134500Z-4b9d2f68",
+  "theoryIds": [
+    "TH-20260820-distributional-afterstate-ranker-7aba7fb3"
+  ],
+  "experimentId": "EX-20260821-afterstate-d2-teacher-58772f17",
+  "runIds": [
+    "RUN-20260821T084812Z-0d366205"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "fail",
+  "assessment": "not-supported-as-tested",
+  "evidenceTier": "pilot",
+  "summary": "The stronger-teacher hypothesis fails as tested. A successor-closed corpus relabeled with a fair-D2 (five-sample) continuation teacher at K=64 (2.88M rows over 6,535 roots; partial at the generator's 4h default wall stop) trained a model that, on the fresh 0x5da70500 ranking gate against the fixed D1-continuation H40 target, reached top-1 0.3365 - far below fair D4's 0.5020, below the D1-teacher model's 0.4245 from iteration 3, and only at exact-D1's own 0.3339. The frozen criterion (top-1 >= 0.4616 on each half, i.e. closing half the iteration-3 gap to D4) failed by a wide margin in both halves (0.342, 0.331). The frozen override gate on fresh 0x5da70600 roots also failed (eligible-root regret: half1 -0.0089, half2 +0.0110, pooled +0.0012). IMPORTANT CONFOUND, disclosed: the D2-teacher model was evaluated against D1-continuation outcomes (frozen for comparability with iteration 3), so part of its regression may reflect the teacher/target mismatch rather than teacher quality alone. Read narrowly, the result says a stronger-teacher corpus did not produce a better ranker of the fixed public-continuation outcome, and the afterstate line's ranking deficit is robust to the teacher choice within the tested configurations.",
+  "metrics": {
+    "corpusD2Rows": 2884224,
+    "corpusD2Roots": 6535,
+    "corpusD2Complete": false,
+    "epochsCompleted": 30,
+    "rankingTop1Pooled": 0.3365,
+    "rankingTop1Half1": 0.3418,
+    "rankingTop1Half2": 0.3314,
+    "d4Top1Pooled": 0.5020,
+    "d1Top1Pooled": 0.3339,
+    "iteration3D1TeacherTop1": 0.4245,
+    "rankingPairwisePooled": 0.6310,
+    "rankingRegretPooled": 0.3120,
+    "overrideRegretGainHalf1": -0.0089,
+    "overrideRegretGainHalf2": 0.0110,
+    "overrideRegretGainPooled": 0.0012,
+    "overrideRate": 0.3592,
+    "labelStabilityDecisiveSpearman": 0.8058,
+    "quantileIntervalCoverage": 0.7244
+  },
+  "gateChecks": [
+    {
+      "criterion": "Corpus successor-closed at K=64 with the D2 teacher, completeness 1.0",
+      "passed": true,
+      "observed": "per-root completeness 1.0 over 6,535 fully labeled roots; the corpus is partial (6,535 of 8,192 planned) at the generator's 4h default wall stop"
+    },
+    {
+      "criterion": "Ranking gate: model top-1 >= 0.4616 on each half-fold",
+      "passed": false,
+      "observed": "half1 0.3418, half2 0.3314"
+    },
+    {
+      "criterion": "Override gate: eligible-root override regret <= D4 regret - 0.01 in EACH half-fold, rate >= 5%",
+      "passed": false,
+      "observed": "half1 -0.0089, half2 +0.0110, pooled +0.0012; override rate 35.9%"
+    },
+    {
+      "criterion": "Decisive-root label stability >= 0.5 for both evaluation corpora",
+      "passed": true,
+      "observed": "0.8058 (override corpus), 0.8010 (ranking corpus)"
+    },
+    {
+      "criterion": "Quantile coverage within [0.66, 0.87]",
+      "passed": true,
+      "observed": "0.7244"
+    }
+  ],
+  "perGameArtifact": {
+    "path": "runs/RUN-20260821T084812Z-0d366205/gate/override-gate-report.json",
+    "sha256": "424970572fc11c652e3d28e5ef1c2bd5340ea49123ad81c521842afe73b7354b",
+    "recordCount": 1
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260820T080056Z-376ada90.json"
+  ],
+  "artifactManifestRef": null,
+  "limitations": [
+    "Teacher/target mismatch confound: the model was trained on D2-continuation outcomes but evaluated against D1-continuation outcomes (frozen for comparability with iteration 3). A matched D2-continuation target was not generated (cost); the regression may partly reflect the mismatch.",
+    "The D2 corpus is partial (6,535 of 8,192 roots) at the generator's 4h default wall stop.",
+    "The compact 3.4M-param architecture and the D1-harvested root distribution are unchanged from iteration 3.",
+    "Single machine profile; FP32 on the shared-memory iGPU."
+  ],
+  "contributionIds": [
+    "CT-20260820T140540Z-f8458dc0"
+  ],
+  "recordedAt": "2026-08-21T13:45:00Z"
+}

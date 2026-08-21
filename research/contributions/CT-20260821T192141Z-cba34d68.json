@@ -1,0 +1,57 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260821T192141Z-cba34d68",
+  "actor": {
+    "kind": "model",
+    "platform": "Claude Code",
+    "model": "claude-opus-5[1m]",
+    "agentId": null
+  },
+  "level": "L2",
+  "roles": [
+    { "role": "formal-analysis", "degree": "lead" },
+    { "role": "writing", "degree": "lead" },
+    { "role": "data-curation", "degree": "substantial" },
+    { "role": "validation", "degree": "substantial" }
+  ],
+  "summary": "Follow-up to CT-20260821T181919Z-05882e86, after a separate agent completed both reveal-sampling arms to 64/64. Ran no gameplay. Re-derived every completed figure from the artifacts with the family's own tooling and confirmed the coordinator's numbers exactly: the depth-3 twelve-reveal-sample arm at 349,345 (work/move 13,506,434, 6,523 decisions, 0 below target depth), -27,097 against the six-sample arm with a 95% interval of (-83,807, +31,209) and W-T-L 28-0-36, +37,019 (-25,076, +102,426) against the one-sample arm, and -49,153 (-125,029, +27,828) against the depth-4 one-sample arm; the depth-4 two-reveal-sample arm unchanged at 356,548 and -41,950 (-100,137, +17,541), 28-0-36, 4.07x work, with the sign holding in both cohort halves (-11,082 and -72,818, independently reproduced here). Wrote result RS-20260821T192140Z-189fe392 superseding the partial-arm record RS-20260821T181918Z-ea7076a3, which was already committed and is left byte-unchanged because this repository has no precedent for annotating a committed result in place; the supersession is carried in the new record's summary and limitations and by appending it to the theory's evidenceRefs, matching how the afterstate line links its superseded results. Registered run RUN-20260821T143541Z-2b35eaaf for the complete four-chunk arm-2 execution (the committed RUN-20260821T143541Z-4c4370b6 remains as its partial snapshot) with a content manifest, and confirmed that arm 1's existing run record already covered its complete execution so no second run record was needed. Updated docs/exploratory/finding-16-factored-reveal-sampling.md throughout for the completed numbers, replacing the 'ladder stops ordering' framing with a saturation result stated as saturation rather than regression, and adding the two supporting arguments of finding-09 that the fourth ladder point weakens (non-monotone dose-response, and the joint-coverage attribution failing at its own 100% endpoint) while recording that finding-09's headline stands on its own paired test; cross-referenced that document's Continuation sections rather than restating them. Recorded the chunk-and-pool validity control (depth 3 (5,1) as 4x16 chunks at 1 thread reproducing the 64-game 12-thread artifact field-for-field, identical summed logical work 312,966,881, only per-game wallSeconds differing, also a worker-count independence check) in both the result record and the finding, and verified independently that two separate poolings of the same chunks produce byte-identical artifacts. Made the family's finish.sh route each arm by completeness so an in-flight arm is compared on shared seeds with its paired n printed and can never be read as a 64-game cohort.",
+  "theoryIds": [
+    "TH-20260821-factored-chance-depth-compounding-aca01725"
+  ],
+  "experimentIds": [
+    "EX-20260821-reveal-sampling-unfinished-arms-470677b5"
+  ],
+  "runIds": [
+    "RUN-20260821T035407Z-00483c6c",
+    "RUN-20260821T143541Z-2b35eaaf"
+  ],
+  "artifactPaths": [
+    "research/results/RS-20260821T192140Z-189fe392.json",
+    "research/runs/RUN-20260821T143541Z-2b35eaaf.json",
+    "research/theories/TH-20260821-factored-chance-depth-compounding-aca01725.json",
+    "docs/exploratory/finding-16-factored-reveal-sampling.md",
+    "docs/exploratory/README.md",
+    "approaches/lifetime-objective/reveal-sampling/finish.sh",
+    "runs/RUN-20260821T143541Z-2b35eaaf/manifest.json",
+    "runs/RUN-20260821T143541Z-2b35eaaf/reveal-report-complete.txt"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "make research-validate: schema, ID, cross-reference, per-game artifact hash, machine-profile, seed-lease and markdown-link checks, plus the research unit tests",
+    "Re-ran approaches/lifetime-objective/reveal-sampling/finish.sh end to end on the completed cohorts and took every figure from its output; retained verbatim at runs/RUN-20260821T143541Z-2b35eaaf/reveal-report-complete.txt",
+    "Independently recomputed the M=12 paired deltas, both one-sided bounds and both cohort halves outside the family's tooling, reproducing -27,097 (-83,807, +31,209), +37,019 (-25,076, +102,426) and the arm-1 halves -11,082 / -72,818",
+    "Verified byte-identity of runs/RUN-A525-reveal/d3-n7-m12.json with d3-n7-m12-pooled.json and of d4-n7-m2.json with d4-n7-m2-pooled.json (two independent poolings of the same chunks)",
+    "Re-verified all 17 entries of the two earlier content manifests still hash correctly after the arms completed, and that the superseded record's per-game artifact hash is unaffected",
+    "Confirmed the completed-depth and work-bound audits from each artifact's config block: 6,523 decisions and 6,633 decisions, 0 below target depth, 0 work-limit events, 0 censored games, 0 score-decomposition identity failures"
+  ],
+  "limitations": [
+    "Self-reported contribution; not independently reviewed.",
+    "Analysis and record-writing only. The gameplay, the chunked runner, the completion of both arms, the upper-bound addition to stats.py and the Continuation appended to finding-09 are other contributors' work and are not claimed here.",
+    "The superseded record RS-20260821T181918Z-ea7076a3 still carries assessment 'not-supported-as-tested' rather than 'superseded'. Setting that field would mean editing a committed result in place, which this repository has only ever done at record-creation time; the decision is left to the coordinator.",
+    "gitCommit is null on the new run record because the arm ran from an uncommitted working tree; a source-closure hash is recorded instead."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-21T19:21:41Z"
+}

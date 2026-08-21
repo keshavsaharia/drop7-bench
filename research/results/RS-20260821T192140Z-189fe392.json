@@ -1,0 +1,236 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260821T192140Z-189fe392",
+  "theoryIds": [
+    "TH-20260821-factored-chance-depth-compounding-aca01725"
+  ],
+  "experimentId": "EX-20260821-reveal-sampling-unfinished-arms-470677b5",
+  "runIds": [
+    "RUN-20260821T035407Z-00483c6c",
+    "RUN-20260821T143541Z-2b35eaaf"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "fail",
+  "assessment": "not-supported-as-tested",
+  "evidenceTier": "public-development",
+  "summary": "SUPERSEDES RS-20260821T181918Z-ea7076a3, which assessed the same experiment while its second arm held 32 of 64 games. Both arms are now complete at 64 of 64 and the run validity rises from partial to valid. The old record remains as committed history and is not edited; this record carries the completed figures and everything below replaces the partial ones. Nothing in arm 1 changed and the direction of arm 2 did not change; only its magnitude did, by about 6x. ARM 1, unchanged and complete: depth 4 with seven disc samples and two reveal samples scores 356,548 against the 398,498 of the same search with one reveal sample - a paired -41,950 with a one-sided 95% bootstrap interval of (-100,137, +17,541) and W-T-L 28-0-36, for 4.07x the logical work per move. The gate required a lower bound above zero, so the compounding theory is rejected as tested. The sign is stable across both cohort halves (-11,082 on seeds 0xa51d1000-0xa51d101f and -72,818 on 0xa51d1020-0xa51d103f), independently confirmed by the agent that completed the runs. The +17,541 ceiling is the load-bearing number: had the axes compounded even at a quarter of the +64,116 the same knob is worth at depth 3, the data would have had to show it. The axes substitute in the strong sense. ARM 2, now complete: depth 3 with twelve reveal samples - the configuration at which (disc, reveal) joint coverage reaches 100% - scores 349,345, not the 356,890 its first 32 games suggested. Against the six-sample arm it is -27,097 with an interval of (-83,807, +31,209) and W-T-L 28-0-36; against the one-sample arm +37,019 (-25,076, +102,426), 30-0-34. THE REVEAL AXIS SATURATES AT M ABOUT 6 AND DOES NOT IMPROVE TO FULL COVERAGE. Read this as saturation, not as a demonstrated regression: the M=6 to M=12 step does not clear zero in either direction, so the data are consistent with the curve being flat from M=6 onward and are not consistent with it continuing to climb at the rate M=1 to M=6 showed. Score, moves, numbered clears and covered reveals all peak at M=6 (85.7% coverage) and fall back at M=12 (100%); only mean occupancy improves monotonically across all four points (23.88, 23.81, 23.49, 23.39). This weakens two SUPPORTING arguments in finding-09 without touching its headline, which rests on its own paired tests and stands: the dose-response is no longer monotone once the fourth point is added, with four of five tracked quantities reversing, and section 2's attribution of strength to joint coverage fails exactly at the 100% endpoint that attribution predicts should be best. finding-09 section 5 should now be read as 'M=6 is a local optimum', not 'more M is better'. Validity controls all pass: 0 decisions below target depth, 0 work-limit events, 0 censored games and 0 score-decomposition identity failures in both arms, and the chunk-and-pool procedure on which every cohort in this family depends was verified end to end by running depth 3 (N=5, M=1) as four 16-game chunks at 1 thread and reproducing the existing 64-game 12-thread artifact field-for-field - 0 mismatches, identical summed logical work of 312,966,881, only per-game wallSeconds differing, which also re-confirms worker-count independence.",
+  "metrics": {
+    "cohort": "0xa51d1000-0xa51d103f, 64 games, 2,000-move cap, corrected 17,000-point Hardcore scoring",
+    "supersedes": "RS-20260821T181918Z-ea7076a3",
+    "supersededFieldsFromPartialRecord": "d3N7M12MeanScoreOn32 356,890 -> d3N7M12MeanScore 349,345 (64 games); pairedD3M12MinusD3M6 -4,495 [-91,425] at n=32 -> -27,097 [-83,807, +31,209] at n=64; pairedD3M12MinusD3M1 +31,413 [-70,729] at n=32 -> +37,019 [-25,076, +102,426] at n=64; pairedD3M12MinusD4M1 -31,616 [-143,344] at n=32 -> -49,153 [-125,029, +27,828] at n=64; runValidity partial -> valid",
+    "ladderD3N7": {
+      "M1": 312327,
+      "M3": 337306,
+      "M6": 376442,
+      "M12": 349345
+    },
+    "ladderMovesD3N7": {
+      "M1": 92.27,
+      "M3": 98.7,
+      "M6": 109.45,
+      "M12": 101.92
+    },
+    "ladderClearsPerMoveD3N7": {
+      "M1": 1.9849,
+      "M3": 2.0033,
+      "M6": 2.0447,
+      "M12": 2.0231
+    },
+    "ladderRevealsPerMoveD3N7": {
+      "M1": 1.1001,
+      "M3": 1.1111,
+      "M6": 1.1423,
+      "M12": 1.1309
+    },
+    "ladderOccupiedD3N7": {
+      "M1": 23.88,
+      "M3": 23.81,
+      "M6": 23.49,
+      "M12": 23.39
+    },
+    "ladderWorkPerMoveD3N7": {
+      "M1": 156834,
+      "M3": 1045719,
+      "M6": 4244020,
+      "M12": 13506434
+    },
+    "jointCoverageByM": {
+      "M1": 0.143,
+      "M2": 0.286,
+      "M3": 0.429,
+      "M6": 0.857,
+      "M12": 1.0
+    },
+    "d4N7M2Games": 64,
+    "d4N7M2MeanScore": 356548.0,
+    "d4N7M2MeanMoves": 103.64,
+    "d4N7M2WorkPerMove": 20178327,
+    "d3N7M12Games": 64,
+    "d3N7M12MeanScore": 349345.21875,
+    "d3N7M12MedianScore": 258855.0,
+    "d3N7M12MeanMoves": 101.921875,
+    "d3N7M12ScoreSd": 254059.01,
+    "d3N7M12WorkPerMove": 13506434,
+    "d3N7M12GamesAtOrAboveOneMillion": 3,
+    "pairedD4M2MinusD4M1": {
+      "n": 64,
+      "meanScoreDelta": -41950,
+      "lowerBound95": -100137,
+      "upperBound95": 17541,
+      "meanMoveDelta": -11.02,
+      "winTieLoss": "28-0-36",
+      "workRatio": 4.07,
+      "half1": -11082,
+      "half2": -72818
+    },
+    "pairedD4M2MinusD4N5M1": {
+      "n": 64,
+      "meanScoreDelta": 59221,
+      "lowerBound95": 9134,
+      "upperBound95": 111812,
+      "winTieLoss": "37-0-27",
+      "workRatio": 15.57
+    },
+    "pairedD4M2MinusD3M6": {
+      "n": 64,
+      "meanScoreDelta": -19894,
+      "lowerBound95": -76456,
+      "upperBound95": 36846,
+      "winTieLoss": "37-0-27",
+      "workRatio": 4.75
+    },
+    "pairedD3M6MinusD4M1": {
+      "n": 64,
+      "meanScoreDelta": -22056,
+      "lowerBound95": -89867,
+      "upperBound95": 46009,
+      "winTieLoss": "30-0-34",
+      "workRatio": 0.86
+    },
+    "pairedD3M3MinusD3M1": {
+      "n": 64,
+      "meanScoreDelta": 24980,
+      "lowerBound95": -23451,
+      "upperBound95": 73442,
+      "winTieLoss": "32-0-32"
+    },
+    "pairedD3M6MinusD3M1": {
+      "n": 64,
+      "meanScoreDelta": 64116,
+      "lowerBound95": 7475,
+      "upperBound95": 121776,
+      "winTieLoss": "36-0-28"
+    },
+    "pairedD3M12MinusD3M6": {
+      "n": 64,
+      "meanScoreDelta": -27097,
+      "lowerBound95": -83807,
+      "upperBound95": 31209,
+      "meanMoveDelta": -7.53,
+      "winTieLoss": "28-0-36",
+      "workRatio": 3.18,
+      "half1": -4495,
+      "half2": -49698
+    },
+    "pairedD3M12MinusD3M1": {
+      "n": 64,
+      "meanScoreDelta": 37019,
+      "lowerBound95": -25076,
+      "upperBound95": 102426,
+      "meanMoveDelta": 9.66,
+      "winTieLoss": "30-0-34"
+    },
+    "pairedD3M12MinusD4M1": {
+      "n": 64,
+      "meanScoreDelta": -49153,
+      "lowerBound95": -125029,
+      "upperBound95": 27828,
+      "meanMoveDelta": -12.73,
+      "winTieLoss": "22-0-42"
+    },
+    "boundDiagnosticsD4N7M2": {
+      "decisions": 6633,
+      "decisionsBelowTargetDepth": 0,
+      "workLimitEvents": 0,
+      "minCompletedDepth": 4,
+      "maxDecisionWork": 81686570,
+      "declaredBound": 187336114
+    },
+    "boundDiagnosticsD3N7M12": {
+      "decisions": 6523,
+      "decisionsBelowTargetDepth": 0,
+      "workLimitEvents": 0,
+      "minCompletedDepth": 3,
+      "maxDecisionWork": 190214472,
+      "declaredBound": 407634528
+    },
+    "poolingValidity": {
+      "games": 64,
+      "fieldMismatches": 0,
+      "summedLogicalWorkChunked1Thread": 312966881,
+      "summedLogicalWorkSingle12Thread": 312966881,
+      "onlyDifferingField": "per-game wallSeconds",
+      "note": "depth 3 (N=5, M=1) run as four 16-game chunks at 1 thread against the existing single 64-game 12-thread artifact; also a worker-count independence check. Recorded in finding-09 Continuation section 12."
+    },
+    "poolDeterminism": "the completing agent's single-file pooling and this session's independent re-pooling of the same four chunks produce byte-identical artifacts for both arms (d4-n7-m2.json vs d4-n7-m2-pooled.json, d3-n7-m12.json vs d3-n7-m12-pooled.json)",
+    "censoredGamesAllArms": 0,
+    "scoreIdentityFailuresAllArms": 0,
+    "bootstrap": "one-sided 95% percentile bootstrap over whole paired games, 20,000 resamples, seed 0xb0075eed (stats.py); upper bounds from the same estimator at alpha 0.95"
+  },
+  "gateChecks": [
+    {
+      "criterion": "Pooling validity: four pooled 16-game chunks reproduce a single 64-game run on all per-game fields with identical summed logical work",
+      "passed": true,
+      "observed": "depth 3 (N=5, M=1) as 4x16 chunks at 1 thread vs the existing 64-game 12-thread artifact: 64 games, 0 field mismatches, logical work 312,966,881 = 312,966,881, only per-game wallSeconds differing; pooled bound diagnostics identical (5,750 decisions, 0 below target, 0 work-limit events, maxDecisionWork 85,085)"
+    },
+    {
+      "criterion": "Bound diagnostics: 0 decisions below target depth and 0 work-limit events in every arm",
+      "passed": true,
+      "observed": "d4 N=7 M=2: 6,633 decisions, busiest at 44% of its bound; d3 N=7 M=12: 6,523 decisions, busiest at 47% of its bound; 0 below target depth and 0 work-limit events in both"
+    },
+    {
+      "criterion": "Depth 4 with two reveal samples beats depth 4 with one reveal sample, 95% bootstrap lower bound above zero, 64 complete games",
+      "passed": false,
+      "observed": "-41,950, interval (-100,137, +17,541), W-T-L 28-0-36, at 4.07x the logical work per move; negative in both cohort halves (-11,082 and -72,818) and not distinguishable from zero in either direction"
+    },
+    {
+      "criterion": "Depth 3 with twelve reveal samples is at least as strong as depth 3 with six, 64 complete games",
+      "passed": false,
+      "observed": "-27,097, interval (-83,807, +31,209), W-T-L 28-0-36, at 3.18x the work; the ladder peaks at M=6 and turns over at full joint coverage. Failed as a criterion, but the interval spans zero, so this is saturation rather than a demonstrated regression"
+    },
+    {
+      "criterion": "0 censored games and 0 score-decomposition identity failures in every arm",
+      "passed": true,
+      "observed": "0 and 0 in both arms and in every comparator arm re-read here"
+    }
+  ],
+  "perGameArtifact": {
+    "path": "runs/RUN-A525-reveal/d4-n7-m2.json",
+    "sha256": "06fc7bdacb9849962e7369515a8084afd3d1b6e4b9a92b7b0cb9c5526384d861",
+    "recordCount": 64
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260820T080056Z-376ada90.json"
+  ],
+  "artifactManifestRef": "runs/RUN-20260821T143541Z-2b35eaaf/manifest.json",
+  "limitations": [
+    "SUPERSESSION: this record replaces RS-20260821T181918Z-ea7076a3 for the same experiment. That record was written and committed while arm 2 held 32 of 64 games and is left byte-unchanged, because this repository has no precedent for annotating a committed result in place; the supersession relationship is carried here and by the theory record's evidenceRefs list, which is how the afterstate line's superseded results are linked. Quote this record, not the partial one.",
+    "DOSE, NOT AXIS, for arm 1: the depth-4 arm tested two reveal samples (28.6% joint coverage), below the six samples (85.7%) that first cleared noise at depth 3. The negative is about that dose at that depth; a wide depth-4 reveal estimator was never affordable and remains unmeasured. What the +17,541 ceiling does bound is how much compounding could have been hiding at this dose.",
+    "SATURATION, NOT REGRESSION, for arm 2: the M=6 to M=12 step does not clear zero in either direction. The defensible statement is that the reveal axis is exhausted by M about 6 and that filling the last of the joint grid buys at most +31k and plausibly nothing. It is not evidence that more reveal samples hurt.",
+    "No adjacent step in the depth-3 M ladder is individually significant, so the whole M >= 3 region is consistent with one plateau. The M=1 to M=6 endpoint test (+64,116 [+7,475]) is what carries finding-09's positive result, and it is unaffected by this record.",
+    "The three readings finding-09's Continuation section 16 lists for the turnover - redundant last atoms, variance reduction rather than coverage per se, or 64 games being unable to resolve steps this size - are not separated by this experiment.",
+    "64 paired games with a score standard deviation of 55-73% of the mean; the M=12 arm's is 254,059 on a mean of 349,345. Effects below roughly 60,000 points are invisible at this sample size.",
+    "The cohort 0xa51d1000-0xa51d103f was opened by finding-05 and read again by finding-09; it is permanently development data. STANDARD tier, diagnostic only, never a freeze gate and never confirmation evidence. A fresh-block replication is owed before anything here is promoted.",
+    "Work per move is not comparable across arms with different declared cache capacities: the new arms auto-size from their branching factor (960,695 and 346,921 entries) while the recorded comparators declare 60,000.",
+    "Not timing-grade: shared machine throughout, and chunk 1 of the depth-4 arm ran at 8 threads rather than 12 after a load back-off. Scores, moves and logical work are deterministic and unaffected, as the 1-thread-versus-12-thread pooling control demonstrates directly.",
+    "The experiment record was written after the runs. The arms and their launch protocol were fixed in prose in finding-09 and in run-arms.sh before either produced a game, but this is retroactive registration and the experiment record's amendment says so.",
+    "All artifacts live under runs/, which is gitignored, so the evidence is not committed with the record; the content manifest and the retained analysis output under the run directories are the durable reference.",
+    "Nothing here moves the ceiling. The best arm on this cohort remains 398,498 against the 1,050,000 the frozen qualification protocol requires, and every game ended."
+  ],
+  "contributionIds": [
+    "CT-20260821T181919Z-05882e86",
+    "CT-20260821T192141Z-cba34d68"
+  ],
+  "recordedAt": "2026-08-21T19:21:40Z"
+}

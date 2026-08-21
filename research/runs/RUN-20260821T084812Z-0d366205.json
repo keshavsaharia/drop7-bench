@@ -1,0 +1,54 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260821T084812Z-0d366205",
+  "experimentId": "EX-20260821-afterstate-d2-teacher-58772f17",
+  "lifecycle": "completed",
+  "runValidity": "valid",
+  "startedAt": "2026-08-21T08:48:12Z",
+  "endedAt": "2026-08-21T13:35:00Z",
+  "protocolSha256": "89aa9fc6f1cde64e5626ce377c388f06d2dee17ec5d821466d2d03c61b600b70",
+  "machineProfileRef": "research/system-profiles/MACH-20260820T080056Z-376ada90.json",
+  "sourceState": {
+    "gitCommit": "2386224f31e4528922bfff93a36f85847e314a1f",
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "build/afterstate/generate-corpus --seed-start 0x5da70000 --games 256 --roots 8192 --scenarios 64 --threads 22 --continuation d2 --out runs/RUN-20260821T084812Z-0d366205/corpus-d2",
+    "build/afterstate/generate-corpus --seed-start 0x5da70500 --games 64 --roots 8000 --scenarios 256 --threads 12 --fold-force heldout --out runs/RUN-20260821T084812Z-0d366205/corpus-rank (and 0x5da70600 corpus-override)",
+    "build/afterstate/label-d4 --roots <both gate corpora> --threads 12",
+    "PYTHONUNBUFFERED=1 .venv-afterstate/bin/python approaches/afterstate-learning/distributional-afterstate/train.py --corpus runs/RUN-20260821T084812Z-0d366205/corpus-d2/corpus.ndjson --heldout-corpus runs/RUN-20260821T084812Z-0d366205/corpus-rank/corpus.ndjson --comparator-labels runs/RUN-20260821T084812Z-0d366205/corpus-rank-labels/comparator-labels.tsv --out runs/RUN-20260821T084812Z-0d366205/model --epochs 30 --max-train-rows 2000000 --max-train-seconds 10800",
+    "override-gate.py --model runs/RUN-20260821T084812Z-0d366205/model/model.pt --heldout-corpus runs/RUN-20260821T084812Z-0d366205/corpus-override/corpus.ndjson --comparator-labels runs/RUN-20260821T084812Z-0d366205/corpus-override-labels/comparator-labels.tsv (run twice; byte-identical)"
+  ],
+  "seedLeaseRefs": [
+    "SL-20260820T083000Z-5da70000"
+  ],
+  "resourceLimits": {
+    "wallSeconds": 28800,
+    "cpuThreads": 24,
+    "maxHostBytes": 51539607552,
+    "maxGpuBytes": 32212254720
+  },
+  "resourceObserved": {
+    "wallSeconds": 17200,
+    "cpuSeconds": 60000,
+    "peakHostBytes": null,
+    "peakGpuBytes": 3737333248,
+    "measurementNotes": "D2-continuation corpus generation hit the generator's 4h default wall stop (the protocol allowed 6h; --wall-seconds was not raised), producing 2,884,224 rows over 6,535 fully-labeled successor-closed roots of the 8,192 planned - a partial corpus, recorded as such. Training: 30 epochs on a 2M-row streamed subsample, ~260s/epoch on the Radeon 8060S. Both gates deterministic (override gate byte-identical across two runs)."
+  },
+  "exitCode": 0,
+  "stopReason": "corpus generation stopped at the generator's 4h default wall bound (partial corpus of 6,535 roots)",
+  "artifactRefs": [
+    "runs/RUN-20260821T084812Z-0d366205/corpus-d2/corpus.ndjson",
+    "runs/RUN-20260821T084812Z-0d366205/corpus-rank/corpus.ndjson",
+    "runs/RUN-20260821T084812Z-0d366205/corpus-override/corpus.ndjson",
+    "runs/RUN-20260821T084812Z-0d366205/model/model.pt",
+    "runs/RUN-20260821T084812Z-0d366205/model/gate-report.json",
+    "runs/RUN-20260821T084812Z-0d366205/gate/override-gate-report.json"
+  ],
+  "contributionIds": [
+    "CT-20260820T140540Z-f8458dc0"
+  ]
+}

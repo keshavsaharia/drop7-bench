@@ -558,3 +558,369 @@ d2c74210…  approaches/lifetime-objective/risk-calibration/search.cpp
 8b4267af…  src/core/native/public-behavior.hpp
 b6dcde5f…  src/core/native/engine.hpp
 ```
+
+---
+
+# Continuation — the two arms §10 left open
+
+**Added 2026-08-21 by a later session.** Nothing above this line was edited.
+This section completes `depth 4, N=7, M=2` (the interrupted arm) and
+`depth 3, N=7, M=12` (the deliberate no-run), both on the same fixed shared
+evaluation cohort `0xa51d1000`–`0xa51d103f`, 64 paired games. New files were
+created only under `approaches/lifetime-objective/reveal-sampling/`,
+`build/reveal-sampling/` and `runs/RUN-A525-reveal/`.
+
+**Headline: the two axes substitute, they do not compound, and the reveal
+dose-response does not continue to the 100%-coverage endpoint.**
+
+| arm | mean | Δ vs its comparator | 95% lower | 95% upper | W–T–L | work/move |
+| --- | ---: | ---: | ---: | ---: | :---: | ---: |
+| **d4 (7,2)** vs d4 (7,1) | **356,548** | **−41,950** | −100,137 | +17,541 | 28–0–36 | 20,178,327 |
+| **d3 (7,12)** vs d3 (7,6) | **349,345** | **−27,097** | −83,807 | +31,209 | 28–0–36 | 13,506,434 |
+
+Neither difference clears zero, so neither is a demonstrated *loss*. But both
+point estimates are negative, both cost 3.2–4.1× the work of their comparator,
+and in both arms score, moves, numbered clears and covered reveals all move
+together in the negative direction — the same four-quantity co-movement that
+§5 used as evidence *for* the positive result, here pointing the other way.
+
+## 11. CHECK gate, re-run before any gameplay
+
+The binary was rebuilt with `clang++` (the Makefile's `CXX ?= clang++` loses to
+make's builtin `CXX=g++`, which trips a false `-Werror=array-bounds`) and the
+whole §3 gate was re-run. The frozen source hashes written to
+`build/reveal-sampling/sources.sha256` are byte-identical to those recorded at
+the end of this document, so the oracles are the same code the original session
+compared against.
+
+| gate | oracle | configuration | moves compared | action mismatches | logical-work mismatches |
+| --- | --- | --- | ---: | ---: | ---: |
+| A | frozen `ref::chooseDepth4Action` | N=5, M=1, depth 4, work 3,200,000 | 50 | **0** | n/a |
+| B1 | single-knob, `chance_samples`=5 | N=5, M=1, depth 3 | 222 | **0** | **0** |
+| B2 | single-knob, `chance_samples`=7 | N=7, M=1, depth 3 | 220 | **0** | **0** |
+| B3 | single-knob, `chance_samples`=5 | N=5, M=1, depth 4 | 90 | **0** | **0** |
+| B4 | single-knob, `chance_samples`=7 | N=7, M=1, depth 4 | 30 | **0** | **0** |
+
+Identical counts to §3, all five `CHECK OK`. Logs:
+`runs/RUN-A525-reveal/cont-gate*.log`.
+
+## 12. Chunked execution, and why pooling is not a new statistical object
+
+The previous attempt at d4 (7,2) was killed after about an hour with no games
+written, because the artifact is only serialized when the whole cohort
+finishes. Both arms here were instead run as **four sequential 16-game chunks**
+at seed starts `0xa51d1000`, `+0x10`, `+0x20`, `+0x30`, launched detached with
+`setsid nohup` so they survive the controlling session, with per-game progress
+to a log. `runCohort` maps game index *i* to seed `seedStart + i`, so the four
+chunks play exactly the 64 cohort seeds, once each.
+
+Whole games are the statistical unit and each game is a deterministic function
+of its seed and the policy, so a pooled 64-game cohort is the same object as a
+single 64-game run. That is asserted rather than assumed, and it was checked:
+
+| check | result |
+| --- | --- |
+| d3 (5,1) run as 4×16 chunks at 1 thread, pooled, vs the existing 64-game 12-thread artifact | **64 games, 0 field mismatches**, total logical work 312,966,881 = 312,966,881 |
+| recursive numeric comparison of all 17 aggregate and per-game field groups (tolerance 1e-11 relative) | **only per-game `wallSeconds` differs** — 64 of 64, every other value equal |
+| pooled bound diagnostics vs single-run | `decisions` 5,750 = 5,750, `belowTargetDepth` 0 = 0, `workLimitEvents` 0 = 0, `minCompletedDepth` 3 = 3, `maxDecisionWork` 85,085 = 85,085 |
+
+`pool.py` recomputes every aggregate with the same formulas as
+`harness.hpp:writeArtifact`, including a Python reimplementation of the
+`Mulberry32` percentile bootstrap, and combines chunk diagnostics
+conservatively (counts add, `minCompletedDepth` takes the minimum,
+`maxDecisionWork` the maximum). This also re-confirms worker-count
+independence: 1-thread and 12-thread runs produce identical per-game records.
+
+## 13. The work bound, computed per configuration and verified never to bind
+
+Both arms passed `--max-work` explicitly, taken from the binary's own
+`--work-bound` (the frozen arithmetic with `b = 7·N·M`). Leaving a bound sized
+for a smaller branching factor does not error — it silently completes a
+shallower depth — so this is load-bearing.
+
+| arm | b = 7·N·M | worst-case work | `--max-work` used | worst-case cache entries | cache used |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| d4, N=7, M=2 | 98 | 187,336,114 | 187,336,114 | 960,694 | 960,695 |
+| d3, N=7, M=12 | 588 | 407,634,528 | 407,634,528 | 346,920 | 346,921 |
+
+**Evidence the bound never bound.** Every decision records its completed depth;
+the binary counts decisions finishing below the target depth and work-limit
+events, and reports the busiest single decision.
+
+| arm | decisions | below target depth | work-limit events | min completed depth | max work in one decision | bound | headroom | score-identity failures | censored |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| d4, N=7, M=2 | 6,633 | **0** | **0** | **4** | 81,686,570 | 187,336,114 | 2.29× | 0 | 0 |
+| d3, N=7, M=12 | 6,523 | **0** | **0** | **3** | 190,214,472 | 407,634,528 | 2.14× | 0 | 0 |
+
+Per chunk the minimum completed depth is 4, 4, 4, 4 for the depth-4 arm and
+3, 3, 3, 3 for the depth-3 arm, and the busiest decision in each chunk is
+73.1M / 76.7M / 81.7M / 71.4M and 97.3M / 128.4M / 190.2M / 135.7M. No decision
+in 13,156 completed below its target depth; the busiest used 44% and 47% of its
+bound. Both arms are genuine depth-4 and depth-3 results.
+
+## 14. The arms
+
+Shared evaluation cohort `0xa51d1000`–`0xa51d103f`, 64 paired games, 2,000-move
+cap, corrected 17,000-point Hardcore scoring.
+
+| arm | depth | N | M | mean | median | Q25 | min | max | sd | moves | moves Q25 | cens | clears/mv | reveals/mv | occupied | work/mv | ≥1M |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| d3 (7,1) | 3 | 7 | 1 | 312,327 | 267,279 | 175,287 | 85,589 | 846,544 | 177,026 | 92.27 | 55.00 | 0 | 1.9849 | 1.1001 | 23.88 | 156,834 | 0 |
+| d3 (7,3) | 3 | 7 | 3 | 337,306 | 285,023 | 196,045 | 103,180 | 931,090 | 208,038 | 98.70 | 60.00 | 0 | 2.0033 | 1.1111 | 23.81 | 1,045,719 | 0 |
+| **d3 (7,6)** | 3 | 7 | 6 | **376,442** | 322,859 | 227,224 | 103,015 | 1,002,557 | 223,366 | **109.45** | 70.00 | 0 | **2.0447** | **1.1423** | 23.49 | 4,244,020 | 1 |
+| **d3 (7,12)** *(new)* | 3 | 7 | 12 | **349,345** | 258,855 | 186,866 | 103,319 | 1,216,867 | 254,059 | 101.92 | 55.75 | 0 | 2.0231 | 1.1309 | **23.39** | 13,506,434 | 3 |
+| d4 (5,1) frozen | 4 | 5 | 1 | 297,327 | 260,415 | 192,352 | 86,935 | 836,427 | 150,550 | 87.16 | 58.75 | 0 | 1.9489 | 1.0697 | 24.29 | 1,296,034 | 0 |
+| **d4 (7,1)** | 4 | 7 | 1 | **398,498** | 344,630 | 212,864 | 103,331 | 1,341,287 | 254,414 | **114.66** | 65.00 | 0 | **2.0571** | **1.1549** | 23.15 | 4,956,614 | 2 |
+| **d4 (7,2)** *(new)* | 4 | 7 | 2 | **356,548** | 305,167 | 192,347 | 103,348 | 1,064,716 | 219,723 | 103.64 | 60.00 | 0 | 2.0306 | 1.1358 | 23.35 | 20,178,327 | 2 |
+
+### Paired deltas over whole games
+
+One-sided 95% bounds by percentile bootstrap, 20,000 resamples, RNG seed
+`0xb0075eed`, resampling whole games. For a null or negative result the
+**upper** bound is the informative direction, so both are given.
+
+| comparison | Δ score | 95% lower | 95% upper | Δ moves | Δ clears/mv | Δ reveals/mv | Δ occupied | W–T–L |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | :---: |
+| **d4 (7,2) − d4 (7,1) — does M compound with the 4th ply?** | **−41,950** | −100,137 | **+17,541** | −11.02 | −0.0265 | −0.0191 | +0.20 | 28–0–36 |
+| **d3 (7,12) − d3 (7,6) — the M=6→12 step** | **−27,097** | −83,807 | **+31,209** | −7.53 | −0.0215 | −0.0114 | −0.09 | 28–0–36 |
+| d3 (7,12) − d3 (7,3) | +12,039 | −50,119 | +74,688 | +3.22 | +0.0198 | +0.0198 | −0.42 | 30–0–34 |
+| d3 (7,12) − d3 (7,1) | +37,019 | −25,076 | +102,426 | +9.66 | +0.0382 | +0.0308 | −0.49 | 30–0–34 |
+| d3 (7,12) − d4 (5,1) frozen | +52,018 | −4,998 | +112,368 | +14.77 | +0.0742 | +0.0612 | −0.89 | 32–0–32 |
+| **d4 (7,2) − d4 (5,1) frozen** | **+59,221** | **+9,134** | +111,812 | +16.48 | +0.0817 | +0.0661 | −0.94 | 37–0–27 |
+| d3 (7,12) − d4 (7,1) | −49,153 | −125,029 | +27,828 | −12.73 | −0.0340 | −0.0240 | +0.25 | 22–0–42 |
+| d4 (7,2) − d3 (7,6) | −19,894 | −76,456 | +36,846 | −5.81 | −0.0141 | −0.0065 | −0.14 | 37–0–27 |
+| d4 (7,2) − d3 (7,12) | +7,203 | −56,004 | +69,691 | +1.72 | +0.0075 | +0.0049 | −0.04 | 40–0–24 |
+
+**Stability across cohort halves.** No fold was preregistered, so this is a
+post-hoc diagnostic, not a gate. Both headline deltas keep their sign and their
+losing win–loss split in both halves; the magnitudes differ substantially,
+which is what a 64-game cohort with sd ≈ 60% of the mean predicts.
+
+| comparison | half | n | Δ score | 95% lower | W–T–L |
+| --- | --- | ---: | ---: | ---: | :---: |
+| d4 (7,2) − d4 (7,1) | first 32 | 32 | −11,082 | −94,711 | 14–0–18 |
+| d4 (7,2) − d4 (7,1) | last 32 | 32 | −72,818 | −156,151 | 14–0–18 |
+| d3 (7,12) − d3 (7,6) | first 32 | 32 | −4,495 | −91,425 | 15–0–17 |
+| d3 (7,12) − d3 (7,6) | last 32 | 32 | −49,698 | −120,167 | 13–0–19 |
+
+## 15. Arm 1 — the axes substitute, they do not compound
+
+The question §8 left open was whether the fourth ply and chance-node
+decorrelation are *exchangeable* (§5's finding) or *additive*. Adding the
+cheapest useful reveal decorrelation on top of the fourth ply gives
+**−41,950 points at 4.07× the work**, with a 95% upper bound of **+17,541**.
+
+That upper bound is the useful number. Had the axes compounded even weakly —
+say by half of the +64,116 the same knob is worth at depth 3 — the data would
+have had to show it; instead the 95% one-sided ceiling on any compounding gain
+is about +17.5k, roughly a quarter of the depth-3 effect, at 4× the cost. **The
+axes substitute in the strong sense.** The remaining question §8 posed, the
+exchange rate, is answered by §7 and unchanged: at matched work d3 (7,6) and
+d4 (7,1) are a tie and the depth-3 arm is 14% cheaper.
+
+Two things make this more than a null. First, every flow quantity moves with
+the score: −11.02 moves, −0.0265 clears/move, −0.0191 reveals/move, and mean
+occupancy *rises* 0.20 cells — the exact reverse of the co-movement §6 used to
+argue the depth-3 effect was mechanical. Second, the sign is stable across both
+cohort halves. The straightforward reading is that once the disc marginal is
+exact and a fourth ply is present, the (disc, reveal) joint is no longer the
+binding error, and paying 4× for it buys nothing.
+
+The pilot in §10 projected the cost well: 3.59× predicted logical work against
+4.07× measured, versus a 15.75× worst-case bound ratio.
+
+## 16. Arm 2 — coverage saturation and flow-rate saturation do not coincide
+
+d3 (7,12) is the configuration at which the (disc, reveal) joint reaches
+**100% coverage**. If the §5 dose-response were driven by that coverage, this
+is where the curve should top out. It does not top out here — it turns over
+one step earlier:
+
+| depth-3 arm | (disc, reveal) joint coverage | mean score | mean moves | clears/mv | reveals/mv | occupied |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| N=7, M=1 | 14.3% | 312,327 | 92.27 | 1.9849 | 1.1001 | 23.88 |
+| N=7, M=3 | 42.9% | 337,306 | 98.70 | 2.0033 | 1.1111 | 23.81 |
+| **N=7, M=6** | 85.7% | **376,442** | **109.45** | **2.0447** | **1.1423** | 23.49 |
+| N=7, M=12 | **100.0%** | 349,345 | 101.92 | 2.0231 | 1.1309 | **23.39** |
+
+**Answer: no, coverage saturation does not match flow-rate saturation.** Score,
+moves, numbered clears and covered reveals all peak at M = 6 with 85.7%
+coverage and fall back when the remaining 14.3% of joint atoms are filled in.
+Only **mean occupancy** keeps improving monotonically all the way to M = 12
+(23.88 → 23.81 → 23.49 → 23.39), which is the one quantity that tracks coverage
+across all four points.
+
+The M=6→12 step is −27,097 with a 95% interval of (−83,807, +31,209) and
+28–0–36, so this is a **saturation result, not a demonstrated regression**: the
+data are consistent with the curve being flat from M = 6 onward, and are not
+consistent with it continuing to climb at the rate M = 1→6 showed. The
+strongest defensible statement is that **the reveal axis is exhausted by
+M ≈ 6**, and that filling the last of the joint grid buys at most +31k and
+plausibly nothing.
+
+This weakens, without refuting, §2's attribution. The mechanism table predicted
+strength should track the (disc, reveal) column; it does over M ∈ {1, 3, 6} and
+then stops. Three readings are consistent with the data and this experiment
+does not separate them: (a) the effect saturates once *most* of the joint has
+weight and the last atoms are redundant; (b) the gain over M ∈ {1,3,6} was
+partly the extra scenario count acting as variance reduction rather than
+coverage per se, and that too saturates; (c) 64 games cannot resolve steps this
+size and the whole M ≥ 3 region is one plateau. Reading (c) deserves weight:
+the four M values span 312k–376k, and *no adjacent step in the sweep is
+individually significant*.
+
+## 17. Work, and the shape of the frontier now
+
+| arm | work/move | relative to frozen d4 | mean score | score per unit work |
+| --- | ---: | ---: | ---: | ---: |
+| d3 (7,1) | 156,834 | 0.121× | 312,327 | 1.991 |
+| d3 (7,3) | 1,045,719 | 0.807× | 337,306 | 0.323 |
+| d4 (5,1) *(frozen)* | 1,296,034 | 1.000× | 297,327 | 0.229 |
+| d3 (7,6) | 4,244,020 | 3.275× | **376,442** | 0.089 |
+| d4 (7,1) | 4,956,614 | 3.824× | **398,498** | 0.080 |
+| d3 (7,12) | 13,506,434 | 10.421× | 349,345 | 0.026 |
+| d4 (7,2) | 20,178,327 | 15.569× | 356,548 | 0.018 |
+
+Measured work ratios again land far below their bounds because the
+transposition cache collapses duplicate reveal scenarios: 3.18× measured for
+M=6→12 against a 7.98× bound ratio, 4.07× for d4 M=1→2 against 15.75×.
+
+**The frontier has a knee and both new arms are past it.** Everything above
+roughly 4–5 million work per move is indistinguishable from d4 (7,1) or worse,
+while costing up to 4× more. The two best-value points in this study remain
+d3 (7,1) at 156,834 work per move and, if strength is the objective,
+d4 (7,1) / d3 (7,6) at ~4–5 million. Nothing here moves the ceiling: the best
+arm on this cohort is still 398,498 against the 1,050,000 the frozen protocol
+requires.
+
+## 18. Verdict, and what it revises above
+
+- **Validity: valid.** Both arms passed the full CHECK gate on the rebuilt
+  binary with identical counts to §3, on unmodified frozen sources with matching
+  hashes. Work bounds were computed per configuration, passed explicitly, and
+  verified never to bind (0 of 13,156 decisions below target depth, 0 work-limit
+  events, busiest decision at 44–47% of bound). 0 censored games and 0
+  score-decomposition identity violations in both arms. The chunk-and-pool
+  procedure was validated against an existing single-process 64-game artifact
+  before being used.
+- **Outcome: two informative negatives.** Neither arm produced a significant
+  loss and neither produced a gain. Both were run to answer a question whose
+  either-way answer was worth having, and both answered it.
+- **Evidence tier: `development`,** on the same previously-read cohort as
+  everything above. No protected or final seed was opened and none is justified.
+
+**What this revises in §8.**
+
+1. **§8's open question is closed: the axes substitute, they do not compound.**
+   The 95% ceiling on any compounding gain from M = 2 on top of depth 4 is
+   +17,541 points at 4.07× the work. The symmetric statement in §8 — that depth
+   and chance-node decorrelation are two ways of buying the same thing — is
+   supported and now has its complement: **you cannot buy it twice.**
+2. **The dose-response in §5 is not monotone beyond M = 6; it peaks there.**
+   §5's claim rested explicitly on "the monotone ordering of five quantities
+   across three settings". Extending it to a fourth setting breaks the
+   monotonicity for four of those five (occupancy is the exception). The
+   positive result at M = 6 stands on its own paired test against M = 1
+   (+64,116, lower bound +7,475) and against the frozen reference (+79,115,
+   lower bound +30,242), both unchanged — but **the dose-response argument that
+   was offered as corroboration no longer extends**, and §5's framing should be
+   read as "M = 6 is a local optimum" rather than "more M is better".
+3. **§2's mechanism attribution is weakened.** Joint coverage was offered as the
+   quantity strength tracks. It reaches 100% at M = 12 and strength is lower
+   there than at 85.7%. Coverage may still be the right variable with a
+   saturating rather than linear response, but this experiment cannot separate
+   that from the alternative that the M ≥ 3 region is one noise-limited
+   plateau.
+4. **§10's remaining agenda is now empty.** Both arms it recorded as
+   unfinished are complete and recorded here.
+
+## 19. Limitations of this continuation
+
+1. **Neither headline delta is significant.** Both are negative point estimates
+   with intervals spanning zero. The claims made are the bounded ones — an upper
+   bound on compounding, and saturation rather than regression — and nothing
+   stronger is supported.
+2. **64 paired games, sd 62–73% of the mean in the new arms.** A separate
+   session has shown a small cohort badly misstating a different quantity here
+   (an 8-tape comparison put fair D4 at 117.75 mean moves against 93.78 on 160
+   tapes). These comparisons are paired on a fixed 64-seed cohort, so they are
+   not exposed to that particular failure, but they are exposed to ordinary
+   64-game noise and the half-split shows magnitudes moving by 4–6× between
+   halves.
+3. **One cohort, already read.** The same permanently-development seeds as
+   everything above. Nothing here can be confirmation evidence.
+4. **Only M = 2 was tested at depth 4.** A larger M at depth 4 is not ruled out
+   by this arm, only made unattractive: M = 2 already costs 4× and its ceiling
+   is +17.5k. The d3 sweep needed M ≥ 6 to show any effect, and depth-4 M = 6
+   would cost roughly 4,500,000,000 worst-case work per decision.
+5. **The reveal-by-reveal joint remains untouched.** As §2 notes, all reveal
+   events within one scenario still share the sample index. A design giving each
+   scenario an independent reveal stream is still untested, and the saturation
+   in §16 is a fact about the *(disc, reveal)* axis only.
+6. **Wall times are provenance, not performance.** Arm 1 ran across a machine
+   whose load average moved between 5 and 72 driven by other contributors, at
+   8 threads for one chunk and 12 for the rest; only work per move is comparable.
+7. **A model contribution record under `research/contributions/` is owed and was
+   not written,** the same open debt §9 records, because this work was scoped to
+   the reveal-sampling namespace and `docs/exploratory/`.
+
+## Reproduce (continuation)
+
+```sh
+./approaches/lifetime-objective/reveal-sampling/build.sh   # clang++
+B=./build/reveal-sampling/reveal-sampling
+R=runs/RUN-A525-reveal
+
+# CHECK gate, as §3
+$B --parity --seed-start 0xa5250000 --parity-games 2 --parity-moves 25
+$B --gate --depth 3 --disc-samples 5 --max-work  3200000 --seed-start 0xa5250010 --parity-games 4 --parity-moves 60
+$B --gate --depth 3 --disc-samples 7 --max-work 16000000 --seed-start 0xa5250010 --parity-games 4 --parity-moves 60
+$B --gate --depth 4 --disc-samples 5 --max-work  3200000 --seed-start 0xa5250010 --parity-games 3 --parity-moves 30
+$B --gate --depth 4 --disc-samples 7 --max-work 16000000 --seed-start 0xa5250010 --parity-games 2 --parity-moves 15
+
+# work bounds; --max-work is mandatory for a gameplay cohort
+$B --work-bound --depth 4 --disc-samples 7 --reveal-samples 2    # 187,336,114
+$B --work-bound --depth 3 --disc-samples 7 --reveal-samples 12   # 407,634,528
+
+# the chunk-and-pool procedure, validated against an existing 64-game artifact
+for c in 0 1 2 3; do
+  printf -v s '0x%x' $((0xa51d1000 + c*16))
+  $B --depth 3 --disc-samples 5 --reveal-samples 1 --max-work 3200000 \
+     --seed-start $s --games 16 --threads 1 --quiet --output $R/cont-pooltest-c$c.json
+done
+python3 approaches/lifetime-objective/reveal-sampling/pool.py \
+  $R/cont-pooltest-pooled.json $R/cont-pooltest-c{0,1,2,3}.json
+python3 approaches/lifetime-objective/reveal-sampling/compare.py identity \
+  $R/cont-pooltest-pooled.json $R/d3-n5-m1.json
+
+# the arms, detached and chunked (CROWDED_THREADS bounds the shared-machine
+# backoff: wait up to 15 min for load <= 26, then run at that many threads)
+setsid nohup ./approaches/lifetime-objective/reveal-sampling/run-arms.sh arm1 \
+  >> $R/cont-arm1-driver.log 2>&1 &      # d4 N=7 M=2
+CROWDED_THREADS=12 setsid nohup ./approaches/lifetime-objective/reveal-sampling/run-arms.sh arm2 \
+  >> $R/cont-arm2-driver.log 2>&1 &      # d3 N=7 M=12
+
+python3 approaches/lifetime-objective/reveal-sampling/pool.py $R/d4-n7-m2.json  $R/d4-n7-m2-c{0,1,2,3}.json
+python3 approaches/lifetime-objective/reveal-sampling/pool.py $R/d3-n7-m12.json $R/d3-n7-m12-c{0,1,2,3}.json
+
+# tables
+S=approaches/lifetime-objective/reveal-sampling/stats.py
+python3 $S rows "d3 (7,1)=$R/d3-n7-m1.json" "d3 (7,3)=$R/d3-n7-m3.json" \
+  "d3 (7,6)=$R/d3-n7-m6.json" "d3 (7,12)=$R/d3-n7-m12.json" \
+  "d4 (5,1)=runs/RUN-A51D-s7confirm/fresh-s5.json" \
+  "d4 (7,1)=runs/RUN-A51D-s7confirm/fresh-s7.json" "d4 (7,2)=$R/d4-n7-m2.json"
+python3 $S delta  "d4 (7,2)=$R/d4-n7-m2.json" "d4 (7,1)=runs/RUN-A51D-s7confirm/fresh-s7.json" \
+                  "d3 (7,12)=$R/d3-n7-m12.json" "d3 (7,6)=$R/d3-n7-m6.json"
+python3 $S halves "d4 (7,2)=$R/d4-n7-m2.json" "d4 (7,1)=runs/RUN-A51D-s7confirm/fresh-s7.json" \
+                  "d3 (7,12)=$R/d3-n7-m12.json" "d3 (7,6)=$R/d3-n7-m6.json"
+```
+
+### Environment (continuation)
+
+Same host as above: AMD Ryzen AI Max+ 395 (16 physical / 32 logical cores),
+125 GiB RAM, AMD clang 23.0.0git, `-O3 -std=c++20 -pthread -Wall -Wextra`.
+Shared with other contributors' jobs throughout; 1-minute load average ranged
+from 5 to 72, at most 12 threads used by this work. Arm 1 took 36,813 s of
+wall across its four chunks (one chunk at 8 threads during a load-50 period,
+the rest at 12); arm 2 took 16,470 s at 12 threads. Frozen source hashes in
+`build/reveal-sampling/sources.sha256` are unchanged from the list above.
