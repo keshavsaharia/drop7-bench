@@ -32,7 +32,9 @@ after every deployment; production waits for the invalidation to finish.
 
 SST needs an AWS role that GitHub Actions can assume through OIDC. The included
 CloudFormation template restricts the trust policy to pushes from this repository's
-`main` and `dev` branches.
+`main` and `dev` branches. It uses GitHub's immutable owner and repository IDs in the
+OIDC subject (`keshavsaharia@563902/drop7-bench@1340390077`), so a future account or
+repository rename cannot transfer this AWS trust to a recycled name.
 
 First check whether the GitHub OIDC provider already exists in the AWS account:
 
