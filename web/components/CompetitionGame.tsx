@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { signIn } from "next-auth/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   MOVES_PER_LEVEL,
@@ -257,13 +258,13 @@ export function CompetitionGame({
             {needsAuth && (
               <p className="text-sm text-amber-200">
                 Sign in explicitly before sharing this run. Nothing has been uploaded yet.{" "}
-                <Link
-                  href="/api/auth/signin/github?callbackUrl=%2Fcompete"
-                  prefetch={false}
+                <button
+                  type="button"
+                  onClick={() => void signIn("github", { redirectTo: "/compete" })}
                   className="font-semibold underline underline-offset-2"
                 >
                   Sign in with GitHub to contribute →
-                </Link>
+                </button>
               </p>
             )}
             {submission && (
@@ -287,13 +288,13 @@ export function CompetitionGame({
         ) : (
           <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-zinc-500">
             <p>This run is local-only. No game data is sent while you play.</p>
-            <Link
-              href="/api/auth/signin/github?callbackUrl=%2Fcompete"
-              prefetch={false}
+            <button
+              type="button"
+              onClick={() => void signIn("github", { redirectTo: "/compete" })}
               className="text-zinc-400 underline underline-offset-2 hover:text-zinc-200"
             >
               Sign in to contribute later
-            </Link>
+            </button>
           </div>
         )}
       </div>

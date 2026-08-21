@@ -1,0 +1,38 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260821T231423Z-30e0a516",
+  "actor": {
+    "kind": "model",
+    "platform": "Codex",
+    "model": "GPT-5",
+    "agentId": null
+  },
+  "level": "L1",
+  "roles": [
+    { "role": "software", "degree": "substantial" },
+    { "role": "validation", "degree": "substantial" }
+  ],
+  "summary": "Diagnosed the deployed GitHub OAuth configuration error from production Lambda logs and corrected the competition UI to initiate Auth.js provider sign-in through its CSRF-protected client POST flow instead of unsupported direct GET links.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "web/components/CompetitionGame.tsx"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "Production CloudWatch Logs Insights: isolated Auth.js UnknownAction errors on GET provider sign-in requests",
+    "npm run lint --prefix web -- components/CompetitionGame.tsx: passed",
+    "npm test --prefix web: 18 tests passed",
+    "npm run build --prefix web: Next.js webpack production build passed",
+    "git diff --check -- web/components/CompetitionGame.tsx: passed"
+  ],
+  "limitations": [
+    "Self-reported contribution; not independently reviewed.",
+    "A live GitHub callback still requires the OAuth app callback URL and client credentials to match the deployed domain."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-21T23:14:23Z"
+}
