@@ -1,28 +1,96 @@
 ---
-title: Mcts
+title: TypeScript MCTS lab
 family: tree-search
-status: Rejected
+summary: A small, readable Monte Carlo tree search you can run in a terminal — the one place in the repository where the idea is easy to watch.
+status: rejected
 evidence: task-record only
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
+A small, readable Monte Carlo tree search you can run in a terminal — the one
+place in the repository where the idea is easy to watch.
+
+<EvidenceLabel status="rejected" evidence="task-record only" reads="public" />
+
+<Callout title="There is no retained result for this program" tone="warn">
+The [experiment index](/docs/research/experiment-index) records this source as
+rejected because "ordinary MCTS did not establish a whole-game improvement",
+and labels that verdict **task-record only** — meaning it comes from a research
+conversation, not from the written ledger. There is no protocol, no artifact,
+no per-game data and no score to quote.
+[Audit 04](/docs/exploratory/audit-04-blind-spots) lists this source among the
+thirty rejections that "cannot be re-derived". Everything below the outcome
+section therefore describes what the code does, from the code.
 </Callout>
 
-## TypeScript MCTS lab
+## What it is
 
-Benchmarks the reusable observable-state MCTS solver.
+The C++ programs in this family are research instruments: thousands of lines,
+frozen gates, sanitizer builds. This one is a few hundred lines of TypeScript
+that plays complete games and prints a line of statistics. It exists so the
+idea can be read, modified and run without a compiler, and because the solver
+it drives is shared with the
+[benchmark playground](/leaderboard).
 
-**Status: Rejected** (task-record only). ordinary MCTS did not establish a whole-game improvement.
+## How it works, step by step
 
-## Sources
+The search itself lives in `src/core/typescript/mcts-solver.ts` and is called
+by the lab in a loop until the game ends.
 
-- `typescript.ts`
+1. The lab starts a game from a seed and hands the solver the public position:
+   board, visible next disc, moves until the next rise, terminal flag. The
+   solver is given its own fixed random stream, which is deliberately *not* the
+   game's seed, so the search cannot sample the future the game will actually
+   deal.
+2. Each simulation walks down the stored tree, choosing at every step the
+   column with the best average result plus an exploration bonus for the
+   least-visited ones. Tree nodes are keyed by the complete visible position,
+   so a branch reached by two different routes is the same node, and a
+   decision made after a sampled reveal is conditioned on the board that was
+   actually observed — not on a future decided in advance.
+3. When the walk reaches a position the tree has not stored, the simulation is
+   finished by a short greedy playout and the resulting board is scored by the
+   heuristic evaluator. Dying is charged a large fixed penalty.
+4. Results are added back along the path. After the last simulation the lab
+   plays the root column with the best average, the real game deals a real
+   disc, and the loop repeats.
 
-## More evidence
+The stored tree has a hard entry limit; once it is full, further simulations
+fall back to the bounded playout evaluator rather than growing without bound.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/tree-search)
+## Defaults, and what they mean
+
+| Setting | Lab default | What it controls |
+| --- | ---: | --- |
+| `--simulations` | 2,000 | How many futures are sampled per move |
+| `--horizon` | 20 | How many moves ahead a simulation may run |
+| `--rollout-depth` | 2 | Greedy moves used to finish a new position |
+| `--exploration` | 40,000 | Bonus for under-visited columns, in score units |
+| `--max-nodes` | 100,000 | Hard cap on stored positions |
+| `--terminal-utility` | −1,000,000 | The penalty charged for dying |
+| `--games` / `--max-moves` | 4 / 1,000 | Size of a run |
+
+The registered playground policy uses a much smaller budget — 400 simulations
+and a sixteen-move horizon — so that a scripted round finishes quickly. Those
+rounds are a demonstration and are never used as research evidence.
+
+## What happened, in plain English
+
+Nothing was retained. The conclusion carried forward from this program is the
+one sentence in the index: ordinary Monte Carlo tree search did not establish a
+whole-game improvement over the reference. That statement is consistent with
+the three ledger-recorded C++ experiments in this family, which failed their
+frozen gates for reasons that were diagnosed in detail — but it is not itself
+evidence, and it should not be cited as though it were. If this program is ever
+run against fair depth 4 on a paired cohort with a registered protocol, the
+result will be the first real measurement this file has.
+
+## What this taught us, and what is still open
+
+- **Provenance is part of a result.** A rejection with no protocol and no data
+  cannot be checked, reproduced, or rescored when the rules change — and the
+  scoring rules did change here, from a 7,000-point rise bonus to 17,000.
+- **The cheapest open experiment in this family** is probably not a new idea
+  but a registered run of code that already exists: this lab, and the
+  [PUCT lab](/approaches/tree-search/puct) next door, both complete and both
+  without a retained outcome.

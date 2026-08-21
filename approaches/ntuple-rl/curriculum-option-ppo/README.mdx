@@ -1,28 +1,108 @@
 ---
-title: Curriculum Option Ppo
+title: Nudging a one-move search, from easy and hard starting boards
 family: ntuple-rl
-status: Rejected
+summary: A learned correction bolted onto a simple search, trained half on fresh games and half on difficult mid-game positions — it improved on the search slightly and stayed far below the reference.
+status: rejected
 evidence: task-record only
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
+A learned correction bolted onto a simple search, trained half on fresh games
+and half on difficult mid-game positions.
+
+<EvidenceLabel status="rejected" evidence="task-record only" reads="public" />
+
+<Callout title="Only a one-line result was retained" tone="warn">
+The [experiment index](/docs/research/experiment-index) records this as
+rejected, task-record only: "it modestly improved D1 but remained far below
+sustainable flow and D4." There is no ledger section, no artifact hash, and no
+per-game data, so **no score from this experiment can be quoted** — none was
+kept. What follows describes the design from the source and from the audit that
+catalogued it.
 </Callout>
 
-## Curriculum option PPO
+## The intuition
 
-Adds a reflection-equivariant residual to exact fair-D1 logits and trains on initial plus mature restart states.
+Two ideas that recur across this family, combined.
 
-**Status: Rejected** (task-record only). it modestly improved D1 but remained far below sustainable flow and D4.
+**Learn a correction, not a policy.** Starting a policy network from nothing
+means spending most of the budget rediscovering that filling a column to the
+ceiling is bad. Instead, take an exact one-move
+[fair search](/approaches/fair-expectimax/reference), normalise its opinion of
+each column into scores, and let a small network add a correction on top. Set
+that correction to zero and the policy is bit-for-bit identical to the search.
+Every point of difference is therefore attributable to what was learned, and
+there is a safe fallback by construction.
 
-## Sources
+**Do not only start from the beginning.** A policy trained solely from opening
+boards sees crowded, dangerous mid-game positions only after it has learned to
+survive long enough to reach them — which is exactly the skill it lacks. So half
+of every training round starts from a **restart state**: a public position
+extracted from a long trajectory, replayed forward with a fresh, independent
+random future.
 
-- `curriculum-option-ppo.cpp`
+The network is also built to be exactly mirror-equivariant, so it cannot learn
+an arbitrary left-right preference from the noise in its data.
 
-## More evidence
+## How it works, step by step
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/ntuple-rl)
+1. **Score the columns exactly.** Run the fixed fair one-move search and
+   normalise its per-column values.
+2. **Add a learned residual.** A small two-pass network, structurally guaranteed
+   to be reflection-equivariant, adjusts those scores.
+3. **Collect experience.** Each iteration plays 512 episodes: 256 from a fresh
+   opening board with a long move cap, 256 from a curriculum restart position
+   with a 100-move horizon.
+4. **Update by policy gradient.** Four passes over each batch, minibatches of
+   512, across 64 iterations — 32,768 episodes in total.
+5. **Gate.** A 32-game screen stands between training and any further stage.
+
+## What happened
+
+It modestly improved on the one-move search it was correcting, and remained far
+below both the sustainable-flow targets it was given and the depth-4 reference.
+That sentence is the whole retained result.
+
+<TechnicalDetails title="The technical record">
+
+Status in [the experiment index](/docs/research/experiment-index): **rejected,
+task-record only.** `docs/exploratory/audit-04-blind-spots.md` lists
+`curriculum-option-ppo.cpp` among 30 sources whose rejection "exists only as a
+task record, with no ledger protocol, no artifact hash, and no retained per-game
+data". No result number exists to quote.
+
+The configuration facts above come from the source and from
+`docs/exploratory/audit-05-optimistic-curriculum.md`, which records the mixing
+rule as a fixed 50/50 split of initial and mature-restart episodes per
+iteration, in a **single arm** — the ratio was never ablated, so nothing is
+known about whether the curriculum helped, hurt, or did nothing.
+
+From the source: training lane `0x3d670000...0x3d678000`, Stage-A screen
+`0x3d680000...0x3d680020` (32 games), 64 iterations of 512 episodes, four update
+epochs, minibatch 512, a 1,000-move cap on initial episodes and a 100-move
+curriculum horizon, and 4,096 expected curriculum states. The source reuses the
+viability-controller program's public-state representation.
+
+Source: `curriculum-option-ppo.cpp`.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+**A safe-fallback residual is a good pattern, and it recurs.** Several later
+programs in the repository adopted the same structure — an exact search plus a
+zero-initialised learned correction — because it makes "did learning help?" a
+well-posed question with a trivially available control. This experiment is an
+early instance.
+
+**The curriculum question is genuinely unanswered.** Mixing restart states into
+training appears in at least four programs across this repository, always at a
+fixed ratio and always as a single arm. `docs/exploratory/audit-05-optimistic-curriculum.md`
+concludes that the *order* and *proportion* of oracle-derived and ordinary data
+were never ablated as independent factors — not once. So no page here, including
+this one, can say whether the curriculum was doing anything.
+
+**Still open, and cheap.** Because the residual reduces exactly to the base
+search at zero, a properly powered comparison of "residual, curriculum on" and
+"residual, curriculum off" against the unmodified search is a small, well-defined
+experiment that has never been run.

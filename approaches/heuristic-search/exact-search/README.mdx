@@ -1,36 +1,143 @@
 ---
-title: Exact Search
+title: Exact search
 family: heuristic-search
-status: Rejected
+summary: Three attempts to fix a search by giving it more — more independent chance estimates, more depth, more voters — and the discovery that none of them repairs a biased judgement of the board.
+status: rejected
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
+Three attempts to fix a search by giving it more — more independent chance
+estimates, more depth, more voters — and the discovery that none of them
+repairs a biased judgement of the board.
+
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
+
+## The intuition
+
+A search that looks ahead has two sources of error, and they need different
+cures. It can be **noisy** — its handful of sampled chance outcomes happen to
+flatter one column — or it can be **biased** — the evaluator at the bottom of
+the tree is simply wrong about which boards are good. Noise averages out with
+more samples; bias does not average out with anything.
+
+These three programs are, in effect, a controlled experiment on that
+distinction. Each one attacks noise, in a different way, while leaving the
+evaluator alone:
+
+- **Independent root quadratures.** Run the same complete search three times
+  with three independent sampling salts and average the results. Pure variance
+  reduction, no other change.
+- **A fully completed fourth ply.** No shortlisting, no learned pruning: every
+  legal action expanded at every depth, with the same chance sampler.
+- **A three-member policy ensemble.** Let three complete searches *vote*, and
+  when they split — no majority — keep the reference member's move rather than
+  trusting a divided committee.
+
+## How it works, step by step
+
+1. **Read the public position** — board, next disc, rise clock.
+2. **Expand every legal column at every choice node.** "Exact" here means
+   full-width decision nodes; the gray-disc reveals are still sampled, and the
+   ledger says so explicitly.
+3. **Vary only the chance sampling** between members: each gets a different
+   fixed, deterministic salt derived from the public state.
+4. **Combine.** Average the root values across members, or count votes, or
+   simply search one ply deeper.
+5. **Fall back when the committee splits.** A split vote is treated as
+   containing no robust direction, so the reference member's action is
+   retained.
+
+## What happened, in plain English
+
+The first two were rejected, and together they make a single argument that
+shaped everything after them.
+
+Averaging three independent chance estimates **passed a four-game screen and
+then lost its eight-game confirmation decisively**, losing seven of the eight
+paired games while spending about three times the work per move. The lesson
+recorded in the ledger is sharper than "it did not help": reducing sampling
+variance can *remove accidental regularisation* that one fixed quadrature was
+providing. A noisy estimate of a wrong value was, by luck, better behaved than
+a precise estimate of the same wrong value.
+
+Completing a full extra ply lost its screen too, by 25,449 points and 18.75
+moves, at about 24 times the cost. The ledger's conclusion is the one this
+family is remembered for: *"a fully completed extra ply is therefore not the
+missing ingredient: the phase heuristic at the horizon is the central source
+of bias."*
+
+The voting ensemble is a looser end. A small replicated gain was reported
+against its own comparator, but it was never tested against the strongest
+reference search, so it certifies nothing.
+
+<Callout title="This is not the same result as the reference depth-4 search" tone="warn">
+These programs use an **older leaf evaluator**. When the same fourth ply was
+completed later with the *fair* leaf, it was a clear improvement — the
+reference search in the
+[fair expectimax](/approaches/fair-expectimax) family won seven of eight
+paired games against depth 3. Depth helped there and hurt here, with the same
+depth and different evaluators. That contrast is the point.
 </Callout>
 
-## Exact root quadrature and historical D4
+<TechnicalDetails title="The technical record">
 
-Tests independent root quadratures and a fully completed extra ply with the older leaf.
+**Independent root-quadrature ensemble — rejected, ledger-recorded.** Three
+members, each expanding every legal action through three plies with five
+stratified chance samples, differing only in a fixed public-state sampling
+salt; root-Q arrays averaged before selection. A four-game screen passed
+(128,858.75 points and 88.75 moves versus 96,304 and 67.5), and the gated
+eight-game confirmation reversed decisively: **117,066.5 points and 80.625
+moves versus 162,492.125 and 109.375**, losing **seven of eight** paired
+games, at **157,047 work units per move versus 53,778**. Optimised `-Werror`
+and ASan/UBSan self-tests passed determinism, reflection, public-state
+isolation, legality, resource bounds, scoring and single-member action parity.
 
-**Status: Rejected** (ledger-recorded). both were slower and worse, showing that depth alone cannot repair a biased leaf.
+**Fully completed depth 4 (older leaf) — rejected, ledger-recorded.** Every
+legal decision action expanded with the same five-stratum public chance
+sampler at depths 3 and 4, with compile-time worst-case bounds proving the
+search fits in 3,134,950 work units and 45,430 cached nodes, and a hard
+assertion that the requested iteration completed. Depth 3 averaged
+**149,621.25 points and 103.75 moves**; depth 4 averaged **124,172.25 and 85** —
+a paired difference of **−25,449 points and −18.75 moves** with a 2–2 record,
+at **1,303,982 work units per move (about 24.1× depth 3)** and 0.943 moves per
+second. It failed the screen, so confirmation seeds were not read.
 
-## Three-member exact policy ensemble
+**Both of those are historical 7,000-point Sequence-scored runs**, using the
+7,000-point level award of the 30-drop rules instead of the 17,000-point award
+of the mode studied here. Their absolute scores are not evidence about the
+million-point target; the paired comparisons on the same games, the work
+measurements and the win records remain valid
+([mode-specific scoring correction](/docs/research/history)). Four and eight
+games are small cohorts.
 
-Votes or aggregates independent complete root searches, falling back when they split.
+**Three-member exact policy ensemble — completed, task-record only.** The
+[experiment index](/docs/research/experiment-index) records *"a small
+replicated gain was reported against its comparator, but it was not qualified
+against the strongest D3/D4 reference."* Task-record only means the comparison
+lives in a research conversation and was never promoted into the ledger;
+**no score, cohort or margin for it is retained in this repository.**
+Repository-verified from the source: three or five members drawn from a fixed
+table of five policy seeds, modes `vote`, `qmean` and `screen`, a strict
+majority requirement (*"A split vote contains no robust direction; retain the
+reference member"*), defaults of 4 games at a 1,000-move cap from
+`0x3d707000`.
 
-**Status: Completed** (task-record only). a small replicated gain was reported against its comparator, but it was not qualified against the strongest D3/D4 reference.
+</TechnicalDetails>
 
-## Sources
+## What this taught us, and what is still open
 
-- `exact-depth4.cpp`
-- `exact-root-ensemble.cpp`
-- `policy-ensemble.cpp`
-
-## More evidence
-
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/heuristic-search)
+- **Precision is not accuracy.** Three independent estimates of a biased value
+  gave a confidently wrong answer where one noisy estimate had been
+  accidentally hedged. This is the cleanest demonstration in the repository
+  that variance reduction is not a free improvement.
+- **Depth is conditional on the leaf.** The identical extra ply was harmful
+  with the older evaluator and helpful with the fair one. "Search deeper" is
+  not a strategy; it is a multiplier on whatever judgement sits at the bottom.
+- **A committee cannot invent information its members do not have.** Voting
+  and majority fallbacks are safety mechanisms, in the same category as the
+  conservative overrides the strategy catalog describes — useful for
+  preventing damage, not for producing insight.
+- **What is still open** is a properly powered comparison for the ensemble
+  against the current reference search. As it stands it is an unqualified win
+  over an unqualified comparator, which is not evidence of anything.

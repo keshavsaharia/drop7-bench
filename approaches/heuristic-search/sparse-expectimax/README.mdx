@@ -1,28 +1,115 @@
 ---
-title: Sparse Expectimax
+title: Sparse expectimax
 family: heuristic-search
-status: Completed
+summary: Look several moves ahead, but instead of considering every disc the game might deal, take a small fixed handful of representative ones — and always finish the depth you promised.
+status: completed
 evidence: task-record only
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Look several moves ahead, but instead of considering every disc the game might
+deal, take a small fixed handful of representative ones — and always finish the
+depth you promised.
 
-## Sparse expectimax lab
+<EvidenceLabel status="completed" evidence="task-record only" reads="public" />
 
-Benchmarks the sampled, reduced-width expectimax component over complete games.
+## The intuition
 
-**Status: Completed** (task-record only). it established a useful bounded-search baseline, still well below the target.
+Looking ahead in this game is expensive for a specific reason. After you
+choose a column, the game deals one of seven discs, and if your move opened a
+[gray disc](/learn/glossary) it also shows a number nobody could have known.
+Every one of those is a [chance node](/learn/concepts/chance-vs-choice), and
+enumerating them all multiplies the tree by roughly fifty per move of depth.
 
-## Sources
+The sparse search buys depth by paying less at each chance node. Rather than
+every outcome, it evaluates a small fixed set of representative ones — the
+[strata](/learn/glossary) — chosen deterministically from the visible
+position, so the same board always gets the same handful. Five strata for
+seven possible discs is a coarse approximation, and it is a defensible one:
+the alternative is to be exact about the next disc and blind about the move
+after that.
 
-- `main.ts`
+Two engineering details make it usable as a component rather than a
+curiosity: identical boards reached by different routes are recognised and
+scored once, and the search deepens one ply at a time so that a search cut off
+by its work budget returns the last depth it *completed* rather than a
+half-finished one.
 
-## More evidence
+## How it works, step by step
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/heuristic-search)
+1. **Read the public position** — board, next disc, rise clock.
+2. **Search depth 1, then depth 2, and so on** up to the requested depth,
+   keeping the result of the last fully completed pass.
+3. **At each player node, try every legal column**; at each chance node, take
+   the fixed handful of stratified outcomes and average them.
+4. **Score the boards at the bottom** with a swappable evaluator — the
+   [combined hand evaluator](/approaches/heuristic-search), the fair leaf, the
+   [phase-horizon](/approaches/heuristic-search/phase-horizon) evaluator, or a
+   hybrid.
+5. **Stop on the work or time budget**, and play the best column from the last
+   completed depth.
+
+## What happened, in plain English
+
+It works, it is the workhorse of this family, and it is nowhere near strong
+enough on its own. The index calls it a useful bounded-search baseline that
+remains well below the target — which is exactly how it is used everywhere
+else in the repository: as the search wrapper that other people's evaluators
+get plugged into.
+
+Almost every other lab on this family's list runs *inside* this search. When
+you read that the virtual-ignition residual or the phase-horizon weights were
+rejected, the thing that was actually played was this search with a different
+evaluator at the bottom.
+
+<TechnicalDetails title="The technical record">
+
+The [experiment index](/docs/research/experiment-index) records this lab as
+**completed, task-record only**: *"it established a useful bounded-search
+baseline, still well below the target."* Task-record only means the benchmark
+is reported in a research conversation and was never promoted into the
+[experiment history](/docs/research/history). **No mean score, move count, or
+cohort size for the TypeScript sparse-expectimax lab is retained in this
+repository**, and none is quoted here.
+
+A closely related *native* sparse search is recorded properly, but it belongs
+to a different family and used a learned n-tuple value at its leaves rather
+than a hand evaluator; its numbers are on the
+[n-tuple family](/approaches/ntuple-rl) pages and in the
+[experiment history](/docs/research/history), and they are not this lab's
+numbers.
+
+Repository-verified from the source. `src/core/typescript/sparse-expectimax.ts`
+performs iterative deepening to at most 8 plies with at most 32 chance samples
+per node, Latin-hypercube stratified draws by default, a transposition cache
+of 40,000 entries by default (100,000 maximum), and explicit work and
+wall-clock bounds; the returned result carries the depth actually completed, a
+`complete` flag, node and work counts, and cache hit statistics, so a truncated
+search is visible rather than silent. The lab `main.ts` defaults to depth 3,
+two chance samples, a 1,000,000 work bound, a −1,000,000 terminal utility and
+4 games from the `0x1d70…` training range, and can swap in fair-tuner weights,
+phase-safety weights, a tunneling action residual, or a rollout-based danger
+check. The registered playground policy `sparse-d2` uses depth 2 with five
+stratified samples.
+
+The search reads only the visible board, next disc and rise clock; its
+sampling seed is solver-local and never the game seed.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **"Completed" is a statement about mechanics, not strength.** This entry is
+  marked completed because the component works and was benchmarked, not
+  because it is a candidate. It is a long way below the reference search and a
+  very long way below the target.
+- **Never returning a half-finished search is worth the bookkeeping.** The
+  same discipline appears in the reference implementation, which proves at
+  compile time that its whole tree fits inside its budget. A policy that
+  silently degrades under load is not reproducible, and reproducibility is the
+  point.
+- **The interesting variable was never depth.** Across the whole repository,
+  deeper search with the same leaf did not reliably help — the properly
+  recorded attempts to add a fifth ply to the reference search were rejected
+  or stopped by runtime gates. What sits at the bottom of the tree has
+  mattered more than how tall it is.

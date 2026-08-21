@@ -1,35 +1,125 @@
 ---
-title: State Curriculum
+title: State curriculum
 family: oracle-curriculum
-status: Unknown
-evidence: repository-verified
-generated: true
+summary: Keep the deep, mature boards a future-reading planner reaches, throw away everything privileged about them, and hand them to other experiments as practice positions.
+status: support-only
+evidence: task-record only
+reads: teacher
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
+Keep the deep, mature boards that a future-reading planner reaches after fifty
+or a hundred moves, strip away everything privileged about how it got there, and
+hand the bare positions to other experiments as practice starting points.
+
+<EvidenceLabel status="support-only" evidence="task-record only" reads="teacher" />
+
+This is infrastructure, not a policy. Nothing here plays a game to win one; it
+manufactures a dataset that several later experiments consumed.
+
+## The intuition
+
+A learner that always starts from an empty board spends nearly all of its
+experience on easy, early positions. The interesting decisions — the ones that
+decide whether a game reaches move 200 — happen on crowded boards with tall
+columns, buried gray discs and a rise about to land. Ordinary play reaches those
+positions rarely and briefly; the
+[perfect-information oracle](/approaches/oracle-curriculum/perfect-information-oracle)
+reaches them constantly and survives inside them for hundreds of moves.
+
+So: use the oracle as a *tour guide* to interesting positions, then delete the
+guide. What is exported is a board, not a trajectory.
+
+## Where the privilege stops
+
+The C++ converter states the rule in one line: **oracle privilege terminates at
+the public-state constructor.** An exported record contains a canonical board,
+the visible next disc, and the five-drop rise phase. It does not contain the
+seed, the future tape, the hidden values behind any gray disc that was still
+covered, the score, the level, or the move index.
+
+More than that, the diagnostics attached to each record are *not* the oracle's
+own outcome. Each exported position is re-played forward under **seven
+independent futures derived from the public state itself**, using a fair depth-1
+search, over a 25-move horizon. So the numbers stored next to a position — mean
+moves survived, survival rate, clears and reveals per move, and a coarse flow
+band — describe what an ordinary player can expect from that board, not what the
+cheating planner achieved from it.
+
+## How it works, step by step
+
+1. Play 64 games with the privileged beam planner (depth 4, beam 128, 500-move
+   cap) on a training-only seed family.
+2. From move 50 onward, sample positions along those games.
+3. Convert each to the public encoding, canonicalize it by reflection, and
+   deduplicate, keeping at most 4,096 states.
+4. Re-score each state under seven public-derived futures with fair depth-1
+   play, at a 25-move horizon, and attach the flow diagnostics.
+5. Write the file. A separate TypeScript generator produces a sibling format
+   that tags each record by where it came from — oracle play, a combined
+   policy, or a safety policy — and stores remaining moves and remaining score
+   as targets.
+
+## What happened, in plain English
+
+The generator worked and its isolation checks passed: 4,096 restart states were
+produced, and the privilege-isolation tests confirmed that nothing privileged
+crossed into the exported records. That is the whole retained result. It is a
+support artifact, recorded as task-record only, with no ledger entry.
+
+What the curriculum was *used for* is where the outcomes are, and those are all
+negative so far: a value network trained on these states plateaued well below
+fair search; a reinforcement learner that began half of its episodes from these
+positions failed every one of its absolute floors; an option-based policy
+learner using the same 50/50 mix improved on the shallowest search and stayed
+far below depth-4; and the
+[curriculum long-outcome network](/approaches/d4-long-outcome/long-outcome)
+predicted survival usefully while ordering moves worse than exact search. None
+of those failures is attributed to the curriculum itself; none of them
+vindicates it either.
+
+<Callout title="The measurement that would settle it was never taken" tone="warn">
+The converter computes exactly what is needed to answer "is an oracle-visited
+board actually worth more to a fair player?" — and the aggregate was never
+reported. [`audit-05`](/docs/exploratory/audit-05-optimistic-curriculum) §5.4
+calls this "the single missing measurement" and estimates it at about an hour of
+compute: if oracle boards re-labelled fairly are barely better than ordinary
+boards matched on phase, occupancy and height, then practising from them has
+nothing to teach.
 </Callout>
 
-## TypeScript restart generator
+<TechnicalDetails>
 
-Extracts public restart states from long oracle trajectories for curriculum use.
+- Native converter, `oracle-curriculum.cpp`: **completed — task-record only
+  support**; "4,096 restart states were generated and privilege-isolation checks
+  passed" ([experiment index](/docs/research/experiment-index)). No ledger entry
+  exists for it.
+- TypeScript generator, `generate.ts`: **support-only — repository-verified**.
+  Emits `D7CURR1` records tagged by source (oracle, combined, phase-safety) with
+  remaining-moves and remaining-score targets.
+- Read from the source: 64 generation games from `0x3d660000`, oracle depth 4 /
+  beam 128, 500-move cap, first sample at move 50, at most 4,096 states, seven
+  restart scenarios at horizon 25, separate reveal and visible-disc random
+  domains for the restart futures, and a static assertion that the level bonus
+  is **17,000** — so the restart diagnostics are on corrected Hardcore scoring.
+- Downstream consumers and their recorded outcomes are listed in
+  [`audit-05`](/docs/exploratory/audit-05-optimistic-curriculum) §2.1 and §2.4;
+  the corpus fingerprints appear there too. §2.5 of the same audit records that
+  the generated corpora themselves lived under `/tmp` and are **gone from this
+  machine**, so any experiment that wants them must regenerate them from a
+  leased training range.
 
-**Status: Unknown** (repository-verified). 
+</TechnicalDetails>
 
-## Native restart curriculum
+## What this taught us, and what is still open
 
-Converts privileged trajectories into canonical public-only restart artifacts with independent future streams.
-
-**Status: Completed** (task-record only support). 4,096 restart states were generated and privilege-isolation checks passed.
-
-## Sources
-
-- `generate.ts`
-- `oracle-curriculum.cpp`
-
-## More evidence
-
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/oracle-curriculum)
+- **Isolation can be made structural.** Terminating privilege at a constructor,
+  and recomputing every diagnostic from public-derived randomness, is a pattern
+  worth copying: it makes the information boundary a property of the type system
+  rather than a promise in a comment.
+- **A dataset is not a result.** Four thousand positions exist, were used four
+  or five times, and have not yet produced a policy improvement.
+- **Still open:** the one-hour measurement above; and, separately, whether a
+  training *pool* drawn from oracle-visited boards but labelled *fairly* helps —
+  which [`audit-05`](/docs/exploratory/audit-05-optimistic-curriculum) identifies
+  as untested in this repository, as distinct from the optimistic *labels* that
+  have already failed.

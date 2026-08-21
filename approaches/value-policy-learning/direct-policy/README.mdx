@@ -1,28 +1,143 @@
 ---
-title: Direct Policy
+title: Direct public policy
 family: value-policy-learning
-status: Rejected
+summary: Skip the value model entirely — score each column with 25 weighted features and tune the weights against whole games.
+status: rejected
 evidence: task-record only
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Every other approach in this family fits a model to a label. This one has no
+labels. It writes down 25 things you might care about on a Drop7 board, adds
+them up with adjustable weights, and then searches for weights that make
+complete games go well.
 
-## Direct public policy
+<EvidenceLabel status="rejected" evidence="task-record only" reads="public" />
 
-Evolves a seed-blind policy directly on complete games.
+It reads only what a player can see. Its recorded verdict is **task-record
+only** — no ledger section, no artifact, no per-game data — and, as noted
+below, the recorded sentence does not describe the mechanism that is actually
+in the source file.
 
-**Status: Rejected** (task-record only). learned-policy roll-ins drifted away from their teacher and did not clear the whole-game gate.
+## The intuition
+
+A value model tries to answer "how will this game turn out?" and then trusts
+that answer to rank moves. Two things can go wrong: the answer can be wrong,
+and the answer can be right but useless for ranking. Direct policy search
+sidesteps both by never asking the question. It only ever asks: *when I play
+this way for a whole game, how does the game end?*
+
+Concretely, the policy scores a column by a weighted sum of features of what
+placing there would do — how many discs it clears, how many gray covers it
+reveals, how deep the chain goes, how much dangerous height it adds near the
+top, whether it leaves a trench that a high disc could later fill, whether it
+puts a low-numbered cap over something that now cannot escape. Those features
+are hand-written; only the 25 weights are searched.
+
+The search itself is a cross-entropy method: keep a distribution over weight
+vectors, sample a population from it, play the same fixed set of games with
+each one, keep the best few, and pull the distribution toward them. Because
+every candidate plays the *same* games, a candidate that wins did not simply
+get luckier discs.
+
+## How it works, step by step
+
+1. **Score each legal column** by a fixed utility term plus the dot product of
+   25 features with the current weights, and play the highest. Board positions
+   are canonicalised so a board and its mirror are treated identically.
+2. **Look one step into the fog, blindly.** Some features are computed over a
+   couple of stratified sampled outcomes for the hidden reveal and the disc
+   that follows. Those samples are drawn from the *policy's own* random
+   domains, seeded from the visible position — the real game's seed is never
+   passed to the chooser, so the policy cannot peek at what is actually coming.
+3. **Score a whole game, not a move.** The objective is deliberately mostly
+   about survival: 55% how long the game lasted against the move cap, 25%
+   score capped at one million, 15% a bonus for reaching the cap at all, and
+   5% the deepest chain achieved.
+4. **Evolve the weights.** 24 candidates per generation over 10 generations,
+   each evaluated on 64 shared training games; the best 6 update a Gaussian
+   over the weight vector, with each weight clipped to a declared range.
+5. **Freeze and check on unseen games.** The champion is then replayed on a
+   separate validation range that had no part in the search.
+
+## What happened
+
+The approach was retired, and almost nothing about the run survives.
+
+The [experiment index](/docs/research/experiment-index) records the verdict as
+**rejected, task-record only**, with the sentence: "learned-policy roll-ins
+drifted away from their teacher and did not clear the whole-game gate."
+
+Two things must be said honestly about that. First, **there is no retained
+number** — no mean score, no mean lifetime, no cohort size, no comparison
+against a baseline. The
+[blind-spot audit](/docs/exploratory/audit-04-blind-spots) lists this source
+among the 30 whose rejection "cannot be re-derived". Second, the recorded
+sentence describes a teacher and roll-ins, and **the source file contains
+neither**: there is no imitation target, no expert, and no roll-in mechanism
+anywhere in it — the weights are searched directly against complete games. The
+verdict may have been written about a different configuration, or about a
+sibling experiment; as it stands it cannot be checked against this code.
+
+So the defensible statement is narrow: an evolutionary direct policy of this
+shape was tried, was not adopted, and left no evidence behind. What it would
+score today is unknown.
+
+<TechnicalDetails title="The technical record">
+
+Source: `main.ts`. Status **rejected**, evidence **task-record only**
+([experiment index](/docs/research/experiment-index), Value and policy learning
+table). No section of the [full ledger](/docs/research/history) covers it.
+
+Configuration below is read **from the source file**, not from any result
+record. 25 tuned parameters, each with a declared initial mean, standard
+deviation, and clip range — `immediateScore`, `clearedDiscs`, `revealedCovers`,
+`chainDepth`, `emptyCells`, `topLoad`, `coverEnergy`, `solidEnergy`,
+`edgeCoverEnergy`, `highestCover`, `lowCaps`, `adjacentLowCaps`, `trenchDepth`,
+`topTwoCliffs`, `excessCliffs`, `highNumberFoundation`,
+`highNumberVerticalPotential`, `dangerCoverEnergy`, `dangerPeak`,
+`risePressure`, `adjacentCoverAtLanding`, `edgeCoverAtLanding`,
+`triggerReadiness`, `highDiscTrenchFit`, `landingHeight`.
+
+Defaults: 10 generations, population 24, 6 elites, 64 games, 2 planner samples
+per action, 500-move cap, cross-entropy update rate 0.72, minimum standard
+deviation fraction 0.07, terminal utility −2,500,000, score target 1,000,000.
+The whole-game objective is `0.55·(moves/cap) + 0.25·min(score, 1e6)/1e6 +
+0.15·censored + 0.05·min(maxChain, 20)/20`.
+
+Information boundary: the planner uses its own reveal, disc, and candidate
+random domains derived from the observable position and a fixed solver seed;
+the headless game seed is never passed to `chooseMove`.
+
+Seed ranges declared in the source: training from `0x1d700000`, validation from
+`0x7d700000`, reserved final from `0xd7000000`. Note that
+[history's seed discipline](/docs/research/history) reserves the protected bank
+as `0x7d000000`–`0x7d00ffff` only, while
+[`audit-03`](/docs/exploratory/audit-03-claim-arithmetic) recommends reserving
+the whole `0x7d` and `0xd7` byte families; under the audit's proposed registry
+this file's validation constant would sit inside a reserved family. No run
+using it is recorded either way.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+Direct policy search is the one method here that cannot suffer from
+[the sibling trap](/learn/concepts/ranking-siblings), because it never learns a
+value for an unplayed move — it only ever measures whole games. What it buys
+with that immunity is a brutally weak learning signal: one number per complete
+game, for a policy with 25 knobs, on 64 games per generation. The related
+evolutionary work elsewhere in the repository (see the
+[heuristic-search](/approaches/heuristic-search) family and the constructive
+policies) repeatedly reached the same ceiling, well below fair depth-4 search.
+
+The open question this leaves is not "would more generations help" but whether
+a whole-game objective belongs at the top of a stack rather than at the bottom:
+tuning a handful of coefficients *inside* a strong search, rather than tuning a
+standalone policy that has to do everything by itself. The
+[leaf-reweighting work](/approaches/lifetime-objective/leaf-reweight) is the
+current expression of that idea.
 
 ## Sources
 
-- `main.ts`
-
-## More evidence
-
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/value-policy-learning)
+- `main.ts` — features, the cross-entropy tuner, and the self-test.

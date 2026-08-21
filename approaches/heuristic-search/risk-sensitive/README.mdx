@@ -1,28 +1,117 @@
 ---
-title: Risk Sensitive
+title: Risk sensitive
 family: heuristic-search
-status: Rejected
+summary: Judge a column by how bad its worst futures are, not only by how good its average future is — because one collapse ends the game and there is no next game to average it against.
+status: rejected
 evidence: task-record only
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Judge a column by how bad its worst futures are, not only by how good its
+average future is — because one collapse ends the game and there is no next
+game to average it against.
 
-## Risk-sensitive lab
+<EvidenceLabel status="rejected" evidence="task-record only" reads="public" />
 
-Applies lower-tail/CVaR weighting to sampled rollouts.
+## The intuition
 
-**Status: Rejected** (task-record only). the best mild-risk pilot trailed the phase baseline.
+An ordinary [expectimax](/learn/glossary) search values a column by the
+average over everything that could happen next. Averages are the right thing
+to maximise when you get many independent tries. In Drop7 you get one: a move
+whose average is excellent but which loses the game one time in eight is not
+an excellent move, because the losses are permanent and the score stops.
 
-## Sources
+The fix borrowed from finance is **conditional value at risk**: rank a column
+by the average of its *worst* quarter of outcomes instead of the average of
+all of them, or by a blend of the two. Set the risk weight to 0 and you have
+the ordinary search back; set it to 1 and the policy only cares about
+disasters; anything in between trades mean for safety.
 
-- `main.ts`
+## How it works, step by step
 
-## More evidence
+1. **Read the public position** — board, next disc, rise clock.
+2. **For each legal column, build a fixed set of scenarios** — sampled
+   immediate chance outcomes, the same set for every column so that the
+   comparison is paired.
+3. **Continue each scenario** with an ordinary risk-neutral search of a couple
+   of plies, using stratified samples at its chance nodes.
+4. **Collapse each column's scenario outcomes** into a mean, a lower quantile,
+   and a conditional-value-at-risk over the worst tail fraction; select on a
+   blend controlled by one number.
+5. **Play the winning column.**
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/heuristic-search)
+The planner takes a solver-local seed only. It refuses the game seed, and no
+future disc or reveal tape can reach action selection.
+
+## What happened, in plain English
+
+Every setting of the risk dial was retired. The best mild-risk configuration —
+the one that only leans slightly toward caution — still finished behind the
+plain phase-conditioned baseline it was tested against, and the strongly
+risk-averse settings were worse.
+
+The same idea was tested separately, and much more thoroughly, inside the
+reference search, where it is recorded properly. There it did not merely fail
+to help: it made the policy worse on every measure at once, including the
+lower tail it was designed to protect.
+
+<TechnicalDetails title="The technical record">
+
+**This lab.** The [experiment index](/docs/research/experiment-index) records
+it as **rejected, task-record only**: *"the best mild-risk pilot trailed the
+phase baseline."* Task-record only means the pilot is reported in a research
+conversation and was never promoted into the
+[experiment history](/docs/research/history); **no score, move count, or
+per-game outcome for it is retained in this repository.**
+
+Repository-verified from the source. `main.ts` sweeps risk weights
+`0, 0.5, 1` with a 0.25 tail fraction, seven root scenarios, a two-ply
+risk-neutral continuation and three chance samples per continuation node, over
+4 pilot and 16 confirmation games at a 500-move cap, with 500,000 work units
+for the risk planner against 1,000,000 for the baseline and a `REQUIRED_MEAN`
+constant of 300,000. Pilot games come from `0x3d70…` and the probe range is
+`0x4d70…`; `0x5d70…` is explicitly forbidden. The comparator is the
+[phase-horizon](/approaches/heuristic-search/phase-horizon) evaluator inside a
+sparse search. `src/core/typescript/risk-sensitive-planner.ts` documents the
+boundary directly: *"Solver-local seed; no game seed or future chance tape is
+accepted."*
+
+**The properly recorded sibling experiment.** `fair-root-risk.cpp` in the
+[fair expectimax](/approaches/fair-expectimax) family applied the same
+mechanism to the reference search with a preregistered root utility of
+`0.75 × mean + 0.25 × CVaR25` over seven scenarios per action. It is
+**rejected, ledger-recorded**. On its eight-game screen the unchanged
+depth-3 fair search averaged 176,819.75 points and 114.125 moves; the risk
+version averaged 87,112 points and 61.5 moves — a paired difference of
+−89,707.75 points and −52.625 moves, losing seven of eight games on both
+measures. Clear and reveal throughput fell from 2.043/1.141 to 1.730/0.945 per
+move and mean maximum chain fell from 7.875 to 5.125. It switched away from
+the fair recommendation on 28.25% of decisions. Confirmation seeds were not
+read and nothing was retuned.
+
+That screen is a **historical 7,000-point Sequence-scored** run: the level
+award was 7,000 rather than the 17,000 of the Hardcore mode studied here, so
+its absolute scores are not evidence about the million-point target. The
+comparison between the two policies on the same eight games, and the
+throughput and chain measurements, remain valid
+([mode-specific scoring correction](/docs/research/history)). Eight games is a
+small screen.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **Changing the objective does not repair the action model.** The strategy
+  catalog states the conclusion for the whole conservative-override family:
+  confidence gates and tail objectives are a safety mechanism, not a source of
+  new strategic information, and they become useful only after the underlying
+  challenger can rank legal siblings on disjoint data.
+- **Mean-protecting and tail-protecting came apart in the wrong direction.**
+  The recorded root-CVaR screen lost mean score, survival *and* flow. A
+  risk-averse policy that dies sooner is not being cautious about the right
+  thing — with a short horizon, "avoid the worst sampled outcome" is a
+  statement about sampling noise as much as about danger.
+- **What is still open.** Distributional gates are still in the recommended
+  decision standard for a future candidate — but as a *check* applied after a
+  challenger already ranks moves well, not as the thing that makes it rank
+  moves well.

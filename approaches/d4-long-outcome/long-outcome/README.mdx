@@ -1,63 +1,201 @@
 ---
-title: Long Outcome
+title: Long outcomes
 family: d4-long-outcome
-status: Rejected
+summary: Measure what each column is worth by playing it forward twenty-five moves under shared imagined futures, then try five different ways of learning that measurement — all of which ranked moves worse than a cheap exact search.
+status: rejected
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
+Measure what each of the seven columns is worth by playing it forward
+twenty-five moves under shared imagined futures — then try to learn that
+measurement, so a policy can have it without paying for it.
+
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
+
+Six programs are collected here. Between them they test a general learned
+ranker, a readable hand-built feature and a broadened version of it, a
+multi-output network at two sizes, the same idea on curriculum positions, and a
+narrowly targeted veto. All of them were rejected, and together they make an unusually
+well-controlled argument about *why*.
+
+## The data is the point
+
+Nearly every learning failure elsewhere in this repository can be blamed on the
+training data: only the move that was actually played has a recorded outcome, so
+the model is asked at deployment to rank six alternatives it never saw. See
+[ranking siblings](/learn/concepts/ranking-siblings).
+
+These corpora are built to remove that excuse. At each recorded position, **every
+legal column** is forced in turn, and each is played forward for 25 moves under
+the **same seven imagined futures**, with a fresh complete depth-2 search
+choosing every subsequent move. The return is the score the line actually
+earned, minus a large penalty if it died, plus one leaf evaluation if it was
+still alive at the horizon. Positions are drawn evenly through whole games, and
+splits are always by whole game.
+
+So the question these experiments ask is narrow and fair: *given a perfect record
+of what each column led to, can a model learn to order them?*
+
+## What happened, in plain English
+
+**Adding a learned correction to exact depth-2 search made the ordering worse.**
+On the fitting positions the correction looked strong — top-move accuracy rose
+from 26.0% to 34.7%. On the held-out games it fell to 22.2%, below the plain
+search's 27.8%, and the leftover-value measure got worse too. This is ordinary
+overfitting, cleanly caught by splitting on whole games; it failed eight of ten
+component checks.
+
+**The readable feature was real and useless.** A carefully constructed
+"vertical-ladder" measure — how much release potential is stored in a column as
+discs are added — correlates with outcomes at roughly 0.01. Fitting it gave it a
+*negative* coefficient in every fold. Stored ladders genuinely exist on these
+boards; they are not what separates a good column from a bad one twenty-five
+moves later.
+
+**Some things are very learnable, and none of them is the ranking.** The
+multi-output networks predict whether a line survives with a correlation around
+0.85, and numbered clears at around 0.43. The quantity that actually decides the
+move — the return residual — sits at 0.35, downside at 0.33 and variance at 0.14.
+A shared representation that is good at survival did not become good at choosing.
+
+**More data and more capacity made it worse, not better.** This is the cleanest
+single-factor test in the repository. Holding everything else identical, the
+corpus was enlarged 5.24 times and the network's hidden layer was widened from 12
+units to 48. Top-move accuracy went **27.79% (plain exact search) to 25.99% (12
+units) to 23.94% (48 units)**, while the survival output stayed at 0.85 either
+way. Zero of four folds avoided regressing. The "we just need more data" and "we
+just need a bigger model" hypotheses were both tested here and both failed.
+
+**Restricting the model to a veto did not save it.** The final attempt used only
+the trustworthy survival and clear outputs, and only to override depth-4 search
+when an alternative was clearly safer. Of 288 positions, only seven had any
+eligible alternative at all. It made 19 overrides and **zero of them were
+correct**. Its mean return actually rose — by 14,165 — which the ledger flags as
+the exact reason mean-only selection is unsafe here.
+
+**Broadening the readable feature did not help either.** A relaxed version, which
+lets a column's potential be realised by one or two hypothetical future drops
+rather than a literal existing ladder, correlated better than the literal
+version but still failed every material gate, non-regressing in only one of six
+folds.
+
+<Callout title="Two of these results are burned development evidence" tone="warn">
+The 144-position held-out split was opened by the first experiment in this
+group. Everything measured on it afterwards is explicitly labelled *burned
+development evidence* — useful for deciding what to try next, and not usable as
+a formal gate. The repository records that distinction rather than quietly
+reusing the split.
 </Callout>
 
-## D2 long-outcome ranker
+<TechnicalDetails>
 
-Learns 25-move public-D2 sibling returns from grouped root panels.
+**Corpus.** 288 fitting roots from 24 games and 144 held-out roots from 12 games,
+12 evenly spaced roots per game, drawn from the already-consumed `0x3df2` /
+`0x3df3` depth-4 corpus; every sibling, seven common-random-number tapes, horizon
+25, fresh complete full-width depth-2 search at every continuation step; reveals
+and later visible discs in independent event-indexed domains. The scaled version
+uses 1,508 fitting roots from 16 whole games (5.236 times the sample) plus 465
+roots from 8 already-burned games.
 
-**Status: Rejected** (ledger-recorded). held-out ranking and regret did not beat exact D2/D4 comparators.
+**Ranker over exact depth 2** (rejected — ledger-recorded):
 
-## Long-outcome feature audit
+| Split / ranker | Top-1 | Top-2 | Pairwise | Normalized regret |
+| --- | ---: | ---: | ---: | ---: |
+| Fitting, exact depth 2 | 26.04% | 43.75% | 56.90% | 0.33442 |
+| Fitting, depth 2 + residual | **34.72%** | **53.82%** | **60.67%** | **0.26712** |
+| Held out, exact depth 2 | **27.78%** | 45.83% | **58.48%** | **0.33050** |
+| Held out, depth 2 + residual | 22.22% | 45.83% | 57.67% | 0.36350 |
 
-Measures survival, flow, downside, and ladder features against the same long-outcome panels.
+Failed eight of ten component checks; the first held-out half regressed most
+clearly (top-1 30.56% to 19.44%). No gameplay seed was opened.
 
-**Status: Rejected** (ledger-recorded). the feature conjunction did not pass.
+**Feature and multi-head audit** (rejected — ledger-recorded, development-only).
+Ladder alone reached 15.63% fitting top-1; depth 2 + fitted ladder was
+indistinguishable from depth 2; the fitting-only coefficient was −0.02315 and all
+six fold coefficients were negative; ladder pair-difference correlation 0.0133
+fitting and 0.0053 held out. The 12-unit five-head network scored 24.31% top-1 /
+54.84% pairwise / 0.35884 regret in nested fitting cross-validation against exact
+depth 2's 26.04% / 56.90% / 0.33442, and 22.22% / 56.26% / 0.41081 on the burned
+held-out split against 27.78% / 58.48% / 0.33050. Auxiliary Pearson correlations
+on that split: survival 0.854, numbered clears 0.427, return residual 0.350,
+downside 0.325, variance 0.139. A replay verified every persisted scenario return
+with maximum error exactly zero.
 
-## Curriculum long-outcome NNUE
+**Scaled network** (rejected — ledger-recorded). Only varied factor: 12 against
+48 hidden units, identical epochs, losses, optimizer and folds.
 
-Artifact-only H100 multi-head model over frozen public curriculum states.
+| Split / ranker | Top-1 | Pairwise | Regret | Survival r |
+| --- | ---: | ---: | ---: | ---: |
+| Cross-validation, exact depth 2 | **27.79%** | **57.44%** | **0.34828** | 0.0209 |
+| Cross-validation, 12 hidden | 25.99% | 55.70% | 0.36251 | **0.8547** |
+| Cross-validation, 48 hidden | 23.94% | 55.15% | 0.37018 | 0.8494 |
+| Burned held out, exact depth 2 | **30.75%** | **59.61%** | **0.33356** | 0.0403 |
+| Burned held out, 12 hidden | 26.02% | 57.80% | 0.35371 | 0.8185 |
+| Burned held out, 48 hidden | 24.73% | 56.88% | 0.38022 | **0.8291** |
 
-**Status: Rejected** (task-record only). survival prediction was useful, but action ordering regressed versus exact search.
+Zero of four folds fully non-regressing. This experiment **predates the scoring
+correction**: its engine and all return labels use the historical 7,000-point
+level bonus, and the source now asserts that dependency so it cannot silently
+rerun against the corrected engine. It is architecture evidence, not
+score-calibrated Hardcore evidence.
 
-## Scaled long-outcome NNUE
+**Veto classifier** (rejected — ledger-recorded). Nine public features, balanced
+logistic model, switching only above probability 0.90 and only after survival and
+clear prefilters, nested by whole game. Frozen gate: at least 80% precision, 20%
+coverage, 10,000 mean gain, paired-scenario 10th percentile at least −7,000, at
+least 85% fallback, 90% survival and clear retention, 12 switches, four active
+and four stable folds. Observed on 288 roots: only 7 roots had an eligible
+alternative; 19 switches, **zero true positives**; precision and coverage zero;
+paired-scenario 10th percentile −39,674.24; survival retention 84.21%; clear
+retention 57.89%; zero of six folds stable. Mean return rose 14,165.41. On the
+burned held-out split: 3 switches against 6 eligible roots, again zero true
+positives, 10th percentile −39,470.31, clear retention 33.33%.
 
-Tests whether more labels and capacity fix the earlier long-outcome sample bottleneck.
+**Curriculum network** (rejected — task-record only; **no ledger entry**).
+Artifact-only, 3,072 training and 1,024 held-out states from the frozen 4,096-state
+[public oracle curriculum](/approaches/oracle-curriculum/state-curriculum), every
+action, seven scenarios, horizon 100, five heads, 36 epochs, no gameplay runner
+and no gameplay seed accepted. Retained outcome: survival prediction was useful,
+action ordering regressed versus exact search. No numbers are retained.
 
-**Status: Rejected** (ledger-recorded). no whole-origin fold fully non-regressed.
+**Relaxed chain potential** (rejected — ledger-recorded). Eleven fixed summaries
+over one or two hypothetical drops from each existing first-step outcome, with
+revealed covers becoming inert so no future value is ever queried; ridge residual
+over exact depth 2, six whole-game folds. Raw relaxed pair correlation 0.0505
+fitting / 0.0517 held out against exact depth 2's own 0.2164 / 0.2614; the
+combined model scored 25.00% / 25.69% top-1 against depth 2's 26.04% / 27.78%;
+only one of six folds non-regressed; every material gate failed.
 
-## D4 veto classifier
+Records: [experiment index](/docs/research/experiment-index) "D4 and long-outcome
+research"; [ledger](/docs/research/history) sections "Public-D2 25-move outcome
+ranker", "Long-outcome ladder and multi-head audit", "Long-outcome D4 veto
+classifier", "Relaxed chain-potential feature audit" and "Scaled long-outcome
+NNUE sample-bottleneck audit". Sources: `d2-long-outcome-ranker.cpp`,
+`d2-long-outcome-feature-audit.cpp`, `curriculum-long-outcome-nnue.cpp`,
+`scaled-long-outcome-nnue.cpp`, `d4-long-outcome-veto-classifier.cpp`,
+`relaxed-chain-potential-audit.cpp`.
 
-Uses long-outcome heads only to veto fragile D4 actions.
+</TechnicalDetails>
 
-**Status: Rejected** (ledger-recorded). override precision and downside gates failed.
+## What this taught us, and what is still open
 
-## Relaxed chain-potential audit
-
-Broadens the literal ladder feature into relaxed reachable chain potential.
-
-**Status: Rejected** (ledger-recorded). every material transfer gate failed.
-
-## Sources
-
-- `curriculum-long-outcome-nnue.cpp`
-- `d2-long-outcome-feature-audit.cpp`
-- `d2-long-outcome-ranker.cpp`
-- `d4-long-outcome-veto-classifier.cpp`
-- `relaxed-chain-potential-audit.cpp`
-- `scaled-long-outcome-nnue.cpp`
-
-## More evidence
-
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/d4-long-outcome)
+- **Scale was tested, and it is not the answer.** More labels and more capacity
+  made the ranking monotonically worse while the survival prediction stayed
+  flat. That is the signature of a limit in the *label*, not in the model or the
+  optimiser.
+- **Predicting the game is easier than choosing a move.** A correlation of 0.85
+  on survival next to a rank ordering below cheap exact search is the whole
+  lesson of this family in one line.
+- **Means are not gates.** The veto classifier increased mean return while making
+  nineteen consecutive wrong decisions. Every design here that survived scrutiny
+  reports precision, coverage, downside quantiles and per-fold stability rather
+  than an average.
+- **Still open:** the audit that follows from all of it — targeting *per-rise
+  survival* rather than return, as
+  [`audit-05`](/docs/exploratory/audit-05-optimistic-curriculum) §5.3 argues,
+  since the survival heads are the only strong signal anyone here has fitted.
+  Also open: whether seven imagined futures are simply too few for the return
+  labels to separate close siblings at all, which
+  [`finding-03`](/docs/exploratory/finding-03-rollout-veto-17k) estimates at 16
+  to 51 for the closely related veto.

@@ -1,31 +1,247 @@
 ---
-title: Scenario
+title: Scenario engine and exact solver
 family: lifetime-objective
-status: Unknown
-evidence: unknown
-generated: true
+summary: A version of the game in which every future disc and every hidden number is decided in advance, so that a position has one exactly computable best line — the yardstick the repository had never had.
+status: support-only
+evidence: repository-verified
+reads: oracle
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
+This is not a strategy. It is the missing measuring instrument: a way to ask
+"what was the best possible play from here?" and get an exact answer rather than
+an estimate.
+
+<EvidenceLabel status="support-only" evidence="repository-verified" reads="oracle" />
+
+Everything on this page reads hidden values. The solver is a **clairvoyant
+reference** — an [oracle](/learn/concepts/oracles-and-teachers), used to label
+and to bound. It is not a policy and can
+never be one, and no score produced here is comparable to a score from an
+ordinary game.
+
+## The problem it solves
+
+You would think you could always ask a simulator "what was the best move
+here?". In this repository you could not, and the reason is a detail of how gray
+discs work.
+
+The engine does not decide what number is hiding under a gray disc when the disc
+appears. It decides at the moment the disc is *revealed*, by drawing the next
+number from its random stream. So the same physical gray disc holds a different
+number depending on when, and in what order, you happen to open it. There is no
+hidden board sitting underneath the visible one; there is only a stream of
+numbers waiting to be handed out.
+
+The figure below is the engine's own output. Two cracked gray discs sit on a
+bottom row of 3s. Two different (and completely independent) moves each open one
+of them.
+
+<Board
+  cells="0000000000000000000000000000000000009000903300330"
+  highlight={[36, 40]}
+  caption="The starting position, from the repository's TypeScript engine. Two cracked gray discs, one above column 1 and one above column 5, each resting on a pair of 3s."
+/>
+
+<BoardCompare
+  before="0000000000000000000000000000000000000000000500040"
+  after="0000000000000000000000000000000000000000000400050"
+  beforeLabel="Left opened first"
+  afterLabel="Right opened first"
+  highlightBefore={[43, 47]}
+  highlightAfter={[43, 47]}
+  caption="Same starting position, same random seed, same two moves — only the order changed. Whichever gray is opened first gets the 5; the other gets the 4. Both lines score exactly 42 points. Generated with the repository's TypeScript engine."
+/>
+
+An engine audit put the consequence bluntly: under these rules there is no true
+hidden value for a privileged planner to inspect, only a counterfactual that
+moves the instant the player deviates. Every oracle and teacher experiment in
+the repository rested on a quantity the engine did not define.
+
+## What a scenario is
+
+A **scenario** fixes everything the game would otherwise leave to chance:
+
+- the visible board and how many drops remain before the next rise;
+- the hidden number under every covered cell — a real hidden board, carried
+  through gravity and row rises alongside the visible one;
+- the exact sequence of discs the player will be handed;
+- the hidden numbers of every future row that rises from below;
+- a horizon, the number of moves the scenario is scored over.
+
+With all of that fixed, the game stops being a gamble and becomes a
+deterministic single-player puzzle over a fixed number of moves — which means it
+has an exact best line, findable by exhaustive search. Each scenario carries a
+content hash of every field as its identity, so a suite of them is
+self-verifying, and a loader refuses any record whose contents do not match its
+own name.
+
+The starting position, the hidden board, and the randomness are stored as
+separate fields on purpose, so the same position can be re-dealt with fresh
+discs and fresh hidden numbers. That is the operation a *fair* evaluation needs,
+and this work deliberately stops short of implementing it — see the caution at
+the end of this page.
+
+## How it was made trustworthy
+
+1. **It is the same game, proven.** The scenario engine is the repository's own
+   move loop with one thing factored out: where a revealed number comes from.
+   Run with a reveal source that draws from the ordinary random stream, it must
+   produce trajectories identical to the base engine. It was compared on every
+   move — all 49 cells, the next disc, score, score delta, level, moves, the
+   game-over and board-clear and level-advance flags, and every wave of every
+   chain, element by element. **8,192 game-plays, 218,470 moves, 0 mismatches.**
+   Total scores are bit-identical across 4,096 games under both engines.
+2. **The latent mode is a different game, and is labelled as one.** Swapping in
+   the hidden-board reveal source changes when a number is decided. The
+   distribution of revealed numbers is the same (uniform over 1 to 7, measured,
+   not assumed), but scores under it are **not** comparable to any figure in the
+   research ledger, and this is stated wherever a number appears. It is,
+   incidentally, closer to how the commercial game behaves than the base engine
+   is.
+3. **The solver is exact, not approximate.** Depth-first search over every legal
+   move sequence to the horizon, maximising total points, with dying simply
+   ending the line and earning nothing further — so survival is priced by the
+   points it would have bought rather than by an invented penalty. A
+   [transposition table](/learn/glossary) keyed on the full visible board, the
+   full hidden board and the depth stores a value only when a position was
+   searched exhaustively. When the horizon is too large the run is reported
+   incomplete; it is never approximated.
+4. **Every reported best line is replayed.** The winning move sequence is
+   rebuilt from the table and played back through the engine. If the replay does
+   not earn exactly the reported optimum, the result is marked incomplete rather
+   than published. Across every run reported, that check never fired.
+5. **The solver was checked against a deliberately stupid one.** 107 scenarios
+   were solved by a naive enumerator with no table, no bound, no threads and no
+   move ordering, and compared against four solver variants: **428 comparisons,
+   all agreeing.**
+
+## What it measured
+
+**A board clear is reachable — but only from boards that real play never
+reaches.** This settles an open question the
+[score decomposition](/approaches/lifetime-objective/score-decomposition) had to
+leave open: emptying the board is worth 70,000 points, about 20 moves of
+survival, and the reference policy achieved it zero times in 64 games. Was it
+even possible? Over 128 realistic-to-crowded positions solved with perfect
+knowledge, the best possible line clears the board **zero times**. Over 256
+deliberately sparse positions, it clears **4.7%** of the time. But only 3.1% of
+snapshots from real games are that sparse, and none are as sparse as the region
+where clearing is easiest. A policy running a clearance deficit never gets the
+board empty enough for a clear to be reachable even with the answer key.
+
+**The engine can pay far more than the reference policy ever collects.** The
+suite's best scenario spends four moves scoring 21 points in total and then
+collects 148,124 points in a single move, from a cascade running twenty waves
+deep. The reference policy never exceeded fourteen across the whole suite. The
+5.7% of score that chains contribute in ordinary play is a statement about what
+that policy can find, not about what the game can pay.
+
+**And a known scoring divergence is exploitable.** In one scenario the best line
+empties the board on the move that also triggers a rise, and is paid both
+bonuses — 87,007 points where the commercial reference implementation would pay
+17,007. The clairvoyant solver walks straight into it. Any future clear-seeking
+work using this suite must treat that double award as a known upward bias.
+
+<TechnicalDetails title="The technical record">
+
+Source: [`finding-02-scenario-benchmark`](/docs/exploratory/finding-02-scenario-benchmark)
+and the design note [`design-01-benchmark-suite`](/docs/exploratory/design-01-benchmark-suite),
+status exploratory, **evidence tier `pilot`/`development`**, built and measured
+in this checkout on 2026-08-20. Seed lease `SEEDLEASE-A51D-SCEN` =
+`0xa51dc000`–`0xa51dffff`.
+
+**Parity gate.** Paired gravity and rise transforms checked against the shared
+primitives over 20,000 random boards each; trajectory parity over 4,096 seeds
+and 86,946 moves with a centre-first policy and 4,096 seeds and 131,524 moves
+with a lowest-column policy; latent-source invariants and a serialization round
+trip over 64 games. **Total 8,192 game-plays, 218,470 moves, 0 mismatches.**
+Aggregate scores identical to the digit under both engines: 228,382,336 across
+4,096 centre-first games, 390,070,924 across 4,096 lowest-column games.
+
+**Largest exactly solvable horizon: 9 moves**, for all of 12 test scenarios
+inside about ten seconds on eight threads. At horizon 10, two of twelve time
+out; from horizon 12 the only scenarios that finish are ones whose lines die
+early. The 128-scenario suite solved 128 of 128 exactly at horizon 9.
+
+**A recorded negative on the solver's own machinery.** The transposition table
+is worth 7.6 times in nodes and 4.9 times in wall time. The admissible upper
+bound prunes **exactly zero nodes** at every horizon tested — the no-table node
+counts are identical to the node with and without it (52,198,097 either way).
+The bound that can be *proved* allows roughly 3.2 million points per move, while
+real optima are in the tens of thousands; a bound tight enough to prune would
+have to assert something about achievable chain structure, which is the thing
+being measured.
+
+**The suite** (`data/suite-h9-v1.jsonl`): 128 scenarios at horizon 9, all solved
+exactly, 390 seconds on 8 threads. 64 harvested from positions real games visit
+(under a weak lowest-column policy) and 64 synthetic with controlled occupancy,
+cover fraction and number profile. Mean clairvoyant optimum 53,109; mean fair
+depth-1 / depth-2 / depth-4 scores 29,385 / 29,983 / 30,402; mean privileged
+one-ply greedy 28,295. Gap between the optimum and the best shallow policy:
+median 15,445, mean 21,653, maximum 119,391, positive in 123 of 128 and never
+negative.
+
+**Board-clear probe:** `suite-h9-v1` harvested 0 of 64 and synthetic 0 of 64;
+`sparse-probe-h9-v1` 12 of 256 (4.7%), rising to about 6% at three to eight
+occupied cells. Real mid-game snapshots have a median of 29 occupied cells and a
+5th percentile of 16.
+
+**Limitations as recorded.** The latent model is not the base engine's model, so
+scenario scores are not comparable to any ledger figure. Horizon 9 is one and a
+bit rise cycles, and the zero-clear result on realistic boards is partly a
+horizon artifact — emptying a 25-cell board in nine moves would need about 3.6
+clears per move against a steady-state requirement of 2.4, and horizons above 11
+are not exactly solvable with this solver. Every per-scenario number rests on a
+single deal, so the comparison between depth 1, 2 and 4 is inside noise and must
+not be used to rank them. Synthetic positions are not real positions, and the
+harvested ones come from a weak policy. **Timings are not timing-grade**: every
+run shared a 16-core machine with other jobs at load averages of roughly 35 to
+55, so node counts are exact and machine-independent while wall times are
+pessimistic. The engine's own rise-boundary scoring divergences are inherited
+and actively exploited by the solver.
+
+</TechnicalDetails>
+
+## The trap this work names, and does not spring
+
+<Callout title="A large gap does not mean a fair policy could have done better" tone="warn">
+It is tempting to build a training suite out of the positions where shallow
+search falls furthest short of the clairvoyant optimum. That selects for
+positions that require **knowing the future**, which a legal policy never does.
+Some of the gap is a real planning deficiency a better fair policy could
+recover; some of it is a coincidence between one deal and one hidden board, and
+selecting on it teaches a student to memorise luck. The honest statement about
+the mean gap of 21,653 points over nine moves is that it is an **upper bound**
+on what better fair play could recover, with an unknown fraction unrecoverable.
+The one piece of evidence pointing at a genuine planning gap is that the
+privileged one-ply greedy — which sees everything the solver sees — matches the
+best shallow policy in only 21 of 128 scenarios, so most of the gap is created
+by planning several moves ahead rather than by information alone.
 </Callout>
 
-This approach is not yet listed in the experiment index. Read the
-source files below and the family page for context, and expand this
-page when the approach is understood.
-## Sources
+That separation was left to a later work package, which built it and then
+reported that **the horizon-9 suite fails its own validation gate**: it
+separates strong policy families from weak ones and nothing finer, because at
+that horizon the rise count is nearly fixed and 92% of a scenario score has no
+room to move. See
+[`finding-10-suite-validation`](/docs/exploratory/finding-10-suite-validation)
+and the [suite validation](/approaches/lifetime-objective/suite-validation)
+approach for the measurement and the proposed repair.
 
-- `generate.hpp`
-- `mint.cpp`
-- `scenario-io.hpp`
-- `scenario-parity.cpp`
-- `scenario.hpp`
-- `solve.cpp`
-- `solver.hpp`
+## What this taught us, and what is still open
 
-## More evidence
+The parity gate is the durable part. It is the reason this engine can be used at
+all: it proves the rules are the shared, audited rules and not a re-derivation,
+so a scenario optimum is an optimum of *this* game. The exploratory record is
+explicit that if that gate is ever non-zero, everything downstream is void.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/lifetime-objective)
+The exact solver gave the repository its first well-posed clairvoyant baseline
+and immediately paid for itself twice: it answered the board-clear question,
+and it independently reproduced an engine-fidelity finding by walking straight
+into a double-scoring boundary that a human reader had only reasoned about.
+
+What is still open is reach. Nine moves is about one and a bit rise cycles, and
+the questions this family cares about — flow deficits accumulating over dozens
+of cycles — live far beyond it. The solver cannot be pushed much further without
+a bound that actually prunes, and the one bound that can be proved sound prunes
+nothing.

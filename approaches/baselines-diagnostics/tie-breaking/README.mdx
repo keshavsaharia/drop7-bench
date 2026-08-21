@@ -1,28 +1,117 @@
 ---
-title: Tie Breaking
+title: Tie-breaking
 family: baselines-diagnostics
-status: Unknown
+summary: When two columns are worth exactly the same, something has to choose — this measures how much that arbitrary choice is worth over a whole game.
+status: support-only
 evidence: repository-verified
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Every policy in this repository ends up with two columns it likes exactly
+equally. The rule it uses to pick between them is arbitrary — and this program
+measures whether "arbitrary" is harmless.
 
-## Tie-breaking
+<EvidenceLabel status="support-only" evidence="repository-verified" reads="public" />
 
-Measures sensitivity to fixed legal-column ordering.
+## The intuition
 
-**Status: Unknown** (repository-verified). 
+Here is a position that is symmetric down the middle. A 3 is coming, and
+columns 1 and 5 are mirror images of each other:
 
-## Sources
+<BoardCompare
+  before="0000000000000000000000000000000000003000308888888"
+  after="0000000000000000000000000000000000000000308988888"
+  beforeLabel="a 3 is coming"
+  afterLabel="dropped in column 1"
+  highlightBefore={[36, 40]}
+  highlightAfter={[43]}
+  caption="The engine's output for this position and this move: the 3 lands on the 3 already in column 1, the column run reaches three, both discs clear for 14 points, and the gray disc beneath them is hit once and cracks."
+/>
 
-- `main.ts`
+Dropping the same 3 into column 5 does the identical thing on the other side —
+the same two discs cleared, the same 14 points, the same single crack — and
+leaves the exact mirror image of the board above:
 
-## More evidence
+<Board
+  cells="0000000000000000000000000000000000003000008888898"
+  highlight={[47]}
+  size={200}
+  caption="Same position, same disc, column 5 instead of column 1. No evaluator that treats left and right alike can prefer one of these."
+/>
+Real ties are rarer than mirror images, but near-ties are everywhere: two moves
+whose scores differ by less than the noise in the evaluation. Whichever column
+the loop reaches first wins them all, so a fixed order like "left to right" is
+a silent, permanent bias in the policy. If that bias is worth a few percent of
+score, then a comparison between two candidates that use different orders is
+partly measuring the order.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/baselines-diagnostics)
+## How it works
+
+1. Play complete games with a simple one-move-ahead policy: for each legal
+   column, play the move a few times with different imagined reveals, average
+   the immediate points plus a hand-written board score, and keep the best.
+2. The comparison is strict — a later column has to be *better*, not equal, to
+   displace an earlier one — so the order in which columns are visited decides
+   every exact tie.
+3. Run the whole thing four times, changing only that order: left-to-right,
+   centre-outwards, edges-first, and a paired order.
+4. Then, as a second family, run three deterministic rules that use no
+   evaluation at all: always play the lowest legal column; prefer a column
+   whose new height would equal the disc's number (a guaranteed vertical
+   clear); or prefer the column already holding the most copies of that number.
+   Each falls back to the lowest column, centre-first.
+5. Report mean score, mean moves and best score for each of the seven
+   variants over the same games.
+
+Everything it reads is public. It is not a candidate policy: the point is the
+*spread* between the variants, not the level any of them reaches.
+
+## What happened
+
+**No retained result.** The [experiment index](/docs/research/experiment-index)
+lists this source as support-only and repository-verified, and
+[audit 04](/docs/exploratory/audit-04-blind-spots) §B.2 lists it among the
+sources whose question has no lane and no retained output. Nothing in this
+repository records how large the tie-breaking effect is.
+
+What can be said without a run: the fixed order matters enough that the
+repository standardised on one. The native search policies use the centre-first
+order `3, 2, 4, 1, 5, 0, 6`, and the fair depth-4 audit
+([audit 02](/docs/exploratory/audit-02-fair-d4)) refers to positions that "fall
+through to `kColumnOrder` tie-breaking" as a normal, frequent event rather than
+an edge case.
+
+<TechnicalDetails title="The technical record">
+
+**Status: support-only — repository-verified.** No ledger entry, no task
+record, no retained output.
+
+Defaults in `main.ts`: 64 games from seed `0x1d700500`, four imagined reveals
+per candidate column, a 1,000-move cap. Orders tested: `left` = 0…6,
+`center` = 3,2,4,1,5,0,6, `edge` = 0,6,1,5,2,4,3, `paired` = 0,1,6,5,2,3,4.
+Rule policies: `shortest`, `vertical`, `grouped`. The evaluator is
+`evaluateHeuristic(..., "combined")` from
+`src/core/typescript/heuristic.ts`, and the tie is resolved by the strict
+`value > bestValue` comparison, i.e. first-in-order wins.
+
+Reading the output correctly: these are seven variants of a weak one-move
+policy, so their absolute scores say nothing about the strength of any research
+candidate. Only the difference *between* the seven rows is the measurement, and
+64 games is a small cohort for a heavy-tailed score.
+
+Source: `main.ts`.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- A fixed column order is a real degree of freedom in every policy here, not a
+  formality, and near-ties are common enough for it to have an effect.
+- Nobody has recorded how big that effect is. This is one of the cheapest
+  unanswered questions in the repository: seven complete-game arms on a
+  documented seed range, no training, no model.
+- The result that would matter most is not on the weak policy above but on the
+  [depth-4 reference](/approaches/fair-expectimax/reference): if changing only
+  its tie order moves its mean by an amount comparable to the differences
+  experiments are gated on, then some past gate decisions were partly measuring
+  column order.

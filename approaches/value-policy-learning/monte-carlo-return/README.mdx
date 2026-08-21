@@ -1,29 +1,117 @@
 ---
-title: Monte Carlo Return
+title: Monte Carlo return
 family: value-policy-learning
-status: Rejected
+summary: Score every column with what whole games that started from it actually ended up earning, then always drop in the column with the highest learned number.
+status: rejected
 evidence: task-record only
-generated: true
+reads: teacher
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Play thousands of games to the end, write down what each move was followed by,
+and train a network to predict that number for any board and column — then play
+the column the network likes best.
 
-## Monte Carlo return
+<EvidenceLabel status="rejected" evidence="task-record only" reads="teacher" />
 
-Learns action values from complete realized returns and benchmarks a frozen artifact.
+The badge above describes the *training* pipeline, which is allowed to collect
+demonstration games from the repository's
+[perfect-information oracle](/approaches/oracle-curriculum) — a planner that
+reads the future disc and reveal streams. The frozen artifact that actually
+plays reads only the board, the visible next disc and the rise clock, which is
+the rule this repository requires of any policy: a
+[teacher](/learn/glossary) may be privileged, the student may not.
 
-**Status: Rejected** (task-record only). the independent audit trailed the existing DQN.
+## The intuition
 
-## Sources
+Most learned evaluators in this repository predict something *indirect* —
+survival, remaining lifetime, a bootstrapped estimate of a later estimate. This
+one predicts the thing the research is actually scored on, and it gets its
+training signal from reality rather than from another prediction.
 
-- `benchmark.ts`
-- `train.ts`
+Concretely: a game is played from the first drop to the game-over board. It
+scores, say, 240,000 points across 70 moves. Every position in that game is then
+paired with the column that was played there and with the return that actually
+followed, and the network is asked to reproduce that pairing. Nothing in the
+target is modelled or bootstrapped: it is the realized outcome. If the network
+fits that data well, then at play time you can hand it the current board and each
+of the seven columns and read off which one it expects to earn most.
 
-## More evidence
+That is the appeal, and it is also where the trouble starts — see
+[the sibling trap](/learn/concepts/ranking-siblings). The game only ever plays
+one column per position, so the data contains one measured column and six
+unmeasured ones, while deployment asks the network to compare all seven.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/value-policy-learning)
+## How it works
+
+1. **Collect.** `train.ts` plays complete games with the current policy and an
+   exploration schedule, plus a configurable number of episodes copied from the
+   privileged oracle, on the training seed lane (`0x1d70…`). Oracle demonstration
+   episodes may be duplicated several times in the replay buffer.
+2. **Label.** Each stored transition carries the realized return of the rest of
+   its own game, adjusted by fixed shaping constants the source declares for
+   five-move clear and reveal throughput and for reaching a terminal board.
+3. **Encode.** The action encoder in
+   `src/core/typescript/mc-return-policy.ts` builds its input from the mirrored-
+   canonical public board, the visible next disc, the rise phase and a small
+   number of one-ply chance samples. Its own validator rejects a state that
+   carries anything else, so the encoding is where the information boundary is
+   enforced.
+4. **Fit and freeze.** The network is trained over repeated collection rounds,
+   and the best checkpoint by a separate selection lane is exported as a
+   self-contained JSON artifact.
+5. **Play.** At each move the compiled artifact scores every legal column and
+   returns the highest — a one-ply greedy policy over learned action values,
+   with no look-ahead search around it.
+6. **Audit.** `benchmark.ts` replays the frozen artifact and the frozen
+   [DQN](/learn/glossary) checkpoint over the same 64 games from a fixed audit
+   seed, so the two learned policies are compared game by game rather than by
+   their training curves.
+
+## What happened
+
+It lost to the learned policy that already existed. The repository's index
+records the audit in a single line — the Monte Carlo return artifact trailed the
+DQN — and does not retain a score, a cohort table, or a per-game artifact for it.
+So the honest reading is narrow: this configuration was retired, and there is no
+retained number on this page because the repository does not hold one.
+
+<TechnicalDetails title="The technical record">
+
+The [experiment index](/docs/research/experiment-index) row reads:
+*"Monte Carlo return … Learns action values from complete realized returns and
+benchmarks a frozen artifact. **Rejected — task-record only;** the independent
+audit trailed the existing DQN."*
+
+**Task-record only** is the repository's weakest evidence label: the referenced
+research conversation reports the outcome, but it was never promoted into
+[the ledger](/docs/research/history). A search of the ledger finds no protocol,
+no seed discipline statement, no cohort summary and no numbers for this
+approach. Treat "trailed the DQN" as provisional, and note that the DQN itself
+is recorded as *"far below the research target"*.
+
+What *is* verifiable from the source: three seed lanes are hard-coded and
+separated (training `0x1d70…`, champion selection `0x1d70f…`, calibration
+`0x5d70…`), the trainer refuses to read the calibration lane at all unless its
+champion first clears a 300,000-point mean on the selection lane, and the
+encoder's own validator rejects any state carrying more than public
+information. That is discipline, not evidence of strength — the numbers those
+lanes produced were not retained.
+
+Sources: `train.ts` (collection, oracle demonstrations, training, selection,
+export), `benchmark.ts` (64-game paired audit against the DQN checkpoint), and
+the shared encoder `src/core/typescript/mc-return-policy.ts`.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+The played-action design is the whole lesson. Realized returns are an honest,
+unbiased target, but they are only available for the move that was played, so
+the resulting values are strongest exactly where the policy already agreed with
+itself and weakest among the alternatives it must rank. That diagnosis is what
+the [afterstate-learning](/approaches/afterstate-learning) family was built to
+attack, by labelling every legal sibling instead of only the played one.
+
+What this run did *not* rule out: Monte Carlo returns as a *label family*. The
+later afterstate work also uses realized multi-move outcomes; what it changed is
+who gets labelled, not what the label measures.

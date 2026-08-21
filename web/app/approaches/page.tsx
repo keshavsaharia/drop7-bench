@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { familyDocPath, listApproaches, listFamilies } from "@/lib/repo";
+import { familyDocPath, familyMeta, listApproaches, listFamilies } from "@/lib/repo";
 
 export const dynamic = "force-dynamic";
 
@@ -34,7 +34,9 @@ export default function ApproachesPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {families.map((family) => {
           const approaches = listApproaches(family);
-          const documented = approaches.filter((a) => a.hasDocs).length;
+          const meta = familyMeta(family);
+          const documented = approaches.filter((a) => a.hasDocs && !a.draft).length;
+          const drafts = approaches.filter((a) => a.draft).length;
           return (
             <Link
               key={family}
@@ -43,17 +45,17 @@ export default function ApproachesPage() {
             >
               <div className="flex items-baseline justify-between gap-2">
                 <h2 className="font-bold text-zinc-100 group-hover:text-sky-300">
-                  {family}
+                  {meta.title}
                 </h2>
                 <span className="text-xs text-zinc-500">
                   {approaches.length} approaches
                 </span>
               </div>
               <p className="mt-1 text-sm text-zinc-400">
-                {FAMILY_BLURBS[family] ?? ""}
+                {meta.summary || FAMILY_BLURBS[family] || ""}
               </p>
               <p className="mt-2 text-xs text-zinc-600">
-                {documented}/{approaches.length} documented
+                {documented} written · {drafts} draft · {approaches.length} total
                 {familyDocPath(family) ? " · family guide" : ""}
               </p>
             </Link>

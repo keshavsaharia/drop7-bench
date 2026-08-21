@@ -1,28 +1,115 @@
 ---
-title: Oracle Dagger
+title: Oracle DAgger
 family: oracle-curriculum
-status: Rejected
+summary: Copy the future-reading teacher's moves, then let the copy play and ask the teacher what it should have done in the positions the copy reached.
+status: rejected
 evidence: task-record only
-generated: true
+reads: teacher
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
+Copy the moves of a planner that can see the future — then let the copy play,
+and ask the teacher what it *should* have done in every position the copy got
+itself into.
+
+<EvidenceLabel status="rejected" evidence="task-record only" reads="teacher" />
+
+## The problem it was built to fix
+
+Plain imitation has a well-known weakness. A student trained only on the
+teacher's games sees only the kinds of positions a very strong player reaches.
+The first time the student makes a mistake it lands somewhere the teacher never
+visited, so its next choice is a guess, which makes things worse, and the errors
+compound. The classical fix — collect data *where the student actually goes*,
+label it with the teacher, and add it to the pool — is what the acronym DAgger
+names, and this approach is that fix applied here.
+
+## What each side was allowed to see
+
+The teacher deliberately reads one training game's **exact future tape**: the
+discs to come and the hidden gray numbers. It is the same beam planner as the
+[perfect-information oracle](/approaches/oracle-curriculum/perfect-information-oracle),
+run here at depth 4 with a beam of 128 by default.
+
+The student receives **no seed, no tape, no move index, no score and no level**.
+Its input is a list of canonical position tokens — what is on each cell — plus
+the five-move rise phase, the column heights, and the disc it is about to place.
+Its output is one of seven columns.
+
+## How it works, step by step
+
+1. Play a set of games with the teacher and record every position, in the
+   student's public encoding, labelled with the teacher's column.
+2. Train the student on that pool for a first block of epochs, with a little
+   label smoothing so it never becomes certain.
+3. **Let the student drive.** Play a second set of games in which the student
+   chooses the moves, and at every position ask the teacher — who can see that
+   game's future — which column it would have played. These are the positions
+   plain imitation never covers.
+4. Add those labelled positions to the same pool and retrain on the union at
+   half the learning rate.
+5. Play probe games with the frozen student to see whether it improved.
+
+## What happened, in plain English
+
+It did not work, and the retained description of why is short: the student
+drifted, and the teacher's choices were not recoverable from the public state.
+
+The second half of that sentence is the important one. DAgger is the standard
+remedy for the *first* half — a student wandering into unfamiliar positions —
+and applying the remedy did not rescue the result, because the obstacle was
+never really the distribution of positions. It was that two boards which look
+identical to a player can have opposite best moves depending on gray numbers
+the player cannot see, and no amount of extra labelled positions makes an
+invisible difference visible.
+
+<Callout title="This page has no measured numbers to quote" tone="warn">
+This experiment is recorded as **task-record only**. The
+[experiment index](/docs/research/experiment-index) carries its status and its
+one-line outcome; the [ledger](/docs/research/history) has **no entry** for it,
+mentioning the file only as a predecessor of the later native distillation. No
+accuracy, score, move count or cohort size is retained anywhere in this
+repository, so none is quoted here.
 </Callout>
 
-## Oracle DAgger
+<TechnicalDetails>
 
-Iteratively labels public student states with a privileged oracle.
+- Status of record: **rejected — task-record only**
+  ([experiment index](/docs/research/experiment-index), "Oracle and curriculum
+  research"): "the student drifted and oracle choices were not recoverable from
+  public state."
+- Read from the source rather than from a result: teacher depth 4 / beam 128 by
+  default, 500-move cap; the student is a small sparse action network with a
+  32-wide accumulator and 16 hidden units, trained with label smoothing 0.05,
+  Adam and gradient clipping; the default schedule is 15 epochs on the teacher
+  pool, then DAgger collection, then 10 epochs on the union at half the learning
+  rate; the example pool is capped at 50,000. Training seeds start at
+  `0x3d700000`, DAgger seeds at `0x3d710000`, probe seeds at `0x4d700000`.
+- [`audit-05`](/docs/exploratory/audit-05-optimistic-curriculum) §4 classifies
+  this as failure 2 of 17: primary mode "representation / information gap", with
+  distribution shift secondary, and observes that "DAgger exists precisely to fix
+  distribution shift; it still failed." §3 of the same audit notes that the
+  two-stage schedule here is *data aggregation*, not an ordering experiment —
+  the trainer reshuffles the whole pool every epoch — so this run says nothing
+  about whether the order of training examples matters.
+- The closely related native experiment that *was* measured is
+  [oracle distillation](/approaches/oracle-curriculum/oracle-distillation), whose
+  held-out top-1 accuracy of 0.218 is the nearest thing to a number for the same
+  hypothesis.
+- Source: `main.ts`.
 
-**Status: Rejected** (task-record only). the student drifted and oracle choices were not recoverable from public state.
+</TechnicalDetails>
 
-## Sources
+## What this taught us, and what is still open
 
-- `main.ts`
-
-## More evidence
-
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/oracle-curriculum)
+- **Distribution shift was not the binding constraint.** That is a real
+  conclusion, and it redirected later work away from "collect better positions"
+  and towards "stop asking the student to reproduce a privileged choice".
+- **A task-record-only result stays task-record only.** It is enough to justify
+  not repeating this exact configuration; it is not enough to cite as a measured
+  quantity, and the repository does not upgrade it by restating it.
+- **Still open:** the same aggregation loop against a teacher whose advantage is
+  public rather than privileged. That is the shape of the later
+  [planner distillation](/approaches/lifetime-objective/planner-distill) work,
+  which had a fair teacher and still failed its held-out sibling-ranking gate —
+  for reasons documented in
+  [finding-11](/docs/exploratory/finding-11-planner-distillation).

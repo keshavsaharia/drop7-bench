@@ -1,28 +1,137 @@
 ---
-title: D4 Q Clone
+title: D4 root-Q clone
 family: value-policy-learning
-status: Rejected
+summary: Train a tiny fast network to copy how the expensive depth-4 search orders the seven columns.
+status: rejected
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+The reference [depth-4 search](/approaches/fair-expectimax/reference) is strong
+but slow — it imagines hundreds of thousands of futures per move. This
+experiment asked whether its *decisions* could be squeezed into a small network
+that reproduces the same ordering of columns in microseconds.
 
-## D4 root-Q clone
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
 
-Compresses normalized within-root D4 action ordering into a small public model.
+Nothing hidden is involved anywhere: the teacher is itself a
+public-information search, so the clone is a legal policy candidate. It failed
+its label gate and never played a game.
 
-**Status: Rejected** (ledger-recorded). the label/ranking gate failed.
+## The intuition
+
+When the depth-4 search finishes a position it has produced more than a chosen
+column: it has a number for every legal column — its **root-Q vector**. A
+learner given the whole vector learns the shape of the decision, not just the
+winner: that column 3 was nearly as good, that column 6 was a disaster.
+
+The trick that makes this a *ranking* problem rather than a *value* problem is
+normalisation. Each position's vector is rescaled on its own, so a quiet
+position where every column is worth about the same and a violent one where the
+spread is enormous both contribute the same thing: an ordering. Absolute score
+scale is deliberately destroyed, because a clone that learned "positions like
+this are worth 40,000 points" would be learning the wrong lesson.
+
+And this is the one place in the family where the training data does *not* have
+[the sibling problem](/learn/concepts/ranking-siblings) — every legal column at
+every position carries a teacher label, because the search computed them all.
+That makes the outcome below more informative, not less.
+
+## How it works, step by step
+
+1. **Reuse a stored label file.** 1,508 training and 465 held-out positions,
+   each already annotated by the fair depth-4 search with its complete legal
+   root-Q vector. No new games are played and no new seeds are opened.
+2. **Normalise within each position.** The vector is rescaled per position, so
+   only the within-position ordering survives. Legal-column masks and exact ties
+   are preserved.
+3. **Train on the ordering.** A listwise target at temperature 0.18 is combined
+   with gap-weighted pairwise ranking; pairs the teacher scored identically are
+   dropped rather than forced into an arbitrary order.
+4. **Keep the network small and symmetric.** 502 sparse inputs (49 board cells,
+   the next disc, the rise clock), 24 accumulators, seven outputs, 12,247
+   parameters. Mirror symmetry is exact by construction: the network averages a
+   forward pass with a mirrored pass in reversed column order. Game seed, score,
+   level, move index, history and the future tape never enter it.
+5. **Read the held-out set exactly once,** after a fixed 260 training epochs and
+   after the checkpoint has been written and round-tripped. No held-out number
+   was allowed to choose architecture, weights, or hyperparameters.
+
+## What happened
+
+The clone memorised its training positions and did not generalise. On positions
+it had been trained on it picked the teacher's top column about 76% of the
+time; on held-out positions from unseen games, under 25%. Its ordering of pairs
+of columns fell to barely better than a coin flip. Every declared gate failed,
+so no gameplay run was authorised.
+
+The most useful part of the record is the compounding argument. A policy makes
+hundreds of decisions per game, so a per-move agreement rate is not the thing
+that matters — the ledger works out that at the observed held-out accuracy, a
+30-move stretch would contain about 22.6 wrong top choices. The chance of
+matching the teacher across all 30 is effectively zero. A fast approximation of
+a strong search is not a strong policy unless the approximation is *very*
+close, and this one is not.
+
+<TechnicalDetails title="The technical record">
+
+Source: `d4-q-clone.cpp`. Status **rejected**, evidence **ledger-recorded**
+([experiment index](/docs/research/experiment-index); ledger section "Fair-D4
+root-Q behavior clone (label gate rejected)" in the
+[full ledger](/docs/research/history)).
+
+Data: the preserved 1,508-training / 465-held-out root-label file. Model: 502
+sparse inputs, 51 active per state, 24 ReLU accumulators, seven action outputs,
+12,247 parameters / 97,976 parameter bytes, 260 fixed epochs.
+
+| Metric | Training | Held out | Gate |
+| --- | ---: | ---: | ---: |
+| top-1 with ties | 0.76459 | 0.24731 | 0.35 |
+| top-2 | 0.89721 | 0.45806 | 0.55 |
+| pairwise | 0.75467 | 0.57350 | 0.65 |
+
+Whole-seed-half pairwise accuracies were 0.57430 / 0.57248 against a 0.62 half
+gate. Normalized regret 0.42125 beat center-first's 0.53023 but was almost
+twice the public one-ply baseline's 0.21257, failing the regret-retention gate
+as well.
+
+Error changed shape rather than disappearing along a trajectory: moves 0–29 gave
+top-1/pairwise 0.20417/0.59128, moves 30+ gave 0.29333/0.55161. Under an
+**explicitly labelled independence proxy — not a real stochastic rollout** — 30
+decisions imply 22.58 wrong top choices on average, a 6.27e-19 chance of
+matching all 30 top choices, 12.79 expected pairwise errors, and 5.70e-8 for
+all-30 pairwise correctness.
+
+Engineering: symmetrized inference reached 3,485,535 states/second over 250,000
+held-out evaluations; the checkpoint is 98,008 bytes with fingerprint
+`0x1e9b525281e8b3c5`. Optimized `-Werror` and ASan/UBSan builds passed inherited
+D4 parity, deterministic training, a 7.06e-12 finite-difference gradient check,
+checkpoint round-trip, exact reflection, metadata blindness, legality,
+masks/ties, and seed-range checks. **No fresh gameplay seed was read**, including
+the reserved training-only range.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+This result rules out one specific hope: that the depth-4 policy is *simple* —
+that its decisions are a compact function of the visible board which a 12,000-
+parameter network can absorb from 1,508 examples. It is not, at that data scale
+and capacity.
+
+What it does not rule out: the same architecture with far more labelled
+positions, or a clone used as a *move-ordering prior* inside a search rather
+than as a standalone policy, where a 45% top-2 rate would still save work
+without being trusted to decide. The closely related
+[scaled D4 distillation](/approaches/d4-long-outcome/d4-distillation)
+experiment pushed on the data-scale side of that question.
+
+Note also what the failure is *not*: this training set labelled every legal
+sibling, so the family's usual sibling-extrapolation explanation does not apply
+here. The clone had complete supervision and still could not reproduce the
+teacher on unseen games — which points at capacity and sample count, not at
+data shape.
 
 ## Sources
 
-- `d4-q-clone.cpp`
-
-## More evidence
-
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/value-policy-learning)
+- `d4-q-clone.cpp` — labels, normalisation, training, and the gate report.

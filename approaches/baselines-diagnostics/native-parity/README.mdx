@@ -1,28 +1,122 @@
 ---
-title: Native Parity
+title: Native parity
 family: baselines-diagnostics
-status: Completed
+summary: Play the same games in both copies of the rules — the readable TypeScript one and the fast C++ one — and require the two write-ups to match character for character.
+status: completed
 evidence: reproduced
-generated: true
+reads: diagnostic
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+The rules of Drop7 are written twice in this repository, and this program
+checks that the two versions really are the same game.
 
-## Native parity
+<EvidenceLabel status="completed" evidence="reproduced" reads="diagnostic" />
 
-Compares native and TypeScript traces byte for byte.
+## Why there are two engines at all
 
-**Status: Completed** (reproduced). 256 seeds and 6,852 transitions matched in this checkout.
+The TypeScript engine is the readable one: it has a test suite, it drives the
+console's animations, and it is where a rule is settled when someone argues
+about it. The C++ engine is the fast one: nearly every search and training
+experiment here plays hundreds of thousands of games, and that is only
+affordable in native code.
 
-## Sources
+Two implementations mean two chances to be wrong. If the fast engine dropped a
+chain wave one move earlier, or awarded the rise bonus in a different order,
+every score produced by the C++ experiments would mean something slightly
+different from every score produced by the TypeScript ones — and the difference
+would be invisible, because nobody compares a mean of 308,296 against a mean of
+307,900 and concludes "our rules disagree."
 
-- `main.ts`
+## How it works
 
-## More evidence
+1. Pick a seed. The seed fixes the sequence of discs the game will deal, in
+   both engines, through the same arithmetic.
+2. Play a complete game in each engine, choosing columns from a **shared
+   random stream** rather than from a policy — so both engines make exactly the
+   same moves, and any difference in the result is a difference in the rules,
+   not in the player.
+3. After every move, each engine writes one record: the points that move
+   scored, the running score, the level, the moves left before the next rise,
+   whether the game ended, whether the board was cleared, whether the level
+   advanced, every chain wave as its depth, discs cleared, discs revealed and
+   points, and the full 49-cell board as a string.
+4. Compare the two streams of records line by line, byte for byte. Any
+   difference at all is a failure.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/baselines-diagnostics)
+The two engines also have to agree on the hidden parts: the next disc is drawn
+from one shared formula keyed by the seed and the move number, and each move's
+gray-disc reveals are drawn from a generator re-seeded from the same seed, so
+the same reveal must land in the same cell in the same order in both.
+
+## What happened
+
+The check passes exactly. Replaying 256 seeded games — 6,852 individual moves —
+produced identical records in both engines, in this checkout, on a plain
+`npm run parity`.
+
+That is a genuine determinism-and-portability result, and it is the reason the
+fast C++ experiments and the TypeScript ones can be read on the same scale. It
+is *not* evidence that either engine plays real Drop7, and it does not cover
+everything the engines can do.
+
+<TechnicalDetails title="The technical record">
+
+**Status: completed — reproduced in this checkout.** 256 seeds, 6,852
+transitions, `PARITY {"seeds":256,"moves":6852,"exact":true}`. Seed range
+`0x2d700000 + 0..255`, which is a determinism range rather than a research
+cohort. Sources: [reproducibility guide](/docs/reproducibility) §"Current
+verification snapshot"; [experiment index](/docs/research/experiment-index);
+[research status](/docs/research/status) evidence snapshot.
+
+Run it with `npm test`, `make test-native` and `make parity` (or the combined
+`make test`). Alongside parity, the same command runs 122 TypeScript tests and
+the native gradient, n-tuple, n-tuple-search, fair-D3 and fair-D4 self-tests.
+
+**Measured coverage and its holes**, from
+[audit 01](/docs/exploratory/audit-01-engine-fidelity) §M1, which regenerated
+all 6,852 traces:
+
+| quantity | value |
+| --- | --- |
+| games / transitions | 256 / 6,852 |
+| moves per game | mean 26.8, min 20, max 45 |
+| deepest chain reached | 9 |
+| level advances | 1,115 |
+| gray reveals | 2,389 |
+| board clears | **0** |
+| games reaching the move cap | **0** |
+| termination | 254 blocked rise, 2 no legal column |
+
+Because no parity game ever cleared the board or hit the cap, the 70,000-point
+board-clear branches and the censoring path have **zero** cross-engine
+coverage; chains of depth 7 or more appear in 5 of 6,852 moves (0.07%). And
+because the games are uniform-random, none of them reaches the kind of position
+a strong policy actually visits.
+
+The same audit records two further limits. Agreement is not fidelity: it lists
+three divergences (§H1–H3) between this engine and the reference implementation
+the repository cites — the level bonus is forfeited on the terminating rise
+where the reference pays it, the board-clear bonus is tested before the rise so
+a fifth-drop clear is overpaid by 70,000, and the opening position is a solid
+gray row rather than the reference's 11–21 numbered discs. Its scientific
+outcome against "the simulator is a faithful model of the target game" is
+recorded as **fail** at the `proposal/mechanics` evidence tier, with the biases
+described as one-sided and computable rather than invalidating. And §M3 notes
+that the native policy layer contains a **second copy** of the move loop, which
+every native rollout runs on and which this harness never touches.
+
+Source: `main.ts`.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- Two independent implementations of these rules agree exactly over 6,852
+  transitions. Portability and determinism are settled.
+- Fidelity to the commercial game is not settled, and the audit says so
+  explicitly. An absolute score from this engine is a score in this engine's
+  variant of Drop7.
+- The most valuable extension is cheap and has not been done: drive the parity
+  sweep with a *strong* policy instead of random play, so the comparison
+  reaches board clears, long chains, and the censoring path — the exact
+  branches a million-point candidate would live in.

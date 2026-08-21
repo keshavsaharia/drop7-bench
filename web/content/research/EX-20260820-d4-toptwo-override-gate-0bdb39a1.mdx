@@ -1,0 +1,44 @@
+---
+title: Letting the network break the search's close calls — a narrow miss with real signal
+---
+
+The [third pilot](/experiments/EX-20260820-afterstate-pilot-h40-k256-65a05477)
+established that the learned board-scorer cannot replace the four-move search as
+the thing that picks the move. This experiment asks a much smaller question:
+could it still be useful in the one situation where the search is least sure of
+itself?
+
+Often [fair D4](/learn/glossary) rates its top two columns almost identically.
+Those near-ties are where a four-move estimate is most at the mercy of which
+futures it happened to sample. The candidate here is unchanged fair D4 with one
+conservative addition: at a near-tie — the top two within 500 points, a
+threshold fixed from already-read data before this experiment existed — consult
+the frozen third-iteration network, and swap to the search's second choice only
+if the network's advantage survives a resampling test. The comparator is
+unchanged fair D4. Nothing else about either player differs, and again no games
+were played: both were graded on how well they ordered columns at fresh
+held-out positions.
+
+"Pass" required the override to cut average regret by at least 0.01 in **each**
+half of the held-out set, to fire on at least 5% of eligible positions, and to
+reproduce byte-identically across two runs.
+
+**What happened.** A valid run with a `fail` outcome — but a narrow one, and
+the record says so explicitly. The rule fired often (38.3% of positions were
+near-tied; the override triggered on 37.0% of those), it was deterministic, and
+it improved regret in *both* halves: by 0.0351 in one and 0.0075 in the other.
+The frozen bar was 0.01 in each, so the second half missed by a quarter of a
+percentage point and the gate fails. The record's own reading is that the
+mechanism works as designed and that this is the first preregistered held-out
+test here where a learned model's intervention improved on fair D4 at all, with
+the checkpoint's ranking quality as the bottleneck. It also warns, in the
+limitations, that the miss "should be read as a narrow failure, not as evidence
+of no effect."
+
+<ResultSummary id="RS-20260820T184500Z-63c0a8e2" />
+
+What it closes: no further override variants of *this* checkpoint without new
+evidence. What it leaves open: the same frozen rule applied to a fully trained
+model, or one taught by a stronger continuation player. And what it cannot speak
+to at all is real play — an offline ranking test cannot measure how these choices
+interact over a whole game, which only a paired gameplay tier could.

@@ -1,28 +1,135 @@
 ---
-title: D4 Distillation
+title: Depth-4 distillation
 family: d4-long-outcome
-status: Rejected
-evidence: ledger-recorded for the clone
-generated: true
+summary: Before trying to learn something better than the reference search, check whether a small model can even learn to imitate it — and discover that a cheap exact search does the job better.
+status: rejected
+evidence: ledger-recorded
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
+Before trying to learn something *better* than the reference search, check the
+easier thing first: can a small, fast model learn to imitate the search we
+already have?
+
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
+
+The learned part failed. The comparison it was measured against — a plain
+depth-2 search — turned out to be excellent, and that is the result this
+experiment is actually remembered for.
+
+## Why imitate a search you already have?
+
+Depth-4 search is expensive: roughly 1.35 million units of work per move in this
+repository's accounting. Almost every ambitious idea in the project needs to
+evaluate *many* candidate lines, and it cannot afford depth 4 inside a loop.
+So it matters a great deal whether depth 4's judgement can be compressed into
+something cheap.
+
+It is also a control experiment. If a model cannot reproduce a deterministic
+function of the public board — which is exactly what depth 4 is — then the
+repeated failures of models trying to learn something *harder* cannot be blamed
+on the horizon or on the noise in long outcomes. Imitation is the easy case.
+
+## How it works, step by step
+
+1. Take the preserved file of depth-4 root valuations: for each position, the
+   full vector of values that depth 4 assigned to every legal column.
+2. Design the architecture using **only** the already-consumed split, so no
+   design decision is made against fresh data.
+3. Freeze everything before a new seed is opened: the anchor, the feature
+   layout, 100 training epochs, batch size, learning rate, regularisation, loss
+   weights, and every acceptance threshold.
+4. Anchor the model on **exact depth-2 search** and learn only a *residual* — a
+   small correction on top of it — expressed relative to the action, and
+   averaged over the board and its mirror image so the model cannot treat a
+   reflected position as a different one.
+5. Collect fresh games, split by whole game, and score both the anchor and the
+   anchor-plus-residual on how often they pick depth 4's own top column, how
+   often they order pairs of columns correctly, and how much value they leave on
+   the table.
+
+## What happened, in plain English
+
+**The cheap exact search was the surprise.** On held-out games, plain depth-2
+search picked depth-4's own best column **60.5% of the time** and ordered pairs
+of columns correctly **76.7% of the time** — and it costs about 693 times less
+work per decision than depth 4 does. That is a strong, ledger-recorded ranking
+diagnostic and it is why depth 2 became the standard cheap continuation
+throughout the rest of this family.
+
+**The learned residual added nothing.** It reached 59.4% top-1 and 76.1%
+pairwise — slightly *worse* than the anchor on all three accuracy measures — and
+improved the leftover-value measure by 1.29% against the 5% the protocol had
+demanded in advance. It also failed the required improvements inside each half of
+the held-out games. Its 13,216-byte checkpoint exists and is not worth loading.
+
+An earlier, unanchored attempt to clone depth 4 had already failed much more
+severely — training accuracy 0.765 collapsing to 0.247 on held-out positions.
+Anchoring on exact search fixed that generalisation failure completely. What it
+could not do was add anything on top.
+
+<TechnicalDetails>
+
+Architecture design used only the already-consumed 1,508 / 465 root-value
+artifact. On that fitting-only split: exact depth 1 reproduced depth 4 at 48.60%
+top-1 and 69.68% pairwise; full-width depth 2 reached 56.77% / 76.68% with
+0.14103 normalized regret; the 1,647-weight action-relative sparse residual
+reached 55.70% / 76.11% / 0.13461.
+
+Frozen run: 1,885 roots from 24 complete fitting games `0x3df20000...017`; 926
+roots from 12 complete held-out games `0x3df30000...00b`. No game censored at the
+250-move cap.
+
+| Held-out cohort | Top-1 | Top-2 | Pairwise | Normalized regret |
+| --- | ---: | ---: | ---: | ---: |
+| Exact depth 2, all 12 games / 926 roots | **60.475%** | **76.782%** | **76.701%** | 0.13192 |
+| Exact depth 2, first six games | 64.444% | 78.788% | 76.936% | 0.11911 |
+| Exact depth 2, second six games | 55.916% | 74.478% | 76.434% | 0.14662 |
+| Depth 2 + learned residual, all 12 | 59.395% | 76.458% | 76.119% | 0.13021 |
+
+Acceptance required at least 55% top-1, 70% top-2 and 72% pairwise overall, the
+same in each six-game half, regret at most 0.18, **and** improvements over the
+anchor of one point top-1, half a point top-2 and pairwise, and 5% regret in the
+full cohort and both halves. The residual met the absolute thresholds and failed
+the improvement thresholds.
+
+Cost: exact depth 2 used 1,949.21 logical work units, 983.49 nodes and 5.33 cache
+hits per root, maximum 2,485 work units, running at 435.39 roots per second; the
+residual needed both depth 1 and depth 2, 2,016.88 work units per root, at 421.11
+roots per second. Against depth 4's roughly 1.35 million work units per move,
+exact depth 2 is about **693 times cheaper in this accounting**.
+
+<Callout title="One number in the ledger is explicitly excluded" tone="warn">
+A pre-guard binary that was already running executed a cheap depth-2-only
+trajectory on the same 12 held-out seeds immediately after the residual's gate
+had failed, averaging 119,061.25 points / 81.25 moves against depth 4's
+115,073.08 / 77.17. It used no new seed family and no residual gameplay ran, but
+it happened *after* the gate failed. The ledger preserves it as an explicitly
+excluded diagnostic and sets accepted gameplay evidence to null. It is not
+evidence that depth 2 plays as well as depth 4, and any such claim needs its own
+preregistered fresh comparison.
 </Callout>
 
-## Scaled D4 distillation
+Records: [experiment index](/docs/research/experiment-index) "D4 and long-outcome
+research"; [ledger](/docs/research/history) section "Scaled fair-D4 distillation
+and exact-D2 rollout primitive". Source: `scaled-d4-distill.cpp`.
 
-Compresses normalized D4 root-Q labels and compares the model with an exact D2 primitive.
+</TechnicalDetails>
 
-**Status: Rejected** (ledger-recorded for the clone). exact D2 itself completed a strong ranking diagnostic and remains useful support.
+## What this taught us, and what is still open
 
-## Sources
-
-- `scaled-d4-distill.cpp`
-
-## More evidence
-
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/d4-long-outcome)
+- **Anchor on something exact.** The difference between the failed clone (0.247
+  held-out top-1) and this one (59.4%) is almost entirely that this model only
+  had to learn a *correction* to a search that already works. Later experiments
+  reuse the pattern, including one that starts a network as the exact zero
+  residual over depth 4 so the untrained model *is* the reference policy.
+- **Learning did not beat searching, even at imitation.** With the easy case set
+  up as favourably as possible — a deterministic target, full valuation vectors,
+  a good anchor — the learned part still could not improve on cheap exact search.
+  That is a meaningful negative for the whole "compress the search" direction.
+- **Depth 2 is the reusable asset.** It became the continuation inside the
+  [rollout veto](/approaches/d4-long-outcome/rollout-veto) and the label
+  generator for the [long-outcome](/approaches/d4-long-outcome/long-outcome)
+  corpora on the strength of this ranking audit.
+- **Still open:** the ranking audit deliberately makes no gameplay claim about
+  depth 2 as a *policy*. Nobody has run that comparison properly.

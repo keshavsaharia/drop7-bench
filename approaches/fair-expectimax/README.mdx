@@ -1,35 +1,163 @@
 ---
 title: Fair expectimax
-summary: The reference line — search that averages chance honestly instead of hoping or fearing.
+summary: Look a few moves ahead, take the best column on your own turns, and average honestly over every disc the game might deal — no hoping, no fearing.
 ---
 
-Expectimax treats Drop7 as what it is: a game of alternating **choices** and
-**chance**. At choice nodes it takes the best column; at chance nodes — the
-next disc, the gray reveals — it takes the probability-weighted average. That
-fairness is the whole idea, and the ledger shows it beats optimistic,
-worst-case, and under-sampled chance handling.
+Look a few moves ahead, take the best column on your own turns, and average
+honestly over every disc the game might deal — no hoping, no fearing. That is
+the whole family. The strongest policy this repository has is one of these
+searches, and every other idea in the project is measured against it.
 
-## The landscape
+## Why anyone thought this would work
 
-This family holds the reference policy and its close variants:
+A Drop7 turn is two things glued together: a **choice** (which of the seven
+columns) and then **chance** (which disc is dealt next, and what number a
+newly opened gray disc turns out to hold). A player who only asks "which
+column scores the most right now?" is answering half the question.
 
-- **The reference itself** — completed full-width depth 3 (D3) and depth 4
-  (D4) with the fair leaf. D4 is the strongest dependable public policy found
-  so far.
-- **Leaf tuning** — the fair evaluator's coefficients were fitted by sweeps
-  and CEM over complete games.
-- **Depth and chance variants** — selective D5, full D5, seven-stratum chance
-  coverage, root risk shaping. All were rejected or runtime-paused: more
-  depth did not reliably mean more strength.
+The alternative is to enumerate: for each column, imagine every disc that
+could come next, work out the best reply to each, and average. That average is
+what the search compares. Averaging is not the only attitude available — you
+could assume the disc you want (optimistic), the disc you fear (pessimistic),
+or ignore the future (greedy) — and on a real position those four attitudes
+pick different columns:
 
-## The one picture to remember
+<ChanceStyles caption="One real position, valued four ways by the repository's rules engine. Greedy and pessimistic take the 53-point chain; the optimist gambles on a one-in-seven disc; the fair player banks 7 points and keeps the chain structure standing. Full walkthrough on the chance-and-choice concept page." />
+
+The repository's first durable conclusion is that the fair attitude is the one
+that survives contact with a random disc stream: optimistic, worst-case, and
+tiny reused reveal samples **ranked moves incorrectly** in measured games
+([research status](/docs/research/status)). Everything in this family starts
+from that.
+
+For the ideas behind the figure — [choice and chance nodes](/learn/concepts/chance-vs-choice),
+[depth](/learn/glossary), [strata](/learn/glossary), [leaf evaluator](/learn/glossary) —
+read the concept page first; the pages here link rather than re-explain.
+
+## How the reference search works, step by step
+
+1. **Read the public position.** The visible board, the visible next disc, and
+   how many drops remain before the next row rise. Nothing else: not the seed,
+   not the hidden gray numbers, not the score or the move number.
+2. **Try every legal column** at the root. No pruning, no shortlist.
+3. **At each chance point, take a fixed handful of representative outcomes**
+   instead of enumerating everything — five of them in the frozen reference.
+   These are the [strata](/learn/glossary).
+4. **Repeat for four of the player's own moves**, alternating choice and
+   chance, and stop.
+5. **Score the boards at the bottom** with a hand-tuned evaluator that rewards
+   ready-to-fire chain structure and latent potential and penalises height,
+   buried gray discs, low-number clogs, and danger close to a rise. A modelled
+   game over is charged a flat −1,000,000.
+6. **Average back up** — best at the player's nodes, mean at chance nodes —
+   and play the winning column.
+
+The search has fixed work and cache ceilings that are proved, at compile time,
+to be larger than the whole four-move tree, so a played move is always the
+promised depth rather than a silently truncated one.
+
+## What happened
+
+The four-move search (depth 4) beat the three-move search (depth 3) on the
+recorded comparison, and nothing since has displaced it. On the eight paired
+games of its confirmation cohort, replayed under corrected Hardcore scoring, it
+averaged about 400,675 points to depth 3's 235,071 and won seven of the eight
+games. That is the strongest dependable public-information result here — and it
+is roughly 40% of the score the project is aiming for.
 
 <div className="my-4 grid gap-3 sm:grid-cols-3">
-  <Stat label="Fair D3 mean" value="235,071" hint="8-game corrected cohort" />
-  <Stat label="Fair D4 mean" value="400,675" hint="same cohort, 7/8 wins" />
-  <Stat label="Target" value="1,000,000+" hint="mean, not best game" />
+  <Stat label="Depth-3 search" value="235,071" hint="8-game confirmation cohort, corrected scoring" />
+  <Stat label="Depth-4 search" value="400,675" hint="same 8 games, 7 of 8 paired wins" />
+  <Stat label="Target" value="1,000,000+" hint="mean over many games, not a best game" />
 </div>
 
-The gap between D4 and the target is the size of the research problem. Depth
-alone will not close it — the open directions are cheaper chance handling and
-better leaf/continuation knowledge.
+<Callout title="Eight games is a small cohort" tone="warn">
+The 400,675 figure is a mean over eight paired games on already-consumed
+development seeds. The repository's broader reference number — about 308,296
+points and 90.0 moves over 64 games — is quoted in the
+[status summary](/docs/research/status) as the reference mean, but an
+independent audit found it appears exactly once in the ledger, as an internal
+comparator inside a different experiment, with **no recorded seed range,
+dispersion, or censoring statement**
+([audit 03, H2](/docs/exploratory/audit-03-claim-arithmetic)). Treat it as a
+reference point, not a measured cohort.
+</Callout>
+
+<TechnicalDetails title="The technical record">
+
+- **Reference sources.** `approaches/fair-expectimax/reference/fair-only-horizon.cpp`
+  (full-width depth 3, five strata) and `fair-only-depth4.cpp` (the same leaf,
+  four completed plies). Both **completed — ledger-recorded** in the
+  [experiment index](/docs/research/experiment-index).
+- **Depth-4 confirmation, corrected 17,000-point Hardcore scoring** (ledger,
+  "Corrected Hardcore scoring replay"): eight-game confirmation, D3 235,071.25
+  points / 71.0 moves, D4 400,675.25 / 116.375, paired gains +165,604 points and
+  +45.375 moves, D4 winning 7 of 8; neither arm censored at 1,000 moves. The
+  four-game screen: D3 318,528.75 / 93, D4 399,951.75 / 115.
+- **Cost.** The depth-4 confirmation used 1,351,112.6 logical work units per
+  move and ran at 0.744 moves per aggregate game-second; peak resident memory
+  30,441,472 bytes.
+- **Original 7,000-point figures.** The same trajectories were first recorded
+  under the historical Sequence scoring (D3 102,571.25, D4 176,925.25). The
+  replay changed no decision — identical move counts — so those sections are
+  archival, not separate evidence.
+- **Broad reference cohort.** 308,295.578 points and 90.031 moves over 64 games,
+  recorded once in the ledger inside the regenerative expert-iteration
+  experiment. Evidence: ledger-recorded, cohort unidentified.
+- Full context: [experiment ledger](/docs/research/history),
+  [experiment index](/docs/research/experiment-index),
+  [strategy landscape](/docs/strategies).
+
+</TechnicalDetails>
+
+## The variants, and what each one settled
+
+Every page below is one bounded change to the reference search. Most made it
+worse, which is the useful part: each is a specific configuration ruled out.
+
+| Idea | What changed | Outcome |
+| --- | --- | --- |
+| [The fair leaf](/approaches/fair-expectimax/fair-policy) | The evaluator itself, and how its coefficients were fitted | Completed; produced the reference weights |
+| [A rise-cycle residual](/approaches/fair-expectimax/phase-fair-combination) | Added a phase-throughput term to the leaf | Completed; part of the recovered depth-3 lineage |
+| [Seven chance samples](/approaches/fair-expectimax/chance-strata) | Five representative next discs became seven — exact coverage | Rejected in the ledger; **an exploratory re-test found the opposite** |
+| [Deeper than four moves](/approaches/fair-expectimax/selective-depth) | A fifth move, selectively or full width | Two rejected, one stopped by its runtime budget |
+| [Weighting the downside](/approaches/fair-expectimax/root-risk) | Root value became part average, part worst-case | Rejected; score, survival and flow all fell |
+| [Tuning the leaf on whole games](/approaches/fair-expectimax/cem) | Eight coefficients optimised, then frozen | Rejected at its fresh screen and at depth 4 |
+| [The old placement rewards](/approaches/fair-expectimax/full-action-terms) | Restored a one-move policy's landing-geometry terms | Rejected; the geometry was already in the leaf |
+| [Paying for clears and reveals](/approaches/fair-expectimax/transition-rewards) | Explicit reward per numbered clear or per reveal | Rejected on held-out games after promising fits |
+| [Stacking a column deliberately](/approaches/fair-expectimax/vertical-ladder) | A leaf term for energy stored in a vertical ladder | Cheap probe positive; the transfer to depth 4 failed |
+| [Playing the position out](/approaches/fair-expectimax/rollout-improvement) | Root actions scored by short simulated continuations | Rejected; worse than the one-move policy it improved on |
+
+## What this taught us, and what is still open
+
+**Fair chance handling matters, and it may still be the binding constraint.**
+The reference search draws five representative outcomes at each chance point,
+but the next disc has seven equally likely values. An audit measured that, on
+average, 2.41 of the seven receive **zero** weight at every node
+([audit 02](/docs/exploratory/audit-02-fair-d4)). An exploratory experiment then
+set the count to seven and measured +101,171 points and +27.5 moves over the
+frozen reference on 64 previously unread games, and found that the fourth move
+of look-ahead is worth almost nothing at five samples but about 86,000 points at
+seven ([finding 05](/docs/exploratory/finding-05-chance-strata), development
+tier, headline arm replicated on two cohorts). That directly contradicts the
+ledger's own rejection of seven samples; the chance-strata page below sets the
+two records side by side without resolving them.
+
+**Depth is a dial, not a ladder.** Every recorded attempt to search a fifth
+move — selectively, at rise boundaries, or full width with fewer chance
+samples — lost score, lost survival, or ran out of its time budget. The
+exploratory work suggests a mechanism: with a biased chance estimator, extra
+depth propagates the bias rather than the signal.
+
+**Bolting rewards onto the leaf keeps failing the same way.** Clear rewards,
+reveal rewards, restored placement terms, vertical-ladder energy and
+machine-tuned coefficients all fitted well on the games used to select them and
+regressed on fresh ones. Small fitting cohorts and heavy-tailed scores are a
+bad combination; one long game can carry a mean.
+
+**What is still open.** A properly powered corrected-scoring re-test of exact
+seven-sample chance coverage; whether covered-disc reveals, not the next disc,
+are now the binding sampling bias; and whether depth 5 pays once the estimator
+is exact — an in-progress exploratory arm reports it is currently far behind on
+a partial, admittedly biased sample
+([finding 15](/docs/exploratory/finding-15-depth5-exact-estimator)).

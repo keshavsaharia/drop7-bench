@@ -1,28 +1,144 @@
 ---
-title: Conservative Fitted Policy Iteration
+title: Conservative fitted policy iteration
 family: value-policy-learning
-status: Rejected
+summary: Learn the whole spread of how long a game might last, and only leave the safe move when the evidence says so.
+status: rejected
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Most learned evaluators predict one number: how good is this board. This one
+predicts a *distribution* — the odds of surviving another 10 moves, 30 moves,
+100 moves — and then refuses to deviate from a known-safe fallback move unless
+the improvement clears a confidence bound. The idea was to make the usual
+failure mode impossible by construction: if the model is unsure, it does not
+get to act.
 
-## Conservative fitted policy iteration
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
 
-Fits an ensemble distribution over remaining lifetime and permits only confidence-supported deviations from phase safety.
+It reads only what a player can see. It was rejected in its own first staged
+pilot: the aggressive setting lost, and the cautious setting made no decisions
+at all.
 
-**Status: Rejected** (ledger-recorded). aggressive switching regressed and the conservative setting made no change.
+## The intuition
+
+Two boards can have the same average future and be completely different bets.
+One is a steady position that reliably lasts another forty moves. The other
+usually collapses in ten but occasionally runs for two hundred. A single
+predicted number cannot tell those apart, and a policy that treats them as
+equal will happily trade a safe game for a lottery ticket.
+
+So instead of one output, the model carries 101 buckets covering lifetimes from
+0 to 500 moves in steps of five, and learns how much probability sits in each.
+Four independently initialised copies are trained, and their disagreement is
+used as a measure of ignorance: where the four ensemble members disagree, the
+model is out of its depth and the safe move stands.
+
+The safe move is the exact depth-3, five-stratum phase-safety policy — a fixed
+search, not a learned thing. The learned part is only ever allowed to *override*
+it, never to play on its own.
+
+## How it works, step by step
+
+1. **Play with the fallback.** Complete games are played by the exact
+   phase-safety policy, and states are collected along the way.
+2. **Expand every legal move at each collected state.** Each state enumerates
+   all seven columns under seven common, exactly stratified outcomes for the
+   gray-disc reveal and the following disc — the same seven futures for every
+   column, so the comparison between siblings is like-for-like.
+3. **Fit a distribution, not a mean.** Four bootstrap ensemble members fit the
+   101-bucket lifetime distribution. Auxiliary heads predict survival past the
+   next rise, five-move clear and reveal throughput, and top-row risk.
+4. **Keep the shaping honest.** The extra shaping reward is defined as the
+   difference of a potential function between consecutive states, so it
+   telescopes and cannot change what a complete game is ultimately worth; the
+   lifetime target itself is left unshaped.
+5. **Rotate frozen members.** The member used to choose an action online is not
+   the member used to evaluate the target, so the model cannot grade its own
+   homework.
+6. **Deviate only under confidence.** An alternative column is played only when
+   its four-member *lower* confidence margin over the fallback action stays
+   positive after an additional "epistemic floor" — a fixed number of moves of
+   predicted advantage that the model must clear before it is believed.
+
+That last floor is the tunable knob, and the pilot's result is entirely a story
+about it.
+
+## What happened
+
+With the floor set low — a five-move advantage required — the model switched
+often and played worse than the fallback it was correcting: a recorded 224,621
+points against 257,423 on the same paired games, with a confidence bound so
+wide it spans the whole effect. (Those are the only two numbers the ledger kept
+for that comparison; no move counts were recorded with them, and a later audit
+could not recover which scoring mode they were in. See the technical record.)
+
+With the floor set high — ten moves — the model never found an alternative it
+believed in, made zero switches, and reproduced the fallback policy exactly.
+
+That is the whole finding: between "acts and hurts" and "never acts", the pilot
+found no setting that acts and helps. It stopped there, having used a tiny
+fraction of its training budget, and never reached the 64-game qualification
+gate. A negative result on the exact configuration tested — not a proof that
+distributional, confidence-gated improvement cannot work.
+
+<TechnicalDetails title="The technical record">
+
+Source: `cfpi.cpp`. Status **rejected**, evidence **ledger-recorded**
+([experiment index](/docs/research/experiment-index); ledger section
+"Conservative distributional fitted-policy lab" in the
+[full ledger](/docs/research/history)).
+
+Model: four bootstrap members, 101 lifetime atoms spanning 0–500 moves in
+five-move increments, seven common exactly stratified reveal / next-disc
+outcomes per legal action, frozen-member rotation, auxiliary survival /
+throughput / risk / potential-shaped heads.
+
+Result, iteration two with a five-move epistemic floor: **224,621** for the
+value policy versus **257,423** for the paired behavior games, with a score
+lower confidence bound of **−134,808**. A ten-move floor made **zero switches**
+and exactly retained the behavior policy. The run consumed 14,164 modeled
+training transitions and about 58.2 MB peak RSS, far below its 20-million-
+transition cap. It did not run the 64-game qualification gate and read no
+development-probe, validation, or final-test seeds.
+
+**Two recorded caveats.** First, the arithmetic audit in
+[`audit-03`](/docs/exploratory/audit-03-claim-arithmetic) classifies both of
+those means as **unclassifiable**: no move count was recorded with them and the
+scoring mode cannot be recovered, so they cannot be compared with corrected
+17,000-point Hardcore numbers elsewhere in the repository. The same audit
+records the cohort as four games. Second, the ledger elsewhere uses the
+abbreviation "CFPI" for a depth-3 comparator in the fair-only horizon screen
+(109,336.75 points / 75.625 moves over 8 games; 102,612.8125 / 71.5625 over 16,
+both classified by `audit-03` as historical 7,000-point Sequence scoring). The
+ledger does not state whether that comparator is this program, so those numbers
+are not quoted here as results for this approach.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+The design anticipated the family's central problem and tried to engineer
+around it: rather than trusting a learned ranking, trust it only where an
+ensemble agrees. The pilot showed that this converts the problem rather than
+solving it. Confidence gating has exactly two failure modes — believe too much
+and lose, believe too little and change nothing — and finding the window
+between them is itself an empirical search that this run never got to conduct.
+
+Worth noting for anyone resuming it: the collection step here already labels
+*every* legal sibling under shared random outcomes, which is the data shape the
+[sibling-trap page](/learn/concepts/ranking-siblings) argues is necessary. What
+it lacked was scale — 14,164 modeled transitions is a pilot, not a training
+run — and a cohort large enough for a four-game paired comparison to mean
+anything.
+
+The "act only when confident" pattern reappears throughout the repository
+([the denoised phase-5 veto](/approaches/value-policy-learning/denoised-value)
+is the clearest later example) and lands in the same place: the gate that is
+tight enough to be safe is usually tight enough to be inert.
 
 ## Sources
 
-- `cfpi.cpp`
-
-## More evidence
-
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/value-policy-learning)
+- `cfpi.cpp` — the standalone falsification lab, including its self-test and
+  pilot mode. The fallback policy it never abandons lives in
+  `src/core/native/public-behavior.hpp`.

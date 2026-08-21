@@ -1,0 +1,167 @@
+---
+title: What makes a board good?
+summary: The leaf evaluator, x-rayed — what a Drop7 search actually measures when it looks at a board, and why no measurement of the board as it stands is enough.
+order: 5
+---
+
+A search that looks four moves ahead ends up staring at millions of boards
+where the game is not over. Somebody has to say how promising each one is. That
+opinion is the **leaf evaluator**, and in the repository's reference policy it
+is a hand-written scoring function: a list of things you can count on a board,
+each multiplied by a number and added up.
+
+This page opens that function up. It is worth doing carefully, because the
+evaluator is where nearly all the work goes — in the reference search, 96.1% of
+the positions visited are leaves, and evaluating them accounts for 79.1% of the
+attributed time of a single depth-4 decision
+([finding 13](/docs/exploratory/finding-13-fast-engine), sections 2.1 and 2.3).
+Whatever the evaluator is blind to, the search is blind to.
+
+If the words *leaf*, *depth* or *expectimax* are new, start with
+[choice, chance, and looking ahead](/learn/concepts/chance-vs-choice); every
+term also has a one-line entry in the [glossary](/learn/glossary).
+
+## What there is to look at
+
+Here is a real position — a board the rules engine actually reached — with the
+*kinds* of thing an evaluator counts marked on it. Nothing here uses the
+evaluator itself: every annotation was recomputed by dropping discs into the
+engine and asking what happened.
+
+<LeafXray caption="The board comes from a game played by a deliberately simple policy; the rings, counts and column heights are recomputed with the engine's own placement and clear-detection code. A leaf evaluator sees exactly this much: shape, covers, live triggers, and the rise clock. It does not see the hidden numbers, and it does not see the future." />
+
+Three things about that picture matter more than any individual number.
+
+**The board is mostly unreadable.** Most of the discs are gray: their numbers
+are hidden until a clear lands next to them, twice. A policy that lets covers
+pile up is playing blindfolded, and the covers arrive on a schedule — a fresh
+row of seven every five moves.
+
+**Height is not a single quantity.** A column of five is fine with five moves
+of room before the next rise and close to fatal with one. The evaluator
+therefore counts height, *and* counts height again weighted by how soon the
+board rises.
+
+**Some discs are live and some are dead.** A 5 sitting in a row of four is one
+neighbour away from clearing. A 2 sitting in a run of five can never clear where
+it stands, no matter what you drop. Both look like "a disc on the board" until
+you count runs.
+
+## The terms that survive
+
+The reference evaluator is a plain weighted sum. It shares a feature extractor
+with other policies in the repository, and reads 13 of that extractor's 24
+fields; the rest are computed and thrown away, which is one of the things the
+fast reimplementation deleted
+([finding 13](/docs/exploratory/finding-13-fast-engine) §3, lead L1).
+
+<LeafTerms caption="Every term in the reference leaf, grouped by the six stages the fast-engine profile measures. Green terms make a board look better, orange terms make it look worse. The weights themselves are hand-tuned constants in the source; no retained record establishes them as optimal, so none of them is quoted here." />
+
+Read as a sentence, the function says: *a good board is short, open, mostly
+readable, full of discs that are one drop from clearing, with more clears
+waiting behind those, and free of low numbers stranded in places they can never
+escape.* That is a reasonable description of good Drop7 play, and it is worth
+noticing that it never mentions points. The connection between "the board looks
+like this" and "the game will go well" is left entirely to the weights.
+
+<Callout title="One term was doing nothing at all" tone="warn">
+The roughness term — how uneven the column heights are — has a weight of
+exactly zero in the frozen source. The board was measured and the result
+multiplied by nothing on every one of the search's hundreds of thousands of leaf
+evaluations. The fast engine removed it after checking that the removal changed
+no evaluation on 225,183 real leaf states
+([finding 13](/docs/exploratory/finding-13-fast-engine) §3, lead L7). It is a
+useful reminder that a hand-tuned evaluator accumulates history.
+</Callout>
+
+## Why a good-looking board is not enough
+
+Here is the uncomfortable part. The repository's status summary lists, among its
+most useful conclusions, that **static board potential is insufficient**:
+*"Similar-looking boards can have very different futures depending on how
+reachable triggers and covered discs evolve across rises"*
+([research status](/docs/research/status)).
+
+That is easy to say and easy to demonstrate. These two boards agree on every
+summary quantity an evaluator of the kind above can compute — the same column
+heights, the same number of solid and cracked covers, the same three numbered
+discs, the same number of discs one drop from clearing, and the same response to
+an immediate rise. They differ only in *where* those discs sit.
+
+<BoardLookalikes caption="Both boards were reached by the engine in real games. Each was then replayed forward sixteen times with the same sixteen scripted disc tapes and the same toy policy — a demonstration, not a research measurement, since the policy is trivial and sixteen replays is a small sample. The point is not the size of the gap; it is that a gap exists at all between two boards a static score cannot tell apart." />
+
+The evaluator can be refined, of course: count more shapes, count them more
+cleverly. But there is a limit built into the game. A depth-4 search sees at
+most one row rise, while the thing that ends a game — falling behind on clearing
+discs — accumulates over eight or more rise cycles. That argument is made
+quantitatively in [score is survival](/learn/concepts/survival-vs-score), and it
+is the reason so much of this repository's history is attempts to *learn* a leaf
+evaluator that sees further than the search does.
+
+Those attempts have mostly failed, and they failed in a specific and
+instructive way: a model can predict how a game will go from the boards it was
+trained on, and still rank the seven columns available right now in the wrong
+order. That failure has its own page:
+[evaluating a board, and the sibling trap](/learn/concepts/ranking-siblings).
+
+<TechnicalDetails title="The technical record">
+
+**Where the evaluator lives.** The reference leaf is `fairLeaf` in
+`approaches/fair-expectimax/reference/fair-only-horizon.cpp`. It calls
+`cfpi::detail::extractPhaseFeatures` in `src/core/native/public-behavior.hpp`,
+which fills a `PhaseFeatures` struct, and adds six further terms of its own
+(`covered_height_risk`, `low_number_height_risk`, `danger_height_squared`,
+`roughness`, `rise_pressure`, `next_disc_vertical_options`). The weights are
+`constexpr double` constants at the top of the same file. `danger_height_squared`
+is the square of `max(0, tallest column − 4)`, which is where the "danger line
+of four" in the figure above comes from.
+
+**Which terms survive.** The stage grouping in the second figure follows the
+in-leaf profile in
+[`docs/exploratory/finding-13-fast-engine.md`](/docs/exploratory/finding-13-fast-engine)
+§3.2: occupancy masks, heights, rise pressure and danger height; the per-cell
+sweep for direct potential, height load and covered/low-number height risk; the
+release inventory; adjacent ones; runs of twos; cover exposure. That document is
+an **engineering result** at `CHECK` tier — it makes no claim about strength,
+only that the fast implementation returns the identical bit pattern on 225,183
+real leaf states.
+
+**Information boundary.** `fairLeaf` throws on a state outside the public
+domain, and the reference binary self-tests that a board and its mirror image
+evaluate identically and that hidden metadata does not change the result. The
+evaluator reads the visible board, the visible next disc and the moves remaining
+before the next rise — nothing else.
+
+**Weights.** No retained record in this repository fits, tunes or validates
+these weights against an alternative set; the comment in `public-behavior.hpp`
+describes its own profile as "the release2 + queue2 + altitude2 phase-safety
+profile". Treat them as a working hand-tuned configuration, not as a measured
+optimum. An attempt to reweight the leaf toward achievable clears is recorded in
+[`finding 14`](/docs/exploratory/finding-14-leaf-reweight), which is marked a
+draft with its gameplay arms still running; it carries no completed result yet.
+
+**The two boards.** Both positions and both replay sets were generated by
+`web/scripts/generate-leaf-scenarios.ts` into
+`web/content/learn/data/leaf-scenarios.json`, using the TypeScript engine in
+latent mode with seeds from the scripted-round playground domain
+(`0x5eed****`), which overlaps no research seed lease. The policy used for the
+replays is the toy policy in `web/scripts/toy-policy.ts`: most points now, ties
+to the lowest column. **This is a teaching demonstration and is not evidence
+about strategy strength**; it consumed no seed lease and belongs to no
+experiment.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- The evaluator is the search's entire opinion about the future, and almost all
+  of its cost.
+- Everything it measures is a property of the board *as it stands*. Nothing in
+  it looks at how the board will decay over the next eight rise cycles.
+- Two boards can agree on every such property and still differ in how long they
+  survive, which is why the repository keeps returning to learned, longer-horizon
+  evaluators.
+- What nobody has yet produced is a learned evaluator that beats this hand-written
+  one over whole games. The record of those attempts is in the
+  [experiment index](/docs/research/experiment-index) and summarised on
+  [is more computation the answer?](/learn/concepts/does-more-compute-help).

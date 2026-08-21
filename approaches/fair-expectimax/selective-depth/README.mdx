@@ -1,42 +1,195 @@
 ---
-title: Selective Depth
+title: Looking five moves ahead
 family: fair-expectimax
-status: Rejected
+summary: Three attempts to search a fifth move — for the most promising columns only, only at a row rise, or everywhere with fewer chance samples — and why none of them paid.
+status: rejected
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+The reference search looks four of its own moves ahead. These three experiments
+each try to buy a fifth — for the most promising columns only, only when a row
+rise is about to happen, or everywhere at once by taking fewer chance samples
+to pay for it.
 
-## Selective D5
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
 
-Extends only selected roots beyond D4.
+Two were rejected on gameplay and one was stopped by its own runtime budget
+before it could produce a result. None displaced the four-move search.
 
-**Status: Rejected** (ledger-recorded). the screen lost score, survival, and flow.
+## The intuition, and the arithmetic that makes it hard
 
-## Cycle-boundary D5
+Every extra move of look-ahead multiplies the tree by the number of columns
+times the number of chance outcomes considered — seven times five, or 35, in
+the reference configuration. Four moves is already about 1.35 million unit
+operations per decision. A fifth, done naively, is 35 times that.
 
-Searches one extra ply only where D4 cannot see through the next rise.
+So each of these experiments buys the fifth move by giving something up:
 
-**Status: Rejected** (ledger-recorded). the pilot was adverse and also missed its runtime gate.
+- **Search it only where it might matter.** Rank the columns cheaply, then
+  search deeply only the best two or three. Everything the shallow ranking got
+  wrong is now invisible to the deep search.
+- **Search it only at the moment it might matter.** A row rises every five
+  drops; a four-move search standing one move before a rise cannot see past it.
+  Deepen only there.
+- **Search it everywhere, but look at fewer futures.** Drop from five chance
+  samples to three and spend the savings on depth. That makes the averaging over
+  chance cruder — the thing the whole family is built on.
 
-## Full-width D5/s3
+There is also a subtler trap, which the first experiment guarded against
+correctly: if a deeper search runs out of its work budget it must fall back to
+a shallower completed answer, so a "depth 5" policy can quietly be a depth-4
+policy on most decisions. The recorded runs report their fallback rates
+explicitly for that reason.
 
-Trades chance quality for a completed fifth ply.
+## How each one works, step by step
 
-**Status: Runtime-paused** (ledger-recorded). the runtime gate stopped the full study and the available pilot was unfavorable.
+**Selective extension.** (1) Every legal column is searched at the root, full
+width. (2) At internal decision points, an exact one-move fair evaluation using
+the same five chance samples deterministically orders the legal columns.
+(3) Only the leading two or three receive the deeper search. (4) A work cap and
+cache bound every attempt, and an incomplete attempt returns the separately
+completed four-move answer. The menu of configurations — five moves with the
+top two columns, five with the top three, six with the top two — was frozen
+before any data was read.
+
+**Rise-boundary extension.** (1) The policy reads how many drops remain before
+the next rise. (2) If exactly five remain, it uses the proved-complete
+five-move, top-two-columns search. (3) Otherwise it uses the unchanged
+four-move reference. Nothing is retuned. A fallback plan covering the last two
+drops of the cycle existed but was only eligible if the primary configuration
+failed its fit.
+
+**Full-width fifth move with three samples.** (1) Three policies are compared on
+the same games: the reference at five samples, the reference at three samples
+as a sampling control, and the full-width five-move search at three samples.
+(2) Every legal column is searched at every decision point. (3) The five-move
+search carries a compile-time proof that it completes within 8,791,020 unit
+operations per move without depending on cache retention. (4) A mandatory pilot
+projects the total runtime from the first paired games before a second seed may
+be read.
+
+## What happened, in plain English
+
+**Selective extension** fitted well and then failed on fresh games. On the four
+games used to choose the configuration, the five-move top-three-columns search
+gained about 55,000 points and 32 moves. On the eight-game held-out pass it kept
+a smaller gain. On the eight-game fresh screen that followed it lost — about
+7,200 points and 3.5 moves — winning only three of eight games. The gain in the
+earlier rounds had come mostly from single long games: remove the biggest
+winning game from the screen and the average moves to −45,549 points. It cost
+2.77 times the reference's work per move and fell back to the four-move answer
+on 69% of decisions.
+
+**The rise-boundary version** never got a statistical result. Its runner is
+required to play one pair of games, project the cost of the full protocol from
+that measurement, and stop if the projection exceeds 40 minutes. It did: the
+projection came out at 44.8 minutes. On that single pilot pair the four-move
+reference scored 231,290 in 150 moves and the candidate 107,668 in 75 — a very
+large loss, with both flow rates moving the wrong way as well. One pair is not
+a rejection, but it gave no reason to override the time guard.
+
+**The full-width fifth move with three samples** stopped the same way, and even
+earlier: its mandatory pilot projected 46.7 minutes against a 45-minute limit,
+so it paused after one paired triple. On that one game the reference scored
+269,141 in 170 moves, the three-sample control 151,153 in 95, and the five-move
+three-sample search 182,622 in 120. The fifth move beat the sampling control it
+was paying for, but stayed well behind the plain reference — which is the shape
+you would expect if chance-sample quality matters more than depth.
+
+<TechnicalDetails title="The technical record">
+
+**Selective extension** — `fair-selective-depth.cpp`; **rejected —
+ledger-recorded** ("the screen lost score, survival, and flow"). None of the
+three sections carries a scoring label; [audit 03](/docs/exploratory/audit-03-claim-arithmetic)
+classifies every figure on this page as **historical 7,000-point Sequence
+scoring** from the score identity. Rescoring does not change any of these
+outcomes: score and survival moved together in all three.
+
+| Stage | Cohort | Reference | Candidate | Paired change |
+| --- | --- | --- | --- | --- |
+| Fit (menu of 3) | 4 games `0x3dd00000...003`, 500-move cap | — | five moves / top three columns selected | +55,436 pts, +32.5 moves, robust utility +0.1848 |
+| Training heldout | 8 games `0x3dd10000...007` | 120,580.75 / 82.875 | 133,977.125 / 89.75 | +13,396.375 pts, +6.875 moves |
+| Fresh screen | 8 games `0x3ea70000...007`, 1,000-move cap | 182,041.125 / 115.875 | 174,808.375 / 112.375 | **−7,232.75 pts, −3.5 moves** |
+
+Both held-out 95% lower bounds were negative (4/8 score wins, 3/8 move wins with
+one tie), and removing one +201,765-point pair made the held-out means negative.
+On the screen, removing the largest +260,980-point win moved the means to
+−45,548.86 / −25.43, and only two of eight leave-one-pair-out means were
+positive on both endpoints. Clears fell 2.0647 → 2.0378 per move, reveals
+1.1672 → 1.1324. The candidate switched 76 of 899 same-position four-move
+actions (8.45%) and fell back on 620 decisions (68.97%); 60.5% of switches
+occurred in the last two drops of the rise cycle, which held 40.0% of decisions
+— diagnostic, not causal. Work 3.839M per move versus 1.387M (2.77×); the cache
+hit its 45,000-entry cap; 6,825.3 seconds for the gated run; no censoring.
+Confirmation `0x3ea80000...00f` never read. Artifact SHA-256
+`730caf83ad6dfb9b7f473a0a058bd10a4e29ed9306f9a56daec7b710125a2ab7`.
+
+**Rise-boundary extension** — `fair-cycle-boundary-depth5.cpp`; **rejected —
+ledger-recorded** ("the pilot was adverse and also missed its runtime gate").
+Pilot pair `0x3de70000`: reference 231,290 / 150 moves, candidate 107,668 / 75,
+change −123,622 points and −75 moves; clears 2.1200 → 1.9600, reveals 1.1933 →
+1.1067; every deep decision completed without fallback. The pair took 256.071
+seconds and projected 2,688.743 seconds against a fixed 2,400-second ceiling, so
+the process exited paused before the second fitting seed, the fallback ablation,
+the held-out, screen and confirmation ranges. The artifact marks this
+pilot-only, with **no formal inference**. Source SHA-256
+`b2f2f2987c63fe878e46a6d375f27c61c6c4fafc823909554b91145291d5e680`.
+
+**Full-width fifth move, three samples** — `fair-depth5-s3.cpp`;
+**runtime-paused — ledger-recorded**. Fitting gate (never reached) required the
+candidate to improve both means against *both* controls while retaining 98% of
+each control's clear and reveal throughput. First paired triple on
+`0x3de40000`: reference (four moves, five samples) 269,141 / 170; three-sample
+control 151,153 / 95; five moves, three samples 182,622 / 120 — behind the
+reference by 86,519 points and 50 moves. Throughput 2.0750/1.1417 per move
+versus 2.2000/1.2824 and 1.9895/1.0842. Work per move 1.521M / 0.226M / 3.904M.
+The triple took 623.250 seconds and projected 2,804.627 seconds against a
+45-minute limit, so the run paused before `0x3de40001`; **no gate conclusion may
+be drawn from its single game**. Screen and confirmation ranges never read.
+Artifact SHA-256
+`c94a28dffe9d10c3a4a2026f2acdfe14b7e5f71bd4c6c0ef0289b7612848f448`.
+
+All three passed their optimised `-Werror` and ASan/UBSan self-tests, including
+exact parity with the reference search where required, completion proofs,
+determinism, reflection safety, and metadata and game-seed blindness.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+The three runs rule out three specific ways of buying a fifth move inside the
+frozen five-sample search: shallow-ranked selective extension, rise-boundary
+extension, and paying for depth with coarser chance sampling. They also
+established a practical habit that later work reused — projecting the cost of a
+protocol from a measured pilot and stopping before consuming seeds you cannot
+afford to finish.
+
+They do not establish that a fifth move is worthless. Two open threads:
+
+- **The chance estimator may be the reason.** A later exploratory experiment
+  found that the fourth move is worth almost nothing at five chance samples and
+  about 86,000 points at seven ([finding 05](/docs/exploratory/finding-05-chance-strata)).
+  Every depth experiment in the ledger was run on top of the five-sample
+  estimator, so "depth does not pay" and "depth does not pay *here*" are not
+  distinguished by this evidence.
+- **The cost projections that cancelled these runs were too pessimistic.** An
+  in-progress exploratory measurement found that worst-case work bounds
+  overestimate real work by roughly ten times at depth 5, because repeated
+  positions collapse most of the tree, and that at depth 5 with seven chance
+  samples the frozen 60,000-entry cache costs 2.19× more work than a
+  200,000-entry one for **identical play** — a budget decision, not a
+  scientific one. Its own interim
+  five-move, seven-sample arm is nevertheless far behind the four-move
+  comparator on the games finished so far — on a partial sample its author
+  explicitly warns is biased against it
+  ([finding 15](/docs/exploratory/finding-15-depth5-exact-estimator)).
 
 ## Sources
 
-- `fair-cycle-boundary-depth5.cpp`
-- `fair-depth5-s3.cpp`
-- `fair-selective-depth.cpp`
-
-## More evidence
-
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/fair-expectimax)
+- `fair-selective-depth.cpp` — bounded, public-state-only selective extension;
+  every root column stays full width.
+- `fair-cycle-boundary-depth5.cpp` — the deeper search only when the visible
+  phase is exactly one full five-drop cycle from the next rise.
+- `fair-depth5-s3.cpp` — the reference, a three-sample control, and the
+  full-width fifth move at three samples, at a cycle boundary.

@@ -1,29 +1,154 @@
 ---
-title: Full Action Terms
+title: Bringing back the old placement rewards
 family: fair-expectimax
-status: Rejected
+summary: An earlier one-move policy scored where a disc landed and what the drop achieved; this puts those rewards back inside the deeper search, then strips them down to the two that seemed most defensible.
+status: rejected
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Before the look-ahead search existed, a simpler one-move policy scored each
+drop directly: where the disc landed, how close it was to completing something,
+how many covered discs it exposed, how deep a chain it set off. Those terms were
+dropped when the search was built. These two experiments put them back — first
+all of them, then only the two that looked most defensible — and both made the
+policy worse.
 
-## Full action terms
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
 
-Restores historical placement terms, then isolates reveal/chain transition rewards.
+## The intuition
 
-**Status: Rejected** (ledger-recorded). neither transfer survived its fresh screen.
+There are two different places a policy can express what it wants.
+
+- **State terms** describe the board *after* a move: how tall it is, what is
+  ready to fire, how buried the gray discs are. The search's leaf evaluator is
+  entirely made of these.
+- **Transition terms** describe the move *itself*: this drop landed at height
+  four, this drop revealed two covered discs, this drop set off a three-wave
+  chain.
+
+The one-move policy needed both, because with no look-ahead the only way to say
+"prefer moves that expose covers" is to pay for exposing covers. When the search
+arrived, only the state terms were carried over — and that is a real gap in
+fidelity, worth testing rather than assuming.
+
+The argument for putting them back is that some of these are genuinely *new*
+information: whether a drop cracked a cover, or whether it produced a second
+wave, is an outcome you cannot read off the resulting board. The argument
+against is double counting: the resulting board already shows how tall the
+column is and how good the structure looks, so paying separately for the
+landing geometry charges the same thing twice — and can outvote it.
+
+## How each one works, step by step
+
+**All the terms.** (1) Take the confirmed depth-3 fair search unchanged.
+(2) At every level of the search, add back the complete frozen block from the
+one-move policy: 300 points per revealed cover, 120 times the square of the
+continuation chain depth, and the original landing-height, column-content,
+build-distance, overshoot, neighbour-height, centre, one-away and imminent-rise
+terms. (3) Change nothing else. No coefficient is fitted or chosen from
+gameplay — they are the historical values, copied exactly.
+
+**Only the transition terms.** (1) Remove every placement prior. (2) Keep only
+the two signals that describe newly observed outcomes: 300 per revealed cover
+and 120 times squared chain continuation depth. (3) The separation was argued
+for in writing **before** any gameplay: the placement terms duplicate geometry
+the leaf already sees, whereas cover damage and a multi-wave transition are new
+observations.
+
+## What happened, in plain English
+
+**All the terms together** were clearly harmful. On the eight fresh screening
+games the unchanged search averaged about 134,900 points and 89 moves; with the
+historical block restored, about 94,800 points and 65 moves — roughly 40,000
+points and 24 moves worse. The most damaging single game had the reference
+surviving 175 moves and the candidate 80.
+
+**The stripped-down version** looked promising and then did not replicate. On a
+24-game training-only diagnostic it improved the average score by 22,105 points
+and survival by 12.4 moves. On the fresh eight-game screen it lost about 17,000
+points and 11.6 moves, improving only three of eight games on each measure, and
+in one game it threw away a trajectory the reference took to 145 moves after
+just 65.
+
+Both rejections stand under either scoring mode: score and survival moved the
+same way, so rescoring the historical games to corrected Hardcore rules would
+widen the gap rather than close it.
+
+The ledger draws a specific conclusion from the first result and a broader one
+from the second. The first shows that one-move action geometry **cannot be
+transplanted wholesale into a deeper evaluator**, because successor-state
+scoring already represents much of the same height and build information, so
+charging both can reverse good decisions. The second is described as an explicit
+false-positive record: *rewarding the outcomes associated with a strong planner
+does not tell a public search which preparations produce them reliably.*
+
+<TechnicalDetails title="The technical record">
+
+**Sources.** `full-fair-horizon.cpp` (all terms) and
+`transition-reward-horizon.cpp` (transition terms only).
+[Experiment index](/docs/research/experiment-index): **rejected —
+ledger-recorded**, "neither transfer survived its fresh screen." Both were run
+under the **historical 7,000-point Sequence scoring** — the first section says
+so explicitly; the second carries no label and is classified from the score
+identity by [audit 03](/docs/exploratory/audit-03-claim-arithmetic).
+
+**All terms** — ledger "Full historical fair action terms", fresh screen
+`0x3ea10000...007`, eight games:
+
+| Arm | Mean score | Mean moves |
+| --- | ---: | ---: |
+| Fair leaf, depth 3 | 134,923.875 | 89.125 |
+| Full historical block, depth 3 | 94,812 | 65.25 |
+
+Paired change −40,111.875 points and −23.875 moves; three of eight score pairs
+and three move pairs won with one tie; neither cohort censored; worst case seed
+`0x3ea10002`, 175 moves versus 80. Confirmation `0x3ea20000...00f` not read.
+Artifact `/tmp/drop7-full-fair-horizon.json`.
+
+**Transition terms only** — ledger "Fair transition rewards without placement
+priors":
+
+| Stage | Cohort | Reference | Candidate | Outcome |
+| --- | --- | --- | --- | --- |
+| Training diagnostic | 24 games `0x3d9a0000...017` | — | — | +22,104.625 points, +12.375 moves |
+| Fresh screen | 8 games `0x3ea50000...007` | 113,772.5 / 78.125 | 96,759.625 / 66.5 | **−17,012.875 points, −11.625 moves**; 3/8 score and 3/8 move pairs improved |
+
+Neither cohort censored; `0x3ea60000...00f` remained unread.
+Artifact `/tmp/drop7-transition-reward-horizon.json`.
+
+**Verification.** Optimised and ASan/UBSan strict builds passed deterministic
+completion, reflection, metadata blindness, legal-action, fixed-seed and
+public-state checks, plus — for the second experiment — an explicit
+action-prior exclusion test.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+The durable finding is about representation, not coefficients: **information the
+resulting board already contains should not be paid for twice.** A deeper
+search sees the successor state, so restating the landing geometry as a bonus
+gives that geometry two votes and lets it outvote everything the search learned
+by looking further ahead.
+
+The stripped-down follow-up is the more interesting failure, because its two
+surviving terms really are new information. It still failed — and its 24-game
+training gain, which reversed on eight fresh games, is a compact demonstration
+of why this repository will not accept a fitting result as evidence.
+
+Still open: the same two signals have never been tried as *features of the
+leaf* rather than as payments per move, and the closely related question of
+paying per numbered clear or per reveal was tested separately, with the same
+shape of outcome — a strong fit followed by a held-out reversal
+([transition rewards](/approaches/fair-expectimax/transition-rewards)).
 
 ## Sources
 
-- `full-fair-horizon.cpp`
-- `transition-reward-horizon.cpp`
-
-## More evidence
-
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/fair-expectimax)
+- `full-fair-horizon.cpp` — evaluates the fixed action and transition terms
+  inside depth-3 search; action terms charged once per decision, transition
+  terms once per realised sampled move at every level. Gameplay selects no
+  coefficient.
+- `transition-reward-horizon.cpp` — disables placement priors while retaining
+  the dense transition signals for revealed covers and squared continuation
+  chain depth.

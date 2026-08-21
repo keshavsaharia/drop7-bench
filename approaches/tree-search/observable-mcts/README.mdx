@@ -1,42 +1,168 @@
 ---
-title: Observable Mcts
+title: Observable-state MCTS
 family: tree-search
-status: Rejected
+summary: Grow the look-ahead by simulation, but only ever let the search know what a player would actually be able to see.
+status: rejected
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Grow the look-ahead by simulation, but only ever let the search know what a
+player would actually be able to see.
 
-## Observable stochastic UCT
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
 
-Samples chance at observable-state edges, avoiding determinization and strategy fusion.
+## The problem this was built to solve
 
-**Status: Rejected** (ledger-recorded). it missed the frozen held-out top-action gate by one root.
+There is a cheap way to plan under uncertainty that does not work. Guess the
+whole future in advance — every disc the game will deal, every hidden gray
+number it will show — then plan perfectly inside that imagined future, and
+average the results over many guesses. Each individual plan looks brilliant,
+because each was made by a planner who already knew the answers. Averaging
+brilliant plans that could never have been made by the same player produces a
+number that flatters the first move and cannot be achieved by anybody. The
+ledger calls this failure *strategy fusion*; the glossary entry is
+[determinization](/learn/glossary).
 
-## Confidence-gated MCTS
+This approach removes the opportunity. A position in its tree is identified by
+the visible board, the visible next disc, the moves left until the next rise,
+whether the game is over, and how much search horizon remains — and by nothing
+else. No game seed, no future disc sequence, no hidden number is stored
+anywhere in a node or passed to any decision. A chance outcome is drawn only
+when the search actually crosses that event for the first time, and later
+decisions along that line see only the visible position that resulted. Because
+one policy has to work across all the futures, it cannot specialize to any of
+them.
 
-Allows MCTS to override fair D3 only with Q and visit-share confidence.
+## How it works, step by step
 
-**Status: Rejected** (ledger-recorded). held-out pairwise accuracy and regret worsened.
+1. Read the public position: board, next disc, rise clock, terminal flag.
+2. Run many simulations. Each one walks down the stored tree preferring
+   columns with good recorded results and a bonus for the least-tried ones,
+   adds one new position where the walk leaves the tree, finishes the line with
+   a cheap one-move-ahead fair search out to a fixed horizon, and credits every
+   column choice on the path with the result.
+3. Draw chance outcomes lazily. The first few times an action edge is crossed,
+   sample a fresh outcome and keep it in a small per-edge pool; afterwards,
+   replay from that pool. The original lab caps the pool at eight outcomes.
+4. Play the column with the best record at the root — or, in the gated
+   variant, hand the decision back to exact fair search unless the tree's
+   preference clears a fixed confidence rule.
 
-## Scaled observable MCTS
+Three programs live here, and it is worth reading them as one argument rather
+than three experiments: the first asked whether the idea ranks moves at all,
+the second asked whether it can be used safely as an override on top of a
+search that already works, and the third asked whether it was simply too small.
 
-Re-runs observable MCTS at larger simulation/horizon scale on locked root artifacts.
+## What happened, in plain English
 
-**Status: Rejected** (ledger-recorded). larger search worsened long-outcome ranking.
+All three were retired, and the third is the one worth remembering.
 
-## Sources
+The plain search **almost** cleared its bar. On positions it had never seen, it
+ranked pairs of columns slightly better than the exact depth-3 comparator and
+had substantially lower regret — but its rate of picking the single best column
+was 11 correct out of 32, and the frozen gate required a rate that 11 out of 32
+just misses. Nothing was retuned and no further games were opened, which is the
+correct behaviour and also why there is no better number to report.
 
-- `fair-mcts-confidence.cpp`
-- `observable-mcts-lab.cpp`
-- `observable-mcts-scaled-audit.cpp`
+The gated version, allowed to override a working depth-3 search only when it
+was confident, cut its disagreements from 34 positions to 12 and did improve
+its top-choice rate — but it got *worse* at ranking pairs and its regret rose.
+A rule that switches rarely and is wrong when it switches is worse than no rule.
 
-## More evidence
+The scaled version is the informative failure. It was given four times the
+simulations, twice the horizon, twice the chance pool, and a proper evaluator
+at the end of each playout. Against short-horizon reference values it improved
+enormously — it became an excellent imitator of the four-move reference. Against
+what actually mattered, the outcome twenty-five moves later, it got worse than
+the small version it replaced. The audit's conclusion was blunt: the remaining
+failure is not search quantity, and this candidate should not receive a
+gameplay screen. The cheap one-move-ahead playout policy and the small replayed
+pool of chance outcomes were optimizing the wrong future, and a bigger budget
+buys more of the wrong future.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/tree-search)
+None of these three ever played a cohort of complete games. Everything below is
+a measurement of how well a search ranks the columns available at stored
+positions, against labels made by playing those positions forward.
+
+<TechnicalDetails title="The technical record">
+
+**Observable-state stochastic UCT** — rejected at the held-out gate,
+ledger-recorded. Tuning used 64 roots from 32 origin games with independent
+32-scenario labels and 60-move public depth-1 continuations, over all twelve
+combinations of 256/1,024/4,096/16,384 simulations and horizons 8/16/32; the
+preregistered minimum-regret rule froze 16,384 simulations and horizon 32. On
+32 roots from 16 disjoint games it reached 0.6498 pairwise accuracy and 28,420
+mean regret versus exact depth 3's 0.6418 and 44,142, but top-1 accuracy was
+11/32 = 0.34375 against a 0.35 gate. The screen and confirmation seeds were not
+read and nothing was retuned. Maximum active storage was 7,876,784 bytes
+against a fixed 8,257,960-byte reservation, with at most 15,486 nodes.
+
+**Confidence-gated MCTS over fair depth 3** — rejected, ledger-recorded.
+Fitting used 64 roots from 32 origin games, each sibling evaluated on 64
+aligned 80-move public fair-depth-1 continuations. The frozen thresholds were a
+Q margin of 3.2 and a visit-share margin of 0.8. Raw MCTS disagreed with fair
+depth 3 on 34 of 64 fitting roots and the gate reduced that to 12, but fitting
+regret was still worse than fair (29,783.74 versus 25,848.30). On the one
+allowed held-out set — 32 roots from 16 origin-disjoint games — the gate
+switched six actions: tie-aware top-1 rose from 0.28125 to 0.34375, pairwise
+accuracy fell from 0.58742 to 0.54755, and regret rose from 28,165.14 to
+32,443.13. Raw MCTS alone was weaker still at 0.21875, 0.51994 and 41,105.89.
+
+**Scaled public-state observable MCTS** — rejected before gameplay,
+ledger-recorded. A ranking-only audit that opened no gameplay seed and
+reconstructed no origin game; it replayed 36 already-stored public roots (one
+fixed middle root from each of 24 fitting and 12 disjoint held-out games) and
+recomputed fair depth-3 and depth-4 values under corrected 17,000-point
+Hardcore scoring. The candidate was frozen before any ranking at 65,536
+simulations, horizon 64, a 16-outcome reservoir, the same depth-1 playout and
+one public fair leaf at a surviving cutoff.
+
+On the 12 held-out roots, against corrected 25-move labels:
+
+| Predictor | Top-1 | Pairwise | Normalized regret |
+| --- | ---: | ---: | ---: |
+| Old observable MCTS | 25.00% | 61.02% | 0.29450 |
+| Scaled candidate | 25.00% | 56.78% | 0.37251 |
+| Exact public fair D3 | 25.00% | 57.63% | 0.35712 |
+| Exact public fair D4 | 33.33% | 55.93% | 0.36314 |
+
+Both six-game held-out halves lost pairwise accuracy and the second more than
+doubled normalized regret, from 0.13592 to 0.29193, so the frozen gate failed
+and no fresh, protected, or final seed was opened. The diagnostic contrast is
+the point of the entry: measured against corrected fair-D4 root values on the
+same states, scaling raised top-1 from 66.67% to 91.67%, pairwise from 66.10%
+to 74.58%, and cut normalized regret from 0.03896 to 0.00356. The audit ran in
+550.296 seconds within a 47,710,856-byte fixed arena.
+
+**Limitations, stated plainly.** The held-out sets are 32 and 12 roots — small,
+and the 12-root table separates predictors by a single root in places.
+`observable-mcts-lab.cpp` and `fair-mcts-confidence.cpp` carry a compile-time
+assertion pinning the historical 7,000-point Sequence level bonus, so their
+recorded numbers are archival and are not comparable with corrected Hardcore
+results; only the scaled audit was recomputed at 17,000 points. All three are
+root-ranking measurements, not whole-game scores.
+
+Sources: "Observable-state stochastic UCT (rejected at held-out gate)",
+"Confidence-gated MCTS over fair depth 3 (rejected)", and "Scaled public-state
+observable MCTS (rejected before gameplay)" in the
+[experiment history](/docs/research/history), and the tree-search table in the
+[experiment index](/docs/research/experiment-index).
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **The information boundary can be kept honestly inside a sampling search.**
+  That is a real engineering result: nodes keyed only by the visible position,
+  self-tests for determinism, reflection, metadata blindness and legality, and
+  hard arena bounds that were never exhausted.
+- **Ranking well against a short-horizon teacher is not the same as ranking
+  well against the future.** The scaled audit measured both at once and they
+  moved in opposite directions. This is the sharpest version of the lesson on
+  the [sibling ranking](/learn/concepts/ranking-siblings) page.
+- **What was ruled out** is this configuration: a myopic one-move-ahead playout
+  with a small replayed chance pool, at any budget tested. What was *not* ruled
+  out is Monte Carlo tree search in this game. The ledger's own recommendation
+  is a separately frozen long-value or playout replacement, and unbiased
+  sampling of fresh chance events — not another budget increase.

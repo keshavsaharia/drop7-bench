@@ -1,28 +1,111 @@
 ---
-title: Bellman Ntuple
+title: Learning from every column, not just the one played
 family: ntuple-rl
-status: Rejected
+summary: An n-tuple value learner whose every update looks at all seven legal columns under the same imagined luck, so that exploration noise cannot leak into what it learns.
+status: rejected
 evidence: task-record only
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
+An n-tuple value learner whose every update looks at all seven legal columns
+under the same imagined luck, so that exploration noise cannot leak into what it
+learns.
+
+<EvidenceLabel status="rejected" evidence="task-record only" reads="public" />
+
+<Callout title="There is no retained result for this experiment" tone="warn">
+The [experiment index](/docs/research/experiment-index) carries one row —
+rejected, task-record only, "the run plateaued below fair search" — and that is
+the entire retained evidence. There is no ledger section, no preregistration in
+this directory, no artifact hash, and no per-game data. The rejection cannot be
+re-derived from anything in the repository. Everything below the outcome section
+describes what the source code does, from the source code.
 </Callout>
 
-## Bellman n-tuple
+## The intuition
 
-Performs off-policy fitted Bellman updates over all legal actions with common chance samples.
+Most of the learners in this family have the same quiet flaw. They play a move,
+watch what happened, and adjust their opinion of the position they came from.
+But the move they played was chosen by a policy that sometimes explores at
+random. When it explored badly, the learner records the consequence of a bad
+move as if it were the value of the position itself. The value function ends up
+describing "how this position goes when I play the way I currently play,"
+including the mistakes.
 
-**Status: Rejected** (task-record only). the run plateaued below fair search.
+The textbook fix is to make the update ask a different question: *what is this
+position worth if I play the best available column from here?* — regardless of
+what was actually played. The recorded games are then only a source of
+positions; the learning target is computed fresh over all of them. That is what
+"off-policy fitted Bellman value iteration" means, and it is what this program
+does.
 
-## Sources
+There is a second, subtler piece. Comparing seven columns is only fair if each
+is judged under the same luck. If column 3 happens to be evaluated with a
+generous set of imagined gray-disc reveals and column 4 with a stingy one, the
+comparison measures the dice, not the move. This program derives its chance
+samples from a hash of the position, so every column at a given position is
+scored against the same imagined futures — the same
+[common-random-numbers](/learn/concepts/chance-vs-choice) discipline the
+repository's fair searches use.
 
-- `bellman-ntuple.cpp`
+## How it works, step by step
 
-## More evidence
+1. **Collect positions.** Play games with an exploring policy and store the
+   [public](/learn/glossary) positions it visits — board, visible next disc, and
+   moves until the next rise. The action taken is not stored as a target.
+2. **Build a fair chance sample.** For a stored position, derive a fixed set of
+   gray-disc reveal outcomes from a hash of the position itself, so it is the
+   same for every column and the same every time the position is revisited.
+3. **Maximise over all legal columns.** Simulate each legal drop under those
+   shared outcomes, evaluate the resulting board, and take the best value found.
+   This is the update target.
+4. **Update the tables.** Move the stored position's value toward that target.
+   The evaluator adds three shared pattern tables — horizontal fours, vertical
+   fours, and 2×2 squares — 92 absolute-position tables, and auxiliary features
+   for the rise phase, the visible disc, the maximum column height, and the
+   count of each disc value on the board. Weights start at an optimistic value
+   so that unvisited patterns are tried rather than avoided.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/ntuple-rl)
+The whole model is capped at 64 MB.
+
+## What happened
+
+It plateaued below fair search and was rejected. That single sentence, from the
+experiment index, is all that was retained; there is no recorded score, cohort,
+comparator, or gate.
+
+<TechnicalDetails title="The technical record">
+
+Status in [the experiment index](/docs/research/experiment-index): **rejected,
+task-record only** — "the run plateaued below fair search."
+
+There is no corresponding section in [the ledger](/docs/research/history).
+`docs/exploratory/audit-04-blind-spots.md` lists `bellman-ntuple.cpp` among 30
+sources whose rejection "exists only as a task record, with no ledger protocol,
+no artifact hash, and no retained per-game data." No number from this experiment
+should be quoted, because none exists.
+
+The design facts above are read from `bellman-ntuple.cpp` itself: three shared
+pattern tables of 10,000 patterns each, 92 absolute four-cell tables, auxiliary
+phase / disc / maximum-height / token-count features, a 64 MB parameter bound,
+optimistic initialisation, and state-hashed common chance samples with the
+maximum taken over all legal actions.
+
+`docs/exploratory/audit-05-optimistic-curriculum.md` groups this source with
+`ntuple-tc.cpp` and `ntuple-phase-conditioned.cpp` as using optimistic scalar
+initialisation as its exploration device.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+Honestly: very little, because nothing was retained. The idea is not
+discredited — it is untested in any way a reader can check.
+
+It is worth noting what this program got *right*, because later work in the
+repository converged on the same two requirements independently: score every
+legal column, and score them under shared imagined futures. That is exactly the
+prescription the [sibling-ranking](/learn/concepts/ranking-siblings) page argues
+for and the [scale-out proposal](/learn/concepts/scale-out-direction) is built
+around. If this line is resumed, it should be as a fresh, preregistered
+experiment with its own cohort — not as a continuation of an unrecoverable run.

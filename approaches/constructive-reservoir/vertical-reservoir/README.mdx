@@ -1,28 +1,110 @@
 ---
-title: Vertical Reservoir
+title: Vertical reservoir
 family: constructive-reservoir
-status: Rejected
+summary: Writes down by hand what a good vertical stack looks like — a ladder of high discs that can be released, a way out if it goes wrong, covered discs still within reach — then tunes those preferences on whole games. It finished behind the one-move-ahead reference.
+status: rejected
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+The most literal version of the family's idea: describe a good vertical
+structure directly, in features a person can name, and let an optimiser tune
+how much each one is worth. It ended up playing worse than the simple search it
+was meant to improve on.
 
-## Vertical reservoir
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
 
-Fits nonlinear vertical release, escape, cover-access, and low-cap features by complete-game CEM.
+## The intuition
 
-**Status: Rejected** (ledger-recorded). the 128-game tournament trailed fair D1.
+The [family page](/approaches/constructive-reservoir) shows the mechanism this
+approach is named after: a column of identical high discs that sits inert
+until its run reaches exactly the right length, then clears all at once. The
+bet here is that the *shape* of such a structure can be recognised directly
+from the board, without simulating the future at all.
 
-## Sources
+So the evaluator is built out of named, deliberately non-linear quantities:
 
-- `vertical-reservoir-policy.cpp`
+- **release ladders** — how close a stack is to being exactly releasable by one
+  more disc, computed exactly rather than approximated;
+- **same-target powers** — several discs sharing one target value, which is
+  what makes a stack pay off all at once;
+- **escape wells** — a low, empty column kept as a way out if the structure
+  goes wrong;
+- **horizontal reachability** and **cover access** — whether covered discs can
+  still be attacked;
+- **low caps** — the badness of a small number sitting on top of something you
+  need.
 
-## More evidence
+None of this reads hidden information: it is a description of the visible
+board. The claim being tested is that structural potential is *legible* from a
+still image of the position.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/constructive-reservoir)
+## How it works
+
+1. Score every legal column by applying the evaluator to the position after the
+   move, averaged over seven sampled chance outcomes; play the best.
+2. Fit the evaluator's weights with a cross-entropy method — repeatedly sample
+   a population of weight vectors, play complete games with each, keep the best
+   few, and move the sampling distribution toward them.
+3. Score every candidate on complete games played under **common random
+   numbers**, so two candidates are always compared on the same games.
+4. Freeze the winner and play a larger tournament against the one-move-ahead
+   fair search.
+
+## What happened
+
+It lost. On its 128-game tournament the frozen candidate averaged **160,498.1
+points and 50.9 moves** against fair D1's **178,554.4 and 55.8**. Score,
+lifetime, lower-quartile score and reveal flow all failed admission, so the
+probe cohort was never opened.
+
+The result is more interesting than a simple failure. The same family's
+[constructive planner](/approaches/constructive-reservoir/constructive-spectrum),
+which simulates a cycle forward instead of scoring a still image, beat the same
+comparator by a wide margin on the same kind of cohort. Taken together the two
+runs say something specific: it is not the reservoir *idea* that fails here,
+it is the attempt to read structural value off a static board. The research
+status makes the same point in general terms — similar-looking boards can have
+very different futures depending on how reachable triggers and covered discs
+evolve across the rises.
+
+<TechnicalDetails title="The technical record">
+
+**Status: rejected — ledger-recorded.**
+[Experiment history](/docs/research/history) §"Explicit reservoir and
+constructive-cycle policies (rejected)": 128-game tournament, candidate
+160,498.094 points / 50.891 moves versus fair D1 178,554.438 / 55.750.
+Corrected 17,000-point scoring, checked as internally consistent by
+[audit 03](/docs/exploratory/audit-03-claim-arithmetic) row 4399. The ledger
+retains source and artifact SHA-256 values; the
+[reproducibility guide](/docs/reproducibility) notes that historical hashes no
+longer match current bytes after the tree was reorganised.
+
+Frozen configuration, from the source: training seeds
+`0x3d630000`–`0x3d63ffff`, tournament seeds `0x3d640000`–`0x3d64ffff`, probe
+seeds `0x4d630000`–`0x4d63007f` (never opened), 7 successor samples,
+1,000-move cap, population 65, 13 elites, 24 generations, 64 games per fitting
+batch, 128 tournament games, 32 probe games, policy seed `VRSV`, 30-minute wall
+limit, 256 MiB RSS limit. Admission required at least 150 mean moves, at least
+500,000 mean points and a 1.50 ratio on the fitting stage before the probe
+could open.
+
+A related but separate experiment tested the same instinct inside the
+four-move search: a literal 7/6/5 vertical-ladder energy term screened cheaply
+at depth 2 looked promising and was **rejected** when transferred to depth 4.
+Both are listed in the [experiment index](/docs/research/experiment-index)
+under fair expectimax.
+
+Source: `vertical-reservoir-policy.cpp`.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- A hand-named description of vertical structure, tuned directly on complete
+  games, is not enough to beat even a one-move-ahead fair search.
+- The failure is specific to reading structure from a still board. Simulating
+  the cycle forward with the same underlying idea worked much better.
+- This is a valid negative result on one frozen feature set. It does not rule
+  out vertical structure as a *component* — but the one attempt to transfer a
+  vertical-ladder term into the depth-4 reference also failed.

@@ -1,28 +1,130 @@
 ---
-title: Edge Priority
+title: Edge priority
 family: heuristic-search
-status: Unknown
+summary: Test the two things an experienced human player actually says about this game — attack the high covered discs, and distrust the edge columns — as measurable changes to one term in the evaluator.
+status: unknown
 evidence: repository-verified
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
+Test the two things an experienced human player actually says about this game
+— attack the high covered discs, and distrust the edge columns — as measurable
+changes to one term in the evaluator.
+
+<EvidenceLabel status="unknown" evidence="repository-verified" reads="public" />
+
+<Callout title="No retained result" tone="warn">
+This lab is complete, gated and buildable, and **no outcome for it exists
+anywhere in this repository** — not in the
+[experiment history](/docs/research/history), not in the machine-readable
+records, not as a task-record note. The
+[experiment index](/docs/research/experiment-index) marks it *unknown*. This
+page therefore describes what the program does, from the program. Nothing on
+it is a claim about whether the idea works.
 </Callout>
 
-## Edge-cover priority
+## The intuition
 
-Screens nonlinear cover-altitude and edge multipliers with paired confirmation gates.
+Nearly every strategy in this repository was invented by someone reading code.
+There is one source of ideas that was not: the strategy notes of an
+experienced human player, who recommends prioritising **high covered discs**
+and watching the **less-connected edge columns** in this mode. The author
+explicitly warns that the advice may be wrong or luck-dependent, and the
+strategy catalog labels it *anecdotal hypotheses*, not evidence.
 
-**Status: Unknown** (repository-verified). no ledger or task-record outcome was located.
+The two claims have a mechanism behind them that a program can express:
 
-## Sources
+- **Altitude.** A [covered disc](/learn/glossary) that is high up is close to
+  the ceiling and has few moves left before a [rise](/learn/glossary) pushes it
+  higher. The evaluator already charges for that as the square of its height —
+  so the question is whether the true penalty is steeper than square.
+- **Edges.** A disc in column 0 or column 6 has only one horizontal neighbour,
+  so there is one fewer direction from which a clearing disc can reach it. The
+  evaluator already applies a 1.3× multiplier there — so the question is
+  whether it should be larger.
 
-- `edge-priority-lab.cpp`
+The lab isolates exactly those two constants. Nothing else about the policy
+changes.
 
-## More evidence
+## How it works, step by step
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/heuristic-search)
+1. **Take the reference behaviour policy unchanged** — a bounded expectimax
+   with the phase-safety evaluator, the same one used as the behaviour policy
+   in other experiments.
+2. **Replace one term of its evaluator**, the cover-potential term, with a
+   parameterised version: penalty proportional to *height raised to the
+   altitude exponent*, times an *edge multiplier* on the outer columns.
+3. **Play six profiles on paired games** — the same seeds for all six, so the
+   comparison is game by game:
+
+   | Profile | Altitude exponent | Edge multiplier |
+   | --- | ---: | ---: |
+   | baseline (the unchanged reference term) | 2.0 | 1.3 |
+   | edge2 | 2.0 | 2.0 |
+   | edge3 | 2.0 | 3.0 |
+   | edge4 | 2.0 | 4.0 |
+   | altitude3 | 3.0 | 1.3 |
+   | altitude3-edge3 | 3.0 | 3.0 |
+
+4. **Screen on eight games, then confirm the winner on eight fresh games**,
+   reporting paired score and move differences, clears and reveals per move,
+   board clears and search work for each profile.
+
+The design is a clean single-variable experiment: the edge rows isolate the
+edge claim, the altitude row isolates the altitude claim, and one joint row
+tests them together.
+
+## What is known, in plain English
+
+That the program exists, that it builds, and that it checks itself. Its
+self-test verifies that the baseline profile reproduces the unchanged
+reference potential exactly, that its action matches the reference behaviour
+policy's action, that decisions are deterministic and legal, and that a
+mirrored board produces the mirrored column. It reads only the visible board,
+the next disc and the rise clock.
+
+What is not known is anything at all about the six profiles' performance.
+
+<TechnicalDetails title="The technical record">
+
+The [experiment index](/docs/research/experiment-index) records this as
+**unknown, repository-verified**: *"no ledger or task-record outcome was
+located."* Repository-verified means the source is present and its purpose can
+be established from reading it; it is explicitly **not** a claim that a run
+occurred.
+
+Repository-verified from the source: `edge-priority-lab.cpp` defines six
+`CoverProfile` entries with the comment *"Adam Saltsman's two rules are
+isolated by the edge-only rows, the altitude-only row, and one joint row. The
+reference profile is the internal control and remains unchanged outside this
+executable."* Screen and confirmation cohorts are eight games each, from
+`0x3d700300…` and `0x3d700400…` respectively, at a 500-move cap. Profile
+selection prefers the larger paired mean score difference and breaks ties on
+paired mean move difference. Output is per-profile JSON including every game's
+score and move count.
+
+Eight games is a small cohort. Even a completed run of this lab would be a
+screen, not a confirmation of anything.
+
+The anecdotal source is described in the
+[strategy catalog](/docs/strategies), which links the player's notes and
+labels them explicitly as hypotheses.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **This is the cheapest unfinished experiment in the family.** Sixteen games
+  of a bounded search, two constants, a self-test that already passes. If the
+  reader is looking for something small and real to do, this is it.
+- **A negative here would be worth as much as a positive.** The strategy
+  catalog's sixth open direction is precisely to convert human strategy advice
+  into reflection-safe public features and test them, because that is more
+  informative than copying a human rule into a policy. Either answer settles
+  something.
+- **The related terms are scattered.** An edge multiplier of 1.65 appears in
+  the `fertile` evaluator inside
+  [policy comparison](/approaches/heuristic-search/policy-comparison), and an
+  edge-specific cover penalty appears in
+  [tunneling](/approaches/heuristic-search/tunneling). Neither has been
+  isolated to a gate. This lab is the one that would do it.

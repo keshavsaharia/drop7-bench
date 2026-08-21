@@ -8,9 +8,14 @@ It is the most natural question in the project: the best policy averages about
 a third of the target, computers are fast, so *search deeper, sample more, train
 bigger*. This page goes through what the repository has actually measured for
 each of those, in plain language, with the technical record one click away.
-The short version: **more computation spent the same way has not helped, and in
-one measured case made things worse; more computation spent in a specific
-different way has not been tried, and is the most defensible bet.**
+The short version: **it depends entirely on what the compute is spent on.**
+Spent on removing a measured bias in how the search handles luck, it was worth
+about a third more score and it unlocked a whole extra ply of look-ahead.
+Spent on more imagined futures for a planner with a broken objective, it made
+things measurably *worse*. Spent on bigger models trained on the wrong shape of
+data, it reproduces the same blind spot with more confidence. The most
+promising untested use — closing a learning loop that has already been half
+built here — is section 4.
 
 ## 1. Deeper search
 
@@ -21,23 +26,42 @@ that looking ahead matters.
 Going from depth 4 to depth 5 has *not* produced a better policy so far. The
 status summary records that selective depth 5, full depth 5, and variants that
 stop at the next row rise *"often spent much more work, sampled chance outcomes
-too noisily, or overrode good D4 actions on unstable estimates."* A deeper tree
-needs more chance samples to stay fair; with too few, the extra ply adds noise
-faster than insight, and the search talks itself out of good moves.
+too noisily, or overrode good D4 actions on unstable estimates."*
 
-Two things changed recently and should be said plainly. First, the fast engine
-made a proper depth-5, seven-sample cohort cheap — the retained estimate is
-roughly 19 CPU-hours for 64 games, under an hour on this workstation — so the
-"is depth 5 better when sampled properly?" question is now *affordable to answer
-cleanly* rather than projected at 75 hours. Second, that does not mean the
-answer is yes; it means the experiment can be run and recorded rather than
-argued about.
+But a later, replicated measurement reframes that whole conclusion, and it is
+the most important thing on this page. **Depth was never being tested on its
+own.** Every historical depth experiment sat on top of a chance estimator that
+was quietly biased — see section 2 — and when that bias was removed, the fourth
+ply went from worth almost nothing to worth a great deal:
+
+- with the old five-sample estimator, depth 4 beat depth 3 by about 7,700
+  points, which the confidence interval could not distinguish from zero;
+- with an exact seven-sample estimator, depth 4 beat depth 3 by about **86,000
+  points**, and the interval cleared zero comfortably.
+
+In the finding's own words: *"With a biased chance estimator, the fourth ply
+buys nothing. With an exact one, it is worth 86,000 points."* Depth and the
+quality of the chance estimate are **complements, not independent dials**. That
+is a mechanism for the repository's most-repeated conclusion — "deeper is not
+automatically stronger" — and it means the depth-5 question has never actually
+been asked cleanly.
+
+It is now affordable to ask. The fast engine brought a depth-5, seven-sample
+64-game cohort down to roughly 19 CPU-hours, under an hour on this workstation,
+against an earlier projection of 75 hours. That does not predict the answer; it
+means the experiment can be run and recorded rather than argued about.
 
 <details>
 <summary>The technical record</summary>
 
 - Fair D4 vs D3: 400,675 vs 235,071 mean score over the same 8 corrected-score
   games ([status](/docs/research/status), evidence snapshot).
+- The depth × estimator interaction, from
+  [finding-05](/docs/exploratory/finding-05-chance-strata) (evidence tier
+  *development*, replicated across two independent cohorts, 64 paired games):
+  depth 4 minus depth 3 is +7,723 points with five strata (95% lower bound
+  −42,743 — not significant) and **+86,172 with seven** (lower bound +26,468,
+  40–0–24 wins–ties–losses).
 - Depth-5 variants: [status](/docs/research/status) §3.
 - Depth-5 / seven-strata cost: measured work 55,765,609 per decision against a
   worst case of 582,727,796; 19.1 CPU-hours per 64-game cohort with the fast
@@ -48,6 +72,32 @@ argued about.
 </details>
 
 ## 2. More samples of the future
+
+This is where the answer splits in two, depending on *what* the extra samples
+are being spent on.
+
+### When more samples fixed a real bias — and paid
+
+The reference search does not enumerate every possible next disc. It draws a
+fixed number of representative samples at each chance node: five, in the frozen
+reference. But the next disc is uniform over **seven** values, and five samples
+cannot represent seven possibilities. An audit measured the consequence: on
+average **2.41 of the 7 disc values receive zero weight at every chance node**,
+and because the sampling is deterministic the error never averages out. The
+search was not mis-estimating the future randomly; it was systematically blind
+to part of it.
+
+Raising the sample count to seven makes the next-disc expectation **exact**.
+On 64 previously unread paired games that was worth **+101,171 mean points
+(+34%) and +27.5 more moves per game**, winning 41 games, tying none and losing
+23, with a 95% lower bound of +47,457. The result was replicated on a second
+independent cohort.
+
+That is the clearest "more compute helped" result in the repository — and note
+what it actually bought: not more search, but an **unbiased** one. The extra
+samples removed a defect rather than adding depth.
+
+### When more samples made things worse
 
 One family of planners handles uncertainty by imagining many complete futures
 ("worlds"), planning in each as if the hidden values were known, and choosing
@@ -72,6 +122,14 @@ spending more on it.
 <details>
 <summary>The technical record</summary>
 
+Seven strata versus five, from
+[finding-05](/docs/exploratory/finding-05-chance-strata) (development tier,
+replicated; the zero-weight measurement is
+[audit-02](/docs/exploratory/audit-02-fair-d4) H1): at depth 4, +101,171 points
+/ +27.50 moves, 95% lower bound +47,457, 41–0–23. At depth 3 the same change is
++7,276 points with a lower bound of −45,961 — not significant. The effect is an
+interaction with depth, not a main effect of sampling.
+
 Clairvoyant (hindsight-optimisation) planner, horizon 7, pooled numbered clears
 per move on the original eight tapes, from
 [finding-12](/docs/exploratory/finding-12-fair-planner-ceiling-extended) §3:
@@ -94,38 +152,60 @@ Many learned evaluators were trained here: n-tuple networks, Monte Carlo value
 models, small neural networks, Q-learning and policy-gradient variants, phase
 models, fitted policies. Some predicted outcomes well. None displaced fair D4.
 
-The diagnosed reason is not model size and not training length. It is the
-shape of the data: models were trained on the move that was played and then
-asked to rank moves that were never played — the
+For most of them the diagnosed reason was not model size and not training
+length. It was the shape of the data: models were trained on the move that was
+played and then asked to rank moves that were never played — the
 [sibling trap](/learn/concepts/ranking-siblings). A bigger model trained on the
 same data learns the same blind spot with more confidence. The status summary is
 explicit that students *"usually lacked enough diverse successor data, failed
 held-out sibling ranking, or were too slow to improve complete games."*
 
-So the honest answer to "would a giant training run fix it?" is: **not if it
-trains on the same kind of data.** A thousand GPUs generating played-move-only
-labels produce the failure at scale.
+So the first honest answer to "would a giant training run fix it?" is: **not if
+it trains on the same kind of data.** A thousand GPUs generating
+played-move-only labels produce the failure at scale.
+
+The most recent line is the exception that sharpens the point. The afterstate
+pilot *did* fix the data shape — and then ran into two different walls, label
+noise and undertraining, both of which are things compute buys down. Section 4
+is about that.
 
 ## 4. Where compute *would* convert into strength
 
 There is a way of spending compute that addresses the diagnosed problem
-directly, and it has not been tried here at any scale:
+directly:
 
 1. At every position the actors visit, run a fair search for **every legal
    column**, under the same random futures, and record all seven values — the
-   successor-closed data the sibling page calls for.
+   successor-closed data the [sibling page](/learn/concepts/ranking-siblings)
+   calls for.
 2. Train a public evaluator on those labels.
 3. Put the trained evaluator at the leaves of the search and repeat. Each
    round's labels come from a stronger searcher than the last.
 
-Step 1 is expensive — a full search per sibling per position — and that expense
-is exactly what a cluster is for. Step 3 is what makes compute compound rather
-than saturate: it is approximate policy iteration, the pattern behind the
-strongest game-playing systems of the last decade, adapted to a one-player game
-with a hard information boundary.
+**Steps 1 and 2 have been done here, at pilot scale, and they are the reason
+this section is not speculation.** The afterstate pilot built exactly that
+corpus — every legal sibling, chance scenarios shared across siblings — and
+trained an evaluator on it. What it found is the most useful compute result in
+the repository: with eight imagined futures per label the labels were too noisy
+to learn a reliable ranking from, and raising that to 256 — a 32× increase in
+compute per label — fixed the stability problem outright. The bottleneck then
+moved to the model itself, whose own result record names an undertrained
+checkpoint (11 of 20 planned epochs) and a weak teacher.
 
-This is now a registered theory in the repository, with stated ways to prove it
-wrong, and no implementation yet. The next concept page,
+That is a compute-response signal in the direction the theory predicts, and it
+is also a warning: it is one pilot at one scale, and the model it produced
+still lost to fair D4 on ranking, and its most conservative deployment narrowly
+failed its gate.
+
+**Step 3 — closing the loop — has not been done.** No trained evaluator here
+has been put back at the leaves of the search to generate the next round of
+labels. That is the step that makes compute compound rather than saturate: it
+is approximate policy iteration, the pattern behind the strongest game-playing
+systems of the last decade, adapted to a one-player game with a hard
+information boundary.
+
+Steps 1–3 together are now a registered theory with stated ways to prove it
+wrong. The next concept page,
 [what a large-scale run would look like](/learn/concepts/scale-out-direction),
 describes the software shape, the order of work, and the gates it would have to
 pass — starting with a small pilot on a single workstation.

@@ -1,28 +1,116 @@
 ---
-title: Perfect Information Oracle
+title: Perfect-information oracle
 family: oracle-curriculum
-status: Completed
-evidence: ledger-recorded diagnostic
-generated: true
+summary: A planner that is shown the whole future of a game before it plays, to measure what the simulator makes possible — never a policy.
+status: completed
+evidence: ledger-recorded
+reads: oracle
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+A planner that is handed the entire future of a game — every disc that will
+arrive and every hidden gray number — before it plays, so we can measure how
+long a game *could* last if uncertainty were removed.
 
-## Perfect-information oracle
+<EvidenceLabel status="completed" evidence="ledger-recorded" reads="oracle" />
 
-Uses a realized future tape to estimate a mechanical performance ceiling.
+Its own source file says it in capitals: **upper-bound diagnostic only**. It is
+not a policy, it cannot be entered in any comparison with a real policy, and it
+is not even a proof of the best possible cheating play, because it prunes.
 
-**Status: Completed** (ledger-recorded diagnostic). it demonstrates feasibility but is not deployable.
+## Why anyone would build this
 
-## Sources
+Before spending months teaching a program to play well, it is worth knowing
+whether the target is reachable at all. The qualification standard is a *mean*
+above one million points, and the strongest legal search averages roughly a
+third of that. Two very different worlds are consistent with that gap:
 
-- `main.ts`
+- the simulator simply does not permit long games, and a million-point average
+  is arithmetically out of reach; or
+- long games exist and are common enough, and the difficulty is entirely one of
+  *choosing* well under uncertainty.
 
-## More evidence
+Removing uncertainty separates the two. If a planner that knows everything still
+cannot survive, the objective is impossible. If it survives easily, then every
+point of the gap is attributable to not knowing — which is the problem the rest
+of the repository works on.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/oracle-curriculum)
+## How it works, step by step
+
+1. Start a game from a seed. The harness knows the game's future disc stream and
+   the reveal stream that turns gray discs into numbers.
+2. At each move, plan by **beam search** over that known future: expand every
+   legal column, apply the *actual* next disc and the *actual* reveals rather
+   than averaging over what might happen, keep the best few thousand resulting
+   positions, and repeat for a fixed number of plies. The file's defaults are
+   depth 12 and beam width 512, with a 500-move cap; the runs used in later
+   experiments configure it down to depth 4 and beam 128.
+3. Rank the surviving plans by the score they accumulate, and play the first
+   column of the best one.
+4. Advance one real move and re-plan. Dying is charged an enormous penalty, so
+   the planner is effectively told to survive first and score second.
+
+Because chance has been replaced by fact, there are no
+[chance nodes](/learn/concepts/chance-vs-choice) here at all — the whole thing
+is a plain search over a known sequence. That is exactly what makes it illegal:
+a real player choosing between seven columns does not know which of them the
+next four discs will reward.
+
+## What happened, in plain English
+
+It survives, comfortably. In a twelve-game cohort it reached the 500-move cap in
+every single game and averaged over a million points, while public depth-3
+search on the same games averaged about 133,000 and lived about 90 moves. In a
+separate sixteen-game matched audit at a much smaller beam it still hit the
+200-move cap in all sixteen and won every paired game.
+
+So the answer to the question the oracle was built to ask is: **long games
+exist**. What it did not, and cannot, show is that any of that is available to a
+player who must guess. The [family page](/approaches/oracle-curriculum) collects
+the several attempts to transfer it, all of which failed.
+
+Three limitations belong in the same breath as the numbers. The cohorts were
+**censored at a move cap**, so those means are lower bounds on the oracle's own
+play and not comparable with uncensored games. They were scored with the
+**historical 7,000-point level bonus**, which the ledger preserves as Sequence-
+scored evidence and not as evidence for the Hardcore target. And the beam prunes,
+so this is a *reachable* ceiling, not the true perfect-information optimum.
+
+<TechnicalDetails>
+
+| Cohort | Configuration | Result | Evidence |
+| --- | --- | --- | --- |
+| Seed `0x3d700000`, one game | receding beam over the realized tape | 2,079,579 points, stopped by the 500-move cap | ledger-recorded |
+| `0x3d950000...0b`, 12 training-only games | depth 4 / beam 128, 500-move cap | capped in all 12; mean **1,058,931.5** under the historical 7,000-point level bonus; paired public depth 3 averaged 132,979 points / 90.5 moves | ledger-recorded |
+| `0x3d70f000...0f`, 16 games | depth 4 / beam 128, 200-move cap, matched against public depth 3 | oracle 429,182.5 points, capped in all 16, won every pair; depth 3 90,273 / 63.625 moves; clears and reveals per move 2.354 / 1.386 against 1.792 / 0.960 | ledger-recorded, historical 7,000-point seeds |
+
+The clear and reveal rates are worth noting on their own. The
+[status summary](/docs/research/status) records roughly 2.4 numbered clears and
+1.4 reveals per move as the region associated with stable long games, treating
+those as diagnostic targets from limited runs rather than proven thresholds. The
+oracle's 2.354 / 1.386 sits essentially in that region while public depth 3, at
+1.792 / 0.960, does not.
+
+Records: [experiment index](/docs/research/experiment-index) "Oracle and
+curriculum research" (completed, ledger-recorded diagnostic);
+[ledger](/docs/research/history), sections "Privileged-future oracle
+distillation" and "Privileged topology audit". Source:
+`perfect-information-oracle/main.ts`.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- The million-point objective is **not** blocked by the rules of the simulator.
+  Whatever else is hard, that is settled.
+- The gap between the oracle and legal search is a measure of the value of
+  information, not a measure of how much better a legal policy could be. Later
+  work ([`audit-05`](/docs/exploratory/audit-05-optimistic-curriculum) §5.4)
+  measured how much of the oracle's edge survives when the real tape is taken
+  away, and the answer was: not much, and what remains is visible as board
+  quality rather than as move preference.
+- The oracle remains useful as a *generator*: the positions it reaches are the
+  input to the
+  [state curriculum](/approaches/oracle-curriculum/state-curriculum) and the
+  [topology audit](/approaches/oracle-curriculum/topology). Whether those
+  positions are worth practising from is
+  [still unmeasured](/docs/exploratory/audit-05-optimistic-curriculum).

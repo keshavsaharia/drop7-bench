@@ -99,6 +99,31 @@ export default function OverviewPage() {
         </a>
       </section>
 
+      <section className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">
+          Start here — a path for newcomers
+        </h2>
+        <ol className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { href: "/learn/rules", step: "1", title: "Learn the game", text: "Every rule, animated by the engine." },
+            { href: "/learn/concepts", step: "2", title: "Learn the ideas", text: "Chance, look-ahead, evaluating a board, the sibling trap, what compute can and cannot buy." },
+            { href: "/approaches", step: "3", title: "See what was tried", text: "Twelve strategy families, each in plain language first, with the record one click deeper." },
+            { href: "/theories", step: "4", title: "See what is open", text: "Registered claims, how they would be proven wrong, and the large-scale direction." },
+          ].map((item) => (
+            <li key={item.href}>
+              <Link
+                href={item.href}
+                className="block h-full rounded-lg border border-zinc-800 bg-zinc-950/50 p-3 hover:border-sky-800"
+              >
+                <div className="text-xs text-zinc-500">step {item.step}</div>
+                <div className="mt-0.5 font-semibold text-zinc-100">{item.title}</div>
+                <div className="mt-1 text-xs text-zinc-400">{item.text}</div>
+              </Link>
+            </li>
+          ))}
+        </ol>
+      </section>
+
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <Stat label="Approaches" value={String(approachCount)} hint={`${families.length} families`} />
         <Stat label="Theories" value={String(theories.length)} hint="registered claims" />

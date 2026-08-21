@@ -1,28 +1,118 @@
 ---
-title: Tail Survival Cem
+title: Tail-survival CEM
 family: constructive-reservoir
-status: Rejected
+summary: Tests whether an existing policy was failing because it was tuned for average score rather than for staying alive — by retuning it, unchanged in every other way, to reach 75, 100, 150, 225 and 300 moves. It barely moved.
+status: rejected
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+If a policy dies too early, perhaps it is because nobody ever asked it to
+survive. This experiment changed one thing about an existing policy — the
+objective it was tuned against — and retuned it to chase survival milestones
+instead of mean score.
 
-## Tail-survival CEM
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
 
-Optimizes complete-game 75/100/150/225/300-move survival milestones around a fixed selective policy.
+## The intuition
 
-**Status: Rejected** (ledger-recorded). 50,432 candidate-games produced only a small gain and missed every admission floor.
+Drop7 scores are heavy-tailed, and a mean is easily dominated by a handful of
+enormous games. A tuner that optimises the mean can therefore be pulled toward
+a policy that occasionally does something spectacular and usually dies early —
+which is the opposite of what this project needs, because reaching a
+million-point *average* requires games that go on for hundreds of moves.
 
-## Sources
+So the objective was replaced with a survival curve: reward a policy for the
+fraction of its games that reach 75 moves, then 100, then 150, 225 and 300,
+with rapidly increasing weight for the later milestones. Two details in the
+frozen design are worth noting, because both are aimed at the same failure:
 
-- `tail-survival-cem.cpp`
+- a milestone's **first** hit in a batch earns only 35% of its rate, with the
+  remaining 65% unlocked by repeated hits — so one lucky game cannot carry a
+  32-game batch;
+- both mean and lower-quartile survival count, at 55% and 45%, so a policy
+  cannot buy its average with a collapsing lower tail.
 
-## More evidence
+Everything else about the policy stayed frozen: the same 165-weight
+hand-written evaluator, the same three-ply search with internal width two and
+three chance strata. This is a clean single-variable experiment — objective in,
+objective out.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/constructive-reservoir)
+## How it works
+
+1. Start from the existing frozen policy and its weights.
+2. Run a cross-entropy optimiser for 32 generations: sample a population of
+   weight vectors, play 32 complete games with each under common random
+   numbers, keep the best few, move the sampling distribution toward them.
+3. Rank candidates by the survival curve above, fixed before evaluation, never
+   by anything the policy could not see.
+4. At the end, re-rank the starting policy together with 64 archived means and
+   champions on the same fresh 256-game tournament, and check the frozen
+   admission floors.
+
+## What happened
+
+The retuned policy was **very slightly better and nowhere near good enough**.
+Over the 256-game tournament the starting policy averaged 208,940.7 points and
+64.0 moves; the frozen champion reached 214,968.9 and 65.6. Its lower-quartile
+lifetime was 38.25 moves and its flow was 1.800 clears and 0.967 reveals per
+move — well under the 2.400 and 1.400 the board demands. Only **two of 256
+games reached 150 moves, and none reached 225**, against an admission floor of
+500,000 points and 150 moves. It failed every admission check, and Stage A was
+never opened.
+
+The whole run cost 50,432 complete candidate-games. That is the useful part of
+the result: a large, honest, negative answer to a specific question. Changing
+what you ask a fixed linear evaluator to optimise does not make it survive
+longer, because the limit is what that evaluator can express about the board,
+not which summary of the games it is scored by.
+
+<TechnicalDetails title="The technical record">
+
+**Status: rejected — ledger-recorded.**
+[Experiment history](/docs/research/history) §"Tail-focused complete-game CEM
+(rejected before Stage A)":
+
+| Quantity | Starting policy | Frozen champion |
+| --- | ---: | ---: |
+| Mean score, 256-game tournament | 208,940.695 | 214,968.934 |
+| Mean moves | 64.004 | 65.590 |
+
+Champion detail: lower-quartile lifetime 38.250 moves; clear/reveal flow
+1.800/0.967 per move; 2 of 256 games reached 150 moves; none reached 225.
+Volume: 32 generations, 33,792 fitting candidate-games, plus the re-ranking
+tournament for 50,432 candidate-games in all. Recorded resources: 3,334.006
+seconds and 2,998,272 bytes peak resident memory — as recorded, with no machine
+profile attached to it in the ledger. Corrected 17,000-point scoring, checked
+as internally consistent by
+[audit 03](/docs/exploratory/audit-03-claim-arithmetic) rows 4469–4470.
+
+Frozen configuration, from the source: depth 3, internal width 2, three chance
+strata, 500-move cap; population 33, 8 elites, 32 games per batch, 256
+tournament games, 8 threads; milestones 75/100/150/225/300 weighted
+24/40/80/150/240; fitting seeds `0x3d740000`–`0x3d74ffff`, tournament seeds
+`0x3d750000`–`0x3d7500ff`, Stage A seeds `0x3d760000`–`0x3d76001f` (never
+opened). The ledger records that strict Clang/GCC builds and sanitiser
+self-tests passed and that the preflight opened zero fitting, tournament, Stage
+A, protected or final seeds, and retains frozen source, result, checkpoint and
+golden-artifact SHA-256 values.
+
+Why this sits in the constructive family: it is not a reservoir policy, it is
+the same family's question asked from the objective side — can a policy be made
+to live long enough for structure to matter?
+
+Source: `tail-survival-cem.cpp`.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- A different complete-game objective does not rescue an existing linear
+  policy. The ledger records this as useful negative evidence, and it is: the
+  hypothesis was cheap to state and expensive to test, and it is now closed.
+- Survival milestones remain the right *diagnostic* to report — the fact that
+  two games in 256 reached 150 moves is far more informative than the two mean
+  scores above.
+- The gap it exposes is between what the objective asks for and what the
+  evaluator can express. That is an argument about representation, and it is
+  where the repository's open work now sits.

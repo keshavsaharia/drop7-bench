@@ -1,0 +1,41 @@
+---
+title: Third try — a trustworthy answer key at last, and a clear verdict against direct play
+---
+
+Two earlier iterations could not deliver a verdict because their answer key was
+not reproducible enough to grade anyone. This one raised the shared runs of luck
+per column to 256, trained the network properly rather than briefly, and — the
+only diagnostic change — measured the key's reproducibility on *decisive*
+positions, ones where the columns genuinely differ by more than 20,000 points.
+That 20,000 cut was fixed from earlier training data before any of this
+experiment's data was read.
+
+The candidate is the same learned board-scorer, reading only a resolved board,
+the visible next disc, and the rise clock. The comparator is exact
+[fair D4](/learn/glossary). Again no games were played: both were asked to order
+the legal columns at fresh held-out positions and graded against the average
+40-move outcome. "Pass" meant the key first proved reproducible, and then the
+network landed within two percentage points of the search on top-choice
+accuracy, on head-to-head column comparisons, and on regret — in both halves of
+the held-out set. Passing would have opened a 32-game paired
+[SCREEN](/learn/glossary) match against the search.
+
+**What happened.** The key passed decisively for the first time (0.818 on
+decisive positions, 0.638 overall, against a 0.50 floor), so for once a real
+verdict was possible — and the verdict is a valid negative. The network trailed
+the four-move search on every preregistered comparison in both halves: top
+choice 0.424 against 0.499, head-to-head 0.685 against 0.737, regret 0.241
+against 0.178. On the 411 decisive positions the gap narrowed but did not
+close. The record is careful about what this *is*: the model is a calibrated,
+genuinely long-horizon evaluator that comfortably beats the weak player whose
+games trained it — it is simply not a replacement for four-ply search as the
+thing that picks the move.
+
+<ResultSummary id="RS-20260820T142500Z-8f4a2d17" />
+
+What it did not rule out: this exact configuration was tested, and the record
+names two untested confounds — the model stopped at 11 of 20 epochs with its
+ranking loss still falling, and its labels came from a deliberately weak
+one-move continuation player. The stated conclusion is that any future use of
+this model belongs *inside* a search as a companion signal, under the same
+ranking gate. No gameplay tier was opened.

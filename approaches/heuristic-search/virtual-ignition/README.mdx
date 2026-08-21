@@ -1,28 +1,102 @@
 ---
-title: Virtual Ignition
+title: Virtual ignition
 family: heuristic-search
-status: Rejected
+summary: Before choosing a column, imagine dropping a few imaginary discs onto the board to see which arrangements would go off like a firework — and prefer the boards that would.
+status: rejected
 evidence: task-record only
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Before choosing a column, imagine dropping a few imaginary discs onto the
+board to see which arrangements would go off like a firework — and prefer the
+boards that would.
 
-## Virtual ignition lab
+<EvidenceLabel status="rejected" evidence="task-record only" reads="public" />
 
-Tests explicit stored-chain energy under hypothetical triggers.
+## The intuition
 
-**Status: Rejected** (task-record only). the small gain did not justify its substantial search cost.
+Hand evaluators normally judge chain potential with a static rule of thumb:
+count the discs that are one addition away from clearing, add something for
+how those clears might link up, and stop. That rule is a guess about a
+cascade, made without simulating one.
 
-## Sources
+Virtual ignition replaces the guess with the real thing. It takes the board,
+places up to a handful of *virtual* discs on it — discs that do not exist and
+are marked as such — and asks the actual rules engine what would happen. If a
+board answers "a five-wave chain that opens four gray discs", it is a board
+with stored energy. If it answers "nothing", it is not, whatever the static
+count says.
 
-- `main.ts`
+The measured answer is turned into nine features: how ready the board is to
+ignite, how much the seed disc itself would clear, how many covered discs
+would crack and reveal in the first wave, how many discs, reveals and waves
+would follow downstream, how deep the cascade would run, and how much the
+total covered population would fall.
 
-## More evidence
+## How it works, step by step
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/heuristic-search)
+1. **Read the public position** — visible board, visible next disc, rise clock.
+2. **For each candidate ignition point**, add a virtual disc and run the real
+   cascade resolver over several stratified guesses about what the hidden gray
+   numbers would turn out to be. Nothing about the actual hidden values is
+   read; the guesses are drawn from a fixed public sampler.
+3. **Collect the nine energy features** and score them with fixed weights,
+   which pay most for downstream reveals (+260), downstream waves (+240) and
+   downstream clears (+160).
+4. **Add that as a residual** to the fair leaf evaluator, scaled by a constant.
+5. **Use the combined evaluator as the leaf** of a depth-3
+   [sparse expectimax](/approaches/heuristic-search/sparse-expectimax) search
+   and play the winning column.
+
+## What happened, in plain English
+
+It was retired for cost. Simulating hypothetical cascades at every leaf of a
+three-move search is expensive, the gain it bought was small, and small gains
+do not justify large costs when the reference search is faster and stronger.
+
+The lab is built as a scale sweep — it plays the same games with the ignition
+residual switched off and at four increasing strengths — so the retirement is
+a statement about the whole curve, not one setting.
+
+<TechnicalDetails title="The technical record">
+
+The [experiment index](/docs/research/experiment-index) records this lab as
+**rejected, task-record only**: *"the small gain did not justify its
+substantial search cost."* Task-record only means the comparison lives in a
+research conversation and was never promoted into the
+[experiment history](/docs/research/history). **No score, move count, work
+figure, or cohort size for that comparison is retained anywhere in this
+repository**, so this page quotes none. What "substantial search cost" means
+numerically is exactly the thing that is missing.
+
+Repository-verified from the source: `src/core/typescript/virtual-ignition.ts`
+extracts nine features with weights +40 (ignition readiness), +40 (seed clear
+potential), +90 (initial cover cracks), +180 (initial cover reveals), +160
+(downstream clears), +260 (downstream cover reveals), +240 (downstream waves),
++80 (cascade depth energy) and +160 (cover reduction); it places at most six
+virtual additions and defaults to seven reveal scenarios. The lab `main.ts` is
+pinned to depth 3 with five chance samples, three ignition scenarios, a
+1,000,000 work bound, and sweeps residual scales `0, 0.05, 0.1, 0.25, 0.5` over
+games from the `0x1d70…` training range. It reports mean and median score,
+moves, censored games, work per move and evaluator cache hit rate — the shape
+of the missing result.
+
+The virtual discs and the reveal guesses are generated from a fixed public
+sampler keyed on the visible state. No hidden value or future disc is read.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **Measuring chain potential is not the same as being able to afford it.**
+  This is the family's clearest cost-side negative: a more faithful feature
+  can be strictly better per evaluation and still lose, because the search
+  around it gets smaller.
+- **A negative for one price, not for the idea.** The rejection is of this
+  configuration — full cascade simulation at every leaf of a depth-3 search.
+  An incremental or cached formulation, or the same signal used only at the
+  root, was not tested.
+- **The record is thinner than it should be.** A rejection whose retained form
+  is one sentence cannot be re-examined, re-powered, or refuted. Anyone
+  resuming this line should expect to re-run the scale sweep rather than build
+  on it.

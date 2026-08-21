@@ -1,28 +1,104 @@
 ---
-title: Phase Benchmark
+title: Phase benchmark
 family: baselines-diagnostics
-status: Support-only
+summary: Plays complete games with the shared hand-written policy and reports not only its score but how it survived — clears, reveals, board height, search work and how many games were cut short.
+status: support-only
 evidence: repository-verified
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+A stopwatch and a set of scales for the policy that most of the native
+experiments are built on top of: play some complete games, and report six
+numbers about *how* they went rather than one number about how they ended.
 
-## Phase benchmark
+<EvidenceLabel status="support-only" evidence="repository-verified" reads="public" />
 
-Reports score, survival, clear/reveal flow, height, work, and censoring for the shared phase policy.
+## The intuition
 
-**Status: Support-only** (repository-verified). no durable standalone result was located.
+Two policies can average the same score for completely different reasons. One
+survives a long time while clearing steadily; another lives a shorter life and
+gets rescued by one enormous chain. On a heavy-tailed score those look the
+same in a mean, and they behave completely differently when you change anything
+about them.
 
-## Sources
+So this harness reports the score, and then the mechanism underneath it:
 
-- `phase-benchmark.cpp`
+- **mean moves** — how long the games lasted, which for this game is nearly the
+  same statement as the score;
+- **clears per move** and **reveals per move** — the flow rates the board has
+  to sustain against the rise (see the
+  [family page](/approaches/baselines-diagnostics) for why 2.4 and 1.4 are the
+  numbers that matter);
+- **mean maximum height** — how close to the ceiling the policy was living;
+- **work per move** — search cost in the repository's own unit, so a strength
+  change can be separated from a budget change;
+- **censored games** — how many were still alive at the move cap, whose score
+  is therefore only a lower bound.
 
-## More evidence
+Every one of those is public information about the trajectory. Nothing here
+looks under a gray disc or forward in the tape.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/baselines-diagnostics)
+## How it works
+
+1. Start a headless game from a seed.
+2. Ask the shared native behaviour policy for a column. The default
+   configuration is a three-ply search with five imagined chance outcomes per
+   node, a one-million-unit work cap per move, and a large negative value for
+   dying.
+3. Play the move, add its cleared and revealed discs to the running totals,
+   record the board's maximum height, and add the search work the move cost.
+4. Stop at game over or at the move cap (default 1,000), and mark the game
+   censored if the cap ended it.
+5. After all games, print one JSON line: games, mean score, mean moves, clears
+   per move, reveals per move, mean maximum height, work per move, wall seconds,
+   censored count. With `--trace` it also prints one line per move with the
+   disc, the column, the height, occupancy, cover count, potential and the
+   board.
+
+## What happened
+
+**No retained result.** The [experiment index](/docs/research/experiment-index)
+records this source as support-only and repository-verified and states plainly
+that "no durable standalone result was located";
+[audit 04](/docs/exploratory/audit-04-blind-spots) §B.2 lists it among the
+sources whose question has no lane. This page describes the instrument from its
+code and quotes no scores for it.
+
+<TechnicalDetails title="The technical record">
+
+**Status: support-only — repository-verified.** No ledger entry and no task
+record was located, so no measurement is attributed to this source.
+
+Defaults: 8 games from seed `0x3d700100`, `--max-moves 1000`, `--depth 3`,
+`--samples 5`, `--max-work 1000000`, `--terminal-utility -1000000`. The policy
+is `drop7::cfpi::chooseBehaviorAction` in `src/core/native/public-behavior.hpp`
+— the same shared phase behaviour that several other experiments freeze and
+build on, including the
+[tail-survival CEM](/approaches/constructive-reservoir/tail-survival-cem), which
+records its version as a 165-weight public evaluator inside a depth-3,
+internal-width-two, three-stratum selective search.
+
+Build it like any standalone experiment:
+`make experiment SOURCE=approaches/baselines-diagnostics/phase-benchmark/phase-benchmark.cpp`
+(see the [reproducibility guide](/docs/reproducibility); use `CXX=clang++`).
+
+Two cautions when reading its output. The clears- and reveals-per-move figures
+are computed as the mean per-game total divided by the mean moves, not as the
+mean of the per-game rates, so they are not paired per-game statistics. And the
+default 8 games is a smoke test, not a cohort — [benchmarks](/docs/benchmarks)
+defines the tiers that count.
+
+Source: `phase-benchmark.cpp`.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- The vocabulary this project judges policies in — flow, height, work,
+  censoring — is implemented here, and it is deliberately richer than "mean
+  score".
+- What that vocabulary said about the shared phase policy is not recorded
+  anywhere in this repository. The instrument survived; its readings did not.
+- Any future use should state its seed range and role up front, because this
+  program has no seed-lease bookkeeping of its own and will happily replay any
+  range it is given.

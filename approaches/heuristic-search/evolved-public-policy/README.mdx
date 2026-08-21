@@ -1,28 +1,150 @@
 ---
-title: Evolved Public Policy
+title: Evolved public policy
 family: heuristic-search
-status: Rejected
+summary: Give the weight search a bigger, phase-aware evaluator and let it optimise complete games directly — no imitation, no proxy label, just play and keep what survives.
+status: rejected
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Give the weight search a bigger, phase-aware evaluator and let it optimise
+complete games directly — no imitation, no proxy label, just play and keep
+what survives.
 
-## Evolved public policy
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
 
-Evolves a larger public phase evaluator used inside selective expectimax.
+## The intuition
 
-**Status: Rejected** (ledger-recorded). it failed before the protected probe.
+Most learning experiments in this repository optimise a stand-in: match a
+teacher's move, predict a value, minimise a loss. Every stand-in can be
+satisfied by a model that then plays badly. This lab removes the stand-in.
+Each candidate weight vector is judged by **playing complete games to the end**
+on shared seeds, and by nothing else.
 
-## Sources
+Two design choices make it more than a bigger version of the earlier
+[evolution](/approaches/heuristic-search/evolution) work:
 
-- `evo-public-policy.cpp`
+- **Phase blocks.** The five positions in a rise cycle get *independent*
+  weights. A board four drops from a [rise](/learn/glossary) and the same
+  board one drop away are scored by different numbers, so the policy can be
+  greedy early and cautious late without anyone hand-designing that behaviour.
+- **A survival-flavoured objective.** Candidates are ranked by
+  `0.60 × mean + 0.40 × lower quartile` of `moves + score ÷ 17,000` — a
+  measure that pays for lasting, and that pays attention to a policy's bad
+  games rather than only its average.
 
-## More evidence
+It is also the one member of this family measured under the **corrected
+17,000-point Hardcore scoring**, which makes its numbers directly comparable
+with the reference search.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/heuristic-search)
+## How it works, step by step
+
+1. **Read the public position** — board, next disc, rise clock. The program
+   structurally excludes score, level, moves played, game seed, history, and
+   any future disc or reveal.
+2. **For each legal column, average seven exactly stratified public
+   successors** — the immediate outcomes a player could imagine.
+3. **Describe each successor with 33 normalised features**: direct and latent
+   potential, cover exposure and altitude, low-number clogs, quiet-build and
+   rise readiness, height risk, and the clears, reveals, waves and score the
+   transition produced.
+4. **Score with the weight block for the current rise phase** — 33 weights ×
+   5 phases = 165 numbers — and play the best column.
+5. **Evolve the 165 numbers** with a diagonal cross-entropy method over
+   generations of complete games on common random seeds, then replay the frozen
+   champion on a generation-disjoint tournament.
+
+## What happened, in plain English
+
+It improved, clearly and reproducibly — and the improvement was in the wrong
+place.
+
+On its 128-game tournament the evolved policy scored **15.7% more than the
+hand-seeded starting point and survived 13.8% longer**. But its
+**lower-quartile survival did not move at all**: 32.938 moves before, 32.938
+moves after. It got better at its good games and no better whatsoever at its
+bad ones. Since the objective was survival and the target is a *mean* over
+many games including the bad ones, that is close to the least useful shape an
+improvement can have.
+
+Wrapping the evolved evaluator in a search made the numbers larger and the
+picture no better. The best configuration reached 272,605 points on eight
+games — but those were eight games the policy had already been fitted on, so
+the ledger records the whole search comparison as a mechanism ablation and not
+as evidence. Deeper variants were unstable and one to two orders of magnitude
+slower, and even the best of them stayed below the reference search's recorded
+mean.
+
+The candidate was rejected without opening its probe cohort. The entire
+`0x4d500000…7f` probe range remains sealed, as do all validation and final
+seeds.
+
+<TechnicalDetails title="The technical record">
+
+**Phase-conditioned public heuristic evolution — rejected before probe,
+ledger-recorded.** Full entry in the
+[experiment history](/docs/research/history). Corrected 17,000-point Hardcore
+scoring throughout.
+
+An initial 33-weight phase-*independent* pilot improved its 96-game fitting
+tournament from 137,725 points / 44.55 moves to 151,923 / 48.49 — too small to
+justify a probe. The larger fixed run used 80 generations, 65
+antithetic-plus-mean candidates, 32 common-random-number games per generation,
+12 elites, and a 128-game generation-disjoint fitting tournament, evaluating
+166,400 candidate-games. All games ended naturally before the 500-move cap.
+
+| 128-game fitting tournament | Mean score | Mean moves | Lower-quartile score | Lower-quartile moves | Clears / move | Reveals / move |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Hand-seeded phase policy | 136,169.15 | 44.156 | 95,855.97 | 32.938 | 1.5400 | 0.7619 |
+| Evolved phase policy | 157,528.50 | 50.234 | 96,130.41 | 32.938 | 1.6516 | 0.8566 |
+
+The ledger is explicit that this tournament *"remained fitting evidence after
+its first use in the phase-independent pilot; it is not described as a heldout
+result."* The candidate *"remained far below the roughly 285-move trajectory
+implied by a million points."*
+
+The selective-expectimax follow-up changed no model parameter and deliberately
+reused the same eight fitting-only games `0x3d510900…07`, so its table is a
+mechanism ablation, not independent evidence. Its best row — depth 4, internal
+width 2, five strata — reached **272,605.13 points and 81.750 moves in 162.543
+seconds for eight games**, against 162,932.25 / 51.875 for the direct policy in
+0.014 seconds. Depth 3 / width 2 / three strata consumed 3,694.64 sampled
+transitions per move; the direct policy used 47.54 per played move.
+
+Resource and integrity record: 165 doubles (1,320 parameter bytes) in a
+1,352-byte versioned checkpoint; training 105.784 wall seconds at 3,719,168
+bytes peak RSS; the 128-game replay 0.472 seconds at 1,720,320 bytes. Optimised
+strict-`-Werror` and ASan/UBSan self-tests passed deterministic and legal
+direct decisions, selective-search determinism, reflection, public-metadata
+blindness, exact 17,000-point scoring, headless-disc reproducibility and
+bit-exact checkpoint round trips. Canonical orientation and public-state-derived
+chance salts make mirrored positions select mirrored actions. The rejected
+checkpoint and final source SHA-256 digests are recorded in the ledger.
+
+The executable mechanically rejects every seed outside its assigned
+`0x3d500000…0x3d51ffff` fitting and `0x4d500000…0x4d50007f` probe ranges.
+
+**For comparison** (a different family, ledger-recorded, corrected scoring):
+the fair depth-4 reference search averages 308,295.578 points and 90.031 moves
+over its 64-game reference cohort.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **Optimising the real objective removes one failure mode and not the
+  important one.** There was no proxy label here to be gamed, and the policy
+  still improved on the games it was fitted to in a way that did not
+  generalise into the thing that matters.
+- **Watch the lower quartile, not the mean.** An unchanged lower-quartile
+  survival next to a 13.8% mean gain is the clearest single illustration in
+  the repository of why mean-only reporting hides damage — and why the
+  benchmark contract requires lower-tail outcomes and censoring counts.
+- **Search cannot rescue an evaluator, and reused games cannot measure it.**
+  The ablation table is a useful catalogue of how expensive each search
+  configuration is. It is not evidence that any of them is good, and the
+  ledger says so itself.
+- **What was ruled out** is the phase-conditioned linear successor family and
+  this selective-search wrapper. What is untouched is the phase-block idea,
+  which survives elsewhere in the repository as a way of conditioning an
+  evaluator on the rise clock.

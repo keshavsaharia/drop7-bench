@@ -1,28 +1,130 @@
 ---
-title: Oracle Distillation
+title: Oracle distillation
 family: oracle-curriculum
-status: Rejected
+summary: Show a network thousands of positions labelled with the column a future-reading planner chose, and see whether it can guess that column from the screen alone.
+status: rejected
 evidence: ledger-recorded
-generated: true
+reads: teacher
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Show a small network thousands of positions, each labelled with the column that
+a planner who could see the future chose there, and find out whether the screen
+alone contains enough information to guess that column.
 
-## Native oracle distillation
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="teacher" />
 
-Aggregates privileged actions over whole-game splits and gates a public policy hybrid.
+This is the most direct form of the idea. No features, no residuals, no
+tie-breaks: copy the teacher's moves, then play the copy.
 
-**Status: Rejected** (ledger-recorded). held-out labels overfit and the apparent screen gain reversed in confirmation.
+## What each side was allowed to see
 
-## Sources
+| | The teacher | The student |
+| --- | --- | --- |
+| The board on screen | yes | yes |
+| The visible next disc | yes | yes |
+| Moves until the next rise | yes | yes |
+| Hidden gray-disc numbers | **yes** | no |
+| The discs still to come | **yes** | no |
+| Game seed, score, level, move number | yes | no |
 
-- `oracle-distill.cpp`
+The boundary is enforced in code, not by convention: an example passes through a
+public-state constructor that keeps only the board, the visible disc and the
+rise phase, and drops the seed, the future tape, the reveal generator, the
+score, the level and the move count. Boards are canonicalized by reflection so
+that a mirrored position cannot be treated as a different one.
 
-## More evidence
+## How it works, step by step
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/oracle-curriculum)
+1. Play **12 games with the future-reading planner** and **32 games with an
+   ordinary public depth-3 search**, capping label collection at 200 moves per
+   game.
+2. In *both* sets, write down the position as the student would see it, and
+   label it with the column the **teacher** would have chosen. Using ordinary
+   search to generate the positions is deliberate: it makes the label task
+   "what would the teacher do *here*", on boards a normal player actually
+   reaches, rather than only on boards the teacher's own play produced.
+3. Split by **whole game**, never by position, so that no position from a
+   training game can appear in the held-out set.
+4. Train a sparse network — 614 inputs, two hidden layers of 128, seven outputs,
+   one per column — to predict the teacher's column.
+5. Gate the labels *before* any game is played: held-out top-1 accuracy at least
+   0.30, top-2 at least 0.55, cross-entropy at most 1.75.
+6. Only if the labels pass, deploy as a **hybrid**: exact search decides, and the
+   student may override it only when it is at least 40% confident, at least 12
+   percentage points ahead of the search's own choice, and the alternative is
+   within 10% of the search's value range. Eight fresh games screen it;
+   sixteen more confirm it.
+
+## What happened, in plain English
+
+The network learned the training data well and could not reproduce it on games
+it had not seen. On held-out positions it picked the teacher's column about
+**22% of the time**, against the 30% the protocol required in advance, and its
+cross-entropy was far worse than the gate allowed. Crucially, it was just as bad
+on the ordinary-search positions as on the teacher's own positions — so this is
+not a case of the student being shown unfamiliar boards. The information needed
+to reproduce the teacher's choice is simply not on the screen.
+
+The gate had failed, but the eight-game screen was run anyway for completeness,
+and it *passed*: the hybrid scored about 22,000 points more and lived five moves
+longer. That was a false positive. On the sixteen-game confirmation the same
+frozen hybrid lost about 62,000 points and 18 moves per game. It is a clean
+illustration of why this repository runs a confirmation cohort at all: eight
+games cannot separate policies whose scores are heavy-tailed.
+
+<TechnicalDetails>
+
+Frozen run: fitting seeds `0x3d7a0000...` (oracle roll-ins) and `0x3d7b0000...`
+(behaviour roll-ins); whole-game label holdouts `0x3d7c0000...` and
+`0x3d7d0000...`. 5,110 fitting labels, 1,629 held-out labels. Network 614 /
+128 / 128 / 7, 384,540 bytes. Single run 296.3 seconds.
+
+| Quantity | Gate | Observed |
+| --- | --- | ---: |
+| Held-out top-1 | at least 0.30 | **0.218** |
+| Held-out top-2 | at least 0.55 | 0.386 |
+| Held-out cross-entropy | at most 1.75 | **3.282** |
+| Training cross-entropy | — | 0.480 |
+
+The oracle fitting roll-ins all reached the 200-move label cap and averaged
+829,516.75 points — teacher figures, produced with future information, not
+comparable with policy scores.
+
+| Cohort | Exact behaviour search | Hybrid | Paired delta |
+| --- | ---: | ---: | ---: |
+| Screen, 8 games `0x3d7e0000...07` | 261,871.875 pts / 79.25 moves | 283,850.625 / 84.5 | **+21,978.75 / +5.25**, both paired 95% lower bounds negative |
+| Confirmation, 16 games `0x3d7f0000...0f` | 249,816.875 / 75.375 | 187,542.625 / 57.25 | **−62,274.25 / −18.125**, lower bounds −118,363.971 / −33.322 |
+
+The hybrid overrode the search on 18.45% of confirmation moves. The ledger entry
+does not state which level bonus was in force, and it sits well before the
+corrected-scoring replay in the ledger, so treat the absolute point totals as
+historical rather than as corrected-score Hardcore evidence; the *paired
+direction* of the confirmation is what the rejection rests on.
+
+[`audit-05`](/docs/exploratory/audit-05-optimistic-curriculum) §4 classifies
+this as failure 1 of 17, primary mode "representation / information gap", and
+notes that distribution shift was *controlled* here — the ledger's own words are
+that "oracle and behavior holdouts were similarly weak" — and that fitting was
+excellent, so it is not an optimisation failure either.
+
+Records: [experiment index](/docs/research/experiment-index) "Oracle and
+curriculum research"; [ledger](/docs/research/history) section "Privileged-future
+oracle distillation". Source: `oracle-distill.cpp`.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **A screen win on eight games means very little.** The predeclared
+  confirmation is what caught this, and the ledger records both halves rather
+  than only the flattering one.
+- **The label was the problem, not the model.** Training cross-entropy of 0.480
+  says the network had ample capacity to fit what it was shown; held-out 3.282
+  on positions drawn from *ordinary* play says the target is not a function of
+  the public board.
+- **What it does not rule out.** It rejects imitating the *choices* of a
+  future-reading teacher. It says nothing about teachers whose advantage is
+  itself public — a distinct line of work pursued later under
+  [planner distillation](/approaches/lifetime-objective/planner-distill) — nor about learning
+  something other than the teacher's action, which is what the
+  [topology](/approaches/oracle-curriculum/topology) experiments tried next.

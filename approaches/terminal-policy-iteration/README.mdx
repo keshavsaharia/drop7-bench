@@ -1,25 +1,193 @@
 ---
 title: Terminal policy iteration
-summary: Judge actions by how whole games actually end, and override the baseline only with statistical confidence.
+summary: Choose between moves by actually playing each of them forward many times and seeing which one leads to the longest, highest-scoring games — then change the reference policy's mind only when the evidence is overwhelming.
 ---
 
-Instead of trusting a heuristic leaf, run each candidate root action through
-many long continuations — hundreds of moves, sometimes to the game's end — and
-compare the distributions. Then, crucially, only override the baseline policy
-when the improvement is statistically supported; otherwise keep the safe
-choice.
+Choose between moves by actually playing each of them forward many times and
+seeing which one leads to the longest, highest-scoring games — then change the
+reference policy's mind only when the evidence is overwhelming.
 
-## Why it matters
+## Why lifetime, and why this family exists
 
-This family produced the repository's most careful **offline** evaluation
-asset: a locked panel of 477 public roots with every legal sibling labeled by
-long continuations. On that panel the latest completed work found:
+In this game, almost the whole score is survival. Across 64 games of the
+reference policy, the correlation between final score and moves survived was
+r = 0.9995, and 94.3% of all points came from the flat 17,000-point bonus for
+surviving a row rise — 5.7% came from chain waves and none at all from board
+clears ([finding 01](/docs/exploratory/finding-01-score-is-survival),
+exploratory, development tier, 64 paired games). Playing beautifully is not the
+objective. Not dying is the objective, and points arrive as a by-product at a
+near-constant rate.
 
-- a martingale-dual ranker underperformed fair D4 (28.93% vs 38.16% top-1
-  accuracy);
-- a regenerative policy-iteration variant was nearly identical to D4,
-  overriding only 11 roots — six helped, but confidence bounds were negative.
+That reframing exposes a structural problem with the
+[reference search](/approaches/fair-expectimax/reference). It looks four of the
+player's moves ahead. The board rises every five moves. So the reference can
+barely see one rise boundary, while the thing that actually ends its games is a
+shortfall that accumulates over dozens of them: it clears about 1.973 discs per
+move where 2.400 are needed to break even, and reveals about 1.090 covered
+discs per move where 1.400 are needed. Its mean lifetime is 94.06 moves; a
+million-point average needs roughly 294. A four-move search cannot see a
+40-cycle deficit, no matter how carefully it evaluates the board in front of it.
 
-Neither justified a gameplay run, and both were recorded as valid negatives.
-The lesson generalizes: **conservative overrides need overwhelming evidence**,
-because a wrong override costs more than a right one gains.
+This family's answer is to stop evaluating boards and start measuring outcomes.
+Do not ask a hand-tuned function how promising a position looks. Play it.
+
+<svg viewBox="0 0 660 250" className="my-4 w-full max-w-3xl rounded-xl border border-zinc-800 bg-zinc-900/40" role="img" aria-label="Schematic: fix each candidate first move, play the same imagined futures forward from each, compare average outcomes, and override only if a confidence bound clears">
+  <g fontSize="11" fill="#e4e4e7" fontFamily="ui-sans-serif, system-ui, sans-serif">
+    <text x="16" y="22" fontSize="12" fontWeight="700" fill="#a1a1aa">1. fix one first move</text>
+    <text x="230" y="22" fontSize="12" fontWeight="700" fill="#a1a1aa">2. play the same futures forward from each</text>
+    <text x="530" y="22" fontSize="12" fontWeight="700" fill="#a1a1aa">3. compare, then decide</text>
+    <rect x="16" y="36" width="120" height="26" rx="6" fill="#1e3a8a" />
+    <text x="76" y="53" textAnchor="middle" fontWeight="700">current position</text>
+    <g>
+      <rect x="16" y="86" width="120" height="22" rx="5" fill="#27272a" stroke="#52525b" />
+      <text x="76" y="101" textAnchor="middle">column A</text>
+      <rect x="16" y="118" width="120" height="22" rx="5" fill="#27272a" stroke="#52525b" />
+      <text x="76" y="133" textAnchor="middle">column B</text>
+      <rect x="16" y="150" width="120" height="22" rx="5" fill="#27272a" stroke="#52525b" />
+      <text x="76" y="165" textAnchor="middle">column C …</text>
+      <text x="16" y="196" fontSize="10" fill="#a1a1aa">every legal column,</text>
+      <text x="16" y="210" fontSize="10" fill="#a1a1aa">not just the favourite</text>
+    </g>
+    <g stroke="#3f3f46" strokeWidth="1.5">
+      <line x1="76" y1="62" x2="76" y2="86" />
+      <line x1="136" y1="97" x2="236" y2="97" />
+      <line x1="136" y1="129" x2="236" y2="129" />
+      <line x1="136" y1="161" x2="236" y2="161" />
+    </g>
+    <g>
+      <rect x="236" y="80" width="250" height="98" rx="8" fill="#14532d" opacity="0.35" stroke="#166534" />
+      <text x="248" y="99" fontSize="10.5" fill="#bbf7d0">the same K imagined disc-and-reveal</text>
+      <text x="248" y="113" fontSize="10.5" fill="#bbf7d0">tapes are replayed for every column</text>
+      <text x="248" y="133" fontSize="10.5" fill="#bbf7d0">after the fixed first move, a plain</text>
+      <text x="248" y="147" fontSize="10.5" fill="#bbf7d0">public policy plays on for 25–200 moves</text>
+      <text x="248" y="167" fontSize="10.5" fill="#bbf7d0">record: score, moves survived, flow</text>
+    </g>
+    <g stroke="#3f3f46" strokeWidth="1.5">
+      <line x1="486" y1="129" x2="524" y2="129" />
+    </g>
+    <g>
+      <rect x="524" y="80" width="120" height="44" rx="6" fill="#4c1d95" />
+      <text x="584" y="99" textAnchor="middle" fontSize="10.5" fill="#ddd6fe">mean outcome</text>
+      <text x="584" y="114" textAnchor="middle" fontSize="10.5" fill="#ddd6fe">per column</text>
+      <rect x="524" y="134" width="120" height="60" rx="6" fill="#78350f" />
+      <text x="584" y="153" textAnchor="middle" fontSize="10.5" fill="#fde68a">override the</text>
+      <text x="584" y="167" textAnchor="middle" fontSize="10.5" fill="#fde68a">reference only if a</text>
+      <text x="584" y="181" textAnchor="middle" fontSize="10.5" fill="#fde68a">confidence bound clears</text>
+    </g>
+    <text x="16" y="238" fontSize="10" fill="#71717a">Sharing the imagined futures across columns is what makes the comparison fair: every column meets the same luck.</text>
+  </g>
+</svg>
+
+## How it works, step by step
+
+1. At a position, list **every** legal column — not just the ones a policy
+   likes. This is the deliberate cure for the
+   [sibling trap](/learn/concepts/ranking-siblings), where a model is trained
+   only on moves that were actually played and then asked to rank moves that
+   never were.
+2. Generate a fixed set of imagined futures: which discs will be dealt, which
+   hidden numbers will be revealed. Crucially, **the same set is used for every
+   column**, so no column can win by being dealt luckier cards.
+3. For each column, force that move, then let a simple public policy — usually
+   the one-move-ahead or two-move-ahead fair search — play on for a fixed
+   horizon: 25, 50, 75, 100 or 200 moves depending on the experiment. Record
+   the score, the moves survived, and the clear and reveal rates.
+4. Average across the futures. Now every column has a measured outcome instead
+   of a heuristic estimate.
+5. Do not simply take the best. Compare the winner with what the reference
+   policy would have played, and switch only if a one-sided confidence bound on
+   the paired difference clears a threshold that was frozen before the data was
+   read. Otherwise keep the reference's move.
+
+Step 5 is the "policy iteration" half of the name and it is where most of the
+family's discipline lives. One step of improvement over a known-decent policy
+is a classical, well-understood operation; the danger is that noisy measurement
+makes a worse move look better, and a rule that switches on noise is worse than
+no rule at all.
+
+## What happened, in plain English
+
+Every candidate in this family was retired, and the family's most valuable
+output turned out to be a dataset rather than a policy.
+
+The recurring shape of the failure is easy to state. When the measurement is
+cheap enough to run, it is too noisy to beat the reference; when it is faithful
+enough to trust, it is far too slow to play a game. The most faithful design of
+all — comparing candidate moves by playing them to the actual end of the
+game — was measured at roughly hundreds of seconds *per move* and was paused
+before it produced a policy result. The cheapest version, using fifteen
+imagined futures and fifty-move continuations, did improve every one of its
+four paired games, and still failed: its frozen gate demanded a 1.20× gain in
+both score and lifetime and it produced about 1.07× and 1.03×, while its rate
+of uncovering hidden discs actually fell.
+
+What the family did produce is a locked panel of 477 positions taken from eight
+complete games, with every legal column at every position labelled by long
+continuations under shared imagined futures. That corpus is the closest thing
+in this repository to the successor-closed data the
+[sibling ranking](/learn/concepts/ranking-siblings) problem calls for, and it
+has since been used to test three quite different rankers offline, without
+opening a single new game. All three lost to the reference search. One was
+statistically indistinguishable from simply keeping the reference: it changed
+its mind at 11 of 477 positions, six of those changes helped, and the
+confidence bounds on its advantage were negative.
+
+That negative is worth reading precisely, because it is easy to over-claim in
+either direction. It does not show that long continuations are the wrong
+signal. It shows that these particular measurements, at these budgets, on this
+panel, could not separate the reference's move from a better one reliably
+enough to act.
+
+<TechnicalDetails title="The technical record">
+
+| Approach | Status and evidence | Recorded outcome |
+| --- | --- | --- |
+| [Terminal rollout](/approaches/terminal-policy-iteration/terminal-rollout) | Runtime-paused — task-record only | A faithful full-terminal design projected roughly hundreds of seconds per move |
+| [Public survival rollout](/approaches/terminal-policy-iteration/public-survival-rollout) | Rejected — task-record only | 31 aligned 100-move continuations were worse than fair D1 on fitting games |
+| [Terminal policy iteration](/approaches/terminal-policy-iteration/terminal-policy-iteration) | Rejected — task-record only | 255 aligned 200-move continuations: the gain was real but missed the frozen gates |
+| [Public rollout policy iteration](/approaches/terminal-policy-iteration/public-rollout-policy-iteration) | Rejected — ledger-recorded | 1.0697× score and 1.0256× moves against a 1.20× gate |
+| [Deployment panel](/approaches/terminal-policy-iteration/deployment-panel) | Mixed — see the page | The 477-root corpus, one completed diagnostic, and two rejected rankers |
+| [Public regenerative B0](/approaches/terminal-policy-iteration/public-regenerative-b0) | Rejected — ledger-recorded | Overrode 11 of 477 roots; every gate but one failed |
+
+**A caveat about the family's name.** The lifetime framing above is the
+motivation, and two of these programs did require a gain in survived moves as
+well as score. But the locked 477-root panel labels siblings by *score return*
+over a truncated continuation, and the panel rankers were judged on how well
+they reproduce that label. Given how tightly score tracks lifetime over whole
+games, these are closely related quantities — but a truncated continuation
+return is not the same thing as a completed game's lifetime, and no experiment
+in this family has ranked siblings by measured lifetime alone.
+
+**A caveat about what a panel result is.** Everything measured on the 477-root
+corpus improves only the *root* action; every later move reverts to the
+continuation policy. These are offline root-panel proxies, not complete-game
+results, and the ledger says so explicitly.
+
+Sources: the terminal-policy-iteration table in the
+[experiment index](/docs/research/experiment-index); the ledger entries
+"Corrected-17k public rollout policy iteration", "Full-panel conservative-policy
+preflight", "Martingale-dual B0 ranking audit" and "Public regenerative
+policy-iteration B0" in the [experiment history](/docs/research/history); and
+the summary in [research status](/docs/research/status).
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **Measuring outcomes is not automatically better than evaluating boards.** A
+  long continuation replaces one source of error, a hand-tuned leaf, with
+  another, sampling noise, and the second is not obviously smaller.
+- **Conservative overrides need overwhelming evidence, not merely positive
+  evidence.** Two independent experiments here produced positive mean
+  differences whose confidence bounds were negative, and both were correctly
+  rejected. A wrong override costs more than a right one gains.
+- **A policy that almost never acts has not solved anything.** Coverage is a
+  first-class metric in this family for a reason: an override that fires at 11
+  of 477 positions cannot move a mean, whichever way it points.
+- **Still open:** a comparison that is cheap by design. The
+  [strategy catalog](/docs/strategies) calls multi-cycle comparison one of the
+  more informative open directions and says the existing implementation is
+  neither fast nor robust enough. It also warns that the one striking positive
+  pilot in this line of work — a 25-move rollout veto, which lives in the
+  [D4 and long-outcome](/approaches/d4-long-outcome) family — must not be turned
+  into a tuning target.

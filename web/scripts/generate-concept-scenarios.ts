@@ -8,7 +8,7 @@
  * scored by the move — so the reader can check every number by hand. It is a
  * teaching device, not a research policy.
  *
- *   cd web && npm run concept:scenarios
+ *   cd web && npm run figures:concepts
  */
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";

@@ -31,7 +31,7 @@ There are only three kinds of thing on the board, plus empty space:
 What the player sees is also exactly what a legal strategy in this repository
 is allowed to see:
 
-<PlayerView caption="The visible board, the next disc, and the rise clock are public. The number under a gray disc was fixed the moment that row appeared, but nobody can see it until the disc is opened; and nobody knows which discs are coming after the next one." />
+<PlayerView caption="The visible board, the next disc, and the rise clock are public. What is under a gray disc is unknowable until it is opened, and nobody knows which discs are coming after the next one." />
 
 ## 2. A turn: pick a column
 
@@ -186,10 +186,22 @@ two clearing neighbours in the same wave opens immediately.
   caption="Two hits in the same wave open a solid disc at once. Hits are judged on the board before the clear, so a disc that is about to be removed still counts as a neighbour."
 />
 
-The number under a gray disc is **fixed** at the moment its row appears. Nothing
-you do changes it — you only control when it is exposed. In the scripted
-benchmark rounds used by the leaderboard that value is written down in advance,
-so every policy that opens the same disc finds the same number.
+A gray disc hides one number from 1 to 7, drawn uniformly. Nothing you do
+changes the odds — you only control *when* and *whether* it is exposed.
+
+<Callout title="One place where this simulator differs from the original game" tone="warn">
+In the original Drop7 the hidden number is decided when the gray disc is
+created, and stays with that disc. **This repository's engine draws it at the
+moment of reveal instead**, in row-major order. To a player the two are
+indistinguishable — either way the number you see is uniform on 1–7 and
+unknowable in advance — but they are not the same thing for research: it means
+there is no persistent "answer key" underneath the board unless the engine's
+optional **latent mode** is switched on, which is exactly what the scripted
+benchmark rounds and the hidden-board research tools do. In latent mode the
+values are written down in advance, so every policy that opens the same disc
+finds the same number. This divergence is measured and recorded in the
+repository's engine-fidelity audit.
+</Callout>
 
 ## 5. Gravity and chain reactions
 
@@ -266,8 +278,9 @@ appears along the bottom. The clock resets to 5 and play continues.
 />
 
 Two details of the rise matter for strategy. It happens **after** the cascade
-of the move that triggered it, not before; and the seven new gray discs carry
-their hidden numbers from the moment they appear.
+of the move that triggered it, not before; and the seven new gray discs are
+seven more unknown numbers *and* seven more occupied cells, which lengthens
+every vertical run passing through them.
 
 ## 8. How a game ends
 
@@ -302,7 +315,7 @@ censored), and no way to lose points.
 | A turn | You are shown the next disc; you choose a column whose top cell is empty; the disc falls to the lowest empty cell in that column. |
 | Clearing | A numbered disc clears when the contiguous run of occupied cells through it, along its row **or** its column, has length **exactly** equal to its number. Gray discs count as occupied. |
 | Waves | All matching discs clear simultaneously; gravity then pulls everything above them down; if new matches exist, the next wave clears them; repeat until nothing matches. |
-| Gray discs | A hit is an orthogonally adjacent disc clearing in the current wave, judged on the pre-clear board. Solid + 1 hit = cracked. Cracked + 1 hit = revealed. Solid + 2 hits in one wave = revealed. The revealed number was fixed when the row appeared. |
+| Gray discs | A hit is an orthogonally adjacent disc clearing in the current wave, judged on the pre-clear board. Solid + 1 hit = cracked. Cracked + 1 hit = revealed. Solid + 2 hits in one wave = revealed. The revealed number is uniform on 1–7; this engine draws it at reveal time unless latent mode fixes it in advance (see section 4). |
 | Wave score | `floor(7 × d^2.5)` points per disc cleared in wave `d`: 7, 39, 109, 224, 391, 617, 907, 1,267, … |
 | Rise | After every fifth drop (and after that move's cascade), the board moves up one row and a row of seven solid gray discs appears at the bottom; **+17,000**. A cascade caused by the new row continues the move's wave count. |
 | Board clear | A move that ends with an empty board earns **+70,000**. |

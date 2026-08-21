@@ -1,0 +1,254 @@
+---
+title: Is the required clearing rate reachable at all?
+family: lifetime-objective
+summary: Let a planner cheat — read the hidden numbers and plan against a future it already knows — to find out whether any way of playing can remove discs as fast as the game adds them.
+status: completed
+evidence: development-tier exploratory findings
+reads: oracle
+---
+
+Let a planner cheat — read the hidden numbers under the gray discs and plan
+against a future it already knows — to find out whether **any** way of playing
+can remove discs as fast as the game adds them.
+
+<EvidenceLabel status="completed" evidence="development-tier exploratory findings" reads="oracle" />
+
+<Callout title="Everything headline on this page is a cheat, and that is the point" tone="warn">
+The planner measured here reads the hidden value under every gray disc and the
+whole future sequence of discs. It is an **oracle**: a measuring instrument and
+a possible source of training labels, never something that could play the game
+for real. Its numbers are a *ceiling* — they say what the game permits, not what
+a legal player achieved. This page also measures a **legal** planner with the
+same design and the cheating removed; every number below says which one it is.
+</Callout>
+
+## Why the question is worth asking
+
+The [family page](/approaches/lifetime-objective) has the arithmetic: twelve
+discs enter a 49-cell board every five moves, so surviving forever needs
+**2.400 numbered clears and 1.400 gray-disc reveals per move**. The reference
+policy manages 1.973 and 1.090. Two completely different research programmes
+follow from what that means:
+
+- **If no line of play can sustain 2.400**, every game necessarily ends, average
+  lifetime is capped, and a million-point average would have to come from
+  spectacular chain reactions instead.
+- **If flow balance is sustainable**, survival is the lever and the whole
+  problem is finding a legal policy that holds the balance.
+
+Nobody had checked which world this is. That is what this approach is for.
+
+## The intuition: an empty board is not a safe board
+
+The obvious guess is that the reference policy dies because it lets the board
+get too full, and that a tidier player would live longer. The engine says the
+opposite about the sparse end. A disc clears when its number equals the length
+of the run it lands in, so a nearly empty board offers almost nothing to match
+against.
+
+<BoardCompare
+  before="0000000000000000000000000000000000047000008888888"
+  after="0000000000000000000060005598074988849888888888888"
+  beforeLabel="9 discs · 14 of 49 drops clear"
+  afterLabel="25 discs · 39 of 49 drops clear"
+  caption="Two positions from one game played through the repository's rules engine (move 2 and move 16). For each board, every one of the seven disc values was dropped into every legal column and the engine asked whether anything popped. On the sparse board only 14 of the 49 possible drops clear anything; on the fuller board, 39."
+/>
+
+That is the mechanism behind everything below. **The rate at which a board can
+clear discs rises with how full it is** — up to a point. So there is some
+occupancy at which the achievable clear rate crosses 2.400, and a policy that
+can hold the board there is in equilibrium: below it the board fills, above it
+the board empties. The question is whether that crossing point exists on a real
+board and whether anything can sit on it.
+
+## How the measurement works
+
+1. **Fix a whole future in advance.** A *master tape* pins the starting
+   position, one disc per move index, and the hidden numbers of every row that
+   will ever rise. Every policy in a comparison plays the same tapes, so nothing
+   is redrawn when one of them deviates. This needs a simulator with a
+   persistent hidden board, which is why the work runs inside the
+   [scenario engine](/approaches/lifetime-objective/scenario) rather than the
+   base one.
+2. **Plan exactly over a short window.** At every move, cut a window of `H`
+   moves out of that fixed future, solve it exactly — every legal move, every
+   consequence, no [leaf evaluator](/learn/glossary) and no guessing — play the
+   first move of the best line, and re-solve from the new position. Windows of
+   5, 7 and 9 moves were used; 9 is the largest that solves exactly in seconds.
+3. **Choose what to maximise.** One objective maximises the window's **points**;
+   the other maximises **numbered discs cleared**, which is the quantity the
+   conservation law is about. Both read the hidden board. The reference depth-4
+   search and a trivial "always drop in the lowest column" player are the
+   controls, and both read only public information.
+4. **Then take the cheating away, one privilege at a time.** The same planner,
+   given no hidden values, draws `K` complete guesses of what is under the
+   covers, solves the window exactly against each guess, and plays the column
+   with the best average. A third arm is given the future disc sequence but not
+   the hidden board. A mechanical gate proves the legal arm is legal: over
+   20-plus consecutive real decisions, replacing *every* hidden value and
+   substituting a completely different future left its chosen column identical.
+
+## What happened
+
+**The ceiling is above the requirement.** Told to maximise clears, the
+clairvoyant planner with a nine-move window sustained **2.3875 clears and 1.3963
+reveals per move over 6,000 moves**, and **2.4023 clears per move over the
+second half of those games — at the requirement rather than approaching it**.
+Board occupancy sat flat at 19–20 of 49 cells for 200 consecutive five-move
+cycles, and all six games reached the 1,000-move cap still alive. The reference
+policy on identical futures died. So flow balance is achievable *in the game*:
+this is a control problem with a solution, not an arithmetic impossibility.
+
+**And the equilibrium is self-correcting.** Conditioning on how full the board
+was before each move, the clairvoyant clear-seeker extracts 2.16 clears per move
+at 15–19 occupied cells, 2.97 at 20–24 and 4.21 at 25–29 — so below about 20
+cells it clears less than 2.400 and the board fills, above it clears more and
+the board empties. The reference policy has no such fixed point: its rate peaks
+at 2.59 near 27 cells and then *falls* — 2.26, 1.58, 1.40, 1.00 as the board
+crowds — which is a death spiral, and explains why its lifetimes are so
+unevenly distributed.
+
+**Chain building is real, and it is not the lever.** Given the same futures and
+the same exact look-ahead, a planner told to maximise *points* plays a
+completely different game: more than half its score comes from chain reactions,
+it reaches 22-deep cascades, and it earns 1.75 times the points per move. It
+also lost 2.4 times the lifetime and finished with a **lower** mean score. Deep
+cascades are constructible with perfect knowledge; collecting them still loses.
+
+**No legal policy got near the ceiling.** Take the hidden board away and the
+same planner, averaging over 256 guesses, closes only part of the gap — and
+much less than was first reported. On 32 fresh futures played by all four arms it
+sustains **2.0260 clears per move**, against **1.9004** for the reference policy
+and **2.3637** for the clairvoyant planner on those same futures: about **27% of
+the gap** at the longer of the two affordable windows, and 22% at the shorter
+one. Across every legal arm ever
+run in this approach — 87 games in the first study, then 128 and 32 more on
+fresh futures — **not one game survived to the move cap**, and every one of
+those boards filled up monotonically.
+
+**Knowing the future is worth nothing; knowing what is under the covers is
+worth everything.** The arm handed the exact future disc sequence was no better
+than the fully legal arm. But the shortfall against the clairvoyant planner
+grows sharply with how much is hidden: **+0.05 clears per move on boards with
+10–14 discs, +3.54 on boards with 30–34**, where about twenty covered cells are
+unknown. More guessing closes the sparse end and does essentially nothing at the
+crowded end — which is exactly the regime a policy running a flow deficit gets
+pushed into.
+
+**More guessing eventually makes it worse.** The obvious lever — raise the number
+of guessed futures — turns over. Going from 256 guesses to 1,024 was worse on
+five of six paired futures and cut mean lifetime from 182 to 100 moves. That is
+the expected behaviour of this kind of planner: inside every guess it plans as
+if the guess were true — [strategy fusion](/learn/glossary) — so more compute
+buys a more faithful optimisation of a biased objective. There is no setting of this dial at which the planner
+approaches 2.400.
+
+<Callout title="One of the numbers on this page corrects an earlier one" tone="info">
+The first study reported the legal planner at **2.2309 clears per move**, closing
+**58.8%** of the gap. Both figures were measured on eight futures that turned out
+to favour long games: the reference policy scores 117.75 mean moves on those
+eight and **93.56** on 128 fresh ones — a 26% inflation, confirmed by two
+independent measurements of the same policy at 94.06 and 93.78 moves. The
+clairvoyant planner, which was hitting the move cap either way, was **not**
+affected (2.3601 → 2.3663). So the ceiling stands and the legal planner's share
+of the gap was roughly halved. Both the original claim and its correction are
+retained in the record rather than edited away.
+</Callout>
+
+<TechnicalDetails title="The record: cohorts, configurations and gates">
+
+Three retained exploratory findings, all at the repository's `development` /
+`pilot` evidence tier, all measured in this checkout on 2026-08-20, none with a
+row in the [experiment index](/docs/research/experiment-index) or an entry in the
+[ledger](/docs/research/history):
+
+- [`finding-06-flow-ceiling`](/docs/exploratory/finding-06-flow-ceiling) — the
+  clairvoyant ceiling and the equilibrium mechanism.
+- [`finding-07-fair-planning-ceiling`](/docs/exploratory/finding-07-fair-planning-ceiling) —
+  removing the two privileges one at a time.
+- [`finding-12-fair-planner-ceiling-extended`](/docs/exploratory/finding-12-fair-planner-ceiling-extended) —
+  the re-baselining on fresh futures, and the correction above.
+
+**Clairvoyant clear-seeker, nine-move window, one move committed per solve**
+(finding-06 §2.1): 6 games, 1,000-move cap, 6/6 censored alive, mean score
+3,865,157 (not comparable with any ledger figure — different randomness model),
+2.3875 clears / 1.3963 reveals per move whole-game, 2.4023 clears per move over
+moves 501–1000, occupancy slope −0.0015 cells per cycle over cycles 2–200, mean
+occupancy 20.67 at cycle 2 and 19.50 at cycle 200, 0 board clears.
+
+**Paired controls on the same eight master tapes** (finding-06 §2): lowest
+column 33.12 mean moves and slope +4.47; reference depth-4 search 117.75 moves
+and slope +0.99; points-maximising clairvoyant planner 165.00 moves, 1,123,130
+mean score; clear-maximising clairvoyant planner at the nine-move window 396.88
+moves, 1,544,461 mean score, 7 of 8 censored alive.
+
+**Occupancy bands, clears per move** (finding-06 §3): clairvoyant clear-seeker
+1.08 / 1.48 / 2.16 / 2.97 / 4.21 / 5.70 across the 0–9, 10–14, 15–19, 20–24,
+25–29 and 30–34 bands; reference depth-4 search 0.87 / 1.38 / 1.91 / 2.10 / 2.59
+/ 2.26, then 1.58, 1.40 and 1.00 in the three fullest bands. The bands are
+descriptive, not matched samples: each policy generates its own occupancy
+distribution and the counts are published for that reason.
+
+**The legal planner, re-baselined** (finding-12 §2, §9): at the seven-move
+window with 256 guesses on 32 fresh master tapes, 2.0260 clears and 1.1256
+reveals per move against the reference search's 1.9004 and 1.0339 on the same
+tapes; +18.81 mean moves with a one-sided 95% bootstrap lower bound of +0.56;
+mean score +66,365 with a lower bound of −505, i.e. straddling zero. At the
+five-move window with 256 guesses on 128 fresh tapes, only the flow rates have
+lower bounds above zero (+0.0580 clears, lower bound +0.0157) — lifetime and
+score straddle zero and the planner wins the lifetime race on 58 of 128 tapes.
+Corrected gap shares on the matched 32-tape cohort: 22.2% at the five-move
+window, 27.1% at the seven-move window, against finding-07's 40.0% and 58.8%.
+
+**Gates, all before any number was taken** (finding-06, finding-07, finding-12):
+master-tape determinism; a cut window reproduces the long game move for move;
+the per-move score identity `17,000 × rises + 70,000 × board clears + wave
+points` held with **0 violations in 19,610 moves**; the window solver reproduced
+the frozen exact solver on **128 scenarios with 0 mismatches**; every solved
+window's best line replayed through the engine for its reported value, 9,175
+windows, 0 mismatches; and the information-boundary gate on the legal arm
+described above. All seven `--self-test` gates still pass after finding-12's
+changes.
+
+**Limitations the findings state about themselves:** eight to 128 games per arm;
+every clairvoyant game is censored at a move cap, so its lifetime is a lower
+bound; the planner is a determinization (hindsight-optimisation) controller and
+not the optimal legal planner, so its rate is a floor and the "information
+share" is an upper bound; a nine-move fair arm was never affordable and is not
+reported; the K = 1024 arm is 6 of 8 games, stopped after four hours; the
+scenario engine's randomness model is not the base engine's, so scores here are
+not comparable with ledger figures; and no timing on this page is timing-grade —
+the machine carried load averages of 36–60 throughout.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **The programme has a target, and it is not a score.** Hold roughly 20 of 49
+  cells occupied, where the achievable clear rate crosses 2.400. That is a
+  learnable objective in a way that "play better" is not.
+- **A negative result with a direction.** Determinized planning — imagine many
+  complete boards, plan in each, average — has now been pushed to its limit on
+  both of its dials, more guesses and a longer window, and neither gets there.
+  The family is measured out, and that rules something out rather than merely
+  failing to confirm it.
+- **The residual has a shape.** It is concentrated on crowded boards, where the
+  hidden state is largest, and it is not something a better [leaf](/learn/glossary)
+  can absorb. Whatever comes next has to *reason about* what is under the covers
+  instead of averaging over guesses of it — a belief-state search, or an explicit
+  reason to open a cover in order to learn from it. Nothing in this repository
+  does that yet.
+- **One tempting repair is already ruled out.** "Make the reference search keep
+  a lower board" is the wrong variable: it already runs a board about six cells
+  *fuller* than the clairvoyant equilibrium and still extracts less at every
+  occupancy band. It is not too conservative; it is ineffective at the height it
+  already plays at.
+- **Still open, and stated as such by the record:** whether flow balance holds
+  beyond the 6,000 measured moves; where the true legal ceiling is, since the
+  planner measured here is not the best possible legal planner; and what the
+  nine-move legal planner would do, which was never affordable.
+
+Related: the [distillation attempt](/approaches/lifetime-objective/planner-distill)
+that tried to compress this page's legal planner into a network, and the
+[benchmark validation](/approaches/lifetime-objective/suite-validation) that used
+the same exact-window machinery to grade positions.

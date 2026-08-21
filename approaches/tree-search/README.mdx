@@ -1,33 +1,67 @@
 ---
 title: Tree search
-summary: MCTS, PUCT, and observable-state tree search — sampling futures instead of enumerating them.
+summary: Instead of examining every column to a fixed depth, grow the look-ahead only where it looks promising, guided by quick simulated playouts.
 ---
 
-Where expectimax enumerates chance exactly, Monte Carlo tree search **samples**
-it: play many randomized futures, remember which root actions do well, and
-concentrate sampling there.
+Instead of examining every column to a fixed depth, grow the look-ahead only
+where it looks promising, guided by quick simulated playouts.
 
-<svg viewBox="0 0 640 120" className="my-4 w-full max-w-2xl rounded-xl border border-zinc-800 bg-zinc-900/40" role="img" aria-label="The four MCTS phases">
+## Why anyone would want this
+
+The reference policy in this repository is
+[fair expectimax at depth 4](/approaches/fair-expectimax/reference): at every
+turn it considers **all seven columns**, then all seven again after the game
+deals the next disc, and so on for four of the player's own moves. Nothing is
+skipped. That completeness is what makes it trustworthy, and it is also what
+makes it expensive — the number of positions at the bottom of the tree
+multiplies by roughly forty-nine every time you look one move further ahead.
+
+<TreeGrowth caption="Why a complete look-ahead cannot simply be extended. Each extra move ahead multiplies the bottom of the tree by about forty-nine, before gray-disc reveals are counted at all. The reference stops at four." />
+
+Monte Carlo tree search asks a different question. Rather than *how do I cover
+everything four moves out*, it asks *where is my next unit of thinking best
+spent*. It plays a future forward quickly, sees roughly how it turned out,
+records that against the first move it made, and lets that record decide where
+to look next time. Moves that keep doing well get explored deeply; moves that
+keep doing badly are visited a few times and left alone. The tree ends up
+lopsided — very deep along a few lines, one node thick along the rest.
+
+Two consequences follow, and both matter here. A lopsided tree can reach much
+further ahead than a complete one for the same cost, which is attractive in a
+game where the thing that kills you — falling behind on clearing discs over
+dozens of row rises — happens far beyond four moves. But its answer is a
+sample, not a calculation. Run it twice and it may pick differently; run it
+with a bad quick-playout policy and it will confidently rank moves by a future
+no good player would ever have.
+
+## How it works, step by step
+
+At a turn, the search reads only what a player can see: the visible board, the
+visible next disc, the number of moves until the next
+[rise](/learn/glossary), and whether the game is over. Its output is one
+column. In between, it repeats one loop a few hundred to a few thousand times:
+
+<svg viewBox="0 0 640 120" className="my-4 w-full max-w-2xl rounded-xl border border-zinc-800 bg-zinc-900/40" role="img" aria-label="The four phases of one Monte Carlo tree search simulation">
   <g fontSize="12" fill="#e4e4e7">
     <g>
       <rect x="10" y="35" width="140" height="50" rx="8" fill="#1e3a8a" />
       <text x="80" y="57" textAnchor="middle" fontWeight="700">1. Select</text>
-      <text x="80" y="73" textAnchor="middle" fontSize="10" fill="#bfdbfe">walk down by UCB</text>
+      <text x="80" y="73" textAnchor="middle" fontSize="10" fill="#bfdbfe">follow the good lines</text>
     </g>
     <g>
       <rect x="170" y="35" width="140" height="50" rx="8" fill="#78350f" />
       <text x="240" y="57" textAnchor="middle" fontWeight="700">2. Expand</text>
-      <text x="240" y="73" textAnchor="middle" fontSize="10" fill="#fde68a">add a new node</text>
+      <text x="240" y="73" textAnchor="middle" fontSize="10" fill="#fde68a">add one new position</text>
     </g>
     <g>
       <rect x="330" y="35" width="140" height="50" rx="8" fill="#14532d" />
-      <text x="400" y="57" textAnchor="middle" fontWeight="700">3. Simulate</text>
-      <text x="400" y="73" textAnchor="middle" fontSize="10" fill="#bbf7d0">roll out a future</text>
+      <text x="400" y="57" textAnchor="middle" fontWeight="700">3. Play out</text>
+      <text x="400" y="73" textAnchor="middle" fontSize="10" fill="#bbf7d0">a quick policy finishes it</text>
     </g>
     <g>
       <rect x="490" y="35" width="140" height="50" rx="8" fill="#4c1d95" />
       <text x="560" y="57" textAnchor="middle" fontWeight="700">4. Back up</text>
-      <text x="560" y="73" textAnchor="middle" fontSize="10" fill="#ddd6fe">update the path</text>
+      <text x="560" y="73" textAnchor="middle" fontSize="10" fill="#ddd6fe">credit the moves taken</text>
     </g>
     <g stroke="#3f3f46" strokeWidth="2">
       <line x1="150" y1="60" x2="170" y2="60" />
@@ -37,16 +71,98 @@ concentrate sampling there.
   </g>
 </svg>
 
-## The Drop7 twist
+1. **Select.** Walk down from the current board, at each step preferring the
+   column whose recorded results are best, with a bonus for columns that have
+   been tried least. That bonus is the only thing stopping the search from
+   falling in love with the first move that worked.
+2. **Expand.** When the walk reaches a position the tree has not stored yet,
+   store it.
+3. **Play out.** From there, finish the line with a cheap policy — in this
+   repository usually a one-move-ahead fair search — until a horizon is
+   reached, and score whatever happened.
+4. **Back up.** Add that result to every column choice on the path, so the next
+   walk is a little better informed.
 
-Drop7's chance nodes break the usual MCTS assumptions. The repository's
-observable-state variant samples chance at the edges where it actually
-happens, avoiding "strategy fusion" (planning as if hidden information will be
-known later). Even so, the ledger verdicts were consistent: ordinary MCTS did
-not establish whole-game improvement, confidence-gated overrides worsened
-ranking, and scaling simulations made long-outcome ranking **worse**, not
-better. The diagnosed bottleneck is the weak continuation policy inside the
-rollouts — replace the continuation, not the budget.
+After the last repetition, play the column with the best record at the root.
 
-A bounded TypeScript MCTS is in the benchmark registry, so you can see its
-behavior on the [leaderboard](/leaderboard).
+## The part that is specific to Drop7
+
+Between your move and your next move, the game does two things you cannot
+predict: it deals a disc, and, if your move cracked a gray disc open, it shows
+you a number that was hidden. A tempting shortcut is to guess all of that in
+advance — imagine a complete future, plan perfectly inside it, and average over
+many such imagined futures. That shortcut is called
+[determinization](/learn/glossary), and it quietly cheats: it credits a first
+move with a plan that could only have been made by someone who already knew the
+hidden number. The ledger calls that failure *strategy fusion*, and the
+family's main implementation avoids it by sampling each chance event only at
+the moment the search actually crosses it, and by identifying tree nodes purely
+by the *visible* position that resulted. See [choice, chance, and looking ahead](/learn/concepts/chance-vs-choice)
+for how the reference handles the same problem.
+
+## What happened, in plain English
+
+Every member of this family that was tested was retired, and the one that was
+never tested is still sitting there unrun.
+
+The plain reading of the record is that the tree machinery worked and the
+thing it was built on did not. Nodes stayed within their memory budgets, the
+searches were deterministic and passed their information-boundary self-tests,
+and one variant genuinely improved on the depth-3 comparator on two of the
+three quantities it reported, missing only the frozen top-choice gate. But no version ever demonstrated a better
+*whole game*, and the most informative experiment in the family found that
+making the search bigger made it **worse** at the thing it was being asked to
+do. Scaling up the number of simulations, the horizon, and the chance sampling
+turned the search into a much better imitator of the short-horizon reference,
+while making it a worse predictor of how a position would look twenty-five
+moves later. The audit's own conclusion was that the weak quick-playout policy
+and the small replayed pool of chance outcomes were optimizing the wrong
+future — so the next experiment should replace the continuation, not buy a
+bigger budget.
+
+<TechnicalDetails title="The technical record">
+
+| Approach | Status and evidence | Recorded outcome |
+| --- | --- | --- |
+| [Observable-state UCT](/approaches/tree-search/observable-mcts) | Rejected — ledger-recorded | Missed a frozen top-action gate by one root out of 32 |
+| [Confidence-gated override](/approaches/tree-search/observable-mcts) | Rejected — ledger-recorded | Held-out pairwise accuracy and regret both worsened |
+| [Scaled observable MCTS](/approaches/tree-search/observable-mcts) | Rejected — ledger-recorded | Larger search ranked 25-move outcomes worse |
+| [Learned-guidance search](/approaches/tree-search/nnue-guided) | Rejected — ledger-recorded | Screens were worse than the plain depth-3 comparator |
+| [TypeScript MCTS lab](/approaches/tree-search/mcts) | Rejected — task-record only | "Ordinary MCTS did not establish a whole-game improvement" |
+| [PUCT](/approaches/tree-search/puct) | Unknown — repository-verified | Complete lab, preregistered gates, never run |
+
+Sources: the [experiment index](/docs/research/experiment-index) tree-search
+table and the ledger entries "Observable-state stochastic UCT", "Confidence-gated
+MCTS over fair depth 3", "Scaled public-state observable MCTS", "Learned
+deeper-search override", and "Root reveal quadrature" in the
+[experiment history](/docs/research/history). Per-experiment numbers are on the
+approach pages, each with its own evidence label. Two of the tree-search sources
+are locked to the historical 7,000-point Sequence scoring and are archival; the
+[research status](/docs/research/status) page explains why those are not
+comparable with corrected Hardcore results.
+
+</TechnicalDetails>
+
+## A note on the leaderboard
+
+A small Monte Carlo tree search — 400 simulations, a sixteen-move horizon —
+is registered as a policy in the benchmark playground and plays the scripted
+rounds on the [leaderboard](/leaderboard). That is a demonstration you can
+watch, not evidence. Eight fixed rounds cannot separate policies whose scores
+are heavy-tailed, and the rounds are visible in the repository, so nothing
+there is ever used as a research result.
+
+## What this taught us, and what is still open
+
+- **Budget was not the bottleneck.** This is the family's one durable, general
+  lesson, and it was earned by a measurement that went the wrong way: more
+  simulations, a longer horizon, more chance samples, and a proper leaf made
+  long-horizon ranking worse, not better.
+- **What that leaves open** is the continuation policy. Every playout in this
+  family finished with a myopic one-move-ahead policy. A search cannot rank
+  futures better than the player it imagines playing them, and this is exactly
+  the direction [`strategies.md`](/docs/strategies) lists as still worth
+  trying: replace the continuation, not the budget.
+- **One experiment in this family has simply never been run.** The PUCT lab is
+  complete and carries its own frozen gates. Until it is run, "PUCT does not
+  work here" is not something this repository knows.

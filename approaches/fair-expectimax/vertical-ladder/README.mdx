@@ -1,35 +1,183 @@
 ---
-title: Vertical Ladder
+title: Stacking a column for a later chain
 family: fair-expectimax
-status: Completed
-evidence: ledger-recorded diagnostic
-generated: true
+summary: Reward the search for building columns that are one quiet drop away from collapsing in several waves, and see whether deliberately stored energy makes games longer.
+status: rejected
+evidence: ledger-recorded
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Reward the search for building columns that are one quiet drop away from
+collapsing in several waves. The idea is that a policy which deliberately stores
+energy — instead of cashing chains as soon as it can — will have something to
+spend when the board gets tight. A cheap survey said the idea was worth a
+coefficient; transferring that coefficient to the full search did not work.
 
-## Vertical-ladder probe
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
 
-Screens a literal 7/6/5 vertical-reservoir energy term cheaply at D2.
+Two records sit behind that label: the cheap survey is **completed —
+ledger-recorded diagnostic**, and the transfer into the real search is
+**rejected — ledger-recorded**.
 
-**Status: Completed** (ledger-recorded diagnostic). the shallow signal motivated a D4 transfer.
+## The intuition, on a real board
 
-## Vertical-ladder D4
+A disc clears when the unbroken line through it — along its row or its column —
+is exactly as long as its number. So a column's height is a trigger: change the
+height, and different discs in it become live.
 
-Applies the frozen ladder feature to fair D4.
+Here is a column of three discs that is completely inert. Nothing in it matches
+its run length, so it can sit there indefinitely. Drop one <Disc n={4} /> on
+top, and it takes itself apart:
 
-**Status: Rejected** (ledger-recorded). the shallow benefit did not transfer.
+<BoardCompare
+  before="0000000000000000000000000000000400000020000005000"
+  after="0000000000000000000000000000000000000000000005000"
+  beforeLabel="Inert: heights do not match"
+  afterLabel="After one 4 lands"
+  highlightBefore={[31, 38]}
+  caption="Engine output, not an illustration. The column holds 5, 2, 4 from the bottom; at height three nothing matches. The dropped 4 makes the column four tall, so both 4s clear at once (wave 1); the 5 and 2 fall to height two, so the 2 clears (wave 2); the 5 is left alone and stable. 53 points from a disc that scored nothing on arrival."
+/>
+
+That is stored energy: a structure whose value is not visible in the score, only
+in what one future drop can do to it. The feature tested here measures exactly
+this, and deliberately measures it *conservatively*: for each visible column it
+simulates adding inert discs and repeatedly removes any numbered disc whose
+value equals the resulting column height, giving a bonus for multi-wave collapses
+and discounting by how many additions were needed to set them off. It ignores
+horizontal help and ignores covered-disc reveals — so it never counts energy it
+is not sure about.
+
+## How it works, step by step
+
+1. **Compute the ladder feature** for the position: for each column, and for
+   each possible number of inert additions, repeatedly remove numbered discs
+   equal to the current column height. Multi-wave collapses get a quadratic
+   bonus; each collapse is discounted by the number of additions needed to
+   reach it.
+2. **Screen the coefficient cheaply.** Add the feature to the evaluator at a
+   range of weights and play 256 complete games with a two-move search, which
+   is fast enough to sweep. This runs only on training seeds.
+3. **Freeze one weight** — the single value that improved score, survival and
+   both flow rates — and change nothing else.
+4. **Transfer it to the real search.** The evaluator becomes the reference leaf
+   plus 500 times the ladder energy; every legal column and every chance branch
+   is still completed at four moves. Nothing is retuned after the transfer.
+5. Play eight complete games on a disjoint training-only range against the
+   unchanged search.
+
+The implementation is worth one note: because a column's ladder value depends
+only on that column, every gravity-valid column state has a shared cache slot —
+5,380,840 entries in 21,523,360 bytes — so the exact feature is computed once
+per distinct column rather than per board. A thousand fixtures proved the cache
+bit-exact against the direct feature.
+
+## What happened, in plain English
+
+**The cheap survey was mildly positive.** Over 256 two-move games, a weight of
+500 raised the average score from 98,642 to 103,467 and average survival from
+68.8 to 71.6 moves, with both flow rates improving and both halves of the
+ordered results improving. But the confidence bounds on the paired difference
+were still negative, the lower quartile of score actually slipped, and every
+larger weight tested — 1,000 through 4,000 — was harmful. The ledger is explicit
+that this was a coefficient-selection signal, not qualification evidence.
+
+**The transfer failed.** Inside the four-move search on eight fresh
+training-only games, the unchanged search averaged 124,934 points and 83.9
+moves; with the ladder term, 121,849 and 82.1. It won four of eight games on
+score and four on survival — a coin flip. Its clear and reveal rates per move
+went *up*, to 1.933 and 1.061, and that extra throughput simply did not turn
+into longer games.
+
+That last detail is the interesting one, and it recurs across this family: flow
+statistics moving in the right direction while survival does not follow. A
+policy can churn through more discs per move and still be arranging the board
+worse.
+
+<TechnicalDetails title="The technical record">
+
+**Sources.** `d2-vertical-ladder-probe.cpp` (**completed — ledger-recorded
+diagnostic**; "the shallow signal motivated a D4 transfer") and
+`fair-vertical-ladder-depth4.cpp` (**rejected — ledger-recorded**; "the shallow
+benefit did not transfer"), per the
+[experiment index](/docs/research/experiment-index). Ledger section "Literal
+vertical-ladder energy".
+
+**Scoring mode.** Neither section carries a scoring label;
+[audit 03](/docs/exploratory/audit-03-claim-arithmetic) classifies all four
+means below as **historical 7,000-point Sequence scoring**. Score and survival
+regressed together in the transfer, so rescoring widens the gap.
+
+**Coefficient sweep** — 256 training games `0x3d9e0000...00ff`, two-move search,
+1,000-move cap:
+
+| Arm | Mean score | Mean moves | Clears / move | Reveals / move | Score Q25 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| No ladder term | 98,642.29 | 68.77 | 1.84857 | 1.00034 | 61,074 |
+| Weight 500 | 103,467.46 | 71.59 | 1.87227 | 1.01855 | 60,739 |
+
+Paired 95% lower bounds −3,032 points and −1.995 moves. Weights 1,000–4,000 were
+harmful. Weight 500 was the unique fixed choice for transfer.
+
+**Transfer** — eight training-only games `0x3d9f0000...007`, full-width
+four-move search:
+
+| Arm | Mean score | Mean moves | Score Q25 | Move Q25 | Clears / move | Reveals / move |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Unchanged reference | 124,934.38 | 83.875 | 90,673 | 65 | — | — |
+| Reference + 500 × ladder | 121,848.63 | 82.125 | 82,277 | 58.75 | 1.93303 | 1.06088 |
+
+Paired change −3,085.75 points and −1.75 moves, 95% lower bounds −56,964.47 and
+−35.259; 4 of 8 score pairs and 4 of 8 move pairs won. All games uncensored.
+Four-move work 2.709 million units per candidate move; peak resident memory
+37,011,456 bytes under a 128 MiB cap. The D2 audit took 84.230 seconds and the
+D4 cohort 844.028 seconds. No seed outside these two ranges was opened and no
+model was retuned after transfer. Artifact
+`/tmp/drop7-fair-vertical-ladder-depth4.json`, SHA-256
+`db6b6b6bb2214317200f4ead1e0243e88da797b0444fac479a79099d21326e93`; source
+hashes `a41c6562e1f360a8fde29af2ff74f34b50498f4fec5806bd57e8f539ee4dac8c` (probe)
+and `098f95201d8e8ba3daebe2c75eb4de0d00ff10f120dc1f9ad924efc94dbe15b7`
+(transfer).
+
+**Verification.** Optimised strict `-Werror` builds and the ASan/UBSan self-test
+passed inherited engine parity, deterministic and reflection-safe actions,
+metadata blindness, full-width completion, exact cache equality with the direct
+feature, legality, seed bounds and resource proofs.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+The clean lesson is about method, and it is the second time this family learned
+it: **a signal measured with a cheap shallow search does not automatically
+survive being put inside a deep one.** A two-move search has a poor idea of the
+future, so an evaluator term that supplies some of that idea helps it. A
+four-move search already simulates two more moves of the same future, so the
+same term is partly redundant — and where it is not redundant, it competes with
+what the search actually computed.
+
+The idea being tested is not refuted, only this way of expressing it. The
+feature is deliberately conservative: it ignores horizontal clears and ignores
+covered-disc reveals, which are two of the main ways stored energy actually
+gets released. And the transfer used a coefficient chosen at a different depth,
+which the [machine-tuning experiment](/approaches/fair-expectimax/cem) also
+found does not carry across.
+
+Related work elsewhere in the repository points the same direction without
+resolving it: a constructive planner that builds towards reachable high-number
+reservoirs across a rise cycle **materially beat the one-move fair policy** and
+is a useful fast continuation, but did not beat the four-move search
+(**completed — ledger-recorded**, see the
+[experiment index](/docs/research/experiment-index)). The
+[status summary](/docs/research/status) records the standing judgement: stored
+structure looks useful as a feature or an option, not yet as a controller.
 
 ## Sources
 
-- `d2-vertical-ladder-probe.cpp`
-- `fair-vertical-ladder-depth4.cpp`
-
-## More evidence
-
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/fair-expectimax)
+- `d2-vertical-ladder-probe.cpp` — training-only falsification lab for a literal
+  form of stored chain energy; ignores horizontal help and covered-disc reveals,
+  so it is a conservative description of energy already in the visible column
+  rather than a clairvoyant cascade simulation.
+- `fair-vertical-ladder-depth4.cpp` — the frozen coefficient of 500 inside the
+  four-move search; the leaf is the reference leaf plus 500 times the
+  conservative ladder energy, with every legal action and chance branch
+  completed.

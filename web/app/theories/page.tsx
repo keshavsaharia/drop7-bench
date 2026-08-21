@@ -65,7 +65,9 @@ export default function TheoriesPage() {
               <Badge label={theory.informationClass} />
               <span className="text-xs text-zinc-600">{theory.theoryId}</span>
             </div>
-            <h2 className="mt-2 text-lg font-bold text-zinc-50">{theory.title}</h2>
+            <h2 className="mt-2 text-lg font-bold text-zinc-50">
+              <Link href={`/theories/${theory.theoryId}`} className="hover:text-sky-300">{theory.title}</Link>
+            </h2>
             <div className="mt-3 grid gap-4 md:grid-cols-2">
               <div>
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-500">

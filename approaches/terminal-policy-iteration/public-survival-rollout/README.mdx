@@ -1,28 +1,91 @@
 ---
-title: Public Survival Rollout
+title: Public survival rollout
 family: terminal-policy-iteration
-status: Rejected
+summary: Judge each column by how long the game survives afterwards — thirty-one shared imagined futures, a hundred moves each.
+status: rejected
 evidence: task-record only
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Judge each column by how long the game survives afterwards: thirty-one shared
+imagined futures, a hundred moves each.
 
-## Public survival rollout
+<EvidenceLabel status="rejected" evidence="task-record only" reads="public" />
 
-Evaluates each root action with 31 aligned H100 public fair-D1 continuations.
+## The intuition
 
-**Status: Rejected** (task-record only). the longer rollout was worse than fair D1 on fitting games.
+This is the family's idea at its most literal. Survival is what the score
+almost entirely consists of
+([finding 01](/docs/exploratory/finding-01-score-is-survival): correlation
+r = 0.9995 between score and moves survived over 64 reference games), so
+instead of asking a board evaluator which column *looks* safest, force each
+column and watch how long the game actually lasts.
 
-## Sources
+A hundred moves is twenty row rises. That is far past anything a four-move
+search can reason about, and comfortably past the point where a decision that
+merely postpones trouble stops looking clever.
 
-- `public-survival-rollout.cpp`
+## How it works, step by step
 
-## More evidence
+1. Read the public position: board, visible next disc, moves until the next
+   rise, terminal flag.
+2. Build 31 event-indexed synthetic scenarios — the discs that will be dealt
+   and the hidden numbers that will be shown — and use the same 31 for every
+   sibling column, so the comparison is not decided by luck.
+3. Force the column under test; from then on, every move is chosen by the same
+   exact, completed fair one-move-ahead policy. That policy is handed only the
+   board, the visible next disc, the rise phase and the terminal status. It
+   never sees the real game seed, and it never learns which synthetic scenario
+   it is inside.
+4. Run to the 100-move horizon and compare columns by their outcomes.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/terminal-policy-iteration)
+## What happened, in plain English
+
+It was worse than the policy it was built on top of.
+
+The retained verdict is that the longer rollout came out behind plain fair
+one-move-ahead search on the games it was fitted on — a result that sounds
+paradoxical and is not. A rollout comparison is only as good as the player
+doing the rolling: if the continuation policy is myopic, then a hundred moves
+of it mostly measures how well a column suits *that* player's weaknesses.
+Thirty-one shared futures is also a small sample for a quantity as
+heavy-tailed as a Drop7 lifetime, so column averages that differ by a little
+may not differ at all.
+
+This is **task-record only** evidence. There is no protocol, no artifact and no
+per-game data in the repository, so no number can be quoted here.
+[Audit 04](/docs/exploratory/audit-04-blind-spots) lists this source among the
+thirty rejections that "cannot be re-derived", and notes it as one of the
+survival-flavoured experiments whose numbers a later analysis wanted and could
+not find.
+
+<TechnicalDetails title="The technical record">
+
+Status **rejected**, evidence **task-record only**. The
+[experiment index](/docs/research/experiment-index) records the purpose as
+"evaluates each root action with 31 aligned H100 public fair-D1 continuations"
+and the outcome as "the longer rollout was worse than fair D1 on fitting
+games". There is no entry in the
+[experiment history](/docs/research/history).
+
+From the source: a public-only 100-move survival rollout around the reference
+fair-D1 continuation policy; every root action is evaluated on 31 aligned,
+event-indexed synthetic chance scenarios; the root action is fixed and all
+later actions are freshly chosen by the same exact, completed fair-D1 function
+of board, visible next disc, rise phase and terminal status; neither the real
+game seed nor the synthetic scenario identity is available to that continuation
+policy. The file asserts the corrected 17,000-point level bonus at compile
+time.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **A rollout inherits the judgement of its continuation policy.** This is the
+  same conclusion the [tree search](/approaches/tree-search) family reached from
+  the opposite direction, where scaling a search with a myopic playout made
+  long-horizon ranking worse.
+- **Still open:** the same measurement with a stronger continuation — the
+  family's later panels moved to a two-move-ahead policy for exactly this
+  reason — and with enough scenarios to say something about a heavy-tailed
+  quantity.

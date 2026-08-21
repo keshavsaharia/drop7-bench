@@ -1,36 +1,168 @@
 ---
-title: Dqn
+title: Double-DQN and continuation
 family: value-policy-learning
-status: Completed
+summary: The textbook reinforcement-learning method — learn a score for each column from experience, reward staying alive, and add a short look-ahead on top.
+status: completed
 evidence: task-record only
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Give the agent a reward for every move it survives, let it play a few hundred
+thousand moves, and let it adjust its own estimate of what each column is worth
+until those estimates stop changing. That is Q-learning, and this is the
+repository's implementation of its standard modern form, plus a small
+look-ahead wrapped around the frozen result.
 
-## Double-DQN and continuation
+<EvidenceLabel status="completed" evidence="task-record only" reads="public" />
 
-Trains a public Double-DQN and evaluates it with bounded six-move continuations.
+Everything the deployed network reads is public. The v2 follow-up can
+optionally train on demonstrations from a privileged
+[oracle](/learn/glossary) that sees hidden values — teacher data, used only to
+generate training transitions, never at decision time. Both verdicts here are
+**task-record only**, and no number from either survives in the repository.
 
-**Status: Completed** (task-record only). continuation improved the frozen DQN over 64 games, but remained far below the research target.
+## The intuition
 
-## DQN v2
+The learner keeps one number per column: *if I drop here and then keep playing
+the way I currently play, how well does it go?* After the move it sees what
+actually happened and nudges that number toward what it now believes. Repeat a
+few hundred thousand times and the numbers stop moving.
 
-Adds five-step credit, prioritized trajectory replay, and optional privileged demonstrations.
+Two details do most of the work here.
 
-**Status: Rejected** (task-record only). the first fixed five-step/prioritized ablation regressed.
+**The reward is about survival, not points.** Each surviving move is worth 1,
+with small bonuses for score, reveals, clears and extra chain waves, and a
+large penalty of 12 for dying. Learning from raw score is hopeless in a game
+where one lucky chain dwarfs fifty competent moves; learning from "stay alive"
+gives a signal on every single move.
+
+**"Double" fixes a specific bug.** A single network both picks the best next
+column and estimates its value, which means any random overestimate gets
+selected *because* it is an overestimate, and the error compounds. Double
+Q-learning splits those two jobs across two copies of the network, one of which
+lags behind, so the estimate is not chosen by the same noise that inflated it.
+
+## How it works, step by step
+
+1. **Encode the position publicly.** 170 features: the visible board, the rise
+   clock, the disc about to arrive, and a set of deterministic probes computed
+   by trying each candidate column and looking at what it would do. No seed, no
+   RNG state, no hidden value, no future disc.
+2. **Act, mostly greedily, sometimes at random.** Exploration starts at 90%
+   random and decays to 4% over most of training.
+3. **Store the transition and replay it.** A buffer of the last 24,000
+   transitions is sampled in small batches, so the network learns from a spread
+   of its own past rather than only from the move it just made.
+4. **Train with a lagged target copy.** The second network is refreshed every
+   500 steps; the online network chooses, the lagged one evaluates.
+5. **Check against a real opponent.** Validation replays a fixed set of unseen
+   games with both the frozen network and a fair-policy baseline on the same
+   seeds, so the comparison is paired.
+6. **Then add look-ahead.** A separate benchmark takes the frozen checkpoint
+   and, instead of playing its top column directly, plays each candidate
+   forward for six moves — either with sampled continuations, or with a sparse
+   search that uses the learned Q values as its leaf evaluator or as a prior
+   over which columns to expand.
+
+Step 6 is the interesting one: it treats the learned network as *advice to a
+search* rather than as a policy, which is the pattern that recurs throughout
+this family.
+
+## What happened
+
+The record says two things, both without numbers.
+
+The frozen network plus six-move continuations **improved on the frozen network
+playing directly**, over 64 games — and remained far below the research target.
+That is the entire retained content of the "completed" verdict: a direction,
+not a magnitude.
+
+The v2 follow-up — longer credit assignment over five steps, replay prioritised
+by trajectory, and optional privileged demonstrations — was **rejected**: its
+first fixed ablation of those two changes regressed against v1.
+
+Neither statement can be re-derived. There is no ledger section for either
+file, no artifact hash, no per-game data, and no mean score or lifetime for the
+DQN, for the continuation, or for the baseline they were compared against.
+**The one thing this page cannot tell you is how well any of it played.**
+
+<TechnicalDetails title="The technical record">
+
+Sources: `train.ts` (status **completed**), `continuation-benchmark.ts`, and
+`train-v2.ts` (status **rejected**). Evidence for all three: **task-record
+only** ([experiment index](/docs/research/experiment-index), Value and policy
+learning table). No section of the [full ledger](/docs/research/history) covers
+them, and the
+[blind-spot audit](/docs/exploratory/audit-04-blind-spots) lists `train-v2.ts`
+among the 30 sources whose rejection "cannot be re-derived".
+
+Index verdicts, quoted: "continuation improved the frozen DQN over 64 games,
+but remained far below the research target"; "the first fixed five-step /
+prioritized ablation regressed".
+
+Configuration below is read **from the source files**, not from any result
+record. `train.ts`: format `drop7-observable-double-dqn`, 170 features, hidden
+layers 32 and 16, learning rate 7e-4, discount 0.99, epsilon 0.9 → 0.04 over
+80% of training, replay capacity 24,000, warmup 1,500, batch 24, train every 4
+steps, target refresh every 500, default 40,000 training steps over 512
+training games, 64 validation games, 500-move cap, 2 planner samples per
+action. Reward: `1 + 0.15·min(scoreDelta, 1e5)/1e5 + 0.025·revealed +
+0.01·cleared + 0.015·(waves − 1) − 12 if terminal`. Validation is paired
+against `runFairPolicyGame` with the initial fair-policy weights.
+
+`continuation-benchmark.ts`: default horizon 6, 16 rollouts, modes `rollout`,
+`direct`, `sparse`, `sparse-q-leaf`, `sparse-q-prior`, default terminal utility
+−1,000,000, Q-to-points scale 3,200, prior window 5,000.
+
+`train-v2.ts`: five-step returns, trajectory-shaped prioritized replay, and an
+optional demonstration generator that calls `planOracleMove` from the
+[perfect-information oracle](/approaches/oracle-curriculum/perfect-information-oracle).
+Its own comment states the boundary: "Oracle seeds and future RNG are used only
+to generate transitions; action inputs and every deployed decision remain
+observable-state-only."
+
+Seed ranges declared in `train.ts`: training from `0x2d700000`, validation from
+`0x7d700000`, reserved final from `0xd7000000`; v2 trains from `0x8d700000` with
+demonstrations from `0x8e700000`. Note that
+[history's seed discipline](/docs/research/history) reserves the protected bank
+as `0x7d000000`–`0x7d00ffff` only, while
+[`audit-03`](/docs/exploratory/audit-03-claim-arithmetic) recommends reserving
+the whole `0x7d` byte family; under the audit's proposed registry the
+validation constant would sit inside a reserved family. No run using it is
+recorded either way.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+Two things generalise from this attempt, and both are visible elsewhere in the
+repository.
+
+First, **shaping the reward toward survival was the right instinct.** The
+[blind-spot audit](/docs/exploratory/audit-04-blind-spots) groups the public
+state-value models by what they predicted and observes that the lifetime and
+survival group produced the corpus's best held-out prediction and its only
+positive learned gameplay result, while the group that targeted score was
+rejected across the board on ranking. This DQN sits in the survival group.
+
+Second, **the learned network was most useful as an ingredient in a search,
+not as a player.** The only positive statement retained about it is about the
+continuation wrapper, not the network alone.
+
+What is open is everything quantitative. A rerun would be a new experiment: the
+code is present and self-contained, but there is no baseline number to
+reproduce, no checkpoint retained, and no cohort to compare against. If the
+approach is revisited, the interesting question is no longer "does DQN work
+here" but whether an off-policy learner can be trained on
+[successor-closed](/learn/glossary) data — every legal sibling labelled — rather
+than on the single move its own exploration happened to take. That is
+[the sibling trap](/learn/concepts/ranking-siblings), and a replay buffer is
+one of its purest examples.
 
 ## Sources
 
-- `continuation-benchmark.ts`
-- `train-v2.ts`
-- `train.ts`
-
-## More evidence
-
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/value-policy-learning)
+- `train.ts` — the Double-DQN laboratory, features, reward, paired validation.
+- `continuation-benchmark.ts` — six-move continuations and sparse-search modes
+  over a frozen checkpoint.
+- `train-v2.ts` — five-step credit, prioritized trajectory replay, optional
+  privileged demonstrations.

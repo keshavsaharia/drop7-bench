@@ -1,25 +1,199 @@
 ---
-title: Risk Calibration
+title: Turning the reference search's constants into dials
 family: lifetime-objective
-status: Unknown
-evidence: unknown
-generated: true
+summary: A copy of the reference search whose death penalty, look-ahead depth and number of chance samples can be set at run time, built to find out whether either dial makes the policy survive longer.
+status: completed
+evidence: reproduced
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
+The strongest policy in this repository has a handful of numbers baked into it
+that nobody had ever varied. This approach makes three of them adjustable
+without changing anything else, so they can be swept and measured instead of
+assumed.
+
+<EvidenceLabel status="completed" evidence="reproduced" reads="public" />
+
+Two sweeps have been run through it. The first — the one the approach is named
+after — is a **valid negative**: the death penalty is at its stop and is not a
+lever. The second is a **replicated positive**: the number of chance samples was
+too small to represent the game's own randomness, and fixing it was worth about
+a third more score.
+
+## The intuition
+
+At the bottom of its look-ahead, the search puts a number on every board it can
+reach. A board where the game is over gets a fixed, very large negative number —
+the *terminal utility*, set to −1,000,000. Every other board gets a score from a
+hand-written [leaf evaluator](/learn/glossary), and in practice those come out
+between roughly 200 and 11,000.
+
+So the death penalty is about a hundred times larger than the entire spread of
+everything else. The decision rule is effectively: **first avoid dying within
+four moves; only then prefer the nicer-looking board**. Given that surviving is
+where 94% of the points come from
+([score decomposition](/approaches/lifetime-objective/score-decomposition)),
+that constant is the single number pointed most directly at the objective — and
+it had never been swept. Perhaps the search was too timid, or not timid enough.
+
+The second dial is subtler. At a [chance node](/learn/concepts/chance-vs-choice)
+the search has to average over the next disc, which is equally likely to be any
+of seven values. The frozen reference averages over **five** representative
+samples. Five buckets cannot cover seven equally likely outcomes, so some disc
+values get no weight at all — the same ones, every time, at every node. That is
+not noise that cancels out; it is a fixed bias built into every estimate the
+search makes.
+
+## How it works, step by step
+
+1. **Input.** Exactly what the reference reads: the visible board, the visible
+   next disc, and how many drops remain before the next rise. Nothing else.
+2. **Reuse, not reimplementation.** The leaf evaluator, the chance
+   stratification, the board canonicalisation, the cache keys, the column
+   ordering, the work accounting and the legal fallback are the unmodified
+   frozen code, included as a library. Only the depth-limited driver is
+   rewritten, so that three constants become command-line options.
+3. **A parity gate before any game is played.** At its default settings the
+   parameterised driver must pick the identical column as the frozen reference
+   on every move. Recorded result: **50 moves compared, 0 mismatches.**
+4. **Paired sweeps.** Each setting plays the same ordered list of game seeds as
+   the reference, so scores can be compared game by game rather than as two
+   separate averages.
+5. **Output.** A column, and per-game records through the family's
+   [shared harness](/approaches/lifetime-objective/common), including the
+   survival-flow rates that the whole family watches.
+
+## What happened — the death penalty
+
+**Nothing at all, in the direction that mattered.** Making death fifty times
+more expensive produced byte-identical games: same scores, same lifetimes, 0
+wins, 64 ties, 0 losses. The search is already as risk-averse as the constant
+can make it. Moving the other way, towards recklessness, only cost — and it cost
+in an instructive shape: at a penalty of −100,000 the policy cleared slightly
+*more* discs per move and still died *sooner*. Throughput is not the objective;
+throughput sustained without dying is.
+
+That closes a cheap hypothesis. The gap between a 94-move average and the
+roughly 294 moves a million-point average would need cannot be bought by
+re-pricing death.
+
+<TechnicalDetails title="The technical record — terminal utility">
+
+Source: [`finding-04-terminal-utility-saturated`](/docs/exploratory/finding-04-terminal-utility-saturated),
+status exploratory, **evidence tier `development`**, recorded as a valid
+negative result. Six arms, 64 paired games each, seeds
+`0xa51d0000`–`0xa51d003f` on the exploratory development lease `SEEDLEASE-A51D`,
+2,000-move cap, common seeds across arms.
+
+| Terminal utility | Mean score | Mean moves | Clears/move | Paired delta vs reference | W–T–L | 95% lower bound |
+| ---: | ---: | ---: | ---: | ---: | :---: | ---: |
+| −50,000,000 | 321,992 | 94.06 | 1.973 | 0 | 0–64–0 | 0 |
+| −10,000,000 | 321,992 | 94.06 | 1.973 | 0 | 0–64–0 | 0 |
+| −3,000,000 | 321,992 | 94.06 | 1.973 | 0 | 0–64–0 | 0 |
+| −1,000,000 *(frozen)* | 321,992 | 94.06 | 1.973 | 0 | — | — |
+| −300,000 | 321,652 | 93.98 | 1.973 | −340 | 1–62–1 | −1,039 |
+| −100,000 | 320,161 | 92.92 | 1.987 | −1,831 | 4–29–31 | −4,563 |
+
+The identical-game result at magnitudes at or beyond 1,000,000 is exact and
+needs no statistics. The −300,000 and −100,000 deltas are single-cohort
+estimates. Only the terminal utility was varied; the leaf weights are frozen, and
+a jointly re-tuned leaf could in principle move the saturation point — which is
+what the [leaf reweight](/approaches/lifetime-objective/leaf-reweight) work went
+on to test, using this same parameterised search as its base.
+
+</TechnicalDetails>
+
+## What happened — the number of chance samples
+
+**Averaging over seven disc values instead of five was worth about a third more
+score**, and it replicated on a second, previously unread set of games. On the
+confirmation cohort the seven-sample search scored 398,498 against 297,327, and
+lasted 114.66 moves against 87.16. Median, lower quartile and minimum all
+improved, so this is not one lucky long game; and the survival-flow rates moved
+in the direction the mechanism predicts, closing roughly a fifth of the gap to
+the clears and reveals per move that indefinite survival requires.
+
+The more interesting part is that this is an **interaction, not a "more samples
+is better" result**. With the biased five-sample estimator, adding a fourth move
+of look-ahead bought nothing measurable. With the exact seven-sample estimator,
+the fourth move was worth about 86,000 points. Depth and estimator quality are
+complements. That offers a mechanism for one of the repository's most repeated
+conclusions — that deeper search is not automatically stronger — because every
+historical depth experiment sat on top of the same biased estimator.
+
+It is also not free: the exact estimator costs 3.82 times the work per move at
+the same depth, and a variant one move shallower with the exact estimator ties
+the frozen reference at an eighth of the work.
+
+<Callout title="A trap that has already produced one wrong conclusion" tone="warn">
+The frozen search carries a work limit sized to sit just above five-sample
+depth-4 search. Seven samples need 3.7 times that. Left at the frozen limit, a
+seven-sample run silently hits the ceiling and falls back to a completed
+three-move search — so a naive comparison measures a shallower search and
+reports it as a chance-sampling result. Every arm here declares its limit
+explicitly.
 </Callout>
 
-This approach is not yet listed in the experiment index. Read the
-source files below and the family page for context, and expand this
-page when the approach is understood.
-## Sources
+<TechnicalDetails title="The technical record — chance samples">
 
-- `search.cpp`
+Source: [`finding-05-chance-strata`](/docs/exploratory/finding-05-chance-strata),
+status exploratory, **evidence tier `development`, replicated across two
+independent cohorts for the headline arm**. Positive result. Same parity gate
+(50 moves, 0 mismatches).
 
-## More evidence
+| Comparison | Delta score | 95% lower bound | Delta moves | W–T–L | Verdict |
+| --- | ---: | ---: | ---: | :---: | --- |
+| depth 4: 7 samples − 5 samples | +101,171 | +47,457 | +27.50 | 41–0–23 | significant |
+| depth 3: 7 samples − 5 samples | +7,276 | −45,961 | +2.42 | 34–0–30 | not significant |
+| 7 samples: depth 4 − depth 3 | +86,172 | +26,468 | +22.39 | 40–0–24 | significant |
+| 5 samples: depth 4 − depth 3 | +7,723 | −42,743 | +2.69 | 29–0–35 | not significant |
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/lifetime-objective)
+Cohorts: a first cohort on `0xa51d0000`–`0xa51d003f`, whose seeds had already
+influenced other decisions and therefore cannot serve as confirmation
+(+71,138, lower bound +5,826); and a **confirmation cohort on previously unread
+seeds** `0xa51d1000`–`0xa51d103f` (+101,171, lower bound +47,457). 64 paired
+games each.
+
+Confirmation cohort detail: mean score 297,327 versus 398,498; mean moves 87.16
+versus 114.66; clears per move 1.9489 versus 2.0571; reveals per move 1.0697
+versus 1.1549; 0 censored games and 0 score-identity violations in both arms;
+games at or above one million: 0 versus 2.
+
+Cost, at fixed depth 4: work per move 1,296,034 versus 4,956,614, a ratio of
+3.824 against a predicted 3.79. Depth 3 with seven samples costs 156,834 per
+move and ties depth 4 with five samples (+14,999, 95% lower bound −31,029,
+32–0–32).
+
+**Limitations as recorded.** 64 paired games per arm; only the headline arm is
+replicated, and every other row of the interaction table rests on a single
+cohort. Seven samples makes the *next-disc* expectation exact, but gray-disc
+reveals are still sampled, so the reveal expectation is not exact — whether
+reveal sampling is now the binding bias was tested separately in the
+[reveal sampling](/approaches/lifetime-objective/reveal-sampling) work. No
+fixed-time comparison is reported. And the headline mean of 398,498 is far below
+the 1,050,000 the frozen protocol requires before a candidate may even be
+frozen: **no protected or final seed was opened or is justified by this
+result.**
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+Two constants, two opposite outcomes, and the difference between them is the
+lesson. The risk constant was saturated: it had no reachable setting that
+changed a decision, so no amount of tuning could have helped. The sample count
+was biased: it was systematically wrong in a way that no amount of extra depth
+could average away. Sweeping a constant is cheap; assuming which way it will go
+is not.
+
+The negative result also narrowed the search for the remaining headroom. The
+search already minimises death within its horizon as its first priority, and its
+horizon is four moves against a rise every five. Whatever is missing has to live
+in the long-horizon content of the leaf evaluator, not in the search's appetite
+for risk.
+
+Still open, and cautionary: whether the depth gradient keeps climbing once the
+estimator is exact. A later, still in-progress test in the
+[fast engine](/approaches/lifetime-objective/fast-engine) approach reports the
+fifth move of look-ahead *reversing* rather than continuing the gain, on interim
+partial cohorts. Read that record's own caveats before quoting it.

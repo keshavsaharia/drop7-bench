@@ -1,42 +1,158 @@
 ---
 title: Oracle and curriculum research
-summary: Privileged teachers that can see the future — legal only as label factories, never as players.
+summary: Let a planner cheat — show it the hidden numbers and the discs still to come — then try to teach a player who cannot cheat.
 ---
 
-An oracle plays with the future tape visible. That is cheating as a policy —
-but a legitimate way to answer two questions: **how much can structure matter**
-(a ceiling), and **can a public student be taught** (distillation).
+Let a planner cheat — show it the hidden gray-disc numbers and the discs that
+are still to come — then try to teach an ordinary player, who sees only the
+screen, to play the way the cheater did.
 
-<svg viewBox="0 0 640 130" className="my-4 w-full max-w-2xl rounded-xl border border-zinc-800 bg-zinc-900/40" role="img" aria-label="Oracle teacher to public student">
+A cheating planner is called an **oracle** or a **teacher** — the idea, and the
+line it must never cross, are explained in
+[cheating on purpose](/learn/concepts/oracles-and-teachers) and the
+[glossary](/learn/glossary). It is never a player. Its scores are produced
+with information a real player cannot have, so they belong on a different scale
+entirely: they are an upper bound on what the simulator makes possible, and a
+source of labelled examples. Every page in this family is about one of two
+questions — *how much is that hidden information worth?*, and *can any of its
+advantage be handed across the boundary to a legal policy?*
+
+## Where the boundary sits
+
+<svg viewBox="0 0 660 190" className="my-4 w-full max-w-2xl rounded-xl border border-zinc-800 bg-zinc-900/40" role="img" aria-label="What the teacher sees, what crosses the boundary, and what the student sees">
   <g fontSize="11" fill="#e4e4e7">
-    <rect x="20" y="30" width="170" height="60" rx="8" fill="#7f1d1d" />
-    <text x="105" y="55" textAnchor="middle" fontWeight="700">Oracle teacher</text>
-    <text x="105" y="72" textAnchor="middle" fontSize="10" fill="#fecaca">sees future discs + hidden values</text>
-    <rect x="240" y="30" width="150" height="60" rx="8" fill="#78350f" />
-    <text x="315" y="55" textAnchor="middle" fontWeight="700">Labels</text>
-    <text x="315" y="72" textAnchor="middle" fontSize="10" fill="#fde68a">public state → good action</text>
-    <rect x="440" y="30" width="180" height="60" rx="8" fill="#14532d" />
-    <text x="530" y="55" textAnchor="middle" fontWeight="700">Public student</text>
-    <text x="530" y="72" textAnchor="middle" fontSize="10" fill="#bbf7d0">board + next disc + rise clock only</text>
+    <rect x="16" y="26" width="196" height="140" rx="10" fill="#7f1d1d" />
+    <text x="114" y="48" textAnchor="middle" fontWeight="700">Teacher (oracle)</text>
+    <text x="114" y="70" textAnchor="middle" fontSize="10" fill="#fecaca">the board on screen</text>
+    <text x="114" y="88" textAnchor="middle" fontSize="10" fill="#fecaca">the next disc</text>
+    <text x="114" y="106" textAnchor="middle" fontSize="10" fill="#fecaca">every hidden gray number</text>
+    <text x="114" y="124" textAnchor="middle" fontSize="10" fill="#fecaca">every disc still to come</text>
+    <text x="114" y="150" textAnchor="middle" fontSize="10" fill="#fca5a5">plays a game, records moves</text>
+
+    <rect x="244" y="26" width="164" height="140" rx="10" fill="#78350f" />
+    <text x="326" y="48" textAnchor="middle" fontWeight="700">What may cross</text>
+    <text x="326" y="72" textAnchor="middle" fontSize="10" fill="#fde68a">a public board</text>
+    <text x="326" y="90" textAnchor="middle" fontSize="10" fill="#fde68a">the visible next disc</text>
+    <text x="326" y="108" textAnchor="middle" fontSize="10" fill="#fde68a">moves until the rise</text>
+    <text x="326" y="132" textAnchor="middle" fontSize="10" fill="#fde68a">the column the teacher</text>
+    <text x="326" y="146" textAnchor="middle" fontSize="10" fill="#fde68a">chose, as a label</text>
+
+    <rect x="440" y="26" width="204" height="140" rx="10" fill="#14532d" />
+    <text x="542" y="48" textAnchor="middle" fontWeight="700">Student (legal policy)</text>
+    <text x="542" y="70" textAnchor="middle" fontSize="10" fill="#bbf7d0">the board on screen</text>
+    <text x="542" y="88" textAnchor="middle" fontSize="10" fill="#bbf7d0">the next disc</text>
+    <text x="542" y="106" textAnchor="middle" fontSize="10" fill="#bbf7d0">moves until the rise</text>
+    <text x="542" y="150" textAnchor="middle" fontSize="10" fill="#86efac">must choose a column alone</text>
+
     <g stroke="#3f3f46" strokeWidth="2">
-      <line x1="190" y1="60" x2="240" y2="60" />
-      <line x1="390" y1="60" x2="440" y2="60" />
+      <line x1="212" y1="96" x2="244" y2="96" />
+      <line x1="408" y1="96" x2="440" y2="96" />
     </g>
+    <text x="228" y="184" textAnchor="middle" fontSize="9" fill="#71717a">seed, tape, score, level, move number: dropped here</text>
   </g>
 </svg>
 
-## What the evidence showed
+The middle column is the whole design problem. A teacher can be as strong as we
+like; what determines whether the exercise works is whether the *reason* for its
+move is visible in the narrow slice of information that crosses to the student.
 
-- The perfect-information oracle demonstrated that million-point structure
-  **exists** in the simulator — an upper-bound teaching signal, never a legal
-  policy result.
-- Distillation kept failing the same way: students drifted, held-out labels
-  overfit, and apparent screen gains reversed in confirmation. Oracle choices
-  are often simply not recoverable from the public state.
-- The topology audits did identify split-stable observable geometry — the kind
-  of signal that survives the privilege boundary.
+## How this family works, in general
 
-<Callout title="Never compare scores across the boundary" tone="warn">
-Oracle scores use future information and must never be placed on the same
-scale as public-information policies.
+1. Play games with a privileged planner. In this repository that is a
+   receding-horizon beam search over the game's realized future — see
+   [the perfect-information oracle](/approaches/oracle-curriculum/perfect-information-oracle).
+2. Record, at each position, the *public* view only, plus the teacher's choice
+   or some summary of what the teacher's positions looked like.
+3. Train something on that: an action classifier
+   ([distillation](/approaches/oracle-curriculum/oracle-distillation),
+   [DAgger](/approaches/oracle-curriculum/oracle-dagger)), a board-shape
+   classifier ([topology](/approaches/oracle-curriculum/topology)), a hand-built
+   feature family ([accessible energy](/approaches/oracle-curriculum/accessible-energy)),
+   or a set of restart positions to practise from
+   ([state curriculum](/approaches/oracle-curriculum/state-curriculum)).
+4. Freeze it, and make it play complete games through the public interface,
+   against unchanged fair search, on games it has never seen.
+
+One page here is the odd one out.
+[The hindsight planner](/approaches/oracle-curriculum/hindsight-planner) reads
+no hidden information at all — it *invents* futures from a hash of the public
+board and plans as if each invented future were certain. It sits in this family
+because it fails for the same reason the oracle cannot be copied.
+
+## What happened, in plain English
+
+The cheating planner is enormously strong. On twelve training-only games it hit
+the 500-move cap in every one and averaged more than a million points — under
+the historical 7,000-point scoring, and censored by the cap. That answered the
+first question: the simulator does contain million-point structure, and long
+games are mechanically possible.
+
+Nothing has yet crossed the boundary. Every attempt — copying the teacher's
+moves, copying them again on the student's own positions, learning what an
+oracle-visited board *looks like*, turning the oracle's stable board features
+into a scoring term, restricting that term to statistically tied moves —
+produced either a weak held-out label or an apparent gain that reversed when
+more complete games were played. Two independent measurements say why, and they
+agree: the oracle's advantage is mostly *knowing the tape*, not *judging the
+board better*.
+
+<Callout title="Never put oracle scores on the leaderboard" tone="warn">
+An oracle score is computed with information no player has, and several of the
+cohorts here are also censored at a move cap and scored under the historical
+7,000-point level bonus. These numbers measure the simulator, not a policy.
 </Callout>
+
+<TechnicalDetails title="The record behind those sentences">
+
+- Single upper-bound check: **2,079,579 points at the 500-move cap** on seed
+  `0x3d700000` (ledger-recorded; one game).
+- Twelve training-only games `0x3d950000...0b` at depth 4 / beam 128: capped in
+  all twelve, mean **1,058,931.5** under the **historical 7,000-point
+  Sequence-style level bonus**; paired public depth-3 play averaged 132,979
+  points and 90.5 moves (ledger-recorded).
+- Sixteen-game matched audit: oracle **429,182.5** points, 200-move cap in all
+  16, winning every pair, against depth 3's 90,273 and 63.625 moves; clears and
+  reveals per move 2.354 / 1.386 against 1.792 / 0.960 (ledger-recorded,
+  historical 7,000-point seeds).
+- Action distillation: training cross-entropy 0.480 against held-out top-1
+  **0.218**, top-2 0.386, cross-entropy 3.282 — and the ledger notes the oracle
+  and behaviour holdouts were "similarly weak", so this is not merely the
+  student visiting unfamiliar boards.
+- [`audit-05`](/docs/exploratory/audit-05-optimistic-curriculum) §5.4 collects
+  four independent measurements of the same question and concludes the oracle's
+  advantage is "overwhelmingly … exploitation of the realised tape", with a real
+  but non-actionable residue that shows up as *state* quality, not as *action*
+  preference. §4 of the same audit classifies seventeen failed learned models by
+  failure mode; the oracle distillations are classed as
+  representation/information-gap failures.
+- Sources: [experiment index](/docs/research/experiment-index) "Oracle and
+  curriculum research"; [ledger](/docs/research/history) sections on privileged
+  oracle distillation, the privileged topology audit, accessible energy, and
+  synthetic-tape hindsight optimization.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **A ceiling is not a curriculum.** Knowing a million points is reachable told
+  us the objective is not impossible. It did not supply a single usable move.
+- **State quality and action quality are different measurements.** A separate
+  discriminator (in the n-tuple family) separated oracle-visited boards from
+  fair boards on public features alone at held-out area-under-curve
+  **0.925 / 0.915**, and the very same scalar, used to rank *moves* as a
+  near-tie tie-break, lost games to plain depth-3 search — 253,798.9 against
+  301,101.1 points (ledger-recorded, quoted in
+  [`audit-05`](/docs/exploratory/audit-05-optimistic-curriculum) §2.4). This is
+  the [sibling-ranking problem](/learn/concepts/ranking-siblings) in its
+  privileged-teacher form.
+- **Optimism in a label is a trap.** A target realized on a lucky future is not
+  a function of the public board, so the best a public model can fit is the
+  average lucky outcome — an over-confident survival estimate, worst exactly on
+  the cluttered boards where confidence kills.
+- **One cheap measurement is still missing.** The restart curriculum re-scores
+  every oracle position under independent public futures, but
+  [`audit-05`](/docs/exploratory/audit-05-optimistic-curriculum) §5.4 records
+  that the aggregate fair-relabelled survival was never reported. Nobody has
+  published *what an oracle-visited board is worth to a fair player*. That
+  number decides whether practising from oracle positions is worth anything at
+  all, and it has never been run.

@@ -7,8 +7,14 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "rules:scenarios": "node --experimental-strip-types scripts/generate-rules-scenarios.ts",
-    "concept:scenarios": "node --experimental-strip-types scripts/generate-concept-scenarios.ts"
+    "figures:rules": "node --experimental-strip-types scripts/generate-rules-scenarios.ts",
+    "figures:concepts": "node --experimental-strip-types scripts/generate-concept-scenarios.ts",
+    "figures:sample-game": "node --experimental-strip-types scripts/generate-sample-game.ts",
+    "figures:leaf": "node --experimental-strip-types scripts/generate-leaf-scenarios.ts",
+    "figures:cohort": "node --experimental-strip-types scripts/extract-d4-cohort.ts",
+    "figures:oracle": "node --experimental-strip-types scripts/generate-oracle-scenario.ts",
+    "figures:heuristic": "node --experimental-strip-types scripts/generate-heuristic-figures.ts",
+    "check:mdx": "node scripts/check-mdx.mjs ../approaches ./content"
   },
   "dependencies": {
     "gray-matter": "^4.0.3",

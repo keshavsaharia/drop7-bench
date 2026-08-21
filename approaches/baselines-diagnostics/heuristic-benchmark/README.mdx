@@ -1,28 +1,95 @@
 ---
-title: Heuristic Benchmark
+title: Heuristic benchmark
 family: baselines-diagnostics
-status: Unknown
+summary: A harness that makes several simple hand-written players play the same games and reports who won each one, so a new idea can be compared against a fixed opponent instead of against luck.
+status: support-only
 evidence: repository-verified
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+A tournament runner for the simplest players in the repository: give each of
+them the same list of games, and report not just their averages but who won
+each individual game.
 
-## Heuristic benchmark
+<EvidenceLabel status="support-only" evidence="repository-verified" reads="public" />
 
-Runs paired complete-game comparisons among named TypeScript heuristic profiles.
+## The intuition
 
-**Status: Unknown** (repository-verified). 
+Drop7 scores are wildly uneven. The same policy can score 40,000 on one seed
+and 1,200,000 on another, so comparing two policies on *different* games tells
+you almost nothing — the difference you measure is mostly which seeds each one
+happened to get.
 
-## Sources
+The fix is pairing. Both policies play seed 1, both play seed 2, and the thing
+you record is the difference **within each seed**. A policy that wins 7 games
+out of 8 by a small margin is a much stronger signal than one that wins the
+average because a single game went enormous. This harness is the TypeScript
+implementation of that discipline, and the reason it exists as a separate
+program is so that "run the same games through both" is not re-implemented, and
+re-broken, in every experiment.
 
-- `main.ts`
+## How it works
 
-## More evidence
+1. You name one or more **profiles** — hand-written board evaluators that
+   differ only in how much they care about each feature. The built-in set is
+   `legacy`, `survival`, `potential`, `anti-clog` and `combined`; each is a
+   fixed vector of weights over features such as open columns, height load,
+   covered-disc exposure, chain potential and clog patterns.
+2. You give it a list of seeds, a search depth, and a work or time budget per
+   move. Every profile plays every seed, and a game stops naturally or at a
+   move cap.
+3. For each profile it reports mean, median, 10th and 90th percentile, minimum
+   and maximum score, mean moves, mean final level, mean completed search depth,
+   how many games were censored at the cap, how many searches ran out of budget,
+   and the mean search work and cache hits per move.
+4. Against the first profile as comparator it also reports the **paired**
+   figures: number of paired games, mean and median per-seed difference, a 95%
+   interval on that difference, and the win/tie/loss count.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/baselines-diagnostics)
+Everything it reads is public: the visible board, the next disc and the rise
+clock. It is not a candidate policy, and the profiles it runs are far below the
+[depth-4 reference](/approaches/fair-expectimax/reference).
+
+## What happened
+
+**No retained result.** The [experiment index](/docs/research/experiment-index)
+records this source as support-only and repository-verified; it is listed in
+[audit 04](/docs/exploratory/audit-04-blind-spots) §B.2 among the sources whose
+question — "paired comparisons among named TypeScript heuristic profiles" — has
+no recorded lane and no retained output. This page therefore describes what the
+code does, from the code, and quotes no scores.
+
+<TechnicalDetails title="The technical record">
+
+**Status: support-only — repository-verified.** No ledger entry and no task
+record was located for this source, so no number is attributed to it.
+
+Entry point `main.ts`, run with Node's type stripping:
+`node --experimental-strip-types approaches/baselines-diagnostics/heuristic-benchmark/main.ts`.
+It accepts a profile list, a seed list (up to 100,000 seeds), `--depth`, an
+optional time limit and work cap, a move cap, and `--format table|json`. The
+tournament itself is `runHeadlessTournament` in
+`src/core/typescript/headless.ts`; the profiles are `HEURISTIC_PROFILES` in
+`src/core/typescript/heuristic.ts`.
+
+Note on interpretation: a table produced by this harness is a comparison
+between hand-written profiles on whatever seeds were passed in. It carries no
+seed-lease bookkeeping of its own, so a run of it is not automatically
+development-cohort evidence — the caller has to say which seeds were used and
+in what role. See the [methodology](/docs/methodology) for the seed roles and
+[benchmarks](/docs/benchmarks) for the tiers.
+
+Source: `main.ts`.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- Paired, whole-game comparison is the unit of evidence in this project, and
+  this is where that machinery lives on the TypeScript side.
+- Nothing recorded here says which profile is best. If that comparison was ever
+  run, its output was not retained.
+- The open item named in the [experiment index](/docs/research/experiment-index)
+  is adjacent: the corrected depth-4 native reference has no TypeScript
+  benchmark entry point, so the two implementations do not currently expose the
+  same research policy through this harness.

@@ -1,26 +1,139 @@
 ---
-title: D4 and long-outcome research
-summary: Teachers built from exact D4 search and 25-move outcomes — and the veto that almost worked.
+title: Depth-4 search and long outcomes
+summary: The reference search sees four of your own moves; these experiments judge a move by playing on for twenty-five, then try to keep only the moves that survive that longer look.
 ---
 
-Fair D4 is strong but sees only four plies. This family asks what lies beyond:
-label root actions by their **long outcomes** (25-move continuations, terminal
-results), then distill, rank, or veto.
+The strongest dependable policy here looks four of your own moves ahead. These
+experiments ask what a move looks like when you keep playing for **twenty-five**
+— five complete rise cycles — and whether anything useful can be brought back
+from that far out.
 
-## The headline experiment
+Everything in this family is a legal public-information policy or an offline
+study of one. There is no privileged information anywhere on these pages; for
+that, see [oracle and curriculum research](/approaches/oracle-curriculum).
 
-The exact D4 + 25-move D2 rollout veto let a costly common-tape comparison
-overrule fair D4 only when the long evidence disagreed. One pilot reached a
-**404,047-point** mean with quality gates passed — but it missed its runtime
-limit by a wide margin, and the frozen replication later failed its gates.
-Signal existed; it did not survive contact with confirmation.
+## What "four moves" misses
 
-## What the evidence showed
+<svg viewBox="0 0 660 220" className="my-4 w-full max-w-2xl rounded-xl border border-zinc-800 bg-zinc-900/40" role="img" aria-label="A four-move horizon compared with a twenty-five-move rollout across five rise cycles">
+  <g fontSize="11" fill="#e4e4e7">
+    <text x="16" y="24" fontSize="10" fill="#a1a1aa">moves from now</text>
+    <g stroke="#3f3f46" strokeWidth="1">
+      <line x1="16" y1="34" x2="644" y2="34" />
+    </g>
+    <g fill="#71717a" fontSize="9">
+      <text x="16" y="48">0</text>
+      <text x="140" y="48">5</text>
+      <text x="264" y="48">10</text>
+      <text x="388" y="48">15</text>
+      <text x="512" y="48">20</text>
+      <text x="628" y="48">25</text>
+    </g>
 
-- Long-outcome labels carry real signal that D4 cannot see (rise-boundary
-  fragility, slow-burn structure).
-- Distilling that signal into a fast student kept failing sibling-ranking
-  gates — the same trap documented in
-  [value and policy learning](/approaches/value-policy-learning).
-- A cheaper exact veto that preserves the original intervention decisions is
-  still an open direction.
+    <rect x="16" y="66" width="103" height="34" rx="6" fill="#1e3a8a" />
+    <text x="67" y="88" textAnchor="middle" fontWeight="700">depth 4</text>
+    <text x="130" y="88" fontSize="10" fill="#93c5fd">everything past here is a leaf guess</text>
+
+    <rect x="16" y="118" width="628" height="34" rx="6" fill="#14532d" />
+    <text x="330" y="140" textAnchor="middle" fontWeight="700">25-move rollout, 7 shared imagined futures per column</text>
+
+    <g stroke="#f59e0b" strokeWidth="1.5" strokeDasharray="4 3">
+      <line x1="140" y1="60" x2="140" y2="176" />
+      <line x1="264" y1="60" x2="264" y2="176" />
+      <line x1="388" y1="60" x2="388" y2="176" />
+      <line x1="512" y1="60" x2="512" y2="176" />
+      <line x1="628" y1="60" x2="628" y2="176" />
+    </g>
+    <text x="330" y="192" textAnchor="middle" fontSize="10" fill="#fbbf24">dashed lines: the board rises, a new covered row appears</text>
+    <text x="330" y="210" textAnchor="middle" fontSize="10" fill="#a1a1aa">the depth-4 search never reaches the second rise; the rollout crosses five</text>
+  </g>
+</svg>
+
+A rise happens every five drops. A four-move search therefore usually does not
+see even one full cycle, and it never sees what its choice does to the *next*
+one. Structures in this game are built and released over several cycles: a
+column stacked to prepare a long run, a covered disc kept reachable, a low
+number left where the rise will make it useful. Those pay off well outside a
+four-move window, and a shallow search values them at whatever its leaf
+evaluator happens to say.
+
+## The two things you can do with a longer look
+
+**Use it directly.** Keep depth-4 search as the default, and only when the board
+is dangerous, replay every legal column forward for 25 moves under seven shared
+imagined futures. If some alternative is clearly better across all seven, take
+it; otherwise keep depth 4. That is the
+[rollout veto](/approaches/d4-long-outcome/rollout-veto).
+
+**Learn it.** A 25-move replay of every column at every position is far too slow
+to play with, so train a model on those replays and use the model instead. That
+is the [long-outcome family](/approaches/d4-long-outcome/long-outcome), the
+[sibling network on the 200-move panel](/approaches/d4-long-outcome/h200-sibling-nnue),
+and — as a sanity check on whether the learning machinery works at all —
+[compressing depth-4 search itself](/approaches/d4-long-outcome/d4-distillation).
+
+Every one of these keeps exact depth-4 search as the fallback, so a failure
+costs nothing but time.
+
+## What happened, in plain English
+
+The long look **does** contain information the shallow search cannot see. The
+learned models predict survival over a 100-move horizon strikingly well. But
+predicting survival is not choosing a column, and every attempt to convert the
+long-outcome signal into a *ranking* of the seven available moves ranked them
+worse than a plain, much cheaper exact search — the
+[sibling trap](/learn/concepts/ranking-siblings) in its purest form.
+
+The direct version has a more dramatic history. One single game — one — scored
+404,047 points and lasted 250 moves where depth 4 scored 159,616 in 105. That
+number was shelved for being far too slow rather than for being wrong, and it
+sat in the repository for a long time as the most tempting unexploited result in
+it. It has since been retested properly, at corrected scoring, on 32 paired
+games. It does not reproduce; on that cohort the veto is significantly *worse*
+than plain depth 4, and it degrades exactly the clear and reveal rates that
+would have had to improve for it to work.
+
+<TechnicalDetails title="The record behind those sentences">
+
+- Single pilot, ledger-recorded, **one game**: seed `0x3ded0000`, stock fair
+  depth 4 scored 159,616 in 105 moves; the veto scored 404,047 in 250 moves.
+  Recorded at the time as "only one pair, not statistical evidence", and paused
+  for missing its runtime ceiling by a wide margin (projected 15,340.599 seconds
+  against a 2,700-second limit).
+- [`finding-03`](/docs/exploratory/finding-03-rollout-veto-17k) reports the
+  corrected-scoring retest, reproduced in this checkout: 32 paired games, run
+  validity `valid`, scientific outcome `fail`, evidence tier `development`. Fair
+  depth 4 averaged **339,290** points / 98.66 moves; the veto averaged
+  **292,780** / 86.34. Paired mean delta **−46,510.5** points, one-sided 95%
+  bootstrap lower bound −91,924.6, wins–ties–losses 9–4–19. Clears per move fell
+  2.0200 to 1.9515 and reveals per move 1.1308 to 1.0749.
+- Learned long-outcome rankers: the auxiliary survival head reaches Pearson
+  correlation around 0.85 on held-out data while top-move accuracy falls *below*
+  exact depth-2 search — 27.79% for exact depth 2 against 25.99% and 23.94% for
+  the two learned capacities (ledger-recorded; this comparison predates the
+  scoring correction and uses the historical 7,000-point level bonus).
+- The reference figure every candidate is measured against: fair depth 4,
+  **308,295.578** points over 90.031 moves on the recorded 64-game cohort
+  ([status](/docs/research/status), detailed ledger).
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **A single spectacular game is not evidence.** Scores here are heavy-tailed;
+  [`finding-03`](/docs/exploratory/finding-03-rollout-veto-17k) found a
+  +299,746 game and a −446,294 game side by side inside one 32-game cohort. That
+  is what a one-game result from this policy actually looks like.
+- **Rejecting a configuration is not rejecting the family.** The retest ruled out
+  one exact configuration — horizon 25, seven futures, danger height 4, a
+  depth-2 continuation — at both of the two value bands that were argued about.
+  It did not rule out a longer look done differently, and it identified the
+  single most likely defect: the return estimate is under-sampled by roughly two
+  to seven times at seven futures.
+- **The continuation policy matters as much as the horizon.** A move chosen
+  because it looks good under 25 moves of *depth-2* play is then executed in a
+  game that will be played by *depth-4*. The estimator was measuring a different
+  policy's future.
+- **Still open:** a cheaper exact veto that preserves the original intervention
+  decisions ([experiment index](/docs/research/experiment-index), "what remains
+  genuinely open"), and a scenario count high enough for the return test to mean
+  what it claims.

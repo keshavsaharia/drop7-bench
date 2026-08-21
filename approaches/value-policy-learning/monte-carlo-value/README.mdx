@@ -1,35 +1,123 @@
 ---
-title: Monte Carlo Value
+title: Monte Carlo state value
 family: value-policy-learning
-status: Rejected
+summary: Label every board with how many more moves the game it came from actually lasted, then only leave the safe move when the learned numbers agree it is better.
+status: rejected
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Play games with a trusted policy, write down for every board how much longer
+that game really lasted, fit a model to those numbers, and then let the model
+change a move only when it is confident.
 
-## Direct Monte Carlo state value
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
 
-Labels public states with terminal behavior returns, then compares sibling successors conservatively.
+Both programs here are in the written [ledger](/docs/research/history) with a
+declared protocol, frozen gates and a stop rule — the strongest evidence class
+this repository has short of a re-run. Both were retired, and the second was
+retired *before it ever played a move*.
 
-**Status: Rejected** (ledger-recorded). the first held-out stage collapsed.
+## The intuition
 
-## Scaled survival value
+Score is mostly survival: a game that lasts twice as long scores far more than
+twice as much, because every fifth move pays a rise bonus. So instead of
+predicting points, predict **how many moves are left**. That label needs no
+model at all — you play the game to the end and count.
 
-Tests more terminal behavior data with whole-game holdouts and strict AUC/rank gates.
+The design is deliberately conservative. The learned value is not put in charge.
+The exact depth-3 phase policy keeps playing, and the model is allowed to swap
+its move only when every member of a small ensemble prefers the alternative by a
+margin, when the alternative's board looks like boards the model was actually
+trained on, and when the ensemble members do not disagree too much with each
+other. The idea is that a value function does not have to be right everywhere —
+it only has to be right about the rare positions where it speaks up.
 
-**Status: Rejected** (ledger-recorded). held-out lifetime ranking missed its gate.
+## How it works
 
-## Sources
+1. **Collect.** Complete games are played by the exact depth-3, five-stratum
+   phase-safety policy. `mc-value-policy.cpp` runs them one at a time;
+   `survival-value-scale.cpp` runs 64 in parallel to test whether more data was
+   the missing ingredient.
+2. **Label.** Every public position is stamped with three targets read straight
+   off the finished game: its remaining lifetime in moves, whether the game
+   survived 25 more moves, and whether it survived 50.
+3. **Fit.** A four-member, reflection-safe ensemble regresses those targets. It
+   takes **no action input** — it values a board, so the same function can be
+   applied to any successor. Whole games, never individual positions, are held
+   out, so a held-out board's own game never contributed a label.
+4. **Gate before playing.** `survival-value-scale.cpp` declared in advance that
+   the model must reach 0.75 area-under-curve on both survival horizons *and*
+   0.60 Spearman rank correlation on held-out lifetime before it was permitted
+   to influence a single move.
+5. **Deploy conservatively.** Where the gate allowed it, each legal column is
+   rolled one ply through the same set of common, stratified chance outcomes, and
+   the exact policy's move is kept unless the challenger clears the margin,
+   support and disagreement tests.
 
-- `mc-value-policy.cpp`
-- `survival-value-scale.cpp`
+## What happened
 
-## More evidence
+The first program failed on the board, badly. On the eight held-out games of
+the one paired stage it was allowed, the trusted policy averaged about 246,000
+points and 75 moves while the value-guided policy managed about 122,000 and 40 —
+roughly half the score and half the length. It was stopped there, without tuning, exactly as
+the protocol said it must be.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/value-policy-learning)
+The second program never got that far. With eight times as many collected
+games it predicted
+*whether* a game would end soon quite well, but its ranking of held-out boards
+by remaining lifetime came in at 0.557 against the 0.60 it had promised in
+advance, so under its own frozen rule it stopped at prediction and played
+nothing. That is worth stating plainly: a model that looks strong on the metric
+you happen to plot can still miss the metric you committed to.
+
+<TechnicalDetails title="The technical record">
+
+Both entries are ledger-recorded in
+[the experiment history](/docs/research/history).
+
+**Direct Monte Carlo behavior-value pilot** (`mc-value-policy.cpp`). The first
+required paired training-only stage: eight-game held-out behavior mean
+**246,447.875 points / 75 moves**; value policy **122,100.125 / 40 moves**;
+paired 95% lower bounds **−223,447 points** and **−62.904 moves**; clear and
+reveal throughput fell from **1.888 / 1.023** to **1.516 / 0.778**. The run used
+634 terminal Monte Carlo labels and 15,029 counterfactual transitions, read only
+the `0x3d…` and `0x3e…` lanes, and stopped after the first failure without
+tuning or reading any probe, validation or final-test range.
+
+**Survival-value scale experiment** (`survival-value-scale.cpp`). One
+predeclared run: 64 uncensored trajectories, 5,717 labels (4,212 from 48
+training games, 1,505 from 16 held-out games); behavior mean **299,059.75 points
+/ 89.328 moves**. Training: MAE **12.636 moves**, death-within-25/50 AUC
+**0.990 / 0.963**, lifetime Spearman **0.911**. Held out by whole game: MAE
+**30.773 moves**, AUC **0.920 / 0.756**, Spearman **0.557** against the frozen
+**0.60** gate; Brier **0.099 / 0.200**, expected calibration error
+**0.047 / 0.063**. No policy switches were made and no screen or confirmation
+seeds were read. The experiment was not retuned or repeated.
+
+Both entries appear in the ledger *before* the corrected-Hardcore scoring replay
+that restored the five-move level award to 17,000 points. Read their point
+totals as within-run, paired comparisons against their own behavior baseline;
+they are not comparable with the corrected-score
+[fair D4 reference](/approaches/fair-expectimax/reference).
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+Two separate lessons, and it matters that they are separate.
+
+- **A board-only value can be accurate and still be useless for choosing.** The
+  scaled run's held-out survival classifier was good; its *ordering* of boards
+  by lifetime was not. Ordering is the skill a policy needs — the
+  [sibling trap page](/learn/concepts/ranking-siblings) is the general form of
+  this.
+- **Held-out has to mean held-out games.** Both programs split by whole game
+  rather than by position, and both saw a large gap between training and
+  held-out numbers. A position-level split would have hidden that gap and
+  produced a much more flattering, much less true, page.
+
+Still open: nothing here tested a *conservative* deployment with a model that
+had passed its gate — the second program never reached deployment. The
+conservative-override mechanism itself was tested much later, and successfully,
+in the [afterstate line](/approaches/afterstate-learning/distributional-afterstate).

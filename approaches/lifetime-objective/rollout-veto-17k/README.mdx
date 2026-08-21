@@ -1,0 +1,198 @@
+---
+title: Letting a long look-ahead overrule the search
+family: lifetime-objective
+summary: Before playing the move the reference search chose, play every column forward twenty-five moves under seven imagined futures with a cheap player, and overrule the search only when another column looks clearly better on all of them.
+status: rejected
+evidence: reproduced
+reads: public
+---
+
+The reference search sees four moves. This candidate looks twenty-five moves
+ahead with a much weaker player, and is allowed to overrule the search when the
+long view disagrees strongly enough.
+
+<EvidenceLabel status="rejected" evidence="reproduced" reads="public" />
+
+It was tested on 32 paired games and **it lost** — not narrowly, and not only on
+score. It made the game's two survival flow rates *worse*, which is the one
+thing it could not afford to do.
+
+## The intuition
+
+A four-move look-ahead is very good at not dying in the next four moves and
+completely blind to a board slowly filling up over the next thirty. The idea
+here is a division of labour: keep the strong short-range search as the default,
+and add a second opinion that trades accuracy for reach.
+
+The second opinion works like this. Take each column you could legally play.
+Imagine seven possible futures — seven sequences of discs and hidden numbers.
+Play each column forward for twenty-five moves in each future, using a fast
+two-move search to make the intervening decisions. Now you have seven paired
+comparisons for every column against the column the reference chose. If a
+challenger wins consistently enough across all seven, take it; otherwise stay
+with the reference.
+
+The seven futures are shared across all the columns, and each future is seeded
+from the visible board alone — never from the game's seed — so the comparison is
+between columns rather than between lucky and unlucky imagined futures.
+
+## How it works, step by step
+
+1. **Input.** The visible board, the visible next disc, and the drops remaining
+   before the next rise. The imagined futures are generated from a hash of the
+   visible position, so nothing about the real game's randomness leaks in, and
+   the score, level and move number are structurally unreachable by the
+   continuation player.
+2. **Default.** The unmodified reference: full-width, four-move
+   [fair expectimax](/learn/concepts/chance-vs-choice) with five chance samples.
+   Its chosen column is the incumbent.
+3. **Routing.** The long look-ahead only runs when the board is already tall —
+   when some column holds four or more discs. In the recorded cohort that fired
+   on 77.3% of decisions.
+4. **Challengers.** Every other legal column. There is no shortlist and no width
+   limit.
+5. **Continuation.** For each column and each of the seven futures, play the
+   column, then let a fresh two-move search play the next twenty-four moves. Add
+   up the points; if the line dies, charge it the same large death penalty the
+   reference uses; if it survives all twenty-five moves, add one leaf score for
+   where it ended up.
+6. **The veto test.** A challenger replaces the incumbent only if it passes all
+   four conditions: it survives at least as many of the seven futures; it clears
+   at least as many numbered discs on average; its paired advantage over the
+   incumbent clears a confidence bound across the seven futures; and the
+   reference search itself does not rate it worse than the incumbent by more
+   than one row-rise bonus.
+7. **Output.** A column — the best passing challenger, or the reference's own
+   column if none passes.
+
+## What happened
+
+**It was rejected on every one of its five preregistered conditions.** On 32
+games played by both, the reference averaged 339,290 points and 98.66 moves; the
+candidate averaged 292,780 points and 86.34 moves. Game by game it lost 19,
+won 9 and tied 4, and the confidence bound on the difference sat around
+−92,000 — comfortably on the wrong side of zero.
+
+The rule genuinely fired: 68 vetoes across 2,137 opportunities, so this is not a
+policy that quietly did nothing. Three games drew no vetoes at all, and in all
+three the two arms produced *exactly* identical games, which is a free check
+that the fallback works. Attributing the whole cohort's loss to the vetoes that
+caused it gives an average of about −21,900 points per veto taken — and
+individual vetoes were near coin flips with a strongly negative mean, one game
+gaining nearly 300,000 and another losing over 440,000.
+
+The decisive part is not the score. It is that the candidate **cleared fewer
+discs and revealed fewer gray discs per move than the policy it was trying to
+improve**. For a long look-ahead to buy survival it has to buy flow, and this one
+sold it — despite one of the four veto conditions being an explicit demand for
+more clears. The estimate of a column's clear advantage, measured twenty-five
+moves deep under a two-move continuation, **did not transfer to a game that was
+actually going to be played by the four-move search**. The rollout was measuring
+a different policy's future.
+
+<Callout title="This retest exists because a single game looked spectacular" tone="warn">
+An earlier version of this mechanism produced one game worth 404,047 points in
+250 moves, under the repository's old, incorrect 7,000-point rise bonus. Rescored
+at the corrected 17,000-point bonus that becomes 894,047 — 89% of the
+qualification bar, from a legal public-information policy. An internal audit
+called it "the single largest unexploited number in the repository". Properly
+powered, with the correction the audit itself specified, **the mechanism did not
+reproduce.** The original seed was deliberately not re-run, because re-running
+the exact game that produced a headline number and reporting it would be
+selection on the outcome.
+</Callout>
+
+<TechnicalDetails title="The technical record">
+
+Source: [`finding-03-rollout-veto-17k`](/docs/exploratory/finding-03-rollout-veto-17k).
+Run validity **`valid`**; scientific outcome **`fail`**; **evidence tier
+`development`** (SCREEN, 32 paired whole games); provenance **reproduced**,
+executed in this checkout. Seed lease `SEEDLEASE-A51D-VETO`, cohort
+`0xa51e0000`–`0xa51e001f`, 600-move declared cap, 8 threads. 0 runner failures,
+0 illegal moves, 0 score-identity violations, 0 censored games in either arm.
+
+Gate frozen in `PREREGISTRATION.md` before any cohort seed was read.
+
+| Arm | Mean | Median | Min / max | Mean moves | Clears/move | Reveals/move |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| fair depth-4 (comparator) | 339,290 | 257,270 | 120,279 / 725,934 | 98.66 | 2.0200 | 1.1308 |
+| rollout veto (candidate) | 292,780 | 250,794 | 120,286 / 799,183 | 86.34 | 1.9515 | 1.0749 |
+
+| Statistic | Score | Moves |
+| --- | ---: | ---: |
+| Paired mean delta | −46,510.5 | −12.31 |
+| Paired median delta | −9,264.0 | −2.00 |
+| One-sided 95% bootstrap lower bound (20,000 resamples) | −91,924.6 | −24.34 |
+| Wins–ties–losses | 9–4–19 | 7–9–16 |
+| Paired delta standard deviation | 159,175 | — |
+
+An exact one-sided sign test on the 28 non-tied games gives p = 0.0436. All five
+preregistered conditions failed: positive mean score delta, positive bootstrap
+lower bound, positive mean move delta, at least 20 score wins of 32, and flow
+rates not below the reference's.
+
+Mechanism counters: 2,763 decisions, 2,137 routed, 12,314 alternatives scored,
+103 passing all four conditions, **68 vetoes taken**. The binding condition is
+the confidence test on the paired return, which rejected **12,203 of 12,314
+alternatives (99.1%)** — because a single imagined future in which one column
+dies and another does not moves the difference by the whole million-point death
+penalty, so the spread across seven futures is enormous relative to the mean.
+A diagnostic on one probe game puts the number of futures the estimator would
+actually need at roughly **16 to 51, against the 7 in use**.
+
+An ablation ran the whole cohort again with the pre-correction band of 7,000
+points instead of 17,000 on the fourth condition. It tripled rejections on that
+condition (720 to 2,266) and changed the number of vetoes actually taken by one
+(68 to 67); **29 of 32 games were identical between the two bands**, and both
+bands failed all five conditions. The audit's specified repair was applied,
+measured, and did not rescue the mechanism.
+
+**Runtime, and why the original was shelved for the wrong reason.** The
+historical version was paused on a projected 15,341 seconds against a 2,700-second
+ceiling. Measured here, the long look-ahead adds about 1.92 times to total
+decision CPU and 1.61 times to arm wall time — a factor of two, not a factor of
+six. The runtime gate was never the real obstacle. **These timings were taken on
+a heavily contended machine** (other jobs held 20 to 70 of 32 logical CPUs
+throughout); the absolute seconds are upper bounds and are not benchmark-grade,
+and only the ratios transfer.
+
+**Correctness.** The port is proven byte-identical to the frozen historical
+source at the rollout level: a canonical digest of per-column mean return,
+surviving futures, mean clears, legal-action count, transitions, calls, work and
+nodes over 10 public states matched over 80 digest lines. That gate caught a real
+transcription error on its first run. Self-tests cover corrected scoring, repeat
+determinism, horizontal-reflection equivalence, blindness to score, level and
+move index, legality, and seed-lease containment. No cross-engine
+TypeScript parity sweep was run for this candidate, which is a weaker claim than
+full engine parity.
+
+**Other limitations as recorded.** n = 32, with a paired delta standard
+deviation of 159,175 — enough to decline promotion, not enough to quantify how
+much worse the mechanism is. One machine, one compiler. The cohort and probe
+seeds are now permanently development data; no protected or final seed was
+touched.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+**Ruled out:** this exact configuration — twenty-five moves, seven futures,
+danger threshold of four discs, a two-move continuation, the confidence test as
+written, every legal column as a challenger, at both settings of the fourth
+condition, on 32 fresh paired games.
+
+**Not ruled out:** the family. A valid negative rejects a configuration, not an
+idea. Two live alternatives survive it. The first is simply that seven imagined
+futures is too few to decide anything — the estimator is under-sampled by
+something like two to seven times, and cost grows linearly in the number of
+futures, so the cheapest honest next test is more futures over a shorter horizon,
+preregistered as a new configuration rather than as a repair of this one. The
+second is harder: even the vetoes that *were* accepted made realized flow worse,
+which under-sampling alone does not explain. A continuation player that is much
+weaker than the policy that will really be playing may simply be answering the
+wrong question.
+
+The wider lesson is about single spectacular games. This cohort contains a
++299,746 game and a −446,294 game side by side. That is what a one-game result
+from this policy looks like, and it is why the repository counts
+[means over paired whole games](/learn/glossary), not best games.

@@ -1,28 +1,116 @@
 ---
-title: Phase Horizon
+title: Phase horizon
 family: heuristic-search
-status: Rejected
+summary: Judge a board by how it will look when the next row rises, not by how it looks now — a board one drop from a rise is in far more trouble than the same board five drops away.
+status: rejected
 evidence: task-record only
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Judge a board by how it will look when the next row rises, not by how it looks
+now — a board one drop from a rise is in far more trouble than the same board
+five drops away.
 
-## Phase-horizon policy
+<EvidenceLabel status="rejected" evidence="task-record only" reads="public" />
 
-Tests phase-conditioned safety and rise-readiness weights.
+## The intuition
 
-**Status: Rejected** (task-record only). the frozen policy improved some games but failed its 400,000-point gate.
+Most hand evaluators score the board in front of them. But in this game the
+board is on a clock: every five drops, everything shifts up and seven new
+[covered discs](/learn/glossary) appear underneath. Two boards can look
+identical and be in completely different situations because one of them has
+four drops of breathing room and the other has one.
 
-## Sources
+Phase horizon makes the [rise clock](/learn/glossary) a first-class input. Its
+central feature is not occupancy but **projected occupancy debt**: assume the
+policy manages the sustainable 2.4 clears per drop between now and the rise,
+project the board forward to that moment, and score *that*. A crowded board
+with time to work is fine; a comfortable board about to be squeezed is not.
 
-- `main.ts`
+The same trick is applied to covered discs. **Residual cover debt** asks how
+many covers will still be closed when the next seven arrive, and a separate
+"imminent" altitude term sharpens the penalty for high covers as the rise gets
+close.
 
-## More evidence
+## How it works, step by step
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/heuristic-search)
+1. **Read the public position** — visible board, visible next disc, and how
+   many drops remain before the rise.
+2. **Project forward to the rise** at the sustainable clear rate and extract
+   twelve phase features: projected occupancy debt, residual cover debt, two
+   cover-altitude debts, peak height risk, low-cap load, adjacent low-cap load,
+   direct build inventory, quiet build options, quiet direct gain, trigger
+   readiness and release readiness.
+3. **Add them to the ordinary hand evaluator's features** with fixed weights —
+   the largest are −900 for peak height risk and +600 for the best quiet
+   building move available.
+4. **Use the result as the leaf** of a bounded
+   [sparse expectimax](/approaches/heuristic-search/sparse-expectimax) search.
+5. **Play the winning column.**
+
+## What happened, in plain English
+
+The frozen policy helped in some games and was retired because it missed the
+bar it had set for itself. Its own gate was a training-set mean of 400,000
+points; it did not get there, and the calibration and validation seed ranges
+were never opened.
+
+The lab deserves credit for how it failed. The weight sweep is deliberately
+tiny — each family of weights is halved or doubled around one fixed centre,
+nothing else — the selected weights are locked before calibration is allowed
+to run, and the validation and final seed ranges are rejected by the program
+itself rather than by convention. That is what a small honest tuning run looks
+like, and it is why "it did not reach 400,000" is a usable result instead of a
+mystery.
+
+<TechnicalDetails title="The technical record">
+
+The [experiment index](/docs/research/experiment-index) records this as
+**rejected, task-record only**: *"the frozen policy improved some games but
+failed its 400,000-point gate."* Task-record only means the run is reported in
+a research conversation and was never promoted into the
+[experiment history](/docs/research/history). **The achieved mean, the number
+of games, and the per-game outcomes are not retained anywhere in this
+repository.** The gate value is not a guess, though: `REQUIRED_TRAINING_MEAN =
+400_000` is a constant in the lab's own `main.ts`, alongside
+`MATERIAL_IMPROVEMENT = 1.05`.
+
+Repository-verified from the source. `src/core/typescript/phase-horizon-evaluator.ts`
+defines `REQUIRED_CLEAR_RATE = 1 + BOARD_SIZE / MOVES_PER_LEVEL` and
+`REQUIRED_REVEAL_RATE = BOARD_SIZE / MOVES_PER_LEVEL` — the same 2.4 and 1.4
+conservation arithmetic used by
+[gray throughput](/approaches/heuristic-search/gray-throughput) — an operating
+band of two discs per column and three rows of height, and twelve weighted
+features from −900 (peak height risk) to +600 (quiet direct gain). The lab
+sweeps them on the `0x1d70…` training range with 2 pilot and 16 confirmation
+games at a 500-move cap, a 1,000,000 work bound and a −1,000,000 terminal
+utility; the `0x5d70…` calibration range is used only after the weights are
+frozen, and the `0x7d70…` validation and `0xd700…` final ranges are hard
+rejected by the program.
+
+The evaluator is also the baseline comparator inside the
+[risk-sensitive lab](/approaches/heuristic-search/risk-sensitive), and the
+ledger's "hand-crafted blend" experiment calibrated a learned value function's
+scale against it
+([experiment history](/docs/research/history)).
+
+The evaluator reads only the visible board, next disc and rise clock.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **Phase is a real and cheap signal.** Conditioning on the rise clock is now
+  standard across the repository: the reference search's leaf penalises danger
+  near a rise, and later families use phase-conditioned weight blocks. This lab
+  is where that became routine.
+- **A projection is only as good as the rate you assume.** Projected occupancy
+  debt assumes the policy will sustain 2.4 clears per drop. The reference
+  policy sustains about 1.973
+  ([finding 01](/docs/exploratory/finding-01-score-is-survival), exploratory,
+  development tier), so the projection is systematically optimistic about
+  every board it scores. Nothing in the retained record tests whether that
+  matters.
+- **What was ruled out** is one small sweep around one centre, on training
+  seeds, judged by a self-imposed mean. That is a narrow rejection, and a
+  wider one would need paired games against the unchanged reference search.

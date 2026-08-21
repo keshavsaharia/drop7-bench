@@ -1,28 +1,132 @@
 ---
-title: Trajectory Throughput
+title: Trajectory throughput
 family: baselines-diagnostics
-status: Completed
+summary: Runs a cheating player that can see the hidden numbers alongside honest players on the same games, and compares what each one's board looks like five moves at a time — to find out what a self-sustaining game actually looks like.
+status: completed
 evidence: task-record only
-generated: true
+reads: oracle
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
+Line up an ordinary player and a player that is allowed to cheat on the same
+games, chop both games into five-move windows, and compare the windows: what is
+the cheat doing that the honest player is not?
+
+<EvidenceLabel status="completed" evidence="task-record only" reads="oracle" />
+
+<Callout title="This comparison includes a privileged player" tone="warn">
+One of the arms is a perfect-information planner: it reads the hidden numbers
+under the gray discs. That is not a legal Drop7 policy and can never be one —
+it is a **ceiling and a diagnostic**, used here to describe what a much better
+trajectory looks like. No score produced by that arm is a policy result. See
+[oracle in the glossary](/learn/glossary).
 </Callout>
 
-## Trajectory throughput
+## The intuition
 
-Compares matched windows from public policies and a privileged ceiling to locate regenerative clear/reveal regimes.
+The natural question — "why do our policies die?" — is hard to answer by
+staring at final scores, because the answer arrives dozens of moves after the
+mistake. The trick used here is to compare *windows* rather than games.
 
-**Status: Completed** (task-record only). this analysis motivated the approximate 2.4-clear and 1.4-reveal sustainability targets.
+A window is one complete five-drop cycle, ending exactly at a rise. Because
+both players get the same seed and are compared window against window at the
+same point in the game, differences in what happened inside a window are
+differences in play, not differences in luck or in how long each survived.
 
-## Sources
+For each window the program records what the board looked like and what flowed
+through it: how many gray discs were cracked, how many were revealed, how many
+numbered discs cleared, how many chain waves and how deep the deepest was, how
+many boards were cleared outright, how many moves were "quiet" (building
+without scoring), how many produced more than one wave, and how much stored
+trigger potential was spent. Alongside those it records board-shape measures —
+height, occupancy, cover load, direct and latent chain potential, and clog
+patterns such as adjacent 1s and triple 2s — and, for the searching arms, the
+search depth and work per move.
 
-- `main.ts`
+The comparison then asks which of those quantities most separates the
+privileged arm from the honest ones. Whatever that is, is a candidate
+description of "a game that sustains itself".
 
-## More evidence
+## How it works
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/baselines-diagnostics)
+1. Play the same seeds with each arm: the perfect-information planner (a
+   depth-4 beam of width 128 over known hidden values), the hand-written
+   `combined` evaluator inside a bounded search, and optionally a trained DQN
+   checkpoint.
+2. Cut every game at completed five-move boundaries and emit one record per
+   window per arm.
+3. Match windows across arms by seed and by window position, so every
+   comparison is like-for-like.
+4. Rank the measured quantities by how strongly they separate the arms. The
+   report's own note is careful about this: the separation figure is the mean
+   difference divided by the standard deviation of per-seed mean differences,
+   "a ranking aid, not a causal estimate", precisely so that repeated windows
+   from one game do not masquerade as independent games.
+5. Use training and calibration seeds only; validation and final seeds are
+   never opened.
+
+## What happened
+
+This is the analysis that produced the flow targets the rest of the repository
+quotes: roughly **2.4 numbered clears and 1.4 reveals per move** as the region
+associated with games that keep going. The
+[research status](/docs/research/status) carries them with an explicit warning
+attached — "treat these as diagnostic targets from limited runs, not proven
+universal thresholds" — and this page repeats the warning, because the run that
+produced them survives only as a task record.
+
+Two later, independently recorded results speak to the same numbers and are
+worth reading next to them:
+
+- [Finding 01](/docs/exploratory/finding-01-score-is-survival) *derives* 2.400
+  and 1.400 rather than measuring them: every five-move cycle puts five placed
+  discs plus a seven-disc covered row onto a 49-cell board, so 12/5 and 7/5 are
+  the break-even rates. It measures the depth-4 reference at 1.973 clears and
+  1.090 reveals per move over 64 paired games — a structural deficit of 18% and
+  22%.
+- [Finding 06](/docs/exploratory/finding-06-flow-ceiling) measures a
+  clairvoyant planner at 2.3663 clears and 1.3832 reveals per move on 64 fresh
+  tapes. It also carries two published correction notices, including one
+  stating that **no legal policy tested reached flow balance**; the best legal
+  arm reached 2.2309 clears per move, 93.0% of the requirement.
+
+So the target region this diagnostic pointed at has held up as a description of
+what the ceiling looks like. What no retained record shows is a legal policy
+reaching it.
+
+<TechnicalDetails title="The technical record">
+
+**Status: completed — task-record only.** The
+[experiment index](/docs/research/experiment-index) records: "this analysis
+motivated the approximate 2.4-clear and 1.4-reveal sustainability targets."
+There is no ledger entry, protocol, artifact hash or retained per-window data;
+[audit 04](/docs/exploratory/audit-04-blind-spots) §B.2 lists it as
+task-record only and notes that it is **the only file in the repository that
+counts board clears**.
+
+Defaults, from the source: training seeds from `0x2d700000`, calibration seeds
+from `0x5d700000`, validation seeds from `0x7d700000` reserved and untouched,
+4 games each, a 100-move cap, window = 5 moves, oracle depth 4 with beam width
+128, baseline search depth 4 with a 20,000-unit work cap. The privileged arm is
+`planOracleMove` from
+[`approaches/oracle-curriculum/perfect-information-oracle`](/approaches/oracle-curriculum).
+The report begins with its own warning string about the oracle's status.
+
+Both of the corroborating findings above are exploratory documents at the
+`development`/`pilot` tier, not ledger results, and finding 06 explicitly warns
+that its eight original master tapes favour long games. The clairvoyant figures
+there are stated to be unaffected by that bias; the fair depth-4 comparator on
+those tapes is not.
+
+Source: `main.ts`.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- Comparing matched five-move windows, rather than whole games, is a way to see
+  a policy's mistakes near where they happen.
+- A privileged planner shows what a sustained game looks like. It does not show
+  how to get there, and none of the legal policies measured since have.
+- The 2.4 / 1.4 pair has survived contact with two later analyses, one of which
+  derives it from the board's arithmetic — but the run on this page is a task
+  record and cannot be re-derived from anything retained here.

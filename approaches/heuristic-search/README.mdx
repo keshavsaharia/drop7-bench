@@ -1,35 +1,263 @@
 ---
-title: Heuristic and rollout search
-summary: Hand-written features, shallow lookahead, and bounded planners — the fast baselines.
+title: Hand-built heuristics and shallow search
+summary: Give points to the things about a board that a human would notice — low stacks, open columns, gray discs you can reach, numbers that are nearly ready to clear — add them up, and play the column with the best total.
 ---
 
-The oldest way to play: score what you can see. Height, holes, exposed
-numbers, reachable triggers, covered-disc access — a weighted sum of visible
-features, optionally wrapped in one or two plies of lookahead or a short
-sampled rollout.
+Give points to the things about a board that a human would notice — low
+stacks, open columns, gray discs you can reach, numbers that are nearly ready
+to clear — add them up, and play the column with the best total.
 
-## Why it matters
+That is the whole family. It is the oldest idea in the repository, the easiest
+to explain, and the one that everything else is built on top of: these
+weighted sums are the [leaf evaluators](/learn/glossary) at the bottom of
+every deeper search and the quick continuation policies inside every
+[rollout](/learn/glossary). When a large learned system fails here, the
+post-mortem almost always ends with a sentence about features.
 
-Heuristics are the **leaves** of every deeper search and the **continuation
-policies** inside every rollout. When a learned or searched policy fails, the
-post-mortem usually ends here: the features mis-valued a board that looked
-fine. The research surfaced one durable diagnostic — sustainable long games
-keep roughly **2.4 numbered clears and 1.4 covered reveals per move** — and
-several policies here (gray-throughput, phase-horizon) optimize that flow
-directly.
+## The intuition, on real boards
 
-## What the evidence showed
+Every figure below is the repository's own rules engine playing a scripted
+game — the boards, the points, the clears and the reveals are engine output,
+not drawings. Each one shows a real position and what two of its seven legal
+columns actually do.
 
-- Immediate score is a poor guide: a policy must keep opening covered numbers
-  and preserve future chain structure.
-- Hand-tuned evolutions of the feature weights failed their whole-game gates
-  even when the feature directions looked plausible.
-- These policies are cheap and deterministic, which is why several of them
-  (greedy, gray-throughput, rollout, risk-sensitive, open-loop beam) power the
-  scripted-round leaderboard as reference points.
+### "Open the board"
+
+Twenty-eight of the forty-nine cells are occupied and twenty-three of those
+are [covered gray discs](/learn/glossary) whose numbers nobody can see. Five
+drops remain before the next [rise](/learn/glossary) adds seven more.
+
+<BoardCompare
+  before="0000000000000070000068995006888896888888888888888"
+  after="0000000000000070000068970006888606888889888888888"
+  beforeLabel="Next disc: 5"
+  afterLabel="Column 4"
+  highlightBefore={[23, 24, 31, 32, 39]}
+  highlightAfter={[23, 24, 31, 32, 39]}
+  caption="The 5 lands beside another 5 and completes a row-run of exactly five. Two waves follow: three numbered discs clear, three gray discs give up their numbers (one of them is then cleared as well), and one more gray is cracked. 53 points, and the covered count falls from 23 to 20."
+/>
+
+<BoardCompare
+  before="0000000000000070000068995006888896888888888888888"
+  after="0000000500000070000068995006888896888888888888888"
+  beforeLabel="Next disc: 5"
+  afterLabel="Column 0"
+  highlightBefore={[7]}
+  highlightAfter={[7]}
+  caption="The same disc in the leftmost column. Nothing clears, nothing is revealed, no points, and the tallest stack grows from five rows to six — with the rise still coming. A feature-scoring policy is exactly a rule for preferring the first board to this one."
+/>
+
+Two features do that work: how tall the stacks are, and how many gray discs
+are still closed. Both are things a human notices in a second, and both are
+literal terms in the hand evaluator in `src/core/typescript/heuristic.ts`.
+
+### "Prepare useful chains"
+
+Sometimes only one column does anything at all. Here the engine reports that
+six of the seven legal columns score zero, and the seventh scores 770.
+
+<BoardCompare
+  before="0000000072320001991007988106888830688888688888888"
+  after="0000000002000001302007989106888830688888688888888"
+  beforeLabel="Next disc: 6"
+  afterLabel="Column 1"
+  highlightBefore={[8, 10, 11, 16, 17, 18, 24]}
+  highlightAfter={[8, 10, 11, 16, 17, 18, 24]}
+  caption="Five waves from one drop: five numbered discs cleared, two gray discs opened, 770 points, and columns 1, 3 and 4 each fall by one or two rows. The arrangement that made this possible was built several moves earlier — which is why 'chain readiness' is a feature and not just a lucky outcome."
+/>
+
+### Where the idea starts to strain
+
+The three jobs — stay alive, open the board, prepare chains — pull against
+each other, and a weighted sum has to settle the argument with fixed numbers.
+Here is a position where they disagree. It is three drops from a rise.
+
+<BoardCompare
+  before="0000000000000000020009006006910601996693588888888"
+  after="0000000000000000020009006006910601996610588889098"
+  beforeLabel="Next disc: 7"
+  afterLabel="Column 4"
+  highlightBefore={[38, 39, 45, 46, 47]}
+  highlightAfter={[38, 39, 45, 46, 47]}
+  caption="Column 4: three waves, 155 points, three numbered discs cleared and two gray discs opened — one of them in the bottom row. Column 4 empties completely, but the tallest stack is still five rows high."
+/>
+
+<BoardCompare
+  before="0000000000000000020009006006910601996693588888888"
+  after="0000000000000000000009007006910201996613588888888"
+  beforeLabel="Next disc: 7"
+  afterLabel="Column 3"
+  highlightBefore={[17, 24, 31, 38]}
+  highlightAfter={[17, 24, 31, 38]}
+  caption="Column 3: one wave, 14 points, two numbered discs cleared, one gray opened — and the tallest stack comes down from five rows to four before the rise. The repository's one-ply hand evaluator picks this move over the 155-point one."
+/>
+
+Which is right? Nobody in this repository knows. The evaluator traded 141
+points and one extra reveal for one row of height, because that is what its
+fixed weights say height is worth. Deciding such trades correctly is the
+entire research problem, and it is the reason the family's later members stop
+being pure feature sums and start looking one, two, or several moves ahead.
+
+<Callout title="How these figures were made" tone="info">
+A scripted [latent](/learn/glossary) game (generator domain `0x5eed****`, the
+public playground range that overlaps no research seed lease) played by the
+one-ply hand evaluator, with every legal column re-simulated from the same
+position through `src/core/typescript/engine.ts`. Scripted rounds are a
+demonstration; they are never evidence about a policy's strength.
+</Callout>
+
+## How a policy in this family works, step by step
+
+1. **Read the public position.** The visible board, the visible next disc, and
+   the [rise clock](/learn/glossary). Nothing else — not the seed, not the
+   hidden gray numbers, not the score. (One member of the family breaks this
+   and is flagged where it appears: see [gray throughput](/approaches/heuristic-search/gray-throughput).)
+2. **Simulate each legal column** with the real rules engine. Every disc that
+   clears, every gray disc that cracks or reveals, every wave of the chain.
+3. **Measure the resulting board.** The hand evaluator counts open columns, a
+   squared height load, solid and cracked gray cells, numbered cells, discs
+   that are one addition away from clearing, latent chain potential, gray
+   discs exposed to a future clear, and clogging patterns such as adjacent 1s
+   and triples of 2s.
+4. **Add it up with fixed weights.** Positive for open columns, ready
+   structure and exposed covers; negative for height, buried gray discs and
+   clogs; a flat large penalty for a modelled game over. What such a
+   [leaf evaluator](/learn/concepts/evaluating-a-board) can and cannot see is
+   its own subject.
+5. **Optionally look further.** Members of this family extend step 4 in four
+   different directions: average over the possible next discs
+   ([sparse expectimax](/approaches/heuristic-search/sparse-expectimax)); play
+   the position forward with a quick policy
+   ([rollout](/approaches/heuristic-search/rollout)); commit to a whole
+   sequence of columns before seeing the discs
+   ([open loop](/approaches/heuristic-search/open-loop)); or weight the bad
+   outcomes more heavily than the good ones
+   ([risk sensitive](/approaches/heuristic-search/risk-sensitive)).
+6. **Play the winning column.** Ties are broken by a fixed order, so the same
+   visible position always produces the same move.
+
+Everything the searching members do at chance points — averaging honestly
+rather than hoping — is explained on the
+[choice-and-chance concept page](/learn/concepts/chance-vs-choice).
+
+## What happened, in plain English
+
+These policies were fast, they were easy to reason about, and several of their
+features survive today inside the reference search's leaf. As complete
+policies they were brittle. Weight-fitting runs repeatedly improved the games
+they were fitted on and then gave the gain back on fresh games, and **no
+hand-built policy tested here displaced the depth-4 reference search**
+([research status](/docs/research/status), §2 and the compact evidence map in
+the [strategy catalog](/docs/strategies)).
+
+The single most useful thing the family produced is not a policy at all. It is
+the observation that **immediate score is a poor guide**: in this mode
+[score is very nearly survival time](/learn/concepts/survival-vs-score), and
+what a long game needs is a steady rate of clearing numbered discs and opening
+covered ones.
+Two evaluators in `src/core/typescript` encode the arithmetic directly — five
+drops arrive per cycle, a rise adds seven covered discs, so a board that never
+fills needs about **2.4 numbered clears and 1.4 covered reveals per move**.
+
+<Callout title="Read that pair of numbers carefully" tone="warn">
+2.4 and 1.4 are arithmetic about the board, not a measured threshold for
+winning. The research status page records them as *"diagnostic targets from
+limited runs, not proven universal thresholds"*. The one measurement of the
+gap is exploratory, development tier: over 64 games the depth-4 reference
+sustained **1.973 clears and 1.090 reveals per move** — an 18% and 22%
+shortfall ([finding 01](/docs/exploratory/finding-01-score-is-survival),
+reproduced in this checkout). Several policies in this family were built to
+attack that deficit head-on. None of them closed it.
+</Callout>
+
+<TechnicalDetails title="The technical record">
+
+**What is in this family, and how strong the evidence is.** Statuses and
+evidence labels are copied from the
+[experiment index](/docs/research/experiment-index) ("Heuristic and rollout
+search") and, where marked, the
+[experiment history](/docs/research/history).
+
+| Approach | Status | Evidence |
+| --- | --- | --- |
+| [Sparse expectimax](/approaches/heuristic-search/sparse-expectimax) | completed | task-record only |
+| [Open loop](/approaches/heuristic-search/open-loop) | support-only | repository-verified |
+| [Phase horizon](/approaches/heuristic-search/phase-horizon) | rejected | task-record only |
+| [Tunneling](/approaches/heuristic-search/tunneling) | completed | task-record only |
+| [Virtual ignition](/approaches/heuristic-search/virtual-ignition) | rejected | task-record only |
+| [Risk sensitive](/approaches/heuristic-search/risk-sensitive) | rejected | task-record only |
+| [Policy comparison](/approaches/heuristic-search/policy-comparison) | support-only | repository-verified |
+| [Gray throughput](/approaches/heuristic-search/gray-throughput) | rejected | task-record only |
+| [Rollout](/approaches/heuristic-search/rollout) | rejected (planner) / completed (teacher) | task-record only |
+| [Cycle abstraction](/approaches/heuristic-search/cycle-abstraction) | rejected | task-record only |
+| [Edge priority](/approaches/heuristic-search/edge-priority) | unknown | repository-verified |
+| [Critical risk](/approaches/heuristic-search/critical-risk) | unknown | repository-verified |
+| [Evolution](/approaches/heuristic-search/evolution) | rejected | ledger-recorded |
+| [Evolved public policy](/approaches/heuristic-search/evolved-public-policy) | rejected | ledger-recorded |
+| [Exact search](/approaches/heuristic-search/exact-search) | rejected (quadrature, historical D4) / completed (ensemble) | ledger-recorded / task-record only |
+
+**A scoring caveat that applies to most of the older numbers.** A 2026-08-15
+audit found that several early experiments had used the 7,000-point level
+award from the 30-drop Classic/Sequence rules instead of the 17,000-point
+award of the five-drop Hardcore mode studied here. Runs that record
+`levelBonus: 7000` remain valid evidence that one policy beat another *on the
+same games*, and valid evidence about cost, but their absolute scores are not
+evidence for the Hardcore million-point target
+([mode-specific scoring correction](/docs/research/history)). Every page in
+this family says which of its numbers are affected.
+
+**The ledger-recorded results in this family**, in one place:
+
+- *Engineered-feature evolution* — three families of evolved one-step action
+  scorers, all rejected. The small nonlinear network fitted 96.86% of 255
+  training actions but only 43.40% of 235 disjoint teacher actions, then lost
+  its four-game screen 148,349.25 to 307,222.75 points. The phase-weight
+  vector lost its eight-game screen 105,534.875 to 107,709.75. Both are
+  historical 7,000-point Sequence-scored runs.
+- *Evolved public policy* — corrected 17,000-point scoring, and the only
+  member of this family measured under it. It improved its 128-game fitting
+  tournament from 136,169.15 to 157,528.50 points, did not improve
+  lower-quartile survival at all, and its best selective-search wrapper
+  reached 272,605.13 points on eight reused fitting games. Rejected before the
+  probe cohort was opened.
+- *Exact search* — a three-member root-quadrature ensemble passed a four-game
+  screen and then lost its eight-game confirmation 117,066.5 to 162,492.125
+  while using about three times the work per move; a fully completed extra ply
+  with the older leaf lost its screen 124,172.25 to 149,621.25 at about 24
+  times the cost. Both historical 7,000-point Sequence-scored runs.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **Interpretable features earned their place as ingredients, not as
+  policies.** Height danger, reveal flow, build readiness and the timing of a
+  rise all matter, and all of them survive inside the reference search's leaf.
+  The strategy catalog's recommendation is to keep them as diagnostics and
+  leaf inputs, and not to treat a higher fitting score from another weight
+  sweep as a result without a fresh, paired gate.
+- **Fitting a weight vector on games is the failure mode, not the method.**
+  Every evolution run in this family found plausible directions and then lost
+  them on games it had not been fitted to. That is the same
+  [sibling-ranking](/learn/concepts/ranking-siblings) problem that later
+  defeated much larger learned models, arriving early and cheaply.
+- **A whole line of this family is unfinished, not refuted.** Two labs —
+  [edge priority](/approaches/heuristic-search/edge-priority) and
+  [critical risk](/approaches/heuristic-search/critical-risk) — are complete,
+  gated programs with no located outcome at all. The honest label is
+  *unknown*, and running them is cheap.
+- **Human strategy advice has never been tested properly here.** The strategy
+  catalog's sixth open direction is to turn plausible human rules — high
+  covered discs first, watch the weakly connected edge columns, build simple
+  three- and four-wave chains — into reflection-safe public features and test
+  them on preserved sibling panels before letting any of them control a move.
+  The edge-priority lab is that experiment, waiting to be run.
 
 <Callout title="Try them" tone="info">
-Most of this family is runnable in the benchmark registry — see the
-[leaderboard](/leaderboard) for greedy, rollout, sparse expectimax,
-risk-sensitive, and open-loop beam policies on identical scripted rounds.
+Several members of this family are registered in the benchmark playground:
+greedy, gray throughput, rollout, sparse expectimax, risk-sensitive and
+open-loop beam all play the same eight scripted rounds on the
+[leaderboard](/leaderboard). Eight fixed rounds cannot separate policies whose
+scores are [heavy-tailed](/learn/concepts/heavy-tails), so treat that page as a
+demonstration and a smoke test — never as evidence.
 </Callout>

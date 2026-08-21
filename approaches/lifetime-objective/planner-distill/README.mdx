@@ -1,0 +1,248 @@
+---
+title: Compressing a legal planner into a network
+family: lifetime-objective
+summary: Take the one expensive planner in this repository whose advantage is built only from information a real player can see, label every legal move at fifteen thousand positions with what it thinks, and try to teach a small network to do the same thing cheaply.
+status: rejected
+evidence: development-tier exploratory finding
+reads: public
+---
+
+Take the one expensive planner in this repository whose advantage is built only
+from information a real player can see, label every legal move at fifteen
+thousand positions with what that planner thinks, and try to teach a small
+network to reproduce it cheaply.
+
+<EvidenceLabel status="rejected" evidence="development-tier exploratory finding" reads="public" />
+
+## Why this teacher, after seventeen failures
+
+Seventeen learned models in this repository have failed, and an audit sorted
+them by cause. The largest group — six of seventeen — failed at **ranking the
+moves that were not played**: the model learned the outcome of the move the data
+happened to contain, and deployment then asked it to choose among alternatives
+it had never seen labelled. That is the
+[sibling trap](/learn/concepts/ranking-siblings), and it is the single most
+repeated lesson here.
+
+The next largest group failed for a different and more fundamental reason. Their
+teacher was an [oracle](/learn/glossary) that read hidden numbers or the future,
+so a large part of what it knew was **a function of information the student can
+never have**. No amount of training data fixes that.
+
+The [flow ceiling](/approaches/lifetime-objective/flow-ceiling) work produced a
+teacher with neither defect. Its legal planner samples complete guesses of the
+hidden board, solves a short window exactly against each guess, and plays the
+best column on average. It never reads a hidden value or a future disc, and a
+mechanical gate proves it: replace every hidden number *and* the entire future,
+and it chooses the same column. **Its advantage over the reference search is
+therefore public by construction** — and it costs hundreds of exact window
+solves per move, which is precisely the sort of expense a learned evaluator
+exists to amortise.
+
+That made it the first distillation target here whose signal is, in principle,
+representable by a public student.
+
+## How it works
+
+1. **Run the teacher for 160 whole games** and keep the thing it normally throws
+   away. The planner computes a value for *every legal column* and then discards
+   all but the best; this corpus keeps the whole vector, along with the resolved
+   board after each column, and the same 256 guessed hidden boards are used to
+   score every column at a position, so the comparison between siblings is fair
+   by construction.
+2. **Also record the value from each half of the guesses separately.** That one
+   extra field is what makes it possible, for the first time here, to ask how
+   much the teacher agrees with *itself*.
+3. **Make the student a function of the board after the move**, not of the move
+   itself. An [afterstate](/learn/glossary) evaluator cannot use "which column
+   was this" as a shortcut, because it never sees one. The number of discs the
+   move itself clears is supplied by the search rather than learned, since that
+   is not a property of the board that results.
+4. **Train it to rank, not to predict.** The loss compares all the columns at one
+   position against each other, with an explicit margin term weighted by how far
+   apart the teacher put them; plain value regression is kept only as a weak
+   anchor on the scale.
+5. **Gate it offline before any gameplay**, against the unmodified reference
+   search scoring exactly the same positions, split by whole origin game — and
+   write the pass/fail rule down first.
+
+## The thing nobody had measured
+
+Here is a concrete example of the problem this approach uncovered, on the
+held-out positions.
+
+Split the teacher's 256 guessed hidden boards into two halves of 128 and let each
+half choose a column independently. **The two halves disagree on one position in
+six** (they agree 0.8318 of the time). That sounds like a noisy teacher. But when
+they disagree, the two columns they cannot tell apart are worth **0.0765 discs**
+apart, out of an average spread of **2.2643 discs** between the best and worst
+column at a position — about 8% of the range.
+
+**The label is sharp about value and blunt about which column wins.** Which
+means a training target and a grading rule built on "did the student pick the
+same column?" are scoring the student on the least reliable part of what the
+teacher knows. Nothing in this repository had measured that before.
+
+## What happened
+
+**The gate failed, in every fold, at both model sizes.**
+
+<div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 12, margin: "1rem 0" }}>
+  <Stat label="picks the teacher's column" value="48.5%" hint="reference search on the same positions: 61.1%" />
+  <Stat label="orders a pair correctly" value="73.6%" hint="reference search: 79.6%" />
+  <Stat label="origin folds won" value="0 of 5" hint="gate required at least 4 of 5" />
+  <Stat label="games played afterwards" value="0" hint="the preregistration allowed gameplay only on a pass" />
+</div>
+
+The student is not empty: a ranker with a constant board score gets 35.7% and
+42.2% on those two statistics, and the student gets 48.5% and 73.6%. It simply
+did not clear a bar that was fixed in advance, so no gameplay cohort was opened
+and the shared evaluation seeds were left untouched.
+
+**But the dominant explanation is upstream of the student, and it was not what
+was being tested.** Before training anything, this work played the teacher and
+the unmodified reference search over the same 160 fresh futures. The teacher
+beats it by **+16,777 points with a 95% lower bound of −19,143** and **+5.18
+moves with a lower bound of −4.56** — neither distinguishable from zero. It wins
+85 games of 160 on score and 75 of 160 on lifetime. Its board fills at
+**+1.4798** cells per five-move cycle against the reference's **+1.4813**: the
+same number to three decimals. **Both policies die of the same thing.** A
+distillation can only transfer what the teacher has, and at this configuration
+the teacher has almost nothing to transfer.
+
+**Calibration was good; ranking was not.** The student's value head predicts the
+teacher's number with a held-out correlation of **0.8742** and a mean absolute
+error of 1.699 discs against a target spread of 3.958. That is the repository's
+oldest lesson restated on a brand-new kind of teacher: **a well-calibrated value
+head is not a good move ranker.**
+
+**Capacity was not the constraint.** A model with four times the parameters
+lands within 0.002 of the smaller one on every held-out statistic.
+
+**The sibling problem itself is genuinely fixed.** 108,462 labelled
+(position, column) pairs across 15,833 positions, **zero** missing labels on
+legal columns, zero labels on illegal ones, action completeness **1.0000** — the
+defect that killed six of the seventeen earlier models is simply absent here.
+That is a real engineering result even though the gate failed.
+
+**And the student does carry signal the search does not already have.** Compared
+as a *policy* it loses badly, which was foreseeable: the reference search spends
+615,090 board evaluations per decision and the student spends one per column.
+Compared as what it was meant to be — an opinion mixed into that search — and
+with the mixing weight chosen on a separate validation split, it cuts the
+search's ranking regret by **13%** and improves pairwise ordering from 0.7961 to
+0.8117, with both improving on both splits. The top-1 improvement appears on the
+held-out split but not on validation, so it is not claimed.
+
+<TechnicalDetails title="The record: gate, corpus, teacher, and what was not run">
+
+Source: [`finding-11-planner-distillation`](/docs/exploratory/finding-11-planner-distillation),
+a retained exploratory finding measured in this checkout on 2026-08-20. The
+pass/fail rule is in `PREREGISTRATION.md`, written before any student was
+trained, and is reproduced verbatim in the finding. There is no row in the
+[experiment index](/docs/research/experiment-index) and no entry in the
+[ledger](/docs/research/history).
+
+**Verdict as recorded:** run validity **valid**, scientific outcome **fail**,
+evidence tier **development**. Recorded as the eighteenth honest negative in this
+repository.
+
+**Teacher configuration.** The legal planner at a five-move window with 256
+guessed hidden boards, chosen on measured cost: 0.567 s per decision against
+4.315 s for a seven-move window with 64 guesses and roughly 17 s for the
+seven-move, 256-guess configuration, which was never run. The student is
+therefore taught toward the reduced planner's ceiling and compared against that
+ceiling only.
+
+**Teacher versus comparator**, 160 paired master tapes, 400-move cap,
+20,000-resample bootstrap over whole games:
+
+| | legal planner | reference search | paired delta | 95% bounds |
+| --- | ---: | ---: | ---: | --- |
+| mean score | 337,857 | 321,080 | +16,777 | [−19,143, +53,058] |
+| mean moves | 98.96 | 93.78 | +5.18 | [−4.56, +15.03] |
+| clears / move (per game) | | | +0.0405 | [+0.0006, +0.0785] |
+| reveals / move (per game) | | | +0.0283 | [−0.0028, +0.0582] |
+| occupancy slope | +1.4798 | +1.4813 | −0.0015 | |
+
+Both arms are frozen search procedures playing identical futures, so this
+comparison involves no fitted model — but the seeds carry a **training** role and
+it is development-tier diagnostic evidence, not confirmation.
+
+**Corpus.** 15,833 positions from 160 on-policy teacher games; 108,462 labelled
+(position, column) pairs; 6.8504 mean legal columns per position; 0 missing
+labels, 0 illegal columns labelled, action completeness 1.0000; 256 of 256
+guesses solved inside budget at every decision; 0 incomplete windows; 0
+score-identity violations.
+
+**Teacher self-agreement on 1,445 held-out positions:** split-half argmax
+agreement **0.8318**; mean absolute value gap between the halves 0.2511 discs;
+mean best-minus-worst spread 2.2643 discs; median top-1-to-top-2 margin 0.3418
+discs; cost of a half-disagreement judged by the full label **0.0765 discs**.
+
+**The gate**, 16 held-out origin games, 1,445 positions, 9,879 labelled siblings,
+every arm scored with the same tie rule:
+
+| arm | top-1 | pairwise | normalised regret |
+| --- | ---: | ---: | ---: |
+| teacher, half its own compute *(nested, not a true ceiling)* | 0.9114 | 0.9650 | 0.0073 |
+| reference four-move search *(the comparator)* | **0.6111** | **0.7961** | **0.1269** |
+| student, deployable size | 0.4851 | 0.7364 | 0.1915 |
+| student, four times the parameters | 0.4837 | 0.7381 | 0.1886 |
+| trivial reference: immediate clears only | 0.3571 | 0.4222 | 0.3367 |
+
+Headline statistics beaten: **0 of 3**. Folds won on top-1: **0 of 5**.
+
+**The blend diagnostic** (a root-level probe, not a policy result): mixing the
+student into the reference search's ranking at a weight of 0.3, selected on the
+validation origins, moves held-out normalised regret 0.1269 → **0.1105** and
+pairwise 0.7961 → **0.8117**. Top-1 rises on test (0.6111 → 0.6256) but not on
+validation, and is not claimed. `docs/methodology.md` is explicit that a panel of
+positions cannot supply a whole-game interval, and none is offered.
+
+**Deviations and interruptions, recorded rather than hidden:** the
+preregistration's 96-game exploration cohort — deliberately imperfect play, for
+coverage off the teacher's own trajectory — **was not generated**, so the corpus
+is entirely on-policy and distribution shift is untested here. The large
+convolutional arm received 4 epochs against the leaf models' 120, because one of
+its epochs costs 200–1,300× one of theirs; its validation accuracy was still
+rising when the budget closed, so its row is a floor on that architecture and not
+a measurement of it. A warm-started larger version reached 0.5071 validation
+top-1 after a single 2,151-second epoch and was then stopped.
+
+**Limitations the finding states about itself:** one teacher configuration; the
+gate's headline metric is top-1, which this work's own measurement shows is the
+least reliable part of the label; the blend probe is 1,445 positions from 16
+games; the trained model retains a 15% left-right preference because mirror
+augmentation was applied by chance rather than enforced; the scenario engine's
+randomness model is not the base engine's, so the scores above are not comparable
+with any ledger figure; and no timing is timing-grade — the machine carried load
+averages of 44–54 with three other jobs running.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **Re-measure a teacher before distilling it.** The single cheapest thing that
+  would have changed this experiment costs one paired comparator run. The
+  teacher's strength had been carried forward from an eight-game cohort; on a
+  representative sample it is 40% smaller and its lifetime advantage contains
+  zero. Any future distillation should open with that run and only then spend
+  training time.
+- **Stop targeting the teacher's chosen column.** The information is in the value
+  vector, not in the winner. Ranking regret — where half the teacher's own
+  compute scores 0.0073 and the student scores 0.1915 — is the better primary
+  measure, and it is the one the blend probe improves.
+- **Compare a leaf as a leaf, not as a policy.** Pitting one model call against a
+  615,090-evaluation search and reporting that the model lost was foreseeable.
+  The comparison that predicts deployment is the blended one, and it should be
+  the preregistered headline next time, with the weight fixed on validation.
+- **A negative result that rules something out.** This does not refute
+  distilling a legal planner in general; it rejects this teacher, this target,
+  this loss and these two architectures. What it establishes positively is that
+  successor-closed sibling labels are now achievable here, and that they are not
+  sufficient.
+- **Still open:** the stronger teacher. The seven-move, 256-guess planner was
+  budgeted at about 17 seconds per decision and never run — though the
+  [flow ceiling](/approaches/lifetime-objective/flow-ceiling) page's later
+  re-baselining suggests its headroom above the reference search is also small.

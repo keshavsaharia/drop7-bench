@@ -1,42 +1,143 @@
 ---
-title: Topology
+title: Board topology
 family: oracle-curriculum
-status: Unknown
-evidence: repository-verified
-generated: true
+summary: Stop copying the teacher's moves and ask a narrower question — can a player recognise, from the shape of the board alone, the positions a future-reading planner keeps itself in?
+status: rejected
+evidence: ledger-recorded
+reads: teacher
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Stop trying to copy the teacher's moves. Ask something narrower: looking only at
+the *shape* of a board, can you tell whether it came from a planner that could
+see the future, or from an ordinary search?
 
-## Oracle topology audit
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="teacher" />
 
-Matches public and privileged states to identify split-stable observable geometry and flow signals.
+If that question has a good answer, then something about a sustainable board is
+visible on screen, and a legal policy could be nudged toward it — without ever
+being asked to reproduce a choice that depended on invisible information.
 
-**Status: Unknown** (repository-verified). 
+## Why this is a better question than "what would the teacher play?"
 
-## Oracle topology residual
+[Copying the teacher's column](/approaches/oracle-curriculum/oracle-distillation)
+failed because the choice depends on gray numbers a player cannot see. But two
+boards can be equally unknowable and still be very differently *arranged* — one
+with its high numbers stacked where they can never fire and its covers buried
+under four rows, the other with triggers reachable and covers exposed. That
+difference is entirely visible. So the experiment matches the two policies'
+positions on everything superficial — rise phase, exact occupancy, exact maximum
+height, and where in the game they occurred — and then asks a small network to
+tell them apart from the 49 cells alone.
 
-Fits a compact public classifier to matched oracle/fair board topology.
+## Three programs, three stages
 
-**Status: Rejected** (ledger-recorded). favorable metrics were underpowered and did not open a policy screen.
+1. **The audit** plays the privileged planner and an ordinary public search on
+   the same seeds and pairs their positions on the matching keys above. It then
+   looks for feature directions that separate the two, and — this is the part
+   that makes it an audit rather than a fishing trip — requires each direction
+   to appear independently in *both* halves of the seed set before it counts.
+2. **The residual** turns the surviving question into a learned model: a compact
+   board-only network trained to output "oracle-like versus fair-like", then
+   added as a small extra term to the leaf of an otherwise unchanged fair
+   depth-4 search, with the size of that term chosen by a frozen rule.
+3. **The extension** verifies the frozen model byte for byte, replays the
+   original held-out games and requires the original numbers to reproduce
+   exactly, then collects a larger, untouched set of positions to test the same
+   prediction at more than twice the sample size — and only then lets it play.
 
-## Topology residual extension
+Nothing privileged enters the model's input. It receives a reflection-canonical
+49-cell board and nothing else: no seed, no tape, no next disc, no phase, no
+score, no move index, and none of the matching keys used to balance the
+examples.
 
-Rebuilds the frozen topology labels at larger scale and tests the scalar as a policy residual.
+## What happened, in plain English
 
-**Status: Rejected** (ledger-recorded). prediction replicated, but policy confirmation regressed.
+**The signal is real.** The audit found a set of board properties that are
+stable across independent halves of the data: sustainable boards reward
+reachable triggers — direct and latent — triggers that survive a rise, stored
+high numbers that can still fire, and cracked covers that are close to being
+revealed; they penalise solid cover count and cover altitude, projected
+occupancy debt, dead low numbers, low caps and adjacent ones. Two plausible
+candidates — generic access to a cliff, and strong repeated-column cohesion —
+did *not* survive the split-half rule and are recorded as unsupported.
 
-## Sources
+**The first learned version was underpowered, not wrong.** Its held-out numbers
+looked encouraging, but a cost projection had shrunk the cohort *before any model
+metric existed*, and the run finished 30 examples and 15 pairs short of the
+sample size the protocol demanded. The gate was not moved to fit the favourable
+result; the experiment was recorded as a failed gate, and no game was played.
 
-- `oracle-topology-audit.cpp`
-- `oracle-topology-residual-extension.cpp`
-- `oracle-topology-residual.cpp`
+**The prediction replicated, and the policy still lost.** The extension
+reproduced the original metrics exactly, then independently confirmed the model
+on 204 fresh pairs. An eight-game screen looked like a win — until you notice
+each policy won four of the eight games and both confidence bounds were
+negative. The sixteen-game confirmation rejected it: about 42,000 points and 24
+moves worse per game. The failure mode is worth stating precisely, because the
+mean hides it — the candidate did not lose a little everywhere; it destroyed a
+few very long baseline games, turning a 285-move game into a 90-move one and a
+200-move game into a 55-move one, while occasionally making large gains
+elsewhere.
 
-## More evidence
+<TechnicalDetails>
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/oracle-curriculum)
+**Audit** (completed, ledger-recorded diagnostic; historical 7,000-point seeds
+`0x3d70f000...0f`): privileged planner at depth 4 / beam 128 averaged 429,182.5
+points and hit the 200-move cap in all 16 games, winning every pair; public
+depth 3 averaged 90,273 points and 63.625 moves. Clears and reveals per move:
+2.354 / 1.386 against 1.792 / 0.960.
+
+**Residual** (rejected — ledger-recorded; underpowered gate failure): 738
+matched training examples (369 pairs); board-only sparse network, 490 one-hot
+inputs with exactly 49 active, 8 accumulators, 3,937 parameters, 240 fixed Adam
+epochs. Held-out 170 examples / 85 pairs against a preregistered floor of 200
+examples / 100 pairs. Area under curve 0.68097, exact-stratum ranking 0.67059,
+pair accuracy positive in both whole-seed halves (0.70270 and 0.64583). Screen
+and confirmation seeds were not read. Model fingerprint `0x0af6ed6f88895cfe`.
+
+**Extension** (rejected — ledger-recorded; prediction replicated, policy
+regressed): replay reproduced the original 85 pairs and every metric exactly.
+Extension cohort 204 pairs / 408 examples: area under curve 0.63829, matched
+pair accuracy 0.64216, halves 0.64103 / 0.64368. Pooled 289 pairs / 578
+examples: 0.64811 and 0.65052. Held-out logistic loss was poorly calibrated at
+1.94287. The frozen coefficient grid switched 8.33%, 12.5%, 20.83% and 29.17% of
+actions at 250, 500, 1,000 and 2,000; the frozen rule selected 500.
+
+| Cohort | Fair depth 4 | With the residual | Paired delta |
+| --- | ---: | ---: | ---: |
+| Screen, 8 games `0x3ea90000...007` | 85,874.5 pts / 60 moves | 95,697.125 / 65.625 | +9,822.625 / +5.625; four score pairs each; lower bounds −22,580.31 / −14.01 |
+| Confirmation, 16 games `0x3eaa0000...00f` | 196,764.125 / 125.9375 | 154,934.625 / 101.9375 | **−41,829.5 / −24**; lower bounds −116,357.90 / −67.68 |
+
+Clears and reveals per move fell from 2.0705 / 1.1608 to 2.0159 / 1.1245; mean
+maximum chain fell from 7.6875 to 6.6875; no game was censored. Individual
+collapses: 476,511 points / 285 moves became 139,399 / 90, and 329,049 / 200
+became 74,172 / 55.
+
+[`audit-05`](/docs/exploratory/audit-05-optimistic-curriculum) §4 classifies the
+residual as "underpowered, mechanism untested" and the extension as a
+sibling-coverage failure — "state-level classification did not become action
+ranking".
+
+Records: [experiment index](/docs/research/experiment-index) "Oracle and
+curriculum research"; [ledger](/docs/research/history) sections "Privileged
+topology audit", "Privileged-oracle observable-topology residual" and "Frozen
+oracle-topology prediction extension". Sources: `oracle-topology-audit.cpp`,
+`oracle-topology-residual.cpp`, `oracle-topology-residual-extension.cpp`.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **The split-stable feature list is the durable output.** Those directions
+  survived an independent-halves test and were reused directly by
+  [accessible energy](/approaches/oracle-curriculum/accessible-energy). The two
+  rejected candidates are equally useful: they are recorded as *not* supported.
+- **Telling good boards apart is not the same as ranking moves.** The model
+  answered its own question correctly on fresh data and still lost games. This
+  is the [sibling-ranking problem](/learn/concepts/ranking-siblings) again, and
+  it is the single most repeated lesson in this repository.
+- **Means hide tail damage.** A change that improves typical games while
+  occasionally amputating a 285-move game is a losing change, and only paired
+  whole-game reporting shows it.
+- **What was not ruled out.** The underpowered run never tested its mechanism at
+  the sample size it asked for; and no version of this idea has been tried as a
+  *veto* on near-tied moves rather than as a term inside the leaf evaluator.

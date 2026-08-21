@@ -78,30 +78,54 @@ same random futures, so the comparison between them is fair — and record all o
 them. A dataset built that way is called **successor-closed** here: every
 successor the model will be asked about at play time is present in training.
 
-That is precisely what the repository's one registered, still-open theory
-proposes. In plain words it says: *train a single evaluator only on
-successor-closed data, with every sibling labelled under aligned chance
-scenarios and a fixed continuation policy, and it will rank root moves at least
-as well as fair D4 on games it has never seen.* The theory has a name
-(distributional afterstate ranking, AFBR-40), a registered falsification test,
-and — as of this writing — no implementation. It was paused at the stage of
-checking whether the existing data can be made successor-closed without reading
-new game seeds.
+That is precisely what the repository's registered afterstate theory proposes.
+In plain words it says: *train a single evaluator only on successor-closed
+data, with every sibling labelled under aligned chance scenarios and a fixed
+continuation policy, and it will rank root moves at least as well as fair D4 on
+games it has never seen.*
+
+**It was built and tested, and as tested it did not work.** Four pilot
+experiments are on the record. The corpus pipeline did exactly what it promised
+— every legal sibling labelled, under chance scenarios shared across siblings —
+but the labels themselves turned out to be noisy: with a handful of imagined
+futures per sibling, re-running the same measurement on a different half of the
+scenarios produced a substantially different ranking. Raising the number of
+aligned futures to 256 fixed the stability problem, and the trained model still
+did not rank moves better than fair D4. A final, more conservative experiment
+let the model overrule the search only where the search's own top two moves were
+nearly tied; that came closer than anything before it — it improved on fair D4
+in both halves of the data — but the improvement in the second half was smaller
+than the margin fixed in advance, so it is recorded as a **valid run with a
+failed gate**, not as a success.
+
+<TheorySummary id="TH-20260820-distributional-afterstate-ranker-7aba7fb3" />
+
+The honest reading is that the *data shape* was fixed and the problem moved:
+what limits the model now is the quality of its labels and its own training,
+not the sibling gap. The result record itself names an undertrained checkpoint
+(11 of 20 planned epochs) and a weak teacher as the likely bottleneck. That is a
+different, more tractable complaint than the one this page opened with — and it
+is where the [more-computation question](/learn/concepts/does-more-compute-help)
+picks up.
 
 <Callout title="Why this matters for any large-scale plan" tone="warn">
 Everything that makes sibling labelling expensive — a search at every position,
 for every column, under shared random scenarios — is exactly the kind of work
-that parallelises across a large cluster. But the lesson of this page is that
-compute spent generating *played-move-only* data, at any scale, reproduces the
-failure at scale. The data shape has to be right first. The concept page on
+that parallelises across a large cluster. Two lessons carry forward. First,
+compute spent generating *played-move-only* data reproduces the failure at any
+scale; the data shape has to be right. Second, the pilot above shows that even
+with the right shape, the number of imagined futures per label is itself a
+compute dial that had to be turned up by 32× before the labels were stable
+enough to learn from. The concept page on
 [whether more computation helps](/learn/concepts/does-more-compute-help)
-picks this up.
+picks both up.
 </Callout>
 
 <Callout title="Where to read the technical version" tone="info">
 The sibling-corpus work lives under
 [lifetime-objective / sibling-corpus](/approaches/lifetime-objective/sibling-corpus);
-the registered theory and its falsification criteria are on the
+the theory, its four pilot experiments and their results are on the
+[afterstate learning pages](/approaches/afterstate-learning) and the
 [theories page](/theories); the planner-distillation attempt that motivated the
 477-root panel is at
 [lifetime-objective / planner-distill](/approaches/lifetime-objective/planner-distill).

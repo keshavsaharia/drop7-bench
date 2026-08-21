@@ -1,28 +1,101 @@
 ---
-title: Policy Comparison
+title: Policy comparison
 family: heuristic-search
-status: Unknown
+summary: The shared harness that makes two hand-built policies play the same games, so that a difference between them is about the policies and not about which one got luckier discs.
+status: support-only
 evidence: repository-verified
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+The shared harness that makes two hand-built policies play the same games, so
+that a difference between them is about the policies and not about which one
+got luckier discs.
 
-## Policy comparison
+<EvidenceLabel status="support-only" evidence="repository-verified" reads="public" />
 
-Common harness for comparing heuristic and planning policies.
+## Why a harness deserves a page
 
-**Status: Unknown** (repository-verified). 
+Drop7 scores are heavy-tailed. One game that happens to run long can lift an
+average more than a genuinely better policy does, which means an informal
+comparison of two policies on two different sets of games is close to
+worthless. The repository's answer is *paired* games: both policies play the
+identical seeded sequence of discs and reveals, and the comparison is made
+game by game.
 
-## Sources
+This lab is where that is implemented for the hand-built family. It also
+reports the things a score alone hides: how long each game lasted, how many
+discs were cleared, the deepest chain reached, whether the game ended naturally
+or hit the move cap, how much planning work each decision cost, and how many
+decisions failed to finish inside their budget.
 
-- `main.ts`
+## What it can compare
 
-## More evidence
+Eight evaluators, behind one command-line flag:
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/heuristic-search)
+1. the five hand-evaluator profiles — `legacy`, `survival`, `potential`,
+   `anti-clog`, and the default `combined`;
+2. `recursive` — the recursive-potential evaluator, which propagates
+   "readiness to clear" outward from discs that can actually be triggered;
+3. `fertile` — an evaluator defined inside this lab that penalises covered
+   discs by the square of their altitude with a 1.65 multiplier on the two
+   edge columns, penalises high low-numbers, and adds a steep penalty above
+   four rows;
+4. `learned` — a checkpoint from the learned-evaluator work, loaded from a
+   file.
+
+Each can be driven greedily, through sampled [rollouts](/learn/glossary), or
+through an open-loop beam, so the harness separates *which features* from *how
+much search*.
+
+## What happened, in plain English
+
+Nothing, in the sense that this file has no result of its own — and that is
+the correct outcome for a measuring instrument. The
+[experiment index](/docs/research/experiment-index) lists it as support-only
+with no recorded finding. The results it produced live on the pages of the
+policies it compared.
+
+The `fertile` evaluator inside it is worth noticing for a different reason: it
+is a direct encoding of the two pieces of advice an experienced human player
+gave — attack high covered discs, and treat the edge columns as weaker. The
+source comment says it keeps those terms *isolated in this comparison rather
+than adding them to the shared heuristic*, which is the right instinct and is
+also why no page can claim they help.
+
+<TechnicalDetails title="The technical record">
+
+The [experiment index](/docs/research/experiment-index) records this lab as
+**support-only, repository-verified**, with no outcome text at all.
+Repository-verified means the source is present and its purpose is clear from
+reading it; **no run, cohort, or comparison from this harness is recorded in
+the [experiment history](/docs/research/history) or anywhere else in this
+repository.**
+
+Repository-verified from the source. `main.ts` defaults to 16 games from seed
+1 with a 1,000-move cap, four reveal samples per decision, a 20-move rollout
+horizon, a beam of width 8 to depth 10 under a 5,000,000 work cap, a
+−250,000 terminal utility and a fixed centre-out column tie order
+`3, 2, 4, 1, 5, 0, 6`. Reveal and policy sampling use separate fixed domains
+keyed on the observable state; the actual game's discs come from the headless
+game seed, which the policies never see. Per-game output includes score,
+moves, maximum chain, clears, whether the game ended, planner work and the
+count of decisions that did not complete.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **The comparison protocol is the part of this family that survived.** Paired
+  whole games, censoring flags, work accounting and per-game output are now
+  requirements in the repository's
+  [benchmark contract](/docs/benchmarks), not choices a lab makes.
+- **A harness cannot rescue a weak comparator.** Everything measured here was
+  measured against other members of this family, not against the depth-4
+  reference search. That is why several sibling pages describe wins that are
+  not evidence.
+- **What is still open:** the `fertile` and edge-multiplier terms in this file
+  have never been tested to a gate. The strategy catalog's sixth open direction
+  — turn human strategy advice into public features and test them on preserved
+  sibling panels — is unstarted, and the ingredients for it are sitting in this
+  file and in
+  [edge priority](/approaches/heuristic-search/edge-priority).

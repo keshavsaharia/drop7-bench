@@ -1,28 +1,110 @@
 ---
-title: Cycle Abstraction
+title: Cycle abstraction
 family: heuristic-search
-status: Rejected
+summary: Stop choosing a column and start choosing a plan — pick one of five intentions for the whole five-drop cycle, and let a model predict which intention this board should adopt.
+status: rejected
 evidence: task-record only
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Stop choosing a column and start choosing a plan — pick one of five intentions
+for the whole five-drop cycle, and let a model predict which intention this
+board should adopt.
 
-## Five-move cycle abstraction
+<EvidenceLabel status="rejected" evidence="task-record only" reads="public" />
 
-Tests whether 41 cycle-level features can rank five-move options.
+## The intuition
 
-**Status: Rejected** (task-record only). survival prediction was strong but option ranking was weak.
+A search that thinks one column at a time has to rediscover its own strategy
+every move, and it cannot represent an idea like "spend this cycle digging,
+then cash in". A human plays in phrases, not syllables.
 
-## Sources
+This lab compresses the decision. Between two [rises](/learn/glossary) there
+are exactly five drops, so it defines five **macro options** — intentions that
+are held for a whole cycle:
 
-- `cycle-abstraction.cpp`
+- **clear** — take the discs that are available now;
+- **build** — arrange numbers so that a future trigger fires a chain;
+- **tunnel** — dig at the covered discs and open them;
+- **safety** — keep the board low and survive the coming rise;
+- **balanced** — a mixture.
 
-## More evidence
+Each option is a different weighting of the same measurements, so "choosing an
+option" means choosing which of five ready-made evaluators drives the next
+five moves. The board itself is summarised by 41 features — occupancy, cover
+counts and altitude, height and roughness, how far triggers are from firing,
+stored high numbers, low-number clogs, the visible next disc and every column
+height.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/heuristic-search)
+The question the lab asks is narrow and testable: **from those 41 numbers
+alone, can you tell which of the five intentions this board should adopt?**
+
+## How it works, step by step
+
+1. **Collect public positions** at cycle boundaries from played games.
+2. **Label each position five times.** For each option, play the cycle out
+   under that intention and then continue under `balanced` to the horizon,
+   several times, on paired synthetic disc tapes keyed to the visible
+   position. Record how often the branch survived and how long it lasted.
+3. **Fit two models per option** from the 41 features: a logistic model for
+   "does this survive" and a linear model for "how many moves".
+4. **Test on held-out games** with two frozen gates: the survival model's area
+   under the curve must reach 0.75, and the rank correlation between predicted
+   and actual option ordering must reach 0.6.
+5. **If it passed**, a policy could pick its intention at each cycle boundary.
+
+## What happened, in plain English
+
+Half of it worked, and it was the half that does not matter.
+
+Predicting **whether a board survives** turned out to be reasonably easy — 41
+public features are enough to tell a healthy board from a doomed one. Ranking
+**which of the five intentions is best for this board** was weak. Since the
+whole point was to choose an intention, the lab was retired.
+
+This is the repository's central failure pattern arriving in a new costume.
+Being accurate about a position's value is not the same as being accurate
+about the ordering of the choices available at it — the difference the
+[sibling ranking](/learn/concepts/ranking-siblings) page is about. Here the
+"siblings" are not columns but plans, and the result is the same.
+
+<TechnicalDetails title="The technical record">
+
+The [experiment index](/docs/research/experiment-index) records this as
+**rejected, task-record only**: *"survival prediction was strong but option
+ranking was weak."* Task-record only means the run was reported in a research
+conversation and was never promoted into the
+[experiment history](/docs/research/history). **The achieved area under the
+curve, the achieved rank correlation, and the number of games behind them are
+not retained anywhere in this repository**, so this page quotes none of them.
+The two gate values *are* verifiable: `cycle-abstraction.cpp` requires
+`auc >= 0.75 && kendall >= 0.6` and writes both into its report.
+
+Repository-verified from the source: 41 features indexed by name, five macro
+options (`clear`, `build`, `tunnel`, `safety`, `balanced`), option scoring
+built from shared potential, clog, danger and tunnel-progress terms plus a
+scaled score signal, labels produced by holding an option for five drops and
+continuing under `balanced` to the horizon on paired synthetic tapes, and
+per-option logistic and linear models fitted with ridge regularization on the
+`0x3d70…` training range. Tapes are keyed on a hash of the observable state —
+board, next disc, rise clock, level — so no hidden value and no real future
+disc is read.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **Compressing the action space does not compress the difficulty.** Five
+  options instead of seven columns is a much easier ranking problem on paper,
+  and it was still too hard from these features.
+- **The idea keeps reappearing because it is probably right.** Planning across
+  a complete rise cycle is one of the few things that has repeatedly shown
+  signal in this repository — the constructive complete-cycle planner beat a
+  one-ply policy substantially, and a 12-move constructive horizon beat a
+  seven-move one — while never being stable enough to displace the reference
+  search. The strategy catalog's standing recommendation is to test long-cycle
+  features as bounded corrections to the reference search rather than letting
+  them control a whole game.
+- **What was ruled out** is predicting the best cycle-level intention from
+  these 41 static features. Nothing here tests a *search* over macro options,
+  or options chosen by anything other than a fitted model.

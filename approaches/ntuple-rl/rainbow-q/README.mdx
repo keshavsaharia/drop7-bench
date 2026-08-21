@@ -1,35 +1,156 @@
 ---
-title: Rainbow Q
+title: Rainbow-style Q-learning over patterns
 family: ntuple-rl
-status: Rejected
+summary: Learn a score for every column directly, using the standard modern tricks from Atari-playing agents, with a pattern-lookup table instead of a deep network — it beat random play and then lost to a one-move search.
+status: rejected
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Learn a score for every column directly, using the standard modern tricks from
+Atari-playing agents, with a pattern-lookup table instead of a deep network.
 
-## Rainbow-lite n-tuple Q
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
 
-Uses replay, multi-step off-policy targets, and a compact n-tuple Q function under corrected scoring.
+## The intuition
 
-**Status: Rejected** (ledger-recorded). it passed random play but failed the fair-D1 gate at one million transitions.
+The other n-tuple learners in this family score *boards*, and then have to
+simulate each drop to compare columns. A Q-function skips that: it scores
+`(position, column)` pairs directly, so choosing a move is seven table lookups
+and a maximum. That is fast enough to sit inside a search or to play millions of
+games a minute.
 
-## Flow-curriculum Rainbow
+"Rainbow" is the name for the bundle of fixes that made deep Q-learning work on
+Atari, and this experiment ports the parts of it that do not require a large
+network:
 
-Continues the frozen Q checkpoint with balanced initial and sustainable-oracle restart states.
+- **Double Q-learning**, so the same estimate is not used both to pick the best
+  next column and to value it — that combination systematically overestimates.
+- **Multi-step returns**, looking five moves ahead before bootstrapping, so real
+  reward propagates faster than one move per update.
+- **Prioritised replay**, revisiting the stored transitions the model is most
+  wrong about instead of sampling uniformly.
 
-**Status: Rejected** (task-record only). the fixed 16-million-transition Stage A failed all absolute floors.
+The compact part is the model itself: a hashed
+[n-tuple](/learn/glossary) table rather than a neural network, so no large dense
+computation sits on the critical path.
 
-## Sources
+## How it works, step by step
 
-- `flow-curriculum-rainbow.cpp`
-- `rainbow-ntuple-q.cpp`
+1. **Observe.** Strictly the [public](/learn/glossary) board, the visible next
+   disc, and the five-move [rise clock](/learn/glossary). Score, level, move
+   number, seed, and covered values are absent from the model's input type.
+2. **Featurise a column.** 28 horizontal, 28 vertical, and 36 square four-cell
+   windows, hashed both with and without the visible disc, plus cell, height,
+   row, count, next-disc, and phase factors — 259 active features per
+   evaluation.
+3. **Symmetrise.** Every deployed value is the exact average of the direct
+   evaluation of column `a` and the mirrored board's evaluation of column
+   `6 − a`, so the policy cannot prefer left to right by accident.
+4. **Learn.** Double-DQN targets, five-step returns, score deltas divided by
+   17,000, proportional prioritised replay with annealed importance weights, and
+   periodic hard target-network copies.
+5. **Gate in stages.** Beat random play at 250,000 moves before being allowed to
+   train to one million; beat a one-move fair search there before being allowed
+   to train to four million.
 
-## More evidence
+A second program, `flow-curriculum-rainbow.cpp`, continues from the frozen
+checkpoint and changes only where episodes start: half from an ordinary opening
+board, half from a public position taken from a long
+[oracle](/learn/glossary) trajectory, but continued with an independent random
+future. The oracle's actions, seeds, tapes, scores, and move indices are never
+parsed into the learner's state — only the board position is reused.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/ntuple-rl)
+## What happened, in plain English
+
+Stage A passed convincingly. At 250,000 moves the learned policy averaged
+101,325 points against deterministic random play's 73,670 on the same 32 games,
+winning by about 27,655 points and 7.5 moves with the confidence bounds well
+clear of zero.
+
+Stage B then failed decisively, and the run stopped. Trained four times longer,
+to one million moves, the policy reached 111,092 points — while an exact
+one-move fair search on the same 32 games scored 168,072. It lost by about
+56,980 points and 16 moves. Four times the training moved it from 101,325 to
+111,092 points, and left it well short of the cheapest honest search in the
+repository. Stage C and its entire seed range were never opened, and the
+one-million-move model was not even saved.
+
+The curriculum follow-up, which restarted half its episodes from positions an
+oracle had reached, trained to 16 million moves and failed every absolute floor
+it had been given. Its numbers were not retained.
+
+<TechnicalDetails title="The technical record">
+
+Status in [the experiment index](/docs/research/experiment-index): Rainbow-lite
+n-tuple Q is **rejected, ledger-recorded** — "it passed random play but failed
+the fair-D1 gate at one million transitions." Flow-curriculum Rainbow is
+**rejected, task-record only** — "the fixed 16-million-transition Stage A failed
+all absolute floors."
+
+From [the ledger](/docs/research/history):
+
+| 32-game probe | Mean score | Mean moves | Natural | Censored |
+| --- | ---: | ---: | ---: | ---: |
+| Random | 73,670.06 | 26.41 | 32 | 0 |
+| Learned Q at 250k moves | 101,324.97 | 33.91 | 32 | 0 |
+| Exact corrected fair D1 | 168,072.38 | 52.94 | 32 | 0 |
+| Learned Q at 1m moves | 111,092.25 | 36.84 | 32 | 0 |
+
+Stage A paired differences: +27,654.91 points and +7.50 moves, lower-95 bounds
++18,726.26 and +5.01, against gates of 1.10× score and 1.05× moves. Stage B
+paired differences: −56,980.13 points and −16.09 moves, lower-95 bounds
+−84,700.99 and −23.80; every performance gate failed.
+
+Model: 8,388,608 float parameters (32 MiB), below a frozen 128 MiB deployed
+limit. Training: 1,000,021 transitions in 108.234 seconds (9,239 per second),
+34,783 training games all ending naturally, 119,488,512 bytes peak resident.
+Inference: 99,061 public states and 693,430 legal action values per second.
+Probes `0x4d400000...0x4d40001f` (Stage A) and `0x4d400020...0x4d40003f`
+(Stage B) were consumed; the Stage C probe `0x4d400040...0x4d40007f` remains
+unopened, as do all protected and final cohorts. This section states its scoring
+mode: the corrected 17,000-point Hardcore award.
+
+An earlier attempt was stopped at 47,146 transitions by a floating-point defect
+in the replay priority tree that could select an unwritten zero-priority slot.
+The tree was moved to double precision, a stress test was added, and training
+restarted deterministically from the same approved start. That failure and
+restart are recorded in the artifact rather than quietly dropped.
+
+For the curriculum follow-up, `docs/exploratory/audit-05-optimistic-curriculum.md`
+records the mixing rule (a strict 50/50 alternation, final counts 206,899
+initial and 206,898 restart episodes over a fixed 16-million-transition Stage A)
+and the floors it failed (400,000 points, 120 moves, 70 lower-quartile moves,
+2.10 clears and 1.15 reveals per move). It was a single arm — the mixture ratio
+was never ablated — and no achieved values were retained.
+
+Sources: `rainbow-ntuple-q.cpp`, `flow-curriculum-rainbow.cpp`.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+**Beating random is not evidence of anything.** Stage A's clean, well-powered
+win looked like progress and was, in retrospect, only proof that the pipeline
+ran. The staged gate did its job by refusing to let that result open a larger
+budget on its own.
+
+**Four times the training moved the policy from 101,325 to 111,092 points.**
+That trajectory does not extrapolate to a one-move search, let alone to the
+depth-4 reference. See
+[is more computation the answer?](/learn/concepts/does-more-compute-help).
+
+**A recorded doubt about the reward.**
+`docs/exploratory/audit-04-blind-spots.md` notes that both Rainbow programs
+divide the score delta by the 17,000-point rise bonus and feed that to
+prioritised replay, so a single rise dominates the priority of ordinary
+chain-scoring moves by a large factor. The audit does not claim this is a bug
+and neither does this page — but it is an untested design choice sitting
+directly under a rejected result. Why that ratio is so large is the subject of
+[score is survival](/learn/concepts/survival-vs-score).
+
+**What it did not rule out.** The Q-function was trained on the moves an
+exploring policy chose, so it was still asked at play time to rank columns it
+had rarely been scored on — the [sibling trap](/learn/concepts/ranking-siblings).
+A Q-learner trained on data that covers every legal column has not been tried
+here.

@@ -1,0 +1,445 @@
+{
+ "generatedBy": "web/scripts/generate-leaf-scenarios.ts",
+ "engine": "src/core/typescript/engine.ts (latent mode)",
+ "note": "Positions harvested from toy-policy games; annotations recomputed with the engine. The rollouts use the toy policy and are a demonstration, not a research measurement.",
+ "harvest": {
+  "games": 24,
+  "positions": 877,
+  "seedDomain": "0x5eed****"
+ },
+ "xray": {
+  "board": "0000000000000000000389995018889703988893988888888",
+  "heights": [
+   4,
+   4,
+   4,
+   4,
+   2,
+   5,
+   5
+  ],
+  "maxHeight": 5,
+  "dangerHeight": 1,
+  "occupied": 28,
+  "solid": [
+   20,
+   27,
+   28,
+   29,
+   35,
+   36,
+   37,
+   41,
+   42,
+   43,
+   44,
+   45,
+   46,
+   47,
+   48
+  ],
+  "cracked": [
+   21,
+   22,
+   23,
+   30,
+   34,
+   38,
+   40
+  ],
+  "numbered": [
+   19,
+   24,
+   26,
+   31,
+   33,
+   39
+  ],
+  "oneDrop": [
+   24,
+   31,
+   39
+  ],
+  "selfClearColumns": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6
+  ],
+  "triggers": [
+   {
+    "column": 0,
+    "discs": [
+     1,
+     5
+    ]
+   },
+   {
+    "column": 1,
+    "discs": [
+     1,
+     5
+    ]
+   },
+   {
+    "column": 2,
+    "discs": [
+     1,
+     5
+    ]
+   },
+   {
+    "column": 3,
+    "discs": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ]
+   },
+   {
+    "column": 4,
+    "discs": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ]
+   },
+   {
+    "column": 5,
+    "discs": [
+     1,
+     6
+    ]
+   },
+   {
+    "column": 6,
+    "discs": [
+     1,
+     6
+    ]
+   }
+  ],
+  "overRun": [
+   26
+  ],
+  "risePoppers": 2,
+  "riseBlocked": false,
+  "nextDisc": 4,
+  "movesUntilRise": 1,
+  "origin": "toy game 17, after move 24"
+ },
+ "pair": {
+  "rollout": {
+   "policy": "toy-greedy (web/scripts/toy-policy.ts)",
+   "tapes": 16,
+   "moveCap": 200,
+   "seedDomain": "0x5eed****"
+  },
+  "paired": {
+   "wins": 6,
+   "ties": 9,
+   "losses": 1
+  },
+  "better": {
+   "board": "0000000000000000000000000000765000098898888888888",
+   "heights": [
+    3,
+    3,
+    3,
+    2,
+    2,
+    2,
+    2
+   ],
+   "maxHeight": 3,
+   "dangerHeight": 0,
+   "occupied": 17,
+   "solid": [
+    36,
+    37,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48
+   ],
+   "cracked": [
+    35,
+    38
+   ],
+   "numbered": [
+    28,
+    29,
+    30
+   ],
+   "oneDrop": [],
+   "selfClearColumns": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
+   "triggers": [
+    {
+     "column": 0,
+     "discs": [
+      1,
+      4
+     ]
+    },
+    {
+     "column": 1,
+     "discs": [
+      1,
+      4
+     ]
+    },
+    {
+     "column": 2,
+     "discs": [
+      1,
+      4
+     ]
+    },
+    {
+     "column": 3,
+     "discs": [
+      3,
+      4
+     ]
+    },
+    {
+     "column": 4,
+     "discs": [
+      1,
+      3
+     ]
+    },
+    {
+     "column": 5,
+     "discs": [
+      1,
+      3
+     ]
+    },
+    {
+     "column": 6,
+     "discs": [
+      1,
+      3
+     ]
+    }
+   ],
+   "overRun": [],
+   "risePoppers": 0,
+   "riseBlocked": false,
+   "future": {
+    "tapes": 16,
+    "meanMoves": 35.125,
+    "meanScore": 105475.125,
+    "minMoves": 25,
+    "maxMoves": 60,
+    "moves": [
+     45,
+     30,
+     30,
+     30,
+     40,
+     25,
+     35,
+     30,
+     27,
+     30,
+     60,
+     40,
+     30,
+     30,
+     50,
+     30
+    ],
+    "scores": [
+     137467,
+     86636,
+     85450,
+     92285,
+     120777,
+     68341,
+     103302,
+     85693,
+     85542,
+     85744,
+     197890,
+     121036,
+     86546,
+     86436,
+     157714,
+     86743
+    ]
+   }
+  },
+  "worse": {
+   "board": "0000000000000000000000000000675000088998888888888",
+   "heights": [
+    3,
+    3,
+    3,
+    2,
+    2,
+    2,
+    2
+   ],
+   "maxHeight": 3,
+   "dangerHeight": 0,
+   "occupied": 17,
+   "solid": [
+    35,
+    36,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48
+   ],
+   "cracked": [
+    37,
+    38
+   ],
+   "numbered": [
+    28,
+    29,
+    30
+   ],
+   "oneDrop": [],
+   "selfClearColumns": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
+   "triggers": [
+    {
+     "column": 0,
+     "discs": [
+      1,
+      4
+     ]
+    },
+    {
+     "column": 1,
+     "discs": [
+      1,
+      4
+     ]
+    },
+    {
+     "column": 2,
+     "discs": [
+      1,
+      4
+     ]
+    },
+    {
+     "column": 3,
+     "discs": [
+      3,
+      4
+     ]
+    },
+    {
+     "column": 4,
+     "discs": [
+      1,
+      3
+     ]
+    },
+    {
+     "column": 5,
+     "discs": [
+      1,
+      3
+     ]
+    },
+    {
+     "column": 6,
+     "discs": [
+      1,
+      3
+     ]
+    }
+   ],
+   "overRun": [],
+   "risePoppers": 0,
+   "riseBlocked": false,
+   "future": {
+    "tapes": 16,
+    "meanMoves": 31.9375,
+    "meanScore": 94351.125,
+    "minMoves": 25,
+    "maxMoves": 40,
+    "moves": [
+     40,
+     30,
+     30,
+     30,
+     30,
+     25,
+     30,
+     30,
+     26,
+     40,
+     30,
+     40,
+     30,
+     30,
+     40,
+     30
+    ],
+    "scores": [
+     120730,
+     92267,
+     85450,
+     86697,
+     85966,
+     68341,
+     86022,
+     86057,
+     85567,
+     121816,
+     85772,
+     121829,
+     87608,
+     86748,
+     122846,
+     85902
+    ]
+   }
+  }
+ }
+}

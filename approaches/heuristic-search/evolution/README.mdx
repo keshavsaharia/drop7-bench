@@ -1,30 +1,140 @@
 ---
 title: Evolution
 family: heuristic-search
-status: Rejected
+summary: Stop arguing about how much each board feature is worth and let a search find the numbers — play thousands of games with slightly different weights, keep the ones that scored best, repeat.
+status: rejected
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Stop arguing about how much each board feature is worth and let a search find
+the numbers — play thousands of games with slightly different weights, keep
+the ones that scored best, repeat.
 
-## Engineered-feature evolution
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
 
-Evolves linear, small nonlinear, and grouped phase-aware one-step action scorers.
+## The intuition
 
-**Status: Rejected** (ledger-recorded). each family failed its whole-game gate despite inexpensive fitting or plausible feature directions.
+Every hand evaluator in this repository contains a wall of constants: −900 for
+peak height risk, +300 for quiet build options, −550 for adjacent 1s. Nobody
+derived those numbers; somebody chose them. It is an obvious idea to let the
+game itself choose them instead.
 
-## Sources
+The method is derivative-free optimisation on complete games. Perturb the
+weight vector, play whole games with each variant on the *same* seeds so that
+luck cancels, rank the variants, move the distribution toward the winners, and
+repeat. It needs no gradient, no labels, and no theory about why a feature
+matters — only a lot of games.
 
-- `evolution.cpp`
-- `nonlinear-evolution.cpp`
-- `phase-weight-evolution.cpp`
+Three programs here try three versions of that:
 
-## More evidence
+1. **Linear** — 40 features describing what a move did and what board it left,
+   scored as a weighted sum.
+2. **Nonlinear** — the same 40 features fed into a small 12-unit network with
+   505 parameters, first taught to imitate a proper search and then evolved.
+3. **Phase weights** — instead of free parameters, seven interpretable groups
+   of the existing reference leaf are scaled up or down together.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/heuristic-search)
+## How it works, step by step
+
+1. **Extract features for each legal column**: what the move immediately did
+   (score, clears, reveals, crack progress, chain depth, board clear, death,
+   level advance) and what the resulting board looks like (occupancy and
+   projected occupancy debt, heights and roughness, cover load and altitude,
+   readiness and trench features, low-number clogs, outcome dispersion).
+2. **Score each column** with the candidate weights and play the best.
+3. **Play whole games** with every candidate on shared seeds, and rank
+   candidates by a mixture of mean and median score — deliberately not by mean
+   alone, so that one extraordinary chain cannot dominate a generation.
+4. **Update the distribution** toward the best candidates and repeat for a
+   fixed number of generations.
+5. **Freeze the winner** and test it on games it was never fitted on.
+
+Step 5 is where all three died.
+
+## What happened, in plain English
+
+Each version learned its training games and gave the gain back on fresh ones.
+
+The nonlinear version failed most informatively, because it was built as a
+funnel that has to pass a checkpoint before it is allowed to spend real
+compute. It first cloned a proper search's decisions — and the clone matched
+almost all of the actions it was trained on while matching fewer than half of
+the same teacher's actions on states it had not seen. That is a textbook
+distribution shift, caught before a single evolutionary generation ran. It
+then lost its four-game screen by half, and the funnel stopped itself.
+
+The phase-weight version is the most interesting failure, because it was
+*directionally right*. Six generations independently agreed that the reference
+leaf should care more about cover debt and about trigger and rise readiness —
+and a completely separate privileged audit later agreed with those same
+directions. The frozen vector still lost its screen. Turning every weight in a
+group up or down together cannot express the state- and action-conditional
+interactions the game actually needs.
+
+<TechnicalDetails title="The technical record">
+
+The [experiment index](/docs/research/experiment-index) records all three as
+**rejected, ledger-recorded**: *"each family failed its whole-game gate
+despite inexpensive fitting or plausible feature directions."*
+
+**Nonlinear engineered-feature evolution.** The 12-unit tanh network with 505
+parameters cloned exact depth-3 five-stratum phase-safety actions and had to
+reach 85% of the paired behaviour score, at least 250,000 points, and no loss
+of mean moves before evolution was allowed to start. It fitted **96.86% of 255
+training actions but only 43.40% of 235 disjoint teacher actions**. On the
+first paired four-game screen the exact behaviour policy scored **307,222.75
+points over 91.25 moves** and the nonlinear policy **148,349.25 over 47.5**;
+clear and reveal throughput fell from 1.956/1.063 to 1.700/0.932 per move, and
+the paired lower bounds were −441,770 points and −121.882 moves. The funnel
+stopped before evolution or confirmation. Runtime 30.4 s, peak RSS 3.81 MiB.
+Only `0x3d…` cloning/holdout and `0x3e…` screen seeds were read.
+
+**Complete-game phase-weight evolution.** Six antithetic generations increased
+the magnitude of cover debt by **18.4%** and trigger/rise readiness by
+**26.4%**, leaving release and exposure almost unchanged — directions that
+agree with the later matched oracle-topology audit. The frozen vector then
+lost its eight-game screen: the default evaluator averaged **107,709.75 points
+over 75.125 moves**, the evolved vector **105,534.875 over 72.5**.
+Confirmation was not run.
+
+**Both of those runs are historical 7,000-point Sequence-scored**: they used
+the 7,000-point level award of the 30-drop rules rather than the 17,000-point
+award of the mode studied here, so their absolute scores are not evidence
+about the million-point target. The paired comparisons, the imitation rates
+and the throughput figures remain valid
+([mode-specific scoring correction](/docs/research/history)). Four and eight
+games are small screens.
+
+**Linear engineered-feature evolution.** The ledger references this program as
+the source of *"the audited 40 action features"* reused by the nonlinear
+experiment, but **no separate result section for the linear program was
+located** in the [experiment history](/docs/research/history). Its own
+outcome is therefore not retained; the index's family-level rejection is what
+exists. Repository-verified from the source: 40 named features with per-feature
+bounds, a training range of `0x3d70…` and a probe range of `0x4d70…` that are
+deliberately disjoint, defaults of 12 generations × 36 candidates × 48
+training games with a 64-game probe and a 750-move cap, three chance probes
+during fitting and seven for the final evaluation, and a ranking objective of
+`0.65 × mean + 0.35 × median` score.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **Fitting a policy on games is not the same as improving it.** All three
+  programs improved the thing they were fitted to. The strategy catalog's
+  conclusion is blunt about what follows: do not treat a higher fitting score
+  from another weight sweep as a new result without a fresh, paired gate.
+- **A funnel that stops early is a feature.** The nonlinear run cost 30
+  seconds because it checked whether its clone generalised *before* spending
+  compute on evolution. That pattern — cheap falsification first — is what the
+  repository asks of every experiment.
+- **Plausible directions are not a result either.** Two independent methods
+  agreed that cover debt and rise readiness are undervalued, and acting on
+  that agreement still made the policy worse. Global rescaling of a weight
+  group is too blunt an instrument to test the hypothesis it appears to test.
+- **What was ruled out** is these parameterisations, fitted this way. Nothing
+  here rules out learning a leaf — but the successors that tried it, with far
+  more capacity, hit
+  [the same wall from the same direction](/learn/concepts/ranking-siblings).

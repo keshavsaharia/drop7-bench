@@ -1,28 +1,91 @@
 ---
-title: Terminal Rollout
+title: Terminal rollout
 family: terminal-policy-iteration
-status: Runtime-paused
+summary: The faithful version — compare columns by playing each one all the way to the end of the game — which turned out to be unaffordable.
+status: runtime-paused
 evidence: task-record only
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+The faithful version of the family's idea: compare columns by playing each one
+all the way to the end of the game. It was too slow to use.
 
-## Terminal-rollout feasibility
+<EvidenceLabel status="runtime-paused" evidence="task-record only" reads="public" />
 
-Screens faithful full-terminal comparisons around the shared phase behavior.
+## The intuition
 
-**Status: Runtime-paused** (task-record only). a faithful design projected roughly hundreds of seconds per move.
+Every other program in this family truncates. It plays a candidate column
+forward for 25, 50, 100 or 200 moves, and then has to guess what the rest of
+the game would have been worth — with a hand-tuned evaluator, or a fixed
+penalty for dying, or simply by treating the horizon as the end. Each of those
+guesses reintroduces exactly the kind of error the rollout was meant to remove.
 
-## Sources
+This program removes the guess. Play each candidate to the actual end of the
+game, and let the comparison be between real outcomes. If the family's premise
+is right — that the way to judge a move is by the lifetime that follows it —
+this is the version with no approximation left in it.
 
-- `terminal-rollout.cpp`
+## How it works, step by step
 
-## More evidence
+1. Read the public position; ask the shared phase policy which column it wants.
+2. Screen the field down to a small number of challengers — the source's
+   default keeps two — so that the expensive part runs on a short list rather
+   than on all seven columns.
+3. Give each survivor a set of shared imagined futures (up to eight by default)
+   and play each one out to termination, or to a 500-move cap, with the shared
+   phase policy making every subsequent decision.
+4. Compare the resulting distributions with a 99% confidence rule, and keep the
+   baseline unless a challenger clears it.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/terminal-policy-iteration)
+## What happened, in plain English
+
+It was never a policy result, because it never got that far. The design was
+measured, the cost was projected, and the projection ended it: roughly hundreds
+of seconds **per move**. At that rate a single 90-move game takes hours, and
+the paired cohorts this repository requires — dozens of games, candidate and
+reference on the same seeds — are out of reach by orders of magnitude.
+
+The repository's word for this is **runtime-paused**: cost stopped the
+experiment before a decisive comparison, which is a different thing from the
+idea being wrong. Nothing here says that comparing moves by terminal outcomes
+fails. It says this implementation cannot be run, and the family's later work
+is a series of attempts to buy most of the fidelity for a fraction of the
+price — truncated horizons, staged elimination of weak columns, and reuse of a
+locked panel of stored positions instead of fresh games.
+
+The projection itself is **task-record only**: it comes from a research
+conversation, not the written ledger, so there is no timing artifact to check.
+Its practical consequence — that no successor in this family attempts full
+terminal rollouts — is visible throughout the rest of the directory.
+
+<TechnicalDetails title="The technical record">
+
+Status **runtime-paused**, evidence **task-record only**. The
+[experiment index](/docs/research/experiment-index) records the purpose as
+"screens faithful full-terminal comparisons around the shared phase behavior"
+and the outcome as "a faithful design projected roughly hundreds of seconds per
+move". There is no entry in the
+[experiment history](/docs/research/history) and no retained timing artifact.
+
+From the source, the defaults that define the design: two challengers per root,
+at most eight shared scenarios, a 500-move cap per rollout, a four-game audit
+lane with a 115-second time limit, and a 0.99 confidence level. Chance tapes
+use separate domains for reveals and next discs, keyed by scenario, step and
+event. The file carries no compile-time 7,000-point lock, so it builds against
+today's corrected engine.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **Fidelity has a price, and here the price is the result.** A rollout method
+  in this game is a trade between how faithfully it measures an outcome and how
+  many measurements it can afford. Every later program in this family is a
+  different point on that trade.
+- **A paused experiment is not a rejected one.** If a continuation policy
+  became dramatically cheaper — the repository has since built a
+  [much faster engine](/approaches/lifetime-objective/fast-engine) — the
+  projection that stopped this program would need recomputing before it could
+  be quoted again.
+- **Still open:** what the family calls a successor that is "cheaper by
+  design", rather than the same design run harder.

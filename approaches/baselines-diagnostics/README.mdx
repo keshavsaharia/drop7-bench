@@ -1,20 +1,116 @@
 ---
 title: Baselines and diagnostics
-summary: The measurement layer — parity checks, flow audits, and reference benchmarks that keep everyone honest.
+summary: The measuring instruments — simple reference players, cross-checks between the two rules engines, and per-move counters that say what a policy is actually doing.
+status: support-only
+evidence: repository-verified
+reads: diagnostic
 ---
 
-Not every program is a candidate policy. This family holds the instruments:
+Not every program in this repository is trying to win a game of Drop7. The
+seven listed here are the instruments: reference players that a candidate has
+to beat, cross-checks that the two implementations of the rules still agree,
+and counters that describe *how* a policy survives rather than how much it
+scored.
 
-- **Native parity** — compares native and TypeScript traces byte for byte
-  (256 seeds, 6,852 transitions matched in this checkout).
-- **Heuristic benchmark** — paired complete-game comparisons among the named
-  hand evaluators.
-- **Flow audits** — per-move geometry, clear/reveal flow, and root-value
-  traces that produced the 2.4-clears / 1.4-reveals diagnostic targets.
-- **Throughput probes** — how fast the engines actually run, so work budgets
-  are set from measurement instead of guesses.
+<EvidenceLabel status="support-only" evidence="repository-verified" reads="diagnostic" />
 
-Diagnostics produce evidence about *other* approaches, so their own status is
-"support-only": they are the scales, not the contestants. The scripted-round
-leaderboard in this console (`src/bench/`) follows the same philosophy — a
-fixed measuring instrument that any policy can be benched against.
+## Three jobs
+
+**A baseline is a player you keep deliberately simple and frozen.** Its only
+purpose is to give a number meaning. "Averaged 267,000 points" says nothing on
+its own; "averaged 267,000 where the frozen one-move-ahead search averaged
+157,000 on the same 32 games" is a measurement. Comparisons here are made
+game by game against a fixed comparator and paired by seed, because Drop7
+scores vary enormously from one game to the next.
+
+**A cross-check compares two implementations of the same rules.** The rules
+exist twice here — once in TypeScript, once in C++ — because the C++ version is
+fast enough to play millions of games and the TypeScript version is the one
+that is easy to read and test. If they ever disagreed, every recorded score
+would be ambiguous. So the same games are replayed through both and the
+resulting traces are compared character by character.
+
+**A flow counter measures discs, not points.** "Throughput" in this repository
+never means games per second; it means the *rate at which the board is being
+cleared*, per move. Two numbers do most of the work: how many numbered discs
+clear per move, and how many gray discs get their hidden number exposed per
+move.
+
+<BoardCompare
+  before="0000000000000000000000000000000000000330008899888"
+  after="0000000000000000000000000000000000000000008845988"
+  beforeLabel="a 3 is about to fall into column 4"
+  afterLabel="one move later"
+  highlightBefore={[37, 38]}
+  highlightAfter={[44, 45, 46]}
+  caption="What a flow counter counts, on one engine-verified move. Three 3s in a row clear; the two already-cracked gray discs beneath them are hit again and show their numbers (4 and 5); the gray to their right is hit for the first time and cracks. The move scores 21 points — which is why flow, not score, is the useful description of it."
+/>
+
+Every board on these pages is the rules engine's own output for the position
+shown, not a drawing.
+
+## Why the flow numbers matter more than they look
+
+A Drop7 game ends when the board fills. Every five drops, five discs have been
+placed by the player and seven more arrive underneath as a new gray row: twelve
+discs onto a 49-cell board. A policy therefore survives indefinitely only if it
+removes at least 12/5 = **2.400 numbered discs per move** and opens at least
+7/5 = **1.400 covered discs per move**. That arithmetic is why the counters
+exist, and it is recorded in
+[finding 01](/docs/exploratory/finding-01-score-is-survival) together with the
+measurement that the depth-4 reference sustains 1.973 clears and 1.090 reveals
+per move — an 18% and 22% structural deficit — over 64 paired games at the
+exploratory development tier.
+
+Score follows from that. In those same 64 games, 94.3% of all points came from
+the flat 17,000-point bonus paid at each rise, 5.7% from chains, and none at
+all from board clears, with score and moves-survived correlated at r = 0.9995.
+
+<Callout title="A diagnostic is not a result" tone="warn">
+Nothing on these pages is evidence that a policy is strong. A flow audit tells
+you what a policy did; it does not tell you it did well. Where an instrument
+was pointed at a *candidate* and that candidate was retired — the
+[cover-throughput probe](/approaches/baselines-diagnostics/throughput-probe) —
+the page says so and labels the evidence.
+</Callout>
+
+## What the records say
+
+<TechnicalDetails title="The technical record">
+
+| Instrument | What it produces | Status and evidence |
+| --- | --- | --- |
+| [Native parity](/approaches/baselines-diagnostics/native-parity) | Byte-for-byte comparison of native and TypeScript traces | **Completed — reproduced;** 256 seeds and 6,852 transitions matched in this checkout |
+| [Heuristic benchmark](/approaches/baselines-diagnostics/heuristic-benchmark) | Paired complete-game comparisons among named TypeScript profiles | **Support-only — repository-verified** |
+| [Phase benchmark](/approaches/baselines-diagnostics/phase-benchmark) | Score, survival, flow, height, work, censoring for the shared phase policy | **Support-only — repository-verified;** no durable standalone result was located |
+| [D4 flow audit](/approaches/baselines-diagnostics/d4-flow) | Per-move geometry, flow and root-value traces for the depth-4 reference | **Support-only — repository-verified** |
+| [Trajectory throughput](/approaches/baselines-diagnostics/trajectory-throughput) | Matched windows from public policies and a privileged ceiling | **Completed — task-record only;** motivated the ~2.4-clear / ~1.4-reveal targets |
+| [Tie-breaking](/approaches/baselines-diagnostics/tie-breaking) | Sensitivity to the fixed legal-column ordering | **Support-only — repository-verified** |
+| [Cover-throughput probe](/approaches/baselines-diagnostics/throughput-probe) | Five crack/reveal weight profiles over 256 historical games | **Rejected — task-record only;** the strongest profile was nearly flat |
+
+Sources: [experiment index](/docs/research/experiment-index) §"Baselines and
+diagnostics"; [reproducibility guide](/docs/reproducibility);
+[audit 01](/docs/exploratory/audit-01-engine-fidelity);
+[audit 04](/docs/exploratory/audit-04-blind-spots) §B.2, which lists five of
+these seven sources as "support-only — real questions with no lane".
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- The two engines agree exactly on 6,852 transitions of random play. That is a
+  determinism and portability result, and a real one.
+- Agreement is not fidelity. Two engines can agree exactly on the wrong rules,
+  and [audit 01](/docs/exploratory/audit-01-engine-fidelity) demonstrates three
+  places where this engine's scoring and opening differ from the reference
+  implementation the repository itself cites. Its verdict on the hypothesis
+  "the simulator is a faithful model of the target game" is recorded as
+  **fail**, at the mechanics evidence tier; the divergences are one-sided and
+  computable rather than invalidating.
+- The cross-check also has blind spots that matter: in those 256 games the
+  board was never cleared, no game was censored, and no chain went past depth
+  9, so the board-clear and censoring code paths have **zero** cross-engine
+  coverage.
+- Five of these instruments have no retained output at all. They can be run
+  again — they are cheap — but nothing in this repository records what they
+  said.

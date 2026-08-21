@@ -1,42 +1,140 @@
 ---
-title: Nnue Guided
+title: Learned-guidance search
 family: tree-search
-status: Rejected
+summary: Let a small learned board evaluator decide where a deeper search should spend its time — while keeping the exact search as a safety net.
+status: rejected
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Let a small learned board evaluator decide where a deeper search should spend
+its time, while keeping the exact search as a safety net.
 
-## NNUE-guided deeper search
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
 
-Completes D3 first, then permits fully completed learned-guided deeper iterations.
+## The intuition
 
-**Status: Rejected** (ledger-recorded). the safeguarded screen still regressed.
+A complete look-ahead spends the same effort on every column, including the
+ones a competent player would dismiss instantly. If something could tell the
+search which branches are worth expanding, the same budget would reach further
+ahead. That "something" here is a small learned evaluator of the public
+position — an [NNUE](/learn/glossary)-style network trained to reproduce a
+stronger search's judgements.
 
-## Root quadrature
+The design is deliberately timid, and that is its most interesting feature.
+The learned model is never allowed to be the last word:
 
-Expands a larger first-reveal/next-disc product quadrature.
+- **Exact first.** Complete the full-width sampled-chance depth-3 search to a
+  finished answer. Only then spend whatever budget remains on learned-guided
+  deeper iterations, and only accept a deeper answer if that whole iteration
+  finished.
+- **Root actions are untouchable.** The model may order and prune *interior*
+  branches; every legal column at the current position is always searched.
 
-**Status: Rejected** (ledger-recorded). extra chance coverage did not beat full-width D3.
+Three programs sit in this directory. Two of them test guidance; the third
+tests the opposite lever — spending the extra budget on covering more chance
+outcomes at the root instead of on more depth — using the same fixed model and
+feature code so the comparison is clean.
 
-## Selective NNUE search
+## How it works, step by step
 
-Re-searches only model-ranked promising actions while retaining the frozen exact fallback.
+1. Read the public position and run the exact depth-3 search to completion.
+   Record its answer.
+2. With the remaining fixed work budget, run deeper iterations in which the
+   learned evaluator orders and reduces interior choice nodes.
+3. If a deeper iteration completes within budget, and only then, allow its
+   answer to replace the depth-3 answer.
+4. Play that column.
 
-**Status: Rejected** (task-record only). the learned selective extension failed its screen.
+The root-quadrature variant replaces step 2 with a wider treatment of chance:
+three first-reveal strata crossed with all seven possible next discs, followed
+by three joint interior strata.
 
-## Sources
+## What happened, in plain English
 
-- `nnue-guided-search.cpp`
-- `nnue-root-quadrature.cpp`
-- `nnue-selective-search.cpp`
+Every version was worse than the plain depth-3 search it was trying to
+improve, and the ones that spent the most extra work were the worst.
 
-## More evidence
+The safeguarded deeper search spent nearly its whole extra budget, actually
+completed a deeper iteration on about a fifth of moves, and changed the depth-3
+answer on fewer than one move in twenty — and still came out behind on score
+and on how long the games lasted. That combination is the finding: a rare
+learned override is not harmless, because the rare occasions on which a model
+disagrees with an exact search are exactly the occasions where its errors are
+largest. The wider chance coverage at the root failed the same way for a
+different reason — it spent about 239,000 work units per move against about
+58,000 for plain depth 3 and still lost to it by a wide margin, showing that
+better sampling of chance does not repair an evaluator that is biased at the
+horizon.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/tree-search)
+The third program, which re-searched only the actions the model liked, is
+recorded as rejected but has no entry in the written ledger at all. Its number
+exists only in a research conversation, so there is nothing here to quote.
+
+Two limitations must travel with all of this. These screens are four games
+each, which is small even for a screen. And they were decided under the
+historical 7,000-point Sequence scoring, which the repository treats as
+archival: the level bonus is now 17,000 points and carries the overwhelming
+majority of a Hardcore score, so a result that traded score against survival
+could plausibly change sign under the corrected rules. No corrected re-run of
+any of these three is on record.
+
+<TechnicalDetails title="The technical record">
+
+**Learned deeper-search override** — rejected, ledger-recorded. On four
+historical 7,000-point Sequence-scored games, the safeguarded policy averaged
+82,169.25 points and 58.75 moves versus 87,743.75 and 62 for depth 3. It spent
+235,654 work units per move, completed a deeper iteration on 22.1% of moves,
+and changed the depth-3 action on 4.68% of moves. Because even the screen mean
+was worse, the reserved confirmation seeds were not read.
+
+**Root reveal quadrature** — rejected, ledger-recorded. Its predeclared
+absolute gate was the full-width sampled-chance depth-3 policy. On four
+historical 7,000-point Sequence-scored games, depth 3 averaged 205,001.25
+points and 132.5 moves while the larger quadrature averaged 179,243 and 120. It
+used about 239,000 work units per move against about 58,000, failed the screen,
+and confirmation was not run.
+
+**Selective learned search** — rejected, task-record only. There is no ledger
+protocol, no artifact hash and no retained per-game data;
+[audit 04](/docs/exploratory/audit-04-blind-spots) lists this source among the
+thirty rejections that "cannot be re-derived". From the source it re-searches
+only model-ranked promising actions while retaining the frozen exact fallback.
+
+**A caveat on "fresh" seeds.** The ledger describes the seed ranges for the
+deeper-search and quadrature screens as fresh.
+[Audit 03](/docs/exploratory/audit-03-claim-arithmetic) — an exploratory,
+read-only audit, not a re-measurement — finds those ranges fall inside the
+first 100,000-game n-tuple training block, at offsets 45,056 and 49,152, and
+places the selective-search screen and confirmation ranges at offset 36,864 of
+the same block. That does not change these rejections, which are against a
+comparator on the same games, but it means the games were not new to the
+repository.
+
+**Scoring.** Unlike their observable-MCTS neighbours, these three sources carry
+no compile-time 7,000-point lock, so they build against today's corrected
+17,000-point engine. Re-running them therefore would *not* reproduce the
+numbers above.
+
+Sources: "Learned deeper-search override (rejected)" and "Root reveal
+quadrature (rejected)" in the [experiment history](/docs/research/history); the
+tree-search table in the [experiment index](/docs/research/experiment-index).
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **A rare override is a risky override.** Changing under 5% of decisions still
+  lost the game, because a model disagrees with an exact search precisely where
+  it is least reliable. The same shape appears again in the
+  [terminal policy iteration](/approaches/terminal-policy-iteration) family.
+- **More chance coverage is not a substitute for a better leaf.** The
+  quadrature arm isolated that lever and it did not help.
+- **The current guidance is explicit about ordering.** The research roadmap
+  states: "Do not begin with learned action pruning. Every legal root action
+  remains eligible until the model has independently demonstrated safe sibling
+  ranking." These results are why.
+- **What was ruled out** is these configurations under old scoring on
+  four-game screens; what was not ruled out is learned guidance in general,
+  which remains untested under corrected Hardcore scoring on a cohort large
+  enough to decide anything.

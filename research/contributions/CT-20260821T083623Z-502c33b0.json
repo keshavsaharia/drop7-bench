@@ -1,0 +1,40 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260821T083623Z-502c33b0",
+  "actor": {
+    "kind": "model",
+    "platform": "Claude Code",
+    "model": "claude-opus-5[1m]",
+    "agentId": null
+  },
+  "level": "L2",
+  "roles": [
+    {
+      "role": "writing",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Wrote plain-English overlay pages for all six machine-readable research records currently in the repository: both theory records and all four experiment records under research/. Each overlay states the question, the candidate and comparator, what the frozen gate would have counted as a pass, and — for the four experiments with recorded results — what actually happened, preserving the exact run-validity and scientific-outcome wording (two inconclusive, two fail, one of them explicitly a narrow fail with positive signal) and rendering the result records via the ResultSummary component. No research record, protocol, or source file was modified.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "web/content/research/TH-20260820-distributional-afterstate-ranker-7aba7fb3.mdx",
+    "web/content/research/TH-20260821-search-guided-self-play-at-scale-299ed02f.mdx",
+    "web/content/research/EX-20260820-afterstate-pilot-h40-29b8588a.mdx",
+    "web/content/research/EX-20260820-afterstate-pilot-h40-k64-d7a9faf5.mdx",
+    "web/content/research/EX-20260820-afterstate-pilot-h40-k256-65a05477.mdx",
+    "web/content/research/EX-20260820-d4-toptwo-override-gate-0bdb39a1.mdx"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "node web/scripts/check-mdx.mjs web/content/research passes"
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-21T08:36:23Z"
+}

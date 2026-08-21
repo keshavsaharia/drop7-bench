@@ -5,7 +5,7 @@ import matter from "gray-matter";
 import { Mdx } from "@/components/Mdx";
 import { Markdown } from "@/components/Markdown";
 import { Badge } from "@/components/Badge";
-import { approachDocPath, listApproaches, listFamilies } from "@/lib/repo";
+import { approachDocPath, approachOperationalNotes, listApproaches, listFamilies } from "@/lib/repo";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +20,7 @@ export default async function ApproachPage({
   if (!entry) notFound();
 
   const docPath = approachDocPath(family, approach);
+  const operationalNotes = approachOperationalNotes(family, approach);
   if (!docPath) {
     return (
       <div className="space-y-4">
@@ -74,12 +75,33 @@ export default async function ApproachPage({
             <Badge label={frontmatter.status} className="bg-sky-900/60 text-sky-200" />
           )}
           {typeof frontmatter.evidence === "string" && (
-            <Badge label={frontmatter.evidence} />
+            <Badge label={`evidence: ${frontmatter.evidence}`} />
+          )}
+          {typeof frontmatter.reads === "string" && (
+            <Badge
+              label={frontmatter.reads === "public" ? "public information" : String(frontmatter.reads)}
+              className={frontmatter.reads === "public" ? "bg-emerald-900/60 text-emerald-200" : "bg-orange-900/60 text-orange-200"}
+            />
+          )}
+          {frontmatter.draft === true && (
+            <Badge label="draft — generated from records, not yet reviewed" className="bg-zinc-800 text-zinc-400" />
           )}
         </div>
+        {typeof frontmatter.summary === "string" && (
+          <p className="mt-2 max-w-3xl text-zinc-400">{frontmatter.summary}</p>
+        )}
       </div>
 
       {isMdx ? <Mdx source={parsed!.content} /> : <Markdown source={raw} />}
+
+      {operationalNotes && (
+        <section className="rounded-xl border border-zinc-800 bg-zinc-950/40 p-4 text-sm text-zinc-400">
+          This approach also keeps operational notes — build commands, gate
+          commands, and seed leases — in{" "}
+          <code className="text-xs">{operationalNotes}</code>, alongside the page
+          above.
+        </section>
+      )}
 
       <section className="rounded-xl border border-zinc-800 p-4">
         <h2 className="text-sm font-semibold text-zinc-200">Source files</h2>

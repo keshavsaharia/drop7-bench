@@ -1,26 +1,132 @@
 ---
-title: Afterstate Net
+title: A network that predicts how long you will live
 family: lifetime-objective
-status: Unknown
-evidence: unknown
-generated: true
+summary: A planned neural evaluator that looks at a board and estimates how many more row rises the game will survive, so that a search can rank moves by survival rather than by immediate points.
+status: proposal
+evidence: none
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
+Instead of teaching a network to predict a score, teach it to predict how much
+longer the game lasts — and then let the search prefer the move whose resulting
+board survives longest.
+
+<EvidenceLabel status="proposal" evidence="none" reads="public" />
+
+<Callout title="There is no retained result for this approach" tone="warn">
+The training pipeline is written and its data reader is validated against a real
+generated corpus, but **it has never been trained and never been evaluated.**
+There is no result record, no finding document, and no measurement of any kind.
+The only retained statement about its status is a line in its own contribution
+record: "the training pipeline is written and layout-validated but has not yet
+been trained or evaluated." A later reconciliation memo records the same thing
+and adds that under this repository's definition of done, the honest closure may
+be a recorded no-run status rather than a run. Everything below describes what
+the code does, from the code.
 </Callout>
 
-This approach is not yet listed in the experiment index. Read the
-source files below and the family page for context, and expand this
-page when the approach is understood.
-## Sources
+## The intuition
 
-- `dataset.py`
-- `train.py`
+The [score decomposition](/approaches/lifetime-objective/score-decomposition)
+measured that 94% of a Hardcore score is the flat bonus for surviving a row
+rise, and that a game's score tracks its length with a correlation of 0.9995.
+Predicting score is therefore predicting survival, but through a bad lens: score
+comes in 17,000-point steps, has a long right tail, and gives you exactly one
+number per finished game.
 
-## More evidence
+Survival is the same quantity with none of those problems. Every move of every
+finished game already knows how many moves and how many rises came after it. So
+the same data yields one clean, bounded label per *move* instead of one noisy
+label per game.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/lifetime-objective)
+## What the model would predict
+
+Four outputs, from the board alone:
+
+1. **A hazard head** — the probability that the game survives one more rise, two
+   more, and so on up to twelve. This is a calibrated, bounded, per-move quantity
+   with an exact label from any completed game, and it is the thing a policy
+   actually wants to know.
+2. **A lifetime head** — a scalar summary of the moves remaining.
+3. **Two flow heads** — how many numbered discs this move clears, and how many
+   gray discs it reveals. These are the two rates whose steady-state
+   requirements (2.400 clears and 1.400 reveals per move) explain *why* a
+   position dies, and they give the network a dense mechanistic signal rather
+   than a single distant outcome.
+
+## The one design decision worth understanding
+
+**The network never sees which column was played.** It scores a board, not a
+move. At deployment, the plan is to hand it each legal successor board in turn
+and let the existing chance-averaging search compare them.
+
+That is a direct answer to the failure mode this repository documents more than
+any other: every learned ranker that conditioned on the identity of the action
+went on to fail at ranking the actions it had *not* seen played. A state-only
+evaluator cannot use action identity as a shortcut, because it never receives
+one. The [sibling trap](/learn/concepts/ranking-siblings) concept page explains
+why that failure is so persistent.
+
+The model is also normalised per group rather than per batch, so that it behaves
+identically when it is later called on the seven legal successors of a single
+position instead of on a large training batch — and, separately, because the GPU
+software stack on this machine cannot compile the batch-normalisation training
+kernel at all (see the [GPU package](/approaches/lifetime-objective/gpu)).
+
+## The gap that has to be closed before this is worth running
+
+The corpus this trainer reads contains **one row per move actually played**, not
+one row per legal option at each position. The corpus generator was built with an
+all-siblings mode, but it is switched off by default and every training file was
+generated with it off. Diversity across unplayed columns comes instead from
+mixing behaviours — four search depths with occasional random legal deviations —
+so an unplayed column shows up in the data as some *other* game's played column
+rather than as a sibling of the same position.
+
+That is precisely the coverage condition the repository's benchmark contract
+calls out: value error on played actions is not a substitute for ranking
+siblings. A parallel approach in another family did guarantee that coverage
+structurally, evaluated every legal sibling, and produced a recorded negative;
+this one has not been evaluated against that standard at all.
+
+<TechnicalDetails title="What is recorded, and what is not">
+
+**No result record, no experiment record, no finding.** The approach appears in
+one retained artifact list, the contribution record
+`CT-20260820T100249Z-b1ea4b1a`, whose limitations section states that the
+training pipeline "is written and layout-validated but has not yet been trained
+or evaluated". Its recorded validation is the dataset reader check: the record
+layout matches the C++ packed struct at 72 bytes, the chosen column is always
+legal, the moves-to-death label strictly decrements within a game, one-hot
+planes sum to one, and splits by origin game are disjoint.
+
+[`reconciliation-01`](/docs/exploratory/reconciliation-01) reviews this approach
+side by side with the successor-closed alternative and records, in its own
+words, "Recorded outcome. None. There is no result record, no finding document,
+and no numbered finding in `docs/exploratory/` for `afterstate-net`." It labels
+the approach at most **task-record only** and explicitly declines to assign it an
+outcome. It also lists the missing result as an open gap: the approach has a
+contribution record but no result, which under `AGENTS.md`'s definition of done
+is unfinished.
+
+The corpus files that would feed it are recorded as having the all-sibling panel
+disabled — panel stride 0, 0 panel records — in every summary of the four files
+that make up the training data, and the dataset reader contains no panel reader.
+
+The two design premises the code cites are themselves retained:
+[`finding-01-score-is-survival`](/docs/exploratory/finding-01-score-is-survival)
+for the 94% row-rise share and the 0.9995 correlation over 64 games at
+`development` tier, and the same document for the 2.400 and 1.400 per-move
+requirements.
+
+</TechnicalDetails>
+
+## What is still open
+
+The cheap and obvious experiment, recorded in the reconciliation memo and not
+run there, is to turn the generator's all-siblings mode on and grade this
+survival-hazard target through the sibling-ranking gate that already exists
+elsewhere in the repository. That would separate two explanations that no
+experiment here currently distinguishes: **was the target wrong, or was the
+coverage wrong?** Until something like that is run, this page describes an
+intention, not a finding.

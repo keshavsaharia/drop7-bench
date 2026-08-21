@@ -1,0 +1,276 @@
+---
+title: Testing the benchmark instead of the policy
+family: lifetime-objective
+summary: Grade nine policies on a fixed set of 128 saved positions instead of on whole games, then check whether that ranking agrees with how they actually score over complete games — and retire the benchmark when it does not.
+status: rejected
+evidence: development-tier exploratory finding
+reads: diagnostic
+---
+
+Grade nine policies on a fixed set of 128 saved positions instead of on whole
+games, then check whether that ranking agrees with how those policies actually
+score over complete games. It does not, and this approach says so with a number.
+
+<EvidenceLabel status="rejected" evidence="development-tier exploratory finding" reads="diagnostic" />
+
+<Callout title="What is being rejected here is an instrument, not a policy" tone="info">
+Everything on this page is about a **measuring tool**. No candidate policy was
+proposed, gated or retired by this work; what was retired is the claim that a
+128-position benchmark can rank policies by strength. A benchmark that is
+confidently wrong is worse than no benchmark, which is why the check existed.
+</Callout>
+
+## Why anyone wanted this
+
+Whole games are expensive and noisy. Scores in this game are heavy-tailed, so
+telling two policies apart takes dozens of complete games, and each game of the
+reference search costs seconds of compute. A **saved-position benchmark** is the
+obvious economy: freeze 128 interesting positions, let every policy play a short
+window from each, average the results, and compare. Cheap, repeatable, and the
+same positions every time.
+
+The repository built exactly that, and the design document that built it ended
+with a gate on itself: *until the benchmark is shown to predict whole-game
+strength, it is a diagnostic and cannot be cited as evidence of policy strength.*
+That check had never been run. This approach runs it.
+
+## The intuition: what a nine-move window can and cannot vary
+
+Consider what a policy is actually being scored on in a nine-move window. In
+this game mode almost the entire score is a flat **17,000 points every fifth
+drop**, when the board rises. Nine moves contains **one or two** of those rises —
+and which of the two it contains is decided by the rise clock the position
+started with, not by anything the policy does. Unless a policy dies inside the
+window, every policy collects exactly the same rise bonuses.
+
+So the measurement decomposes like this, over the six real search policies:
+
+- the rise bonus is **92%** of the scenario score, and across all six policies it
+  spans **492 points**;
+- chain reactions are the rest, and span 243 points;
+- board clears — the 70,000-point bonus — contributed **zero**, because in 7,004
+  scenario plays the board was never emptied.
+
+Meanwhile those same six policies differ by **148,857 points** over complete
+games. The benchmark's whole dynamic range is 1.9% of its own mean. **There is
+no room in the metric for the thing it is supposed to measure**, and that is an
+arithmetic fact rather than a noise problem.
+
+## How the check works
+
+1. **Build a fair way to score a position.** Hold the board, the hidden numbers
+   underneath it and the rise clock fixed — that is the *position*. Hold the
+   visible next disc fixed too, because a player can see it and it is part of the
+   problem the position poses. Then redraw everything else — every future disc,
+   every hidden value of every future risen row — several times, give every policy
+   the same redraws, and score a policy by its average.
+2. **Prove it is fair, mechanically.** If a policy leaked any of the redrawn
+   future, its first move would change on at least one redraw. Across 8 policies
+   × 24 positions × 4 redraws — **768 decisions — none ever did**.
+3. **Fix the honest half/half split before measuring anything.** The 128
+   positions are split into a development half and a sealed half by a rule that
+   is a pure function of the positions' own content hashes, recorded in a
+   manifest with its own hash, so it cannot be quietly reshuffled after a result.
+4. **Write the pass threshold down first.** The check passes if the benchmark's
+   ranking of nine policies agrees with their whole-game ranking at a rank
+   correlation of 0.70 or better.
+5. **Then run it**, and read the verdict off the metric that was named in
+   advance.
+
+## What happened
+
+**The check failed as preregistered.** Rank correlation with whole-game strength
+is **+0.633** across nine policies against a threshold of 0.70 — and across the
+six real search policies, the ones whose ranking actually matters and which all
+share a single game cohort, it is **−0.257**. The benchmark ranks them slightly
+*backwards*. No secondary metric rescues it: every alternative measure gives a
+correlation between −0.64 and −0.03 on those six.
+
+**It is a family detector, not a strength meter.** Every searching policy beats
+every non-searching one by a wide margin, and the three weak baselines come out
+in the right order. Inside the block of real search policies, four of the six
+comparisons have the wrong sign, and the largest whole-game gap in the whole
+set — one policy beating another by **+133,204 points**, a 50% improvement —
+registers on the benchmark as **minus four points**.
+
+**Its precision makes it more dangerous, not less.** The spread it reports
+between policies is 624 times its own re-measurement noise. An instrument that
+resolves a quantity that precisely, when that quantity has a *negative*
+correlation with the target, produces confident, reproducible, wrong rankings —
+and reproduces them on demand.
+
+**Being cheaper does not help.** 128 positions at five redraws each matches the
+resolving power of a 64-game paired cohort for about 73% of the compute. A 1.4×
+saving on a measurement that does not predict the target is not a saving.
+
+**The split earned its keep on its first use.** Applied to the two halves
+separately, the development half gives a correlation of +0.03 across the six
+search policies and the sealed half −0.37. A candidate tuned on one half would
+have lost its margin on the other — exactly the channel the split exists to
+close, observed immediately.
+
+**The failure is repairable, and the repair is not worth building.** The
+mechanism predicts its own fix: lengthen the window until the number of rises
+*can* vary. Re-scoring the same positions with the same redraws at a 25-move
+window moves the correlation across the search policies from **−0.600 to +0.800**,
+and on all 128 positions it reaches +1.000 — consistently on both halves of the
+split and both origins of the positions, where the nine-move version disagreed
+with itself across all four slices. But a 25-move window is a large fraction of a
+whole game: a valid benchmark of this kind plays **1.5 to 2.8 times more
+decisions** than the 64-game cohort it would replace, and its cost advantage over
+whole games ranges from 50× better on one pair of policies to 5,000× worse on
+another, with nothing observable in advance to say which case you are in. **The
+window that makes it valid is the window that makes it expensive.** The
+recommendation is to keep the machinery for the jobs whole games cannot do at
+all — a well-posed clairvoyant optimum, controlled board occupancies, a hidden
+board a teacher can inspect — and retire the ranking claim.
+
+## The by-product, which may matter more than the check
+
+With the benchmark's ranking role settled, the same machinery was pointed at a
+different question: **what property of a board actually predicts how many discs
+it is possible to clear from it?** A privileged solver labelled 1,024 positions
+with the exact clear optimum, averaged over independent guesses of the hidden
+board *and* the future, so the label is a function of the public position and is
+therefore the kind of thing a board-scoring function could learn.
+
+The answer was not the expected one.
+
+<div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 12, margin: "1rem 0" }}>
+  <Stat label="best any board property can do" value="0.753" hint="held-out R², linear model over 53 candidate properties" />
+  <Stat label="the reference leaf's own 19 features, refitted" value="0.734" hint="98% of that ceiling" />
+  <Stat label="the reference leaf as it actually is" value="0.396" hint="the number the search actually sees" />
+  <Stat label="alignment of the two directions" value="+0.141" hint="cosine between the frozen weights and the fitted ones — nearly orthogonal" />
+</div>
+
+**The hand-written board scorer is not missing features; it is pointing the
+wrong way.** Reweighting its existing nineteen terms recovers 95% of all the
+signal any of the 53 candidate properties can supply. Adding new properties on
+top of a reweighted version buys +0.036. And the specifics are cheap to act on:
+one term is computed at every node and multiplied by **exactly zero** despite
+having a univariate correlation of +0.401 with clear availability; the term with
+the *strongest* correlation of all nineteen (+0.627) carries 0.2% of the
+scorer's direction; and two thirds of the direction is spent on a single term
+that the fit wants at essentially zero. The only genuinely absent properties that
+add anything are all one family — **how many gray discs a clearing wave can
+actually reach** — which is the same missing quantity the
+[flow ceiling](/approaches/lifetime-objective/flow-ceiling) work arrived at from
+a completely different direction.
+
+This is the origin of the [leaf reweight](/approaches/lifetime-objective/leaf-reweight)
+approach. It is worth being precise about what it is and is not: a label that
+says what is *available*, not what a legal policy can take, and a demonstration
+of what predicts a diagnostic — **not** evidence that any mean score would rise.
+
+<TechnicalDetails title="The record: the check, the split, the repair and the caveats">
+
+Source: [`finding-10-suite-validation`](/docs/exploratory/finding-10-suite-validation),
+a retained exploratory finding at the repository's `development` / `pilot`
+evidence tier, measured in this checkout on 2026-08-20, with a preregistration in
+`PREREGISTRATION.md` written and amended before any verdict-bearing row was
+inspected. No row in the [experiment index](/docs/research/experiment-index) and
+no entry in the [ledger](/docs/research/history).
+
+**Check 1 as preregistered:** all 128 positions, nine-move window, four redraws
+per position, primary metric mean points. The run was stopped by its own
+90-minute budget with **95 of 128 positions complete**; positions are processed
+in content-hash order so the completed set is an unbiased subsample (48 harvested
+/ 47 synthetic, 45 development / 50 sealed). Spearman with whole-game means:
+**+0.6333 over all nine policies (p = 0.038, threshold 0.70) and −0.2571 over the
+six fair arms (p = 0.717)**. Secondary metrics give six-policy correlations of
+−0.64 to −0.03.
+
+**What it does resolve:** every fair arm over the weakest baseline at t = 8.4–8.7,
+over the lowest-column baseline at t = 3.6–4.9, and the three weak baselines in
+the correct order. Inside the fair block every paired t is |t| ≤ 2.61 and four of
+six signs are wrong.
+
+**Score decomposition of the benchmark metric:** rise bonus 91.76%–92.48% of the
+score, spanning 28,005–28,497 points across the six fair arms (a range of 492);
+chain waves spanning 243; **zero board clears in 7,004 scenario plays**.
+
+**Discriminating power:** between-policy variance over within-policy
+re-evaluation variance is **624** on points, 824 on clears per move, 382 on the
+occupancy measure; re-evaluation noise is 4.0% of the reported spread. Matching a
+64-game paired cohort's resolving power on one pair needs 588 evaluation cells,
+i.e. 128 positions × 5 redraws, for 73% of the logical work.
+
+**Check 2:** a content-hashed 64/64 development/sealed split, both halves
+comparable on every recorded axis, the sealed half slightly easier by clairvoyant
+optimum (50,321 against 55,897). At the nine-move window the two halves give
+six-policy correlations of +0.029 and −0.371.
+
+**The horizon repair (post hoc):** the same 95 positions and the same redraw
+streams at a 25-move window move the four-policy correlation from **−0.600 to
++0.800** and the seven-policy correlation from +0.714 to +0.964; on all 128
+positions both reach **+1.000**, identically on the development half, the sealed
+half and both position origins. Three cautions the finding states: the two
+four-move-deep policies were omitted because they cost an estimated 3.7 hours
+against 11 minutes for the rest, and they are the hard case since whole-game
+means are *not* monotone in depth; individual pairs are still mostly unresolved
+(t values of +0.02 to +2.13); and none of this was predicted in advance at this
+horizon, only the direction of the effect was.
+
+**Addendum A** (authorised after the check failed, on the ground that the probe
+draws its own positions and never touches the benchmark): 1,024 positions,
+eight-move exact clear optimum averaged over four independent completions of both
+the hidden board and the future, whole-position three-way split by content hash
+(628 train / 193 validation / 203 held-out), coefficients fitted on train only
+and the selected block chosen on validation. Held-out R²: occupancy alone 0.187;
+the frozen scalar leaf value 0.396; the leaf's 19 features freely reweighted
+0.734; all 53 candidate properties 0.753; leaf 19 plus the eight selected
+properties 0.770. Cosine between the frozen weight direction and the fitted one:
+**+0.141** on clear availability and +0.007 on the achievable-minus-achieved gap.
+Named terms: `roughness` at weight exactly 0.0 with univariate ρ +0.401;
+`solid_exposure` at 0.2% of the frozen direction with ρ +0.627, the strongest of
+the nineteen; `cracked_exposure` at 0.5% with ρ +0.453; `covered_height_risk` at
+**67.7%** of the frozen direction where the fit wants +0.005.
+
+**Addendum B**, on whether to build a repaired version: cost ratio against 64
+paired whole games has a **median of 1.50 and a range of 0.02 to 5,103** across
+six policy pairs; benchmark-to-whole-game signal transfer varies by **283×**; a
+valid configuration plays **1.5–2.8×** more decisions than the cohort it would
+replace, and costs an estimated **66 core-hours** against 54% of that for a fresh
+64-game paired cohort measuring the target directly. Verdict: do not build it;
+keep the scenario machinery for the four jobs whole games cannot do at all.
+
+**Limitations the finding states about itself:** 95 of 128 positions on the
+primary run; four redraws rather than the sixteen originally preregistered,
+reduced on measured cost before any result row was read; nine policies is a small
+sample for a rank correlation, and the nine-policy comparison mixes two different
+game cohorts, so the six-policy figure is the clean statement and it is the worse
+of the two; one policy's whole-game mean was supplied by the coordinator and
+appears nowhere in `docs/` or `research/`; the horizon repair is post hoc, omits
+the two deepest policies and rests on four policies; the scenario randomness model
+is not the base engine's, so absolute scenario scores are not comparable with any
+ledger figure; Addendum A's target is a clairvoyant label and a linear analysis,
+so it bounds what a *linear* board scorer could extract and is not evidence that
+any score would rise; and the added cover-geometry block earns most of its keep
+**off** the positions a fair policy actually visits (+0.054 on synthetic
+positions against +0.005 on fair-play ones), which is the one result in that
+addendum arguing against its own conclusion.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **Validate an instrument before citing it.** The design document's own gate had
+  never been run, and the numbers already computed on the benchmark turned out to
+  be uninformative about strength — for a stronger reason than "one sample is
+  noisy": the metric does not track the target at that horizon at all.
+- **Horizon is a first-class parameter of a position benchmark**, and this one
+  inherited nine moves from an exact solver's practical limit — a constraint that
+  did not apply to the fair evaluation at all. That single inherited choice is
+  what broke the check.
+- **Harvest positions from the policy family you intend to rank.** The half of
+  the benchmark harvested from a weak policy's games predicts worst.
+- **For cheap screening, use paired whole games and read the flow rates first.**
+  A score's independent unit is the whole game, so 64 of them carry a standard
+  error near 32,000 points; a clear rate is pooled over every move of every game.
+  The finding is explicit that this is a recommendation with a mechanism and not
+  a measured result, and that it costs nothing to test because it only re-analyses
+  records that already exist.
+- **Still open:** whether reweighting the reference board scorer actually raises a
+  mean score. Addendum A says what predicts a diagnostic label; the distance
+  between that and a stronger policy is exactly what the
+  [leaf reweight](/approaches/lifetime-objective/leaf-reweight) experiment is for.

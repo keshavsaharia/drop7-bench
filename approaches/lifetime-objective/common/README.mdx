@@ -1,25 +1,82 @@
 ---
-title: Common
+title: The shared game harness
 family: lifetime-objective
-status: Unknown
-evidence: unknown
-generated: true
+summary: One instrumented game loop and one results writer, shared by every experiment in this family so their numbers are directly comparable and every game's score is checked against the rules.
+status: support-only
+evidence: repository-verified
+reads: diagnostic
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+A single header that plays whole games, counts the same things every time, and
+writes the same file format — so that two experiments in this family can be
+compared without anyone having to ask whether they measured the same way.
 
-This approach is not yet listed in the experiment index. Read the
-source files below and the family page for context, and expand this
-page when the approach is understood.
-## Sources
+<EvidenceLabel status="support-only" evidence="repository-verified" reads="diagnostic" />
 
-- `harness.hpp`
+It contains **no strategy at all.** A policy is handed in from outside, one per
+worker thread; the harness only runs it and watches.
 
-## More evidence
+## What it provides
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/lifetime-objective)
+1. **One game loop.** Plays a game from a seed to its end or to a declared move
+   cap, recording per-move information as it goes.
+2. **One cohort runner.** Plays an ordered list of seeds across threads, so a
+   candidate and its comparator see exactly the same games.
+3. **One results writer.** Emits the same fields for every experiment: score,
+   moves, whether the game hit the cap, row rises survived, board clears, the
+   three point sources, numbered discs cleared, gray discs revealed, deepest
+   chain, a histogram of chain depths, mean board occupancy, and the mean height
+   of the stack at each rise.
+4. **The same statistics.** Quantiles, and a one-sided lower confidence bound on
+   the mean computed by resampling **whole games** — the repository's required
+   statistical unit — with a fixed number of resamples and a fixed seed, so the
+   bound is reproducible.
+
+## The one thing it refuses to let through
+
+Every game's score must satisfy the game's own arithmetic exactly:
+
+> score = 17,000 × row rises + 70,000 × board clears + the points paid for every
+> chain wave
+
+The harness asserts this on **every** game. A run whose scores do not decompose
+is a run whose engine or instrumentation is wrong, and it stops rather than
+reporting a number. That check is not decorative: several results in this family
+are quoted with "0 score-identity violations" as part of their validity
+statement, and a 32-game cohort in the
+[rollout veto](/approaches/lifetime-objective/rollout-veto-17k) work reports 0
+runner failures, 0 illegal moves and 0 identity violations directly from it.
+
+It also flags games stopped at the move cap as **censored**, so that a capped
+game's score is never quietly treated as a finished one.
+
+## Why one shared harness matters here
+
+The results in this family are mostly small differences between similar
+policies, decided on paired whole games. That comparison only means anything if
+both arms were run by the same loop, with the same cap, counting clears and
+reveals the same way, and reporting the same bound. Reimplementing the runner
+per experiment is the cheapest way to produce two numbers that look comparable
+and are not.
+
+<TechnicalDetails title="Where it is used, and what is recorded">
+
+Source: `approaches/lifetime-objective/common/harness.hpp`. It has no experiment
+of its own, no row in the [experiment index](/docs/research/experiment-index) and
+no entry in the [ledger](/docs/research/history) — it is support code, and there
+is **no retained result** to report for it.
+
+It is named as a retained artifact in the contribution record
+`CT-20260820T100249Z-b1ea4b1a`, whose recorded validation includes the score
+decomposition identity holding for **64 of 64** reference-policy games and
+**192 of 192** weak-control games in the
+[score decomposition](/approaches/lifetime-objective/score-decomposition) run.
+
+Experiments in this family that adopt it report the identity check and the
+censoring flag as part of their own run-validity statements — for example the
+[rollout veto](/approaches/lifetime-objective/rollout-veto-17k) cohort, which
+records the harness's game loop and artifact writer as a deliberate substitute
+for the historical program's bespoke one, specifically so its output would carry
+the same fields and the same per-game assertion as every other arm.
+
+</TechnicalDetails>

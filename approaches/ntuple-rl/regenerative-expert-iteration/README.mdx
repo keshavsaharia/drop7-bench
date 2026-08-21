@@ -1,28 +1,132 @@
 ---
-title: Regenerative Expert Iteration
+title: Expert iteration from the depth-4 search
 family: ntuple-rl
-status: Rejected
+summary: Start from the strongest known search, learn from its games, play with what you learned, and repeat — eight rounds later the learned policy was still less than half as good as the search it started from.
+status: rejected
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Start from the strongest known search, learn from its games, play with what you
+learned, and repeat.
 
-## Regenerative expert iteration
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
 
-Reanalyses D4-initialized roll-ins with lifetime, regeneration, and flow heads over eight fixed rounds.
+## The intuition
 
-**Status: Rejected** (ledger-recorded). all rounds remained far below the D4 bootstrap and exported no deployable checkpoint.
+This is the loop behind the famous game-playing systems: a search generates good
+moves, a network learns to predict them, the network makes the next round's
+search better, and the cycle repeats. It is called **expert iteration**, and
+each turn of the loop is supposed to lift both parts.
 
-## Sources
+Here the expert is the repository's
+[fair depth-4 search](/approaches/fair-expectimax/reference) and the student is
+a recurrent evaluator of public positions. Two design choices distinguish it
+from the rest of the family.
 
-- `regenerative-expert-iteration.cpp`
+First, it learns *several* things at once rather than a single value: how long
+the game will last, how well the board regenerates across row rises, and how
+much flow — clears and reveals per move — it sustains. The repository's own
+diagnostics had repeatedly pointed at flow rather than points as the quantity
+that separates long games from short ones, so the student was asked to predict
+it directly.
 
-## More evidence
+Second, each round both plays fresh games and re-examines positions from earlier
+rounds with the current, better model. That "reanalysis" is what keeps the older
+data useful instead of stale.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/ntuple-rl)
+## How it works, step by step
+
+1. **Roll in.** Play games starting from the depth-4 search's behaviour, storing
+   the public positions visited.
+2. **Label.** Compute lifetime, regeneration, and flow targets for those
+   positions.
+3. **Fit and calibrate.** Train the three heads, and check on held-out halves
+   that each head's predictions are actually calibrated, not merely correlated.
+4. **Reanalyse.** Recompute targets for a block of older positions with the
+   current model.
+5. **Repeat, eight times.** No checkpoint may be selected on results and no
+   intermediate gameplay evaluation is permitted, so the run cannot quietly
+   pick its luckiest round.
+
+## What happened, in plain English
+
+The learned policy never came close to the search it was learning from, and it
+did not improve monotonically either.
+
+The depth-4 bootstrap averaged 308,296 points and 90.0 moves over its 64 games.
+The learned policy's own games averaged 110,294 points and 36.4 moves in round
+one, peaked at 138,229 and 44.1 in round two, and finished round eight at
+116,598 and 38.0 — worse than its own peak, six rounds earlier.
+
+The prediction heads tell the same story from the other side. The regeneration
+head calibrated on both held-out halves in every later round; the lifetime head
+was unstable and failed again in the final round; the flow head never calibrated
+at all. Agreement with the expert's top choice ended at about 36%, and agreement
+on which move scored best at about 9%.
+
+The run exported zero policy checkpoints and exited with an explicit
+"not qualified for deployment" status. No gameplay gate, protected cohort, or
+final seed was opened.
+
+<TechnicalDetails title="The technical record">
+
+Status in [the experiment index](/docs/research/experiment-index): **rejected,
+ledger-recorded** — "all rounds remained far below the D4 bootstrap and exported
+no deployable checkpoint."
+
+From [the ledger](/docs/research/history):
+
+| Arm | Mean score | Mean moves |
+| --- | ---: | ---: |
+| Fixed corrected depth-4 bootstrap (64 games) | 308,295.578 | 90.031 |
+| Learned roll-ins, round 1 | 110,294 | 36.386 |
+| Learned roll-ins, round 2 (peak) | 138,229 | 44.134 |
+| Learned roll-ins, round 8 | 116,598 | 38.046 |
+
+Final policy-top-1 agreement 0.362 / 0.353 across the two halves; score-top-1
+agreement 0.093 / 0.095. The sole production run consumed 160,000 new roots and
+reanalysed 40,000 older roots in the sealed lane `0x3da41000...0x3da7ffff`. It
+exited 2 with `deploymentQualified=false`. Source frozen at a recorded SHA-256
+before the run; result, replay, and resume-ledger artifacts are hashed in the
+ledger.
+
+The round-by-round means are recorded without a games count, so they are not
+paired cohort results in the sense the
+[benchmark contract](/docs/benchmarks) requires; they are training-roll-in
+averages.
+
+**About the comparator.** The 308,295.578 / 90.031 figure that
+[status](/docs/research/status) uses as the repository's headline depth-4
+reference originates *here*, as this experiment's internal bootstrap comparator.
+`docs/exploratory/audit-03-claim-arithmetic.md` records as finding H2 that its
+64 seeds, dispersion, censoring, and flow statistics were never retained.
+
+Source: `regenerative-expert-iteration.cpp`.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+**This experiment names the family's central failure precisely.** The ledger's
+own diagnosis: targets were observed for the action that was played, while
+deployment maximised predictions over unplayed siblings — so even regenerating
+fresh on-policy games every round did not remove the extrapolation error. If you
+read one sentence from this family, read that one. It is the
+[sibling trap](/learn/concepts/ranking-siblings) stated by the experiment that
+tried hardest to escape it.
+
+**Fresh data does not fix a missing dimension in the data.** Expert iteration's
+whole promise is that on-policy regeneration keeps the training distribution
+aligned with the deployment distribution. It does — over *positions*. It does
+nothing about the fact that each position carries a label for one column out of
+seven.
+
+**A negative result about flow prediction, too.** The head that was supposed to
+capture the quantity the repository considers most diagnostic never calibrated.
+That is worth knowing before anyone builds another model around a flow target.
+
+**Still open.** The obvious repair is data in which every legal column at each
+position is labelled under shared imagined futures. That is what the
+[scale-out direction](/learn/concepts/scale-out-direction) proposes, and it has
+not been attempted at scale in this repository.

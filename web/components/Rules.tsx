@@ -132,7 +132,7 @@ export function RulesScenario({
     return (
       <div className="engine-fig" style={{ color: INK_3, fontSize: 13 }}>
         Scenario <code>{id}</code> is not available in this checkout. Run{" "}
-        <code>npm run rules:scenarios</code> inside <code>web/</code> to regenerate
+        <code>npm run figures:rules</code> inside <code>web/</code> to regenerate
         <code> content/learn/rules-scenarios.json</code>.
       </div>
     );

@@ -1,21 +1,183 @@
 ---
 title: Lifetime objective
-summary: Optimize how long the game survives and how much flow it sustains, not just the next clear.
+summary: Judge a move by how much longer the game will still last, rather than by how many points it scores right now.
 ---
 
-Score is a lagging indicator: the games that score a million points are first
-the games that **refuse to die**. This family optimizes lifetime directly —
-survival milestones, clear/reveal flow ceilings, risk calibration, and
-score decomposition — on the theory that a policy which sustains the
-approximately 2.4-clears and 1.4-reveals-per-move regime will collect chain
-opportunities as they come.
+Judge a move by how much longer the game will still last, rather than by how
+many points it scores right now.
 
-## What the evidence showed
+That sounds like a slogan until you count the points. When this repository
+instrumented 64 games of its strongest policy and attributed every single point
+to its source, **94.3% of the score was the flat 17,000-point bonus for
+surviving another row rise**, 5.7% was chain reactions, and 0.0% was the
+70,000-point bonus for emptying the board — which never happened once. Final
+score and moves survived correlated at **r = 0.9995**
+([`finding-01`](/docs/exploratory/finding-01-score-is-survival), a development-tier
+exploratory finding; the same run is written up on the
+[score decomposition page](/approaches/lifetime-objective/score-decomposition)).
 
-- Flow is a real constraint: policies that crack covers without sustaining
-  reveals clog the board and die early, however good their tactics look.
-- The family's preregistered 17k-scoring rollout-veto line is documented from
-  its preregistration onward — see the approach pages for the current record.
-- As with constructive reservoirs, lifetime signals look most promising as
-  **bounded corrections** to a strong tactical fallback rather than as
-  whole-game controllers.
+So a Drop7 Hardcore score is survival time wearing a different unit, and the
+million-point target is really a survival target. Points arrive at a measured
+3,423 per move, and the same finding puts the lifetime a one-million-point
+average needs at about **294 moves**. The reference policy's games last **94**.
+
+## The picture: twelve discs arrive every five moves
+
+Here is why the game ends. Both boards below are the repository's own rules
+engine, playing a real game; nothing is drawn by hand.
+
+<BoardCompare
+  before="0000000000000000000000000000067200068699888888888"
+  after="0000000000000000000006672000686998888888888888888"
+  beforeLabel="17 cells occupied"
+  afterLabel="25 cells occupied"
+  highlightAfter={[21, 42, 43, 44, 45, 46, 47, 48]}
+  caption="One move, the fifth of its cycle. The player adds one disc; then the whole board shifts up and a new row of seven gray discs appears underneath. Eight of the 49 cells are new and none of them left. This move scored exactly 17,000 points and cleared nothing."
+/>
+
+Every five moves, five placed discs plus seven risen gray discs — **twelve
+discs** — enter a board that only has 49 cells. Nothing else adds material, and
+the only way material leaves is a numbered disc clearing. The arithmetic is
+therefore exact and unforgiving: a policy survives indefinitely only if it
+sustains
+
+- **2.400 numbered clears per move** (12 ÷ 5), and
+- **1.400 gray discs revealed per move** (7 ÷ 5).
+
+The reference policy sustains **1.973 and 1.090** — a structural deficit of
+about 18% and 22%. Its board fills up, and then it dies. That deficit, not a
+shortage of spectacular chain reactions, is what ends its games
+([`finding-01`](/docs/exploratory/finding-01-score-is-survival)).
+
+## What every approach in this family does
+
+1. **Take a policy** — the reference [depth-4 search](/learn/concepts/chance-vs-choice),
+   a hand-written rule, a planner, or a candidate with something learned bolted
+   into it.
+2. **Play whole games with it**, paired against a comparator on the same random
+   seeds, so the two policies face identical luck.
+3. **Report three numbers besides the score**: numbered clears per move, gray
+   discs revealed per move, and the **occupancy slope** — how many of the 49
+   cells the board gains per five-move cycle. The slope is just the
+   conservation law integrated: a board drifts by `12 − 5 × clears-per-move`
+   cells per cycle, so a positive slope is a policy that is losing, however
+   good its tactics look on any single move.
+4. **Ask whether the mechanism moved, not just the mean.** A score gain with no
+   movement in the flow rates is treated here as unexplained rather than real.
+
+That last rule is what makes this family a family. Score in this game is heavy
+tailed — one lucky game can swamp 63 ordinary ones — while a flow rate is
+averaged over every move of every game and is far better determined. Several
+of the results below were decided on the flow rates when the score deltas could
+not be separated from zero.
+
+## What happened, in plain English
+
+Three things, and none of them is the one the family was hoping for.
+
+**The target is physically reachable.** A planner that is allowed to cheat — it
+reads the hidden numbers under the gray discs and plans exactly against a fixed
+future — holds the required clear rate for 6,000 consecutive moves and never
+dies. That settles a real question: Drop7 Hardcore is a control problem with a
+solution, not an arithmetic impossibility. It is also, emphatically, not a
+policy; see the [flow ceiling](/approaches/lifetime-objective/flow-ceiling)
+page, where the cheating is labelled on every number.
+
+**No legal policy tried here got near it.** A planner with the same objective
+and the same look-ahead but *no* access to the hidden numbers closes only a
+small part of the gap, and the part it cannot close grows exactly as the board
+fills up and there is more hidden information to be ignorant of. Every one of
+those games ended.
+
+**Small, bounded corrections to the reference search worked better than
+replacing it.** The two positive results in this family are both of that
+shape — a better handling of the game's randomness
+([reveal sampling](/approaches/lifetime-objective/reveal-sampling)) and a
+learned survival estimate mixed into the reference search's board-scoring
+function at half weight ([learned leaf](/approaches/lifetime-objective/learned-leaf)).
+Both are worth tens of thousands of points on 64 paired games. Neither is worth
+hundreds of thousands, and the target needs hundreds of thousands.
+
+<Callout title="How strong is any of this?" tone="warn">
+Every result named on this page comes from an **exploratory finding document**
+under `docs/exploratory/`, at the repository's `development` or `pilot` evidence
+tier: 8 to 160 paired games on development seeds, measured on a heavily shared
+machine. None of it has a row in the
+[experiment index](/docs/research/experiment-index) or an entry in the
+[ledger](/docs/research/history), and no protected or final cohort was opened by
+any of it. Read the numbers as "what to try next", not as confirmation.
+</Callout>
+
+## Every approach in the family
+
+**The measurements that started it**
+
+- [**Score decomposition**](/approaches/lifetime-objective/score-decomposition) —
+  counts where each point came from, and finds that a score is a stopwatch.
+- [**Flow ceiling**](/approaches/lifetime-objective/flow-ceiling) — asks whether
+  *any* line of play can sustain the required clear rate, using a clairvoyant
+  planner that reads the hidden board. Answer: yes, but only that planner did.
+- [**Suite validation**](/approaches/lifetime-objective/suite-validation) — tests
+  whether a cheap 128-position benchmark predicts whole-game strength, and finds
+  that at the horizon it was minted with, it does not.
+
+**Bounded changes to the reference search**
+
+- [**Reveal sampling**](/approaches/lifetime-objective/reveal-sampling) — the
+  search had one dial governing two different coin flips; separating them is
+  worth about as much as a whole extra move of look-ahead.
+- [**Risk calibration**](/approaches/lifetime-objective/risk-calibration) — turns
+  the reference search's baked-in constants into dials that can be swept.
+- [**Leaf reweight**](/approaches/lifetime-objective/leaf-reweight) — makes the
+  nineteen weights in the hand-written board-scoring function runtime data, so
+  refitted weight vectors can be tested.
+- [**Rollout veto**](/approaches/lifetime-objective/rollout-veto-17k) — looks
+  twenty-five moves ahead with a weak player and overrules the search only on a
+  clear disagreement.
+
+**Learning something**
+
+- [**Sibling corpus**](/approaches/lifetime-objective/sibling-corpus) — the
+  training-data generator: every public position a game visited, labelled with
+  how many moves that game still had left.
+- [**Afterstate net**](/approaches/lifetime-objective/afterstate-net) — the
+  survival network trained on that corpus.
+- [**Learned leaf**](/approaches/lifetime-objective/learned-leaf) — blends a
+  learned survival estimate into the reference search's board scorer, and
+  measures what a network at that position is actually allowed to cost.
+- [**Planner distillation**](/approaches/lifetime-objective/planner-distill) —
+  tries to compress the expensive legal planner into a small network, with every
+  legal move at every position labelled.
+
+**Machinery the rest of the family runs on**
+
+- [**Scenario engine**](/approaches/lifetime-objective/scenario) — a rules
+  simulator in which every hidden number and every future disc is fixed in
+  advance, which is what makes a clairvoyant optimum well posed at all.
+- [**Fast engine**](/approaches/lifetime-objective/fast-engine) — the same rules
+  about three times faster, proven to make byte-identical decisions.
+- [**Common**](/approaches/lifetime-objective/common) — the shared harness that
+  runs a cohort, enforces seed leases and writes the result artifacts.
+- [**GPU**](/approaches/lifetime-objective/gpu) — the environment and benchmarks
+  for the machine's integrated GPU, including two host defects that had to be
+  worked around.
+
+## What this taught us, and what is still open
+
+- **The objective is now a number, not a slogan.** "Play better" became "hold
+  2.400 clears and 1.400 reveals per move, at around 20 occupied cells". That is
+  a far more testable target than a score.
+- **Flow rates are the cheap early statistic.** They move before the score does
+  and they are averaged over thousands of moves instead of dozens of games.
+- **Chain building is real and is not the lever.** A cheating planner told to
+  maximise points instead of survival earned 1.75 times the points per move —
+  and died in less than half the time, ending with a *lower* mean score
+  ([`finding-06`](/docs/exploratory/finding-06-flow-ceiling)).
+- **Still open:** nothing legal has been shown to hold flow balance. The
+  measurements say the missing ingredient is reasoning about what is under the
+  gray discs, rather than averaging over guesses of it — and no candidate in
+  this family does that yet.
+
+For the wider picture see the [research status](/docs/research/status), and for
+the ideas these pages assume, the [concepts primer](/learn/concepts) and the
+[glossary](/learn/glossary).

@@ -1,48 +1,169 @@
 ---
 title: Value and policy learning
-summary: Learned evaluators and policy networks — and the sibling-extrapolation trap that kept defeating them.
+summary: Instead of searching ahead, train a model on past games to judge a board or pick a column — and learn why that kept failing.
 ---
 
-Train a model to answer "how good is this board?" or "which column here?" from
-example games, then play by its judgment. This family tried value models,
-policy networks, DQN variants, distillation from stronger teachers, and
-sibling-advantage rankers.
+Searching ahead is expensive: to compare seven columns properly you have to
+imagine what happens after each one, and after the disc that follows, and so
+on. The alternative is to *learn* the answer. Play a lot of games, write down
+what happened, and fit a model that says "this board is worth about this much"
+or "from here, drop in column 4". This family is twelve attempts at that.
 
-## The recurring failure: sibling extrapolation
+Eleven of them fell short, and — this is the useful part — most of them fell
+short for the same reason.
 
-A model trained on played games learns the outcome of the action that **was**
-played. At deployment it must rank several actions it has **never** seen
-equally well. Low error on visited states did not translate into good
-root-action ranking:
+## The recipe, and where it breaks
 
-<svg viewBox="0 0 640 170" className="my-4 w-full max-w-2xl rounded-xl border border-zinc-800 bg-zinc-900/40" role="img" aria-label="Sibling extrapolation">
+Every approach here follows one shape. The differences are in what gets
+recorded and what the model is asked to output.
+
+<svg viewBox="0 0 660 190" className="my-4 w-full max-w-2xl rounded-xl border border-zinc-800 bg-zinc-900/40" role="img" aria-label="Collect games, fit a model, then ask it to rank seven columns">
   <g fontSize="11" fill="#e4e4e7">
-    <text x="20" y="24" fontSize="13" fontWeight="700">Training data</text>
-    <rect x="20" y="40" width="60" height="100" rx="6" fill="#14532d" />
-    <text x="50" y="95" textAnchor="middle">played</text>
-    <text x="50" y="110" textAnchor="middle">action ✓</text>
-    <rect x="90" y="90" width="46" height="50" rx="6" fill="#27272a" />
-    <rect x="144" y="90" width="46" height="50" rx="6" fill="#27272a" />
-    <rect x="198" y="90" width="46" height="50" rx="6" fill="#27272a" />
-    <text x="167" y="118" textAnchor="middle" fill="#71717a">siblings</text>
-    <text x="330" y="24" fontSize="13" fontWeight="700">Deployment asks</text>
-    <rect x="330" y="90" width="60" height="50" rx="6" fill="#27272a" />
-    <rect x="398" y="40" width="60" height="100" rx="6" fill="#7f1d1d" />
-    <text x="428" y="90" textAnchor="middle">rank all</text>
-    <text x="428" y="105" textAnchor="middle">seven</text>
-    <rect x="466" y="70" width="60" height="70" rx="6" fill="#27272a" />
-    <rect x="534" y="95" width="60" height="45" rx="6" fill="#27272a" />
+    <rect x="14" y="52" width="120" height="52" rx="8" fill="#1e3a8a" />
+    <text x="74" y="73" textAnchor="middle" fontWeight="700">play games</text>
+    <text x="74" y="90" textAnchor="middle" fontSize="10" fill="#bfdbfe">some policy chooses</text>
+    <rect x="174" y="52" width="130" height="52" rx="8" fill="#14532d" />
+    <text x="239" y="73" textAnchor="middle" fontWeight="700">record what</text>
+    <text x="239" y="90" textAnchor="middle" fontSize="10" fill="#bbf7d0">the played move led to</text>
+    <rect x="344" y="52" width="120" height="52" rx="8" fill="#78350f" />
+    <text x="404" y="73" textAnchor="middle" fontWeight="700">fit a model</text>
+    <text x="404" y="90" textAnchor="middle" fontSize="10" fill="#fde68a">low error on those</text>
+    <rect x="504" y="40" width="142" height="76" rx="8" fill="#7f1d1d" />
+    <text x="575" y="64" textAnchor="middle" fontWeight="700">now rank</text>
+    <text x="575" y="80" textAnchor="middle" fontWeight="700">all seven columns</text>
+    <text x="575" y="99" textAnchor="middle" fontSize="10" fill="#fecaca">six were never played</text>
+    <g stroke="#3f3f46" strokeWidth="1.5">
+      <line x1="134" y1="78" x2="174" y2="78" />
+      <line x1="304" y1="78" x2="344" y2="78" />
+      <line x1="464" y1="78" x2="504" y2="78" />
+    </g>
+    <text x="330" y="160" textAnchor="middle" fontSize="11" fill="#a1a1aa">the data describes moves that were taken; play asks about moves that were not</text>
   </g>
 </svg>
 
-## What the evidence showed
+The gap in the last box has a name in this repository — **sibling
+extrapolation** — and it has its own page, because it is the single most
+important lesson in the record:
+[evaluating a board, and the sibling trap](/learn/concepts/ranking-siblings).
+In one line: a model can predict the outcome of played positions very
+accurately and still order the seven available columns wrongly, because six of
+those columns are boards nothing in its training data ever measured. Low
+prediction error is not the same skill as correct ranking. Terms like
+[value](/learn/glossary), [n-tuple](/learn/glossary),
+[NNUE](/learn/glossary) and [DQN](/learn/glossary) are all one line each in the
+glossary.
 
-- Played-action value error is **not** action-ranking accuracy. Training data
-  must cover every legal sibling, or the objective must target relative action
-  value directly.
-- The denoised public value passed its prediction gates and produced a small
-  confirmation gain — the best learned-value result — but confidence stayed
-  weak and no protected cohort was opened.
-- This failure mode is exactly what the
-  [afterstate-learning](/approaches/afterstate-learning) family was designed
-  to fix with successor-closed, action-complete labels.
+## What is in this family
+
+Grouped by what the model is asked to produce.
+
+**Learn how long the game will last, from a board.**
+
+- [Denoised public value](/approaches/value-policy-learning/denoised-value) —
+  the one that worked best. Instead of labelling a board with the single
+  future that happened to follow it, label it with the average of 32
+  independently simulated futures. Includes two follow-ups that tried to put
+  the model to work and did not succeed.
+- [Chance-state NNUE](/approaches/value-policy-learning/chance-state-nnue) —
+  values the board *before* the next disc is dealt, so the value never has to
+  be split seven ways by which disc arrives.
+- [Structured NNUE](/approaches/value-policy-learning/structured-nnue) —
+  gives each of the 49 cells its own learned embedding, and a variant that
+  labels every legal sibling rather than only the played one.
+- [Monte Carlo state value](/approaches/value-policy-learning/monte-carlo-value)
+  — label each board with the actual remaining lifetime of the game it came
+  from, plus survival checks at 25 and 50 moves.
+- [Conservative fitted policy iteration](/approaches/value-policy-learning/conservative-fitted-policy-iteration)
+  — learns a whole *distribution* over remaining lifetime and only departs
+  from its safe fallback when the improvement is statistically supported.
+
+**Learn the value of a move, then take the best one.**
+
+- [Double-DQN](/approaches/value-policy-learning/dqn) — the textbook
+  reinforcement-learning method, plus a follow-up with longer credit
+  assignment and optional privileged demonstrations.
+- [Monte Carlo return](/approaches/value-policy-learning/monte-carlo-return) —
+  the same idea without any bootstrapping: score each move by the full
+  realized score of the game that followed it.
+- [Sibling advantage](/approaches/value-policy-learning/sibling-advantage) —
+  drops the absolute value entirely and learns only how much better one column
+  is than its siblings, with every sibling continued under the same random
+  future.
+
+**Copy a stronger player.**
+
+- [D4 root-Q clone](/approaches/value-policy-learning/d4-q-clone) — compress
+  the expensive [fair depth-4 search](/approaches/fair-expectimax/reference)
+  into a small fast network that reproduces its ordering of columns.
+- [Phase distillation](/approaches/value-policy-learning/phase-distillation) —
+  the same idea against the exact depth-3 phase policy, once as a direct
+  action copy and once as a numeric-score copy.
+
+**Skip the value function.**
+
+- [Direct public policy](/approaches/value-policy-learning/direct-policy) —
+  evolve the policy's own parameters against complete games; nothing is ever
+  regressed on a label.
+- [General value model](/approaches/value-policy-learning/value-model) — a
+  TypeScript workbench for fitting board and policy models from several kinds
+  of teacher on separate seed lanes.
+
+## What happened, in plain English
+
+One approach in this family came out ahead of its own baseline: the denoised
+public value, which changed the *labels* rather than the network. It passed
+every prediction gate it had declared in advance and, in a small eight-game
+confirmation, its games lasted longer than the policy it was correcting —
+79.5 to 88.125 mean moves (ledger-recorded; see the approach page for the
+important caveats, including that the confidence bounds were negative and no
+scores were retained for that cohort).
+
+Everything else was retired. The patterns are consistent enough to state as
+findings:
+
+- **Predicting well and ranking well are different skills.** The clearest
+  single case is the D4 clone, which reproduced its teacher's top choice 76%
+  of the time on training positions and 24.7% on held-out positions
+  (ledger-recorded).
+- **More data and more capacity did not fix it.** The scaled sibling-advantage
+  study increased both, and the
+  [experiment index](/docs/research/experiment-index) records that it still
+  increased regret relative to exact search (task-record only).
+- **A model that looks right on paper can make no difference in play.** The
+  phase-5 value veto was allowed to act only at the one moment the search
+  cannot see through; on its first paired game it switched zero times out of
+  22 opportunities and then ran out of its runtime budget.
+- **A small screen that looks positive can be a false positive.** The denoised
+  guided veto passed a four-game screen by a wide margin and reversed on the
+  eight-game confirmation.
+
+<Callout title="How to read the numbers on these pages" tone="info">
+Each page carries the repository's own evidence label. **Ledger-recorded**
+means the run is written up in the
+[experiment ledger](/docs/research/history) with its configuration and gates.
+**Task-record only** means the verdict survives as a conversation record with
+no protocol, artifact hash, or per-game data behind it — those numbers cannot
+be re-derived, and several approaches here have no retained number at all.
+</Callout>
+
+## What this taught us, and what is still open
+
+The family's collective negative result is what motivated the current research
+line. If the problem is that training data only ever measures the move that
+was played, the fix is to measure *every* legal move at each position, under
+the same random futures, so the comparison is fair — **successor-closed** data.
+That is exactly what the
+[afterstate-learning](/approaches/afterstate-learning) family builds, and its
+records show the difference: with a stable enough ranking target, a learned
+model finally beat its own teacher, while still trailing fair depth-4 search.
+
+Still open from this family:
+
+- The denoised lifetime model is the best-predicting model in the repository
+  and was never given a deployment rule on top of fair D4 that could actually
+  fire. The exploratory
+  [blind-spot audit](/docs/exploratory/audit-04-blind-spots) names this as an
+  unresolved opportunity rather than a settled negative.
+- Nothing here has been tested as a *bounded correction* to fair D4 with a
+  gate wide enough to produce switches, which is the shape the research status
+  now recommends for every learned signal.

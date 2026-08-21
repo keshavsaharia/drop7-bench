@@ -1,28 +1,111 @@
 ---
 title: Tunneling
 family: heuristic-search
-status: Completed
+summary: Dig a channel down beside the tall side of the board so that the dangerous gray discs high up can actually be reached and opened.
+status: completed
 evidence: task-record only
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Dig a channel down beside the tall side of the board so that the dangerous
+gray discs high up can actually be reached and opened.
 
-## Tunneling policy
+<EvidenceLabel status="completed" evidence="task-record only" reads="public" />
 
-Adds transition credit for damaging high or edge covered discs through reachable paths.
+## The intuition
 
-**Status: Completed** (task-record only). a 64-game comparison improved the open-loop baseline, but did not approach qualification.
+A [covered gray disc](/learn/glossary) only opens when a numbered disc clears
+right next to it. A gray disc sitting high on a tall stack, walled in by other
+discs, therefore has nothing that can reach it — and every [rise](/learn/glossary)
+pushes it higher and adds seven more underneath it. Human players describe the
+answer as *tunneling*: keep one column low, so its wall of neighbours is
+exposed and you have somewhere to attack from.
 
-## Sources
+The lab turns that picture into two claims that a program can measure:
 
-- `main.ts`
+- A gray disc's danger grows **quadratically with its altitude**, and a gray
+  disc on the left or right edge is worse still, because it has one fewer
+  horizontal direction from which it can be attacked.
+- A low column earns credit only for the covered cells that can actually be
+  reached from it. A jagged wall of *numbered* discs earns nothing — the source
+  comment is explicit that generic board roughness is not the point.
 
-## More evidence
+The same file adds a small credit for stacking repeated 5s, 6s and 7s in a
+still-live column, on the theory that each addition advances all of them toward
+the same vertical trigger.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/heuristic-search)
+## How it works, step by step
+
+1. **Read the public position** — visible board, visible next disc, rise clock.
+2. **Score the board's tunneling shape.** Six features: covered-disc altitude
+   risk, edge-covered altitude risk, cliff access to covered cells, edge cliff
+   access, and two high-number cohesion terms.
+3. **Score the move itself.** Five transition features that pay for what the
+   move *did*: committing a high number, extending a trench, cracking a covered
+   disc high up, revealing one, and damaging a cover on the edge.
+4. **Add the result to the ordinary hand evaluator** as a residual, scaled by a
+   fixed constant, and use that sum as the value inside a short
+   [rollout](/learn/glossary) search over sampled futures.
+5. **Play the best-scoring column.**
+
+## What happened, in plain English
+
+Only half the idea survived its own testing, and the code records which half.
+The **transition** bonus — paying for damage actually done to high or edge
+covers — was supported by paired validation and ships switched on at a quarter
+weight. The **state** residual — scoring the standing shape of the board — was
+not supported, and ships at weight zero: available for ablations, off by
+default.
+
+As a whole policy it worked in the sense that it beat the comparator it was
+built against, and did not work in the sense that mattered: it came nowhere
+near the million-point target, and it never displaced the depth-4 reference
+search.
+
+<TechnicalDetails title="The technical record">
+
+The [experiment index](/docs/research/experiment-index) records this lab as
+**completed, task-record only**: *"a 64-game comparison improved the open-loop
+baseline, but did not approach qualification."* A task-record-only label means
+the outcome is reported in a research conversation and has never been promoted
+into the [experiment history](/docs/research/history); no artifact, cohort
+listing, or per-game output is retained here. **No score, move count, or margin
+for that 64-game comparison exists in any retained record in this repository**,
+so none is quoted on this page. The comparator was the
+[open-loop beam](/approaches/heuristic-search/open-loop), which the index
+itself classifies as support-only.
+
+Repository-verified from the source: `src/core/typescript/tunneling-heuristic.ts`
+defines six state features with weights −45 (covered altitude risk), −65 (edge
+covered altitude risk), +90 (cliff access), +110 (edge cliff access), +240 and
++180 (high-number cohesion), and five action features with weights +160, +200,
++100, +180 and +120. `DEFAULT_TUNNELING_STATE_SCALE` is `0` and
+`DEFAULT_TUNNELING_ACTION_SCALE` is `0.25`, with the comment: *"Paired
+validation supported the transition bonus, but not the state residual."* The
+lab `main.ts` compares the `combined` and `tunneling` profiles through the
+shared rollout solver, and the evaluator is also reachable from the open-loop,
+gray-throughput and sparse-expectimax labs.
+
+The evaluator reads only the visible board, next disc and rise clock. It is a
+public-information policy.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **Reachability is a real feature and standing shape is not.** The one
+  durable output of this lab is the asymmetry between its two halves: paying
+  for cover damage that a move actually achieved held up, while scoring how
+  tunnel-shaped a board merely *looks* did not. That is the same lesson the
+  strategy catalog draws from static board potential in general — similar
+  looking boards can have very different futures.
+- **The human hypothesis behind it is still untested.** "Attack the high
+  covers, and watch the edge columns" comes from an experienced player's
+  strategy notes, which the catalog labels explicitly *anecdotal*. Testing it
+  properly is a separate lab,
+  [edge priority](/approaches/heuristic-search/edge-priority), which has no
+  located result at all.
+- **What was ruled out** is nothing. This lab produced a positive comparison
+  against a weak comparator with no retained numbers. What would make it
+  evidence is a paired, whole-game comparison against the unchanged depth-4
+  reference on seeds disjoint from anything used to pick the 0.25 scale.

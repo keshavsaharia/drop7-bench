@@ -1,29 +1,138 @@
 ---
-title: Temporal Coherence
+title: Fixing the learning rule, and conditioning on the rise clock
 family: ntuple-rl
-status: Rejected
+summary: A real bug was found in how the n-tuple's weights were updated, and fixed — and the corrected learner was still not good enough, even after being told how close the next row rise was.
+status: rejected
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+A real bug was found in how the n-tuple's weights were updated, and fixed — and
+the corrected learner was still not good enough, even after being told how close
+the next row rise was.
 
-## Temporal-coherence n-tuples
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
 
-Corrects shared-parameter TD updates and then adds separate rise-phase residuals.
+## The intuition
 
-**Status: Rejected** (ledger-recorded). the update bug was fixed, but neither policy gate passed.
+When a single learned weight is used more than once in the same evaluation, an
+update has to account for that. In this
+[n-tuple network](/learn/glossary), the same weight really is reused: the
+tables are shared across every position a window can occupy, so one weight can
+be looked up many times in a single board. The original code walked all 338
+window placements and divided the correction by 338, as if the placements were
+independent.
 
-## Sources
+They are not. On the opening board those 338 placements collapse onto 220
+distinct weights, one weight appears 25 times, and the arithmetic works out so
+that a requested step of one unit actually moved the prediction by 6.787 units.
+That is a genuine implementation defect, and the audit that found it is one of
+the more valuable pieces of work in this family — the learner had been
+overshooting every target it was ever given.
 
-- `ntuple-phase-conditioned.cpp`
-- `ntuple-tc.cpp`
+A second, smaller defect was in the ordering of the adaptive learning rate: the
+current error was folded into the rate's own statistics *before* the rate was
+computed, whereas the method it was copied from computes the rate from prior
+history and updates afterwards.
 
-## More evidence
+## How it works, step by step
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/ntuple-rl)
+1. **Fix the gradient.** Count how many times each weight was actually used,
+   normalise by the sum of the squares of those counts, apply the correction
+   once per weight, and only then update the adaptive-rate history. A
+   deterministic self-test proves the prediction now moves by exactly the
+   requested amount, including the one-step-delayed reaction to a sign flip that
+   the original method specifies.
+2. **Retrain.** Learn a chance-state value — the board's worth *before* the next
+   disc is dealt — from complete games, using the corrected update.
+3. **Play.** For each legal column, simulate the drop and score the resulting
+   board. The visible disc still affects the choice, because each candidate is
+   played before the successor is evaluated.
+4. **Then add the rise clock.** A follow-up experiment kept the corrected update
+   and added a separate bank of tables for each of the five positions in the
+   [rise cycle](/learn/glossary), starting at exactly zero so that any gain is
+   attributable to the new tables and not to a better starting guess.
+
+## What happened, in plain English
+
+The bug was real and the fix was correct. The policy was not.
+
+With the corrected update, the learner reached about 67,000 points and 49 moves
+per game on its probe — below the gate it had to clear, and below the *buggy*
+version's own earlier result. Training was stopped at 10,000 games; the
+remaining 90,000 were never run. Replaying the same games with an alternative
+learning target changed almost nothing.
+
+Giving the network its own tables for each position in the five-move rise cycle
+was the obvious next hypothesis, and it barely moved: about 68,500 points and 51
+moves, closing under 2% of the score gap and about 2% of the move gap to the
+reference search. Every material gate failed, and no continuation was run.
+
+This is a clean, useful negative: the diagnosis was that the value target and
+the data, not the arithmetic or the missing rise-clock feature, were the
+limiting factors.
+
+<TechnicalDetails title="The technical record">
+
+Status in [the experiment index](/docs/research/experiment-index): **rejected,
+ledger-recorded** — "the update bug was fixed, but neither policy gate passed."
+
+From [the ledger](/docs/research/history):
+
+| Run | Mean score | Mean moves | Cohort |
+| --- | ---: | ---: | --- |
+| Corrected score-TD at 10k games | 66,625.125 | 49.469 | 64-game probe |
+| Legacy (uncorrected) score-TD at 10k | 73,480.453 | 53.766 | same probe |
+| Corrected terminal Monte-Carlo at 10k | 66,296.953 | 49.312 | same probe |
+| Legacy Monte-Carlo at 10k / 100k | 66,442 / 78,194.234 | 49.453 / 57.031 | same probe |
+| Phase-conditioned residual | 68,463.250 | 50.828 | same probe |
+
+The frozen stop gate was 100,000 points and 70 moves. The phase-conditioned gate
+additionally required gains of at least 20,000 points and 12 moves over the
+corrected baseline, which would have closed at least 30% of both gaps to the
+comparator the protocol used; the run gained 1,838.125 points and 1.359 moves,
+closing 1.667% and 2.031%. Its 64-game range was 28,615 to 224,920 points and 25
+to 155 moves, with no censored games. Model size: 9,321,107 general nodes plus
+4,600,000 zero-initialised phase nodes, 159.314 MiB of parameters, 160.828 MiB
+peak resident.
+
+**Scoring mode — important.** These point totals are on the historical
+7,000-point level-bonus scale, not the corrected 17,000-point Hardcore scale.
+The ledger's comparator inside both runs is a fair depth-4 reference of
+176,925.25 points and 116.375 moves; the corrected-scoring replay of that same
+eight-game confirmation is recorded elsewhere in the ledger as 400,675.25 points
+and 116.375 moves. `docs/exploratory/audit-03-claim-arithmetic.md` lists both
+`ntuple-tc.cpp` and `ntuple-phase-conditioned.cpp` among the sources whose
+ledger results are 7,000-point-scored and which carry no build lock enforcing
+that constant — so **rebuilding them against the current engine will produce
+numbers that do not match this table**, and none of these scores can be compared
+directly with a corrected-score result.
+
+Seeds: training `0x3d100000...0x3d10270f`, probe `0x3d200000...0x3d20003f`, both
+already burned and both replayed by the phase-conditioned follow-up. No
+development, protected, or final seed was opened.
+
+Sources: `ntuple-tc.cpp`, `ntuple-phase-conditioned.cpp`.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+**A correctness fix is not a performance fix.** The corrected learner scored
+*lower* than the buggy one. That is not a reason to keep the bug; it is evidence
+that the effective step size, not the update rule's correctness, was doing the
+work, and that the whole configuration was far from the region where the
+learning rule matters.
+
+**The rise clock is real but not the missing piece.** The follow-up isolated
+that variable as cleanly as one could ask — new tables, zero-initialised, same
+data, same target — and got almost nothing. Whatever the network is failing to
+represent, it is not proximity to the next row rise.
+
+**What the ledger itself flags as still open.** Phase enters the base model as a
+single additive scalar, so the pattern weights cannot interact with it; the
+separate-tables experiment tested one way of fixing that at one training scale
+and one data budget. What was never tested here is a different *target* — these
+runs learned the value of the position the policy actually reached, which is the
+[sibling trap](/learn/concepts/ranking-siblings) that recurs across this whole
+family.

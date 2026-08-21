@@ -1,28 +1,111 @@
 ---
-title: Value Model
+title: General value model
 family: value-policy-learning
-status: Rejected
-evidence: task-record only for the tested configurations
-generated: true
+summary: A workbench, not a single idea — one trainer that can fit a board model from four different kinds of teacher, on strictly separated seed lanes, so the teachers can be compared rather than argued about.
+status: rejected
+evidence: task-record only
+reads: teacher
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+One TypeScript trainer with a switch on the front: point it at a hand-written
+heuristic, at a privileged planner that knows the future, at a self-improving
+fitted target, or at a contrastive comparison of columns, and it fits a board or
+policy model from that source.
 
-## General TypeScript value model
+<EvidenceLabel status="rejected" evidence="task-record only" reads="teacher" />
 
-Trains sparse board/policy models from shape, oracle, fitted, or contrastive teachers with disjoint seed lanes.
+The label above is about the *training* side. One of the four selectable
+teachers is the [perfect-information oracle](/approaches/oracle-curriculum),
+which reads the future disc and reveal streams and is therefore never a legal
+player. What comes out of the trainer is a model over the public board, the
+visible next disc and the rise clock, and it is only that frozen student — not
+its teacher — that any strength claim could ever be about.
 
-**Status: Rejected** (task-record only for the tested configurations). early learned leaves helped one ply but hurt the stronger rollout policy.
+## The intuition
 
-## Sources
+Most of the pages in this family are one hypothesis each. This directory is the
+place where the *choice of teacher* is the hypothesis.
 
-- `train.ts`
+If you want to know whether a learned board evaluator can help, "learned from
+what?" is the question that matters most, and it is easy to answer accidentally
+by only ever trying one source. So the trainer exposes four:
 
-## More evidence
+- **shape** — fit the existing hand-written evaluation, the cheapest possible
+  teacher, useful mainly as a wiring check and a speed baseline;
+- **oracle** — fit the choices of a planner that has been shown the future, the
+  strongest possible signal and an unusable policy;
+- **fitted** — fit a target computed from the model's own bounded continuations,
+  a self-improvement loop;
+- **contrastive** — fit the *gap* between columns at one position rather than
+  any column's absolute value, with a declared margin and temperature.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/value-policy-learning)
+Keeping all four in one trainer with one encoder means the comparison between
+them is not confounded by four different implementations.
+
+## How it works
+
+1. **Fixed seed lanes.** Three ranges are hard-coded and never moved:
+   training (`0x1d70…`), calibration (`0x5d70…`) and validation (`0x7d70…`).
+   The source comment states the reason plainly — the ranges stay fixed so that
+   checkpoints trained at different times remain directly comparable.
+2. **Generate.** Games are played on the training lane by the selected teacher.
+   Every kind of randomness the trainer touches — reveals, exploration, shuffles,
+   the fitted target's own futures — is drawn from its own labelled deterministic
+   domain, so two runs of the same configuration produce the same data.
+3. **Encode.** Sparse public board features plus next disc and rise phase.
+4. **Fit.** Huber-loss regression with gradient clipping and Adam for value
+   targets; smoothed classification for policy targets.
+5. **Use.** A trained value model can be dropped in as the leaf of the sparse
+   expectimax search or the rollout solver that the file imports, which is how
+   the learned evaluation was actually put to work.
+
+## What happened
+
+The one recorded outcome is a warning about where a learned evaluator helps: an
+early learned leaf improved a *one-ply* policy and made the *stronger* rollout
+policy worse. In other words, the model was adding something the weak policy
+lacked and subtracting something the strong policy already had — so measuring it
+against a weak baseline would have produced a positive result and a wrong
+conclusion.
+
+No score, cohort or checkpoint is retained for this. The index labels it
+**task-record only**, and it is careful to reject only the configurations that
+were actually tried, not the workbench.
+
+<TechnicalDetails title="The technical record">
+
+The [experiment index](/docs/research/experiment-index) row reads:
+*"General TypeScript value model … Trains sparse board/policy models from shape,
+oracle, fitted, or contrastive teachers with disjoint seed lanes. **Rejected —
+task-record only for the tested configurations;** early learned leaves helped one
+ply but hurt the stronger rollout policy."*
+
+A search of [the ledger](/docs/research/history) finds no protocol or result for
+`value-model/train.ts`, so there is **no retained number** on this page: no
+paired cohort, no gate, no checkpoint. The seed lanes, teacher modes,
+deterministic domains, loss functions and search integrations described above
+are read from the source and are **repository-verified** — evidence that the
+machinery exists and is disciplined, not evidence that anything it produced
+played well.
+
+Note the qualifier the index chose: *for the tested configurations*. Four
+teachers, several targets and several search integrations are selectable here;
+the retained record covers one outcome.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+The finding that survived is methodological: **a learned component must be
+tested against the strongest baseline it would replace, not the weakest one it
+can beat.** A leaf that improves one-ply play tells you almost nothing about a
+leaf inside a deep search, because the search may already be recovering the
+information the leaf supplies. That principle is visible in every later gate in
+this repository, which compare against
+[fair depth-4 expectimax](/approaches/fair-expectimax/reference) rather than
+against a convenient weaker policy.
+
+What is still open here is most of the workbench. Three of the four teachers
+have no retained result at all, and the trainer is intact, deterministic and
+lane-disciplined. Reviving it would mean registering a theory and a frozen gate
+first — not rerunning it to see what happens.

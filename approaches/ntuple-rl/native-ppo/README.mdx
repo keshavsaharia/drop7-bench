@@ -1,28 +1,136 @@
 ---
-title: Native Ppo
+title: Copying the one-move search, in C++
 family: ntuple-rl
-status: Rejected
+summary: Before letting a policy network learn on its own, teach it to imitate a simple exact search — it never imitated well enough to be allowed to start.
+status: rejected
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Before letting a policy network learn on its own, teach it to imitate a simple
+exact search. It never imitated well enough to be allowed to start.
 
-## Native PPO v2
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
 
-Public actor/critic with behavior cloning and PPO fine-tuning in the native environment.
+## The intuition
 
-**Status: Rejected** (ledger-recorded). the corrected PPO policy remained far below fair search.
+Learning a Drop7 policy from scratch by trial and error is very slow: a random
+player dies in about 27 moves, so almost every game ends before anything
+interesting happens. The standard remedy is a **warm start**. First train the
+network to copy a policy that already works — here, an exact one-move
+[fair search](/approaches/fair-expectimax/reference) — and only then let
+reinforcement learning improve on it.
 
-## Sources
+That ordering also protects the experiment from a measurement trap. If you let
+the reinforcement-learning stage run from a bad clone, whatever improvement you
+see is mostly the network recovering from its own imitation errors, not learning
+to play better. So this experiment put a gate in between: the clone had to
+reproduce a fixed fraction of the teacher's strength before the policy-gradient
+stage was allowed to run at all.
 
-- `ppo-v2.cpp`
+The clone is also asked to copy the teacher on states the *clone* visits, not
+only on states the teacher visits, by two rounds of collecting the student's own
+positions and labelling them with the teacher. Without that, a policy drifts
+into positions its training data never covered.
 
-## More evidence
+## How it works, step by step
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/ntuple-rl)
+1. **Audit the old code first.** The unused first-generation policy code in
+   `src/core/native/ppo.hpp` was re-read and found to include cumulative score,
+   level, and move count in its observation — an
+   [information-boundary](/learn/glossary) violation for a deployable policy —
+   along with an unbalanced critic loss and no random-play comparison. Its
+   greedy policy scored below deterministic random play.
+2. **Rebuild the observation.** Version two sees only the board, the visible
+   next disc, the [rise clock](/learn/glossary), and scalars derived from the
+   board.
+3. **Make it symmetric by construction.** A shared two-pass reflection ensemble
+   makes the action distribution exactly mirror-equivariant and the critic
+   exactly mirror-invariant.
+4. **Clone the teacher.** Collect positions from 512 games of the exact one-move
+   fair search, train on the teacher's action, then add student-visited
+   positions over two labelling rounds.
+5. **Gate.** Compare the clone with random play and with the teacher on a fixed
+   probe. Only a pass opens the policy-gradient stage.
+
+## What happened, in plain English
+
+The warm start failed its gate, so the policy-gradient stage never ran.
+
+After about 41,000 training examples the clone agreed with the teacher on 36.6%
+of moves, against 14.3% for guessing. That is a real signal — but in gameplay it
+scored barely above random and nowhere near the teacher it was copying. The
+preregistered floors required it to reach 1.10× random and 0.70× the teacher on
+both score and moves; it cleared neither reliably. The reserved held-out seed
+range was never read.
+
+The clear diagnosis in the ledger is worth repeating: an on-policy update from a
+still-fragile clone would have measured recovery from imitation error rather
+than genuine policy improvement. Stopping was the scientifically informative
+choice.
+
+<TechnicalDetails title="The technical record">
+
+Status in [the experiment index](/docs/research/experiment-index): **rejected,
+ledger-recorded** — "the corrected PPO policy remained far below fair search."
+
+From [the ledger](/docs/research/history), on the fixed 64-game fitting probe:
+
+| Policy | Mean score | Mean moves |
+| --- | ---: | ---: |
+| Clone before warm start | 18,906.03 | 18.28 |
+| Clone after warm start | 33,539.47 | 28.02 |
+| Deterministic random | 32,143.69 | 27.03 |
+| Exact fair D1 (the teacher) | 69,274.41 | 51.27 |
+
+Numbered-clear throughput was 1.0881 for the clone, 0.9751 for random, and
+1.6525 for the teacher; reveal throughput 0.4055, 0.3584, and 0.8470. Final
+teacher-action agreement 36.62% against 14.29% chance, cross-entropy 1.5340,
+over 26,832 teacher-distribution states plus 14,189 student-distribution states
+from two labelling rounds (41,021 examples).
+
+The first-generation audit is recorded alongside: untrained greedy 23,936.52
+points / 21.72 moves, best greedy probe 24,503.34 / 22.11, deterministic random
+31,835.25 / 26.94 — the trained policy never overtook random.
+
+The actor has 8,240 parameters. Optimized, library-mode, and sanitizer builds
+passed exact reflection, metadata blindness, deterministic inference,
+terminal and truncation semantics, reward accounting, legality, seed
+partitioning, and bit-exact checkpoint round-trip; a repeat run reproduced every
+non-resource metric and the checkpoint byte-for-byte. The reserved held-out
+range `0x3f200000...` was never opened.
+
+**Scoring mode — important.** `docs/exploratory/audit-03-claim-arithmetic.md`
+classifies every row above as on the historical **7,000-point** level-bonus
+scale and flags that this ledger section "carries no scoring label". These point
+totals therefore cannot be compared with corrected-score results elsewhere in
+the repository; the within-table comparisons (clone versus random versus
+teacher) are the usable content.
+
+Source: `ppo-v2.cpp`; the audited first-generation path is
+`src/core/native/ppo.hpp`.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+**A small network could not imitate even a one-move search.** 8,240 parameters
+reproduced 36.62% of the teacher's decisions. Whether the limit was
+capacity, the input encoding, or the imitation schedule was not separated — one
+configuration was tested and rejected.
+
+**Gating before the expensive stage worked.** The most useful structural lesson
+from this experiment is procedural: because the gate sat between the clone and
+the policy-gradient run, the failure cost a warm start rather than a full
+training run, and no development seeds were spent.
+
+**The audit of the old code is itself a result.** Finding that the unused
+first-generation policy read score, level, and move count is a reminder that an
+information-boundary violation can sit undetected in code nobody is running. The
+repository's later programs assert their observation type explicitly for this
+reason.
+
+**Still open.** Nothing here tests whether policy-gradient learning *would* help
+from a good clone, because a good clone was never produced. The
+[PyTorch line](/approaches/ntuple-rl/torch-ppo) took that question further with
+a larger network and a stronger teacher.

@@ -1,0 +1,211 @@
+---
+title: Why one great game proves nothing
+summary: Drop7 scores are heavy-tailed, so a single million-point game can sit happily inside a policy whose average is three hundred thousand — and telling two policies apart takes paired games and a confidence bound, not a highlight reel.
+order: 7
+---
+
+The goal of this project is a policy whose **mean** score over many games is
+above one million points. That word does a lot of work. Somewhere in this
+repository is a record of a single depth-4 game that scored 1,246,684 points,
+and the research status page files it under *"Anecdote; not an average or
+qualification"*. This page is about why that filing is correct, and what it takes
+instead.
+
+## Sixty-four games, one dot each
+
+Here is every game of a retained cohort: the repository's reference policy,
+fair depth-4 expectimax, over 64 complete games.
+
+<ScoreStrip caption="Each dot is one complete game. The data are the per-game rows recorded in runs/RUN-A51D-d4/d4-standard64.json and reported in docs/exploratory/finding-01-score-is-survival.md — an exploratory, development-tier cohort on seed lease SEEDLEASE-A51D, reproduced in this checkout on 2026-08-20, with no censored games. Hover a dot for its seed." />
+
+The shape is the point. Most games cluster low. A long thin tail runs off to the
+right. And there, at the far end, sits a game worth 1,017,234 points — a genuine
+million-point game, played by a policy whose average over the same 64 games was
+321,991.72 and whose median was 266,282.
+
+That single game is not a fluke to be explained away, and it is not evidence of
+a million-point policy either. **It is what a heavy tail looks like.**
+
+## Mean, median, and why they disagree
+
+The **median** is the middle game: half scored more, half scored less. The
+**mean** is the total divided by the number of games. When a distribution is
+symmetric they are close. When a few games are enormous, the mean is dragged
+towards them and the median is not.
+
+In this cohort the mean is 321,991.72 and the median 266,282: the average game
+is not the typical game. The standard deviation — a rough measure of how spread
+out the games are — is about 187,502, which finding 01 notes is 58% of the mean
+itself. It draws the honest conclusion: with 64 games at that spread, **the mean
+is known to roughly ±46,000 at one standard error**.
+
+Both numbers are useful and they answer different questions. The median answers
+*what happens in a typical game*. The mean answers *what happens on average over
+a long session* — and the mean is what the qualification standard is written
+against, because the target is a mean. That choice makes the standard harder to
+meet reliably, not easier: a mean over a heavy-tailed variable is a jumpy
+quantity.
+
+## What a small cohort can and cannot say
+
+Every recorded figure for the reference policy, on one axis, with the target:
+
+<CohortScale
+  points={[
+    { label: "fair D4, mean of 8 games", value: 400675.25, display: "400,675.25", evidence: "ledger-recorded; small confirmation cohort (status.md)" },
+    { label: "fair D4, mean of 64 games", value: 308295.578, display: "308,295.578", evidence: "ledger-recorded; broader reference cohort (status.md)" },
+    { label: "fair D4, mean of 64 fresh-seed games", value: 321991.71875, display: "321,991.72", evidence: "development tier; finding 01, reproduced 2026-08-20" },
+    { label: "median of those 64 fresh-seed games", value: 266282, display: "266,282", evidence: "recorded in the same run" },
+    { label: "best single game in that cohort", value: 1017234, display: "1,017,234", evidence: "one game, 280 moves, seed 0xa51d0033", tone: "anecdote" },
+    { label: "one D4 game", value: 1246684, display: "1,246,684", evidence: "task-record only — an anecdote, not an average", tone: "anecdote" }
+  ]}
+  caption="Grey bars are single games and are not comparable with the means above them. The 8-game and 64-game ledger figures are different cohorts of the same policy; the gap between 400,675.25 and 308,295.578 is what a small sample does to a heavy-tailed mean, not a change in the policy." />
+
+Look at the first two rows. The same reference policy measured 400,675.25 over
+eight games and 308,295.578 over 64. Nothing about the policy changed. Eight
+games is simply not enough to pin down the mean of a distribution with a tail
+this long — which is exactly why the repository's benchmark contract calls a
+1–8 game run a `PILOT`, whose entire permitted purpose is to *"find bugs and
+project runtime/memory"* with **no strength claim**
+([benchmark contract](/docs/benchmarks)).
+
+Now look at the last two rows. A single million-point game is above the target
+line. It says nothing whatsoever about the mean, because you can always find the
+best game in a sample, and the best game of a heavy-tailed sample is always
+impressive.
+
+<Callout title="A single game can never qualify" tone="warn">
+The frozen validation protocol asks for a mean above one million over hundreds
+of games, on data the candidate has never seen, three times over. No single
+game, however large, is a step towards that; only the average is.
+</Callout>
+
+## Comparing two policies: pair the games
+
+If score is this noisy, how does anyone tell whether a change helped? The answer
+is not "run more games and compare averages" — or not only that. It is to make
+the two policies **play the same games**.
+
+A cohort is a fixed, ordered list of seeds. Both the candidate and the reference
+play seed 1, then seed 2, and so on, and the comparison is done seed by seed:
+the candidate scored more on this game, less on that one. This is a **paired**
+comparison, and it removes the largest source of noise, which is that some games
+are simply luckier than others. The methodology document requires exactly that —
+*"per-game paired results against the reference"* — and asks for wins, ties and
+losses, not just a difference of means
+([methodology](/docs/methodology), [benchmarks](/docs/benchmarks)).
+
+You have already seen a small paired comparison on this site: the two look-alike
+boards on [what makes a board good?](/learn/concepts/evaluating-a-board) were
+replayed under the *same* sixteen scripted disc tapes, and the result was
+reported as six wins, nine ties and one loss rather than as two averages.
+
+The same rule is why the repository refuses to promote an aggregate win when a
+preregistered subgroup fails: a policy that gains overall but regresses on a
+whole class of positions has not been shown to be better.
+
+## Bootstrap lower bounds, without the statistics
+
+Suppose a candidate averages 1,050,000 over 256 games. Is its *true* long-run
+mean above one million, or did it get a lucky tail?
+
+The **bootstrap** answers that by resampling. Take the 256 recorded game scores.
+Draw 256 of them at random, with replacement — some games appear twice, some not
+at all — and compute the mean of that imaginary cohort. Do it thousands of
+times. You now have a spread of plausible means, built entirely out of the games
+you actually played. The 5th percentile of that spread is a **one-sided 95%
+lower bound**: a value the true mean is unlikely to be below.
+
+Two things make this the right tool here. It assumes nothing about the shape of
+the distribution, which matters when the shape is a long tail. And it resamples
+**whole games**, respecting the rule that a complete game is the independent
+unit of measurement — move-level or position-level statistics can diagnose a
+model, but they cannot supply a confidence interval for a policy.
+
+The qualification ladder is built from these bounds:
+
+| Stage | Games | What it must show |
+| --- | ---: | --- |
+| Development gate | 256 | observed mean above 1,050,000 **and** a one-sided 95% whole-game bootstrap lower bound above 1,000,000 |
+| Protected validation | 256 | mean above 1,000,000, with **both** bootstrap and Student-t one-sided lower bounds above it, no illegal moves, no runner failures |
+| Final confirmation | 256 | the unchanged, frozen candidate repeats those conditions on a one-shot cohort |
+
+*From the archived validation protocol as summarised in
+[docs/methodology.md](/docs/methodology). The frozen record states that no
+candidate has qualified and that neither the protected nor the final seeds have
+been opened.*
+
+Note the gap between the first two rows: the development gate demands 1,050,000,
+not 1,000,000. That margin exists because a mean measured on data you were
+allowed to look at is optimistic, and a heavy tail makes it more optimistic
+still.
+
+## How to read a number on this site
+
+- **Ask how many games.** Eight games is a pilot. Sixty-four is a development
+  cohort, useful for deciding what to try next and explicitly *"never fresh
+  confirmation"*. Two hundred and fifty-six on unseen seeds is a gate.
+- **Ask whether it is a mean or a game.** A single score is an anecdote no
+  matter how large.
+- **Ask whether it was paired.** An unpaired comparison of two policies on
+  different seeds is mostly measuring luck.
+- **Ask what the label says.** This repository marks every figure
+  `task-record only`, `ledger-recorded`, `repository-verified` or `reproduced`,
+  and those words are not decoration. The 1,246,684-point game is
+  `task-record only`: it survives as a note in a conversation record, with no
+  run artifact behind it.
+
+<TechnicalDetails title="The technical record">
+
+**The dot plot.** Per-game rows from `runs/RUN-A51D-d4/d4-standard64.json`,
+snapshotted into `web/content/learn/data/d4-cohort-scores.json` by
+`web/scripts/extract-d4-cohort.ts`, which copies recorded fields and computes
+nothing. Policy `fair-d4`, 64 games, seeds `0xa51d0000`–`0xa51d003f`, seed lease
+`SEEDLEASE-A51D`, 2,000-move cap, 0 censored games. Recorded summary: mean
+321,991.71875, median 266,282, lower quartile 188,700.75, minimum 104,731,
+maximum 1,017,234, standard deviation 187,501.831766; mean moves 94.0625.
+Reported in
+[`docs/exploratory/finding-01-score-is-survival.md`](/docs/exploratory/finding-01-score-is-survival)
+as an exploratory, **development-tier** result reproduced in this checkout on
+2026-08-20. `runs/` is not committed, so on a checkout without it the figure
+degrades to a message rather than inventing data.
+
+**The ledger figures** — 400,675.25 over 8 games and 308,295.578 over 64 games,
+against depth-3's 235,071.25 over the same 8 — are the ledger-recorded entries
+in [`docs/research/status.md`](/docs/research/status), labelled there as a small
+confirmation cohort and a broader reference cohort respectively. They are
+different cohorts from the finding-01 run above and must not be pooled.
+
+**The 1,246,684-point game** appears in the status snapshot as `task-record
+only`, with the explicit note "Anecdote; not an average or qualification". No
+run artifact for it exists in this checkout.
+
+**Statistical rules.** The independent unit is a complete game; report mean,
+median, lower quartile and minimum score, mean and lower-quartile lifetime,
+censor count and cap, clears and reveals per move, chain depth, per-game paired
+results, and whole-game confidence bounds for a qualification claim
+([methodology](/docs/methodology), [benchmarks](/docs/benchmarks)). A game
+stopped at the 2,000-move cap is censored, keeps the score already earned, and
+is a lower bound that must never be extrapolated. For qualification the exact
+bootstrap and Student-t rules of the frozen protocol apply; for earlier tiers
+the estimate, resampling method and seed, interval direction and number of
+whole-game samples must all be published.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- Drop7 scores are heavy-tailed: in a retained 64-game cohort the standard
+  deviation was 58% of the mean, and the best game scored 1,017,234 against a
+  mean of 321,991.72.
+- A million-point game and a 300,000-point average are perfectly consistent, and
+  this repository has both.
+- Small cohorts move a lot: the same policy measured 400,675.25 over 8 games and
+  308,295.578 over 64.
+- Pairing games and reporting wins, ties and losses removes far more noise than
+  simply running more unpaired games.
+- The open question is not whether some game can reach a million — one already
+  has — but whether any policy can put the **average** there. Nothing in this
+  repository is close; the reference policy would need roughly three times its
+  current mean lifetime, as [score is survival](/learn/concepts/survival-vs-score)
+  works out.

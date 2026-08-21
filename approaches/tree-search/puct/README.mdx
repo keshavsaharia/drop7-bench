@@ -1,28 +1,127 @@
 ---
-title: Puct
+title: PUCT
 family: tree-search
-status: Unknown
+summary: A tree search that starts from a hunch about which columns are worth trying — complete, and never run.
+status: unknown
 evidence: repository-verified
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
+A tree search that starts from a hunch about which columns are worth trying,
+and is allowed to overrule the existing policy only when it is very sure.
+
+<EvidenceLabel status="unknown" evidence="repository-verified" reads="public" />
+
+<Callout title="No retained result" tone="warn">
+This lab is complete, compiles, carries its own preregistered seed lanes and
+frozen acceptance rules — and there is no record anywhere in this repository
+that it was ever run. The [experiment index](/docs/research/experiment-index)
+gives it the status **Unknown**: "the source exists, but neither the ledger nor
+the task record establishes a trustworthy outcome." Everything on this page is
+read from the source.
 </Callout>
 
-## PUCT
+## The idea
 
-Bounded public PUCT with phase-policy priors and screen/confirmation lanes.
+The plain [Monte Carlo tree search](/approaches/tree-search/observable-mcts)
+next door starts every position knowing nothing. Its first simulations are
+spent equally on all seven columns, including columns that any reasonable
+player would reject immediately, and it only learns to avoid them by trying
+them. In a game where a decision budget buys a few hundred simulations, that is
+a lot of the budget spent confirming the obvious.
 
-**Status: Unknown** (repository-verified). no durable result was located.
+PUCT — "predictor + upper confidence bounds applied to trees", the selection
+rule made famous by AlphaGo — adds a **prior**: a cheap opinion, formed before
+any simulation, about how plausible each column is. Columns the prior likes are
+tried first and often; columns it dislikes are not forgotten, but must earn
+attention. The prior here is not a neural network. It is three quick sampled
+probes per column using the repository's shared phase policy, turned into a
+distribution over columns by a softmax with a fixed temperature.
 
-## Sources
+The second idea in this lab is caution. The search is not the player. The
+player is the existing phase policy, and the tree is only allowed to change its
+mind when the tree is emphatic — the challenger column must have been visited
+at least a minimum number of times, must hold a large share of all visits, and
+must lead by more than a fixed margin in value. Four such rules of increasing
+strictness are laid out side by side so a run would show how the outcome
+depends on how brave the override is.
 
-- `puct.cpp`
+## How it works, step by step
 
-## More evidence
+1. Read the public position: board, visible next disc, moves until the next
+   rise, terminal flag. Ask the shared phase policy for its action; that is the
+   baseline.
+2. Form a prior over the legal columns from three sampled probes each,
+   flattened through a softmax with temperature 0.75.
+3. Run 256 simulations over an eight-move horizon, with at most 4,096 stored
+   positions. Selection scores each column by its average result plus an
+   exploration term proportional to its prior and to how little it has been
+   visited relative to its parent.
+4. Compare the tree's favourite with the baseline. Accept the switch only if
+   the challenger has at least 32 visits, more than 65% (or 80%) of the visit
+   share, and a normalized advantage over the baseline above 0.10 (or 0.25).
+   Otherwise play the baseline's column.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/tree-search)
+Simulation, gray-disc reveal and next-disc randomness each draw from a separate
+domain of the solver's own random stream, so the search's imagined futures
+cannot line up with the game's real ones.
+
+## What happened, in plain English
+
+Nothing happened. That is the honest state of this approach: a finished
+experiment with no result.
+
+It is not an oversight so much as a queue. The research roadmap places PUCT
+last in a sequence — first get a model that ranks moves safely, then let it
+override the reference conservatively, then batch and widen — and states the
+rule plainly: "Do not begin with learned action pruning. Every legal root
+action remains eligible until the model has independently demonstrated safe
+sibling ranking." A search that concentrates its budget by prior is exactly the
+kind of thing that rule is holding back until the ranking problem is solved.
+
+Meanwhile the family's other results argue both for and against running it.
+Against: the scaled observable search showed that a bigger, better-directed
+tree became a better imitator of short-horizon values while getting *worse* at
+predicting long outcomes, and a prior directs the tree, it does not change what
+the playouts believe. For: this is a complete program with frozen gates whose
+cost an exploratory audit estimated at roughly one to three CPU-hours, and
+running an experiment that already exists is cheaper per unit of knowledge than
+writing a new one.
+
+<TechnicalDetails title="The technical record">
+
+There is no result record, no ledger entry and no artifact. What exists:
+
+- Preregistered lanes in the source: an eight-game screen and an eight-game
+  confirmation, on separate training seed ranges.
+- One frozen search configuration — 256 simulations, horizon 8, exploration
+  constant 1.25, at most 4,096 nodes — and four override gate profiles
+  combining a 0.65 or 0.80 visit share with a 0.10 or 0.25 value margin at a
+  minimum of 32 challenger visits.
+- Separate random domains for simulations, reveals and next discs; a
+  reflection-canonical treatment of mirrored positions; the shared public phase
+  policy as both prior source and fallback.
+- A build line in the [reproducibility guide](/docs/reproducibility).
+
+[Audit 04](/docs/exploratory/audit-04-blind-spots) — exploratory, read-only —
+groups this lab with two others as "finished experiments with zero recorded
+outcome", estimates roughly one to three CPU-hours each, and adds a warning
+that matters more than the estimate: confirm with the coordinator that the
+preregistered seed ranges are still unconsumed before opening them. Eight games
+is a screen, not a measurement; even a clean pass here would be a reason to run
+a larger cohort, not a result about strength.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **"Not tried" is not "does not work."** This page exists to keep those two
+  apart. Nothing in this repository licenses the sentence "PUCT was tried on
+  Drop7 and failed."
+- **The open question is narrow and cheap:** does a prior plus a strict
+  override gate beat the shared phase policy on its own preregistered eight-game
+  screen? A run would produce the family's first result that is about
+  *deployment* rather than about ranking stored positions.
+- **The prior is the weak point to watch.** It is built from the same phase
+  policy that the search is trying to improve, so a run that shows no switches
+  would be telling you about the prior, not about PUCT.

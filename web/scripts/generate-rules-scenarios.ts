@@ -3,7 +3,7 @@
  * rules" scenario through the repository's TypeScript engine in latent mode.
  * The page's animations are therefore engine output, not illustrations.
  *
- *   cd web && npm run rules:scenarios
+ *   cd web && npm run figures:rules
  */
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";

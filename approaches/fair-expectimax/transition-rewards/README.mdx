@@ -1,49 +1,232 @@
 ---
-title: Transition Rewards
+title: Paying the search for clears and reveals
 family: fair-expectimax
-status: Completed
-evidence: task-record only diagnostic
-generated: true
+summary: Give the search a bonus every time a move clears a numbered disc or exposes a hidden one, on the theory that a policy that keeps the board flowing survives longer.
+status: rejected
+evidence: ledger-recorded
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Give the search a bonus every time one of its imagined moves clears a numbered
+disc or exposes a hidden one, on the theory that a policy which keeps the board
+flowing survives longer. Four experiments tested that idea. The cheap surveys
+were encouraging, one four-game selection was spectacular, and every held-out
+test reversed it.
 
-## D2 reward landscape
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
 
-Training-range-only sweep of clear and reveal transition rewards at depth 2.
+The label above is the group's outcome, not a single record. Of the four
+experiments here, two were **rejected** on held-out games (ledger-recorded), one
+was **runtime-paused** and kept as a diagnostic (ledger-recorded), and the cheap
+survey that started the line is **completed — task-record only**, with no
+numbers retained anywhere in the repository.
 
-**Status: Completed** (task-record only diagnostic). it generated hypotheses but cannot qualify a policy.
+## The intuition
 
-## Phase-energy release
+The single most repeated observation in this repository is that Drop7 score is
+survival: long games score, short games do not, and a game stays alive only
+while the board keeps consuming itself. The task record repeatedly points at
+roughly **2.4 numbered clears and 1.4 reveals per move** as the region
+associated with stable long games — treated in the
+[status summary](/docs/research/status) as diagnostic targets from limited runs,
+not proven thresholds. The reference search sits well below both.
 
-Tests phase-dependent stored-energy release terms inside fair D4.
+So the temptation is direct: if flow is what keeps you alive, pay the search for
+flow. Add a fixed number of points to a move's value for every numbered disc it
+clears, or for every covered disc it exposes, and the search will prefer moves
+that keep the board turning over.
 
-**Status: Runtime-paused** (ledger-recorded). useful diagnostics were retained after the resource cap.
+The reason this is not obviously right is that the reward is a **proxy**, and
+the search is very good at maximising proxies. Clearing discs is valuable
+because of the position it leaves behind — and the position it leaves behind is
+already what the evaluator scores. Paying separately for the act of clearing
+means a move that clears wastefully can outrank a move that prepares something
+larger.
 
-## Clear reward confirmation
+## How the four experiments work
 
-Re-tests the fitting winner that pays a fixed reward per numbered clear.
+1. **The cheap survey.** A depth-2 probe sweeps a twelve-point menu of
+   clear-reward and reveal-reward combinations (from 150 to 600 per clear, 300
+   to 1,200 per reveal). It uses the same evaluator, the same five chance
+   samples, and the same transition semantics as the reference, but completes
+   only two moves of look-ahead so it is cheap enough to sweep. Its executable
+   is **deliberately barred** from the fresh, validation and final seed
+   families: it can generate hypotheses, and cannot qualify one.
+2. **Clear reward plus a rise-cycle schedule.** Inside the full four-move
+   search, add explicit value per numbered disc cleared, and separately, vary
+   how much the evaluator's stored-potential terms are worth across the
+   five-drop cycle (+35% early, down to −40% just before a rise). The frozen
+   menu was clear-only, schedule-only, their moderate combination, and one
+   aggressive combination.
+3. **The clear-reward confirmation.** Strip the schedule and the menu away
+   entirely, freeze the single winning value of +600 per numbered clear, and
+   test it against the unchanged search on eight untouched games.
+4. **The reveal reward.** The same shape for exposure instead: a frozen
+   three-arm menu of stock, reveal-only (+600 per reveal), and balanced (+300
+   per clear and +600 per reveal), where the transition reward counts every
+   wave's exact reveal count, including cascades after a row rise.
 
-**Status: Rejected** (ledger-recorded). the held-out cohort reversed the fitting gain.
+## What happened, in plain English
 
-## Reveal reward
+**The rise-cycle schedule was harmful on its own** and diluted the clear reward
+when combined with it. On the four games that finished, the schedule-only policy
+scored 93,785 and survived 65.5 moves against the unchanged search's 143,300 and
+88.75 — the worst arm in the experiment. That run also **ran out of its time
+budget** before its last two games completed, so it is recorded as a
+resource-capped diagnostic, not a result: no held-out, screen or confirmation
+cohort exists for it.
 
-Isolates direct reward for newly exposed covered numbers.
+**The clear reward looked, briefly, like the best idea in the family.** On those
+same four games, +600 per numbered clear scored 244,187 and survived 156.25
+moves against 143,300 and 88.75 — a triple win in every leave-one-out fold, an
+improvement of about 100,000 points. That justified one fixed follow-up.
 
-**Status: Rejected** (ledger-recorded). the held-out comparison failed.
+**The follow-up reversed it completely.** On eight untouched games the unchanged
+search averaged 155,655 points and 101.25 moves; the +600 clear reward averaged
+106,702 and 72.6. It won one game of eight. Every flow measure moved the wrong
+way as well — clears fell from 2.02 to 1.86 per move, reveals from 1.12 to 1.01
+— which is the sharpest part of the result: **paying for clears produced fewer
+clears.** The ledger's own conclusion is that the four-game selection was a false
+positive.
+
+**The reveal reward failed the same way, with a documented flaw in its
+selection.** Its balanced arm won the four-game fit convincingly (152,413 points
+and 98.75 moves against 110,139 and 71.25) and then regressed on the eight-game
+held-out cohort by 6.6% on score and 5.7% on survival, along with both flow
+rates and both lower quartiles. An audit later showed that the fit itself should
+not have been trusted: the first fitting game had been run and inspected as a
+separate diagnostic before being included in the fitting average, and **60.8% of
+the balanced arm's fitting score comes from that one pre-observed game**. On the
+three fitting games opened afterwards, the balanced arm averaged 79,688 points
+against the unchanged search's 99,959 — the selection reverses without the
+pre-observed game, which exactly predicts the held-out failure
+([audit 03](/docs/exploratory/audit-03-claim-arithmetic), H1).
+
+<TechnicalDetails title="The technical record">
+
+All four are under `approaches/fair-expectimax/transition-rewards/`. Statuses
+from the [experiment index](/docs/research/experiment-index).
+
+**`d2-reward-probe.cpp`** — **completed — task-record only diagnostic**; "it
+generated hypotheses but cannot qualify a policy." Twelve-arm menu, depth 2, 256
+games by default from `0x3d98_0000`, 1,000-move cap, training range
+`0x3d00_0000`–`0x3e00_0000` enforced in the source. **No numbers from this probe
+are recorded in the ledger**; treat any figure attributed to it as provisional
+until one is.
+
+**`fair-phase-energy-release.cpp`** — **runtime-paused — ledger-recorded**;
+"useful diagnostics were retained after the resource cap." Ledger "Fair-D4
+phase-energy release pilot". Zero coefficients reproduce the reference exactly
+(action, root values, nodes, work, cache). Four policies completed all four
+`0x3de50000...003` games:
+
+| Arm | Mean score | Mean moves | Clears / move |
+| --- | ---: | ---: | ---: |
+| Unchanged reference | 143,299.5 | 88.75 | 1.9437 |
+| Clear-only (+600 per clear) | 244,186.5 | 156.25 | 2.1264 |
+| Schedule-only | 93,784.75 | 65.5 | 1.7977 |
+| Moderate combination | 169,493.75 | 112.5 | 2.0489 |
+
+The aggressive arm did not finish; the process exited before any `0x3de60000`,
+`0x3eb30000` or `0x3eb40000` game began, and the artifact records
+`formalGateEvaluated:false` with unavailable per-game reveal/work/cache fields.
+Clear-only beat the reference on score, moves and clear throughput in all four
+leave-one-out folds but is **not a formal fitting winner**, because a
+preregistered menu member is missing.
+
+**`fair-clear-reward-confirmation.cpp`** — **rejected — ledger-recorded**; "the
+held-out cohort reversed the fitting gain." Selection (four `0x3de50000...003`
+games): +600 per clear improved score by 100,887, moves by 67.5, clear
+throughput by 0.18274, a triple win in every fold. Frozen gate, eight
+training-only `0x3de60000...007` games:
+
+| Arm | Mean score | Mean moves | Clears / move | Reveals / move | Mean max chain |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Unchanged reference | 155,655.375 | 101.25 | 2.01975 | 1.11975 | 6.75 |
+| +600 per numbered clear | 106,701.5 | 72.625 | 1.85886 | 1.01205 | 6.625 |
+
+Paired change −48,953.875 points and −28.625 moves; one score pair and one move
+pair won, two move ties; all 16 policy-games uncensored. Work per move
+1.322M/1.262M, peak cache 37,144/35,239 entries, peak resident memory 47,726,592
+bytes, 377.96 seconds. Neither `0x3eb30000...007` nor `0x3eb40000...00f` was
+read. Artifact SHA-256
+`995c6664e068f330eba009f4aa36b1afcffd8afb8a53e07ecaa64ef2f91bdf96`.
+
+**`fair-reveal-reward.cpp`** — **rejected — ledger-recorded**; "the held-out
+comparison failed." Fitting, four seeds `0x3def0000...003`:
+
+| Arm | Mean score | Mean moves | Clears / move | Reveals / move | Score Q25 | Move Q25 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Stock | 110,139.25 | 71.25 | 1.85965 | 1.01404 | 74,049.75 | 52.5 |
+| Reveal-only | 117,299.25 | 77.50 | 1.85161 | 0.98387 | 84,789.75 | 60.0 |
+| Balanced (selected) | 152,413.25 | 98.75 | 2.03797 | 1.14684 | 74,179.50 | 52.5 |
+
+Held-out, eight seeds `0x3df40000...007`: stock 108,247.50 / 74.375 versus
+balanced 101,147.875 / 70.125 — −7,099.625 points (6.56%) and −4.25 moves
+(5.71%), with reveal throughput, clear throughput and both lower quartiles also
+regressing. No `0x3ebd...`, `0x3ebe...`, `0x7d...` or `0xd7...` seed was opened.
+860.982 seconds of a 2,100-second limit; peak resident memory 89,899,008 bytes.
+Artifact SHA-256
+`d18543028169e2aa262d2efea0847e3410886220d0e7bf2d9346533d7a5a92fa`. The ledger
+discloses that seed `0x3def0000` was run first as a separately persisted
+diagnostic and then included in the fitting mean; the audit finding above
+quantifies what that did to the selection.
+
+**Scoring mode.** None of these ledger sections carries a scoring label. An
+independent audit reconstructed the mode from the score identity — every
+reported mean-score/mean-moves pair is feasible under exactly one level bonus —
+and classifies all of the figures above as **historical 7,000-point Sequence
+scoring** ([audit 03](/docs/exploratory/audit-03-claim-arithmetic), rows at
+ledger lines 1688–1700, 1751–1752 and 2167 onward). Rescoring to corrected
+Hardcore rules does not rescue either rejection: score and survival regressed
+together in both, and the audit found only two sign changes in the whole
+7,000-point set, neither of them here.
+
+**Verification.** All four passed optimised `-Werror`, library-mode and
+ASan/UBSan self-tests covering exact zero-coefficient parity with the reference,
+determinism, reflection, metadata blindness, isolated-ablation semantics, exact
+multi-wave and row-rise reveal accounting, legality, completion, and work, cache
+and memory bounds.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+Three things are worth carrying out of this group.
+
+**Paying for flow does not produce flow.** The clearest single number here is
+that a +600 reward per numbered clear *reduced* numbered clears from 2.02 to
+1.86 per move on fresh games. Rewarding an outcome tells the search to grab it
+early; the flow that keeps a game alive comes from structure that has to be
+built and left standing.
+
+**A four-game selection is not evidence.** Both rejected candidates were chosen
+on four games and both reversed on eight. Drop7 scores are heavy-tailed enough
+that a single long game can carry a small cohort's mean, and the two
+confirmations here exist precisely because someone insisted on running them.
+
+**Selection hygiene is fragile in ways that are easy to miss.** The reveal
+reward's fit was dominated by a game that had already been observed before it
+was counted. The run disclosed the pre-observation honestly; nobody re-evaluated
+the gate without it until an audit did, and the answer changed.
+
+Still open: whether the aggressive arm of the rise-cycle schedule experiment
+would have changed its picture — it was never finished — and whether clear and
+reveal counts belong in the evaluator as **features of the resulting board**
+rather than as payments per move. The depth-2 survey that started all of this
+has no retained numbers at all, so its landscape would have to be re-measured
+before being used again.
 
 ## Sources
 
-- `d2-reward-probe.cpp`
-- `fair-clear-reward-confirmation.cpp`
-- `fair-phase-energy-release.cpp`
-- `fair-reveal-reward.cpp`
-
-## More evidence
-
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/fair-expectimax)
+- `d2-reward-probe.cpp` — fast, training-range-only landscape probe; same
+  evaluator, chance sampling and transition semantics as the reference, but
+  only two moves of look-ahead.
+- `fair-phase-energy-release.cpp` — separate terms for stored potential near a
+  rise and for releasing numbered discs, with search topology, chance sampling,
+  terminal utility, deepening and cache limits matching the reference.
+- `fair-clear-reward-confirmation.cpp` — fixed-candidate confirmation of the
+  isolated +600 numbered-clear reward, with no phase term and no remaining menu.
+- `fair-reveal-reward.cpp` — an access-to-covered-number reward with
+  coefficients fixed before evaluation, reading neither of the clear-reward seed
+  ranges.

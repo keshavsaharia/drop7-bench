@@ -1,28 +1,105 @@
 ---
-title: D4 Flow
+title: D4 flow audit
 family: baselines-diagnostics
-status: Unknown
+summary: Replays the reference search over already-used games and writes down, for every single move, what the board looked like and what the search thought — so its habits can be studied instead of guessed at.
+status: support-only
 evidence: repository-verified
-generated: true
+reads: diagnostic
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+The strongest reliable player here is a four-move-deep search, and it is
+largely a black box: it produces a column and a score. This program opens it
+up and records everything it saw and valued, one line per move.
 
-## D4 flow audit
+<EvidenceLabel status="support-only" evidence="repository-verified" reads="diagnostic" />
 
-Emits per-move D4 geometry, flow, and root-value traces on already-consumed seeds.
+## The intuition
 
-**Status: Unknown** (repository-verified). 
+Suppose the reference search averages roughly 90 moves per game and you want to
+know *why it dies*. A mean score cannot tell you. What you need is the shape of
+the last twenty moves: was the board getting taller, were covered discs piling
+up out of reach, did the search's own opinion of the position collapse
+suddenly or drift down for thirty moves?
 
-## Sources
+That means recording, at every move, three different things side by side:
 
-- `d4-flow-audit.cpp`
+- **the position** — the board itself, the next disc, how many drops remain
+  before the rise, how many cells are occupied, how many are still covered,
+  and how tall the tallest column is;
+- **what the hand-written evaluator thinks of it** — its overall value plus the
+  individual features it is built from: immediate chain potential, latent
+  chain potential, exposure of cracked and solid grays, clog patterns such as
+  adjacent 1s and triple 2s, dead low numbers, quiet build options, how ready a
+  trigger is now and how ready it will be after the rise, projected occupancy
+  debt, cover-altitude debt, peak-height risk, and low-cap load;
+- **what the search decided** — the column chosen, the column a three-ply
+  search would have chosen instead, the search's value for the chosen column,
+  and the immediate points it expected.
 
-## More evidence
+Then the move is played and its outcome is appended: points scored, discs
+cleared, discs revealed, number of chain waves, whether the level advanced,
+whether the game ended.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/baselines-diagnostics)
+Line up a few hundred of those and questions such as "does the depth-4 search
+disagree with depth 3 more often just before it dies?" become arithmetic.
+
+## How it works
+
+1. Refuse to start unless the seed is one of four already-consumed development
+   games (`0x3d6e4000`–`0x3d6e4003`). This is instrumentation on data whose
+   status has already been spent; it must not open a fresh cohort.
+2. Play the game with the unmodified depth-4 reference, and abort if the search
+   ever fails to complete all four plies or returns an illegal column — an
+   incomplete search would make the trace a record of a different policy.
+3. Write one JSON object per move to a file, with the fields above.
+4. Print a running summary to the terminal every 25 moves: score so far,
+   clears per move, reveals per move.
+
+It defines no policy of its own and it changes nothing about the search. It is
+labelled a diagnostic rather than public because it exists to describe a policy,
+not to be one.
+
+## What happened
+
+**No retained result.** The [experiment index](/docs/research/experiment-index)
+lists this source as support-only and repository-verified;
+[audit 04](/docs/exploratory/audit-04-blind-spots) §B.2 records it as
+"diagnostic only; no retained output". No trace file from it is kept in this
+repository, and no conclusion in the research documents cites one.
+
+The related question it was built to answer *has* since been answered
+elsewhere, by different code: the depth-4 reference's flow deficit is measured
+in [finding 01](/docs/exploratory/finding-01-score-is-survival) as 1.973 clears
+and 1.090 reveals per move against the 2.400 and 1.400 the board demands, over
+64 paired games at the exploratory development tier.
+
+<TechnicalDetails title="The technical record">
+
+**Status: support-only — repository-verified.** No ledger entry, no task
+record, no retained artifact.
+
+`d4-flow-audit.cpp` includes the reference implementation
+`approaches/fair-expectimax/reference/fair-only-depth4.cpp` directly with its
+`main` disabled, so the audited policy is byte-for-byte the reference and not a
+copy. Options: `--seed` (restricted to `0x3d6e4000`–`0x3d6e4003`),
+`--max-moves` (1–1,000, default 500), `--output` (default a path under `/tmp`).
+Features come from `extractFairFeatures` and the shared phase feature struct;
+the leaf value is `fairLeaf`.
+
+The same four seeds `0x3d6e4000`–`0x3d6e4003` are the fitting quartet used by
+the [structural terminal veto](/approaches/constructive-reservoir/structural-terminal-veto),
+which is why they are already consumed.
+
+Source: `d4-flow-audit.cpp`.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- A per-move trace is the right instrument for asking why a search dies, and
+  this one is already wired to the exact reference policy rather than an
+  imitation of it.
+- Four games is the entire licensed range. Anything statistical would need a
+  fresh, declared development lease.
+- Nothing produced by it is on record. If the traces were ever read, what they
+  showed was not written down.

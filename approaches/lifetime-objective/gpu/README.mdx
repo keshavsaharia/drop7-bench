@@ -1,26 +1,237 @@
 ---
-title: Gpu
+title: Getting the workstation's GPU to do the training
 family: lifetime-objective
-status: Unknown
-evidence: unknown
-generated: true
+summary: An infrastructure package that made PyTorch work on this machine's integrated AMD GPU, checked that it computes correct answers, and measured how much faster it is than the CPU.
+status: support-only
+evidence: repository-verified
+reads: diagnostic
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
+Some of the ideas in this repository need a neural network trained. This package
+answers a purely practical question: can that training run on the graphics
+processor built into the research machine, and is it worth it?
+
+<EvidenceLabel status="support-only" evidence="repository-verified" reads="diagnostic" />
+
+The answer is yes on both counts, with two software defects to work around — and
+the work also uncovered two separate bugs on the machine itself that quietly
+corrupt numbers the rest of the repository was relying on.
+
+<Callout title="What was and was not measured" tone="warn">
+**No game was played, no seed lease was opened, and no claim about playing
+strength is made anywhere in this package.** It measures matrix throughput,
+training throughput, and numerical correctness. Every throughput number was
+taken on a **heavily contended machine** — other jobs held 20 to 50 of the 32
+logical CPUs throughout — and is reported as best-of-N, which bounds the effect
+but does not remove it. The figures are **lower bounds**. A brief quiet window
+suggested the GPU numbers are around 1.8 times pessimistic. Nothing here
+qualifies as a clean performance baseline, and the exploratory record says so
+explicitly: re-measure on an idle host before promoting any performance claim.
 </Callout>
 
-This approach is not yet listed in the experiment index. Read the
-source files below and the family page for context, and expand this
-page when the approach is understood.
-## Sources
+## What it does
 
-- `bench.py`
-- `openblas_sgemm_race.py`
+The package is one benchmark and correctness harness plus an environment script,
+and it runs four independent stages:
 
-## More evidence
+1. **Probe.** Reports what is actually installed — interpreter, framework, GPU
+   runtime, device properties — so that a later result can be attributed to a
+   configuration.
+2. **Verify.** Checks that the GPU computes *correct* results, scored against a
+   double-precision reference on the CPU rather than against single-precision
+   CPU output. That choice turned out to matter enormously.
+3. **Matrix throughput.** A sweep over matrix sizes and number formats.
+4. **Training throughput.** Forward and backward passes of a network shaped like
+   the ones this repository would actually train: a 7-by-7 board encoded as
+   twelve planes, a stack of residual blocks, and two output heads.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/lifetime-objective)
+## What it found about the machine
+
+**The GPU works, and it is right.** Against a double-precision reference, a
+4096-square single-precision matrix multiply came out with a relative error of
+3.451e-06; gradients through the board-shaped network matched to 3.278e-07; a
+200-step soak left every parameter finite and drove the loss from 2.948 to 0.003
+on a fixed batch, so the network demonstrably learns rather than merely running.
+
+**Memory is one pool, not two.** This is an integrated GPU with no dedicated
+video memory. The 512 MiB the system tool reports is a firmware carve-out and is
+misleading; the real figure is a 94.94 GiB pool shared with system RAM. The
+largest configuration measured used 5.81% of it, so memory is nowhere near being
+the constraint.
+
+**It is worth using for large batches, and roughly a wash for small ones.**
+
+<div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12, margin: "1rem 0" }}>
+  <Stat label="2M-parameter net, batch 8,192" value="4.42×" hint="6,150 vs 1,392 samples/sec" />
+  <Stat label="0.7M-parameter net, batch 256" value="1.25×" hint="7,360 vs 5,892 samples/sec" />
+  <Stat label="bf16 vs fp32 matrix throughput" value="11–14×" hint="the GPU has matrix cores for bf16 and not for fp32" />
+  <Stat label="peak memory used" value="5.81%" hint="of the 94.94 GiB shared pool" />
+</div>
+
+The advantage is batch size, not raw speed: GPU throughput rises about 2.5 times
+from batch 256 to batch 8,192 while CPU throughput *falls* about 40% under cache
+pressure. At the small end the margin is thin enough that the CPU remains a
+legitimate fallback, and avoids the operational burden entirely.
+
+**The CPU and GPU share one power budget.** On this kind of chip they are the
+same package. Measured mean shader clock fell from 2,084 MHz at a host load of
+10.7 to 1,059 MHz at a load of 41 — nearly half. Running a heavy CPU job beside
+GPU training makes both miss their numbers, and it means the speedups above are
+if anything understated, because the GPU was clock-starved by the same
+contention that was slowing its CPU comparator.
+
+## The two defects it works around
+
+**The shipped GPU runtime crashes on the first operation.** Every GPU call
+segfaulted out of the box. Compiling a native vector-add against the
+system-installed runtime worked perfectly, which separated "the framework's
+bundled copy is broken" from "the hardware or driver is broken". The fix is to
+preload the system copy of one specific leaf library — safe precisely because it
+pulls in nothing else.
+
+**Batch normalisation cannot be compiled for this GPU.** The shipped kernel
+library selects a solver written for an older GPU generation and emits assembly
+this one rejects. It only affects *training* mode, which makes it easy to miss —
+the original correctness suite passed because it ran in evaluation mode. The
+obvious fix is a trap: preloading the system copy of that library does make it
+work, and then gives the process two copies of the GPU runtime and two device
+contexts, which survives simple tests and crashes nondeterministically a few
+training steps in. The workaround used instead is to avoid that layer entirely
+and use group normalisation, which is also the better choice on the merits for
+this kind of training.
+
+## The two host bugs found along the way
+
+These are the most broadly important part of the package, because they are not
+about the GPU at all.
+
+**Multithreaded single-precision matrix multiply on this CPU returns wrong
+answers.** Once the numerical library uses four or more threads, roughly 0.1% to
+1% of output elements come back wrong — by around 10, five orders of magnitude
+beyond legitimate rounding — and differently on every run for byte-identical
+inputs. That makes it a data race, not a precision effect. Double precision
+never reproduced it; one and two threads never reproduced it; and a *different*
+maths library performing the same multiplication on the same CPU, in the same
+process, interleaved with the failing calls, was correct 40 times out of 40 while
+the failing one was wrong 40 out of 40. The mitigation is to pin that library to
+one thread, which costs essentially nothing here.
+
+**Convolutions on the CPU do not repeat.** Two identical forward passes of the
+same convolution over the same input, in evaluation mode, with every thread count
+pinned to one, differ in about 6.25% of output elements. At whole-model scale the
+effect is larger, because normalisation mixes channels: repeated passes of a
+three-million-parameter network over an identical batch differ in **100%** of
+outputs. This silently invalidated a parity check — a comparison that reported a
+maximum difference of 1.1e-5 reported failure on every head twenty minutes later,
+and neither run was wrong about the code being tested. The *reference* had moved.
+
+<Callout title="Why this matters beyond the GPU work" tone="warn">
+Any measurement in this repository that compares something against a CPU-side
+neural reference — an export check, a distillation target, a held-out metric, a
+teacher label — is measuring that comparison plus an unknown perturbation,
+unless the affected path was disabled or the work ran on the GPU. The rule the
+record settles on is: **prove your reference repeats before comparing anything
+to it.** More generally, the corruption was found only because a GPU check
+compared against a CPU reference and the *reference* was what failed. The
+natural reading — "the GPU disagrees with the CPU, so the GPU is wrong" — was
+exactly backwards, and what resolved it was a third, higher-precision arm.
+Given how much of this repository's evidence is a candidate compared against a
+baseline, "the baseline is the broken one" is a failure mode worth keeping on
+the table.
+</Callout>
+
+<TechnicalDetails title="The technical record">
+
+Sources: [`gpu-01-rocm-enablement`](/docs/exploratory/gpu-01-rocm-enablement),
+[`gpu-02-openblas-sgemm-race`](/docs/exploratory/gpu-02-openblas-sgemm-race),
+[`gpu-03-onednn-conv-nondeterminism`](/docs/exploratory/gpu-03-onednn-conv-nondeterminism).
+Status exploratory; infrastructure and measurement only. Machine: AMD Ryzen AI
+MAX+ 395 ("Strix Halo"), 16 physical cores / 32 logical, Radeon 8060S integrated
+GPU (`gfx1151`, RDNA 3.5, 20 compute units), 125 GiB system RAM with a 94.94 GiB
+unified pool visible to the GPU, kernel `6.18.35+rex+2-amd64`.
+
+**Correctness, scored against a float64 CPU reference.** 4096-square fp32
+matmul: max absolute difference 1.157519e-03 against a max magnitude of 335.39,
+relative 3.451e-06. 1024-square bf16: relative 3.032e-03. Board-network forward:
+max logit error 1.132e-06. Board-network gradients: max 3.278e-07. Five optimiser
+steps change weights and stay finite. Batch-normalisation training mode: **WARN**,
+kernel build failure. Stability soak: 200 steps, 128 channels, batch 1024, all
+parameters finite, loss 2.948 to 0.003.
+
+**Training throughput, best-of-N, contended host.** 128 channels / 2,006,888
+parameters, host load 10.6 to 33.7: GPU 3,481 / 5,113 / 6,283 / 6,150 samples per
+second at batches 256 / 1,024 / 4,096 / 8,192, against CPU 1,697 / 1,693 / 1,400 /
+1,392 — speedups 2.05, 3.02, 4.49, 4.42. 64 channels / 667,112 parameters, host
+load 7.3 to 18.9: GPU 7,360 / 11,405 / 17,450 / 18,726 against CPU 5,892 / 5,039 /
+3,708 / 3,617 — speedups 1.25, 2.26, 4.71, 5.18.
+
+**Matrix throughput.** In the table taken at host load 29.8 to 34.6, bf16 peaked
+at 15.64 TFLOP/s and fp32 at 1.39 TFLOP/s. In the least-contended window of the
+whole session the same sweep reached **27.76 TFLOP/s bf16** and 2.60 TFLOP/s
+fp32, roughly 1.8 times higher — the clearest single illustration of what the
+shared host costs these measurements. Two structural observations that are not
+contention artifacts: bf16 is 11 to 14 times faster than fp32 because this GPU
+has matrix cores for bf16 and not for fp32, and the fp32 path reaches only about
+5% of its theoretical peak.
+
+**Thermal and power.** Edge temperature 59 to 82 °C; socket power 33 to 114 W for
+the whole package, not a GPU rail; shader clock 600 to 2,899 MHz. Mean shader
+clock by host load: 2,084 MHz at 10.7, 1,577 at 20.6, 1,172 at 32, 1,059 at 41.
+
+**The matrix-multiply race** (`gpu-02`): reproduced and characterised, not yet
+reported upstream. Corruption appears at four or more threads and is intermittent
+per process; 1 and 2 threads never failed across every experiment run. At
+1024-square, 40 trials: 40 of 40 corrupted at 32 threads, 13 of 40 at 16 threads,
+**0 of 40** for the alternative library at 16 threads in the same process.
+Maximum absolute errors 1.4e+01 to 4.4e+01 against a legitimate rounding error of
+about 1.2e-04. The library dispatches an Intel-targeted kernel on this AMD CPU
+because its build has no target for this microarchitecture. What is **not**
+established: whether upstream or only this packaged build is at fault, whether it
+is version-specific, whether it affects the Intel parts the kernel was written
+for, which kernel exactly, and the mechanism.
+
+**The convolution nondeterminism** (`gpu-03`): `Conv2d` over a
+(256, 128, 7, 7) input, max absolute difference across repeats **0.146** in
+**6.25%** of elements; the same convolution with the accelerated path disabled,
+and group normalisation, linear layers and plain matrix multiply, all bit-exact
+at 0. Whole-model: 100% of outputs differ, maximum absolute logit difference 0.18
+to 0.35. One host, one framework build; the offending kernel was not identified
+and no upstream report was filed; only one convolution shape was tested, so 6.25%
+describes that shape and is not the defect's general magnitude; GPU execution was
+not tested for the same property.
+
+**Other limitations as recorded.** Batch-normalisation training is unusable on
+the recommended install; the alternative vendor build fixes it but is an older
+framework version and links the affected maths library. The preload workaround
+couples the environment to the system GPU installation. GPU device access here
+depends on a session-level access control rather than group membership, so a
+headless or service context may lose it entirely. The CPU governor was left on
+its power-saving setting. Only one package index and two framework versions were
+compared, with no attempt at kernel tuning, compilation, or graph capture. Mixed-
+precision *training* throughput was never captured because the host load returned
+before the run finished. The retained machine profile
+`MACH-20260820T080056Z-376ada90` is imprecise about this GPU and was deliberately
+not edited, as it belongs to another work package.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+The practical verdict is narrow and useful: **only the neural training step
+belongs on the GPU.** Game simulation stays on the CPU — nothing here suggests
+otherwise — and any training loop that intends to use the GPU should be written
+to push large batches in bf16, because that is where the hardware's advantage
+lives.
+
+The methodological verdict is broader, and it is the reason this page exists at
+all rather than living only in a build script. Two independent, silent numerical
+defects were found on the research machine within one session, both of which had
+already produced a wrong conclusion before they were understood. Neither raises
+an error, a warning, or a not-a-number. The only thing that caught them was
+checking a reference against something more trustworthy than itself.
+
+What is still open: every throughput figure needs re-measuring on an idle host
+under a resource lease before it can be quoted as a performance claim, and the
+matrix-multiply race deserves the two cheap upstream checks the record names —
+whether a differently-built copy of the same library at the same version
+reproduces it, and whether a newer version has already fixed it.

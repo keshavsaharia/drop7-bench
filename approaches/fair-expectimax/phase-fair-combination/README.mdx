@@ -1,28 +1,138 @@
 ---
-title: Phase Fair Combination
+title: Adding a rise-cycle residual to the evaluator
 family: fair-expectimax
-status: Completed
+summary: Bolt a small extra term onto the board evaluator that cares about where you are in the five-drop cycle before the next row rise — and keep the weights it left behind.
+status: completed
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Bolt a small extra term onto the board evaluator — one that cares about where
+you are in the five-drop cycle before the next row rise — and see whether the
+policy plays better. The lasting product of this bench is not the extra term but
+the five frozen evaluator weights it left behind, which the reference search
+still uses.
 
-## Phase/fair combination
+<EvidenceLabel status="completed" evidence="ledger-recorded" reads="public" />
 
-Combines the fair leaf with frozen phase overrides.
+## The intuition
 
-**Status: Completed** (ledger-recorded). it is part of the recovered D3 baseline lineage.
+Drop7's clock is the row rise: every fifth drop, the whole board shifts up and a
+new row of gray discs appears underneath. That means a board is not simply
+"good" or "bad" — it is good or bad *relative to where you are in the cycle*.
+Four drops before a rise, a tall board is survivable and a slow-building plan is
+affordable. One drop before a rise, the same board is an emergency and the same
+plan is worthless.
+
+The evaluator described on the [fair leaf page](/approaches/fair-expectimax/fair-policy)
+has no such clock inside it. This bench adds a **residual** — a separate
+phase-aware score, added on top of the fixed fair evaluator rather than replacing
+it, so the base behaviour is preserved and only the correction is being tested.
+The residual used here doubles two phase-throughput terms — how ready the board
+is to trigger, and how ready it is to release — so the combined policy pays extra
+attention to keeping things moving as a rise approaches.
+
+## How it works, step by step
+
+1. Compute the fixed fair evaluator's value for the position. Nothing about it
+   changes.
+2. Compute the phase-aware residual from the same public features plus the
+   number of drops remaining before the rise.
+3. Add the residual at one of three fixed scales — 0.25, 0.5, or 1 — chosen
+   from a menu frozen before any game was played.
+4. Use the combined value as the leaf of a sparse look-ahead search with a
+   one-million-unit work limit, a 40,000-entry cache, a 500-move cap, and a flat
+   −1,000,000 for a modelled game over.
+5. Select the scale on two development games, then **lock it** and play a
+   sixteen-game confirmation. Calibration only begins if the selected policy
+   clears both preregistered gates: a 400,000-point score bar and a 5%
+   improvement over the paired baseline.
+
+Everything the policy reads is public: the visible board, the visible next disc,
+and the rise clock.
+
+## What happened, in plain English
+
+Two things, and only one of them is a result.
+
+**The residual did not help.** The ledger's account of the recovered evaluator
+is blunt: adding any tested phase residual **broke** the two long historical
+trajectories the fair evaluator had produced, cutting them from 155 and 160
+moves down to somewhere between 55 and 110. That is why the native reference
+search deliberately excludes the residual and keeps only the base leaf. Note the
+size of that evidence: two games, on already-used training seeds, from the
+7,000-point scoring era. It is a mechanism observation, not a measured cohort,
+and no held-out cohort for the residual is retained anywhere in the repository.
+
+**The bench's weights survived.** In the course of this work the fair evaluator
+was pinned to five explicit overrides, exported from this directory as a named
+constant. The native depth-3 reference imports exactly those five values, and
+everything downstream of it — the four-move reference, and every experiment on
+the neighbouring pages — inherits them. The
+[experiment index](/docs/research/experiment-index) records this approach as
+**completed — ledger-recorded**, "it is part of the recovered D3 baseline
+lineage" — that is, the line of work that produced the three-move reference
+search — and that lineage is its real contribution.
+
+<TechnicalDetails title="The technical record">
+
+**Source.** `approaches/fair-expectimax/phase-fair-combination/main.ts`.
+Status: **completed — ledger-recorded**.
+
+**The exported constant.** `FAIR_PHASE_BASELINE_WEIGHTS` overrides the
+laboratory's initial fair-policy weights with: direct potential 1,600, latent
+chain potential 700, height load −20, roughness 0, revealed-cover value 300.
+`approaches/fair-expectimax/reference/fair-only-horizon.cpp` recovers the
+fair-only leaf from `fair-policy/tune.ts` **with these five overrides** and
+"intentionally excludes the later phase residual" (ledger, "Historical fair-only
+horizon evaluator"). The 300-point revealed-cover term is a transition feature
+and is inert when the model is used purely as a leaf.
+
+**The residual.** `RELEASE_DOUBLE_PHASE_WEIGHTS` doubles `triggerReadiness` and
+`releaseReadiness` on the default phase-horizon weight vector from
+`src/core/typescript/phase-horizon-evaluator.ts`. Residual scales tested:
+0.25, 0.5, 1. Declared seed roles: training `0x1d70_0000`, calibration
+`0x5d70_0000`, validation `0x7d70_0000`, reserved final `0xd700_0000`. Defaults:
+2 pilot games, 16 confirmation games, 16 calibration games, 500-move cap,
+1,000,000 work, 40,000 cache entries, −1,000,000 terminal utility. Gates:
+`REQUIRED_TRAINING_MEAN` 400,000 and `MATERIAL_IMPROVEMENT` 1.05.
+
+**What is not retained.** No cohort table, paired comparison, artifact hash or
+confidence bound for the residual itself appears in
+[the ledger](/docs/research/history). The only recorded outcome is the sentence
+quoted above — that every tested residual shortened the two historical
+trajectories from 155/160 moves to 55–110 — inside the section describing the
+native recovery of the base evaluator, under historical 7,000-point scoring.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+The negative half is a useful piece of the family's story: the rise clock is
+obviously important to a human player, and the most direct way of writing it
+into the evaluator — a bolted-on phase term — made the policy die sooner. One
+plausible reason is that the searches on these pages already *see* the rise: the
+look-ahead simulates the rise happening, so its consequences are already priced
+into the boards at the bottom of the tree, and an extra phase bonus double-counts
+them in the same way the
+[restored placement rewards](/approaches/fair-expectimax/full-action-terms) did.
+That is a hypothesis this repository has not tested directly.
+
+The positive half is a caution about provenance rather than a scientific result.
+The five weights that the entire family depends on were pinned here, and their
+fitting protocol is not in the ledger; they should be treated as a well-tested
+starting point, not as a derived optimum.
+
+Still open: whether phase information helps as an **input feature** the
+evaluator can weigh, rather than as a residual added to a finished score, and
+whether it matters more for a search too shallow to see the next rise than for
+one that can. The related rise-boundary depth experiment on the
+[looking-five-moves-ahead page](/approaches/fair-expectimax/selective-depth)
+attacked the same intuition from the search side and was also stopped.
 
 ## Sources
 
-- `main.ts`
-
-## More evidence
-
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/fair-expectimax)
+- `main.ts` — adds only a phase-throughput residual to the fixed fair-policy
+  leaf; candidate selection uses two development seeds, then locks the exact
+  scale for a sixteen-game confirmation, and calibration starts only after the
+  selected policy clears both the 400k score and 5% paired-baseline gates.

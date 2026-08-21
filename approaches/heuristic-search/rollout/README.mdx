@@ -1,35 +1,134 @@
 ---
 title: Rollout
 family: heuristic-search
-status: Rejected
+summary: Instead of judging a column by how the board looks afterwards, play the game on from there — twenty-five more moves, several imagined disc streams — and judge it by how that went.
+status: rejected
 evidence: task-record only
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Instead of judging a column by how the board looks afterwards, play the game
+on from there — twenty-five more moves, several imagined disc streams — and
+judge it by how that went.
 
-## Native rollout planner
+<EvidenceLabel status="rejected" evidence="task-record only" reads="public" />
 
-Evaluates root actions with bounded public continuations and configurable horizons/scenarios.
+## The intuition
 
-**Status: Rejected** (task-record only). the tested 25-move control reproduced the weak continuation policy's mistakes.
+Every hand evaluator is a guess about the future compressed into a number. A
+[rollout](/learn/glossary) replaces the guess with a rehearsal: take the board
+that a column produces, keep playing with some quick policy for twenty-five
+more moves, and see whether you are still alive and how much you scored. Do
+that for each column over several imagined disc streams, and the column that
+survives its rehearsals is the one to play.
 
-## Native rollout teacher
+Twenty-five moves is not an arbitrary number. It is five complete
+[rise](/learn/glossary) cycles, so a rollout of that length sees the
+consequences of a decision *through* the events that actually kill policies in
+this game.
 
-Produces higher-cost common-tape action labels for rollout and distillation studies.
+The idea has the best single anecdote in the repository behind it, and also
+the clearest demonstration of why an anecdote is not a result — see below.
 
-**Status: Completed** (task-record only). useful as a teacher/benchmark, not a deployable policy.
+## How it works, step by step
 
-## Sources
+1. **Read the public position** — board, next disc, rise clock.
+2. **For each legal column, build a set of scenarios**: synthetic streams of
+   future discs and gray-disc reveals, generated from a hash of the visible
+   position so that every column is rehearsed against the same luck.
+3. **Play each rehearsal forward** to the horizon with a quick continuation
+   policy, accumulating the points actually scored.
+4. **Charge a large penalty if the branch dies**, and add one evaluation of
+   the final board if it survives.
+5. **Collapse each column's rehearsals** into a mean, a lower bound, or a
+   worst-quarter average, and play the best.
 
-- `rollout.cpp`
-- `teacher.cpp`
+A second program in this directory does the same thing more expensively and
+for a different purpose: it beam-searches each root column across fourteen
+fixed synthetic tapes and votes across them, to produce *labels* — a stronger
+opinion about which column is best — for training and distillation work rather
+than for playing.
 
-## More evidence
+## What happened, in plain English
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/heuristic-search)
+The playing version was retired. With a weak continuation policy driving the
+rehearsals, the rehearsals inherit that policy's mistakes: you are not seeing
+what would happen, you are seeing what a weak player would do, twenty-five
+times over, and preferring the columns that suit it.
+
+The labelling version was kept, with an explicit warning attached: it is a
+useful teacher and benchmark, and it is not a policy anyone may deploy. It
+costs far too much per decision, and every one of its plans is made inside a
+future it has been told in advance — which is the classic way to make a plan
+look better than any real player could achieve.
+
+The strongest version of this idea lives in a different family, and it is
+worth knowing what happened to it, because it is the most instructive number
+in the repository.
+
+<TechnicalDetails title="The technical record">
+
+**This directory.** The [experiment index](/docs/research/experiment-index)
+records the planner as **rejected, task-record only** — *"the tested 25-move
+control reproduced the weak continuation policy's mistakes"* — and the teacher
+as **completed, task-record only** — *"useful as a teacher/benchmark, not a
+deployable policy."* Task-record only means both outcomes are reported in a
+research conversation and neither was promoted into the
+[experiment history](/docs/research/history). **No cohort, score, or per-game
+result for either program is retained in this repository.**
+
+Repository-verified from the source: `rollout.cpp` defaults to a 25-move
+horizon and 7 scenarios, with root aggregation selectable as mean, lower
+bound, CVaR25 or a blend, one to seven continuation samples, and a scaled
+phase-style leaf for surviving branches. `teacher.cpp` defaults to a 25-move
+horizon, 14 tapes and a beam of 8 per root action, with optional cross-tape
+voting; its tapes are keyed on a hash of the canonical *observable* state —
+board, next disc, rise clock — so it reads no hidden value and no real future
+disc, but it does plan inside a future it has fixed in advance.
+
+**The properly recorded version of this idea, in the
+[D4 long-outcome](/approaches/d4-long-outcome) family.** A 25-move,
+seven-scenario continuation driven by a completed depth-2 search, used to veto
+the reference search's move, produced a single pilot game of **404,047 points
+in 250 moves against 159,616 in 105** for the reference. That is
+**ledger-recorded and labelled signal only** — one game, and far outside its
+runtime limit. It was rescored to the corrected 17,000-point Hardcore award as
+**894,047 against 359,616** in
+[audit 04](/docs/exploratory/audit-04-blind-spots), which called it the single
+largest unexploited number in the repository.
+
+It was then tested properly.
+[Finding 03](/docs/exploratory/finding-03-rollout-veto-17k) is a 32-game
+paired screen at corrected scoring — run validity `valid`, scientific outcome
+`fail`, evidence tier development. The reference search averaged **339,290
+points and 98.66 moves**; the rollout veto averaged **292,780 and 86.34**. The
+paired mean difference was **−46,510.5 points and −12.31 moves**, with a
+one-sided 95% bootstrap lower bound of −91,924.6, a 9–4–19 win record and a
+sign test at p = 0.0436. Clear and reveal rates both fell. The same document
+diagnoses why the veto almost never fired: its confidence test required the
+mean advantage to exceed 0.92 standard deviations over seven scenarios, and
+99.1% of the 12,314 candidate alternatives failed that one condition.
+
+So the honest summary of the family is: one spectacular game, and a properly
+powered retest that went the other way.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **A rollout is only as good as the player inside it.** This is the same
+  diagnosis the [MCTS work](/approaches/tree-search/observable-mcts) reached
+  independently: the bottleneck was the weak continuation policy and the
+  reused chance samples, not the number of simulations. Increasing the budget
+  buys more of the wrong future.
+- **One long game is not evidence, and the repository has now proved that on
+  itself.** Score in this game is heavy-tailed; a policy can win a cohort
+  because a single game ran unusually long. Finding 03 exists precisely
+  because someone refused to let the 404,047-point game stand as a result.
+- **What is still open** is affordability. The strategy catalog's second open
+  direction is to make multi-cycle sibling comparison cheap by design — a
+  cheaper verified continuation, batched transitions, admissible early
+  elimination — while keeping the one positive pilot out of parameter
+  selection. Multi-cycle comparison remains one of the more informative
+  directions in the repository; this implementation of it is not the way to
+  get there.

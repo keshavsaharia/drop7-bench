@@ -1,28 +1,99 @@
 ---
-title: Terminal Policy Iteration
+title: Terminal policy iteration
 family: terminal-policy-iteration
-status: Rejected
+summary: The full-strength version — 255 shared imagined futures, 200 moves each, and a rule that only changes the reference's move when it is 99% sure of a gain in both score and lifetime.
+status: rejected
 evidence: task-record only
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+The full-strength version of the family's idea: 255 shared imagined futures,
+200 moves each, and a rule that only changes the reference's move when it is
+99% sure of a gain in both score and lifetime.
 
-## Terminal policy iteration
+<EvidenceLabel status="rejected" evidence="task-record only" reads="public" />
 
-Uses 255 aligned H200 continuations and strict confidence bounds to override fair D1.
+## The intuition
 
-**Status: Rejected** (task-record only). the gain was real but missed the frozen score/survival and whole-origin gates.
+Its cheaper sibling,
+[public rollout policy iteration](/approaches/terminal-policy-iteration/public-rollout-policy-iteration),
+compared columns with fifteen imagined futures over fifty moves and could not
+tell the good ones apart reliably enough to act. The obvious diagnosis is
+sampling noise, and the obvious remedy is more samples and a longer look: 255
+futures instead of 15, 200 moves instead of 50 — long enough for forty row
+rises, which is the timescale on which a policy actually dies.
 
-## Sources
+The second change is stricter arithmetic. Instead of taking whichever column
+has the best average, this program demands that the paired difference against
+the reference's own move clear a one-sided **99%** lower confidence bound — and
+it demands that separately for corrected score *and* for moves survived. A
+column that scores more but lives less does not qualify. Neither does a column
+that is merely probably better.
 
-- `terminal-policy-iteration.cpp`
+## How it works, step by step
 
-## More evidence
+1. Read the public position only: board, visible next disc, moves until the
+   next rise, terminal flag.
+2. Build 255 event-stratified chance streams and give **every sibling column
+   the same 255**, so all columns face identical luck.
+3. For each column, force that move; every later decision is made by a fresh,
+   completed fair one-move-ahead search whose input type can hold nothing but
+   public information.
+4. Run each continuation out to a 200-move horizon and record score and moves
+   survived.
+5. Replace the reference's action only when the paired one-sided 99% lower
+   bounds are positive on *both* measures. Otherwise keep it.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/terminal-policy-iteration)
+## What happened, in plain English
+
+It found something, and the something was not big enough.
+
+The retained verdict is that the gain was real but missed the frozen
+score-and-survival gate and the requirement that improvement hold up across
+whole origin games rather than in aggregate. That combination — a genuine
+effect that will not survive being split by game — is the single most common
+outcome in this repository, and it is what the whole-origin condition exists to
+detect: a mean can be lifted by one lucky origin while most origins get worse.
+
+The honest problem with this page is that there is nothing to quote. This
+result is **task-record only**: it comes from a research conversation and was
+never promoted into the written ledger, so there is no protocol, no artifact
+hash, no per-game data and no number.
+[Audit 04](/docs/exploratory/audit-04-blind-spots) lists this source among the
+thirty rejections that "cannot be re-derived", and specifically flags it as one
+of the survival-flavoured experiments whose numbers a later analysis needed and
+could not find. Treat "the gain was real" as an unverified claim.
+
+<TechnicalDetails title="The technical record">
+
+Status **rejected**, evidence **task-record only**. The
+[experiment index](/docs/research/experiment-index) records the purpose as
+"uses 255 aligned H200 continuations and strict confidence bounds to override
+fair D1" and the outcome as "the gain was real but missed the frozen
+score/survival and whole-origin gates". There is no entry in the
+[experiment history](/docs/research/history).
+
+From the source: a conservative one-step policy-improvement test around exact
+public fair D1; every sibling action sees the same 255 event-stratified chance
+streams; the root action is forced and every later decision is a fresh,
+completed fair-D1 search whose type boundary contains public information only;
+a candidate action can replace fair D1 only when paired one-sided 99% lower
+confidence bounds establish gains in both corrected score and survived moves.
+The file asserts the corrected 17,000-point level bonus at compile time, so it
+is not one of the archival Sequence-scored sources.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **More samples did not rescue the comparison.** Going from 15 futures to 255
+  and from 50 moves to 200 produced an effect that still could not pass a
+  per-origin check. That is evidence about the size of the available
+  improvement, not just about the noise.
+- **What is missing is provenance.** A rerun of this exact program with a
+  registered protocol and retained per-game output would convert the most
+  interesting claim in this family from an anecdote into evidence, without
+  needing a new idea.
+- **What was ruled out** is this configuration at this budget. What was not
+  ruled out is the objective: judging moves by measured lifetime remains the
+  motivation for the whole family.

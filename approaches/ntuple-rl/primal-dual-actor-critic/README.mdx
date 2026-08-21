@@ -1,28 +1,127 @@
 ---
-title: Primal Dual Actor Critic
+title: Learning a policy with explicit safety constraints
 family: ntuple-rl
-status: Rejected
+summary: Learn a small correction to a simple search while being held to hard limits on how fast the board fills up and how often the game ends — the limits were all violated and the run was sealed before any gameplay test.
+status: rejected
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Learn a small correction to a simple search, while being held to hard limits on
+how fast the board fills up and how often the game ends.
 
-## Primal-dual actor-critic
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
 
-Constrains five-move occupancy drift, cover drift, and terminal risk while learning a policy residual.
+## The intuition
 
-**Status: Rejected** (ledger-recorded). final calibration failed and Stage A stayed closed.
+Most reinforcement learning in this repository optimises one number — score, or
+moves survived — and every failure mode looks the same: the policy learns
+something locally attractive and dies. But Drop7 has a natural bookkeeping
+rhythm. Every five drops the board rises by a row, so a policy that is going to
+survive must, over each five-move cycle, clear roughly as much as arrives and
+uncover roughly as many gray discs as the rise buries. Those are *constraints*,
+not preferences.
 
-## Sources
+Constrained optimisation has a standard tool for this. Alongside the reward,
+attach a price to each violated constraint, raise the price whenever the
+constraint is broken and lower it when it is satisfied, and let the policy
+optimise reward-minus-prices. That is the "primal-dual" part: the policy is the
+primal variable, the prices are the dual variables, and they are updated
+together.
 
-- `primal-dual-actor-critic.cpp`
+Two more decisions make this experiment unusually careful. The learned object is
+a *residual* over a fixed, deterministic one-move fair search, so a zero
+residual reproduces that search exactly and any change is attributable to
+learning. And the constraints are measured over aligned complete five-move
+cycles rather than arbitrary windows, so they line up with the rise the policy
+is actually fighting.
 
-## More evidence
+## How it works, step by step
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/ntuple-rl)
+1. **Observe.** Only the board cells, the visible next disc, and the position in
+   the five-drop [rise cycle](/learn/glossary).
+2. **Act.** A mirror-exact sparse network adds a correction to the fixed
+   one-move fair search's preferences.
+3. **Judge.** Eight separate critics estimate score, lifetime, the hazard of the
+   game ending, regenerative flow, and four constraints on how the board's
+   occupancy and cover change under medium and high load.
+4. **Price the constraints.** Advantages come from five-move returns; each
+   constraint's price is raised or lowered by projected dual ascent on aligned
+   five-move cycles.
+5. **Calibrate per game, then gate.** Confidence estimates are computed per game
+   so that a handful of very long trajectories cannot dominate them. One final
+   frozen checkpoint — not an average over training iterations — has to pass
+   support, drift, terminal-risk, and entropy gates before any gameplay screen
+   may open.
+
+## What happened, in plain English
+
+Training ran exactly as planned and the result failed everything.
+
+On the mandatory 512-game calibration, the greedy policy averaged 175,834 points
+and 55.0 moves — respectable against random play, far below the depth-4
+reference. More importantly, all four of the drift constraints it was supposed
+to satisfy came out on the wrong side of zero with confidence, and its
+terminal-risk bound was 0.10496 against a fixed limit of 0.02. The board was
+filling faster than it was clearing, and the policy's own critics said so.
+
+The checkpoint was sealed as untrusted, and the program refused to open the
+gameplay stage at all. No screen, no development cohort, no protected seed.
+
+<TechnicalDetails title="The technical record">
+
+Status in [the experiment index](/docs/research/experiment-index): **rejected,
+ledger-recorded** — "final calibration failed and Stage A stayed closed."
+
+From [the ledger](/docs/research/history): one authorised run consumed exactly
+131,072 training games in the sealed lane `0x3dac0000...0x3dadffff` and completed
+128 atomic iterations in 339.663 seconds, peaking at 94,846,976 bytes resident.
+On the mandatory final 512-game initial-board calibration the greedy policy
+averaged **175,834 points and 55.006 moves**. Its four five-move drift upper-95
+bounds were 3.1767, 1.8588, 3.8765, and 1.6098 — all above the required zero —
+and its terminal-risk upper bound was 0.10496 against a fixed 0.02 limit. Every
+`0x3dae...` and `0x3daf...` gameplay gate and every protected and final seed
+remain unopened by this experiment.
+
+Pre-production verification: strict Clang and GCC executable and library builds,
+sanitizers, 32 numerical gradient checks with maximum relative error 9.91e-7,
+exact reflection, censoring and terminal alignment, checkpoint resume,
+transactional optimizer, injective restart streams, and seed guards. A
+burned-only preflight projected 1,565.85 seconds of training (4,982.25 at its
+conservative maximum) and 333,348,864 bytes peak resident, inside fixed
+12-hour and 512 MiB limits.
+
+`docs/exploratory/audit-03-claim-arithmetic.md` classifies the calibration row
+as corrected 17,000-point scoring; the ledger section does not state the mode.
+
+**A discrepancy worth noting.** `docs/strategies.md` summarises this run as
+"about 176,000 points and 54 moves". The ledger records 55.006 moves.
+
+Source: `primal-dual-actor-critic.cpp`.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+**The constraint diagnosis is more informative than the score.** Plenty of
+policies in this repository score around 175,000. This one also reported *why*
+it was going to keep dying: occupancy and cover drifting the wrong way over
+every five-move cycle, with confidence. That is a reusable measurement, and it
+matches the repository's broader finding that flow — clears and reveals per
+move — predicts long games better than immediate points do; see
+[score is survival](/learn/concepts/survival-vs-score).
+
+**Optimising a constrained objective did not produce a constrained policy.** The
+prices were free to rise without bound and the policy still violated all four
+constraints at the end of training. Either the residual lacked the capacity to
+satisfy them, or the constraints are not simultaneously satisfiable by a
+one-move-search correction. This experiment cannot tell those apart.
+
+**Refusing to proceed is the right kind of failure.** The gate was checked
+against a single frozen checkpoint rather than an ensemble chosen after the
+fact, and when it failed nothing downstream opened. The cost of the negative
+result was 131,072 training games in a sealed lane and no development data.
+
+**Still open.** The constraint set itself has never been tested independently of
+this learning method — for instance, as a filter applied to an existing search's
+candidate moves. That is a much cheaper experiment than the one that was run.

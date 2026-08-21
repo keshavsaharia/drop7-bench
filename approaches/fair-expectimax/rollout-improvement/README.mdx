@@ -1,28 +1,155 @@
 ---
-title: Rollout Improvement
+title: Judging a move by playing the game out
 family: fair-expectimax
-status: Rejected
+summary: Score each column by simulating the next eight to twenty-four moves with a fast policy on identical imagined futures, instead of by looking a fixed few moves ahead.
+status: rejected
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Instead of looking a fixed few moves ahead and then guessing what the board is
+worth, play the game out. For each column, simulate the next eight, sixteen or
+twenty-four moves with a fast policy, average the results, and take the column
+that did best. It finished behind the fast policy it was built on.
 
-## Fair-D1 rollout improvement
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
 
-Uses public continuations to improve fair D1 one root at a time.
+## The intuition
 
-**Status: Rejected** (ledger-recorded). it failed the fitting gate.
+A look-ahead search needs an opinion about the boards at the bottom of its tree,
+and that opinion is hand-written and imperfect. A
+[rollout](/learn/glossary) sidesteps it: instead of evaluating a position,
+finish the game from it — or at least play a long stretch — with some quick
+policy, and use the actual outcome.
+
+This is *policy improvement* in its most literal form. If you have a fast
+policy and you rank the root moves by "what happens if I play this column and
+then follow the fast policy", the resulting policy is, in theory, at least as
+good as the fast one. Two practical things break that guarantee:
+
+1. **You are estimating, not computing.** Each column's value is an average
+   over a handful of imagined futures, and Drop7 outcomes are heavy-tailed.
+   With too few futures, the ranking is noise.
+2. **The continuation is the ceiling.** A rollout tells you what happens *if
+   you keep playing like the fast policy*. If the fast policy squanders the
+   structure your first move created, the rollout will report that squandering
+   as the move's value.
+
+The experiment controls the first problem carefully — every column is evaluated
+on the *same* seven imagined futures, so the comparison is paired — and it ran
+straight into the second.
+
+## How it works, step by step
+
+1. At the root, take every legal column.
+2. Build seven deterministic scenario tapes. Reveal draws and future visible
+   discs live in separate event-indexed domains, and the first future disc is
+   exactly stratified over all seven values, so the seven tapes cover the
+   immediate next disc exactly once each.
+3. For each column, replay all seven tapes: the first move is the column being
+   tested, and **every later move is chosen by the fair one-move policy from
+   the public board, the visible next disc and the rise clock only** — the
+   continuation policy never sees the tape.
+4. Continue for the configured horizon: 8, 16 or 24 moves. At most 9,408
+   simulated transitions per decision.
+5. Average each column's seven returns and play the best.
+
+The frozen fitting grid crossed the three horizons with two settings of a
+tail-weighting term on the fair evaluator (off, or 0.25), on 12 complete games,
+using plain mean returns.
+
+## What happened, in plain English
+
+The rollout policy lost to the very policy it used as its continuation. The fair
+one-move policy averaged 72,526 points and 53.75 moves; the best rollout
+configuration — a sixteen-move horizon with no tail weighting — averaged 64,305
+points and 45.5 moves. It lost **all twelve** leave-one-out score comparisons
+and all twelve clear-throughput comparisons. It cleared 1.51 numbered discs per
+move against the fair policy's 1.69.
+
+That is unusually clean for a negative result. The sixteen-move horizon was also
+selected in eleven of twelve leave-one-out fits, so the loss is not an accident
+of picking the wrong grid point — the whole grid was weak. The candidate missed
+both frozen thresholds (250,000 points, and 1.05 times the clear rate), so the
+one-shot held-out range was never opened.
+
+The most useful thing this rules out is narrow and precise: **short mean-return
+rollouts whose continuation is the fair one-move policy**. It says nothing about
+rollouts with a stronger continuation policy or a longer-lived value model — the
+ledger states that limitation itself.
+
+<TechnicalDetails title="The technical record">
+
+**Source.** `approaches/fair-expectimax/rollout-improvement/fair-d1-rollout-improvement.cpp`.
+[Experiment index](/docs/research/experiment-index): **rejected —
+ledger-recorded**, "it failed the fitting gate." Ledger section "Public fair-D1
+rollout-improvement pilot".
+
+**Fitting**, 12 complete games on `0x3df00000...00b`:
+
+| Arm | Mean score | Mean moves | Numbered clears / move |
+| --- | ---: | ---: | ---: |
+| Fair one-move policy (benchmark) | 72,526.17 | 53.75 | 1.69147 |
+| Best rollout (horizon 16, tail scale 0) | 64,304.83 | 45.5 | 1.51282 |
+
+Lost 12 of 12 leave-one-out score comparisons and 12 of 12 throughput
+comparisons. Horizon 16 was selected in 11 of 12 leave-one-out fits. Frozen
+gates: 250,000-point fitting threshold and a 1.05× clear-throughput threshold —
+both missed, so `0x3df10000...00f` was never read.
+
+**Scoring mode.** The section carries no scoring label;
+[audit 03](/docs/exploratory/audit-03-claim-arithmetic) classifies both means as
+**historical 7,000-point Sequence scoring** from the score identity. Score and
+survival regressed together, so rescoring widens the gap rather than closing it.
+
+**Interface.** Defining `DROP7_FAIR_D1_ROLLOUT_IMPROVEMENT_LIBRARY` embeds the
+chooser without its standalone entry point; the reusable decision object retains
+each legal column's mean and its seven aligned scenario returns.
+
+**Verification.** Optimised `-Werror`, library-mode `-Werror`, and ASan/UBSan
+self-tests passed exact determinism, reflection, metadata blindness, tape
+alignment and stratification, reveal/visible-domain independence, legality, and
+the resource bound. Peak resident memory 2,162,688 bytes. Artifact SHA-256
+`82b6fe9c78de486ad550dac795f76ff162799846f53a80a76177114ea0b91428`.
+
+**Related evidence elsewhere in the repository.** Longer and more expensive
+rollout variants outside this family reached the same conclusion from the other
+direction: a 31-continuation, hundred-move public rollout was **worse than the
+fair one-move policy on fitting games** (task-record only), and a 255-
+continuation version with strict confidence bounds produced a real but
+insufficient gain that missed its frozen gates (task-record only). Both are in
+the [experiment index](/docs/research/experiment-index) under terminal policy
+iteration.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+Rollouts inherit their continuation's blind spots. Ranking columns by "what
+happens if I keep playing like this" cannot discover a plan the continuation
+policy would not follow, and in Drop7 the whole difficulty is preparing
+structure several moves before it pays. A one-move continuation dismantles that
+preparation as fast as the root move creates it.
+
+The negative result is also a cost lesson. Seven futures per column at a
+sixteen-move horizon is already thousands of simulated transitions per decision,
+and it bought a policy weaker than the four-move search that costs a comparable
+amount. Any future rollout design in this repository has to argue not just that
+it is better than its continuation, but that it is better than spending the same
+computation on look-ahead.
+
+Still open, and explicitly not rejected by this run: rollouts with a stronger
+continuation policy; rollouts whose returns feed a learned value model rather
+than a direct ranking; and rollouts used as a **veto** on a small set of
+near-tied root moves rather than as the ranking itself. That last shape did
+produce one promising pilot elsewhere in the repository — a costly 25-move
+rollout allowed to veto the four-move search passed its quality gates and was
+then stopped for missing its runtime limit by a wide margin (**runtime-paused —
+ledger-recorded**, see the [experiment index](/docs/research/experiment-index)).
 
 ## Sources
 
-- `fair-d1-rollout-improvement.cpp`
-
-## More evidence
-
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/fair-expectimax)
+- `fair-d1-rollout-improvement.cpp` — a deliberately small, public-information
+  rollout pilot; every legal root action is evaluated on the same seven
+  deterministic stratified scenario tapes, and every later action is chosen by
+  the fair one-move policy without access to the tape.

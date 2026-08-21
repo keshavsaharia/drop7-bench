@@ -1,0 +1,47 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260821T084746Z-46a32c8c",
+  "actor": {
+    "kind": "model",
+    "platform": "Claude Code",
+    "model": "claude-opus-5[1m]",
+    "agentId": null
+  },
+  "level": "L2",
+  "roles": [
+    {
+      "role": "writing",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Rewrote the reader-facing console pages for two approach families. For oracle and curriculum research I wrote the family page plus the perfect-information oracle, oracle DAgger, oracle distillation, state curriculum, board topology, accessible energy and hindsight planner pages, landing the point that a privileged planner is a label factory and never a player, and stating for each approach exactly what the teacher saw and what the student was allowed to see. For depth-4 and long-outcome research I wrote the family page plus the rollout veto, depth-4 distillation, sibling network on the 200-move panel, and long-outcomes pages, carrying the ledger, task-record-only and exploratory-finding evidence labels through unchanged, including finding-03's corrected-scoring rejection of the rollout veto. Every quoted number is traced to the ledger, the experiment index, audit-05 or finding-03; approaches with no retained numbers say so explicitly.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "approaches/oracle-curriculum/README.mdx",
+    "approaches/oracle-curriculum/perfect-information-oracle/README.mdx",
+    "approaches/oracle-curriculum/oracle-dagger/README.mdx",
+    "approaches/oracle-curriculum/oracle-distillation/README.mdx",
+    "approaches/oracle-curriculum/state-curriculum/README.mdx",
+    "approaches/oracle-curriculum/topology/README.mdx",
+    "approaches/oracle-curriculum/accessible-energy/README.mdx",
+    "approaches/oracle-curriculum/hindsight-planner/README.mdx",
+    "approaches/d4-long-outcome/README.mdx",
+    "approaches/d4-long-outcome/rollout-veto/README.mdx",
+    "approaches/d4-long-outcome/d4-distillation/README.mdx",
+    "approaches/d4-long-outcome/h200-sibling-nnue/README.mdx",
+    "approaches/d4-long-outcome/long-outcome/README.mdx"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "node web/scripts/check-mdx.mjs passes for the written pages"
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-21T08:47:46Z"
+}

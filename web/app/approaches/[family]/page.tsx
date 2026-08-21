@@ -4,12 +4,7 @@ import { readFileSync } from "node:fs";
 import matter from "gray-matter";
 import { Mdx } from "@/components/Mdx";
 import { Badge } from "@/components/Badge";
-import {
-  approachDocPath,
-  familyDocPath,
-  listApproaches,
-  listFamilies,
-} from "@/lib/repo";
+import { familyDocPath, listApproaches, listFamilies } from "@/lib/repo";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +25,12 @@ export default async function FamilyPage({
         <Link href="/approaches" className="text-sm text-sky-400 hover:text-sky-300">
           ← All families
         </Link>
-        <h1 className="mt-1 text-2xl font-black text-zinc-50">{family}</h1>
+        <h1 className="mt-1 text-2xl font-black text-zinc-50">
+          {typeof doc?.data.title === "string" ? doc.data.title : family}
+        </h1>
+        {typeof doc?.data.summary === "string" && (
+          <p className="mt-2 max-w-3xl text-zinc-400">{doc.data.summary}</p>
+        )}
       </div>
 
       {doc && <Mdx source={doc.content} />}
@@ -46,18 +46,25 @@ export default async function FamilyPage({
               href={`/approaches/${family}/${approach.slug}`}
               className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 hover:border-sky-800"
             >
-              <div className="flex items-center justify-between gap-2">
-                <span className="font-semibold text-zinc-100">{approach.slug}</span>
-                {approach.hasDocs ? (
-                  <Badge label="documented" className="bg-emerald-900/60 text-emerald-200" />
+              <div className="flex items-start justify-between gap-2">
+                <span className="font-semibold text-zinc-100">{approach.title}</span>
+                {approach.draft ? (
+                  <Badge label="draft" className="bg-zinc-800 text-zinc-400" />
+                ) : approach.hasDocs ? (
+                  <Badge label="written" className="bg-emerald-900/60 text-emerald-200" />
                 ) : (
                   <Badge label="no docs" />
                 )}
               </div>
-              <div className="mt-1 text-xs text-zinc-500">
-                {approach.sourceFiles.filter((f) => !f.endsWith(".md") && !f.endsWith(".mdx")).join(", ") ||
-                  "notes only"}
-              </div>
+              {approach.summary ? (
+                <p className="mt-1 text-sm text-zinc-400">{approach.summary}</p>
+              ) : (
+                <div className="mt-1 text-xs text-zinc-500">
+                  {approach.sourceFiles.filter((f) => !f.endsWith(".md") && !f.endsWith(".mdx")).join(", ") ||
+                    "notes only"}
+                </div>
+              )}
+              {approach.status && <div className="mt-2 text-xs text-zinc-500">{approach.status}</div>}
             </Link>
           ))}
         </div>

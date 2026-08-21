@@ -1,49 +1,149 @@
 ---
-title: Constructive Spectrum
+title: Constructive spectrum
 family: constructive-reservoir
-status: Completed
+summary: Plans a whole five-drop cycle at a time toward a described target board — spread-out heights, reachable covered discs, and stored high numbers that share triggers — and it clearly beat the one-move-ahead reference.
+status: completed
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Rather than asking "which column scores most now?", this planner asks "what
+should the board look like when the next row rises, and which column heads
+there?" — and on 32 paired games that question was worth 266,696 points against
+the one-move-ahead reference's 157,198.
 
-## Constructive spectrum
+<EvidenceLabel status="completed" evidence="ledger-recorded" reads="public" />
 
-Plans across a rise cycle toward reachable high-number reservoirs and overlapping trigger keys.
+## The intuition
 
-**Status: Completed** (ledger-recorded). it materially beat fair D1 and is a useful fast continuation, but did not beat D4.
+The planner carries an explicit picture of a healthy board and steers toward
+it. Four things make up that picture:
 
-## Constructive D4 shield
+- **a spectrum of heights** — columns at a variety of heights rather than a
+  flat wall, so that discs of many different numbers have somewhere useful to
+  land;
+- **accessible edge covers** — gray discs that can still be reached and opened,
+  rather than buried;
+- **safe caps** — the discs sitting on top of each column should not be ones
+  that block everything beneath them;
+- **overlapping trigger keys** — stored high-numbered discs whose trigger
+  conditions coincide, so that one arriving disc can set off several of them.
 
-Applies the frozen constructive rollout only to D4's top near-tied actions.
+A "trigger key" is just the pair (which disc arrives, which column it goes in).
+Two stored discs whose keys are the same are worth much more than two whose
+keys differ, because the player only ever gets one disc at a time. The
+[family page](/approaches/constructive-reservoir) shows the underlying
+mechanism on a real board: a stack that is inert until the rise makes its run
+the right length.
 
-**Status: Rejected** (ledger-recorded in the grouped constructive result). frequent overrides reduced score, survival, and flow.
+The target is deliberately asymmetric. Carrying less load than the reference
+motif is safe; carrying more incurs rapidly increasing debt. Reservoir size and
+trigger coverage stop paying once they match the motif, so the planner is not
+rewarded for simply filling the board.
 
-## Constructive horizon scale
+## How it works
 
-Compares frozen H7, H12, H17, and H27 continuation horizons.
+1. A conventional three-ply search runs first and produces a **shortlist**: its
+   best column, plus the runner-up if it is within 2,500 utility units. If only
+   one column qualifies, that column is played and no planning happens.
+2. For each shortlisted column, simulate forward to the end of the current
+   five-drop cycle plus one further build cycle, with a bounded beam and seven
+   sampled chance outcomes at each step — the horizon adapts between 3 and 7
+   moves depending on where in the cycle the position is.
+3. Score the end of each simulated line by the **target picture**, in
+   score-like units so that the two rise bonuses inside the horizon still
+   matter, not by the points collected along the way.
+4. Play the shortlisted column with the best average.
 
-**Status: Rejected** (ledger-recorded). H12 improved means but missed the robustness gate, and longer horizons were not monotonic.
+Everything read is public. The oracle curriculum appears in this source only to
+*measure* what the target motif looks like; the ledger and the source header
+both state that no oracle action, future disc, reveal randomness, seed, score,
+level, move index or history enters the deployed policy.
 
-## H12 risk gate
+## What happened
 
-Accepts H12 over H7 only when two actions satisfy a common 21-scenario Pareto panel.
+Against the one-move-ahead fair search, on 32 complete games, the planner
+averaged **266,695.5 points and 79.5 moves** versus **157,198.1 and 49.9** —
+and won 25 of the 32 paired games, with higher clear and reveal flow. That is
+the strongest result in this family and a genuine demonstration that planning
+across a complete rise cycle contains information a one-move policy does not
+have.
 
-**Status: Rejected** (ledger-recorded in the grouped constructive result). it improved means but missed the paired-win gate.
+It did not survive contact with the four-move search. Three follow-ups were run
+and all three were rejected:
 
-## Sources
+- **As a tie-break on top of depth 4**, allowed to touch only the top two
+  near-equal columns, it averaged 283,286 against exact depth-4's 372,870.5 on
+  the same four fitting games. It changed 37.0% of moves and won one of the
+  four pairs.
+- **Making the continuation longer** helped, then stopped helping. Twelve moves
+  of continuation beat seven (299,730.6 / 88.3 against 258,223.9 / 77.2 on 32
+  fitting games), but won only 16 joint games and failed the frozen robustness
+  gate. Seventeen moves collapsed to 202,634 / 62.0; twenty-seven recovered
+  only to 261,633 / 77.9.
+- **Admitting the longer horizon only when it was safe** — a coefficient-free
+  gate that accepted the 12-move answer over the 7-move one only when it
+  dominated on mean return, lower-quartile return, terminal count and flow
+  across a shared 21-scenario panel — improved the means again (302,114.9 /
+  89.3 against 254,541.3 / 76.3) but switched only 286 of 918 disagreements and
+  produced 17 joint wins where the gate required 20.
 
-- `constructive-h12-risk-gate.cpp`
-- `constructive-horizon-scale.cpp`
-- `constructive-spectrum-depth4.cpp`
-- `constructive-spectrum.cpp`
+Neither of the last two opened a screen, so none of this ever reached a
+confirmation cohort.
 
-## More evidence
+<TechnicalDetails title="The technical record">
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/constructive-reservoir)
+**Status: completed (base planner) — ledger-recorded**, with three rejected
+variants recorded in the same section of the
+[experiment history](/docs/research/history) §"Explicit reservoir and
+constructive-cycle policies (rejected)". All are corrected 17,000-point
+results, checked as internally consistent by
+[audit 03](/docs/exploratory/audit-03-claim-arithmetic) rows 4421–4441.
+
+| Run | Games | Candidate | Comparator |
+| --- | ---: | --- | --- |
+| Stage A | 32 | 266,695.500 / 79.500, 25 joint wins | fair D1 157,198.063 / 49.875 |
+| Depth-4 shield, fitting | 4 | 283,286 / 83.750, 37.0% switches, 1 pair won | exact D4 372,870.500 / 106.250 |
+| Horizon ablation | 32 | H12 299,730.563 / 88.344, 16 joint wins | H7 258,223.938 / 77.219; H17 202,634 / 61.969; H27 261,633 / 77.938 |
+| H12 Pareto risk gate | 32 | 302,114.906 / 89.281, 286/918 switched, 17 joint wins | H7 254,541.344 / 76.344; 20 wins required |
+
+Frozen configuration, from the source: analysis seeds `0x3d690000`–`0x3d69003f`
+(64 games), Stage A seeds `0x3d69c000`–`0x3d69c01f` (32 games), 1,000-move cap,
+7 chance samples, horizon 3–7, tactical depth 3, shortlist of 2, near-tie
+margin 2,500, centre-first column order `3,2,4,1,5,0,6`, policy seed `CSP1`,
+30-minute wall limit and 256 MiB RSS limit. The horizon-scale and risk-gate
+variants reuse that exact configuration and change only the one thing named.
+The depth-4 shield uses the reference full-width fair-D4 root with five chance
+strata and returns exact depth-4 whenever the shortlist is a singleton.
+
+The four-game fitting comparison is a **quartet, not a cohort**: four paired
+games is enough to see a deficit that large and nowhere near enough to certify
+its size.
+The 32-game Stage A comparisons are screens. Nothing here was measured on the
+protected or final cohorts, which remain unopened.
+
+Historical source hashes are recorded in the ledger; note the
+[reproducibility guide](/docs/reproducibility)'s warning that the tree was
+reorganised after those hashes were frozen, so they intentionally no longer
+match current bytes.
+
+Sources: `constructive-spectrum.cpp`, `constructive-spectrum-depth4.cpp`,
+`constructive-horizon-scale.cpp`, `constructive-h12-risk-gate.cpp`.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- Complete-cycle planning beats a one-move policy decisively. That is the
+  family's central positive finding, and the ledger records it as the reason
+  the idea stays alive.
+- The same signal, injected into a stronger search as an override, damaged it.
+  Frequent switching on unstable comparisons between near-equal columns is the
+  named failure mode, and it recurs across the repository.
+- Longer is not better: 7 → 12 helped, 12 → 17 hurt badly, 17 → 27 partly
+  recovered. A sampled continuation policy does not become a reliable evaluator
+  by being run for longer.
+- The open direction recorded in the [strategy landscape](/docs/strategies) is
+  to make multi-cycle comparison between sibling columns affordable and stable
+  — cheaper verified continuations, shared random futures across siblings,
+  early elimination — rather than to plan further.

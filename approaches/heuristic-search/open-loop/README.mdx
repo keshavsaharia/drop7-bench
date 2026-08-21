@@ -1,28 +1,105 @@
 ---
-title: Open Loop
+title: Open loop
 family: heuristic-search
-status: Support-only
+summary: Decide a whole short sequence of columns in advance, judge it against many imagined disc streams at once, and play only its first move before planning again.
+status: support-only
 evidence: repository-verified
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Decide a whole short sequence of columns in advance, judge it against many
+imagined disc streams at once, and play only its first move before planning
+again.
 
-## Open-loop lab
+<EvidenceLabel status="support-only" evidence="repository-verified" reads="public" />
 
-Evaluates public open-loop synthetic-future planning.
+## The intuition
 
-**Status: Support-only** (repository-verified). it primarily serves as a comparator.
+A look-ahead search branches: *if the next disc is a 3 I play here, if it is a
+6 I play there*. That is the right model of the game, and it is expensive —
+the tree multiplies by seven at every chance point.
 
-## Sources
+An open-loop planner refuses to branch. It writes down one plan — a fixed list
+of columns — and then asks how that single plan performs across a whole set of
+imagined disc streams. Because one plan must work for all of them, it cannot
+quietly assume it will know something it will not know. The cost is that it
+also cannot represent the value of *being able to react*, which is real: a
+good player's plan genuinely does change when a 1 arrives instead of a 7.
 
-- `main.ts`
+Since the planner replans from scratch every move and only ever plays the
+first column of its plan, the reaction happens anyway — one move late.
 
-## More evidence
+## How it works, step by step
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/heuristic-search)
+1. **Read the public position** — board, next disc, rise clock.
+2. **Draw a set of scenarios**: complete imagined streams of future discs and
+   gray-disc reveals, generated from a solver-local seed. The *same* scenarios
+   are used for every candidate plan, so plans are compared on identical luck
+   (common random numbers).
+3. **Grow plans one column at a time.** Extend every surviving plan prefix by
+   each legal column, simulate all of them through every scenario, keep the
+   best handful, and repeat to the plan depth. That shortlist is the *beam*.
+4. **Score a plan** by the average value of the boards it reaches, optionally
+   penalised by the spread across scenarios, so that a plan which is good on
+   average but erratic loses to a steadier one.
+5. **Play the first column of the best plan** and throw the rest away.
+
+The leaf value can be the ordinary hand evaluator, the recursive-potential
+evaluator, or the tunneling residual; the lab compares all three.
+
+## What happened, in plain English
+
+There is no result here, and the index does not claim one. This lab is
+classified **support-only**: it exists so that other policies have something to
+be measured against, and its most visible role in the record is as the
+comparator that [tunneling](/approaches/heuristic-search/tunneling) improved on
+in a 64-game comparison whose numbers were never retained.
+
+It is also one of the six policies you can watch play in the benchmark
+playground, which is the easiest way to get a feel for how a plan-then-replan
+policy behaves.
+
+<TechnicalDetails title="The technical record">
+
+The [experiment index](/docs/research/experiment-index) records this lab as
+**support-only, repository-verified**: *"it primarily serves as a
+comparator."* Repository-verified means the implementation is present and its
+purpose is established from the source; it does **not** mean a run happened.
+**No cohort, score, or comparison for this lab is recorded in the
+[experiment history](/docs/research/history) or anywhere else in this
+repository**, so this page reports none.
+
+Repository-verified from the source. `src/core/typescript/robust-open-loop-beam.ts`
+takes a scenario count, a plan depth, a beam width, an optional risk aversion
+(*"mean − riskAversion × population stddev"*), a deterministic work cap and a
+loose wall-clock cap, and hard limits of 8 plan columns, 256 scenarios, 256
+beam entries, 10,000,000 work units and 60 seconds. The lab `main.ts` defaults
+to 16 scenarios, plan depth 4, beam width 32, risk aversion 0, a 2,000,000 work
+cap and 4 games from the `0x1d70…` training range, comparing the `combined`,
+`recursive` and `tunneling` leaf profiles. The registered playground policy
+`open-loop-beam` uses 12 scenarios, depth 3 and beam width 8 under a 150,000
+work bound.
+
+The planner's scenarios are generated from a solver-local seed and the
+observable state. It never receives the game seed, the hidden gray values, or
+the real future disc tape — the scenarios are the planner's own guesses, and
+they are wrong in exactly the way a player's guesses are wrong.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **Support code is not a result, and labelling it honestly matters.** A
+  comparator that has never been measured against the reference search cannot
+  certify anything it wins against. That is why the tunneling comparison is
+  described here as a comparison and not as evidence.
+- **Open loop is a different failure mode from
+  [determinization](/learn/glossary).** Imagining a complete future and
+  planning perfectly inside it produces plans no real player could have made —
+  the failure the [MCTS work](/approaches/tree-search/observable-mcts) calls
+  strategy fusion. Scoring one fixed plan across many futures avoids that by
+  construction; what it gives up instead is the value of reacting. Neither
+  effect has been measured here.
+- **What is still open** is whether a plan-shaped policy is worth anything at
+  Drop7 at all. On the evidence in this repository, that question has not been
+  asked.

@@ -1,0 +1,201 @@
+---
+title: "Cheating on purpose: oracles, teachers and students"
+summary: Some programs here are allowed to see the hidden numbers and the future. They can never be the answer — but they can measure how much that knowledge is worth, and try to teach it to a program that plays blind.
+order: 8
+---
+
+A Drop7 player sees a board, the disc about to drop, and how many drops remain
+before the row rises. That is all. Several programs in this repository see much
+more: the number under every gray disc, and the exact sequence of discs the game
+will deal next. They are allowed to, because they are never going to play.
+
+This page is about that split — what the line is, why anyone would deliberately
+step over it, and what happened every time this project tried to teach a blind
+player what a sighted one knows.
+
+## The line: what a legal policy may read
+
+The [methodology](/docs/methodology) states the deployable policy as a function
+of exactly four things:
+
+```text
+(visible board, visible next disc, moves until rise, terminal flag) -> column
+```
+
+and lists what it must not inspect: the game or origin seed, future numbered
+discs or covered-disc reveals, a future random tape or oracle action,
+accumulated score, level, or absolute move number, and any history that cannot
+be reconstructed from the public state. That list is the **information
+boundary**. A program that reads anything on it is disqualified as a policy —
+not penalised, disqualified — however well it scores.
+
+The reason is not purity. It is that the target is a claim about playing the
+game, and a program that knows the future is not playing the same game.
+
+## The same position, seen twice
+
+<OracleSplit caption="Left: the position as the game shows it — fifteen solid grays and one already cracked, none of them readable. Right: the identical position with the answer key filled in. The right-hand board is not a different game; it is the same game with the covers removed. Every gray disc's number was fixed the moment its row appeared." />
+
+Both boards are the engine's own output. The figure was produced by playing a
+short game through the TypeScript engine in *latent mode*, where each covered
+disc is given a predetermined number instead of drawing one at the moment of
+reveal, so the same position can be exported twice — once as the player sees it,
+once as the answer key.
+
+Notice the size of what is hidden. Sixteen covered discs, each independently one
+of seven numbers, is more than thirty-three trillion possible answer keys. The
+player has to choose a column without knowing which one is true. The privileged
+planner is handed it.
+
+## Why build a cheater at all
+
+Two reasons, both diagnostic.
+
+**To find the ceiling.** If a planner that knows everything still cannot survive,
+the difficulty is in the game, not in the uncertainty. If it thrives, the gap
+between it and the best public policy is a measurement of what the hidden
+information is worth — an upper bound on what any amount of clever public
+reasoning could ever recover.
+
+**To produce labels.** A privileged planner can be run offline over thousands of
+positions and asked, for each one, *which column would you have played?* Those
+answers become training data for a public model. The privileged inputs are
+thrown away; only the public board and the teacher's answer are kept.
+
+Both uses are explicitly allowed. The methodology's wording is the whole rule in
+one sentence: *"Privileged planners may inspect future randomness to generate
+labels. Such an experiment is an oracle or teacher experiment until a separate
+public student is frozen and evaluated without those inputs."*
+
+## Teacher, labels, student, blind evaluation
+
+<TeacherStudentFlow caption="The teacher's score is never a policy result; only the frozen student's blind games are. If any privileged input survives into box 3 — as a feature, a filter, a tuning decision made by looking at hidden values — the whole pipeline reverts to being a diagnostic." />
+
+## What the ceiling turned out to be
+
+The privileged planner is extremely strong. In the retained topology audit, an
+analysis-only future-aware planner was run to a 500-move cap on twelve
+training-only seeds. It reached the cap in all twelve games and averaged
+**1,058,931.5 points**. The public depth-3 search on the same paired cohort
+averaged 132,979 points and 90.5 moves.
+
+Read that carefully, because it is the most misread number in the repository:
+
+- it was scored with the **historical 7,000-point** level bonus, not the
+  corrected 17,000-point Hardcore bonus this project's target uses;
+- every game was **censored** at 500 moves, so the mean is a lower bound on a
+  quantity that is not the target quantity;
+- it is **twelve games**; and
+- above all, it is an **oracle**. The ledger's own sentence is the right one:
+  this "establishes that a million points is mechanically attainable in the
+  simulator, but it is not evidence for a deployable policy: the oracle sees the
+  realized future disc and reveal streams."
+
+So: a million points exists inside these rules. Nobody has shown a blind player
+can find it.
+
+## What happened when the teaching was tried
+
+This is the part worth internalising. The status summary's section on oracle and
+long-outcome teachers says it plainly:
+
+> Privileged future-aware planners, D4 distillation, 25-move outcomes, rollout
+> vetoes, and curriculum data were used to build better labels. They found
+> predictive signal, but students usually lacked enough diverse successor data,
+> failed held-out sibling ranking, or were too slow to improve complete games.
+> Oracle strength is an upper-bound teaching signal, not a legal policy result.
+
+The clearest single example is the native oracle-distillation lab. Its teacher
+was excellent — its labelled roll-ins reached the 200-move label cap and averaged
+829,516.75 points — and the student fitted those labels well during training. On
+held-out *whole games*, it collapsed: top-1 agreement with the teacher was 0.218
+against a preregistered floor of 0.30. The diagnosis in the ledger is
+"strong seed-tape/state-distribution overfit". The teacher's choices, it turned
+out, were not recoverable from the public state at all: two positions that look
+identical to a player can call for different moves depending on covers the
+student cannot see.
+
+Then the part that makes this a cautionary tale rather than a simple failure.
+The frozen hybrid was screened anyway on eight games and appeared to win — plus
+21,978.75 points and plus 5.25 moves — enough to unlock its preregistered
+confirmation. On the disjoint 16-game confirmation it lost badly: minus 62,274.25
+points and minus 18.125 moves per game. An eight-game win that reverses on
+sixteen is exactly what a heavy-tailed score distribution produces when you look
+at too few games.
+
+<TechnicalDetails title="The technical record">
+
+- **Ceiling.** Privileged topology audit
+  (`approaches/oracle-curriculum/topology/oracle-topology-audit.cpp`), ledger-recorded
+  diagnostic. On fresh historical 7,000-point Sequence-scored seeds
+  `0x3d70f000...0f`, public depth 3 averaged 90,273 points and 63.625 moves; the
+  privileged depth-4/beam-128 oracle averaged 429,182.5 points, reached the
+  200-move cap in all 16 games, and won every pair (clear/reveal rates
+  2.354/1.386 per move versus 1.792/0.960). Separately, on twelve training-only
+  seeds `0x3d950000...0b` at a 500-move cap, the same oracle reached the cap in
+  all twelve games and averaged 1,058,931.5 points with the historical
+  7,000-point bonus; paired public depth 3 averaged 132,979 points and 90.5
+  moves. A single earlier TypeScript perfect-information run scored 2,079,579
+  points and reached the 500-move cap on seed `0x3d700000` — one game, and an
+  oracle.
+- **Distillation.** `approaches/oracle-curriculum/oracle-distillation/oracle-distill.cpp`,
+  rejected, ledger-recorded. 5,110 fitted labels and 1,629 held-out labels;
+  whole games form the split; a hard boundary drops the game seed, future tape,
+  reveal RNG, score, level and move count before the 614/128/128/7 sparse
+  network. Oracle fitting roll-ins reached the 200-move label cap and averaged
+  829,516.75 points. Training cross-entropy reached 0.480, but held-out
+  top-1/top-2 accuracy was 0.218/0.386 and held-out cross-entropy was 3.282
+  against fixed gates of 0.30/0.55/1.75. Screen on `0x3d7e0000...07`: exact
+  behavior 261,871.875 points / 79.25 moves, hybrid 283,850.625 / 84.5, both
+  paired 95% lower bounds negative. Confirmation on `0x3d7f0000...0f`: exact
+  behavior 249,816.875 / 75.375, hybrid 187,542.625 / 57.25; paired deltas
+  −62,274.25 points and −18.125 moves with lower bounds −118,363.971 and
+  −33.322. The hybrid switched on 18.45% of confirmation moves.
+- Both entries are in the [experiment history](/docs/research/history) and the
+  [experiment index](/docs/research/experiment-index) under oracle and curriculum
+  research; the summary paragraph quoted above is §5 of the
+  [research status summary](/docs/research/status).
+- The figure position was generated by
+  `web/scripts/generate-oracle-scenario.ts` from the figure/scripted seed domain
+  (`0x5eed****`). It consumes no seed lease and is not gameplay evidence.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+The oracle did its job: it proved the simulator contains long, high-scoring
+games, and it measured a very large gap between knowing the future and not. What
+it did not do — in any form tried here, across distillation, DAgger, topology
+summaries, accessible-energy features, synthetic tapes and oracle-manifold
+features — is transfer that advantage across the boundary.
+
+The [strategy landscape](/docs/strategies) draws the conclusion as a rule for
+whoever tries next: *"Future distillation should first show that its public
+features predict oracle preferences across whole held-out games before it is
+allowed to control moves."* Predicting the teacher on positions the teacher
+visited is not the test; predicting it on whole games nobody has seen is.
+
+There is a second, deeper reason these students struggled, and it is not about
+privilege at all: a student trained on the move that was actually played has no
+information about the six moves that were not, which is exactly what it is asked
+to rank at play time. That is the
+[sibling trap](/learn/concepts/ranking-siblings), and it applies to every
+teacher, privileged or not.
+
+<Callout title="A related trap, one page over" tone="info">
+A planner that imagines many complete futures *with the hidden values filled in*
+and averages over them is also an oracle — and the repository measured something
+counter-intuitive about it: past 256 imagined futures, giving it more compute
+made it play *worse*, because it converged more faithfully on a biased objective.
+That story is in
+[is more computation the answer?](/learn/concepts/does-more-compute-help).
+</Callout>
+
+<Callout title="Where to read the technical version" tone="info">
+The privileged experiments are collected under the
+[oracle curriculum family](/approaches/oracle-curriculum). The boundary itself is
+defined in the [methodology](/docs/methodology); the reference policy that every
+student is compared against is
+[fair expectimax](/approaches/fair-expectimax), explained in plain English on
+[choice, chance and looking ahead](/learn/concepts/chance-vs-choice).
+</Callout>

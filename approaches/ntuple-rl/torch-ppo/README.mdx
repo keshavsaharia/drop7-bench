@@ -1,29 +1,173 @@
 ---
-title: Torch Ppo
+title: A PyTorch policy network, cloned then trained by playing
 family: ntuple-rl
-status: Rejected
+summary: A small convolutional network taught to copy a two-move search and then improved by playing 16,384 games — it finished about 40% short of its own teacher.
+status: rejected
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+A small convolutional network taught to copy a two-move search and then improved
+by playing 16,384 games. It finished about 40% short of its own teacher.
 
-## PyTorch PPO
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
 
-Batched native environment plus PyTorch behavior cloning and PPO.
+## The intuition
 
-**Status: Rejected** (ledger-recorded). the warm-start gate failed; a separately authorized direct run later aborted at its resource limit.
+Everything else in this family scores a board and then compares columns. A
+**policy network** skips the middle step: the board goes in and seven numbers
+come out, one per column, which are turned into probabilities. Playing means
+taking the largest. Training means pushing probability toward the columns that
+led to more score over the rest of the game.
 
-## Sources
+<PolicyNetShape caption="A policy network's shape. The bar heights are illustrative — no retained record in this repository publishes a trained policy's per-column probabilities." />
 
-- `torch-env.cpp`
-- `train.py`
+The attraction is that this learns the decision directly, so it never has to
+build a value that generalises across positions it will not visit. The
+difficulty is sample efficiency: policy-gradient methods need an enormous number
+of games, and Drop7 games are short until a policy is good. This experiment
+therefore did the same two-stage thing as the
+[native C++ attempt](/approaches/ntuple-rl/native-ppo) — copy a teacher first,
+then improve by playing — but with a much faster environment, a bigger network,
+and a stronger teacher.
 
-## More evidence
+## How it works, step by step
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/ntuple-rl)
+1. **Build a fast environment.** A C++ vector environment owns the exact rules
+   and exposes to Python only the 49 board cells, the visible next disc, the
+   [rise clock](/learn/glossary), and the legal-move mask. No seed, future tape,
+   score, level, move index, or history crosses the boundary. Finished games are
+   not silently reset: a terminal transition is reported unambiguously before a
+   slot is reused.
+2. **Generate teacher data.** The same environment runs exact one- and two-move
+   [fair searches](/approaches/fair-expectimax/reference) in parallel, with five
+   [reveal strata](/learn/glossary).
+3. **Clone.** Train the network on the two-move teacher's chosen action, mixed
+   with a softer target that also matches the teacher's relative scores for the
+   other columns, then run rounds of relabelling the student's own positions.
+4. **Gate.** The clone must agree with the teacher on 55% of held-out decisions
+   before policy-gradient training is allowed.
+5. **Improve by playing.** In a separately authorised experiment, drop the
+   imitation anchor and run 32 rounds of 512 complete games, updating the policy
+   from its own experience.
+
+The network is deliberately small — 263,720 parameters — and averages each board
+with its mirror image before masking illegal columns, so its choices are exactly
+symmetric.
+
+## What happened, in plain English
+
+**The clone missed its agreement gate, twice.** It matched the teacher on 47.2%
+of held-out decisions against a 55% requirement. A single permitted correction
+was allowed after diagnosing one concrete defect — a catastrophic losing move
+can dominate a position's range of values and flatten the soft targets among all
+the sensible columns — but retraining without soft targets made held-out
+agreement very slightly *worse* and the cross-entropy worse still. The small
+network had simply overfit. Policy-gradient training did not run.
+
+**The direct run then hit a wall of a different kind.** A separately
+preregistered experiment that skipped the anchor and trained on its own games
+exceeded its 512 MB memory ceiling 2.755 seconds after training began, having
+completed exactly one optimizer update. No candidate was frozen and no score was
+read. A follow-up audit projected that a fresh process would fit; an empirical
+preflight disproved the projection and stopped again.
+
+**The third attempt completed, and was rejected on results.** Changing only the
+memory schedule — the same update, done in four chunks — brought peak memory
+well within the limit. It ran all 32 rounds and 16,384 games, improved its own
+training-batch score from about 112,000 to about 137,000, and only then opened
+its single 64-game development cohort. There it averaged 142,678 points against
+the original clone's 130,797, fair one-move search's 180,713, and the two-move
+teacher it had been cloned from at 241,825. The improvement over the clone was
+about 9% — real in the mean, but its one-sided 95% lower bound was slightly
+negative, so it did not even clear "better than the thing it started from" with
+confidence. Every performance gate failed except zero censoring.
+
+<TechnicalDetails title="The technical record">
+
+Status in [the experiment index](/docs/research/experiment-index): **rejected,
+ledger-recorded** — "the warm-start gate failed; a separately authorized direct
+run later aborted at its resource limit." Note that
+[the ledger](/docs/research/history) records a *third* stage the index row does
+not mention: an ordered gradient-accumulation run that completed all 32
+iterations and was then rejected on its development cohort.
+
+Clone stage, on a fixed 32-game development cohort:
+
+| Policy | Mean score | Mean moves |
+| --- | ---: | ---: |
+| Random | 79,307.875 | 27.969 |
+| Clone | 141,986.938 | 45.125 |
+| Clone after the single correction | 142,364.031 | 45.313 |
+| Exact fair D1 | 181,846.438 | 56.281 |
+| Exact fair D2 (the teacher) | 191,189.344 | 58.688 |
+
+Held-out agreement 0.471840, top-two accuracy 0.697788, cross-entropy 1.367013,
+against a preregistered 0.55 agreement gate; after the correction, 0.471784,
+0.694836, and 1.426484. Teacher corpora: 768 games / 56,484 states for training
+(mean exact-D2 score 244,207.953), 256 games / 17,951 states held out
+(231,063.223), 512 games / 21,654 states of student-distribution relabelling
+(130,565.021). Zero censored games throughout.
+
+Completed gradient-accumulation run, on the single 64-game development cohort
+`0x3d3a0000...0x3d3a003f`:
+
+| Policy | Mean score | Mean moves |
+| --- | ---: | ---: |
+| Random | 77,674.406 | 27.484 |
+| Original clone | 130,797.406 | 42.500 |
+| Trained candidate | 142,677.781 | 45.656 |
+| Exact fair D1 | 180,713.422 | 56.359 |
+| Exact fair D2 | 241,825.203 | 72.594 |
+
+Candidate-to-clone ratios 1.090830 (score) and 1.074265 (moves) against
+registered 1.15 floors; candidate-to-D2 ratios 0.590004 and 0.628928. The paired
+candidate-minus-clone score difference was +11,880.375 with standard error
+7,201.038 and a one-sided 95% lower bound of −141.054. Training-batch means rose
+from 112,175.525 points / 37.168 moves at iteration 1 to 136,608.055 / 44.037 at
+iteration 32, over 16,384 games in 1,597.281 seconds with 371.89 MiB peak
+resident. No intermediate checkpoint was selected.
+
+The aborted direct run peaked at 551,567,360 bytes against a 536,870,912-byte
+ceiling and stopped after exactly one optimizer update; its partial checkpoint
+is explicitly marked non-deployable. The subsequent fresh-process preflight
+peaked at 503.97 MiB against a 480 MiB admission threshold and stopped. The
+gradient-accumulation change was proved numerically equivalent to the original
+update to within about 1e-7 on losses and 5e-9 on gradients before it was
+allowed to run.
+
+Exports are bit-exact between Python and raw float inference and agree with
+TorchScript to 1e-6. This section states its scoring mode: the corrected
+17,000-point Hardcore award, and
+`docs/exploratory/audit-03-claim-arithmetic.md` agrees.
+
+Sources: `torch-env.cpp`, `train.py`.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+**Policy gradients worked — they were just far too weak.** This is the only
+completed reinforcement-learning run in the family that improved a policy and
+then honestly measured it on unseen games. The improvement was about 9% over its
+starting point, at a cost of 16,384 complete games, and left the policy at 59%
+of the two-move search it had been cloned from. That is the sample-efficiency
+problem stated as a number.
+
+**The clone could not reach 55% agreement with a two-move search.** Two
+different networks in two different frameworks failed the same kind of imitation
+gate. Whatever a fair search knows about a Drop7 position, a small feed-forward
+network trained on chosen actions has not been able to absorb it.
+
+**Resource discipline is part of the science here.** Three separate stops came
+from memory limits rather than results, and each was recorded with the exact
+peak, the exact threshold, and which seeds stayed unopened. The failed
+projection is instructive: an analytical memory estimate was contradicted by
+measurement, and the measurement won.
+
+**Still open.** Every stage of this line trained on the action a teacher or the
+policy itself chose. None trained on data covering every legal column — the
+[sibling trap](/learn/concepts/ranking-siblings) again — and none was given a
+compute budget of the kind that makes policy-gradient methods work in other
+games. The [scale-out proposal](/learn/concepts/scale-out-direction) is the
+repository's own statement of what that would require.

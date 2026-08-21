@@ -1,25 +1,179 @@
 ---
-title: Sibling Corpus
+title: The data factory, and the switch that was left off
 family: lifetime-objective
-status: Unknown
-evidence: unknown
-generated: true
+summary: Replays a great many games and writes down every position they passed through, labelled with how many moves that game still had left — the training data other approaches in this family learn from.
+status: support-only
+evidence: none — no retained result of its own
+reads: teacher
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
+Replay a great many games and write down every position they passed through,
+each one labelled with how many moves that game still had left. This approach
+produces no result of its own; it is the data other approaches in this family
+learn from.
+
+<EvidenceLabel status="support-only" evidence="none — no retained result" reads="teacher" />
+
+<Callout title="Why this counts as a teacher, not a policy" tone="info">
+The label attached to each position — *how many moves this game still had left* —
+is only knowable after the game has finished. That makes it a privileged label,
+legitimate for training and diagnosis and never available to a player. The
+positions themselves are ordinary public boards, and the model trained on them is
+judged separately through the public interface. See
+[oracle / teacher](/learn/glossary).
 </Callout>
 
-This approach is not yet listed in the experiment index. Read the
-source files below and the family page for context, and expand this
-page when the approach is understood.
-## Sources
+## Why a label like that is worth having
 
-- `generate.cpp`
+The obvious training target is score. Score in this game mode is a poor target:
+it is dominated by a flat 17,000-point bonus, it is heavy-tailed, and there is
+exactly **one label per game**. Remaining lifetime is the same quantity with the
+noise taken out — final score and moves survived correlate at r = 0.9995
+([`finding-01`](/docs/exploratory/finding-01-score-is-survival)) — and it gives
+**one label per move** instead of one per game.
 
-## More evidence
+## The intuition: seven answers per position, and only one of them written down
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/lifetime-objective)
+Here is one real position from the rules engine. Seven columns are legal and the
+next disc is a <Disc n={4} />. Two of the seven possibilities:
+
+<BoardCompare
+  before="0000000000000000000000000000605500099888888888888"
+  after="0000000000000000000000000000005500060988889988888"
+  beforeLabel="the position"
+  afterLabel="drop into the second column"
+  caption="A three-wave chain worth 155 points. The board ends the move with two fewer discs on it than it started, even after adding one — this is the kind of move that keeps a game alive."
+/>
+
+<BoardCompare
+  before="0000000000000000000000000000605500099888888888888"
+  after="0000000000000000000000000000605500499888888888888"
+  beforeLabel="the same position"
+  afterLabel="drop into the rightmost column"
+  caption="Nothing happens. No clear, no reveal, no points, and the board is one disc fuller. Same position, same disc, and a completely different future."
+/>
+
+A model that is going to *choose* a column has to tell those apart. The
+repository's most repeated failure is a model trained only on the move that was
+actually played and then asked, at play time, to rank the six it never saw —
+the [sibling trap](/learn/concepts/ranking-siblings). The obvious fix is data
+that contains all seven.
+
+**This generator can write all seven, and the corpus that was actually made
+contains one.** That is the single most important fact about this approach and
+it is on the record.
+
+## How it works
+
+1. **Play whole games** with the repository's own searches and write, for every
+   move, a fixed-width record: the public board before the move, the visible next
+   disc, how many drops remain before the next rise, which columns were legal,
+   which one was played, how many discs cleared and how many gray discs were
+   revealed — and the labels, which are how many moves and how many rises that
+   game still had ahead of it.
+2. **Mix the behaviour rather than branching at each position.** The generator
+   was run four times with searches of one, two, three and four moves of
+   look-ahead, each injecting a small fraction of deliberately random legal
+   moves. Positions a strong policy never reaches — crowded, nearly-dead
+   boards — come from the weak arm; positions near where the real policy plays
+   come from the strong arm.
+3. **Optionally, write the panel.** A second record type stores, for a sampled
+   position, the resolved board and immediate effects of **every legal column**
+   under the same randomness. This is the successor-closed data the benchmark
+   contract asks for.
+4. **Keep training and evaluation seeds apart by construction.** The generator
+   refuses to run outside its lease, and evaluation seeds live under a different
+   prefix entirely.
+
+## What happened
+
+**There is no retained result for this approach.** It has no row in the
+[experiment index](/docs/research/experiment-index), no entry in the
+[ledger](/docs/research/history) and no finding document of its own. What is
+recorded is what it produced and who consumed it.
+
+**The corpus exists and was used.** Four training blocks were leased and opened —
+65,536 games at two moves of look-ahead, 16,384 at one, 4,096 at three and 768 at
+four, with deliberately-random move fractions of 8%, 15%, 5% and 3% respectively
+([`lease-map`](/docs/exploratory/lease-map)). The resulting state files are the
+training data behind the
+[learned leaf](/approaches/lifetime-objective/learned-leaf), whose result *is*
+retained, and behind the [afterstate net](/approaches/lifetime-objective/afterstate-net),
+whose outcome is not recorded anywhere.
+
+**The all-sibling panel was built and left switched off.** An independent
+read-only review of the working tree
+([`reconciliation-01`](/docs/exploratory/reconciliation-01)) found that the panel
+is gated behind an option that **defaults to disabled**, that every corpus
+summary from the four training blocks records zero panel records, that only a
+16-game smoke run ever produced a panel file, and that the reader used by the
+model trained on this data contains no panel reader at all. So the capability was
+deliberately built and the corpus that was consumed holds **one row per played
+move, not one row per legal column**. Coverage of alternatives comes instead from
+behaviour mixing: a column that one arm avoids appears in the data as a column
+another arm played, in a different game — which is not the same thing as having
+the alternatives at the *same* position.
+
+**A lease collision was caught and the data destroyed rather than filtered.** The
+first corpus run was sized in games and its end address was not checked against
+the allocation table, so it overlapped the scenario-minting range by 4,096 seeds.
+Both ranges are development data, so no protected seed was touched and no
+qualification claim is affected — but positions minted for a benchmark could have
+appeared in the training data for a model later graded on that benchmark. The
+contaminated corpus, 1,029,206 records, was **destroyed rather than filtered**,
+and regenerating it from a clean range cost 103 seconds
+([`lease-map`](/docs/exploratory/lease-map), incident of 2026-08-20).
+
+<TechnicalDetails title="The record, and what it does not contain">
+
+**Sources.** The generator's own source comments; the seed allocation table
+[`lease-map`](/docs/exploratory/lease-map); and the read-only working-tree review
+[`reconciliation-01`](/docs/exploratory/reconciliation-01) §"Sibling coverage".
+There is no result record, no preregistration and no finding document for this
+approach, and none is implied by the existence of the files.
+
+**Record shapes, from the source.** The per-move record carries the 49 public
+cells, the next disc, the moves remaining before the rise, the legal-column mask,
+the chosen column, moves-to-death and rises-to-death as labels, clears and
+reveals for that move, the behaviour depth, a flag for whether the move was a
+deliberate random deviation, a censored-game flag, occupancy, the move index and
+the game seed. The panel record additionally carries the resolved afterstate and
+immediate effects of every legal column at a sampled position.
+
+**Common random numbers come for free** in this design: the engine derives its
+reveal randomness from the game seed and the number of moves played, which are
+identical across the siblings of one position, so the panel compares columns
+under the same luck without any extra machinery.
+
+**Leases.** `SEEDLEASE-A52` blocks `0xa5200000`–`0xa520ffff` (depth 2),
+`0xa5210000`–`0xa5213fff` (depth 1), `0xa5214000`–`0xa5214fff` (depth 3) and
+`0xa5215000`–`0xa52152ff` (depth 4), all with the **training** role. Once read
+these can never become confirmation evidence. Withdrawn:
+`0xa51d9000`–`0xa51dcfff`, the destroyed first attempt.
+
+**What is not established.** Nothing here is evidence that any policy is
+stronger. This approach produced no games under a benchmark tier, no paired
+comparison, and no bound of any kind.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **A capability that ships disabled is not a capability.** The panel record is
+  the exact thing six of this repository's seventeen failed learned models are
+  recorded as having lacked, and it was present in the generator and off in every
+  run that mattered. It is worth checking, for any corpus, what was actually
+  written rather than what the writer supports.
+- **Behaviour mixing is not successor closure.** Both give a model variety; only
+  one gives it the alternatives at a position it will actually be asked about.
+  The [planner distillation](/approaches/lifetime-objective/planner-distill) work
+  later built a corpus that does have full sibling coverage — 108,462 labelled
+  columns with zero gaps — and found that closing this gap, on its own, was not
+  enough to beat the reference search.
+- **Sizing a seed range in games rather than addresses is a real hazard**, and
+  the recorded process change — print the arithmetic and check it against the
+  allocation table before launch — came from this approach's own incident.
+- **Still open:** whether re-running the generator with the panel enabled, on a
+  fresh training lease, would produce data worth the disk it costs. Nothing here
+  answers that, and the later distillation result is a reason to be cautious
+  rather than optimistic.

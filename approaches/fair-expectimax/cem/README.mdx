@@ -1,29 +1,170 @@
 ---
-title: Cem
+title: Machine-tuning the board evaluator
 family: fair-expectimax
-status: Rejected
+summary: Let an optimiser adjust eight coefficients of the search's board evaluator by playing complete games, then freeze the winner and test it on games it never saw.
+status: rejected
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Let an optimiser adjust the numbers inside the search's board evaluator by
+playing complete games with each candidate setting, keep the best, freeze it,
+and then test it on games it has never seen. The tuned evaluator won on the
+games used to tune it and lost on the fresh ones.
 
-## Fair-leaf CEM
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
 
-Optimizes eight fair-leaf/action coefficients on complete games and transfers the frozen vector to D4.
+## The intuition
 
-**Status: Rejected** (ledger-recorded). the D3 screen and D4 heldout/tail gates failed.
+At the bottom of its look-ahead the search has to say how good a board is. That
+opinion is the [leaf evaluator](/learn/glossary), and in this family it is a
+hand-written sum of features: how ready the board is to fire a chain, how much
+potential is stored, how buried the gray discs are, how tall and clogged things
+are getting, how dangerous the position is with a rise approaching. Every
+feature carries a coefficient, and those coefficients were set by hand.
+
+Hand-set numbers are an obvious place to look for free strength. The method
+used here — a cross-entropy optimiser — is simple to describe: sample a
+population of coefficient vectors, play games with each, keep the best few,
+move the sampling distribution towards them, repeat. The zero vector reproduces
+the existing policy exactly, so the optimiser starts from the known-good
+setting rather than from noise.
+
+The failure mode is equally simple to describe, and it is the reason this whole
+repository insists on fresh games: with heavy-tailed scores and small batches,
+an optimiser can improve its objective by finding coefficients that suit *those*
+games. The two runs on this page are a clean before-and-after picture of that.
+
+## How it works, step by step
+
+**The optimiser.** (1) Eight bounded coordinates scale groups of leaf features
+— direct trigger readiness, latent release, cover debt, altitude/danger/rise,
+low-number clog — and add two new transition rewards paid only after a sampled
+move: one per revealed cover, one per additional wave. Five coordinates are
+log-bounded to a half-to-double range; the others are bounded absolutely.
+(2) Candidates are played on rotating three-game batches with common random
+numbers, 12 candidates per batch, three kept as elites, with antithetic
+perturbations. (3) The objective is a robust blend: 60% of the mean plus 40% of
+the worst-quarter of `moves + score / 14000`. (4) Generation winners are
+re-ranked on 16 tuning-only games. (5) The winner is frozen and written to a
+binary checkpoint before any fresh game is read.
+
+**The interaction test.** The frozen eight-coordinate winner is then embedded,
+unchanged, in the separately confirmed four-move search — same chance sampling,
+same policy seed, same action priors (none), same search order — to ask whether
+coefficients chosen at depth 3 help at depth 4. An all-zero vector reproduces
+stock depth 4 exactly, down to the work count and cache hits on an independent
+fixture. This is an interaction test, not a rescue retune: nothing is
+re-optimised.
+
+## What happened, in plain English
+
+**At depth 3**, the frozen winner passed its held-out cohort convincingly — 32
+games, about 17% more score and 16% more survival, with both worst-quarter
+measures improving. But it won only 15 of the 32 games, and the confidence
+bounds on the paired difference were negative, so the gain was one of a few big
+trajectories rather than a broad improvement. On the fresh eight-game screen
+that followed it came out essentially level: about 905 points behind on average
+while surviving 1.9 moves longer. It won six of eight games; a single
+204,516-point loss erased them. The rule required both averages to improve, so
+the run stopped and the confirmation seeds were never read.
+
+**At depth 4**, the same frozen coefficients looked good on the training games
+(about +22,700 points, +16.6 moves) but failed the worst-quarter part of the
+gate even there, and then regressed on the independent held-out cohort by about
+17,800 points and 10.9 moves. Each policy won eight of the sixteen paired games
+in both cohorts — high variance, not a consistent direction. Clear and reveal
+rates fell as well. Both gates failed, so the fresh ranges were never opened.
+
+One caveat on the depth-3 screen specifically: those games were scored under the
+historical 7,000-point rule. Because the level award does not change any
+decision, the same games can be rescored exactly, and the −905-point gap becomes
+**+2,845** — meaning that screen would not have rejected the candidate and the
+confirmation range would have opened
+([audit 03](/docs/exploratory/audit-03-claim-arithmetic), C2). The independent
+depth-4 held-out failure is a much larger regression that fails under either
+scoring mode, and it is the surviving reason not to adopt these coefficients.
+
+The selected coefficients themselves are also a reason for caution rather than a
+strategy insight: the optimiser reduced the penalty for low-number clogs and
+gave a **negative** reward for extra chain waves. The ledger records both as
+counterintuitive and treats the vector as an empirical artefact.
+
+<TechnicalDetails title="The technical record">
+
+**Sources.** `fair-cem-optimizer.cpp` (the search over coefficients) and
+`fair-cem-depth4-interaction.cpp` (the frozen vector inside the four-move
+search). [Experiment index](/docs/research/experiment-index): **rejected —
+ledger-recorded**, "the D3 screen and D4 heldout/tail gates failed." Neither
+ledger section carries a scoring label; an independent audit reconstructs all
+the figures below as **historical 7,000-point Sequence scoring** from the score
+identity ([audit 03](/docs/exploratory/audit-03-claim-arithmetic)).
+
+**Selected vector** (decoded): 1.2292835 direct trigger, 1.0686570 latent
+release, 1.0579061 cover debt, 1.2186482 altitude/danger/rise, 0.8812588
+low-number clog, +0.3584225 readiness, +75.6220 per revealed cover, −77.9406 per
+additional wave. The run used 432 candidate-games against a 3,000-game ceiling.
+
+**Depth-3 stages** (ledger, "Complete-game fair-leaf CEM optimization"):
+
+| Stage | Cohort | Reference | Candidate | Outcome |
+| --- | --- | --- | --- | --- |
+| Heldout | 32 games `0x3dc10000...01f` | 120,608 / 81.25 | 141,523.75 / 93.969 | passed: +17.34% score, +15.65% moves; tail score 50,065 → 56,529.875, tail survival 38.75 → 42.75; but 15/32 wins and negative 95% lower bounds |
+| Fresh screen | 8 games `0x3ea30000...007` | 149,022.25 / 97.5 | 148,116.875 / 99.375 | **failed: −905.375 points, +1.875 moves**; 6/8 score wins; one 204,516-point loss on `0x3ea30000` |
+
+No censoring at 1,000 moves. Candidate throughput 20.64 moves per aggregate
+game-second versus 21.11; 54,883 versus 54,047 work units per move; 646.0 wall
+seconds total. `0x3ea40000...00f` never read. Artifacts
+`/tmp/drop7-fair-cem-optimizer.json` and `.bin`.
+
+**Depth-4 interaction** (ledger, "Frozen CEM coefficients with full-width fair
+D4"): five chance samples, 3,200,000-work and 60,000-entry limits, worst case
+3,134,950 work and 45,430 cached states. A cohort passed only if the composite
+improved both means while neither worst-quarter measure regressed.
+
+| Cohort | Stock depth 4 | Frozen-vector depth 4 | Outcome |
+| --- | --- | --- | --- |
+| Training, 16 games `0x3da20000...00f` | 178,289.563 / 114.688 | 200,972 / 131.25 | means +22,682.438 / +16.563 but worst-quarter score 89,442.25 → 78,565.75 and survival 61.25 → 56.25 — **tail gate failed**; 8/8 pair split |
+| Heldout, 16 games `0x3da30000...00f` | 177,487.313 / 114.063 | 159,652.063 / 103.125 | **−17,835.25 points, −10.938 moves**; worst-quarter 87,585 → 74,431.25 and 60.75 → 51.25; clears 2.051 → 2.004, reveals 1.140 → 1.103 |
+
+No censoring. Composite work 1,340,143 units per move versus 1,369,565; peak
+cache 38,320 versus 38,277 entries; peak resident memory 40,386,560 bytes; 32
+paired games in 3,136.2 seconds on four workers. `0x3eab0000...007` and
+`0x3eac0000...00f` never read. Artifact
+`/tmp/drop7-fair-cem-depth4-interaction.json`, SHA-256
+`240ee1906c46a68e2ae64d5bb6d32c5e4046cddb6b18b0a5b41acd95f0ef3035`.
+
+**Verification.** Both builds passed optimised `-Werror` and ASan/UBSan runs
+covering exact zero-vector parity with the unmodified policy (leaf, root values,
+actions, node/work/cache counts), determinism, reflection, metadata blindness,
+transition-reward arithmetic, deterministic antithetic sampling,
+fractional-tail arithmetic, coefficient bounds, and seed-protocol checks.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+The pair of runs rejects one exact package: these eight coordinates, this
+objective, this optimiser budget, transferred to depth 4 unchanged. The
+depth-4 held-out regression is the durable part; the depth-3 screen failure is a
+scoring-mode artefact and should not be quoted as evidence on its own.
+
+Three things carry forward. First, a tuned evaluator that wins a small cohort by
+a few long games has told you almost nothing — the confidence bounds were
+negative even when the means looked good. Second, coefficients fitted at one
+search depth do not automatically transfer to another; depth changes which
+errors the leaf is asked to absorb. Third, the honest way to run this is exactly
+how it was run: freeze the vector to a checkpoint before opening a fresh game,
+and report the fit and the fresh result side by side.
+
+Still open: whether an evaluator fitted **with a fresh cohort large enough for
+heavy-tailed scores**, or fitted directly at the depth it will be deployed at,
+behaves differently. Neither has been tried here.
 
 ## Sources
 
-- `fair-cem-depth4-interaction.cpp`
-- `fair-cem-optimizer.cpp`
-
-## More evidence
-
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/fair-expectimax)
+- `fair-cem-optimizer.cpp` — derivative-free complete-game optimisation around
+  the reference depth-3 evaluator; the search space is deliberately small and
+  grouped, with no column or landing-position priors and no privileged inputs.
+- `fair-cem-depth4-interaction.cpp` — applies the fixed coefficients to the
+  full-width four-move search to measure their interaction, optimising nothing.

@@ -1,28 +1,107 @@
 ---
-title: Viability Controller
+title: Viability controller
 family: constructive-reservoir
-status: Rejected
+summary: Replaces "score every column" with "decide what kind of move this is" — charge, dig, release, repair or emergency — and then picks the best move of that kind. It scored well below the one-move-ahead reference.
+status: rejected
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+A policy with no scoring function at all. It first classifies the situation
+into one of five modes, then plays the best move for that mode, using exact
+facts about the position rather than a tuned number.
 
-## Viability controller
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
 
-Selects charge, dig, release, repair, and emergency options from exact public certificates.
+## The intuition
 
-**Status: Rejected** (ledger-recorded). Stage A reduced score, survival, and flow.
+Human players do not evaluate seven columns on a numeric scale. They decide
+what the position calls for — "I need to open some grays", "I need to dump this
+stack before the rise" — and then look for the move that does it. This
+approach makes that literal:
 
-## Sources
+- **charge** — the board is comfortable; add to the stored structure;
+- **dig** — there are covered discs that can be attacked; attack them;
+- **release** — the board is filling, or a big clear is available right now;
+  spend the structure;
+- **repair** — a specific clog is forming, such as a low number capping a
+  column; fix it;
+- **emergency** — the board is nearly dead; survive.
 
-- `viability-reservoir-controller.cpp`
+The appeal is that it removes the thing that goes wrong everywhere else in this
+repository: a fitted number that is slightly miscalibrated and therefore ranks
+two columns in the wrong order. There is no fitted leaf here at all.
 
-## More evidence
+## How it works
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/constructive-reservoir)
+1. Build an **exact certificate** for the position: for all 7 × 7 combinations
+   of "which disc arrives" and "which column it lands in", work out
+   conservatively what would happen — how many discs clear, how many gray discs
+   are damaged or revealed, how many chain waves follow, and whether the column
+   is productive at all.
+2. Pick the mode from thresholds that come from the game's mechanics rather
+   than from fitting. As frozen in the source: emergency if the tallest column
+   reaches six, or at most one column is safe, or the last drop before a rise
+   finds 27 cells occupied; repair if clog debt reaches 16 with a capped low
+   column; release if projected occupancy reaches 32, or 30 cells are already
+   occupied, or the known arriving disc can clear at least three discs in at
+   least two waves; dig if any damage to a covered disc is available; otherwise
+   charge.
+3. Apply a survival shield that removes actions which the certificate cannot
+   show to be survivable.
+4. Rank whatever is left **lexicographically** on eighteen ordered fields —
+   first criterion first, ties broken by the second, and so on — rather than by
+   a weighted sum.
+
+Everything read is public: the visible board, the next disc, the rise clock and
+the terminal flag. There is no gameplay history and no fitted scalar.
+
+## What happened
+
+It was clearly worse than the simple comparator. On its 32-game Stage A the
+controller averaged **132,537.1 points and 43.3 moves** against fair D1's
+**172,697.6 and 54.0**, and its flow fell as well — 1.511 clears and 0.729
+reveals per move against 1.741 and 0.936. Score, survival and flow all
+regressed, so it went no further.
+
+Both directions of that flow number matter. The controller was built partly to
+*increase* reveal flow, through its explicit "dig" mode, and it produced less
+of it than the policy it was competing with. Deciding to dig is not the same as
+finding a move that digs.
+
+<TechnicalDetails title="The technical record">
+
+**Status: rejected — ledger-recorded.**
+[Experiment history](/docs/research/history) §"Explicit reservoir and
+constructive-cycle policies (rejected)": 32-game Stage A, 132,537.094 points /
+43.281 moves versus fair D1 172,697.625 / 53.969; clear and reveal flow
+1.511/0.729 versus 1.741/0.936 per move. Corrected 17,000-point scoring,
+internally consistent per [audit 03](/docs/exploratory/audit-03-claim-arithmetic)
+rows 4409–4410. Source and artifact SHA-256 values are retained in the ledger.
+
+Frozen configuration, from the source: Stage A seeds
+`0x3d65c000`–`0x3d65c01f` (32 games), 1,000-move cap, seven successor samples,
+policy seed `VRC1`, 30-minute wall limit, 256 MiB RSS limit, eighteen ranking
+fields. Its admission gate — never reached — required 700,000 mean points, 200
+mean moves, 2.20 clears and 1.20 reveals per move, a 120-move lower-quartile
+lifetime and 24 joint wins.
+
+Thirty-two paired games is a screen, not a confirmation cohort, and the deficit
+here is large enough that the screen is decisive about the frozen
+configuration; it says nothing about a different set of thresholds.
+
+Source: `viability-reservoir-controller.cpp`.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- Removing the fitted number does not remove the problem. Discrete modes with
+  mechanically justified thresholds ranked moves worse than a simple fair
+  search did.
+- The gap between *intent* and *execution* is where it failed: an explicit dig
+  mode produced fewer reveals per move than a policy with no modes at all.
+- The [experiment index](/docs/research/experiment-index) draws the same
+  conclusion for the family's other option-based work: a persistent option
+  policy is worth revisiting only after a one-step evaluator demonstrates
+  robust score, survival and flow signal.

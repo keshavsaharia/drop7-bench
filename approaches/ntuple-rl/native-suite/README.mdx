@@ -1,28 +1,113 @@
 ---
-title: Native Suite
+title: The native suite (engine benchmark, n-tuple trainer, learned-value search)
 family: ntuple-rl
-status: Completed
+summary: The single C++ program that trains the original n-tuple evaluator, searches with it, benchmarks the fast rules engine, and runs the self-tests everything else depends on.
+status: completed
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+The single C++ program that trains the original n-tuple evaluator, searches
+with it, benchmarks the fast rules engine, and runs the self-tests everything
+else depends on.
 
-## Native suite and hierarchical n-tuples
+<EvidenceLabel status="completed" evidence="ledger-recorded" reads="public" />
 
-Houses the native engine benchmark, n-tuple training, sparse learned-value search, and self-tests.
+This is a **support page**. `native.cpp` is not one candidate policy with one
+result; it is the family's toolbox, and it also happens to contain the first
+learned policy the project ever produced.
 
-**Status: Completed** (ledger-recorded). depth-2 sparse search improved the learned greedy baseline, but it was not selected over later fair D4.
+## Why one program does four jobs
 
-## Sources
+Early on, everything the learned line needed lived in the same binary: a fast
+rules simulator, a trainer, a search that used the trained values, and the tests
+that proved all three agreed with the TypeScript engine. That coupling is why
+the repository's standard verification recipe still starts by building this
+file — the trajectory-agreement sweep between the native and TypeScript engines
+is run through it.
 
-- `native.cpp`
+## How it works, step by step
 
-## More evidence
+1. **Benchmark and verify.** `--benchmark` plays games at speed;
+   `--gradient-check`, `--ntuple-self-test`, and `--ntuple-search-self-test`
+   check deterministic evaluation, reflection-safe values and actions, exact
+   first-reveal stratification, and enforcement of the search's work bound.
+2. **Train a shared n-tuple.** `--train-ntuple --chance-state` learns a value
+   for the board *before* the next disc is dealt — a
+   [chance-state](/learn/concepts/chance-vs-choice) value — over 100,000 games.
+3. **Train the hierarchical model.** A second pass warm-starts from those shared
+   tables and adds absolute board-position residuals, so the same local shape
+   can be valued differently near the ceiling than in a safe spot. That model
+   holds 5.45 million weights.
+4. **Search with it.** `--benchmark-ntuple-search` runs a bounded, sparse
+   [expectimax](/learn/glossary): every legal column at the root, only the best
+   two at deeper choice nodes, three
+   [stratified](/learn/glossary) gray-disc reveal samples per action, exact
+   enumeration of the next visible disc, and a hard work budget.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/ntuple-rl)
+## What happened, in plain English
+
+The learned evaluator on its own averaged about 182,000 points a game on a fixed
+64-game development probe. Putting a two-move look-ahead on top of it lifted that
+to about 232,000 — a clear, honestly paired improvement, and the best result
+anywhere in this family. Going one move deeper made it slightly *worse* and
+twelve times slower, and was rejected rather than adopted for being deeper.
+
+That was real progress, but it was overtaken. The hand-tuned
+[fair depth-4 search](/approaches/fair-expectimax/reference) later recorded
+about 308,000 points on its 64-game reference cohort, and this policy was never
+selected for deployment.
+
+<TechnicalDetails title="The technical record">
+
+Status in [the experiment index](/docs/research/experiment-index): **completed,
+ledger-recorded** — "depth-2 sparse search improved the learned greedy baseline,
+but it was not selected over later fair D4."
+
+On the fixed 64-game probe at `0x4d700000`, as recorded in
+[the ledger](/docs/research/history):
+
+| Policy | Mean score | Mean moves | Min / max score | Mean work per move |
+| --- | ---: | ---: | ---: | ---: |
+| Hierarchical n-tuple, greedy | 182,057.734 | 56.969 | 85,592 / 511,078 | — |
+| Sparse search, depth 2 | 232,107.156 | 70.766 | 102,565 / 568,667 | 2,896.975 |
+| Sparse search, depth 3 | 227,975.859 | 69.141 | 85,669 / 493,564 | 36,376 |
+
+Depth 2 completed in 6.015 seconds with zero incomplete decisions; depth 3 took
+75.3 seconds. The hierarchical checkpoint is 5.45 million float weights
+(21,800,016 bytes) with about 23.5 MB peak resident memory. Training used
+`0x3d700000` onward for the base model and the following 400,000 seeds for the
+hierarchical pass; the probe range `0x4d700000...0x4d70003f` is burned and has
+been reused repeatedly since.
+
+**Scoring mode.** The ledger does not state which level bonus these three rows
+were measured under. `docs/exploratory/audit-03-claim-arithmetic.md` classifies
+all three as consistent with the corrected 17,000-point Hardcore award, from
+their score-to-move ratios; that is an inference from the audit, not a statement
+in the ledger.
+
+The parity sweep run through this binary covers 256 seeds and 6,852 transitions
+compared byte-for-byte. The ledger records 2,673,362 moves in 0.927 seconds
+(2.88 million moves per second) on the development machine of the time; that is
+a historical measurement on unstated hardware, not a current benchmark.
+
+Sources: `native.cpp`, which includes `src/core/native/engine.hpp`,
+`ntuple.hpp`, `ntuple-search.hpp`, and `ppo.hpp`.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+Two things from this experiment survived everything that came after it.
+
+**A learned leaf plus a small search beat the learned leaf alone.** That is the
+strongest evidence in the family that pattern learning has something to
+contribute — as a search evaluator, not as a policy on its own.
+
+**Deeper is not automatically better.** Depth 3 searched twelve times harder and
+scored lower. The same result reappears throughout the repository; see
+[is more computation the answer?](/learn/concepts/does-more-compute-help).
+
+What is still open is whether this baseline would improve if it were trained on
+data that scored every legal column rather than only the played one. It never
+was; see [the sibling trap](/learn/concepts/ranking-siblings).

@@ -1,42 +1,228 @@
 ---
-title: Denoised Value
+title: Denoised public value
 family: value-policy-learning
-status: Completed
+summary: Instead of asking one future what a board was worth, simulate 32 futures from it and average them.
+status: completed
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+A board is only "worth" something on average — the same position can die in ten
+moves or run for two hundred, depending on which discs arrive. Earlier value
+models learned from a single played future, which meant every label was mostly
+noise. This one re-simulates each position 32 times and learns the average.
 
-## Denoised public value
+<EvidenceLabel status="completed" evidence="ledger-recorded" reads="public" />
 
-Labels each public state with many independent futures before fitting lifetime and survival heads.
+It is the best-predicting learned model in this repository, and the only one
+whose gameplay result came out positive. It is also, as the record below shows,
+promising development evidence rather than a qualified policy: two attempts to
+put it to work in a game both failed.
 
-**Status: Completed** (ledger-recorded). prediction gates passed and a small confirmation improved means, but confidence remained weak and no protected cohort was opened.
+## The intuition
 
-## Denoised guided veto
+Take one position and ask "how much longer does this game last?" Play it out
+once and you get a single number, and that number carries the whole variance of
+the game with it. Two identical boards can produce labels forty moves apart. A
+model fitted to those labels spends its capacity chasing coin flips.
 
-Lets the denoised model veto a guided ensemble only in favor of an exact fallback.
+<svg viewBox="0 0 660 200" className="my-4 w-full max-w-2xl rounded-xl border border-zinc-800 bg-zinc-900/40" role="img" aria-label="One future gives a noisy label; many futures give an average">
+  <g fontSize="11" fill="#e4e4e7">
+    <text x="20" y="24" fontSize="12" fontWeight="700" fill="#a1a1aa">the old way: the one future that happened</text>
+    <rect x="20" y="34" width="86" height="38" rx="7" fill="#1e3a8a" />
+    <text x="63" y="58" textAnchor="middle" fontWeight="700">a board</text>
+    <line x1="106" y1="53" x2="220" y2="53" stroke="#3f3f46" strokeWidth="1.5" />
+    <rect x="220" y="34" width="150" height="38" rx="7" fill="#7f1d1d" />
+    <text x="295" y="58" textAnchor="middle">one played-out game</text>
+    <line x1="370" y1="53" x2="430" y2="53" stroke="#3f3f46" strokeWidth="1.5" />
+    <text x="440" y="57" fill="#fecaca">label = that one number</text>
 
-**Status: Rejected** (ledger-recorded). a positive screen failed to replicate.
+    <text x="20" y="106" fontSize="12" fontWeight="700" fill="#a1a1aa">denoised: 32 futures from the same board</text>
+    <rect x="20" y="118" width="86" height="38" rx="7" fill="#1e3a8a" />
+    <text x="63" y="142" textAnchor="middle" fontWeight="700">a board</text>
+    <g stroke="#3f3f46" strokeWidth="1.5">
+      <line x1="106" y1="137" x2="220" y2="114" />
+      <line x1="106" y1="137" x2="220" y2="137" />
+      <line x1="106" y1="137" x2="220" y2="160" />
+    </g>
+    <rect x="220" y="100" width="150" height="26" rx="6" fill="#14532d" />
+    <text x="295" y="118" textAnchor="middle">future 1</text>
+    <rect x="220" y="130" width="150" height="26" rx="6" fill="#14532d" />
+    <text x="295" y="148" textAnchor="middle">future 2 … future 32</text>
+    <rect x="220" y="160" width="150" height="26" rx="6" fill="#14532d" />
+    <text x="295" y="178" textAnchor="middle">same policy, new luck</text>
+    <line x1="370" y1="143" x2="430" y2="143" stroke="#3f3f46" strokeWidth="1.5" />
+    <text x="440" y="140" fill="#bbf7d0">label = the average,</text>
+    <text x="440" y="156" fill="#bbf7d0">plus survival odds</text>
+  </g>
+</svg>
 
-## Phase-5 D4 value veto
+Averaging costs 32 times the simulation, and it buys a label whose remaining
+uncertainty was measured rather than assumed: the ledger records a mean standard
+error of about 1.3 moves per label. What the model then has to learn is the
+signal, not the luck.
 
-Allows a calibrated value model to act only where D4 cannot see through the next rise.
+## How it works, step by step
 
-**Status: Runtime-paused** (ledger-recorded). the first pair made no switches and exceeded the runtime projection.
+1. **Collect positions.** 64 complete games are played by the exact depth-3
+   phase-safety policy, and a position is kept every three moves. Positions are
+   canonicalised (reflections folded together) and de-duplicated.
+2. **Strip the history.** Each kept position is rebuilt from the visible board,
+   the next disc and the [rise clock](/learn/glossary) alone — no score, level,
+   move index, game seed or history. The model can only see what a player sees.
+3. **Label it by simulation.** Each position is played forward 32 times, capped
+   at 50 moves, by a fixed public depth-1 continuation policy. Only the luck
+   differs between the 32 runs. The labels are the average capped lifetime and
+   the probability of still being alive after 25 and after 50 moves.
+4. **Split by whole game.** 48 of the 64 games become training data and 16
+   become the held-out set, split *before* de-duplication, so no position can
+   appear on both sides. Training and held-out labels use separate random
+   domains.
+5. **Fit a small network.** A reflection-averaged [NNUE](/learn/glossary) with
+   35,395 parameters reads position and token embeddings, the next disc, the
+   rise phase, and 16 standardised board metrics.
+6. **Only then, play.** The exact phase-safety action stays the default. An
+   alternative column is played only if it clears a paired lower-confidence
+   bound on predicted lifetime, training-support checks, and an agreement check
+   between the board and its mirror image.
+
+Steps 1–5 are a prediction problem; step 6 is where every model in this family
+has historically come apart. Note that the model still only ever ranks
+siblings it was not trained on — see
+[the sibling trap](/learn/concepts/ranking-siblings) — which is why the
+deployment rule is so heavily hedged.
+
+## What happened
+
+**The prediction part worked, clearly.** On positions from games it had never
+seen, the model's lifetime estimates lined up with reality far better than any
+earlier value model in the repository, and its survival probabilities were
+well calibrated. Every gate that had been declared before the run passed.
+
+**The play part is a small, hedged, positive signal.** In an eight-game
+confirmation the corrected policy survived longer on average than the policy it
+was correcting — 79.5 to 88.125 mean moves — while switching about 2.6 times a
+game. But the confidence bounds on that gain were negative, meaning eight games
+cannot rule out that it was luck; the experiment was never repeated; and the
+baseline it improved was *not* the strong depth-4 reference.
+
+**Both attempts to make it useful in a stronger setting failed.** A version
+that let the model veto a guided ensemble passed a four-game screen by a wide
+margin and then reversed on the eight-game confirmation — a textbook false
+positive. A version bolted onto fair depth-4 search, allowed to act only at the
+one moment the search cannot see through the coming row rise, made zero
+switches in its first paired game and then exceeded its runtime budget, so it
+was paused with nothing learned about its hypothesis either way.
+
+<TechnicalDetails title="The technical record — denoised stochastic value">
+
+Source: `denoised-stochastic-value.cpp`. Status **completed**, evidence
+**ledger-recorded** ([experiment index](/docs/research/experiment-index);
+[ledger](/docs/research/history), "Denoised stochastic public-state value").
+
+Corpus: 1,071 training and 319 held-out disjoint states from `0x3d706800…`;
+17 cross-split duplicates removed. 44,480 label rollouts, 1,156,283 simulated
+moves, mean label standard error 1.304 training / 1.192 held out (90th
+percentiles 1.877 / 1.832 moves). All 64 roll-in games ended naturally,
+averaging 70.906 moves; the ledger records 234,260.75 points for that
+collection run.
+
+Prediction gates (all declared in advance, all passed): held-out lifetime MAE
+2.744 moves, RMSE 3.530, Spearman 0.951 (gate 0.70); survival-at-25/50 soft AUC
+0.920 / 0.809 (gate 0.80); Brier 0.0136 / 0.0032; expected calibration error
+0.0210 / 0.0061 (gate 0.10).
+
+Gameplay: the four-game `0x3e820000…` screen passed both criteria — exact
+behavior 78.75 moves, value policy 81.25 moves, 0.75 switches per game. The
+gated eight-game `0x3e830000…` confirmation improved mean behavior from 79.5 to
+88.125 moves with 2.625 switches per game; clear/reveal throughput rose from
+1.901/1.033 to 1.996/1.112 per move. Paired 95% lower bounds were **negative**:
+−63,414 points and −17.404 moves. Runtime 121.3 s, 5.72 MiB peak RSS. No
+protected seed family was read.
+
+Retained artifact: `artifacts/models/denoised-value/v1.bin`, 35,395 parameters,
+141,780 bytes, payload checksum 1239007257.
+
+**Two recorded caveats about the scoring mode.** The ledger calls the screen
+"that legacy-scoring run" and then states that its absolute point totals use
+the verified 17,000-point Hardcore bonus. The exploratory audit in
+[`audit-03`](/docs/exploratory/audit-03-claim-arithmetic) flags this as
+internally contradictory (finding L1) and notes that **no point means were
+retained for the screen or the confirmation at all** — only move means — so the
+only defensible gameplay statement is the survival improvement quoted above.
+
+</TechnicalDetails>
+
+<TechnicalDetails title="The technical record — denoised guided veto (rejected)">
+
+Source: `denoised-guided-veto.cpp`. Status **rejected**, evidence
+**ledger-recorded**. The frozen model may only replace a guided depth-5/K3
+ensemble's action with a verified exact depth-3 fallback, and only when its
+predicted capped-50 lifetime advantage exceeds the model's own held-out MAE of
+2.744151 moves. It can never nominate a third action.
+
+Under historical 7,000-point Sequence scoring, the four-game `0x3e840000…003`
+screen looked strong: ensemble 126,146 points / 85.5 moves versus veto 184,649.25
+/ 121.25, deltas +58,503.25 and +35.75 — with 95% lower bounds already negative
+at −27,421.531 and −14.210. Seven of 485 moves were vetoes (1.443%), or 8.537%
+of the 82 disagreements.
+
+The eight-game `0x3e850000…007` confirmation did not replicate: ensemble
+164,266 / 110.625 versus veto 161,660.125 / 108.75, deltas −2,605.875 points and
+−1.875 moves, lower bounds −66,414.237 and −42.023. 12 of 870 moves vetoed
+(1.379%), 6.452% of 186 disagreements. Screen plus confirmation took 1,882.9 s.
+The ledger's own verdict: "The screen was a false positive." No threshold was
+swept and the screen seeds were not reused.
+
+</TechnicalDetails>
+
+<TechnicalDetails title="The technical record — phase-5 D4 value veto (runtime-paused)">
+
+Source: `d4-phase5-value-veto.cpp`. Status **runtime-paused**, evidence
+**ledger-recorded**. Fair D4 completes first and remains the default; the model
+is routed only when the rise clock is exactly 5 and the tallest column is at
+least 4 high — the situation D4 cannot see through, because the covered row due
+in five drops would then push the board to height five or more.
+
+Only the first paired fitting seed `0x3de90000` was opened. Baseline and
+candidate were byte-for-byte equal at 162,102 points, 110 moves, 222 numbered
+clears and 120 cover reveals. The candidate routed 21 of 22 phase-5 decisions
+and evaluated 725 modeled successors, and **made zero switches**: 124
+alternatives failed the lifetime gate, 97 the survival gate, 13 the root-Q band,
+none the orientation bound (counts overlap). The paired pilot took 198.902 s
+against a fixed projection of 3,580.240 s for the full design, above the
+2,700-second limit, so the experiment paused before its heldout, screen and
+confirmation seeds were opened.
+
+This is pilot-only evidence — not a rejection and not a qualification. The
+[blind-spot audit](/docs/exploratory/audit-04-blind-spots) records it as the
+most confounded entry in the corpus: the best-predicting model in the repository
+was given a rule so tight that **zero information about the hypothesis was
+obtained**, and one of its bands is still written in terms of the superseded
+7,000-point level bonus.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+The transferable lesson is about labels, not architecture: this model differed
+from its predecessors mainly in how its training targets were computed, and
+that alone moved held-out lifetime correlation to 0.951 — against 0.510 for the
+structured NNUE and 0.557 for the scaled survival value, as tabulated in the
+[blind-spot audit](/docs/exploratory/audit-04-blind-spots). Denoising the
+target is cheap to describe and expensive to run, and it worked.
+
+What remains unproven is whether that accuracy can be converted into better
+play. Both conversion attempts were structurally unlucky: one was measured
+against a weaker comparator on four games and reversed, the other could not
+fire at all. The retained checkpoint is still on disk, and giving it a
+deployment rule with enough room to make switches — on top of fair D4, on a
+cohort large enough to matter — is a live open item in the repository's own
+audit rather than a closed question.
 
 ## Sources
 
-- `d4-phase5-value-veto.cpp`
-- `denoised-guided-veto.cpp`
-- `denoised-stochastic-value.cpp`
-
-## More evidence
-
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/value-policy-learning)
+- `denoised-stochastic-value.cpp` — collection, labelling, fitting, gates.
+- `denoised-guided-veto.cpp` — the veto of the guided ensemble.
+- `d4-phase5-value-veto.cpp` — the phase-5 veto over fair D4.
+- Checkpoint: `artifacts/models/denoised-value/v1.bin`.

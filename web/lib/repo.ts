@@ -1,5 +1,6 @@
 import { readdirSync, readFileSync, existsSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
+import matter from "gray-matter";
 
 /** Absolute path to the repository root (the parent of this Next.js app). */
 export const REPO_ROOT = process.env.DROP7_REPO_ROOT
@@ -90,6 +91,10 @@ export const getResults = () => listJsonRecords<ResultRecord>("results");
 /* ---- Approach directories ---- */
 
 export interface ApproachEntry {
+  title: string;
+  summary: string;
+  status: string;
+  draft: boolean;
   family: string;
   slug: string;
   hasDocs: boolean;
@@ -114,6 +119,8 @@ export function listApproaches(family: string): ApproachEntry[] {
       const sourceFiles = readdirSync(approachDir)
         .filter((file) => /\.(ts|tsx|cpp|hpp|py|md|mdx|json)$/.test(file))
         .sort();
+      const mdxPath = join(approachDir, "README.mdx");
+      const front = existsSync(mdxPath) ? (matter(readFileSync(mdxPath, "utf8")).data as Record<string, unknown>) : {};
       return {
         family,
         slug,
@@ -121,6 +128,10 @@ export function listApproaches(family: string): ApproachEntry[] {
           existsSync(join(approachDir, "README.mdx")) ||
           existsSync(join(approachDir, "README.md")),
         sourceFiles,
+        title: typeof front.title === "string" ? front.title : slug,
+        summary: typeof front.summary === "string" ? front.summary : "",
+        status: typeof front.status === "string" ? front.status : "",
+        draft: front.draft === true,
       };
     });
 }
@@ -132,6 +143,23 @@ export function approachDocPath(family: string, slug: string): string | null {
     if (existsSync(path)) return path;
   }
   return null;
+}
+
+/** True when a hand-written operational README.md sits alongside the rendered README.mdx. */
+export function approachOperationalNotes(family: string, slug: string): string | null {
+  const dir = join(APPROACHES_DIR, family, slug);
+  if (!existsSync(join(dir, "README.mdx"))) return null;
+  return existsSync(join(dir, "README.md")) ? `approaches/${family}/${slug}/README.md` : null;
+}
+
+export function familyMeta(family: string): { title: string; summary: string } {
+  const path = familyDocPath(family);
+  if (!path) return { title: family, summary: "" };
+  const data = matter(readFileSync(path, "utf8")).data as Record<string, unknown>;
+  return {
+    title: typeof data.title === "string" ? data.title : family,
+    summary: typeof data.summary === "string" ? data.summary : "",
+  };
 }
 
 export function familyDocPath(family: string): string | null {

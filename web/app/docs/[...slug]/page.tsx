@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { existsSync, readFileSync } from "node:fs";
 import { join, normalize } from "node:path";
 import { Markdown } from "@/components/Markdown";
-import { DOCS_DIR, REPO_ROOT } from "@/lib/repo";
+import { DOCS_DIR } from "@/lib/repo";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +27,22 @@ export default async function RepoDocPage({
         <span className="text-xs text-zinc-600">docs/{relative}</span>
       </div>
       <Markdown source={source} />
+      <div className="mt-6 rounded-xl border border-sky-900/60 bg-sky-950/20 p-4 text-sm text-zinc-300">
+        These documents are written for researchers. For the same ideas in plain
+        language, with animations, start at{" "}
+        <Link href="/learn/rules" className="text-sky-400 hover:text-sky-300">
+          how the game works
+        </Link>{" "}
+        and the{" "}
+        <Link href="/learn/concepts" className="text-sky-400 hover:text-sky-300">
+          concepts primer
+        </Link>
+        ; every term is defined in the{" "}
+        <Link href="/learn/glossary" className="text-sky-400 hover:text-sky-300">
+          glossary
+        </Link>
+        .
+      </div>
       <div className="border-t border-zinc-800 pt-4 text-sm text-zinc-500">
         <Link href="/docs/research/status" className="text-sky-400 hover:text-sky-300">
           Status

@@ -1,35 +1,131 @@
 ---
-title: Structured Nnue
+title: Structured NNUE
 family: value-policy-learning
-status: Rejected
+summary: Give every one of the 49 cells its own learned description of the disc sitting in it, and predict how long the game has left — then find out that predicting well is not the same as choosing well.
+status: rejected
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+A small network whose input is not a summary of the board but the board itself:
+a separate learned vector for every cell-and-token combination, fed into a
+predictor of remaining lifetime and survival.
 
-## Structured NNUE
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
 
-Uses position-specific token embeddings and phase metrics for lifetime/survival prediction.
+Both experiments are in the written [ledger](/docs/research/history) with frozen
+gates. Between them they produced the cleanest demonstration in this repository
+of the difference between *predicting* a board and *choosing* between boards —
+and the second one is the reason the phrase
+[sibling trap](/learn/concepts/ranking-siblings) exists here.
 
-**Status: Rejected** (ledger-recorded). held-out 50-move AUC and ranking failed.
+## The intuition
 
-## Counterfactual-successor NNUE
+Earlier value models compressed the board into hand-chosen summaries — how tall
+the columns are, how many covered discs there are, how many clears are one disc
+away. Every such summary is a guess about what matters. An
+[NNUE](/learn/glossary)-shaped model makes fewer guesses: it gives each of the
+49 positions a private embedding for each of the ten things that can sit there,
+and lets training decide what a 3 in the bottom-left corner means as distinct
+from a 3 near the top.
 
-Labels all legal sibling successors with independent continuations.
+The model is also made exactly symmetric on purpose. Drop7 has no left or right
+preference, so the network is shown both mirror images of every training board
+and, at inference, its two orientations are averaged — a board and its mirror
+receive exactly the same value, rather than approximately the same one.
 
-**Status: Rejected** (ledger-recorded). good global prediction coexisted with poor sibling ranking and worse games.
+## How it works
 
-## Sources
+1. **Collect.** Complete games are played by the exact depth-3, five-stratum
+   phase policy on one seed lane. Whole games — indices divisible by five — are
+   held out before any fitting.
+2. **Encode.** Every cell/token pair, the visible next disc and the rise phase
+   each activate their own embedding; 20 standardized phase metrics describing
+   chain readiness, quiet build inventory, low-number clogs, cover exposure and
+   height risk are appended. Nothing else is visible to the model.
+3. **Fit.** A fixed 128/64 leaky-ReLU trunk with three heads: normalized
+   remaining lifetime, survival at 25 moves, survival at 50. Lifetime and
+   survival calibrations are fitted on training data only.
+4. **Gate before playing.** Declared in advance: both survival
+   areas-under-curve must reach 0.80 and held-out lifetime rank correlation must
+   reach 0.65, or the model never influences a move.
+5. **The variant that changed the data.**
+   `counterfactual-successor-nnue.cpp` keeps the architecture and changes what is
+   labelled: at each roll-in position it enumerates **every** legal column
+   through three common public chance strata, deduplicates the resulting
+   successors, and gives each of them eight independent 75-move public
+   continuation labels. Splits are by source game with no canonical board
+   shared between them. The goal was to make the model good at exactly the
+   comparison a policy has to make.
 
-- `counterfactual-successor-nnue.cpp`
-- `structured-value-nnue.cpp`
+## What happened
 
-## More evidence
+The first model learned its training data very well and generalized much worse.
+Its ability to say "this game is nearly over" survived the move to held-out
+games; its ability to *rank* boards by how long they had left did not, and both
+of the numbers it had promised in advance came in under target. It stopped at
+prediction and never played.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/value-policy-learning)
+The second is the interesting failure. Labelling every sibling fixed the
+coverage problem, and the model became genuinely accurate about individual
+successor boards — a rank correlation of 0.839 and an average error under four
+moves. But asked which column was best at a position — best according to the very
+labels it had been trained on — it named the right one 15.4% of the time; used
+as the leaf of a depth-3 search, 30.8%. Put on the board, it lost heavily. Strong global accuracy and poor within-root
+discrimination turned out to be entirely compatible.
+
+<TechnicalDetails title="The technical record">
+
+Both entries are ledger-recorded in
+[the experiment history](/docs/research/history).
+
+**Structured multi-head NNUE value experiment** (`structured-value-nnue.cpp`).
+75,395 parameters, 301,764 bytes with normalization and calibration metadata.
+Corpus: 160 uncensored depth-3/five-stratum trajectories, 128 fitting games and
+32 whole-game holdouts, 9,800 fitting labels and 2,132 held-out labels; behavior
+mean **247,202.869 points / 74.575 moves**. Training: MAE **20.391 moves**,
+death-within-25/50 AUC **0.999 / 0.978**, lifetime Spearman **0.887**. Held out:
+MAE **29.524 moves**, AUC **0.855 / 0.614**, Spearman **0.510**, Brier
+**0.192 / 0.314**, expected calibration error **0.186 / 0.286**; mean
+reflection-orientation gap **3.384 moves**, so symmetry was not the failure.
+Against the frozen gates (0.80 AUC on both horizons, 0.65 Spearman) the 50-move
+AUC and the ranking both failed; the reserved screen and confirmation seeds were
+never read and the experiment was not retuned.
+
+**Counterfactual-successor NNUE** (`counterfactual-successor-nnue.cpp`).
+On 242 held-out successors: Spearman **0.839**, MAE **3.888 moves**. Within-root
+signal: direct top-action accuracy **15.4%**; as a full-width depth-3 leaf
+**30.8%**, pairwise accuracy **62.0%**, label regret **1.90 moves**. The screen
+is explicitly recorded as **historical 7,000-point Sequence-scored**: exact
+depth 3 averaged **166,112.25 points / 111.5 moves**, the NNUE-leaf search
+**102,916.25 / 72.5**, a paired loss of **63,196 points and 39 moves**.
+Confirmation seeds were not read. The source carries
+`static_assert(kLevelBonus == 7'000)`, an intentional lock that stops it being
+rerun under the corrected 17,000-point Hardcore engine.
+
+The ledger's own conclusion is quoted often in this repository: *"strong global
+state-value correlation can coexist with poor discrimination among the sibling
+states that determine an action. Future learned evaluators must train and gate
+on grouped, within-position ranking evidence."*
+
+The first experiment's ledger entry precedes the corrected-Hardcore scoring
+replay, so read its point totals as within-run rather than comparable with the
+corrected-score [fair D4 reference](/approaches/fair-expectimax/reference).
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+This pair is where the repository stopped trusting prediction metrics as a proxy
+for playing strength. Every learned-evaluator gate written afterwards asks for
+*within-position ranking* — top-1 agreement, pairwise agreement, regret against
+a reference ordering at the same root — instead of, or in addition to, global
+correlation.
+
+What it did not rule out: the architecture. Position-specific embeddings with
+exact reflection symmetry were never shown to be the problem; the labels and the
+objective were. The
+[distributional afterstate ranker](/approaches/afterstate-learning/distributional-afterstate)
+kept the "value a resolved position" idea and changed both — a within-root
+ranking loss instead of pure regression, and aligned chance scenarios shared
+across siblings instead of independent continuations per successor.

@@ -1,29 +1,121 @@
 ---
-title: Gray Throughput
+title: Gray throughput
 family: heuristic-search
-status: Rejected
+summary: Stop trying to score and start trying to keep up — clear numbered discs and open covered ones fast enough that the board never fills.
+status: rejected
 evidence: task-record only
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
+Stop trying to score and start trying to keep up — clear numbered discs and
+open covered ones fast enough that the board never fills.
+
+<EvidenceLabel status="rejected" evidence="task-record only" reads="public" />
+
+## The intuition
+
+There is a piece of arithmetic in this game that has nothing to do with
+strategy. A board has 49 cells. Every five drops, five numbered discs land on
+it *and* a [rise](/learn/glossary) pushes in a row of seven covered discs.
+Twelve discs arrive per cycle, so a board that is not slowly filling up must
+remove twelve per cycle too:
+
+<Stat label="Numbered discs that must clear" value="2.4 per move" hint="12 arrivals ÷ 5 drops" />
+
+and every one of those seven covered arrivals has to be opened before it can
+be cleared at all:
+
+<Stat label="Covered discs that must be revealed" value="1.4 per move" hint="7 covers ÷ 5 drops" />
+
+This policy is that arithmetic turned into an objective. It does not ask "how
+many points is this move worth"; it asks "does this move keep me at, or above,
+the replacement rate" — and it pays a **surplus** bonus for clearing or
+revealing more than the requirement, not merely for clearing or revealing.
+
+## How it works, step by step
+
+1. **Read the position** — board, next disc, rise clock.
+2. **Simulate each legal column** over a few stratified guesses about what the
+   hidden gray numbers would show, then continue for a short horizon.
+3. **Score the resulting board** with thirteen state features: occupancy,
+   total covers, solid and cracked counts, how much cover load sits high, load
+   above the safe band, peak and mean height excess, pressure from the coming
+   rise, low-number caps and adjacent low caps, and two topology terms for
+   whether covers are exposed and numbers are still live.
+4. **Score the move** with seven transition features, dominated by the two
+   surplus terms — clears above 2.4 per move and reveals above 1.4 per move.
+5. **Blend the immediate value with the continuation value** and play the best
+   column.
+
+The companion `tune.ts` fits the twenty weights with a cross-entropy method on
+complete games from a training seed range, then replays the frozen champion on
+a separate calibration range.
+
+## What happened, in plain English
+
+Pushing harder on gray discs made the board look better and did not make the
+policy live longer. The retained sentence is that stronger gray weights
+improved *exposure* — how much of the covered population was attackable — but
+not the sustainable rate of cracks and reveals, and not the score.
+
+That is a more interesting failure than it first appears. It says the deficit
+is not caused by the policy failing to *value* reveals highly enough. Wanting
+reveals more does not produce more of them.
+
+<Callout title="This policy reads two things a deployable policy may not" tone="warn">
+The chance-sample salt in `gray-throughput-policy.ts` hashes the game's
+**level** and **moves played** along with the board and rise clock. The
+research contract excludes both from the deployable public interface, and the
+benchmark registry flags this policy accordingly
+(`publicInformation: false` in `src/bench/policies.ts`) so that it is shown
+separately on the [leaderboard](/leaderboard). Neither field can leak a hidden
+disc value or a future disc — they only vary the deterministic sampling — but
+the flag is correct and the policy as written could not be submitted for
+qualification without changing that salt.
 </Callout>
 
-## Gray-throughput tuning
+<TechnicalDetails title="The technical record">
 
-Tunes and evaluates policies that prioritize covered-disc damage and removal flow.
+The [experiment index](/docs/research/experiment-index) records this as
+**rejected, task-record only**: *"stronger gray weights improved exposure but
+not sustainable cracks/reveals or score."* Task-record only means the result
+was reported in a research conversation and never promoted into the
+[experiment history](/docs/research/history). **No cohort size, score, or
+measured clear/reveal rate for this policy is retained in this repository**, so
+none appears on this page.
 
-**Status: Rejected** (task-record only). stronger gray weights improved exposure but not sustainable cracks/reveals or score.
+The 2.4 and 1.4 targets are arithmetic, and they are in the source:
+`REQUIRED_CLEAR_THROUGHPUT = 1 + BOARD_SIZE / 5` and
+`REQUIRED_REVEAL_THROUGHPUT = BOARD_SIZE / 5` in
+`src/core/typescript/gray-throughput-policy.ts`, with the same two constants
+repeated in `phase-horizon-evaluator.ts`. The independent measurement of how
+far the reference policy falls short of them —  1.973 clears and 1.090 reveals
+per move over 64 games — is exploratory, development tier, in
+[finding 01](/docs/exploratory/finding-01-score-is-survival), and the
+[research status](/docs/research/status) page cautions that these rates are
+*"diagnostic targets from limited runs, not proven universal thresholds."*
 
-## Sources
+Repository-verified defaults: thirteen state weights ranging from +520
+(exposed cover topology) to −2,400 (peak height excess), seven transition
+weights led by +650 (clear surplus) and +620 (revealed covers), and a
+continuation blend of 0.72. `tune.ts` runs a cross-entropy method over all
+twenty parameters on the `0x1d70…` training range with a separate `0x5d70…`
+calibration range and a bootstrap over game results; `benchmark.ts` compares
+the gray, rollout, combined and tunneling profiles on the same games.
 
-- `benchmark.ts`
-- `tune.ts`
+</TechnicalDetails>
 
-## More evidence
+## What this taught us, and what is still open
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/heuristic-search)
+- **Naming the right objective is not the same as reaching it.** This lab
+  encoded the correct conservation law and still could not satisfy it. The
+  later exploratory work reached the same wall from the other side: no legal
+  policy tested has achieved flow balance
+  ([finding 06](/docs/exploratory/finding-06-flow-ceiling), which carries two
+  published correction notices and should be read with them).
+- **Exposure is a decoupled measurement.** Making covers attackable and
+  actually converting them into reveals came apart here. Any successor should
+  report both, because improving the first is easy.
+- **What was ruled out** is this weight family, tuned this way. The
+  conservation objective itself is now the organizing idea of a separate
+  research line, [lifetime objective](/approaches/lifetime-objective).

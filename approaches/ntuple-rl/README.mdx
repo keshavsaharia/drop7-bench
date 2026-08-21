@@ -1,31 +1,163 @@
 ---
-title: N-tuple and reinforcement learning
-summary: N-tuple value tables, TD/Q-learning, PPO — the reinforcement-learning line of attack.
+title: N-tuple networks and learning from play
+summary: Instead of hand-writing what makes a Drop7 board good, learn it — from small patches of cells, and from millions of games the program plays against itself.
 ---
 
-N-tuple learning values a board by summing many small lookup tables, each
-indexing a handful of cells (a "tuple"). It is the classic approach for games
-like 2048, and it was the **first learned-policy line** tried here: a
-hierarchical 5.45-million-weight model trained over half a million games, then
-a long series of TD, Q-learning, and PPO variants.
+Instead of hand-writing what makes a Drop7 board good, learn it — from small
+patches of cells, and from millions of games the program plays against itself.
 
-<Board
-  cells="00000000000000000000000000000000003420008888888"
-  highlight={[37, 38, 44, 45]}
-  size={240}
-  caption="One n-tuple might read these four cells; hundreds of such tuples vote on the board's value."
-/>
+This is the family that tried to replace human judgement with data. It contains
+the repository's first learned policy and, after it, a long line of
+reinforcement-learning variants: temporal-difference updates, Q-learning,
+policy gradients, actor-critic, and expert iteration. None of them produced a
+policy stronger than the hand-tuned
+[fair depth-4 search](/approaches/fair-expectimax/reference) that the project
+uses as its reference. For how this family compares with the other three ways
+of learning tried here, see
+[four ways a program can learn Drop7](/learn/concepts/learning-from-play).
 
-## What the evidence showed
+## What an n-tuple network is
 
-- Sparse learned-value search over the n-tuple improved the learned greedy
-  baseline — real progress — but was not selected over the later fair-D4
-  reference.
-- The RL variants (rainbow Q, native and torch PPO, primal-dual actor-critic)
-  repeatedly plateaued below fair search or failed their Stage-A floors.
-- A subtle, instructive bug class lives here: shared-parameter TD updates
-  needed temporal-coherence corrections, and even after the fix the policy
-  gates did not pass.
+Pick a small window of cells — four in a row, four in a column, or a 2×2 block.
+Read the contents of that window as an address, and look the address up in a
+table of learned numbers. Do that for every window on the board, add all the
+numbers together, and the sum is the network's opinion of the position.
 
-The family's `native-suite` also houses the native engine benchmark and
-self-tests that anchor the repository's native/TypeScript parity checks.
+<NTupleWindows caption="Three of the 92 windows on one real position. Each turns four cells into a code, the code selects one learned number, and the 92 numbers are added together." />
+
+The position in the figure is this repository's TypeScript rules engine playing
+a game, not a drawing. The native implementation in
+`src/core/native/ntuple.hpp` uses 92 windows — 28 horizontal, 28 vertical, and
+36 square — sharing 17 underlying tables.
+
+Nothing in that machinery knows Drop7's rules. It only knows which small
+patterns of cells tended to precede good games. That is the appeal: a table
+lookup is far cheaper than a neural network, and the tables can hold millions of
+distinct local shapes. In 2048, the game this idea was borrowed from, tables
+like these are enough to play the game very well.
+
+## And "learning from play"
+
+No human labels the boards. The program plays a game, sees what happened, and
+nudges the weights it looked up toward the outcome. Play enough games and the
+weights are supposed to converge on something that ranks positions correctly.
+The variants in this family differ mostly in *what* they nudge toward: the score
+that followed, the number of moves survived, the value of the best next move, or
+the advantage of one column over another.
+
+## How it works, step by step
+
+1. **Read the position.** Every program in this family is a
+   [public-information policy](/learn/glossary): the board, the visible next
+   disc, and the [rise clock](/learn/glossary). No seed, no hidden gray value,
+   no score, no move number.
+2. **Evaluate.** Look up all 92 windows (plus, in some variants, extra features
+   for board height, disc counts, and rise phase) and add the weights.
+3. **Choose a column.** Simulate dropping the visible disc in each legal column,
+   evaluate the resulting board — its [afterstate](/learn/glossary) — and take
+   the best. Some variants put a shallow
+   [expectimax search](/learn/concepts/chance-vs-choice) on top and use the
+   network only at the [leaves](/learn/concepts/evaluating-a-board).
+4. **Learn.** After the move, compare the prediction with what actually
+   followed, and adjust every weight that contributed. Repeat for hundreds of
+   thousands of games, or in the later experiments tens of millions of moves.
+5. **Freeze and test.** Freeze the weights, then play a fixed cohort of complete
+   games against a reference policy on the same seeds.
+
+## What happened, in plain English
+
+The first version worked well enough to be interesting and was never beaten by
+anything that came after it. Adding a two-move look-ahead on top of the learned
+values lifted it from about 182,000 to about 232,000 points per game on a fixed
+64-game development probe — a real improvement, honestly measured. But by the
+time the hand-tuned depth-4 search was properly measured, that search was
+scoring around 308,000 on its own 64-game reference cohort, and the learned
+policies were not close.
+
+Every reinforcement-learning variant that followed landed lower. The clearest
+example: a phase-aware n-tuple trained on 50 million moves scored 181,733 points
+per game, and the two-rise-deep search built on top of it scored *less*, at
+113,644. A Rainbow-style Q-learner beat random play convincingly at 250,000
+training steps, then lost decisively to a plain one-move fair search at one
+million. A PyTorch policy-gradient pipeline, an actor-critic with explicit
+safety constraints, and eight rounds of expert iteration all finished between
+roughly 116,000 and 176,000 points per game, and a second, C++ policy-gradient
+attempt never got past trying to imitate a one-move search.
+
+| Approach | Recorded mean score | Mean moves | Cohort | Source |
+| --- | ---: | ---: | --- | --- |
+| [Learned value plus depth-2 search](/approaches/ntuple-rl/native-suite) | 232,107.156 | 70.766 | 64-game development probe | ledger |
+| [Optimistic phase n-tuple, direct play](/approaches/ntuple-rl/optimistic-phase) | 181,733.422 | 56.359 | 64-game burned gate | ledger |
+| [Primal-dual actor-critic](/approaches/ntuple-rl/primal-dual-actor-critic) | 175,834 | 55.006 | 512-game calibration | ledger |
+| [PyTorch PPO, best candidate](/approaches/ntuple-rl/torch-ppo) | 142,677.781 | 45.656 | 64-game development cohort | ledger |
+| [Regenerative expert iteration, round 8](/approaches/ntuple-rl/regenerative-expert-iteration) | 116,598 | 38.046 | training roll-ins | ledger |
+| [Optimistic phase n-tuple, two-rise search](/approaches/ntuple-rl/optimistic-phase) | 113,643.969 | 37.375 | 64-game burned gate | ledger |
+| Fair depth-4 reference, for comparison | 308,295.578 | 90.031 | 64 games | ledger |
+
+<Callout title="These numbers are not all on the same scale" tone="warn">
+Drop7's five-move mode awards 17,000 points per row rise. Part-way through this
+project a scoring audit found that a 7,000-point constant had been introduced
+by mistake, and results from that window are on a different scale. The ledger
+labels the scoring mode for some of these runs and not others; where it does
+not, the per-page technical records say so. The
+[temporal-coherence](/approaches/ntuple-rl/temporal-coherence) and
+[native PPO](/approaches/ntuple-rl/native-ppo) point totals are on the
+historical 7,000-point scale and cannot be compared with the rest of this table.
+</Callout>
+
+<TechnicalDetails title="The technical record">
+
+Every figure above is ledger-recorded in
+[the experiment history](/docs/research/history); the family's status rows are
+in [the experiment index](/docs/research/experiment-index) under "N-tuple and
+reinforcement learning". Five of the family's sources
+(`bellman-ntuple.cpp`, `flow-curriculum-rainbow.cpp`,
+`manifold-gail-development.cpp`, `manifold-gail-scaled.cpp`,
+`curriculum-option-ppo.cpp`) carry a **task-record only** verdict: an index row
+exists, but no ledger protocol, artifact hash, or per-game data was retained,
+so those rejections cannot be re-derived.
+
+The 308,295.578 / 90.031 reference is itself weaker evidence than it looks. It
+appears once in the ledger, as an internal bootstrap comparator inside the
+regenerative expert-iteration run; the identity of its 64 seeds, its dispersion,
+and its censoring statistics were not retained. This is recorded as finding H2
+in `docs/exploratory/audit-03-claim-arithmetic.md`.
+
+The scoring-mode assignments quoted on the individual pages come from the same
+audit, which classifies every recorded (score, moves, n) triple in the ledger by
+which level bonus is arithmetically consistent with it. Where the ledger states
+the mode, the pages say so; where the audit infers it, the pages say that too.
+
+No approach in this family opened a protected or final cohort. Several left
+their later gameplay ranges unopened, which is recorded per experiment.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+**The representation was never the bottleneck.** The strongest single lesson is
+negative and repeated: more capacity, more training, and better-conditioned
+updates did not fix these policies. A shared-parameter bug in the
+temporal-difference update was found and corrected, and the corrected policy
+still failed. Conditioning the tables on the rise clock closed under 3% of the
+gap to the reference search. Training a Q-function to 50 million moves produced
+a policy no better than one trained far less.
+
+**The bottleneck was which moves the data covered.** Almost every program here
+learned from the move it actually played, then, at play time, was asked to rank
+up to seven columns it had never been scored on. That is the
+[sibling trap](/learn/concepts/ranking-siblings), and the expert-iteration run
+states it most plainly: even regenerating fresh on-policy games every round did
+not remove it, because the targets still described only the played action.
+
+**Search on top of a weak value can hurt.** The two-rise rollout over the
+optimistic phase n-tuple was strictly worse than just playing the network's
+first choice. A deeper look-ahead magnifies whatever the leaf evaluator gets
+wrong, and this one was wrong.
+
+**What is still open.** Nobody has trained an n-tuple on data that scores
+*every* legal column at each position under shared imagined futures. The
+[sibling-ranking](/learn/concepts/ranking-siblings) and
+[scale-out](/learn/concepts/scale-out-direction) pages describe what that would
+take. Until it is tried, this family's negative results rule out the objectives
+that were tested, not pattern learning itself.

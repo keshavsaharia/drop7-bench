@@ -1,0 +1,37 @@
+---
+title: Second try — eight times more luck samples, and still short of the floor
+---
+
+The [first
+iteration](/experiments/EX-20260820-afterstate-pilot-h40-29b8588a) could not
+grade anything, because the answer key it graded against was too noisy to
+reproduce itself. This experiment changed exactly one thing: instead of
+averaging each column's future over 8 shared runs of luck, average it over 64.
+Everything else — the network, the positions, the 40-move continuation, the
+thresholds — was held fixed, and the held-out positions came from a fresh block
+of game seeds that had never been read.
+
+Same two contestants as before. The candidate is the learned board-scorer that
+reads only a resolved board, the visible next disc, and the rise clock; the
+comparator is exact [fair D4](/learn/glossary), the four-move search that is
+this repository's reference. Neither played a game: this is an offline test of
+who orders the columns better at a position. "Pass" required the split-half
+agreement of the answer key to reach 0.50, and then the network to come within
+two percentage points of the search on top-choice and head-to-head accuracy, in
+both halves of the held-out set.
+
+**What happened.** More luck samples helped, in the direction and roughly the
+size the noise arithmetic predicted — split-half agreement rose from 0.246 to
+0.446 — but 0.446 is still under the frozen 0.50 floor, so the verdict is
+*inconclusive* for a second time. The network's confidence intervals were
+well calibrated this time (0.807 against a target band), and it clearly beat the
+weak one-move player whose games produced its labels, but it trailed the
+four-move search in both halves. The record also flags that training stopped at
+epoch 15 of 20 when the GPU budget ran out, with the ranking loss still falling.
+No gameplay tier was opened.
+
+<ResultSummary id="RS-20260820T114500Z-2b7c9e31" />
+
+Nothing about the theory was ruled in or out. The useful output is that the
+noise model held: sample count moved the key's reproducibility about as
+predicted, which is what justified paying for a much larger third iteration.

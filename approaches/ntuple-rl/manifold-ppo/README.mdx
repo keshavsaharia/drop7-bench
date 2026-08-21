@@ -1,49 +1,157 @@
 ---
-title: Manifold Ppo
+title: Learning what a long-lived board looks like
 family: ntuple-rl
-status: Rejected
+summary: Train a classifier to tell boards from very long games apart from ordinary ones, then use that opinion to guide play — it could tell them apart almost perfectly, and still chose worse moves.
+status: rejected
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
+Train a classifier to tell boards from very long games apart from ordinary
+boards, then use that opinion to guide play. It could tell them apart almost
+perfectly, and still chose worse moves.
+
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
+
+<Callout title="Where the training labels came from" tone="info">
+The classifier itself reads only what a player can see. Its *positive examples*,
+however, are positions taken from a privileged planner's long trajectories — a
+[teacher](/learn/glossary) that was allowed to see hidden values. Using a
+teacher to build labels is legitimate — see
+[oracles, teachers and students](/learn/concepts/oracles-and-teachers) — and the
+resulting scalar is a public function of a public board. This page is careful
+never to present the teacher's own play as a policy result.
 </Callout>
 
-## Oracle-manifold discriminator
+## The intuition
 
-Learns a public classifier for states resembling privileged long-lived trajectories.
+A clairvoyant planner that can see every hidden gray disc plays very long games.
+The positions it passes through must have some visible structure in common —
+call it the shape of a board with a future. If a public classifier can learn to
+recognise that shape, then "does my move lead toward that shape?" becomes a
+signal any legal policy can use.
 
-**Status: Rejected** (ledger-recorded). the original coverage gate stopped the policy experiment.
+The delicate part is making the classifier learn the *right* difference. A board
+from a 250-move oracle game is fuller and taller than a board from a 60-move
+ordinary game, so a lazy classifier can hit high accuracy by counting discs and
+learning nothing about structure. This experiment therefore matched every
+positive with a negative having exactly the same rise phase, the same number of
+occupied cells, and the same maximum column height, and used only invariant
+aggregates of causal-graph and trigger features as inputs.
 
-## Manifold root prior
+Three ways of using the resulting signal were tried, in increasing caution:
+as a dense reward for policy-gradient training, as a tie-break between nearly
+equal moves, and as a shaping term added to a fixed training run.
 
-Uses the frozen manifold scalar only as a near-tied D3 root prior.
+## How it works, step by step
 
-**Status: Rejected** (ledger-recorded). it reduced score, survival, and flow.
+1. **Collect.** 4,096 checksum-locked public positions from oracle trajectories
+   as positives; positions from exactly 1,024 fresh games of an exact one-move
+   fair search as negatives.
+2. **Match.** Pair each positive with a negative on rise phase, occupied count,
+   and maximum height, so load cannot be the discriminating feature.
+3. **Train and check honestly.** Two complementary small networks (295 inputs,
+   24 hidden units, 7,129 parameters), each trained on one half of the positions
+   split by board identity, evaluated only on the other. The negatives inherit
+   the split of their whole origin game, so no game straddles the boundary.
+4. **Gate before using it.** Held-out separation had to pass fixed thresholds,
+   and the matched pairs had to cover at least 80% of the positives without
+   reusing any negative.
+5. **Deploy cautiously.** In the tie-break variant, an exact two-move fair
+   search proposes; at most two columns within 2,500 points of its best are
+   admitted; each is scored by the mean classifier opinion of seven public
+   successors; exact ties fall back to the search's own choice.
 
-## Manifold GAIL development
+## What happened, in plain English
 
-Shapes a fixed PPO run with the already-matched public oracle-manifold discriminator.
+**The classifier was excellent and the gate still stopped it.** Held-out
+separation was about 0.92 — far above the 0.62 threshold — but only 74.0% of
+positives could be matched without reusing a negative, against an 80%
+requirement. Execution stopped there. No policy training started, no final
+classifier was saved, and every reserved seed range stayed shut. The gate was
+not loosened, the matching was not redone, and nothing was retried after the
+number was seen.
 
-**Status: Rejected** (task-record only). modest training improvement still missed every Stage-A floor.
+**Used as a tie-break, a near-perfect classifier made play worse.** A separate
+experiment fit one final scalar on the 3,032 pairs that *had* matched, reaching
+about 0.95 separation, and let it choose only between nearly-tied moves. On 16
+games it averaged 253,799 points and 73.9 moves, against the unmodified search's
+301,101 and 88.9. It cleared and revealed fewer discs per move, and it won both
+score and moves in only 5 of 16 games. Every improvement gate failed.
 
-## Scaled manifold GAIL
+The ledger's own conclusion is the lesson: strong matched-state classification
+does not by itself rank close root actions correctly.
 
-Increases only the frozen manifold shaping coefficients on a disjoint lane.
+**Two further attempts using it as a training reward were not retained.** One
+shaped a fixed policy-gradient run with the classifier and improved training
+slightly while missing every floor; a second raised only the shaping strength
+and made things materially worse. Neither has a ledger record.
 
-**Status: Rejected** (task-record only). stronger shaping materially regressed Stage A.
+<TechnicalDetails title="The technical record">
 
-## Sources
+Statuses in [the experiment index](/docs/research/experiment-index): the
+oracle-manifold discriminator and the manifold root prior are **rejected,
+ledger-recorded**; both GAIL-shaping variants are **rejected, task-record only**
+with no ledger protocol, artifact hash, or per-game data retained.
 
-- `manifold-gail-development.cpp`
-- `manifold-gail-scaled.cpp`
-- `manifold-root-prior.cpp`
-- `oracle-manifold-ppo.cpp`
+From [the ledger](/docs/research/history):
 
-## More evidence
+*Discriminator.* Fold 0 held-out AUC 0.924806 and paired ranking 0.930140; fold
+1, 0.915419 and 0.912361 — against frozen thresholds of 0.62 and 0.58. Coverage
+3,032 of 4,096 positives (74.0234%) against an 80% admission gate, so the run
+stopped in 12.574 seconds. Proposed policy-training seeds
+`0x3d6b1000...0x3d6b6fff`, Stage-A seeds `0x3d6c0000...0x3d6c001f`, and every
+protected and final cohort remain unopened.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/ntuple-rl)
+*Root prior.* Whole-fit AUC 0.945853, matched-pair ranking 0.941953, logistic
+loss 0.291224. On 16 fitting games `0x3d6f0000...0x3d6f000f`:
+
+| Policy | Mean score | Mean moves | Clears / reveals per move |
+| --- | ---: | ---: | --- |
+| Manifold root prior | 253,798.875 | 73.938 | 1.826 / 0.986 |
+| Exact fair D3 | 301,101.062 | 88.938 | 1.936 / 1.063 |
+
+It changed 31.53% of the search's moves, had two admissible candidates on 74.81%
+of moves, and won both score and moves in 5 of 16 games. The 32-game screen
+`0x3d6f1000...0x3d6f101f` was never opened.
+`docs/exploratory/audit-03-claim-arithmetic.md` classifies both rows as
+corrected 17,000-point scoring; the ledger section itself does not state the
+mode.
+
+*GAIL variants.* From the source comments and
+`docs/exploratory/audit-05-optimistic-curriculum.md`: the development variant
+trains a reflection-invariant 295-24-1 discriminator from the 3,032 matched
+pairs and shapes one fixed policy-gradient run; the scaled variant changes only
+the shaping coefficients (centred term 0.10 to 0.75, potential shaping 0.15 to
+0.50) on a disjoint evaluation lane, holding the checkpoint, architecture,
+schedule, update, reward, and selection rule fixed. **No achieved numbers from
+either were retained**, so none are quoted here.
+
+Sources: `oracle-manifold-ppo.cpp`, `manifold-root-prior.cpp`,
+`manifold-gail-development.cpp`, `manifold-gail-scaled.cpp`.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+**This is the cleanest "prediction is not ranking" result in the repository.**
+A classifier at 0.95 separation is, by any normal standard, an excellent model.
+Given the job of choosing between two nearly equal columns, it lost score,
+survival, and disc throughput. Recognising the kind of board that survives is a
+different skill from knowing which move gets you one. The
+[sibling-ranking page](/learn/concepts/ranking-siblings) is the general
+statement of this.
+
+**It also shows what a matched control is worth.** Because positives and
+negatives were matched on load and height, nobody can dismiss the 0.92 as
+"it learned to count discs." That rigour is exactly what makes the negative
+result usable.
+
+**And what an honest gate is worth.** The 80% coverage requirement stopped a
+model that had already passed its accuracy thresholds. It would have been easy
+to relax; the record states plainly that it was not.
+
+**Still open.** Whether the manifold signal helps as a *feature inside a value
+function*, rather than as a reward or a tie-break, was never tested. The two
+shaping experiments that came closest left no retained measurements, so they
+constrain nothing.

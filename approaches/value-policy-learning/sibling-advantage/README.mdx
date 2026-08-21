@@ -1,35 +1,141 @@
 ---
-title: Sibling Advantage
+title: Sibling advantage
 family: value-policy-learning
-status: Rejected
+summary: Stop asking how good a board is. Replay all seven columns through exactly the same imagined future and learn only which one came out ahead.
+status: rejected
 evidence: task-record only
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Learn the *difference* between the columns available right now, not the value of
+each one, by continuing every column through an identical future so nothing but
+the choice itself can explain the gap.
 
-## Sibling-advantage ranker
+<EvidenceLabel status="rejected" evidence="task-record only" reads="public" />
 
-Learns relative returns for every legal sibling under aligned continuation tapes.
+## The intuition
 
-**Status: Rejected** (task-record only). the learned ordering did not beat exact search on unseen roots.
+A policy never needs an absolute number. It needs an ordering. So this approach
+throws the absolute number away and learns the ordering directly.
 
-## Scaled sibling-advantage study
+The trick that makes that possible is **common random numbers**. Consider one
+position with seven legal columns. Drop into column 1 and play on for a while;
+drop into column 2 from the same starting board and play on for the same while.
+If the two continuations used different random discs and different gray reveals,
+the difference in their outcomes is mostly luck. If they use the *same* tape of
+future discs and reveals, the luck cancels, and what is left is attributable to
+the choice.
 
-Increases data and capacity while retaining grouped, whole-origin splits.
+<svg viewBox="0 0 660 176" className="my-4 w-full max-w-2xl rounded-xl border border-zinc-800 bg-zinc-900/40" role="img" aria-label="Every sibling replayed on one shared tape of future discs and reveals">
+  <g fontSize="11" fill="#e4e4e7">
+    <rect x="14" y="60" width="96" height="52" rx="8" fill="#1e3a8a" />
+    <text x="62" y="82" textAnchor="middle" fontWeight="700">one root</text>
+    <text x="62" y="98" textAnchor="middle" fontSize="10" fill="#bfdbfe">7 legal columns</text>
+    <rect x="160" y="18" width="122" height="30" rx="6" fill="#14532d" />
+    <text x="221" y="37" textAnchor="middle">column 1 →</text>
+    <rect x="160" y="60" width="122" height="30" rx="6" fill="#14532d" />
+    <text x="221" y="79" textAnchor="middle">column 2 →</text>
+    <rect x="160" y="102" width="122" height="30" rx="6" fill="#14532d" />
+    <text x="221" y="121" textAnchor="middle">column 3 … →</text>
+    <rect x="322" y="18" width="150" height="114" rx="8" fill="#78350f" />
+    <text x="397" y="63" textAnchor="middle" fontWeight="700">one shared tape</text>
+    <text x="397" y="80" textAnchor="middle" fontSize="10" fill="#fde68a">same discs, same reveals</text>
+    <text x="397" y="96" textAnchor="middle" fontSize="10" fill="#fde68a">for every sibling</text>
+    <rect x="512" y="45" width="134" height="60" rx="8" fill="#4c1d95" />
+    <text x="579" y="70" textAnchor="middle" fontWeight="700">learn the gaps</text>
+    <text x="579" y="87" textAnchor="middle" fontSize="10" fill="#ddd6fe">luck has cancelled</text>
+    <g stroke="#3f3f46" strokeWidth="1.5">
+      <line x1="110" y1="70" x2="160" y2="33" />
+      <line x1="110" y1="86" x2="160" y2="75" />
+      <line x1="110" y1="100" x2="160" y2="117" />
+      <line x1="282" y1="75" x2="322" y2="75" />
+      <line x1="472" y1="75" x2="512" y2="75" />
+    </g>
+  </g>
+</svg>
 
-**Status: Rejected** (task-record only). more data still increased regret relative to exact search.
+That design also answers the objection that defeated most of this family. The
+data is not "the move that was played and its outcome"; it is *every* legal move
+and its outcome, at the same position. There is no
+[sibling extrapolation](/learn/concepts/ranking-siblings) by construction.
 
-## Sources
+## How it works
 
-- `scaled-sibling-advantage-lab.cpp`
-- `sibling-advantage-ranker.cpp`
+1. **Harvest roots.** Public positions are taken from games played by the
+   reference policy.
+2. **Expand every sibling.** At each root, every legal column is played, giving
+   up to seven successor boards from one starting board.
+3. **Continue on aligned tapes.** Each successor is rolled forward on exactly
+   the same public continuation tapes as its siblings — 24 of them, each running
+   up to 60 moves — so the difficulty of the *source* position cannot leak into
+   any one sibling's target.
+4. **Label relatively.** Each sibling's target is its return measured against
+   its siblings at the same root, not against boards from elsewhere in the
+   corpus.
+5. **Fit with grouped splits.** Training and evaluation are split by whole
+   origin game, so a held-out root's own game contributed nothing.
+6. **Improve conservatively.** The learned ordering is used as a bounded
+   counterfactual improvement over the existing policy rather than as a
+   standalone player.
 
-## More evidence
+`scaled-sibling-advantage-lab.cpp` is the same experiment with more data and
+more model capacity, reusing the aligned-tape implementation unchanged so that
+scale is the only variable.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/value-policy-learning)
+## What happened
+
+The learned ordering did not beat exact search on positions it had not seen —
+and the scaled repeat, with more data and a bigger model, did not close the gap
+either. The index records that regret against exact search went *up*, not down,
+with scale.
+
+That second sentence is the valuable one. It is a direct test of the most
+common response to a failed learned evaluator ("train it on more") and the
+answer, at this scale and with this design, was no.
+
+<TechnicalDetails title="The technical record">
+
+Two rows in the [experiment index](/docs/research/experiment-index), both
+**task-record only**:
+
+- *"Sibling-advantage ranker … Learns relative returns for every legal sibling
+  under aligned continuation tapes. **Rejected — task-record only;** the learned
+  ordering did not beat exact search on unseen roots."*
+- *"Scaled sibling-advantage study … Increases data and capacity while retaining
+  grouped, whole-origin splits. **Rejected — task-record only;** more data still
+  increased regret relative to exact search."*
+
+There is **no retained result** beyond those two sentences: no accuracy, no
+regret figure, no cohort. A search of [the ledger](/docs/research/history) for
+either source returns nothing.
+
+**Both sources are locked to historical 7,000-point Sequence scoring.** Each
+carries `static_assert(kLevelBonus == 7'000)`, which is a deliberate barrier
+preventing them from being rerun against the corrected 17,000-point Hardcore
+engine and silently producing numbers that look comparable to current work. Any
+revival of this idea has to be ported into a new experiment, not unlocked; that
+is the repository's rule for archival sources.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+This is the honest precursor of the repository's most recent line. The two
+ingredients that the later
+[distributional afterstate ranker](/approaches/afterstate-learning/distributional-afterstate)
+depends on — labelling every legal sibling, and aligning the chance events
+across siblings so the comparison is fair — were already here, and already
+implemented correctly.
+
+What the later work added is a measurement this directory never made: how
+*stable* the labels themselves are. The sources here use 24 aligned continuation
+tapes over a 60-move horizon per sibling (read from the source, so
+repository-verified). When the afterstate line checked stability directly, eight
+aligned scenarios per sibling left the target ranking so noisy that no model
+could be certified against it, 64 was still not enough, and 256 was needed
+before the ordering held up when the scenarios were split in half (results
+`RS-20260820T094500Z-5c1e9a04`, `RS-20260820T114500Z-2b7c9e31` and
+`RS-20260820T142500Z-8f4a2d17`, machine-readable records). Nothing retained here
+reports a comparable diagnostic at 24 tapes — so "the learned ordering was
+wrong" and "the labels it was fitting were too noisy to learn" cannot be told
+apart from what this repository kept.

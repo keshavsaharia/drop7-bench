@@ -4,7 +4,7 @@
   "theoryId": "TH-20260821-search-guided-self-play-at-scale-299ed02f",
   "title": "Search-guided self-play with every-sibling labels converts compute into long-horizon strength",
   "claim": "A search-guided self-play loop \u2014 actors that run a fair public-information search at every visited position, record the value of every legal sibling column under aligned chance scenarios, and train a public board evaluator on those successor-closed labels, which then becomes the leaf of the next iteration's search \u2014 produces a frozen public student whose mean whole-game score on fresh paired development cohorts rises with the compute spent per iteration, and at sufficient scale exceeds fair D4's mean by a preregistered margin.",
-  "mechanism": "Every learned evaluator in the ledger failed at ranking siblings because training data labelled only the move that was played (status.md \u00a74\u2013\u00a77; sibling extrapolation). Labelling every legal sibling at every root closes that gap by construction, and using a search to produce the labels makes them stronger than the evaluator that guided the search (policy improvement). Feeding the trained evaluator back as the search leaf and repeating is approximate policy iteration; each iteration's labels come from a stronger searcher, which is the mechanism by which additional compute \u2014 more actors, deeper or wider search per label, more iterations \u2014 turns into longer-horizon play rather than into a more confident copy of the same bias. The loop is the AlphaZero pattern adapted to a single-player stochastic game with a hard information boundary.",
+  "mechanism": "Most learned evaluators in the ledger failed at ranking siblings because training data labelled only the move that was played (status.md \u00a74-\u00a77; sibling extrapolation). The distributional-afterstate pilot (TH-20260820-distributional-afterstate-ranker-7aba7fb3) removed that defect \u2014 it labelled every legal sibling under chance scenarios shared across siblings \u2014 and its four recorded pilot experiments relocate the bottleneck rather than resolving it: label stability required raising aligned scenarios from 8 to 256, and the resulting model still lost to fair D4 on ranking, with its own result record naming an undertrained checkpoint (11 of 20 epochs) and a weak D1-continuation teacher as the likely causes. This theory claims the missing element is the loop: using a search to produce the labels makes them stronger than the evaluator that guided the search (policy improvement), and feeding the trained evaluator back as that search's leaf and repeating is approximate policy iteration. Each iteration's labels then come from a strictly stronger searcher, which is the mechanism by which additional compute - more actors, more aligned scenarios per label, deeper or wider search per label, more iterations, longer training - turns into longer-horizon play rather than into a more confident copy of the same bias. It is the AlphaZero pattern adapted to a single-player stochastic game with a hard information boundary. No iteration of that loop has been run in this repository.",
   "falsificationCriteria": [
     "Pilot scale (this workstation): after a preregistered number of iterations, the evaluator's held-out sibling ranking on a locked every-sibling panel (top-1 and pairwise agreement with the fair-D4 gold standard, as in the 477-root panel) does not improve across iterations, or never reaches fair D4's own agreement.",
     "Compute response: doubling actor compute between two consecutive iterations, with the data pipeline and learner held fixed, produces no paired SCREEN-tier (32-game) mean-score improvement beyond the whole-game bootstrap interval.",
@@ -20,6 +20,10 @@
   ],
   "evidenceRefs": [
     "docs/research/status.md",
+    "research/results/RS-20260820T094500Z-5c1e9a04.json",
+    "research/results/RS-20260820T114500Z-2b7c9e31.json",
+    "research/results/RS-20260820T142500Z-8f4a2d17.json",
+    "research/results/RS-20260820T184500Z-63c0a8e2.json",
     "docs/exploratory/finding-12-fair-planner-ceiling-extended.md",
     "docs/exploratory/finding-13-fast-engine.md",
     "docs/exploratory/gpu-01-rocm-enablement.md",
@@ -31,5 +35,5 @@
     "agentId": null
   },
   "createdAt": "2026-08-21T07:32:24Z",
-  "updatedAt": "2026-08-21T07:32:24Z"
+  "updatedAt": "2026-08-21T09:05:00Z"
 }

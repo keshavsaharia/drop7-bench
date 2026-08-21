@@ -1,0 +1,45 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260821T085511Z-138eb7cc",
+  "actor": {
+    "kind": "model",
+    "platform": "Claude Code",
+    "model": "claude-opus-5[1m]",
+    "agentId": null
+  },
+  "level": "L2",
+  "roles": [
+    {
+      "role": "visualization",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Wrote three plain-English concept pages for the research console: 'What makes a board good?' (the fair leaf evaluator x-rayed on an engine-produced position, with the terms that survive grouped by the finding-13 in-leaf profile and a look-alike board pair demonstrating that static board potential is insufficient), 'Score is survival' (one complete toy-policy game as a timeline, the 17,000-point rise economy, and the 2.4 clears / 1.4 reveals per move flow balance quoted from status.md as diagnostic targets from limited runs), and 'Why one great game proves nothing' (the per-game scores of the retained 64-game fair-D4 cohort from finding-01 as a strip plot, mean versus median, paired cohorts, and bootstrap lower bounds). Added the server-component figure module web/components/ConceptsB.tsx and four data-generation scripts that use the TypeScript engine in latent mode on playground seeds; every board shown is engine output and every research number is quoted from a retained record with its evidence label. No research record, protocol or source file was modified and no gameplay experiment was run.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "web/content/learn/concepts/evaluating-a-board.mdx",
+    "web/content/learn/concepts/survival-vs-score.mdx",
+    "web/content/learn/concepts/heavy-tails.mdx",
+    "web/components/ConceptsB.tsx",
+    "web/scripts/toy-policy.ts",
+    "web/scripts/generate-sample-game.ts",
+    "web/scripts/generate-leaf-scenarios.ts",
+    "web/scripts/extract-d4-cohort.ts",
+    "web/content/learn/data/sample-game.json",
+    "web/content/learn/data/leaf-scenarios.json",
+    "web/content/learn/data/d4-cohort-scores.json"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "tsc, eslint and check-mdx pass"
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-21T08:55:11Z"
+}

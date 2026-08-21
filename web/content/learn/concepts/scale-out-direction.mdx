@@ -4,10 +4,16 @@ summary: The research direction for a cluster-scale attempt — search-guided se
 order: 4
 ---
 
-This page is a **proposal**. Nothing described here exists as code yet; it is
-registered as a theory with stated falsification tests so that, when serious
-compute becomes available, the work starts from a plan rather than from a
-blank page. It is written for readers who have followed the
+This page is a **proposal**, but not a blank-page one. Parts of the loop already
+exist and have been run once at small scale: the afterstate pilot built the
+every-sibling corpus and trained an evaluator on it (see
+[is more computation the answer?](/learn/concepts/does-more-compute-help) §4).
+What does not exist is the loop itself — feeding a trained evaluator back into
+the search that generates the next round of labels — nor any of the machinery
+for running it beyond one machine. The direction is registered as a theory with
+stated falsification tests so that, when serious compute becomes available, the
+work starts from a plan and from the pilot's measured lessons rather than from
+scratch. It is written for readers who have followed the
 [choice-and-chance](/learn/concepts/chance-vs-choice),
 [sibling trap](/learn/concepts/ranking-siblings), and
 [more-compute](/learn/concepts/does-more-compute-help) pages.
@@ -57,7 +63,7 @@ The sequence matters more than the size:
 
 | Stage | What | Where it runs | Gate to the next stage |
 | --- | --- | --- | --- |
-| 0 | Data-closure audit: can the existing every-sibling panel seed the first dataset without opening new seeds? | this workstation | a written answer, either way |
+| 0 | Data-closure audit: can the afterstate pilot's every-sibling corpus seed the first dataset without opening new seeds, and what did its label-stability result fix at K=256? | this workstation | a written answer, either way |
 | 1 | Batched simulator with differential gates | this workstation | zero mismatches vs the reference over leased seeds |
 | 2 | Actors + shards + learner, one iteration, tiny scale | this workstation, iGPU | evaluator trains; held-out sibling ranking measured on the locked panel |
 | 3 | Three iterations at pilot scale | this workstation | ranking improves across iterations, or the theory is failing and says so |

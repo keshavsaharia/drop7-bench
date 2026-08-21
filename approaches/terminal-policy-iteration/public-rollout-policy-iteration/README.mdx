@@ -1,28 +1,124 @@
 ---
-title: Public Rollout Policy Iteration
+title: Public rollout policy iteration
 family: terminal-policy-iteration
-status: Rejected
+summary: The cheap version of the idea — fifteen shared imagined futures, fifty moves each, one improvement step over a simple search.
+status: rejected
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+The cheap version of the idea: try every column, play each one forward fifty
+moves under fifteen shared imagined futures, and take the column with the best
+average.
 
-## Public rollout policy iteration
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
 
-Runs lower-cost complete-sibling public rollout improvement with conservative fallbacks.
+## The intuition
 
-**Status: Rejected** (ledger-recorded). it failed at the fitting gate.
+One step of policy improvement is the simplest useful move in reinforcement
+learning. Take a policy you already trust, and at each position ask a better
+question than the policy asks: *if I force this column now and then let the
+trusted policy play on, how does it go?* If the answer is reliable, the
+resulting player is at least as good as the one you started with. The word
+"reliable" is doing all the work.
 
-## Sources
+This program is that idea at its cheapest honest setting. The trusted policy is
+a one-move-ahead fair search. The horizon is fifty moves — ten row rises, long
+enough for a bad structural decision to come due. Fifteen imagined futures are
+shared across all seven columns, so no column can win on luck alone: for every
+chance event the fifteen scenarios cover all fifteen strata exactly once.
 
-- `public-rollout-policy-iteration.cpp`
+## How it works, step by step
 
-## More evidence
+1. Reduce the position to what a player can see: board, visible next disc,
+   moves until the next rise, terminal flag. The imagined futures are seeded by
+   hashing *that* — so the tapes cannot smuggle in the game's real seed, score,
+   level, move number or history.
+2. For each legal column, force it, then let a freshly completed full-width
+   fair one-move-ahead search with five chance samples choose every subsequent
+   move for fifty moves.
+3. Score the rollout with the game's real score changes. If it dies before the
+   fiftieth move, charge a large fixed death penalty; if it survives, add the
+   ordinary public evaluator's opinion of the final board.
+4. Play the column with the highest average over the fifteen futures, breaking
+   ties by a fixed centre-first column order.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/terminal-policy-iteration)
+Paired confidence intervals against the reference's action are computed and
+exported, but deliberately do not influence the choice — they are audit output,
+not part of the policy.
+
+## What happened, in plain English
+
+It won on score in every single one of its four games, and was rejected anyway.
+
+The gate had been frozen before the data was read, and it was demanding: at
+least a 1.20× improvement in both mean score and mean lifetime, no loss of
+reveal throughput, and at least three of the four games winning on score and
+survival together. What the run delivered was about 1.07× on score and 1.03× on
+moves, two joint wins rather than three, and — the detail worth pausing on — it
+uncovered *fewer* hidden discs per move than the simple policy it was trying to
+improve, 0.695 against 0.862.
+
+That last number is the interesting one. Uncovering hidden discs is not a
+cosmetic statistic in this game; a policy has to keep clearing and revealing
+fast enough to absorb what each row rise adds, or it slowly loses
+([finding 01](/docs/exploratory/finding-01-score-is-survival)). A candidate
+that scores a little more per game while revealing less per move looks like it
+is buying a short-term gain against its own long-term flow. The four-game
+cohort is far too small to establish that, but it is the sort of thing the
+frozen throughput condition existed to catch.
+
+Because the screen failed, the program stopped without opening any of its
+reserved development games and without writing the training data it would have
+produced on success. Four games is a screen, not a measurement: this result
+rejects this exact configuration, and nothing wider.
+
+<TechnicalDetails title="The technical record">
+
+Rejected at the fitting gate; ledger-recorded; corrected 17,000-point Hardcore
+scoring. Four paired games against exact public fair D1 with five chance
+strata, capped at 500 moves.
+
+| Four-game fitting screen | Mean score | Mean moves | Reveals/move | Natural | Censored |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Exact public fair D1 / five strata | 151,909.25 | 48.75 | 0.86154 | 4 | 0 |
+| 15-tape, 50-move rollout improvement | 162,491.50 | 50.00 | 0.69500 | 4 | 0 |
+
+The candidate improved every paired score, for a mean gain of 10,582.25, but
+reached only 1.0697× fair-D1 score and 1.0256× moves against a 1.20×
+requirement, had two joint score-and-move wins rather than three, and reduced
+reveal throughput. The fitting-only paired one-sided 95% lower bounds were
+−2,137.01 points and −4.38 moves. All four performance gates failed.
+
+Cost: 540,185 synthetic transitions and 520,435 fresh fair-D1 calls
+(34,274,756 fair work units) over 200 real roots; mean decision time 166.97 ms;
+the four-thread screen took 14.137 seconds and peaked at 3,375,104 bytes RSS,
+inside fixed 30-minute and 256 MiB caps. Per-root static maxima are 5,250
+synthetic transitions, 5,146 D1 calls and 360,220 fair work units. No
+development, protected or final gameplay seed was opened and no conditional
+distillation data was created.
+
+Self-tests cover corrected scoring, exact continuation completion,
+public-metadata blindness, determinism, reflection, legality, exact event
+stratification, tape-domain isolation, terminal and tail semantics, mean-only
+tie breaking, resource bounds and seed guards. The canonical artifact is
+7,519 bytes with a recorded SHA-256, as is the source.
+
+Source: "Corrected-17k public rollout policy iteration (rejected at fitting
+gate)" in the [experiment history](/docs/research/history).
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **A gate that only a large effect can pass will reject small real effects.**
+  The 1.20× requirement was chosen because the target is more than three times
+  the reference's mean lifetime; a 7% gain, even if real, is not on that path.
+  This is a defensible choice, not an accident, but it means the experiment
+  cannot tell "no effect" apart from "small effect".
+- **Watch flow, not just score.** The reveal-rate condition is what turned an
+  apparent win into a suspicious one.
+- **Still open:** the same one-step improvement with a stronger continuation
+  policy, or with enough imagined futures to shrink the confidence bounds. Both
+  cost more per move, which is precisely the wall the rest of this family ran
+  into.

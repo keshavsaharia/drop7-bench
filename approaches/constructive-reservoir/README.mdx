@@ -1,26 +1,143 @@
 ---
 title: Constructive and reservoir policies
-summary: Don't wait for chains — build chain structures deliberately across row rises.
+summary: Instead of taking the points that happen to be available, deliberately build a structure that will pay off later — and keep it alive through the rows that keep pushing up from underneath.
+status: rejected
+evidence: ledger-recorded
+reads: public
 ---
 
-Most policies react to the board in front of them. Constructive policies try
-to **manufacture** future chains: stack a high number where a later clear will
-drop matching partners onto it, keep the trigger reachable, and survive the
-rises in between. The standing structure is the "reservoir."
+Most policies answer one question: what is the best move right now? These
+policies answer a different one: what should the board *look like* in five
+moves, and which move gets it there?
 
-<Board
-  cells="00000000000000000000000000000000006060008888888"
-  highlight={[38, 40]}
-  size={240}
-  caption="A tiny reservoir: two 6s held apart, waiting for a drop that links them into a group of six."
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
+
+## The intuition
+
+The thing worth building is a **reservoir**: high-numbered discs stacked where
+they cannot go off yet, arranged so that one specific future event sets all of
+them off at once. Because a disc clears when the unbroken line through it —
+counting gray discs — is exactly its own number, a stack can be made to sit
+there inertly and then be triggered by something as ordinary as the board
+rising.
+
+Here is that mechanism, played through the rules engine. Four 6s are stacked in
+one column above the covered row. Nothing happens when the fourth is dropped:
+the column's unbroken run is five, and five is not six. Then the rise arrives —
+a new covered row is pushed in underneath, everything shifts up, and the run
+becomes exactly six:
+
+<BoardCompare
+  before="0000000000000000060000006000000600000060008888888"
+  after="0000000000000000000000000000000000088898888888888"
+  beforeLabel="the drop stores a 6 — nothing happens"
+  afterLabel="the rise fires the whole stack"
+  highlightBefore={[17, 24, 31, 38]}
+  highlightAfter={[38]}
+  caption="Engine output for this position, dropping a 6 into the stacked column with one drop left before the rise. The drop itself scores nothing. The rise then makes the column's run exactly six, all four 6s clear together for 28 chain points on top of the 17,000-point rise bonus, and the gray disc under them is cracked. The event that usually threatens the player has been turned into the trigger."
 />
 
-## What the evidence showed
+That is the whole family in one picture: a structure that is worthless on the
+move it is built, valuable several moves later, and specifically designed to
+survive — or exploit — the rise in between. The research question is whether a
+policy can find and maintain such structures reliably enough to beat a policy
+that simply searches four moves ahead.
 
-- The constructive-spectrum planner materially beat fair D1 and remains a
-  useful fast continuation — but applying it as an override on top of D4
-  destabilized score, survival, and flow.
-- A 12-move constructive horizon improved on a 7-move one, yet longer horizons
-  were not monotonic. Planning further is not automatically planning better.
-- The family verdict: a valuable **feature or option** inside a larger policy,
-  not yet a standalone controller.
+## How these policies work, in general
+
+The seven approaches here differ in mechanism, but they share a shape:
+
+1. **Name a target.** Some explicit description of a good future board —
+   a spread of column heights, covered discs that are still reachable at the
+   edges, safe caps on the surface, and a set of stored high discs whose
+   trigger conditions overlap so that one disc can set off several.
+2. **Look further than one move.** Plan to the end of the current five-drop
+   cycle and often through the next one, using sampled futures rather than
+   complete enumeration, because complete enumeration over that horizon is
+   unaffordable.
+3. **Score the end of the plan by the target**, not by the points collected on
+   the way.
+4. **Keep a tactical guard.** Most variants let a conventional search veto the
+   plan, either by supplying the shortlist of columns the planner is allowed to
+   consider, or by refusing structural moves when the board is close to dying.
+
+All of them read only public information: the visible board, the next disc, the
+rise clock and the terminal flag. Where an oracle appears, it is used to
+*measure* what the target motif looks like, never to choose a move.
+
+## What happened
+
+The short version: building deliberately across a whole rise cycle really does
+add information that a one-move-ahead policy does not have — and it was still
+not enough to displace the four-move search, and made it worse when bolted on
+top of it.
+
+Three results carry most of the weight, all on corrected 17,000-point scoring:
+
+- A **literal reservoir** policy, with hand-designed vertical-structure
+  features fitted directly on complete games, was **worse than the
+  one-move-ahead reference**: 160,498 points and 50.9 moves against 178,554 and
+  55.8 over a 128-game tournament.
+- The **constructive planner** was a large, real improvement over that same
+  reference: 266,696 points and 79.5 moves against 157,198 and 49.9 over 32
+  games, winning 25 of them. It is the family's strongest result.
+- Attaching that planner to the **four-move search** — only as a tie-break
+  among its top two near-equal columns — made things worse, not better:
+  283,286 against exact depth-4's 372,871 on the same four fitting games, with
+  the planner overriding 37% of moves and winning one of the four pairs.
+
+Planning further did not monotonically help either. A 12-move continuation beat
+a 7-move one on the fitting games, but 17 moves was much worse than both and 27
+moves landed back in between — and the 12-move version still failed its
+robustness gate.
+
+<TechnicalDetails title="The technical record">
+
+All figures below are from the [experiment history](/docs/research/history)
+§"Explicit reservoir and constructive-cycle policies (rejected)" and
+§"Tail-focused complete-game CEM", **ledger-recorded**, and all were checked as
+internally consistent corrected-17,000-point results by
+[audit 03](/docs/exploratory/audit-03-claim-arithmetic).
+
+| Comparison | Games | Candidate | Comparator |
+| --- | ---: | --- | --- |
+| [Vertical reservoir](/approaches/constructive-reservoir/vertical-reservoir) tournament | 128 | 160,498.094 pts / 50.891 moves | fair D1 178,554.438 / 55.750 |
+| [Viability controller](/approaches/constructive-reservoir/viability-controller) Stage A | 32 | 132,537.094 / 43.281 | fair D1 172,697.625 / 53.969 |
+| [Constructive spectrum](/approaches/constructive-reservoir/constructive-spectrum) Stage A | 32 | 266,695.500 / 79.500, 25 joint wins | fair D1 157,198.063 / 49.875 |
+| Constructive shield on depth 4 | 4 | 283,286 / 83.750, 37.0% switches, 1 pair won | exact D4 372,870.500 / 106.250 |
+| Horizon ablation | 32 | H12 299,730.563 / 88.344 (16 joint wins) | H7 258,223.938 / 77.219; H17 202,634 / 61.969; H27 261,633 / 77.938 |
+| H12 Pareto risk gate | 32 | 302,114.906 / 89.281, 286 of 918 disagreements switched, 17 joint wins | H7 254,541.344 / 76.344; gate required 20 |
+| [Tail-survival CEM](/approaches/constructive-reservoir/tail-survival-cem) tournament | 256 | champion 214,968.934 / 65.590 | starting policy 208,940.695 / 64.004 |
+
+"Fair D1" is the one-move-ahead fair search, a much weaker comparator than the
+[depth-4 reference](/approaches/fair-expectimax/reference), whose broader
+64-game recorded mean is 308,295.578 points. Beating fair D1 is a real result
+and is not close to qualification: the target is a **mean above 1,000,000**.
+
+Two approaches in this family have **no retained numbers at all**:
+[panel value](/approaches/constructive-reservoir/panel-value) and the
+[structural terminal veto](/approaches/constructive-reservoir/structural-terminal-veto)
+are recorded as rejected on a task record only, which
+[audit 04](/docs/exploratory/audit-04-blind-spots) §B.3 lists among the
+rejections that "cannot be re-derived". One,
+[rise-option QD](/approaches/constructive-reservoir/rise-option-qd), is
+deliberately seed-free infrastructure with no gameplay lane at all.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **Complete-cycle planning carries information that one-move policies miss.**
+  The ledger's own conclusion is that the 12-move gain is useful evidence for
+  this, and that a future method "must retain that signal without overriding D4
+  on unstable sibling comparisons".
+- **A visible reservoir shape is not a policy.** Making the stored chain
+  explicit — as a feature, as a fitted evaluator, or as a set of discrete
+  charge/dig/release options — did not by itself produce one.
+- **Longer sampled rollouts are not automatically more accurate.** Between 7,
+  12, 17 and 27 moves of continuation, the ordering was not monotonic; a single
+  sampled continuation policy does not become trustworthy by being extended.
+- The [strategy landscape](/docs/strategies) keeps this idea alive as a
+  **feature or an option inside a larger policy**, not as a standalone
+  controller, and the open direction is to make multi-cycle sibling comparison
+  affordable enough to test properly.

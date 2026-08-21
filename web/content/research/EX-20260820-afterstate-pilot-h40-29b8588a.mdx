@@ -1,0 +1,38 @@
+---
+title: First try — building the every-column training set, and finding the answer key too noisy
+---
+
+This was the first attempt to build the training data the
+[theory](/theories/TH-20260820-distributional-afterstate-ranker-7aba7fb3) needs
+and then see whether a network trained on it could pick columns as well as the
+four-move search.
+
+The recipe: take positions from games played by a fast one-move-ahead player;
+at each position, try *every* legal column; from each resulting board, play 40
+more moves with a quick fixed player and write down the score. Do that under 8
+shared runs of luck, so the columns are compared on equal terms. The candidate
+is the network trained on those numbers; the comparator is exact
+[fair D4](/learn/glossary), scored on the same positions.
+
+No games were played by either side. This was an offline ranking test: both the
+network and the search were asked to order the columns at held-out positions,
+and both were graded against the same answer key — the average 40-move outcome.
+"Pass" meant the network came within two percentage points of the search on
+top-choice accuracy and on head-to-head column comparisons, with no worse
+regret, in both halves of the held-out set.
+
+**What happened.** The pipeline worked and the corpus came out complete, but the
+answer key itself turned out to be unusable. The gate had a fixed floor for how
+reproducible the key had to be — split the 8 runs of luck into two halves and
+the two halves must agree — and it came in at 0.246 against a required 0.50. The
+preregistered rule says that makes the outcome *inconclusive*, not a failure and
+not a rejection of the theory: when the grader is that noisy, nobody can be
+graded. The network did trail the search against that noisy key, and the record
+notes this "for the record" only. No gameplay tier was opened.
+
+<ResultSummary id="RS-20260820T094500Z-5c1e9a04" />
+
+It ruled out nothing about the theory. What it did produce was a diagnosis with
+a number attached: the spread within one column across luck was about three
+times the typical gap between columns, which predicted how many more runs of
+luck the next iteration would need.

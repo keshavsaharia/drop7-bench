@@ -1,29 +1,162 @@
 ---
-title: Fair Policy
+title: The fair leaf and the laboratory that produced it
 family: fair-expectimax
-status: Completed
+summary: The hand-written board evaluator every search in this family uses at the bottom of its look-ahead, and the tuning bench its coefficients came from.
+status: completed
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
+Every search in this family stops after a few moves and has to say how good the
+board in front of it is. This directory holds that opinion — a hand-written sum
+of board features — together with the laboratory it was fitted in and a small
+tool for testing one coefficient at a time on identical games.
+
+<EvidenceLabel status="completed" evidence="ledger-recorded" reads="public" />
+
+<Callout title="The laboratory contains a teacher; the policy does not" tone="warn">
+`tune.ts` has an optional mode that imitates a **perfect-information oracle** —
+a planner allowed to read the hidden gray-disc numbers. The file labels its own
+output "oracle teacher (UNFAIR, training only)". That mode produces training
+labels, never a deployable policy, and any result produced with it would be a
+teacher result. The evaluator described on this page reads only the visible
+board, the visible next disc, and the drops remaining before the next rise.
 </Callout>
 
-## Fair policy tuning
+## The intuition
 
-Fits the public fair leaf and performs bounded coefficient sweeps.
+A search that looks four moves ahead still has to guess what happens after the
+fourth move. If that guess is "how many points did I score", the policy will
+cash in every chain the moment it can and leave itself an empty board with
+nothing prepared — which the [chance-and-choice walkthrough](/learn/concepts/chance-vs-choice)
+shows losing to a quieter move on a real position.
 
-**Status: Completed** (ledger-recorded). these runs produced the fair reference weights.
+So the evaluator is written in terms of *what the board can still do*:
+
+- **Direct build readiness** — structures that will fire soon. The heaviest
+  positive term, weighted 1,600.
+- **Latent chain potential** — structure that is one step further away,
+  weighted 700.
+- **Cover access** — how reachable the buried gray discs are, since revealing
+  them is how the board keeps producing usable numbers.
+- and against those, penalties for **height**, for **covered discs sitting high
+  up**, for **low numbers clogging** the board, for **danger with a rise
+  imminent**, and for other public risks.
+
+The historical recovery notes record one deliberate choice worth calling out:
+the "roughness" penalty — a tidiness term that discourages uneven column
+heights — was set to **zero**. The evaluator is allowed to build spiky,
+awkward-looking boards, because that is what a board holding a loaded chain
+looks like. The ledger describes the resulting behaviour as "knife-edge
+chain-building": capable of entering a self-sustaining clear-and-reveal regime,
+and high variance.
+
+## How it works, step by step
+
+1. **Extract features** from the visible position: readiness, latent potential,
+   cover access and altitude, height load, low-number congestion, and rise
+   danger. Nothing in the feature set can see a hidden value, the seed, the
+   score, or the move number.
+2. **Multiply by the frozen weights and add.** That number is the board's leaf
+   value; a modelled game over is a flat −1,000,000 instead.
+3. That is all the searches on the neighbouring pages consume. The evaluator
+   itself chooses nothing.
+4. The laboratory around it (`tune.ts`) can also *play*, as a one-move sampled
+   policy, so a coefficient vector can be scored by complete games. Its planner
+   samples are a pure function of the observable position and a fixed policy
+   seed, so neither training nor play can peek at the game's future randomness.
+5. `weight-sweep.ts` is deliberately **not** a tuner: the caller names the
+   values to test up front, and every candidate is played on exactly the same
+   game seeds, so the comparison is paired.
+
+## What happened, in plain English
+
+These runs are the origin of the coefficients everything else in this family
+uses, and the [experiment index](/docs/research/experiment-index) records them
+as **completed — ledger-recorded**, "these runs produced the fair reference
+weights."
+
+Be careful about what that does and does not include. The ledger records the
+*recovery* of the resulting weight vector into the native depth-3 evaluator, and
+the gameplay results of the searches that used it. **It does not retain a result
+record for the tuning runs themselves** — no cohort, no objective value, no
+before-and-after comparison for the fitting process. If you want to know how
+strong these weights are, the honest answer is the reference search's numbers on
+the [reference page](/approaches/fair-expectimax/reference), not anything on
+this page.
+
+The one direct piece of evidence about the leaf's behaviour is a two-game pilot
+that the ledger itself flags as unrepresentative: two already-used training
+seeds ran 155 and 160 moves, clearing 331 and 351 numbered discs and revealing
+186 and 201 covers — about 2.14 and 2.19 clears and 1.20 and 1.26 reveals per
+move, with longest chains of 7 and 9. Those flow rates are in the region the
+task record associates with long games. The ledger's own verdict: "Because the
+pilot used only two non-independent training seeds, it was evidence for a
+mechanism, not a reliable performance mean."
+
+<TechnicalDetails title="The technical record">
+
+**Sources.** `tune.ts` (the fair-policy laboratory) and `weight-sweep.ts`
+(paired coordinate ablations). Status: **completed — ledger-recorded** in the
+[experiment index](/docs/research/experiment-index).
+
+**Where the weights are pinned.** The native depth-3 evaluator
+(`approaches/fair-expectimax/reference/fair-only-horizon.cpp`) recovers the
+fair-only leaf from `tune.ts` together with five frozen overrides exported as
+`FAIR_PHASE_BASELINE_WEIGHTS` from
+[`phase-fair-combination/main.ts`](/approaches/fair-expectimax/phase-fair-combination):
+direct potential 1,600, latent chain potential 700, height load −20, roughness
+0, revealed-cover value 300. The 300-point revealed-cover term is a transition
+feature and is inert when the model is used only as a leaf. The recovery was
+verified against three deterministic TypeScript fixtures: identical best
+actions, root expected scores, node/work/cache counts and completed depth, with
+maximum leaf and root-value errors of `3.64e-12` and `1.82e-12`.
+
+**Seed roles declared in the source.** Training `0x1d70_0000`, validation
+`0x7d70_0000`, reserved final `0xd700_0000`. Defaults: 10 generations,
+population 24, six elites, 16 training games, 64 validation games, three policy
+samples, 500-move cap.
+
+**The oracle mode.** `tune.ts` imports `planOracleMove` from
+`approaches/oracle-curriculum/perfect-information-oracle/`, runs only on
+training seeds, prints the banner "oracle teacher (UNFAIR, training only)", and
+executes only the seed-blind student's move during roll-outs. Any distillation
+run through this path is a **teacher/diagnostic**, not a policy result. No such
+run is recorded in the ledger.
+
+**Not retained.** There is no ledger section, result record or artifact for the
+tuning runs. The pilot numbers quoted above come from the ledger's "Historical
+fair-only horizon evaluator" section, which describes them as a mechanism
+observation on two non-independent training seeds, under the historical
+7,000-point scoring era.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+The durable lesson is the shape of the evaluator rather than any number: the
+things worth rewarding on a Drop7 board are *capability* (what can still fire,
+what can still be revealed) rather than *achievement* (points already banked),
+and one conventional tidiness term had to be switched off entirely for the
+policy to build anything.
+
+Two open items follow directly from what is missing here:
+
+- **The provenance of the frozen coefficients is thin.** They are recorded as
+  the output of these runs, but the runs' own protocol and cohort are not in the
+  ledger. Anyone re-deriving them should treat this as a fresh fitting problem,
+  not a reproduction.
+- **They have never been refitted under corrected scoring, or at the depth they
+  are used at.** Every later attempt to adjust them
+  ([machine tuning](/approaches/fair-expectimax/cem),
+  [transition rewards](/approaches/fair-expectimax/transition-rewards),
+  [vertical-ladder energy](/approaches/fair-expectimax/vertical-ladder)) has
+  failed on fresh games, which is evidence that the vector is a decent local
+  optimum — not evidence that it is a good one.
 
 ## Sources
 
-- `tune.ts`
-- `weight-sweep.ts`
-
-## More evidence
-
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/fair-expectimax)
+- `tune.ts` — fair-policy laboratory for a one-move sampled policy; the
+  environment seed is deliberately absent from the move chooser.
+- `weight-sweep.ts` — fast paired coordinate ablations; the caller chooses the
+  tested values up front and every candidate plays the same seeds.

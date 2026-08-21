@@ -1,28 +1,107 @@
 ---
-title: Rise Option Qd
+title: Rise-boundary option QD
 family: constructive-reservoir
-status: Support-only
+summary: Scaffolding, not an experiment — a bounded, deterministic prototype of "commit to a plan for a whole five-drop cycle", together with a shelf that keeps one best plan of each behavioural type. It has never played a game.
+status: support-only
 evidence: repository-verified
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+This one is infrastructure. It builds the machinery for a policy that commits
+to a plan for a whole rise cycle, and for keeping a *variety* of such plans
+rather than a single best one — and it deliberately never plays Drop7.
 
-## Rise-boundary option QD
+<EvidenceLabel status="support-only" evidence="repository-verified" reads="public" />
 
-Seed-free prototype of persistent rise-cycle options and a deterministic MAP-Elites archive.
+## The two ideas being prototyped
 
-**Status: Support-only** (repository-verified). the source intentionally has no gameplay or production-training lane.
+**An option is a commitment.** Every other policy in this repository decides
+again from scratch on every move. An option is a plan that persists across
+several moves: "aim for this profile of column heights until the rise, then
+reconsider". The appeal for this family is obvious — building a reservoir takes
+several moves, and a policy that re-decides every move can abandon its own
+half-built structure. Here an option is a target height for each of the seven
+columns plus a weight vector, and a mirrored copy of an option is treated as
+the same idea seen from the other side.
 
-## Sources
+**Quality-diversity keeps a shelf, not a champion.** Ordinary optimisation
+returns one best solution. MAP-Elites instead keeps a grid of cells, each
+holding the best solution *of a particular behavioural type*, so that unusual
+behaviours are not thrown away for being currently worse. The grid here has
+three axes, each cut into four bands: how spread out the plan's target heights
+are, how much release it aims for, and how much it favours the edges. That
+makes 64 cells and up to 64 surviving plans.
 
-- `rise-option-qd.cpp`
+Both ideas are borrowed rather than invented, and the interesting question is
+whether they suit this game. That question is not answered here.
 
-## More evidence
+## What this program actually does
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/constructive-reservoir)
+1. Constructs options and mutates them, checking that every option stays inside
+   its declared bounds — target heights within the board, weights finite and
+   bounded.
+2. Places a visible disc and calls the **exact row-rise helper from the shared
+   engine**, so the one piece of real game mechanics it touches is the real
+   one.
+3. Computes a behavioural descriptor for an option, inserts it into the grid,
+   and reports how many insertions, replacements and attempts happened.
+4. Writes and reads a checkpoint with a magic number and version, and verifies
+   that a reloaded archive is identical.
+5. Enforces hard bounds: at most one million units of work and one mebibyte of
+   memory.
+
+Its own header is explicit about the boundary: there is no gameplay, corpus,
+replay or training mode, and its synthetic transitions "never pretend to be
+sampled Drop7 games" — cascades and future discs are intentionally absent.
+
+## What happened
+
+**No result, by design.** The
+[experiment index](/docs/research/experiment-index) records this as
+support-only and repository-verified, and states that "the source intentionally
+has no gameplay or production-training lane".
+[Audit 04](/docs/exploratory/audit-04-blind-spots) §B.2 lists the question it
+*could* answer — do persistent rise-cycle options cover useful behaviour space?
+— among those with no lane.
+
+Nothing here is evidence that committing to a plan helps. The
+[experiment index](/docs/research/experiment-index)'s list of genuinely open
+directions says so directly, and puts a condition on it: a persistent option
+policy is worth building "only after a one-step evaluator demonstrates robust
+score, survival, and clear/reveal signal", because the current prototype "is
+infrastructure, not evidence that commitment helps".
+
+<TechnicalDetails title="The technical record">
+
+**Status: support-only — repository-verified.** No ledger entry, no task
+record, no gameplay, no seeds consumed.
+
+From the source: up to 8 options in a library; a 4 × 4 × 4 = 64-cell archive
+keyed by spread, release and edge bands; a one-million-unit work cap and a
+1 MiB memory cap; a versioned binary checkpoint; centre-first column order
+`3,2,4,1,5,0,6`; compile-time assertions that the rise cadence is five drops
+and the rise bonus is the corrected 17,000 points. Options are validated on
+construction and after every mutation, and a mirrored option is folded to the
+same fingerprint.
+
+"B0" in the source's own naming is a bounded zeroth build: the deliverable is
+that the machinery is deterministic, bounded and checkpointable, not that it
+plays well. Reading it as a policy result would be a category error.
+
+Source: `rise-option-qd.cpp`.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- The scaffolding for persistent options and a diversity archive exists,
+  compiles, is deterministic and is bounded. That is a real if modest
+  contribution.
+- Whether commitment across a rise cycle helps at all is untested. So is
+  whether a diversity archive finds behaviours a plain optimiser misses in this
+  game.
+- The repository's own sequencing puts this behind a prerequisite: get a
+  one-step evaluator that reliably ranks columns first. Every option-based
+  policy in this family that skipped that step — including the
+  [viability controller](/approaches/constructive-reservoir/viability-controller)
+  — lost to a simple search.

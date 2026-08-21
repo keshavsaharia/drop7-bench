@@ -16,6 +16,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { CellGlyph } from "./Board";
 import { MiniBoard } from "./Engine";
+import { TreeExplorer } from "./TreeExplorer";
 
 const INK = "#fafafa";
 const INK_2 = "#a1a1aa";
@@ -58,7 +59,7 @@ function loadTree(): TreeScenario | null {
 function Missing({ what }: { what: string }) {
   return (
     <div className="engine-fig" style={{ color: INK_3, fontSize: 13 }}>
-      {what} is not available in this checkout. Run <code>npm run concept:scenarios</code>{" "}
+      {what} is not available in this checkout. Run <code>npm run figures:concepts</code>{" "}
       inside <code>web/</code> to regenerate <code>content/learn/concept-scenarios.json</code>.
     </div>
   );
@@ -447,6 +448,21 @@ export function SiblingTrap({
         </g>
       </svg>
       {caption && <figcaption>{caption}</figcaption>}
+    </figure>
+  );
+}
+
+/* =========================================================================
+ * 6. Interactive explorer (client component fed with the precomputed tree).
+ * ========================================================================= */
+
+export function TreeExplorerSection({ caption }: { caption?: string }) {
+  const tree = loadTree();
+  if (!tree) return <Missing what="The look-ahead position" />;
+  return (
+    <figure style={{ margin: "1.2rem 0" }}>
+      <TreeExplorer data={tree} />
+      {caption && <figcaption className="engine-caption">{caption}</figcaption>}
     </figure>
   );
 }

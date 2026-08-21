@@ -1,42 +1,185 @@
 ---
-title: Deployment Panel
+title: Deployment panel
 family: terminal-policy-iteration
-status: Completed
-evidence: task-record only diagnostic
-generated: true
+summary: A locked set of 477 positions with every legal column already labelled by long play-forwards — the repository's re-usable test bench for "can anything rank moves better than the reference?"
+status: rejected
+evidence: ledger-recorded
+reads: diagnostic
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
+A locked set of 477 positions in which every legal column has already been
+labelled by long play-forwards — so a new idea can be tested for a few CPU-minutes
+without opening a single new game.
+
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="diagnostic" />
+
+<Callout title="Three programs, three different labels" tone="info">
+This directory is not one experiment. It holds a **completed diagnostic** that
+measured how well the reference searches rank moves on the panel
+(task-record only), and two **rejected** candidate rankers (both
+ledger-recorded). The page frontmatter carries the strongest evidence label
+present; each result below carries its own.
 </Callout>
 
-## H200 D1/D4 signal audit
+## What the panel is, and why it matters
 
-Recomputes exact D1 and D4 rankings on the locked 477-root H200 corpus.
+Most learning failures in this repository come from one place: a model is
+trained on the moves that were actually played, and then asked at deployment to
+rank six other columns it has never seen the consequences of. The
+[sibling trap](/learn/concepts/ranking-siblings) page explains the trap in
+detail; the cure is data in which *every* legal column is labelled.
 
-**Status: Completed** (task-record only diagnostic). D4 materially beat D1 on top-action, pairwise ranking, regret, and every origin.
+The panel is exactly that. 477 positions drawn from eight complete games. At
+each position, every legal column was forced and then played forward 200 moves
+under shared imagined futures, and the outcome recorded. The corpus is locked
+by checksum, marked development-only and already consumed, and the programs
+that read it are physically unable to start or replay a game: their only
+entry points begin at a stored public position.
 
-## Full-panel conservative preflight
+That makes it the cheapest honest test bench in the repository. Any proposed
+move-ranker can be asked the question that matters — *do you rank the columns
+the way the long outcomes do?* — before anyone spends compute on a game.
 
-Tests nested 7/21/35/63-scenario sibling labels with whole-origin cross-validation before any gameplay.
+## What the panel is not
 
-**Status: Rejected** (ledger-recorded). stability, precision, recall, ranking, regret, and origin gates all failed.
+It is a **root-panel proxy**. It measures how well something ranks the columns
+at a position. It does not measure how well a policy plays, because after the
+first move the panel's continuations revert to a fixed policy. A ranker that
+wins on the panel has earned a gameplay experiment, not a strength claim. And
+the panel has been read: it is model-selection evidence that has already been
+spent, so a new candidate tuned on it is tuning on used data.
 
-## Martingale-dual ranker
+## How a candidate is judged
 
-Charges a bounded hindsight beam for future-information advantage on the locked H200 panel.
+1. Rebuild each stored public position. Nothing else is passed in — no origin
+   game, score, move number, history or scenario identity. Origin identity is
+   used only by the coordinator, to split the 477 roots into eight
+   whole-game folds so that a candidate cannot be scored on positions from a
+   game it was fitted on.
+2. Ask the candidate to value every legal column.
+3. Compare its ordering with the stored long-outcome ordering, using three
+   measures: how often it picks the best column (top-1), how often it gets a
+   pair of columns the right way round (pairwise), and how much outcome it
+   gives up by not picking the best (regret).
+4. Compare all of that against the exact reference search on the same
+   positions, and require non-regression origin by origin — not merely on
+   average.
 
-**Status: Rejected** (ledger-recorded). it ranked siblings materially worse than fair D4.
+## What happened, in plain English
 
-## Sources
+The diagnostic worked, and both candidates lost to the reference.
 
-- `full-panel-cpi-preflight.cpp`
-- `martingale-dual-b0.cpp`
-- `terminal-panel-d4-signal-audit.cpp`
+First, the sanity check. Recomputing the exact one-move-ahead and four-move
+reference searches on the panel confirmed that four-move search ranks moves
+materially better than one-move search on every measure and in every origin
+game. That is reassuring rather than surprising, and it establishes the bar:
+whatever a new ranker is compared against, it has to be the four-move
+reference, because the reference has real signal here.
 
-## More evidence
+Then the two candidates. The first tested whether a conservative learned actor
+built on nested scenario labels could be trusted to override the reference; it
+failed **every** performance gate — stability, precision, recall, ranking,
+regret, and all eight origin folds. The second was cleverer: a planner allowed
+to peek at one imagined future while building its plan, but charged a
+mathematical penalty for every unit of advantage that peeking gave it, so that
+the advantage cancels out in expectation. It ranked siblings clearly worse than
+the reference: it picked the best column 28.93% of the time against the
+reference's 38.16%, and got pairs right 59.85% against 66.82%. It passed zero of
+eight origins, regressed in both halves of the data, and — the detail that
+matters most — agreed with itself only 22.6% of the time when its own planner
+scenarios were split in two. A ranker that unstable is not measuring the
+position; it is measuring its own random draws.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/terminal-policy-iteration)
+<Callout title="The peeking planner is not a policy" tone="warn">
+The second candidate's planner is allowed to see one synthetic future tape
+while constructing a path. It is a **diagnostic ranker on stored positions**,
+never a deployable player, and its numbers can never be reported as a policy
+result. The ledger is also explicit that it is *not* a certified upper bound on
+what future-knowledge is worth: its beam prunes rather than taking an exact
+maximum, it stops at a heuristic evaluator instead of a real ending, and its
+seven-outcome model only approximates the game's chance law.
+</Callout>
+
+<TechnicalDetails title="The technical record">
+
+The corpus: 477 public roots from eight whole-game origins, H200 sibling
+labels, checksum-locked and development-only, with a recorded SHA-256. No
+program in this directory can open a gameplay seed.
+
+**H200 D1/D4 signal audit** — completed diagnostic, *task-record only*. It
+recomputes the exact fair-D1 and fair-D4 root action and Q functions on the
+stored roots and measures their sibling rankings against the stored common-tape
+mean-score-return teacher. Recorded outcome: "D4 materially beat D1 on
+top-action, pairwise ranking, regret, and every origin." No numbers were
+promoted into the ledger.
+
+**Full-panel conservative preflight** — rejected, ledger-recorded. A seed-free
+falsification test frozen by source hash before the single authorized corpus
+run, with nested 7/21/35/63-scenario labels and whole-origin cross-validation.
+The frozen K=63 conjunction required at least 70% independent-half top-action
+stability, 80% override precision, 25% override recall, pairwise accuracy at
+least 0.02 above exact D4, normalized regret at most 0.90× exact D4, at least
+six of eight non-regressing origin folds, and non-regression on both ordered
+halves.
+
+| K=63 actor | Value | Gate |
+| --- | ---: | --- |
+| Independent-half top-action stability | 0.5241 | ≥ 0.70 |
+| Override precision | 0.3478 | ≥ 0.80 |
+| Override recall | 0.0955 | ≥ 0.25 |
+| Pairwise accuracy | 0.5425 (exact D4: 0.6585) | ≥ D4 + 0.02 |
+| Normalized regret | 0.4159 (exact D4: 0.2766) | ≤ 0.90 × D4 |
+| Non-regressing origins | 0 of 8 | ≥ 6 of 8 |
+
+Both ordered halves regressed in both ranking and stored return. The run
+completed all 477 roots in 324.699 seconds with 25,706,496 bytes peak RSS,
+using 13,730,063 synthetic transitions and **zero** origin transitions. The
+artifact records `status=falsified`.
+
+**Martingale-dual B0 ranking audit** — rejected, ledger-recorded. A 12-ply
+search with an eight-state beam averaged over seven planner scenarios, whose
+cutoff value is the frozen public leaf used by fair D4. Every transition the
+planner takes is charged the one-step difference between what it got and what
+it should have expected from the public state and action, so the advantage of
+seeing a tape has mean zero under that empirical law.
+
+| Ranker | Top-1 accuracy | Pairwise accuracy | Normalized regret |
+| --- | ---: | ---: | ---: |
+| Martingale-dual B0 | 28.9308% | 59.8460% | 0.350157 |
+| Frozen fair D4 | 38.1551% | 66.8191% | 0.276577 |
+
+The gate was frozen before the corpus was read. Completeness passed; the
+candidate passed 0 of 8 origins, regressed in both ordered halves, and had
+22.6415% agreement between its two planner scenario splits. The run took
+1,511.812 seconds, peaked at 14,647,296 bytes RSS, and the ledger's verdict is
+"decisive negative evidence for the bounded B0 ranker: retain fair-D4".
+
+**Two panel measurements of the same reference are not identical.** The
+preflight reports exact D4 at 0.6585 pairwise and 0.2766 normalized regret; the
+martingale audit reports 66.8191% and 0.276577. These are different frozen
+protocols with different tie handling, run at different times; quote each
+within its own record rather than across them.
+
+Sources: "Full-panel conservative-policy preflight (preregistered)" and
+"Martingale-dual B0 ranking audit (rejected)" in the
+[experiment history](/docs/research/history); the terminal-policy-iteration
+table in the [experiment index](/docs/research/experiment-index).
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **Offline sibling ranking is a cheap, sharp filter.** Two architectures were
+  falsified for a few CPU-minutes each, with no gameplay seed opened. That is
+  the most efficient rejection machinery in the repository.
+- **Split-half stability belongs in every gate.** The peeking ranker's 22.6%
+  agreement with itself explains its ranking failure better than any of its
+  accuracy numbers do.
+- **The panel is spent as a selection set.** It remains excellent for
+  *falsifying* an architecture and poor for *choosing* one, because it has
+  already been read. The research roadmap says the same thing: the existing
+  477-root panel is reusable diagnosis, not fresh model-selection evidence.
+- **Still open:** a successor-closed corpus collected fresh, with every legal
+  column labelled and successor states recorded under common futures — one of
+  the few directions the [research status](/docs/research/status) page still
+  lists as defensible.

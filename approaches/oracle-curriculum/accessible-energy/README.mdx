@@ -1,35 +1,136 @@
 ---
-title: Accessible Energy
+title: Accessible energy
 family: oracle-curriculum
-status: Rejected
+summary: Turn the board properties that separate a future-reading planner's positions from ordinary ones into a handful of readable numbers, and let a legal search use them.
+status: rejected
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
+Take the board properties that reliably separate a future-reading planner's
+positions from an ordinary search's positions, write them down as a handful of
+readable quantities, and let a completely legal search use them.
+
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
+
+<Callout title="Where the privileged information is, and is not" tone="info">
+The privileged planner appears only in the *design history* of these features:
+the directions came from the split-half-stable list produced by the
+[topology audit](/approaches/oracle-curriculum/topology). The fitting
+continuations, the ranking, and the deployed policy read nothing but the public
+board — the source file says privileged oracle tapes "are unavailable to
+training roll-ins, ranking continuations, and the deployed policy". What this
+page describes is a legal policy built with a privileged hint about *where to
+look*.
 </Callout>
 
-## Accessible-energy residual
+## The intuition
 
-Encodes stored high numbers, trigger reachability, cover access, and low-number debt.
+"Energy" here means potential that is actually *usable*. A 7 sitting in a column
+of height two is worth something: a run of seven can still be built through it.
+The same 7 buried under three rows with no reachable trigger is dead weight that
+will ride the board upward until the game ends. A board's score tells you
+nothing about the difference; a human player feels it immediately.
 
-**Status: Rejected** (ledger-recorded). local prediction improved, but complete-game search worsened.
+The feature family tries to make that feeling explicit, in a few groups:
 
-## Accessible-energy root prior
+- **stored unfired numbers** — high numbers still capable of firing;
+- **trigger readiness** — how close a run is to completing, directly or after a
+  reveal;
+- **cover access** — whether covered gray discs can still be reached and cracked;
+- **debt** — projected occupancy, dead low numbers, low caps and congested
+  adjacent ones, which are the ways a board quietly becomes unplayable.
 
-Restricts the learned signal to a confidence-admissible root action set.
+## Two experiments, in order
 
-**Status: Rejected** (ledger-recorded). the confidence set switched too often and reduced flow.
+**The residual.** Calibrate the existing evaluator first, then fit a small ridge
+regression on top of it, on positions produced by ordinary depth-3 play. Split
+by *source game*, never by position. Then use the improved evaluation inside the
+search.
 
-## Sources
+**The root prior.** After the residual lost games, the same frozen model was
+re-used in a deliberately conservative way. The leaf evaluator was left
+completely unchanged. Three independent chance-sampling salts produce three
+complete valuations of every legal column; an alternative is admitted only when
+a one-sided 95% paired lower bound *fails to establish* that it is worse than
+the search's own pick. Accessible energy then ranks only inside that admissible
+set — and if only one column is admissible, the exact search's action is
+returned untouched. The design intent is a tie-break, not a policy.
 
-- `accessible-energy-lab.cpp`
-- `accessible-energy-root-prior.cpp`
+## What happened, in plain English
 
-## More evidence
+**The prediction improved. The games got worse.** On held-out positions, adding
+the energy residual raised the accuracy of picking the best of the available
+columns from about 23% to about 31%, and pairwise ordering from about 49% to
+about 52% — modest but real. Then it played eight complete games against
+unchanged depth-3 search and lost seven of them, scoring roughly a quarter less.
+Under the protocol, confirmation seeds were never opened.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/oracle-curriculum)
+**The safety valve was not safe.** The confidence-set version was supposed to be
+nearly a no-op: change the move only when the statistics genuinely cannot tell
+two columns apart. In practice it switched **44% of all decisions** — it
+admitted about a third of all non-reference alternatives, and averaged nearly
+three admissible columns per move. That is not a tie-break; that is a different
+policy. It lost about 15,000 points and 12 moves per game, and its realized flow
+— clears, reveals and waves per move — fell across the board while its work per
+move roughly tripled.
+
+The mechanism of the second failure is worth separating from the first. Nothing
+about the energy model *learned* anything new between the two runs; what failed
+was the calibration of "statistically indistinguishable". Three sampling salts
+were not enough to establish that a column was worse, so a great many columns
+that were in fact worse were declared eligible.
+
+<TechnicalDetails>
+
+**Residual** (rejected — ledger-recorded). 601 held-out action successors:
+calibrated score-prediction R-squared 0.580 to 0.615; within-position top-action
+accuracy 22.9% to 31.3%; pairwise ranking 49.2% to 52.2%. Stored energy was the
+strongest feature group. Complete-game gate on fresh historical 7,000-point
+Sequence-scored seeds `0x3e890000...07`: exact depth 3 averaged 112,318.5 points
+and 77.125 moves; the residual-guided search averaged 85,768 and 60.625, losing
+seven of eight pairs. Confirmation seeds were not read.
+
+**Root prior** (rejected — ledger-recorded). Screen on fresh `0x3e930000...07`:
+exact depth 3 averaged 105,767.875 points / 73.125 moves; the root prior
+averaged 90,300.75 / 60.875 — paired losses of 15,467.125 points and 12.25
+moves. The confidence set switched **214 of 487 decisions (43.94%)**, admitted
+31.90% of non-reference alternatives, and averaged 2.828 admissible actions.
+Realized clears / reveals / waves per move fell from 1.885 / 1.032 / 1.405 to
+1.725 / 0.910 / 1.244, while work rose from 53,395 to 158,522 units per move.
+The reserved `0x3e940000...0f` confirmation was not read, and the admission
+threshold was **not** retuned on the failed screen.
+
+The ledger's own conclusion after the first failure: energy "may only be
+reconsidered as a conservative root tie-break among actions that repeated search
+samples cannot distinguish" — which is precisely what the second experiment
+tested, and it failed on the calibration of that phrase.
+
+[`audit-05`](/docs/exploratory/audit-05-optimistic-curriculum) §4 classifies the
+residual as a distribution-shift failure and the root prior as an
+objective-mismatch failure: "calibration, not learning, failed".
+
+Records: [experiment index](/docs/research/experiment-index) "Oracle and
+curriculum research"; [ledger](/docs/research/history) sections
+"Accessible-energy residual" and "Accessible-energy confidence-set root prior".
+Sources: `accessible-energy-lab.cpp`, `accessible-energy-root-prior.cpp`.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **Interpretable features do not escape the ranking problem.** These were
+  hand-designed, split-half validated and readable, and they still improved
+  prediction while losing games. Compare
+  [ranking siblings](/learn/concepts/ranking-siblings): the failure is not about
+  neural networks, it is about what the data supports.
+- **"Only when statistically tied" needs its own evidence.** A confidence set is
+  a claim about power. With three sampling salts it admitted a third of all
+  alternatives. Any future conservative-override design should report its switch
+  rate *before* its score.
+- **Cost is part of the result.** Tripling the work per move to lose points is a
+  worse outcome than losing points cheaply, and the ledger records both.
+- **Still open:** the feature family itself was never tested as an input to a
+  learned ranker trained on *every* legal sibling, which is the data structure
+  later work argues is the missing ingredient
+  ([status](/docs/research/status), open work).

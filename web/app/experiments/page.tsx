@@ -52,7 +52,9 @@ export default function ExperimentsPage() {
               <Badge label={experiment.data.role} />
               <span className="text-xs text-zinc-600">{experiment.experimentId}</span>
             </div>
-            <h2 className="mt-2 text-lg font-bold text-zinc-50">{experiment.title}</h2>
+            <h2 className="mt-2 text-lg font-bold text-zinc-50">
+              <Link href={`/experiments/${experiment.experimentId}`} className="hover:text-sky-300">{experiment.title}</Link>
+            </h2>
             <p className="mt-2 text-sm text-zinc-300">{experiment.hypothesis}</p>
             <div className="mt-3 grid gap-3 text-sm md:grid-cols-2">
               <div className="rounded-lg bg-zinc-950/60 p-3">

@@ -1,28 +1,140 @@
 ---
-title: Public Regenerative B0
+title: Public regenerative B0
 family: terminal-policy-iteration
-status: Rejected
+summary: Spend the measurement budget where it matters — eliminate weak columns cheaply, then test the survivors hard against the reference, and override it only on proof.
+status: rejected
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Spend the measurement budget where it matters: eliminate weak columns cheaply,
+test the survivors hard against the reference, and override the reference only
+on proof.
 
-## Public regenerative B0
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
 
-Evaluates every sibling through staged H25/H50/H75 panels with exact D4 fallback.
+## The intuition
 
-**Status: Rejected** (ledger-recorded). it was effectively tied in mean proxy return but lacked coverage, precision, and stability.
+The family's earlier programs gave every column the same expensive treatment.
+That is wasteful: at most positions, four or five of the seven columns are
+obviously poor, and the entire question is which of the remaining two or three
+is best. So run the comparison as a tournament instead of a survey — a short
+look at everything, a longer look at the survivors, and a final independent
+test between the winner and the reference's own move.
 
-## Sources
+The word "regenerative" refers to the cycle structure of the game. The board
+rises every five moves, and a policy is really trying to arrive at each rise in
+a state it can recover from. The staged horizons here — 25 moves, then 50, then
+75 — are five, ten and fifteen of those cycles.
 
-- `public-regenerative-policy-iteration-b0.cpp`
+There is one more piece of discipline, and it is the reason this experiment is
+worth reading even though it failed. Each stage uses **independent** chance
+scenarios for the decision it is making. Reusing the same imagined futures to
+first choose a winner and then confirm it would let a column that got lucky in
+the first round keep that luck in the second; independent panels make the
+confirmation an honest test.
 
-## More evidence
+## How it works, step by step
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/terminal-policy-iteration)
+1. At a stored public position, evaluate **every** legal column under seven
+   shared 25-move continuations.
+2. Keep the three best challengers, plus whatever the exact four-move reference
+   would play, and re-evaluate all of them under 21 nested 50-move
+   continuations.
+3. Put the survivor through an independent 21-scenario, 75-move panel. It may
+   be admitted only if it beats the reference on *all three* of a paired return
+   lower bound, the number of discs cleared, and the number of covered discs
+   revealed.
+4. Compare the admitted column with the reference on one final, independent
+   35-scenario, 75-move panel.
+5. Every continuation is played by a completed, full-width public two-move-ahead
+   search; the exact four-move reference remains the fallback whenever no
+   challenger is admitted.
+
+The policy is handed only the board, the visible next disc and the rise phase.
+Origin, score, history, scenario identity and any future disc or reveal are
+excluded from it; origin identity is used only by the coordinator, to split the
+positions into eight whole-game folds.
+
+## What happened, in plain English
+
+It came out very nearly identical to simply keeping the reference — and the
+"very nearly" is the result.
+
+Out of 477 positions, the whole apparatus changed the reference's mind eleven
+times. Of those eleven changes, six helped. Score and survival ended up about a
+tenth of a percent above the reference, which sounds like a tie and, once the
+confidence bounds are computed, is worse than a tie: the lower bounds on both
+the score advantage and the lifetime advantage were **negative**, meaning the
+data cannot rule out that the overrides made things worse. Its clear and reveal
+rates were a hair below the reference's. When its own scenario halves were
+compared, it agreed with itself about half the time. Five of eight origin games
+did not regress, where six were required.
+
+Every frozen gate except the ordered-halves check failed, and the experiment
+was recorded as a valid negative. The ledger's own reading is worth repeating
+because it resists the comfortable explanation: the missing signal is score,
+survival and flow — not merely commitment stability. In other words, the
+problem is not that the method was too timid about overriding. It is that when
+it did override, it had not actually found anything better.
+
+Two limits belong with this. This is an offline root-panel proxy: only the root
+action was improved and every subsequent action reverted to the two-move-ahead
+policy, so it is not a complete-game result. And the 477-position panel had
+already been read by earlier work, so it is diagnosis rather than fresh
+model-selection evidence.
+
+<TechnicalDetails title="The technical record">
+
+Rejected, ledger-recorded. It opened only the locked, already-consumed corpus
+of 477 public roots from eight whole-game origins; the stored H200 outcomes
+were not used for selection, no origin game was replayed, and zero gameplay,
+protected or final seeds were opened.
+
+The frozen gate required at least 70% split stability, 5% override coverage,
+75% beneficial-override precision, 1.10× D4's raw score, 1.05× its restricted
+mean survival, positive one-sided 95% whole-origin lower bounds for utility and
+moves, non-regressing clear and reveal flow, at least six of eight
+non-regressing origins, and non-regression in both ordered halves.
+
+| Measure | Candidate | Gate or comparator |
+| --- | ---: | --- |
+| Overrides | 11 of 477 (2.3061%) | ≥ 5% coverage |
+| Beneficial overrides | 6 (54.5455%) | ≥ 75% |
+| Score ratio vs D4 | 1.000718 | ≥ 1.10 |
+| Restricted mean survival ratio | 1.000621 | ≥ 1.05 |
+| Mean utility delta | +695.637 (lower-95 −169.897) | lower bound > 0 |
+| Mean move delta | +0.02660 (lower-95 −0.01365) | lower bound > 0 |
+| Clears / reveals per move | 1.966311 / 1.053280 | D4: 1.966329 / 1.053383 |
+| A1/A2 split stability | 49.6855% | ≥ 70% |
+| Non-regressing origins | 5 of 8 | ≥ 6 of 8 |
+| Ordered halves | both passed | pass |
+
+Cost: 2,509,342 synthetic transitions, 2,436,507 D2 calls, 4,625,296,860 D2
+work units and 572,887,018 D4 work units, in 1,867.000 effective four-thread
+root seconds at 35,831,808 bytes peak RSS. Source, result, checkpoint and
+preflight SHA-256 values are all recorded. The ledger adds a requirement for
+any successor: bind a combined transitive-source hash rather than only the
+top-level source hash, before a passing result can be trusted.
+
+Source: "Public regenerative policy-iteration B0 (rejected)" in the
+[experiment history](/docs/research/history); the terminal-policy-iteration
+table in the [experiment index](/docs/research/experiment-index).
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- **"Statistically indistinguishable from the reference" is a real result.**
+  A staged, careful, well-instrumented comparison could not find eleven
+  reliable improvements in 477 positions. That constrains how much easy
+  headroom sits next to the reference's choices.
+- **Coverage and effect size have to be reported together.** An override rule
+  firing at 2.3% of positions cannot move a mean even if every firing were
+  right — and only 55% of them were.
+- **The staging machinery is reusable.** Cheap elimination followed by
+  independent confirmation panels is a sound design; what it was given to
+  measure, a two-move-ahead continuation over 75 moves, is the part that did
+  not carry enough signal.
+- **Still open:** the same architecture with a stronger continuation policy, on
+  fresh successor-closed data rather than a panel that has already been read.

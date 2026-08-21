@@ -1,35 +1,123 @@
 ---
-title: Panel Value
+title: Panel value
 family: constructive-reservoir
-status: Rejected
+summary: Builds training data the expensive, honest way — every legal column at a position, each played out over the same imagined futures — then learns from it. Both models still ranked columns worse than the four-move search.
+status: rejected
 evidence: task-record only
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Two attempts to learn what a position is worth from data that, for once, covers
+*every* column a player could have chosen — not just the one that was actually
+played.
 
-## Panel-value NNUE
+<EvidenceLabel status="rejected" evidence="task-record only" reads="public" />
 
-Learns public state value from every legal sibling's common H100 continuations.
+## The intuition
 
-**Status: Rejected** (task-record only). the untouched holdout had weak top-action accuracy and worse regret, so gameplay stayed sealed.
+Almost every learned evaluator in this repository has failed the same way, and
+the [sibling trap](/learn/concepts/ranking-siblings) concept page is devoted to
+it: a model trained on the moves a policy actually played becomes good at
+judging *those* moves, and is then asked at play time to compare six
+alternatives it has barely seen. Low prediction error, wrong choice.
 
-## Direct sibling ranker
+The obvious fix is expensive: at each position, play out **all** the legal
+columns, not just the chosen one, and label them all. That is what a "panel"
+means here — the complete set of siblings at one position, each carried forward
+over the *same* imagined futures so the comparison between them is fair.
 
-Trains directly on complete within-root action panels rather than a successor state-value reservoir.
+Two ways to learn from such a panel were tried:
 
-**Status: Rejected** (task-record only). it slightly beat D1 but remained materially behind D4.
+- **Panel-value** learns a value for a board — you evaluate the position each
+  column leads to, and pick the best one.
+- **Direct sibling ranker** skips the intermediate step and learns to rank the
+  columns within a position directly, from complete within-position panels,
+  with no pool of successor states in between.
 
-## Sources
+The second exists because of a suspicion about the first: a state-value model
+trained on a reservoir of successor positions is once again learning about
+states in general, when what is needed is a comparison inside one position.
 
-- `direct-sibling-ranker.cpp`
-- `panel-value-nnue.cpp`
+## How it works
 
-## More evidence
+1. Play 1,024 complete games with two different behaviour policies — half with
+   the one-move-ahead fair search, half with the
+   [constructive planner](/approaches/constructive-reservoir/constructive-spectrum)
+   — so the positions come from two different styles of play.
+2. Take up to eight positions from each game, at fixed move numbers (5, 10, 15,
+   20, 25, 30, 40, 50).
+3. At each position, for **every** legal column, continue the game 100 moves
+   under 15 shared imagined futures, and record how it went. Because the
+   futures are shared across the columns, the differences between them are
+   differences in the move.
+4. Split the positions into training and held-out sets by whole origin game, so
+   no held-out position comes from a game that also fed training.
+5. Train, then test on the held-out half: how often the model's top column is
+   the right one, how often it orders a pair correctly, and how much value it
+   gives up by choosing wrongly.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/constructive-reservoir)
+## What happened
+
+Both were rejected before any gameplay.
+
+The **panel-value** model was recorded as having weak top-action accuracy and
+worse regret on the untouched holdout, so its gameplay screen was never opened.
+The **direct sibling ranker** was recorded as slightly better than the
+one-move-ahead search but materially behind the four-move reference.
+
+There are **no retained numbers** for either. Both statuses exist only as task
+records, and [audit 04](/docs/exploratory/audit-04-blind-spots) §B.3 lists both
+sources among the thirty rejections that "cannot be re-derived" — no ledger
+protocol, no artifact hash, no per-position data. This page therefore reports
+the verdicts as the index words them and quotes no accuracy figures, because
+none survive.
+
+That gap matters, because the *comparison* these runs made is the one the
+repository now thinks is central. When the same question was asked again later
+with machine-readable records — a distributional afterstate ranker trained on a
+successor-closed corpus — the numbers were retained, and the pattern looks
+similar: the model beat its one-move teacher (top-1 0.424 against 0.319) and
+still trailed the four-move reference (0.424 against 0.499, regret 0.241
+against 0.178). See the
+[afterstate learning family](/approaches/afterstate-learning).
+
+<TechnicalDetails title="The technical record">
+
+**Status: rejected — task-record only, for both sources.** From the
+[experiment index](/docs/research/experiment-index): panel-value NNUE — "the
+untouched holdout had weak top-action accuracy and worse regret, so gameplay
+stayed sealed"; direct sibling ranker — "it slightly beat D1 but remained
+materially behind D4". Neither appears in the
+[experiment history](/docs/research/history).
+
+Configuration, from the sources (not from a protocol record): origin seeds
+`0x3d6c1000`–`0x3d6c13ff`, 1,024 games, 512 from fair D1 and 512 from the
+constructive policy; up to 8 roots per game at moves 5/10/15/20/25/30/40/50;
+384 training and 128 held-out roots per behaviour policy, split by a dedicated
+hashing domain; labels from 15 aligned scenarios over a 100-move continuation.
+The panel-value model is a 96-unit, five-head network trained for 16 epochs at
+batch 512, drawing successor states into a reservoir of up to 262,144 entries,
+42 per training root; it declares a screen lane at `0x3d6c8000`–`0x3d6c801f`
+that the index records as never opened. The direct ranker reuses the same
+corpus with three-fold cross-validation, a 96-feature action-relative
+representation, and states in its own header that it has no gameplay screen.
+
+Sources: `panel-value-nnue.cpp`, `direct-sibling-ranker.cpp`.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+- Complete sibling panels are the right shape of data, and this family built
+  them before the vocabulary for them existed. Building the data was not
+  sufficient.
+- Ranking directly, instead of ranking through a learned state value, was the
+  better of the two — but "better" here still means behind the four-move
+  reference.
+- Neither verdict can be re-derived from anything retained. Treat both as
+  provisional in exactly the way the index instructs.
+- The live version of this question is the successor-closed afterstate work,
+  which does keep machine-readable results, and whose most recent finding is
+  that a learned model's *narrow* intervention on near-tied positions improved
+  on the four-move reference for the first time, while still failing its frozen
+  margin in one of two held-out halves.

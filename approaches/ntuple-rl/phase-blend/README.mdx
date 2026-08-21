@@ -1,28 +1,88 @@
 ---
-title: Phase Blend
+title: Blending the learned value with the hand-written one
 family: ntuple-rl
-status: Rejected
+summary: Mix the learned board value with the hand-written heuristic and see whether the combination beats either alone. It did not.
+status: rejected
 evidence: ledger-recorded
-generated: true
+reads: public
 ---
 
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
+Mix the learned board value with the hand-written heuristic, and see whether the
+combination beats either alone.
 
-## Hand/learned phase blend
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
 
-Calibrates and combines the hierarchical n-tuple value with the phase heuristic.
+## The intuition
 
-**Status: Rejected** (ledger-recorded). the frozen blend trailed learned-value search alone.
+Two evaluators were available at this point: a
+[learned n-tuple value](/approaches/ntuple-rl/native-suite) trained from half a
+million games, and a hand-written "phase horizon" heuristic that reasoned about
+the [rise clock](/learn/glossary) directly. They disagree about positions, and
+they disagree for different reasons — one from data, one from a human's model of
+the game. The standard move is to add them: `value = heuristic + c × learned`,
+and tune the single number `c`.
 
-## Sources
+If the two evaluators make uncorrelated mistakes, the blend should be steadier
+than either. This experiment tested that in the cleanest possible way: one
+coefficient, chosen on one set of games, then frozen and measured on a different
+set.
 
-- `main.ts`
+## How it works, step by step
 
-## More evidence
+1. Load the trained native n-tuple checkpoint into the TypeScript engine.
+2. Calibrate the two evaluators onto a common scale, because a learned sum of
+   weights and a hand-written score are not in the same units.
+3. Try four blend coefficients — 0 (heuristic only), 0.25, 0.5, and 1 (learned
+   only) — on a small set of tuning games.
+4. Freeze the winning coefficient.
+5. Play the frozen policy on a separate fixed 64-game development probe, with a
+   depth-2 [expectimax](/learn/glossary) and three chance samples.
 
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/ntuple-rl)
+## What happened, in plain English
+
+The tuning games preferred pure learned value — the more of the learned
+evaluator in the mix, the better the tuning score, right up to using it alone.
+So the "blend" that won the tuning stage was not a blend at all.
+
+Worse, when that frozen choice was played on the fixed probe it scored about
+217,000 points a game, below the roughly 232,000 the native learned-value search
+had already recorded on the same probe. Running the same idea through a
+different implementation lost ground, and mixing in the heuristic never helped
+at any coefficient. It was recorded as a rejected theory.
+
+<TechnicalDetails title="The technical record">
+
+Status in [the experiment index](/docs/research/experiment-index): **rejected,
+ledger-recorded** — "the frozen blend trailed learned-value search alone."
+
+From [the ledger](/docs/research/history): tuning means for learned-value
+coefficients 0, 0.25, 0.5, and 1 were 173,413.5, 186,019.75, 187,391.375, and
+190,087.25 respectively, on the `0x5d70...` tuning games. Coefficient 1 won and
+reached 217,332.672 on the fixed `0x4d70...` 64-game probe, below the native
+n-tuple-only depth-2 result of 232,107.156 on the same probe.
+
+Configuration: 8 training games, 24 scale-calibration games, 64 probe games,
+depth 2, three chance samples, 100,000 work units, 500-move cap.
+
+**Limitations.** The tuning cohort is very small, the probe range was already
+burned, and the ledger records only the four coefficient means — no per-game
+data, dispersion, or paired bounds. The ledger does not state which level bonus
+these figures use.
+
+Source: `main.ts`.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+The experiment rules out this specific linear blend of these two specific
+evaluators at these four coefficients. It does not rule out combining a learned
+and a hand-written signal in general — later approaches in the repository kept
+trying, usually by letting a learned scalar break ties rather than by adding it
+into the value.
+
+The more useful observation is procedural: the tuning set picked a coefficient
+that then underperformed on held-out games. With eight tuning games that is
+exactly what one should expect, and it is a small illustration of why the
+repository's [benchmark ladder](/docs/benchmarks) insists on separate cohorts
+for choosing and for confirming.
