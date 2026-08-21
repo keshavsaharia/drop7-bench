@@ -174,9 +174,14 @@ accelerated engine.
 **Depth and chance resolution interact, and the interaction has a sign.** With
 five strata the best depth is three, and the fourth ply is worth −7,723. With
 seven strata the fourth ply is worth +86,172 (95% lower bound +26,605, 40-0-24)
-— the largest verified improvement in the repository. The fifth ply is worth
-nothing at either resolution: −1,581 at seven strata, −8,624 at five, for 23x to
-34x the work.
+— the largest verified improvement in the repository. The stratum contrast
+itself replicates at two depths: +101,171 at depth 4 and +123,613 at depth 5,
+both significant.
+
+**The fifth ply is not measurable by this design, which is a different claim
+from being worthless.** At five strata it is −8,624 over 64 paired games; at
+seven strata it is +23,367 over 32, having changed sign when the cohort grew
+from 16 games. Both sit far inside their detection floors.
 
 **Depth and chance resolution substitute rather than compound.** Depth 3 with
 six-fold reveal sampling (4.24M work per move, 376,442 points) and depth 4 with
@@ -195,10 +200,27 @@ remaining untested factors from the original list are the learned leaf inside
 the search (tried, negative) and transposition-table size (untested, and now low
 priority given that the table is 1.01x of a decision).
 
-Deeper search is not merely "not monotonically stronger" — past ply four it is
-measurably not stronger at all in this family. Note the precise claim: none of
-the ply-5 contrasts is *significantly negative* either, so the correct reading
-is that the fifth ply does not pay for itself, not that it is harmful.
+Deeper search is not merely "not monotonically stronger" — past ply four its
+effect is below what this program can measure. State it that way and not more
+strongly.
+
+**The binding methodological constraint, discovered here.** Paired whole-game
+deltas have a standard deviation of 228,827 to 371,351 depending on the
+contrast, so a 64-game paired cohort has a one-sided 95% detection floor of
+roughly 47,000 to 108,000 points. Every significant result in this factorial is
+above its floor; every null result is below it and is therefore a
+non-measurement. Giving the observed depth-5 estimate a bound would take about
+684 paired games — about 13 wall-days at that arm's measured throughput of
+1,647 s per game on 14 threads (honest range 8-18 days, since the two chunks
+differed 2.3x under other agents' load), and finishing the planned 64 would not
+have come close.
+
+**This changes how to choose experiments.** Preregister the effect size the
+mechanism predicts and compare it to the floor before committing the machine.
+An experiment whose plausible effect is 20,000 points is not a cheap experiment;
+it is an unaffordable one. The alternatives are to pursue mechanisms with
+large predicted effects, or to build a lower-variance estimator than the
+complete game.
 
 **What a flat top implies for priority.** When both estimate-quality axes are
 exhausted, the binding constraint has moved from the estimate to the objective

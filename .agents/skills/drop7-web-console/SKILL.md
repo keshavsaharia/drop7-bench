@@ -147,12 +147,18 @@ frontmatter is optional.
 ---
 date: 2026-08-21
 title: The search plateau
-summary: One or two sentences, plain English, shown on the index.
+summary: "One or two sentences, plain English, shown on the index."
 contributors: [claude-opus-5 (Claude Code), kimi-k3 (OpenCode)]
 tags: [fair-planner, depth]
 outcomes: { negative: 5, positive: 1, open: 2 }
 ---
 ```
+
+**Always quote `summary:` and `title:`.** A colon-space anywhere in an unquoted
+scalar makes YAML read it as a nested mapping and the build fails with
+`incomplete explicit mapping pair` — pointing at the frontmatter, not at the
+sentence you wrote. Research summaries attract colons ("the result: nothing"),
+so quote by default rather than when it breaks.
 
 Six components are registered for log MDX (`web/components/ResearchLog.tsx`):
 

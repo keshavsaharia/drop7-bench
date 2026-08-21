@@ -18,14 +18,22 @@ both are single-cohort *development* tier — they do not upgrade the ledger:
   approximate five-stratum model the same fourth ply is worth −7,723. Chance
   resolution does not merely add points; it changes the sign of the depth
   gradient.
-- **The fifth ply is worth nothing at either chance resolution** (−1,581 at
-  seven strata over 16 paired games; −8,624 at five strata over 64), at 23x to
-  34x the work. Neither is significantly negative — the one-sided 95% upper
-  bounds are +166,299 and +39,052 — so the finding is "does not pay for
-  itself", not "is harmful". Combined with a factored reveal-sampling ladder,
-  no arm above roughly five million work units per move is distinguishable from
-  depth 4, and the budget frontier is flat on top at the fair-D4 operating
-  point, reachable from either axis.
+- **The fifth ply is not measurable by this design.** At five strata it is
+  −8,624 over 64 paired games; at seven strata it is +23,367 over 32. Both are
+  far inside their own detection floors (see below), and the seven-stratum
+  estimate **changed sign** when the cohort grew from 16 games to 32. The
+  honest statement is that any depth-5 effect is smaller than a 64-game paired
+  cohort can resolve, not that it is zero. What can be said is economic: even
+  the optimistic estimate is +23,367 for 35.6x the work per move.
+- **A 64-game paired cohort in this game cannot see an effect below roughly
+  50,000 points.** Paired whole-game deltas have a standard deviation of
+  228,000 to 371,000 depending on the contrast, so the one-sided 95% detection
+  floor runs from 47,052 to 107,988. Every null result in the depth factorial
+  is below its own floor and is therefore a non-measurement rather than
+  evidence of no effect. Resolving the observed +23,367 would take about 684
+  paired games, about 13 wall-days at that arm's measured throughput.
+  **Choose experiments whose predicted effect exceeds the floor, or find a
+  lower-variance estimator than complete games.**
 
 No candidate has qualified for the protected validation protocol. The frozen
 record marks both the protected and one-shot final cohorts as unopened.
@@ -137,8 +145,13 @@ run.
   As of 2026-08-21 this is necessary but demonstrably not sufficient: a student
   given successor-closed coverage, every legal sibling, and exact search-value
   labels still ranked worse than a one-ply exact search.
-- **Score is heavy-tailed.** One million-point game can coexist with a much
-  lower average; paired whole-game cohorts and confidence bounds are essential.
+- **Score is heavy-tailed, and this sets a hard measurement floor.** One
+  million-point game can coexist with a much lower average; paired whole-game
+  cohorts and confidence bounds are essential. But pairing does not rescue
+  small effects: single-seed paired deltas in the depth factorial reach
+  −1,002,862 and +958,985, more than twice the cohort mean, so a 64-game
+  cohort resolves nothing below roughly 50,000 points. Before running a cohort,
+  state the effect size the mechanism predicts and check it against the floor.
 - **D4 is useful but not the answer.** It is a strong tactical fallback and
   teacher, yet its average is not close enough to qualify.
 - **The leaf evaluation prices what search cannot see.** Refitting it toward a
@@ -160,7 +173,7 @@ names what would reopen it.
 
 | Direction | Result | Reopens if |
 | --- | --- | --- |
-| Search depth beyond four plies | −1,581 (7 strata) and −8,624 (5 strata), neither significantly negative, 23-34x work | A different leaf or a non-uniform depth schedule changes the ply-5 gradient |
+| Search depth beyond four plies | Not measurable: +23,367 (7 strata, n=32) and −8,624 (5 strata, n=64), both inside detection floors of 107,988 and 47,052, at 23-36x work | A design that can resolve sub-50k effects, or a mechanism predicting an effect above the floor |
 | Stacking reveal sampling on top of the fourth ply | −41,950 at M=2 (95% upper bound +17,541), 4.07x work | A wider dose is tested; only 28.6% joint coverage was affordable at depth 4, and the dose that worked at depth 3 was 85.7% |
 | Harsher terminal (death) utility | Parameter saturated; play is identical past the current value | Never, for this parameterization |
 | 25-move rollout veto | −21,887 points per veto | A lower-variance rollout estimator |

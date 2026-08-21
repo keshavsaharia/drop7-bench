@@ -7,14 +7,18 @@
 `approaches/lifetime-objective/fast-engine/cohorts/`.
 **No existing file was modified.**
 
-> **Read section 8 first.** This document was written while the depth-5 arms
-> were running. Sections 2.2 and 5 report an eight-game completion-order-biased
-> slice and conclude that depth 5 *reverses*. With 64 complete games at five
-> strata and 16 at seven, **that interim verdict is withdrawn**: depth 5 is a
-> wash, not a reversal. The original sections are left exactly as written,
-> because the bias they warned about and then fell to is the point. The only
-> edit to the original text is the heading, which said "Finding 14" while the
-> file is `finding-15`; no content was changed.
+> **Read section 10 first — this document has been wrong twice, in opposite
+> directions, and the sequence matters more than any one of its readings.**
+>
+> | written at | reading | status |
+> | --- | --- | --- |
+> | §2.2, §5 — n=8, arm in flight | depth 5 *reverses*, −268,611 | **withdrawn in §8**: completion-order bias, exactly as §2.2 warned |
+> | §8 — n=16 at seven strata | depth 5 is a *wash*, −1,581, "does not separate" | **withdrawn in §10**: a non-measurement reported as a null |
+> | §10 — n=32, arm stopped, final | the contrast was **never measured**; it sits at 22% of its detection floor | current |
+>
+> Sections 2.2, 5 and 8 are left exactly as written. The only edit to the
+> original text is the heading, which said "Finding 14" while the file is
+> `finding-15`; no content was changed.
 
 > **Deviation on file placement, disclosed.** `AGENTS.md` says local run output
 > belongs in `runs/<run-id>/`. This work package was constrained to write only
@@ -505,10 +509,148 @@ top near the fair-D4 operating point, and it is reachable from either axis.**
 | --- | --- |
 | theory | [`TH-20260821-depth-gradient-beyond-fair-d4-034314fc`](../../research/theories/TH-20260821-depth-gradient-beyond-fair-d4-034314fc.json) |
 | experiment | [`EX-20260821-depth5-chance-exactness-factorial-a6a604fd`](../../research/experiments/EX-20260821-depth5-chance-exactness-factorial-a6a604fd.json) |
-| runs | [`RUN-20260821T045349Z-73f29417`](../../research/runs/RUN-20260821T045349Z-73f29417.json) (complete arms), [`RUN-20260821T060358Z-895d0a79`](../../research/runs/RUN-20260821T060358Z-895d0a79.json) (d5s7, running) |
-| result | [`RS-20260821T181917Z-9a34ba02`](../../research/results/RS-20260821T181917Z-9a34ba02.json) — run validity `partial`, outcome `fail`, evidence tier `public-development` |
+| runs | [`RUN-20260821T045349Z-73f29417`](../../research/runs/RUN-20260821T045349Z-73f29417.json) (the two complete arms), [`RUN-20260821T060358Z-93cb9bfc`](../../research/runs/RUN-20260821T060358Z-93cb9bfc.json) (d5s7 as finally stopped, 32 games), superseding the in-flight snapshot [`RUN-20260821T060358Z-895d0a79`](../../research/runs/RUN-20260821T060358Z-895d0a79.json) |
+| result *(current)* | [`RS-20260821T205102Z-d89df4b5`](../../research/results/RS-20260821T205102Z-d89df4b5.json) — run validity `partial`, outcome `inconclusive`, assessment `mixed`, evidence tier `public-development` |
+| result *(superseded, left as committed history)* | [`RS-20260821T181917Z-9a34ba02`](../../research/results/RS-20260821T181917Z-9a34ba02.json) — outcome `fail`; written at n=16, see §10 |
 | machine profile | [`MACH-20260820T080056Z-376ada90`](../../research/system-profiles/MACH-20260820T080056Z-376ada90.json) |
 
 The experiment record was registered **after** the runs, by a different agent
 than the one that executed them; its amendment says so. The comparison rule is
 the repository's standing paired whole-game bootstrap and predates the arms.
+
+---
+
+## 10. Final, 2026-08-21 — the arm was stopped, and the second withdrawal
+
+The depth-5 seven-stratum arm reached 32 of its planned 64 games and was
+**stopped by the repository owner's decision** at a clean 16-game chunk
+boundary: the chunk artifact was rewritten first and the process signalled
+afterwards, so `gamesComplete` is 32, all 32 are whole games, and there are 0
+censored games, 0 score-decomposition identity failures and 0 incomplete
+decisions at minimum completed depth 5. The cohort **will not be resumed**, so
+the arm is *partial* but its analysis is **final**. Those are different things
+and this section keeps them apart.
+
+### 10.1 The sign flipped when the sample doubled
+
+| | n=16 (§8) | n=32 (final) |
+| --- | ---: | ---: |
+| d5s7 mean score | 383,691 | **411,874** |
+| d5s7 mean moves | 110.00 | 117.97 |
+| **d5s7 − d4s7 paired mean** | **−1,581** | **+23,367** |
+| 95% lower bound | −173,154 | −83,046 |
+| median paired delta | −39,660 | **+18,820** |
+| W-T-L | 7-0-9 | 17-0-15 |
+| work ratio | 34.32× | 35.62× |
+
+By chunk, the paired mean is **−1,581** on seeds `0xa51d1000`–`0xa51d100f` and
+**+48,315** on `0xa51d1010`–`0xa51d101f`. Adding sixteen games moved the point
+estimate by 25,000 points and reversed its sign and its median.
+
+### 10.2 So §8's reading is withdrawn too — for a different reason
+
+§8 replaced "depth 5 reverses" with "depth 5 is a wash — depth 3 → 4 → 5 does
+not separate". **That was a non-measurement reported as a null.** The paired
+standard deviation of the d5s7 − d4s7 contrast is **371,351 points**. At n=32
+the smallest true effect whose one-sided 95% bound would clear zero is
+**107,988**; the observed +23,367 is 22% of that. At n=16 the paired sd was
+431,420, the floor was **177,421**, and the observed −1,581 was **1%** of it. Neither number was ever evidence about
+the fifth ply. **The correct statement is that the fourth-to-fifth ply contrast
+at seven strata was never measured.**
+
+And it must not now be flipped into the opposite claim. **+23,367 is exactly as
+unsupported as −1,581 was.** Nothing about this arm licenses "depth 5 helps".
+
+### 10.3 The power analysis, which is the most useful thing here
+
+Detection floor = `1.645 · sd / √n`, the smallest true mean difference whose
+one-sided 95% bound would clear zero:
+
+| contrast | n | mean | paired sd | detection floor | above floor? |
+| --- | ---: | ---: | ---: | ---: | :---: |
+| d4s7 − d4s5 *(strata @ d4)* | 64 | **+101,171** | 268,413 | 55,192 | **yes** |
+| d4s7 − d3s7 *(depth @ s7)* | 64 | **+86,172** | 298,877 | 61,457 | **yes** |
+| d5s7 − d5s5 *(strata @ d5)* | 32 | **+123,613** | 327,399 | 95,207 | **yes** |
+| d5s7 − d3s7 *(two plies @ s7)* | 32 | +86,397 | 334,291 | 97,211 | no |
+| d5s5 − d4s5 *(depth @ s5)* | 64 | −8,624 | 228,827 | 47,052 | no |
+| d5s7 − d4s7 *(depth @ s7)* | 32 | +23,367 | 371,351 | 107,988 | no |
+
+**Every significant result in this factorial is above its floor and every null
+is below it.** The factorial separated exactly the contrasts it had the power to
+separate, and nothing else. That is not a coincidence to be admired; it is the
+warning that the "nulls" carry no information.
+
+Resolving the observed +23,367 at one-sided 95% needs **≈684 paired games** —
+about 13 wall-days at this arm's own observed 1,647 s per game at 14 threads
+(the two chunks differed 2.3× in throughput under other agents' load, so call it
+8–18 days). Finishing to the planned 64 would have left a standard error near
+**46,400** against a 23,367 estimate: still a non-measurement. **The contrast is
+not answerable at any affordable cohort size, and that — not impatience — is the
+justification for stopping the arm.** The marginal machine-day bought no
+information.
+
+The variance is structural. The five largest single-seed paired deltas in this
+contrast are **−1,002,862, +958,985, −678,455, +592,546 and −577,069**:
+individual games swing by more than twice the cohort mean. No amount of tidier
+running fixes that; only a different estimator or a variance-reduction scheme
+would.
+
+**Bootstrap versus normal approximation.** The floors above are
+`1.645·sd/√n`; the tooling reports a one-sided percentile bootstrap (20,000
+resamples, Mulberry32 domain `0xb0075eed`). The two **agree on the significance
+call for all six contrasts**. The bootstrap bound is systematically
+0.5k–4.5k *higher* — less conservative — than `mean − 1.645·SE`, i.e. 1–5% of
+the half-width (d4s7−d4s5 +47,447 vs +45,979; d5s7−d5s5 +32,575 vs +28,406;
+d5s7−d4s7 −83,046 vs −84,621). Paired-delta skewness runs +0.55 to +0.92 on
+four contrasts and −0.30 on d5s7−d4s7, so the two are close but not
+interchangeable at the third digit. No conclusion here depends on the choice.
+
+### 10.4 What *is* measured, and it is the same lesson from the other side
+
+| contrast | n | delta | 95% lower | W-T-L | work |
+| --- | ---: | ---: | ---: | :---: | ---: |
+| **d5s7 − d5s5** *(strata, at depth 5)* | 32 | **+123,613** | **+32,575** | 19-0-13 | 5.85× |
+| **d4s7 − d4s5** *(strata, at depth 4)* | 64 | **+101,171** | **+47,447** | 41-0-23 | 3.82× |
+| d5s7 − d4s7 *(depth, at 7 strata)* | 32 | +23,367 | −83,046 | 17-0-15 | 35.62× |
+| d5s5 − d4s5 *(depth, at 5 strata)* | 64 | −8,624 | −55,134 | 33-0-31 | 23.29× |
+
+**Both stratum contrasts are significant. Neither depth contrast is.** Chance
+exactness pays at depth 5 just as it pays at depth 4, for a 4–6× work premium;
+depth costs 23–36× and buys nothing this cohort can see. §8.4's warning
+therefore survives and is strengthened: the gap between d4s7's 398,498 and
+d5s5's 288,704 is a **chance-samples** effect, and the factorial now says so
+from both rows.
+
+The one genuinely useful *depth* statement the factorial supports is the
+five-stratum bounded null: on a complete 64-game cohort, any true d4→d5 effect
+at five strata is **smaller than about 47,000 points**. That is a bound, not a
+zero, and it is the only depth claim in this document that rests on adequate
+power.
+
+### 10.5 Corrections to §8
+
+- §8.1's arm table: d5s7 is **32 / 64, stopped by decision, final**, not "still
+  running".
+- §8.3's d5s7 row and every paired row involving it are superseded by §10.1 and
+  §10.4 above.
+- §8.5's "Depth 3 → 4 → 5 does not separate at a fixed stratum count" is
+  **withdrawn**. Substitute: *the depth axis was never measured at seven strata,
+  and at five strata it is bounded below 47,000 points.*
+- §8.5's "+16,622 (n.s.) at 1,085× the work" for d5s7 − d3s7 becomes **+86,397
+  [−6,303] at 1,126× the work** — still below its 97,211 floor, so still not a
+  measurement, but no longer a small number.
+- §8.7's conclusion that the frontier "has a flat top near the fair-D4
+  operating point" should be read with §10.3 attached: the top is flat *as far
+  as this cohort can resolve*, which for depth contrasts is not very far.
+  [`finding-16`](finding-16-factored-reveal-sampling.md)'s reveal-axis arms are
+  better powered and are what carry that claim.
+
+### 10.6 The general lesson, which outlives this experiment
+
+Three readings of the same arm, in order: a reversal, a wash, an unmeasurable.
+The first two were both produced by taking a point estimate seriously without
+first asking what the smallest resolvable effect was. **Compute the detection
+floor before running the arm, not after reading it** — `1.645·sd/√n` from a
+pilot's paired deltas costs nothing and would have said, before any of these
+machine-days were spent, that a 64-game cohort could not answer this question.
+The repository has now paid for that lesson twice in one document.

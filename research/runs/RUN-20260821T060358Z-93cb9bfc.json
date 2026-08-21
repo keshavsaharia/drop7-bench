@@ -1,0 +1,52 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260821T060358Z-93cb9bfc",
+  "experimentId": "EX-20260821-depth5-chance-exactness-factorial-a6a604fd",
+  "lifecycle": "interrupted",
+  "runValidity": "partial",
+  "startedAt": "2026-08-21T06:03:58Z",
+  "endedAt": "2026-08-21T20:42:24Z",
+  "protocolSha256": "cf7f2ba30d205bddd20340d39dbdef4a5950f792510776a7fbfd477aefea1c18",
+  "machineProfileRef": "research/system-profiles/MACH-20260820T080056Z-376ada90.json",
+  "sourceState": {
+    "gitCommit": null,
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": "62abbb743684436d72f3e4616107dcbf72f90301879e7b1d3c518f5e8259b60d"
+  },
+  "command": [
+    "./build/fast-engine/cohort --seed-start 0xa51d1000 --games 64 --threads 14 --depth 5 --chance-samples 7 --cache 200000 --chunk 16 --max-moves 2000 --label d5s7 --output approaches/lifetime-objective/fast-engine/cohorts/d5s7.json",
+    "bash approaches/lifetime-objective/fast-engine/finish.sh"
+  ],
+  "seedLeaseRefs": [
+    "SEEDLEASE-A51D confirm (0xa51d1000-0xa51d103f; docs/exploratory/lease-map.md)"
+  ],
+  "resourceLimits": {
+    "wallSeconds": 172800,
+    "cpuThreads": 14,
+    "maxHostBytes": 34359738368,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": 52704.7,
+    "cpuSeconds": null,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "This record covers the same execution that RUN-20260821T060358Z-895d0a79 recorded as a 16-game in-flight snapshot; that record is committed history and is left unchanged, and this one is the final state of the run. LIFECYCLE NOTE: the schema's enum has no token for 'stopped by decision', so the lifecycle reads 'interrupted' - it means the run did not reach its planned 64 games, NOT that it failed or was lost. Nothing crashed, no game was censored, no decision completed below depth 5, and the 32 games present are whole games. Chunk 1 wrote 16 games in 36,888.4 s; chunk 2 wrote 16 more in 15,816.3 s, a 2.3x throughput swing driven entirely by other agents' load on this shared machine, not by the policy. 3,775 decisions, 0 incomplete, minimum completed depth 5, busiest decision 467,827,983 of a declared 582,727,797 bound (80%), work/move 176,536,117 at a declared 200,000-entry cache. Observed throughput 1,647 s per game at 14 threads over the whole run. Not timing-grade. gitCommit is null because the arm ran from an uncommitted working tree; the source-closure hash is recorded instead and is listed file-by-file in this run's manifest.json."
+  },
+  "exitCode": null,
+  "stopReason": "Stopped by the repository owner's decision at the 32-game chunk boundary, not by a crash, timeout or resource guard. Rationale, computed from the run's own data: the contrast this arm exists to measure has a paired standard deviation of 371,351 points, so finishing to the planned 64 games would have left a standard error of about 46,400 against a point estimate of +23,367 - still a non-measurement - and resolving that estimate at one-sided 95% would need roughly 684 paired games, about 13 wall-days at this configuration. The contrast is not answerable at any affordable cohort size, so further machine time on it buys no information. The 32 games retained are final: the cohort will not be resumed.",
+  "artifactRefs": [
+    "runs/RUN-20260821T060358Z-93cb9bfc/d5s7-final-32games.json",
+    "runs/RUN-20260821T060358Z-93cb9bfc/d5s7-final-32games.log",
+    "runs/RUN-20260821T060358Z-93cb9bfc/finish-report-final.txt",
+    "runs/RUN-20260821T060358Z-93cb9bfc/manifest.json",
+    "approaches/lifetime-objective/fast-engine/cohorts/d5s7.json",
+    "approaches/lifetime-objective/fast-engine/cohorts/d5s7.log"
+  ],
+  "contributionIds": [
+    "CT-20260821T181919Z-05882e86",
+    "CT-20260821T205103Z-fa3970f1"
+  ]
+}

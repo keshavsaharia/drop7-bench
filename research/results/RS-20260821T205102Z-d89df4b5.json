@@ -1,0 +1,234 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260821T205102Z-d89df4b5",
+  "theoryIds": [
+    "TH-20260821-depth-gradient-beyond-fair-d4-034314fc"
+  ],
+  "experimentId": "EX-20260821-depth5-chance-exactness-factorial-a6a604fd",
+  "runIds": [
+    "RUN-20260821T045349Z-73f29417",
+    "RUN-20260821T060358Z-93cb9bfc"
+  ],
+  "runValidity": "partial",
+  "scientificOutcome": "inconclusive",
+  "assessment": "mixed",
+  "evidenceTier": "public-development",
+  "summary": "SUPERSEDES RS-20260821T181917Z-9a34ba02, which assessed this experiment when the depth-5 seven-stratum arm held 16 games. The arm was stopped by the repository owner's decision at the 32-game chunk boundary and will not be resumed, so its analysis is now FINAL even though the cohort is partial: 32 of 64 planned games, every one of them a whole game, 0 censored, 0 score-decomposition identity failures, 0 incomplete decisions, minimum completed depth 5. The old record remains committed history and is not edited. THE HEADLINE IS A CORRECTION, NOT AN UPDATE. The previous record read the fifth ply as 'does not separate'. That reading was a NON-MEASUREMENT REPORTED AS A NULL. Doubling the sample from 16 to 32 games moved the depth-5-minus-depth-4 seven-stratum contrast from -1,581 to +23,367 and its median from -39,660 to +18,820 - THE SIGN FLIPPED - which is what a quantity being estimated far below its detection floor looks like. By chunk the paired mean is -1,581 on the first 16 seeds and +48,315 on the second 16. Do NOT replace the old reading with 'depth 5 helps': +23,367 is equally unsupported. The one-sided 95% bootstrap lower bound is -83,046 and the contrast's detection floor at n=32 is 107,988, so the estimate sits at 22% of the smallest effect this cohort could have resolved. The correct statement is that THE FOURTH-TO-FIFTH PLY CONTRAST AT SEVEN STRATA WAS NEVER MEASURED, in either record. THE POWER ANALYSIS IS THE MOST USEFUL THING THIS EXPERIMENT PRODUCED. Detection floor, taken as 1.645 x sd / sqrt(n), the smallest true effect whose one-sided 95% bound would clear zero: d4s7-d4s5 +101,171 against a floor of 55,192 (n=64); d4s7-d3s7 +86,172 against 61,457 (n=64); d5s5-d4s5 -8,624 against 47,052 (n=64); d5s7-d4s7 +23,367 against 107,988 (n=32). EVERY SIGNIFICANT RESULT IN THIS FACTORIAL IS ABOVE ITS FLOOR AND EVERY NULL IS BELOW IT - the factorial separated the contrasts it had the power to separate and nothing else. Resolving the observed +23,367 needs about 684 paired games; finishing to the planned 64 would have left a standard error near 46,400 against a 23,367 estimate, still a non-measurement. That is the justification for the stop: the contrast is not answerable at any affordable cohort size, so the marginal machine-day buys no information. The variance is structural, not fixable by tidier running: the five largest single-seed paired deltas are -1,002,862, +958,985, -678,455, +592,546 and -577,069, so individual games swing by more than twice the cohort mean. WHAT IS ACTUALLY MEASURED HERE, and it is the same lesson from the other side: at depth 5, going from five to seven strata is worth +123,613 with a lower bound of +32,575, W-T-L 19-0-13 - SIGNIFICANT, and comfortably above its 95,207 floor - for 5.85x the work. The chance-exactness axis pays at depth 5 exactly as it pays at depth 4 (+101,171 [+47,447] there). The previous record's warning therefore survives and is strengthened: the eye-catching gap between d4s7's 398,498 and d5s5's 288,704 is a CHANCE-SAMPLES effect, not a depth effect, and both stratum contrasts are now significant while no depth contrast is. The engine controls are unchanged and clean: the fast engine's depth-4 arm reproduces the recorded unoptimised arm over 704 field comparisons with 0 mismatches, and the depth-5 five-stratum arm reproduces its recorded 32-game predecessor over 352 comparisons with 0 mismatches across two binaries and two cache capacities.",
+  "metrics": {
+    "cohort": "0xa51d1000-0xa51d103f, 2,000-move cap, corrected 17,000-point Hardcore scoring; the depth-5 seven-stratum arm covers the first 32 seeds 0xa51d1000-0xa51d101f",
+    "supersedes": "RS-20260821T181917Z-9a34ba02",
+    "supersededFieldsFromPartialRecord": "d5s7Games 16 -> 32 (final; cohort stopped by decision, not resumed); d5s7MeanScoreOn16 383,691 -> d5s7MeanScore 411,874; d5s7MeanMoves 110.00 -> 117.97; d5s7WorkPerMove 170,131,134 -> 176,536,117; d5s7 decisions 1,760 -> 3,775; pairedD5s7MinusD4s7 -1,581 [-173,154] median -39,660 W-T-L 7-0-9 -> +23,367 [-83,046] median +18,820 W-T-L 17-0-15 (SIGN FLIP); pairedD5s7MinusD5s5 +114,640 [-7,280] not significant -> +123,613 [+32,575] SIGNIFICANT W-T-L 19-0-13; pairedD5s7MinusD3s7 +16,622 [-130,027] -> +86,397 [-6,303] W-T-L 20-0-12; scientificOutcome fail -> inconclusive; assessment not-supported-as-tested -> mixed. Unchanged: every depth-4 and depth-5 five-stratum figure, both reproduction controls, and pairedD5s5MinusD4s5 at -8,624 [-55,134] W-T-L 33-0-31 on 64 games.",
+    "d5s7Games": 32,
+    "d5s7GamesPlanned": 64,
+    "d5s7StopKind": "deliberate resource decision at a clean chunk boundary; not resumed",
+    "d5s7MeanScore": 411873.65625,
+    "d5s7MedianScore": 344436.5,
+    "d5s7ScoreSd": 282631.64,
+    "d5s7MeanMoves": 117.96875,
+    "d5s7ClearsPerMove": 2.0575,
+    "d5s7RevealsPerMove": 1.1481,
+    "d5s7Occupied": 23.6169,
+    "d5s7WorkPerMove": 176536117,
+    "pairedD5s7MinusD4s7": {
+      "n": 32,
+      "meanScoreDelta": 23366.8,
+      "lowerBound95": -83046.2,
+      "meanMoveDelta": 6.03,
+      "winTieLoss": "17-0-15",
+      "medianDelta": 18820.0,
+      "workRatio": 35.62,
+      "chunk1MeanDelta": -1581,
+      "chunk2MeanDelta": 48315,
+      "note": "sign flipped from the n=16 record; sits at 22% of its 107,988 detection floor"
+    },
+    "pairedD5s7MinusD5s5": {
+      "n": 32,
+      "meanScoreDelta": 123612.7,
+      "lowerBound95": 32575.2,
+      "meanMoveDelta": 33.53,
+      "winTieLoss": "19-0-13",
+      "medianDelta": 119724.0,
+      "workRatio": 5.85,
+      "significant": true,
+      "detectionFloor": 95207
+    },
+    "pairedD5s7MinusD3s7": {
+      "n": 32,
+      "meanScoreDelta": 86396.8,
+      "lowerBound95": -6302.9,
+      "meanMoveDelta": 22.28,
+      "winTieLoss": "20-0-12",
+      "workRatio": 1125.62,
+      "detectionFloor": 97211
+    },
+    "pairedD5s5MinusD4s5": {
+      "n": 64,
+      "meanScoreDelta": -8623.7,
+      "lowerBound95": -55133.7,
+      "winTieLoss": "33-0-31",
+      "workRatio": 23.29,
+      "detectionFloor": 47052
+    },
+    "pairedD4s7MinusD4s5": {
+      "n": 64,
+      "meanScoreDelta": 101170.8,
+      "lowerBound95": 47446.8,
+      "winTieLoss": "41-0-23",
+      "workRatio": 3.82,
+      "significant": true,
+      "detectionFloor": 55192
+    },
+    "powerTable": [
+      {
+        "contrast": "d4s7 - d4s5",
+        "n": 64,
+        "mean": 101171,
+        "pairedSd": 268413,
+        "standardError": 33552,
+        "detectionFloor": 55192,
+        "aboveFloor": true
+      },
+      {
+        "contrast": "d4s7 - d3s7",
+        "n": 64,
+        "mean": 86172,
+        "pairedSd": 298877,
+        "standardError": 37360,
+        "detectionFloor": 61457,
+        "aboveFloor": true
+      },
+      {
+        "contrast": "d5s7 - d5s5",
+        "n": 32,
+        "mean": 123613,
+        "pairedSd": 327399,
+        "standardError": 57876,
+        "detectionFloor": 95207,
+        "aboveFloor": true
+      },
+      {
+        "contrast": "d5s7 - d3s7",
+        "n": 32,
+        "mean": 86397,
+        "pairedSd": 334291,
+        "standardError": 59095,
+        "detectionFloor": 97211,
+        "aboveFloor": false
+      },
+      {
+        "contrast": "d5s5 - d4s5",
+        "n": 64,
+        "mean": -8624,
+        "pairedSd": 228827,
+        "standardError": 28603,
+        "detectionFloor": 47052,
+        "aboveFloor": false
+      },
+      {
+        "contrast": "d5s7 - d4s7",
+        "n": 32,
+        "mean": 23367,
+        "pairedSd": 371351,
+        "standardError": 65646,
+        "detectionFloor": 107988,
+        "aboveFloor": false
+      }
+    ],
+    "detectionFloorDefinition": "1.645 * sd(paired deltas) / sqrt(n): the smallest true mean difference whose one-sided 95% bound would clear zero. Sample sd uses the n-1 denominator.",
+    "gamesNeededToResolveD5s7MinusD4s7": 684,
+    "standardErrorHadTheArmFinishedAt64": 46419,
+    "detectionFloorHadTheArmFinishedAt64": 76359,
+    "largestSingleSeedPairedDeltasD5s7MinusD4s7": [
+      -1002862,
+      958985,
+      -678455,
+      592546,
+      -577069
+    ],
+    "costToResolve": "684 games at the run's own observed 1,647 s per game at 14 threads is 1,126,562 s = 13.0 wall-days (about 182 thread-days). The two chunks differed 2.3x in throughput under other agents' load (2,306 and 989 s per game), so the honest range is roughly 8-18 wall-days.",
+    "bootstrapVersusNormalApproximation": "The tooling reports a one-sided percentile bootstrap (20,000 resamples, Mulberry32 domain 0xb0075eed) and the floors above are the normal approximation 1.645*sd/sqrt(n). They agree on the significance call for all six contrasts. The bootstrap bound is systematically 0.5k-4.5k HIGHER (less conservative) than mean minus 1.645*SE, i.e. 1-5% of the half-width: d4s7-d4s5 +47,447 vs +45,979; d4s7-d3s7 +26,468 vs +24,715; d5s5-d4s5 -55,134 vs -55,676; d5s7-d4s7 -83,046 vs -84,621; d5s7-d5s5 +32,575 vs +28,406; d5s7-d3s7 -6,303 vs -10,814. Paired-delta skewness is +0.55 to +0.92 on four of the six contrasts and -0.30 on d5s7-d4s7, so the two methods are close but not interchangeable at the third digit; no conclusion in this record depends on which is used.",
+    "auditD5s7Final": {
+      "decisions": 3775,
+      "incompleteDecisions": 0,
+      "minimumCompletedDepth": 5,
+      "maxWorkPerDecision": 467827983,
+      "declaredBound": 582727797,
+      "declaredCacheEntries": 200000
+    },
+    "reproductionD4s7": {
+      "pairedGames": 64,
+      "fields": 11,
+      "comparisons": 704,
+      "mismatches": 0
+    },
+    "reproductionD5s5": {
+      "pairedGames": 32,
+      "fields": 11,
+      "comparisons": 352,
+      "mismatches": 0
+    },
+    "censoredGamesAllArms": 0,
+    "scoreIdentityFailuresAllArms": 0
+  },
+  "gateChecks": [
+    {
+      "criterion": "Control: the fast engine's depth-4 seven-stratum arm reproduces the recorded unoptimised arm on all 11 per-game fields",
+      "passed": true,
+      "observed": "704 comparisons, 0 mismatches; plus d5s5 against its recorded 32-game predecessor, 352 comparisons, 0 mismatches, across two binaries and cache capacities 60,000 vs 200,000"
+    },
+    {
+      "criterion": "Audit: 0 incomplete decisions and minimum completed depth equal to the requested depth in every arm",
+      "passed": true,
+      "observed": "d4s7 7,338 decisions minCompletedDepth 4; d5s5 5,420 decisions minCompletedDepth 5; d5s7 3,775 decisions minCompletedDepth 5; 0 incomplete everywhere, busiest decision at 80% of bound in d5s7"
+    },
+    {
+      "criterion": "Depth 5 beats depth 4 at seven strata with a one-sided 95% bootstrap lower bound above zero, on 64 complete games",
+      "passed": null,
+      "observed": "NOT MEASURABLE AS RUN, and not measurable at 64 games either. On 32 games: +23,367, lower bound -83,046, W-T-L 17-0-15, median +18,820. The paired sd is 371,351, giving a detection floor of 107,988 at n=32 and 76,359 at n=64; the estimate is 22% and 31% of those. Resolving it needs about 684 paired games. The criterion is neither passed nor failed - it was never tested with the power to answer it"
+    },
+    {
+      "criterion": "Depth 5 is at least not worse than depth 4 at five strata, on 64 complete games",
+      "passed": false,
+      "observed": "-8,624 [-55,134], W-T-L 33-0-31, at 23.29x work, on a complete 64-game cohort. This is a bounded null and the strongest depth statement the factorial supports: any true d4->d5 effect at five strata is smaller than about 47,000 points"
+    },
+    {
+      "criterion": "Clears per move, reveals per move and occupancy all move toward the survival requirement from depth 4 to depth 5 at the same stratum count",
+      "passed": false,
+      "observed": "at seven strata on 32 games, clears/move 2.0575 vs 2.0571 (+0.0004), reveals/move 1.1481 vs 1.1549 (-0.0069), occupancy 23.62 vs 23.15 (worse); at five strata all three move away. Nothing approaches the 2.400/1.400 requirement"
+    },
+    {
+      "criterion": "0 censored games and 0 score-decomposition identity failures in every arm",
+      "passed": true,
+      "observed": "0 and 0 in all three arms, including the arm that was stopped"
+    }
+  ],
+  "perGameArtifact": {
+    "path": "runs/RUN-20260821T060358Z-93cb9bfc/d5s7-final-32games.json",
+    "sha256": "e1d09bead37962f72d00903c3b6434f7c186f9de4354087133301c25da25085d",
+    "recordCount": 32
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260820T080056Z-376ada90.json"
+  ],
+  "artifactManifestRef": "runs/RUN-20260821T060358Z-93cb9bfc/manifest.json",
+  "limitations": [
+    "SUPERSESSION: this record replaces RS-20260821T181917Z-9a34ba02 for the same experiment. That record was written and committed when the depth-5 seven-stratum arm held 16 games, and its central depth claim reversed sign when the sample doubled. It is left byte-unchanged, because this repository has no precedent for annotating a committed result in place; the relationship is carried here and by the theory record's evidenceRefs. Quote this record, not its predecessor.",
+    "PARTIAL BUT FINAL: 32 of 64 planned games. The run validity stays partial because the planned cohort was not completed; the analysis is nevertheless final, because the stop was a decision and the arm will not be resumed. These are different things and the record keeps them apart deliberately.",
+    "THE PRIMARY CONTRAST IS UNMEASURED, not null. Neither -1,581 at n=16 nor +23,367 at n=32 is evidence about the fifth ply at seven strata. Anyone quoting either number as a finding is quoting noise.",
+    "The 32 games are the cohort's first two 16-seed blocks, a fixed prefix rather than a random subset, because the runner completes whole chunks. They are paired seed-for-seed against comparators recorded on exactly those seeds, which is what keeps the paired delta fair; the arm's 32-game mean is not an estimate of a 64-game mean.",
+    "The detection floors are a normal approximation (1.645*sd/sqrt(n)) applied to heavy-tailed paired deltas with sample skewness between -0.30 and +0.92. They are planning quantities, accurate to roughly the 1-5% by which they differ from the percentile bootstrap the tooling reports, not exact power guarantees.",
+    "The 684-game and 13-wall-day figures assume the observed effect size is the true one and that throughput matches this run's 1,647 s per game at 14 threads. Throughput varied 2.3x between the two chunks under other agents' load, so the wall estimate spans roughly 8-18 days. If the true effect is smaller than +23,367 the required cohort grows quadratically.",
+    "The one significant new result, d5s7 - d5s5 at +123,613 [+32,575], rests on 32 games rather than 64 and on an arm that was stopped; it is a stratum contrast at fixed depth 5 and should be replicated on a fresh block before it is leaned on.",
+    "The cohort 0xa51d1000-0xa51d103f was opened by finding-05 and is permanently development data. STANDARD tier, diagnostic only, never a freeze gate and never confirmation evidence.",
+    "The depth-5 arms declare a 200,000-entry transposition cache and the depth-4 comparators 60,000. Capacity provably cannot change play but work per move is not comparable across capacities.",
+    "The experiment record was written after the runs, by a different agent than the one that executed them; its amendment says so. The comparison rule predates the arms.",
+    "This still rejects nothing about five-ply search in general - only these depths, this leaf, this terminal utility, these work bounds. The two mechanisms named in finding-15 section 5 remain untested, and a flat-and-unmeasurable depth axis is consistent with both.",
+    "Nothing here moves the ceiling. The best arm on this cohort is 411,874 on 32 games against the 1,050,000 the frozen qualification protocol requires, and every game ended."
+  ],
+  "contributionIds": [
+    "CT-20260821T181919Z-05882e86",
+    "CT-20260821T205103Z-fa3970f1"
+  ],
+  "recordedAt": "2026-08-21T20:51:02Z"
+}

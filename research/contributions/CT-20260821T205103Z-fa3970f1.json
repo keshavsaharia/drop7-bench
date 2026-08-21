@@ -1,0 +1,60 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260821T205103Z-fa3970f1",
+  "actor": {
+    "kind": "model",
+    "platform": "Claude Code",
+    "model": "claude-opus-5[1m]",
+    "agentId": null
+  },
+  "level": "L2",
+  "roles": [
+    { "role": "formal-analysis", "degree": "lead" },
+    { "role": "writing", "degree": "lead" },
+    { "role": "validation", "degree": "substantial" },
+    { "role": "data-curation", "degree": "substantial" }
+  ],
+  "summary": "Third package, a correction to a conclusion this contributor had itself recorded. After the depth-5 seven-stratum arm was stopped by the repository owner at 32 of 64 planned games, re-derived every figure independently and confirmed the coordinator's: mean 411,874, moves 117.97, work/move 176,536,117, 3,775 decisions, 0 incomplete, 0 censored, 0 identity failures; d5s7-d4s7 +23,367 [-83,046] 17-0-15 median +18,820 (against -1,581 median -39,660 at n=16, a SIGN FLIP, chunk means -1,581 and +48,315); d5s7-d5s5 +123,613 [+32,575] SIGNIFICANT 19-0-13; d5s7-d3s7 +86,397 [-6,303] 20-0-12; d5s5-d4s5 unchanged at -8,624 [-55,134]. Independently reproduced the whole detection-floor table (1.645*sd/sqrt(n)) to the digit - 268,413/55,192, 298,877/61,457, 228,827/47,052, 371,351/107,988 - and extended it with the two contrasts the coordinator's table omitted, d5s7-d5s5 (floor 95,207, above) and d5s7-d3s7 (floor 97,211, below), confirming that every significant result in the factorial is above its floor and every null below it. Confirmed 683.4 games needed to resolve +23,367, SE 46,419 had the arm finished at 64, and the five largest single-seed paired deltas. Answered the bootstrap-versus-normal question: the two agree on the significance call for all six contrasts, with the percentile bootstrap systematically 0.5k-4.5k less conservative (1-5% of half-width), and reported paired-delta skewness (+0.55 to +0.92 on four contrasts, -0.30 on d5s7-d4s7) so the closeness is not mistaken for equivalence. Wrote result RS-20260821T205102Z-d89df4b5 superseding RS-20260821T181917Z-9a34ba02 under the same forward-only convention, carrying the headline correction that the earlier 'does not separate' reading was a non-measurement reported as a null and that +23,367 is equally unsupported; set scientificOutcome to inconclusive and assessment to mixed rather than fail/not-supported, and updated the theory record's assessment to mixed. Registered run RUN-20260821T060358Z-93cb9bfc for the stopped execution with a frozen 32-game snapshot and content manifest, recording the stop as a deliberate resource decision with its computed rationale. Appended section 10 to finding-15 and rebuilt its top banner as a three-row table making the sequence of two withdrawn readings legible.",
+  "theoryIds": [
+    "TH-20260821-depth-gradient-beyond-fair-d4-034314fc"
+  ],
+  "experimentIds": [
+    "EX-20260821-depth5-chance-exactness-factorial-a6a604fd"
+  ],
+  "runIds": [
+    "RUN-20260821T045349Z-73f29417",
+    "RUN-20260821T060358Z-93cb9bfc"
+  ],
+  "artifactPaths": [
+    "research/results/RS-20260821T205102Z-d89df4b5.json",
+    "research/runs/RUN-20260821T060358Z-93cb9bfc.json",
+    "research/theories/TH-20260821-depth-gradient-beyond-fair-d4-034314fc.json",
+    "docs/exploratory/finding-15-depth5-exact-estimator.md",
+    "docs/exploratory/README.md",
+    "runs/RUN-20260821T060358Z-93cb9bfc/manifest.json",
+    "runs/RUN-20260821T060358Z-93cb9bfc/d5s7-final-32games.json",
+    "runs/RUN-20260821T060358Z-93cb9bfc/finish-report-final.txt"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "make research-validate: schema, ID, cross-reference, per-game artifact hash, machine-profile, seed-lease and markdown-link checks, plus the research unit tests",
+    "Re-ran approaches/lifetime-objective/fast-engine/finish.sh on the stopped cohort; output retained verbatim at runs/RUN-20260821T060358Z-93cb9bfc/finish-report-final.txt, and every paired figure in the record is taken from it",
+    "Recomputed all six paired contrasts, their paired standard deviations, standard errors, detection floors and sample skewness outside the repository tooling, reproducing the coordinator's four-row power table exactly and extending it by two rows",
+    "Reimplemented the Mulberry32 percentile bootstrap independently and compared it to the normal approximation on all six contrasts: identical significance calls, bootstrap 0.5k-4.5k less conservative",
+    "Verified the stop was clean from the artifact and log: gamesComplete 32, 32 seed lines in the log, 0 censored, 0 identity failures, 0 incomplete decisions, minCompletedDepth 5, busiest decision at 80% of its declared bound; process 127323 confirmed gone",
+    "Verified all 36 entries across the four content manifests still hash correctly, and that the two superseded records and the four earlier committed records are byte-unchanged"
+  ],
+  "limitations": [
+    "Self-reported contribution; not independently reviewed.",
+    "Analysis and record-writing only. The gameplay, the fast engine, the chunked runner and the decision to stop the arm are not this contributor's work.",
+    "This package corrects a conclusion this same contributor recorded twelve hours earlier at n=16. The error was reporting an underpowered point estimate as a null; the detection floor was not computed before the record was written.",
+    "One figure disagrees with the brief: the cost to resolve the contrast is about 13 wall-days at the run's own observed throughput (1,647 s per game at 14 threads), not 26. The two chunks differed 2.3x in throughput under other agents' load, so the honest range is 8-18 wall-days. The 684-game requirement itself reproduces exactly.",
+    "The superseded record RS-20260821T181917Z-9a34ba02 still carries assessment 'not-supported-as-tested' rather than 'superseded'; changing it would mean editing a committed result in place, which this repository has only ever done at record-creation time. Coordinator decision.",
+    "The detection floors are a normal approximation applied to skewed heavy-tailed paired deltas; they are planning quantities, not exact power guarantees.",
+    "gitCommit is null on the new run record because the arm ran from an uncommitted working tree; a source-closure hash is recorded instead."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-21T20:51:03Z"
+}

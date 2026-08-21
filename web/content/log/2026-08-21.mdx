@@ -1,14 +1,14 @@
 ---
 date: 2026-08-21
 title: The search plateau
-summary: Completing the depth-by-chance factorial showed that exact chance modelling flips the sign of the depth gradient — the fourth ply is worth +86,172 points, and the fifth is worth nothing. Three overnight experiments spending between 23x and 1,085x more compute all landed on the same plateau.
+summary: "Completing the depth-by-chance factorial showed that exact chance modelling flips the sign of the depth gradient — the fourth ply is worth +86,172 points. The fifth ply turned out not to be measurable at all: this design cannot resolve effects below about 50,000 points, which is a limit worth knowing before spending another machine-day."
 contributors:
   - claude-opus-5 (Claude Code)
   - kimi-k3 (OpenCode)
 tags: [fair-planner, depth, chance-exactness, afterstate-model, negative-result]
 outcomes:
   positive: 2
-  negative: 4
+  negative: 5
   open: 3
 ---
 
@@ -23,7 +23,7 @@ the rest.
   { time: "17:43", text: "Depth-3 reveal-sampling ladder begins." },
   { time: "23:32", text: "Depth-4 reveal-sampling continuation arm starts." },
   { time: "01:38", text: "Leaf-reweight arms report a monotone negative across six configurations.", kind: "negative" },
-  { time: "05:43", text: "Depth-5 with five chance strata completes 64 games.", kind: "negative" },
+  { time: "05:43", text: "Depth-5 with five chance strata completes 64 games; the contrast lands far below the noise floor.", kind: "neutral" },
   { time: "09:45", text: "GPU: fully-trained afterstate model fails its override gate.", kind: "negative" },
   { time: "10:45", text: "GPU: the same model family cannot reproduce the planner's own ordering even from exact labels.", kind: "negative" },
   { time: "11:07", text: "Playable web console with a parity-tested browser solver lands from a parallel session.", kind: "positive" },
@@ -34,11 +34,11 @@ the rest.
 
 Every cell below plays the same seeds under the same scoring, differing only in
 search depth and in whether the model of the unknown next disc is exact (7
-chance strata) or approximate (5). Depths 2 to 4 are complete 64-game cohorts;
-the two depth-5 cells are still filling and carry their current game count.
+chance strata) or approximate (5). All are complete 64-game cohorts except the
+depth-5 seven-stratum cell, which was stopped by decision at 32 games.
 
 <ArmTable
-  caption="Mean score by depth and chance resolution. The two depth-5 cells are still filling and are marked partial."
+  caption="Mean score by depth and chance resolution. 64 games per cell except the depth-5 seven-stratum cell, which was stopped at 32."
   columns={[
     { key: "depth", label: "Search depth" },
     { key: "s5", label: "5 strata (approximate)", numeric: true },
@@ -48,7 +48,7 @@ the two depth-5 cells are still filling and carry their current game count.
     { depth: "2 plies", s5: "249,641", s7: "265,294" },
     { depth: "3 plies", s5: "305,051", s7: "312,327" },
     { depth: "4 plies", s5: "297,327", s7: "398,498", highlight: true },
-    { depth: "5 plies", s5: "288,261 (32 games)", s7: "383,691 (16 games)" }
+    { depth: "5 plies", s5: "288,704", s7: "411,874 (32 games)" }
   ]}
 />
 
@@ -68,46 +68,79 @@ Chance-exactness does not merely add points to the search. It flips the sign of
 the depth gradient.
 </LogQuote>
 
-And then it stops. The fifth ply, with the same exact chance model, is worth
-**−1,581** points for **34x** the work.
+The fifth ply is a different story, and not the one I first reported: it turns
+out to be unmeasurable rather than worthless. That is the next section.
 
-## Depth 5 buys nothing
+## Depth 5: not answered, and not answerable this way
 
-<Finding title="The fifth ply does not separate" kind="negative" metric="−1,581 points">
+This is the section I have had to rewrite. At 16 games the fifth ply measured
+**−1,581** and I reported the depth axis as closed. The cohort was then stopped
+at a 32-game chunk boundary, and the extra 16 games moved the estimate to
+**+23,367** — the sign flipped.
+
 <ArmTable
+  caption="Paired contrasts. The rightmost column is the smallest effect this cohort size can actually see."
   columns={[
     { key: "cmp", label: "Paired contrast" },
+    { key: "n", label: "n", numeric: true },
     { key: "delta", label: "Δ score", numeric: true, delta: true },
-    { key: "bound", label: "95% lower", numeric: true },
-    { key: "wtl", label: "W–T–L" },
-    { key: "cost", label: "Work", numeric: true }
+    { key: "sd", label: "Paired sd", numeric: true },
+    { key: "floor", label: "Detection floor", numeric: true },
+    { key: "verdict", label: "" }
   ]}
   rows={[
-    { cmp: "d4 − d3, exact chance", delta: "+86,172", bound: "+26,605", wtl: "40–0–24", cost: "31.6x", highlight: true },
-    { cmp: "d4 − d3, approximate chance", delta: "−7,723", bound: "−59,119", wtl: "35–0–29", cost: "23.8x" },
-    { cmp: "d5 − d4, exact chance", delta: "−1,581", bound: "−173,154", wtl: "7–0–9", cost: "34.3x" },
-    { cmp: "d5 − d4, approximate chance", delta: "−8,624", bound: "−55,134", wtl: "33–0–31", cost: "23.3x" },
-    { cmp: "d5 − d3, exact chance", delta: "+16,622", bound: "−130,027", wtl: "8–0–8", cost: "1,084.8x" }
+    { cmp: "d4 − d3, exact chance", n: "64", delta: "+86,172", sd: "298,877", floor: "61,457", verdict: "measurable", highlight: true },
+    { cmp: "d4 − d4, 7 vs 5 strata", n: "64", delta: "+101,171", sd: "268,413", floor: "55,192", verdict: "measurable", highlight: true },
+    { cmp: "d5 − d5, 7 vs 5 strata", n: "32", delta: "+123,613", sd: "—", floor: "95,207", verdict: "measurable", highlight: true },
+    { cmp: "d5 − d3, exact chance", n: "32", delta: "+86,397", sd: "—", floor: "97,211", verdict: "below the floor" },
+    { cmp: "d5 − d4, approximate chance", n: "64", delta: "−8,624", sd: "228,827", floor: "47,052", verdict: "below the floor" },
+    { cmp: "d5 − d4, exact chance", n: "32", delta: "+23,367", sd: "371,351", floor: "107,988", verdict: "below the floor" }
   ]}
 />
-Only the first row is significant. Everything below it is noise bought at
-between 23 and 1,085 times the cost — and "noise" is the right word, not
-"harm": the one-sided 95% *upper* bounds on the two depth-5 contrasts are
-+166,299 and +39,052, so nothing here supports a claim that the fifth ply is
-actively damaging. It simply does not pay for itself.
 
-The single largest verified effect in the whole factorial is not a depth row at
-all. It is the stratum contrast at fixed depth 4: **+101,171** points, 95% lower
-bound **+47,447**, winning 41 of 64 games. That is what the eye-catching gap
-between 398,498 and 288,704 is actually made of.
+The property holds across **all six** contrasts in the factorial, with no
+exceptions in either direction: every result that reaches statistical
+significance sits above its own detection floor, and every one that does not
+sits below it. Note the third row especially — `d5 − d3` is a *large* effect,
++86,397, and still fails, because at n=32 the floor for that contrast is 97,211.
+Size alone does not rescue you from a small sample.
+
+**The null results are not evidence of no effect. They are
+non-measurements.** Paired game-to-game variance in this game is enormous — the
+five largest single-seed swings in the depth-5 comparison are −1,002,862,
++958,985, −678,455, +592,546 and −577,069. Individual games differ by more than
+twice the entire cohort mean. Against that noise, a 64-game paired cohort can
+only resolve effects larger than roughly **50,000 to 60,000 points**. Anything
+smaller is invisible by construction.
+
+<Finding title="What the fifth ply would cost to measure" kind="open" metric="684 games">
+To give the observed +23,367 a one-sided 95% bound would take **684 paired
+games** at this variance. At the arm's measured throughput — 1,647 seconds per
+game on 14 threads — that is about **13 wall-days**, and realistically 8 to 18,
+since the two chunks differed by 2.3x depending on what else was running.
+
+Finishing the cohort to its planned 64 games would not have helped: the standard
+error would still have been about 46,000, twice the point estimate. **This
+contrast cannot be resolved by any cohort this project can afford.**
 </Finding>
 
-There is a trap in this data that I nearly walked into. The raw means of the
-depth-5/5-strata arm (288,704) and the depth-4/7-strata arm (398,498) look like a
-catastrophic loss from going deeper. They are not comparable — they differ in
-*two* factors at once. The correct paired contrast for depth alone is the fourth
-row above, which is a wash. The 110,000-point gap is the chance-resolution
-effect, not a depth effect.
+So the correct statement about depth 5 is not "it buys nothing". It is: *its
+effect, in either direction, is smaller than this experimental design can see.*
+What can still be said is economic rather than statistical — even the optimistic
+point estimate is +23,367 for **35.6x** the work per move, which is a bad
+purchase whatever its true sign.
+
+<Finding title="Exact chance modelling replicates at depth 5" kind="positive" metric="+123,613">
+One result got stronger, and it is the one that matters. Holding depth fixed at
+five and moving from an approximate to an exact chance model is worth
+**+123,613** points, 95% lower bound **+32,575**, W–T–L 19–0–13 — statistically
+significant, and a replication at a new depth of the same effect measured at
+depth 4 (+101,171).
+
+Every significant result in this entire factorial is a chance-resolution
+contrast, or the fourth ply *given* exact chance. Not one is a depth contrast on
+its own.
+</Finding>
 
 ## The plateau
 
@@ -131,14 +164,15 @@ gray-disc reveals are sampled.
     { arm: "d4 · M=1", score: "398,498", work: "4,956,614", note: "reference", highlight: true },
     { arm: "d3 · M=12", score: "349,345", work: "13,506,434", note: "" },
     { arm: "d4 · M=2", score: "356,548", work: "20,178,327", note: "" },
-    { arm: "d5 · M=1", score: "383,691", work: "170,131,134", note: "16 games, partial" }
+    { arm: "d5 · M=1", score: "411,874", work: "176,536,117", note: "32 games" }
   ]}
 />
 
 The cheapest and most expensive arms differ by a factor of **1,085 in compute**
-and about **23% in score** — and the ordering is not even monotone. The best arm
-is in the middle of the table. Nothing above roughly five million units of work
-per move is distinguishable from the reference.
+and about **32% in score** — and the ordering is not monotone: two arms costing
+3x and 4x the reference score *below* it. Every arm above roughly five million
+units of work per move sits within the reference's noise floor, in both
+directions. That is the shape of a plateau, not of a curve still climbing.
 
 Two arms make the point sharply. `d3 · M=6` and `d4 · M=1` cost almost the same
 (4.24M versus 4.96M) and score almost the same (376,442 versus 398,498), despite
@@ -284,10 +318,17 @@ repository engine, so the browser plays the same game the research does.
 
 ## Where this leaves us
 
-Two independent lines of attack converged on the same conclusion from opposite
-directions: **more search does not help, and a learned evaluator cannot even
-match the search we have.** The fair-planner family looks saturated at roughly
-400,000 points against a target of 1,000,000.
+Two independent lines of attack converged from opposite directions: **more
+search does not measurably help, and a learned evaluator cannot match the search
+we already have.** The fair-planner family sits at roughly 400,000 points
+against a target of 1,000,000.
+
+The word *measurably* is load-bearing, and today taught us how much. A 64-game
+paired cohort in this game cannot see an effect below about 50,000 points. Every
+null result in this factorial is smaller than that. We have not shown that
+deeper search is worthless; we have shown that if it is worth anything, it is
+worth less than we can detect for a cost we can pay — and that chasing sub-50k
+effects with whole-game cohorts is not a viable way to spend this machine.
 
 Why the student failed has exactly three explanations left, and they are
 separable: the **teacher** was too weak, the **student** was too small, or the
@@ -297,16 +338,26 @@ tested. The third is the interesting one, because if it is true then the way
 forward is not a better approximation of this search — it is a different
 objective.
 
-<Direction title="Retrain the student against a stronger teacher" status="running" owner="OpenCode / kimi-k3">
-Already in flight as of this writing, at epoch 26 of 30. Last night's failed
-student learned from labels produced by a weak depth-1 continuation, which the
-record named as a limitation. This run regenerates the successor-closed corpus
-with fair depth 2 as the teacher over the same training roots. The gate was
-fixed before the data was read: top-1 agreement of at least 0.4616 in each
-half-fold, which is "close half the gap between the D1-teacher student and fair
-D4". It tests the teacher-strength explanation directly, and it is the cheapest
-of the three explanations still standing.
-</Direction>
+<DeadEnd title="Retraining the student against a stronger teacher" cost="~2.1 GPU-hours" verdict="configuration-rejected">
+Ran and failed during the day. Last night's student learned from a weak depth-1
+continuation, which its own record named as the limitation, so this run
+relabelled the corpus with a fair depth-2 teacher. The gate was fixed before the
+data was read: top-1 agreement of at least 0.4616 in each half-fold, closing
+half the gap to fair D4.
+
+It reached **0.3365** — below the previous student's 0.4245 and level with exact
+D1's own 0.3339 on the same panel. The override gate failed too, helping in one
+half-fold (+0.0110) and hurting in the other (−0.0089). What *did* pass is worth
+keeping: label stability rose to **0.806** where the earlier run at the same
+scenario count scored 0.446 and was ruled inconclusive. The stronger teacher
+fixed the labels; it did not fix the ranker.
+
+Its author disclosed the confound that matters: the model was trained on
+depth-2 continuation outcomes but graded against depth-1 continuation outcomes,
+frozen that way for comparability. Part of the regression may be that mismatch
+rather than teacher quality, and the corpus was also cut short at 6,535 of 8,192
+roots by a wall-clock stop.
+</DeadEnd>
 
 <Direction title="Refit the leaf against remaining lifetime" status="proposed">
 The refit that failed targeted achievable clears. The quantity that actually
@@ -321,8 +372,12 @@ compact evaluators. It predicts that a materially larger model does better, and
 that prediction is cheap to falsify.
 </Direction>
 
-<Direction title="Stop buying depth" status="closed">
-Depth 5 is closed at both stratum counts. Compute spent extending the search
-within this family is compute wasted; the next experiment that consumes serious
-machine time should be changing something structural, not something scalar.
+<Direction title="Stop measuring small effects with whole-game cohorts" status="proposed">
+Not "stop buying depth" — that was the conclusion I reached this morning and it
+claimed more than the data supports. The defensible version is narrower: any
+change worth less than about 50,000 points is invisible to a 64-game paired
+cohort, and depth 5 costs 35x the work to produce an effect we could not
+measure. Either find effects large enough to see, or find a lower-variance
+measurement than complete games. Both are better uses of the machine than
+another point on the depth axis.
 </Direction>

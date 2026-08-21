@@ -266,7 +266,7 @@ public-information policies.
 
 | Approach and sources | Purpose | Status and evidence |
 | --- | --- | --- |
-| Depth x chance-resolution factorial: [search.cpp](../../approaches/lifetime-objective/risk-calibration/search.cpp), [cohort driver](../../approaches/lifetime-objective/fast-engine/), [finish.sh](../../approaches/lifetime-objective/fast-engine/finish.sh) | Varies search depth (2-5) against chance strata (5, 7) on identical seeds with a bit-exact accelerated engine, to separate depth value from chance-estimator bias. | **Valid-partial / fail — machine-readable records;** the fifth ply does not separate at either resolution (−1,581 at seven strata over 16 paired games, −8,624 at five over 64; neither significantly negative). The fourth ply is worth +86,172 [+26,605] at seven strata and −7,723 at five: chance resolution changes the sign of the depth gradient. The largest single effect is the stratum contrast at fixed depth 4, +101,171 [+47,447], 41-0-23. An earlier interim "depth 5 reverses" reading is **withdrawn** as completion-order bias. See [result](../../research/results/RS-20260821T181917Z-9a34ba02.json), [experiment](../../research/experiments/EX-20260821-depth5-chance-exactness-factorial-a6a604fd.json) and [finding-15](../exploratory/finding-15-depth5-exact-estimator.md). |
+| Depth x chance-resolution factorial: [search.cpp](../../approaches/lifetime-objective/risk-calibration/search.cpp), [cohort driver](../../approaches/lifetime-objective/fast-engine/), [finish.sh](../../approaches/lifetime-objective/fast-engine/finish.sh) | Varies search depth (2-5) against chance strata (5, 7) on identical seeds with a bit-exact accelerated engine, to separate depth value from chance-estimator bias. | **Valid-partial / fail — machine-readable records;** the fourth ply is worth +86,172 [+26,605] at seven strata and −7,723 at five: chance resolution changes the sign of the depth gradient. The stratum contrast replicates at two depths, +101,171 [+47,447] at depth 4 and +123,613 [+32,575] at depth 5, both significant. **The fifth ply is not measurable by this design**: −8,624 at five strata (n=64) and +23,367 at seven (n=32), both inside detection floors of 47,052 and 107,988, with the seven-stratum estimate changing sign between n=16 and n=32. Two earlier readings are **withdrawn** — an interim "depth 5 reverses" (completion-order bias) and a subsequent "depth 5 is worth nothing" (a non-measurement reported as a null). See [result](../../research/results/RS-20260821T181917Z-9a34ba02.json), [experiment](../../research/experiments/EX-20260821-depth5-chance-exactness-factorial-a6a604fd.json) and [finding-15](../exploratory/finding-15-depth5-exact-estimator.md). |
 | Factored reveal sampling: [search.cpp](../../approaches/lifetime-objective/reveal-sampling/search.cpp), [run-arms.sh](../../approaches/lifetime-objective/reveal-sampling/run-arms.sh), [finish.sh](../../approaches/lifetime-objective/reveal-sampling/finish.sh) | Separates the reveal-value chance node from the next-disc chance node so each can be refined independently, testing whether chance resolution compounds with depth or substitutes for it. | **Valid / fail — machine-readable records;** refining reveals pays at depth 3 (M=6, +64,116 [+7,475], 36-0-28) and saturates before full joint coverage: the completed 64-game M=12 arm is −27,097 [−83,807, +31,209], 28-0-36 against M=6, which is inside noise and so is saturation rather than regression. Score, moves, clears/move and reveals/move all peak at M=6. Stacking it on ply 4 buys nothing measurable: −41,950 [−100,137, upper +17,541] at 4.07x the work, at a 28.6%-coverage dose the depth-3 ladder also found inconclusive. Depth and chance resolution **substitute rather than compound**; the budget frontier is flat on top near fair D4. See [result](../../research/results/RS-20260821T192140Z-189fe392.json) (which supersedes the [interim record](../../research/results/RS-20260821T181918Z-ea7076a3.json) written while arm 2 held 32 of 64 games), [experiment](../../research/experiments/EX-20260821-reveal-sampling-unfinished-arms-470677b5.json) and [finding-16](../exploratory/finding-16-factored-reveal-sampling.md). |
 
 Both rows are `public-development` tier on the exploratory `SEEDLEASE-A51D`
@@ -286,9 +286,23 @@ a field listing every changed number old-to-new. A reader who reaches the old
 record first sees `runValidity: partial` and a summary that states its game
 counts, which is enough to identify it as interim. The
 depth-5 seven-stratum leg was stopped by decision at a 32-game chunk boundary
-rather than run to 64, because the depth axis was already closed at five strata
-and the remaining games would have cost about a day of the machine for a
-tighter bound on a rejected direction.
+rather than run to 64. The stated reason at the time — that the depth axis was
+already closed — did not survive the extra 16 games, which flipped the estimate
+from −1,581 to +23,367. The decision stands on a better reason: at a paired
+standard deviation of 371,351 the planned 64 games would still have carried a
+standard error of about 46,419 against a point estimate of 23,367, and
+resolving that effect would take roughly 684 games — about 13 wall-days at the
+arm's measured 1,647 s per game on 14 threads. **The contrast is not answerable
+at any cohort size this project can afford**, so completing it would have
+bought no conclusion.
+
+The superseding result is recorded as `inconclusive` / `mixed` rather than
+`fail`. That is deliberate: this theory's falsification criteria can be
+satisfied by an underpowered run, which is precisely the trap that produced the
+first wrong reading, and leaving `fail` in the record's most-quoted field would
+have re-committed it. The five-stratum leg is still recorded as a failed gate
+criterion, because that one is a complete 64-game **bounded null** — the only
+depth statement in the family with adequate power.
 
 ## What remains genuinely open
 
