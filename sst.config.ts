@@ -61,8 +61,12 @@ export default $config({
       bucket: competitionArtifacts.name,
       key: "games/global/2026-08-v1.json",
       contentType: "application/json",
+      metadata: {
+        "drop7-artifact-sha256":
+          "edb288f628f4191d91d4de36d042cea14a9cf1a84d19156b1b8e6117f1463832",
+      },
       source: $asset("src/bench/rounds/gauntlet-01.json"),
-    });
+    }, { dependsOn: [competitionArtifacts] });
     const caller = aws.getCallerIdentityOutput({});
     const githubSecretArn = caller.accountId.apply(
       (accountId) =>

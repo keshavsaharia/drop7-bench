@@ -107,7 +107,9 @@ fields do not need a schema migration.
 The manifest at web/content/competition/global-2026-08-v1.json pins the current
 scripted-round format, round ID, ruleset, object key, and SHA-256 digest. SST uploads that
 exact round to the stage's versioned artifact bucket. The build fails if the checked-in
-round no longer matches the manifest digest.
+round no longer matches the manifest digest. The object upload explicitly depends on the
+bucket component so its first write cannot race ahead of S3 versioning, and the pinned digest
+is also retained as object metadata.
 
 To promote a future global game, add a new immutable manifest and round, retain the old
 definition in the application registry so historical submissions remain replayable, upload
