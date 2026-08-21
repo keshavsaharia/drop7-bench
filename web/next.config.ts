@@ -4,17 +4,22 @@ import type { NextConfig } from "next";
 /**
  * The console imports the repository's TypeScript engine directly
  * (`src/core/typescript/*`) for the in-browser game and its solver worker.
- * Turbopack only resolves files under its root, which it would otherwise pin
- * to `web/` (the nearest lockfile), so the root is widened to the repository.
+ * Local and production builds use webpack so those imports may stay outside
+ * `web/`, while output tracing stays rooted here for OpenNext packaging.
  */
-const repoRoot =
+const webRoot =
   typeof __dirname !== "undefined"
-    ? path.resolve(__dirname, "..")
-    : path.resolve(process.cwd(), "..");
+    ? path.resolve(__dirname)
+    : path.resolve(process.cwd());
 
 const nextConfig: NextConfig = {
-  turbopack: {
-    root: repoRoot,
+  outputFileTracingRoot: webRoot,
+  outputFileTracingIncludes: {
+    "/*": [
+      "./build/repo/**/*",
+      "./content/**/*",
+      "./data/**/*",
+    ],
   },
 };
 

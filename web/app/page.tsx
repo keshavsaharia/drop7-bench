@@ -70,7 +70,7 @@ export default function OverviewPage() {
           </h2>
           <p className="mt-1 text-sm text-zinc-400">
             A guide to the mechanics behind one of the greatest puzzle games of all time. Once
-            you learn the rules and <Link href="/play">play the game for a while</Link>, you'll
+            you learn the rules and <Link href="/play">play the game for a while</Link>, you&apos;ll
             see why this is such a captivating research prize.
           </p>
           <span className="mt-3 inline-block text-sm text-sky-400 group-hover:text-sky-300">

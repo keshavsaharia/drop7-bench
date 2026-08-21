@@ -2,10 +2,15 @@ import { readdirSync, readFileSync, existsSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 import matter from "gray-matter";
 
-/** Absolute path to the repository root (the parent of this Next.js app). */
+/** Absolute path to the checkout, or its build-staged copy in a Lambda bundle. */
+const checkoutRoot = resolve(process.cwd(), "..");
+const packagedRoot = resolve(process.cwd(), "build", "repo");
+
 export const REPO_ROOT = process.env.DROP7_REPO_ROOT
   ? resolve(process.env.DROP7_REPO_ROOT)
-  : resolve(process.cwd(), "..");
+  : existsSync(join(checkoutRoot, "approaches"))
+    ? checkoutRoot
+    : packagedRoot;
 
 export const APPROACHES_DIR = join(REPO_ROOT, "approaches");
 export const RESEARCH_DIR = join(REPO_ROOT, "research");

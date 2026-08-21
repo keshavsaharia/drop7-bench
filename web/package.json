@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "next dev --webpack",
+    "prebuild": "node scripts/stage-repo-content.mjs",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
     "figures:rules": "node --experimental-strip-types scripts/generate-rules-scenarios.ts",
@@ -15,11 +16,15 @@
     "figures:oracle": "node --experimental-strip-types scripts/generate-oracle-scenario.ts",
     "figures:heuristic": "node --experimental-strip-types scripts/generate-heuristic-figures.ts",
     "check:mdx": "node scripts/check-mdx.mjs ../approaches ./content",
-    "test": "node --experimental-strip-types --test lib/play/*.test.ts"
+    "test": "node --experimental-strip-types --test lib/play/*.test.ts lib/competition/*.test.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1116.0",
+    "@aws-sdk/client-secrets-manager": "^3.1116.0",
+    "@aws-sdk/lib-dynamodb": "^3.1116.0",
     "gray-matter": "^4.0.3",
     "next": "16.3.1",
+    "next-auth": "^5.0.0-beta.32",
     "next-mdx-remote": "^6.0.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",

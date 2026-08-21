@@ -2,6 +2,7 @@ import Link from "next/link";
 import { DiscFace } from "@/components/discs";
 
 const NAV = [
+  { href: "/compete", label: "Compete" },
   { href: "/leaderboard", label: "Leaderboard" },
   { href: "/research", label: "Research" },
   { href: "/learn", label: "Learn" },

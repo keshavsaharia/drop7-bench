@@ -1,0 +1,83 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: GitHub OIDC role used by drop7-bench SST deployments
+
+Parameters:
+  CreateGitHubOidcProvider:
+    Type: String
+    Default: "true"
+    AllowedValues:
+      - "true"
+      - "false"
+    Description: Set to false when token.actions.githubusercontent.com already exists in this AWS account.
+  CreateGitHubOAuthSecret:
+    Type: String
+    Default: "true"
+    AllowedValues:
+      - "true"
+      - "false"
+    Description: Set to false when drop7-prod-github already exists outside this stack.
+
+Conditions:
+  ShouldCreateGitHubOidcProvider: !Equals [!Ref CreateGitHubOidcProvider, "true"]
+  ShouldCreateGitHubOAuthSecret: !Equals [!Ref CreateGitHubOAuthSecret, "true"]
+
+Resources:
+  GitHubOidcProvider:
+    Type: AWS::IAM::OIDCProvider
+    Condition: ShouldCreateGitHubOidcProvider
+    Properties:
+      Url: https://token.actions.githubusercontent.com
+      ClientIdList:
+        - sts.amazonaws.com
+
+  GitHubDeployRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: drop7-github-sst-deploy
+      Description: Deploys the dev and production Drop7 SST stages from their protected GitHub branches.
+      MaxSessionDuration: 3600
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !If
+                - ShouldCreateGitHubOidcProvider
+                - !Ref GitHubOidcProvider
+                - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:oidc-provider/token.actions.githubusercontent.com
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+                token.actions.githubusercontent.com:sub:
+                  - repo:keshavsaharia/drop7-bench:ref:refs/heads/main
+                  - repo:keshavsaharia/drop7-bench:ref:refs/heads/dev
+      # SST bootstraps its state and deploys IAM, Lambda, S3, CloudFront,
+      # Route 53, ACM, DynamoDB, and SQS resources. Start with SST's documented
+      # bootstrap policy, then narrow it using IAM Access Analyzer after the
+      # first successful deployment.
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+
+  GitHubOAuthSecret:
+    Type: AWS::SecretsManager::Secret
+    Condition: ShouldCreateGitHubOAuthSecret
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      Name: drop7-prod-github
+      Description: GitHub OAuth credentials and Auth.js signing secret for drop7.dev.
+      GenerateSecretString:
+        SecretStringTemplate: '{"GITHUB_CLIENT_ID":"REPLACE_GITHUB_CLIENT_ID","GITHUB_CLIENT_SECRET":"REPLACE_GITHUB_CLIENT_SECRET","GITHUB_DEV_CLIENT_ID":"REPLACE_GITHUB_DEV_CLIENT_ID","GITHUB_DEV_CLIENT_SECRET":"REPLACE_GITHUB_DEV_CLIENT_SECRET"}'
+        GenerateStringKey: AUTH_SECRET
+        PasswordLength: 64
+        ExcludePunctuation: true
+
+Outputs:
+  RoleArn:
+    Description: Store this as the GitHub Actions repository variable AWS_ROLE_ARN.
+    Value: !GetAtt GitHubDeployRole.Arn
+  GitHubOAuthSecretName:
+    Condition: ShouldCreateGitHubOAuthSecret
+    Description: Update this retained secret with the OAuth client values; preserve AUTH_SECRET.
+    Value: !Ref GitHubOAuthSecret

@@ -1,0 +1,78 @@
+name: Deploy research frontend
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy-web-${{ github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: us-east-1
+  SST_TELEMETRY_DISABLED: "1"
+
+jobs:
+  deploy:
+    name: Deploy ${{ github.ref_name }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            web/package-lock.json
+
+      - name: Install infrastructure dependencies
+        run: npm ci
+
+      - name: Install frontend dependencies
+        run: npm ci --prefix web
+
+      - name: Run engine tests
+        run: npm test
+
+      - name: Run browser-solver parity tests
+        run: npm test --prefix web
+
+      - name: Lint frontend
+        run: npm run lint --prefix web
+
+      - name: Generate AI scores for the global competition game
+        run: npm run bench -- --rounds gauntlet-01 --out web/data
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6.2.3
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          role-session-name: drop7-${{ github.ref_name }}-${{ github.run_id }}
+
+      - name: Select SST stage
+        id: stage
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
+            echo "name=production" >> "${GITHUB_OUTPUT}"
+          elif [[ "${GITHUB_REF_NAME}" == "dev" ]]; then
+            echo "name=dev" >> "${GITHUB_OUTPUT}"
+          else
+            echo "Unsupported deployment branch: ${GITHUB_REF_NAME}" >&2
+            exit 1
+          fi
+
+      - name: Deploy with SST
+        run: npx sst deploy --stage "${{ steps.stage.outputs.name }}"

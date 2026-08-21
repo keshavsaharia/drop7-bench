@@ -6,6 +6,7 @@
 /build/
 /runs/
 node_modules/
+.sst/
 __pycache__/
 *.py[cod]
 .venv/
@@ -16,6 +17,8 @@ web/data/
 # Python virtual environments created by tooling (multi-GB; never committed).
 # The bare `.venv/` rule above does not match suffixed names.
 .venv*/
+.env
+sst-env.d.ts
 
 # Nested package installs and build output under web/ are also covered by
 # web/.gitignore; listed here so the rule survives if that file is edited.
