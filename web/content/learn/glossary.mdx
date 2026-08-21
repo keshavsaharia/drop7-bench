@@ -1,0 +1,81 @@
+---
+title: Glossary
+summary: Every piece of jargon used on this site, in one line each — game terms, search terms, learning terms, and the words the research records use for evidence.
+order: 5
+---
+
+Terms are grouped, not alphabetised, so that related ideas sit together. Where
+a concept page explains the idea properly, it is linked.
+
+## The game
+
+| Term | Meaning |
+| --- | --- |
+| **run** | An unbroken line of occupied cells through a disc, counted along its row or its column. Gray discs count. |
+| **clear / pop** | A numbered disc disappearing because one of its runs is exactly its number. |
+| **wave** | One round of simultaneous clears. Gravity follows; if new clears appear, that is the next wave. |
+| **chain** | A move with more than one wave. |
+| **gray / covered disc** | A disc whose number is hidden. Solid until hit once (cracked), revealed on the second hit. |
+| **hit** | A clearing disc directly beside a gray disc, in the same wave. |
+| **reveal** | A gray disc turning into its hidden number. |
+| **rise** | Every fifth drop, the board shifts up one row and a new gray row appears. +17,000 points. |
+| **rise clock / moves until rise** | How many drops remain before the next rise (5 down to 1). |
+| **Hardcore / five-move mode** | The game mode studied here: a rise every five drops, 17,000-point rise bonus. |
+| **censored game** | A game stopped at the 2,000-move benchmark cap. Its score is a lower bound. |
+
+## Searching
+
+| Term | Meaning |
+| --- | --- |
+| **choice node** | A point in the look-ahead where the player picks a column. Take the best. |
+| **chance node** | A point where the game deals a disc or reveals a number. Take the average. [→ concept](/learn/concepts/chance-vs-choice) |
+| **expected value** | The probability-weighted average outcome over chance. |
+| **expectimax** | A search that takes the best at choice nodes and the average at chance nodes. |
+| **fair** | Averaging over chance honestly (neither optimistic nor pessimistic) and using only public information. |
+| **depth / D3, D4, D5** | How many of the player's own moves the search looks ahead. |
+| **full-width** | Considering every legal column at every choice node; no pruning. |
+| **strata / chance samples** | A fixed handful of representative outcomes used at a chance node when enumerating all of them is too expensive; "five strata" and "seven strata" are the common settings. |
+| **leaf / leaf evaluator** | A board at the bottom of the search, and the function that scores it. |
+| **logical work** | The count of leaf evaluations (and similar unit operations) a search performs; the repository's fixed currency for comparing cost. |
+| **transposition table** | A cache of positions already evaluated, so a position reached by two routes is scored once. |
+| **sibling** | One of the legal columns available at a position, as compared with the others. |
+| **determinization / clairvoyant planner** | Imagining many complete futures with the hidden values filled in, planning in each, and averaging. Reads hidden values, so it is an oracle, not a legal policy. [→ concept](/learn/concepts/does-more-compute-help) |
+| **MCTS** | Monte Carlo tree search: building the look-ahead tree selectively, guided by random playouts. |
+| **rollout** | Playing a position forward to the end (or a horizon) with a quick policy to estimate its value. |
+
+## Learning
+
+| Term | Meaning |
+| --- | --- |
+| **policy** | A rule that maps what the player sees to a column. |
+| **public-information policy** | A policy that reads only the board, the next disc, the rise clock and the terminal flag. The only kind eligible for the million-point claim. |
+| **information boundary** | The line between what a policy may read (public) and may not (seed, hidden values, future discs, score, level, move number). |
+| **oracle / teacher / privileged** | A planner allowed to read hidden information, used only to produce training labels or diagnostics. |
+| **student** | A public policy trained from a teacher's labels. |
+| **value / value function** | A prediction of how a game will go from a position. |
+| **afterstate** | The board after a move resolves, before the next disc is dealt. Evaluating afterstates removes the need for a separate action input. |
+| **sibling extrapolation** | A model trained only on played moves being asked to rank unplayed ones. [→ concept](/learn/concepts/ranking-siblings) |
+| **successor-closed data** | Training data in which every legal sibling at every position is labelled. |
+| **n-tuple network** | An evaluator that looks up learned weights for many small patterns of cells and adds them. |
+| **NNUE** | "Efficiently updatable neural network": a small network designed so a board's evaluation can be updated incrementally after a move. |
+| **policy gradient / PPO / DQN** | Reinforcement-learning methods that adjust a policy or value network from play experience. |
+| **self-play** | Generating training data by having the current policy (or a search guided by it) play games. |
+| **policy iteration** | Alternating between evaluating a policy and improving it; the loop the scale-out direction proposes. [→ concept](/learn/concepts/scale-out-direction) |
+
+## Evidence and records
+
+| Term | Meaning |
+| --- | --- |
+| **theory** | A registered, falsifiable claim with a mechanism. |
+| **experiment** | A frozen plan for testing one configuration of a theory. |
+| **run** | One execution of an experiment: valid, partial, or invalid. |
+| **result** | The assessment of a run: pass, fail, inconclusive, or not applicable. A valid fail is a completed contribution. |
+| **cohort** | A fixed, ordered list of game seeds played by both the candidate and the reference. |
+| **paired** | Candidate and reference play the same games, so their scores can be compared game by game. |
+| **seed lease** | A registered range of random seeds an experiment may use, with a role: training, development, protected, or final. |
+| **tier — CHECK / PILOT / SCREEN / STANDARD / QUALIFY / PROTECTED / FINAL** | The ladder of benchmark sizes and data roles, from mechanics checks (no games) to the one-shot final cohort. |
+| **fair D4** | The reference policy: fair expectimax, depth 4, hand-tuned leaf. About 308,000 mean over its 64-game reference cohort. |
+| **mean vs. best game** | The target is the *average* over many games. One million-point game is an anecdote. |
+| **bootstrap lower bound** | A confidence bound on the mean computed by resampling whole games; the qualification protocol requires it above one million. |
+| **task-record only / ledger-recorded / reproduced** | Labels for how well a historical number is backed: by a conversation only, by the written ledger, or by a re-run in the current checkout. |
+| **engineering result** | A faster implementation proven to make identical decisions; it adds no evidence about strength. |

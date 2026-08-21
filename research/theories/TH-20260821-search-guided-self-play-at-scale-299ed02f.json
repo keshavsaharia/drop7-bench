@@ -1,0 +1,35 @@
+{
+  "$schema": "../schemas/theory-v1.schema.json",
+  "format": "drop7-theory-v1",
+  "theoryId": "TH-20260821-search-guided-self-play-at-scale-299ed02f",
+  "title": "Search-guided self-play with every-sibling labels converts compute into long-horizon strength",
+  "claim": "A search-guided self-play loop \u2014 actors that run a fair public-information search at every visited position, record the value of every legal sibling column under aligned chance scenarios, and train a public board evaluator on those successor-closed labels, which then becomes the leaf of the next iteration's search \u2014 produces a frozen public student whose mean whole-game score on fresh paired development cohorts rises with the compute spent per iteration, and at sufficient scale exceeds fair D4's mean by a preregistered margin.",
+  "mechanism": "Every learned evaluator in the ledger failed at ranking siblings because training data labelled only the move that was played (status.md \u00a74\u2013\u00a77; sibling extrapolation). Labelling every legal sibling at every root closes that gap by construction, and using a search to produce the labels makes them stronger than the evaluator that guided the search (policy improvement). Feeding the trained evaluator back as the search leaf and repeating is approximate policy iteration; each iteration's labels come from a stronger searcher, which is the mechanism by which additional compute \u2014 more actors, deeper or wider search per label, more iterations \u2014 turns into longer-horizon play rather than into a more confident copy of the same bias. The loop is the AlphaZero pattern adapted to a single-player stochastic game with a hard information boundary.",
+  "falsificationCriteria": [
+    "Pilot scale (this workstation): after a preregistered number of iterations, the evaluator's held-out sibling ranking on a locked every-sibling panel (top-1 and pairwise agreement with the fair-D4 gold standard, as in the 477-root panel) does not improve across iterations, or never reaches fair D4's own agreement.",
+    "Compute response: doubling actor compute between two consecutive iterations, with the data pipeline and learner held fixed, produces no paired SCREEN-tier (32-game) mean-score improvement beyond the whole-game bootstrap interval.",
+    "Deployment: the frozen public student of any iteration, evaluated through the public interface on a fresh paired 64-game development cohort, does not exceed fair D4's mean with a one-sided 95% whole-game bootstrap lower bound on the paired difference above zero.",
+    "Information boundary: any student that reads seed, hidden values, future discs, score, level, or move number is disqualified regardless of score."
+  ],
+  "informationClass": "public-policy",
+  "lifecycle": "draft",
+  "assessment": "untested",
+  "evidenceTier": "proposal",
+  "dependencies": [
+    "TH-20260820-distributional-afterstate-ranker-7aba7fb3"
+  ],
+  "evidenceRefs": [
+    "docs/research/status.md",
+    "docs/exploratory/finding-12-fair-planner-ceiling-extended.md",
+    "docs/exploratory/finding-13-fast-engine.md",
+    "docs/exploratory/gpu-01-rocm-enablement.md",
+    "docs/hardware/amd-ryzen-halo.md"
+  ],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": null
+  },
+  "createdAt": "2026-08-21T07:32:24Z",
+  "updatedAt": "2026-08-21T07:32:24Z"
+}

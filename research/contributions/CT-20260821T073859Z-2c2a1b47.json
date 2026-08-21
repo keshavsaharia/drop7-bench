@@ -1,0 +1,44 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260821T073859Z-2c2a1b47",
+  "actor": {
+    "kind": "model",
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": null
+  },
+  "level": "L2",
+  "roles": [
+    {
+      "role": "writing",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Phase 1 of the plain-English research console: a /learn/concepts primer with four pages (choice/chance/look-ahead; evaluating a board and the sibling trap; is more computation the answer; what a large-scale run would look like) and a glossary. Concept figures (web/components/Concepts.tsx) show a real position whose two-ply look-ahead tree is computed by the TypeScript engine via web/scripts/generate-concept-scenarios.ts (deterministic search for a stable, reveal-free root where greedy, optimistic, fair and pessimistic chance handling pick different columns); every number in the figures is engine output with a points-only evaluator, labelled as a teaching device. The compute page quotes only retained findings (status.md, finding-12 K-series, finding-13 costs, gpu-01) with technical details in collapsible blocks. Registered theory TH-20260821-search-guided-self-play-at-scale-299ed02f (search-guided self-play with every-sibling labels) as the scale-out research direction, and wrote the drop7-scale-out agent skill (staged pipeline contracts and cluster mappings for a multi-GPU box, SLURM, Kubernetes, Ray, and spot pools), routed from AGENTS.md. No run, seed, or engine was touched; the theory is a proposal with no evidence.",
+  "theoryIds": [
+    "TH-20260821-search-guided-self-play-at-scale-299ed02f"
+  ],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "web/content/learn/concepts/chance-vs-choice.mdx",
+    "web/content/learn/concepts/ranking-siblings.mdx",
+    "web/content/learn/concepts/does-more-compute-help.mdx",
+    "web/content/learn/concepts/scale-out-direction.mdx",
+    "web/content/learn/glossary.mdx",
+    "web/components/Concepts.tsx",
+    "web/scripts/generate-concept-scenarios.ts",
+    ".agents/skills/drop7-scale-out/SKILL.md"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "cd web && npm run concept:scenarios; npx tsc --noEmit; eslint on changed files; npm run build; all /learn routes render 200 under next start; full-page chromium screenshots inspected; make research-validate passes"
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-21T07:38:59Z"
+}

@@ -1,0 +1,163 @@
+---
+title: Is more computation the answer?
+summary: An honest reading of the evidence on deeper search, more samples, bigger models, and large training runs — what has been measured, what has not, and under which conditions compute converts into strength.
+order: 3
+---
+
+It is the most natural question in the project: the best policy averages about
+a third of the target, computers are fast, so *search deeper, sample more, train
+bigger*. This page goes through what the repository has actually measured for
+each of those, in plain language, with the technical record one click away.
+The short version: **more computation spent the same way has not helped, and in
+one measured case made things worse; more computation spent in a specific
+different way has not been tried, and is the most defensible bet.**
+
+## 1. Deeper search
+
+Going from depth 3 to depth 4 helped clearly: on the same eight games, fair D4
+outscored fair D3 by a wide margin and won seven of them. That is the evidence
+that looking ahead matters.
+
+Going from depth 4 to depth 5 has *not* produced a better policy so far. The
+status summary records that selective depth 5, full depth 5, and variants that
+stop at the next row rise *"often spent much more work, sampled chance outcomes
+too noisily, or overrode good D4 actions on unstable estimates."* A deeper tree
+needs more chance samples to stay fair; with too few, the extra ply adds noise
+faster than insight, and the search talks itself out of good moves.
+
+Two things changed recently and should be said plainly. First, the fast engine
+made a proper depth-5, seven-sample cohort cheap — the retained estimate is
+roughly 19 CPU-hours for 64 games, under an hour on this workstation — so the
+"is depth 5 better when sampled properly?" question is now *affordable to answer
+cleanly* rather than projected at 75 hours. Second, that does not mean the
+answer is yes; it means the experiment can be run and recorded rather than
+argued about.
+
+<details>
+<summary>The technical record</summary>
+
+- Fair D4 vs D3: 400,675 vs 235,071 mean score over the same 8 corrected-score
+  games ([status](/docs/research/status), evidence snapshot).
+- Depth-5 variants: [status](/docs/research/status) §3.
+- Depth-5 / seven-strata cost: measured work 55,765,609 per decision against a
+  worst case of 582,727,796; 19.1 CPU-hours per 64-game cohort with the fast
+  engine; thread scaling was not measured
+  ([fast engine](/approaches/lifetime-objective/fast-engine), §6 of
+  [finding-13](/docs/exploratory/finding-13-fast-engine)).
+
+</details>
+
+## 2. More samples of the future
+
+One family of planners handles uncertainty by imagining many complete futures
+("worlds"), planning in each as if the hidden values were known, and choosing
+the move that does best on average. It is embarrassingly parallel: more worlds,
+more compute, done.
+
+The repository measured what happens as the number of worlds grows from 1 to
+1,024. Quality rose steadily up to 256 worlds — and then **fell**. At 1,024
+worlds the planner survived about half as long and scored about half as much on
+the same games as it did at 256.
+
+That is not a bug; it is a known property of this kind of planner. Inside each
+imagined world the plan is made with the answer key — it knows how the hidden
+discs will turn out — so it systematically overvalues moves that only pay off
+if the covers happen to be right. With few worlds, sampling noise accidentally
+protects the planner from its own bias. With many worlds the noise vanishes and
+the planner converges, faithfully, on the wrong answer. *More compute bought a
+more faithful optimisation of the wrong objective.* The finding's own
+conclusion: improving this planner requires changing the estimator, not
+spending more on it.
+
+<details>
+<summary>The technical record</summary>
+
+Clairvoyant (hindsight-optimisation) planner, horizon 7, pooled numbered clears
+per move on the original eight tapes, from
+[finding-12](/docs/exploratory/finding-12-fair-planner-ceiling-extended) §3:
+
+| worlds K | 1 | 4 | 16 | 64 | 256 | 1,024 |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| clears / move | 1.5370 | 1.7095 | 1.9279 | 2.1403 | **2.2309** | 2.0947 (6 tapes) |
+
+Paired on the same six tapes, K = 1,024 vs K = 256: mean moves 100.33 vs
+182.00; mean score 347,348 vs 653,644; five of six tapes worse. The arm was
+stopped at 6 of 8 games. Note that this planner is an *oracle* — it reads hidden
+values — so its scores are not policy evidence; the lesson is about the
+estimator, and it "bounds the whole determinization family."
+
+</details>
+
+## 3. Bigger models and more training
+
+Many learned evaluators were trained here: n-tuple networks, Monte Carlo value
+models, small neural networks, Q-learning and policy-gradient variants, phase
+models, fitted policies. Some predicted outcomes well. None displaced fair D4.
+
+The diagnosed reason is not model size and not training length. It is the
+shape of the data: models were trained on the move that was played and then
+asked to rank moves that were never played — the
+[sibling trap](/learn/concepts/ranking-siblings). A bigger model trained on the
+same data learns the same blind spot with more confidence. The status summary is
+explicit that students *"usually lacked enough diverse successor data, failed
+held-out sibling ranking, or were too slow to improve complete games."*
+
+So the honest answer to "would a giant training run fix it?" is: **not if it
+trains on the same kind of data.** A thousand GPUs generating played-move-only
+labels produce the failure at scale.
+
+## 4. Where compute *would* convert into strength
+
+There is a way of spending compute that addresses the diagnosed problem
+directly, and it has not been tried here at any scale:
+
+1. At every position the actors visit, run a fair search for **every legal
+   column**, under the same random futures, and record all seven values — the
+   successor-closed data the sibling page calls for.
+2. Train a public evaluator on those labels.
+3. Put the trained evaluator at the leaves of the search and repeat. Each
+   round's labels come from a stronger searcher than the last.
+
+Step 1 is expensive — a full search per sibling per position — and that expense
+is exactly what a cluster is for. Step 3 is what makes compute compound rather
+than saturate: it is approximate policy iteration, the pattern behind the
+strongest game-playing systems of the last decade, adapted to a one-player game
+with a hard information boundary.
+
+This is now a registered theory in the repository, with stated ways to prove it
+wrong, and no implementation yet. The next concept page,
+[what a large-scale run would look like](/learn/concepts/scale-out-direction),
+describes the software shape, the order of work, and the gates it would have to
+pass — starting with a small pilot on a single workstation.
+
+<Callout title="What this page is not claiming" tone="warn">
+Nothing above says the loop in section 4 *will* reach a million-point mean.
+It says that it is the one use of large compute whose mechanism matches the
+diagnosed failure, which is the most that can honestly be said before a pilot
+is run. Two further cautions: the pilot may show the evaluator ceiling is set by
+something else (the horizon of the search, the richness of the board features);
+and every claim will be judged by whole-game mean score on fresh paired cohorts,
+never by a single spectacular game.
+</Callout>
+
+## 5. The hardware that exists today
+
+For completeness: this workstation is a 16-core / 32-thread CPU with an
+integrated GPU that shares system memory. The GPU has been made to work for
+training and, for the small network sizes tried, runs 1.25–5× faster than the
+CPU depending on batch size — measured on a busy machine, so as lower bounds.
+Exact game simulation and tree search remain CPU work; the hardware plan places
+a full GPU simulator as a research prototype that would have to prove itself
+move-for-move identical first. Everything in section 4 can be piloted here
+before it is scaled anywhere.
+
+<details>
+<summary>The technical record</summary>
+
+[gpu-01](/docs/exploratory/gpu-01-rocm-enablement) (ROCm enablement,
+correctness, throughput, two wheel defects and workarounds);
+[amd-ryzen-halo](/docs/hardware/amd-ryzen-halo) (workload placement and memory
+policy); [fast engine](/approaches/lifetime-objective/fast-engine) (CPU
+simulation cost and the batching primer).
+
+</details>

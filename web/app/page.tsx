@@ -74,7 +74,7 @@ export default function OverviewPage() {
             row rises, scoring, and how a game ends.
           </p>
           <span className="mt-3 inline-block text-sm text-sky-400 group-hover:text-sky-300">
-            Read the guide →
+            Read the rules → then the concepts primer
           </span>
         </Link>
         <a

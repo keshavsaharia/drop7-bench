@@ -31,6 +31,11 @@ drive a policy over the D7P wire protocol, or generate scripted rounds, read
 leaderboard number: scripted rounds are a playground and are never tier
 evidence.
 
+To prepare, configure, launch, or scale a large training or simulation run
+(a multi-GPU machine, SLURM, Kubernetes, Ray, or a cloud pool), read
+`.agents/skills/drop7-scale-out/SKILL.md`. It sequences the work into gated
+stages that start on one workstation; a cluster never skips those stages.
+
 To add to or change the Next.js research console under `web/`, read
 `.agents/skills/drop7-web-console/SKILL.md`.
 

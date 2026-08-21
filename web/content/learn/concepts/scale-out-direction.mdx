@@ -1,0 +1,96 @@
+---
+title: What a large-scale run would look like
+summary: The research direction for a cluster-scale attempt — search-guided self-play with every-sibling labels — written down so it can be built, piloted on one machine, and scaled by changing a config file.
+order: 4
+---
+
+This page is a **proposal**. Nothing described here exists as code yet; it is
+registered as a theory with stated falsification tests so that, when serious
+compute becomes available, the work starts from a plan rather than from a
+blank page. It is written for readers who have followed the
+[choice-and-chance](/learn/concepts/chance-vs-choice),
+[sibling trap](/learn/concepts/ranking-siblings), and
+[more-compute](/learn/concepts/does-more-compute-help) pages.
+
+## The loop, in one paragraph
+
+Thousands of games run at once. At every position, instead of playing the move
+a policy likes, the system runs a fair search for **every legal column** under
+the same imagined futures and writes down all of the values — then plays one of
+them (usually the best, sometimes a deliberately different one, so the data
+covers moves a strong player would not make). A learner on the GPUs trains a
+small board evaluator on that ever-growing, every-sibling dataset. When the
+learner produces a better evaluator, it is frozen, tested against fair D4 on
+fixed games, and — if it passes — becomes the leaf of the search that generates
+the next round of data. Repeat until improvement stops.
+
+## The components
+
+1. **Batched simulator.** Thousands of boards in lockstep on the CPU (later,
+   possibly, the GPU), proven move-for-move identical to the reference engine
+   by the same differential gates the [fast engine](/approaches/lifetime-objective/fast-engine)
+   passed. The rules never change; only how many games run at once.
+2. **Actors.** Processes that run the search at each visited position, for
+   each column, with shared chance scenarios across siblings, and emit one
+   record per position: the board, the next disc, the rise clock, and the
+   seven sibling values. The search is the existing fair expectimax with a
+   pluggable leaf.
+3. **Data shards.** Append-only files partitioned strictly by seed role —
+   training seeds never touch evaluation seeds — with a manifest per shard and
+   content hashes, following the repository's seed-lease rules.
+4. **Learner.** A data-parallel trainer on however many GPUs are available,
+   consuming shards, producing candidate evaluators. The network is small: a
+   7×7 board with a dozen feature planes, the next disc, and the rise clock.
+   Inference must be cheap enough to sit at millions of search leaves.
+5. **Evaluator / gate.** Every candidate is frozen and played through the
+   public interface against fair D4 on a fixed paired cohort, with whole-game
+   statistics. It is promoted to the search leaf only on a preregistered win.
+   A candidate that reads anything a player could not see is disqualified.
+6. **Orchestration.** One configuration file describes actors, learner,
+   evaluator, shard locations and budgets. A single workstation and a thousand
+   nodes differ only in that file. The repository's agent skill for scale-out
+   describes how that maps onto the common cluster shapes.
+
+## The order of work
+
+The sequence matters more than the size:
+
+| Stage | What | Where it runs | Gate to the next stage |
+| --- | --- | --- | --- |
+| 0 | Data-closure audit: can the existing every-sibling panel seed the first dataset without opening new seeds? | this workstation | a written answer, either way |
+| 1 | Batched simulator with differential gates | this workstation | zero mismatches vs the reference over leased seeds |
+| 2 | Actors + shards + learner, one iteration, tiny scale | this workstation, iGPU | evaluator trains; held-out sibling ranking measured on the locked panel |
+| 3 | Three iterations at pilot scale | this workstation | ranking improves across iterations, or the theory is failing and says so |
+| 4 | Compute-response test: double actor compute, hold everything else | this workstation, then a small cluster | paired 32-game SCREEN shows a gain beyond noise — or it does not |
+| 5 | Scale-out | cluster | same gates, larger cohorts; whole-game bootstrap bounds on the paired difference vs fair D4 |
+
+Stages 0–3 need no cluster at all. If the loop cannot improve sibling ranking
+on one machine, more machines will not save it, and the theory will have been
+cheaply falsified — which is a valid, useful result.
+
+## What would prove it wrong
+
+The registered theory (`TH-20260821-search-guided-self-play-at-scale-299ed02f`,
+on the [theories page](/theories)) commits to four failure conditions: held-out
+sibling ranking that does not improve across iterations; no measurable gain
+from doubling actor compute; a frozen student that does not beat fair D4's mean
+on a fresh paired cohort with a positive lower bound; and any reading of hidden
+information, which disqualifies a student regardless of score.
+
+## What is deliberately not promised
+
+- A million-point mean. The theory claims that compute converts into strength
+  through this loop; how far it goes is what the experiment measures.
+- That the GPU will simulate games. Exact simulation stays on the CPU until a
+  GPU version passes the same differential gates and beats the CPU end to end.
+- That any number on this page is evidence. There are none; that is the point
+  of writing the direction down before the data exists.
+
+<Callout title="For contributors with compute" tone="success">
+If you can bring GPUs or a cluster, the thing to do first is not to launch
+anything — it is to run stages 0–3 on a single machine, which the repository's
+scale-out skill walks through, and to read the
+[methodology](/docs/methodology) and [benchmark contract](/docs/benchmarks) so
+that what you produce counts as evidence. The open-source repository is at
+[github.com/keshavsaharia/drop7-bench](https://github.com/keshavsaharia/drop7-bench).
+</Callout>

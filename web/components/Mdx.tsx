@@ -2,9 +2,10 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import { Board, BoardCompare, Callout, Disc, Stat } from "./Board";
 import * as Engine from "./Engine";
 import * as Rules from "./Rules";
+import * as Concepts from "./Concepts";
 import remarkGfm from "remark-gfm";
 
-const components = { Board, BoardCompare, Callout, Disc, Stat, ...Engine, ...Rules };
+const components = { Board, BoardCompare, Callout, Disc, Stat, ...Engine, ...Rules, ...Concepts };
 
 /** Renders an MDX document (already stripped of frontmatter) with the Drop7 visual components available. */
 export function Mdx({ source }: { source: string }) {
