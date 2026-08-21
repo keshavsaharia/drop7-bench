@@ -1,0 +1,35 @@
+---
+title: Heuristic and rollout search
+summary: Hand-written features, shallow lookahead, and bounded planners — the fast baselines.
+---
+
+The oldest way to play: score what you can see. Height, holes, exposed
+numbers, reachable triggers, covered-disc access — a weighted sum of visible
+features, optionally wrapped in one or two plies of lookahead or a short
+sampled rollout.
+
+## Why it matters
+
+Heuristics are the **leaves** of every deeper search and the **continuation
+policies** inside every rollout. When a learned or searched policy fails, the
+post-mortem usually ends here: the features mis-valued a board that looked
+fine. The research surfaced one durable diagnostic — sustainable long games
+keep roughly **2.4 numbered clears and 1.4 covered reveals per move** — and
+several policies here (gray-throughput, phase-horizon) optimize that flow
+directly.
+
+## What the evidence showed
+
+- Immediate score is a poor guide: a policy must keep opening covered numbers
+  and preserve future chain structure.
+- Hand-tuned evolutions of the feature weights failed their whole-game gates
+  even when the feature directions looked plausible.
+- These policies are cheap and deterministic, which is why several of them
+  (greedy, gray-throughput, rollout, risk-sensitive, open-loop beam) power the
+  scripted-round leaderboard as reference points.
+
+<Callout title="Try them" tone="info">
+Most of this family is runnable in the benchmark registry — see the
+[leaderboard](/leaderboard) for greedy, rollout, sparse expectimax,
+risk-sensitive, and open-loop beam policies on identical scripted rounds.
+</Callout>

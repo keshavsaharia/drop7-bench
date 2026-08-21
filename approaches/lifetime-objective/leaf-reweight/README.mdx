@@ -1,0 +1,87 @@
+---
+title: Leaf Reweight
+family: lifetime-objective
+status: Exploratory
+evidence: development
+generated: false
+---
+
+## What this is
+
+A bounded correction around fair D4 that makes the frozen leaf's **nineteen
+weights runtime data instead of compile-time constants**, and then tests the
+reweightings that
+[`finding-10` Addendum A](/docs/exploratory/finding-10-suite-validation) says
+predict achievable clears far better than the frozen vector does.
+
+Nothing else changes. The feature extractor is
+`drop7::fair_only_horizon::extractFairFeatures`, called by name from the
+unmodified reference; the chance stratification, canonicalization, cache keying,
+column order, work accounting and terminal utility all come from the frozen code
+by way of `../risk-calibration/search.cpp`, which is already proved
+decision-identical to the reference. The only degree of freedom is the weight
+vector.
+
+## The CHECK gate
+
+With the frozen weight vector the local leaf must return values whose raw
+`uint64_t` bit patterns are identical to `frozen::fairLeaf`, and the search must
+select identical columns and spend identical work. The dot-product accumulation
+order is preserved term for term, because floating-point addition is not
+associative and bit-identity depends on it.
+
+```sh
+./approaches/lifetime-objective/leaf-reweight/build.sh
+B=./build/lifetime/leaf-reweight
+
+# 1. leaf bit patterns on real fair-play boards and their chance expansions
+$B --leaf-check --depth 3 --chance-samples 7 --max-work 16000000 \
+   --seed-start 0xa5278000 --check-games 24 --check-moves 400
+$B --leaf-check --depth 4 --chance-samples 7 --max-work 16000000 \
+   --seed-start 0xa5278100 --check-games 3 --check-moves 45
+
+# 2. the frozen reference driver, at its own configuration
+$B --reference-parity --seed-start 0xa5278200 --check-games 4 --check-moves 60
+
+# 3. weights-as-data vs weights-as-constants, columns AND work, at the
+#    configuration the evaluation actually uses
+$B --self-parity --depth 4 --chance-samples 5 --max-work 3200000 \
+   --seed-start 0xa5278400 --check-games 3 --check-moves 60
+$B --self-parity --depth 4 --chance-samples 7 --max-work 16000000 \
+   --seed-start 0xa5278300 --check-games 3 --check-moves 22
+```
+
+## Setting weights
+
+```sh
+# one constant at a time
+$B --arm t1-rough --depth 4 --chance-samples 7 --max-work 16000000 \
+   --weight roughness=560 --seed-start 0xa5279000 --games 64 --threads 10
+
+# a whole vector from a file of "name value" lines, plus an optional bias
+$B --arm t2 --weights approaches/lifetime-objective/leaf-reweight/weights-refit-fair-achievableClears-a0p5.txt ...
+```
+
+`--max-work 16000000` is mandatory at seven chance strata. Worst-case depth-4
+work there is 11,892,398; leaving the frozen 3,200,000 bound in place silently
+degrades the search to a completed depth 3, which has already produced one wrong
+conclusion in this programme
+([`finding-05`](/docs/exploratory/finding-05-chance-strata)).
+
+## Analysis scripts
+
+| script | what it does |
+| --- | --- |
+| `refit.py` | fits the leaf's 19 features to the achievable-clear label, rescales the fitted direction into leaf units matched to the frozen leaf's mean and standard deviation, and writes `weights-refit-*.txt` at several frozen↔fitted interpolation weights |
+| `tier1.py` | per-term Tier-1 anchors, and the cross-origin transfer table that decides whether the fitted direction is a synthetic-position artifact |
+| `sweeptable.py` | tabulates a directory of cohort artifacts against `frozen`, paired by seed |
+| `compare.py` | the reported cohort table: quantiles, flow rates, occupancy, paired deltas with a one-sided 95% bootstrap lower bound over whole games, W-T-L, and the lower-tail listing |
+
+## Result
+
+See [`finding-14`](/docs/exploratory/finding-14-leaf-reweight).
+
+## Sources
+
+- `search.cpp`, `build.sh`, `sweep.sh`, `evaluate.sh`
+- `refit.py`, `tier1.py`, `sweeptable.py`, `compare.py`

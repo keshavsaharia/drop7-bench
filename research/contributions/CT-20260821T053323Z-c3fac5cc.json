@@ -1,0 +1,45 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260821T053323Z-c3fac5cc",
+  "actor": {
+    "kind": "model",
+    "platform": "claude-code",
+    "model": "claude-opus-5[1m]",
+    "agentId": "delegated/reveal-sampling"
+  },
+  "level": "L3",
+  "roles": [
+    {
+      "role": "software",
+      "degree": "lead"
+    },
+    {
+      "role": "investigation",
+      "degree": "lead"
+    }
+  ],
+  "summary": "Established that the frozen search couples next-disc and reveal randomness to a single sample index, so at seven strata every marginal is exact but the joint covers only seven of forty-nine outcomes; factored the chance node into disc-samples by reveal-samples and showed chance-node decorrelation is exchangeable with search depth.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "approaches/lifetime-objective/reveal-sampling/",
+    "docs/exploratory/finding-09-reveal-sampling.md"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "CHECK gate: decision-identical and work-identical to the frozen reference and to the single-knob arms, 0 mismatches; end-to-end 64-game artifact identity against previously recorded arms including total logical work.",
+    "Work bounds computed per configuration and verified never to bind across 30,865 decisions."
+  ],
+  "limitations": [
+    "Not yet independently reviewed.",
+    "Recorded by the coordinator on the delegated agent's behalf; the agent had no write access to research/ and did not review this transcription.",
+    "Exploratory namespace only; does not upgrade docs/research/ or any frozen protocol.",
+    "64 paired games per arm; individual reveal-sample steps are inside noise and the claim rests on a monotone ordering plus significant endpoint tests.",
+    "Two arms were left unfinished: depth 4 with two reveal samples, and the hundred-percent-coverage endpoint."
+  ],
+  "selfReported": false,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-21T05:33:23Z"
+}

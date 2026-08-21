@@ -1,0 +1,42 @@
+---
+title: Observable Mcts
+family: tree-search
+status: Rejected
+evidence: ledger-recorded
+generated: true
+---
+
+<Callout title="Generated starter page" tone="info">
+This page was generated from the experiment index. Expand it with a visual
+explanation of the mechanism when you work on this approach.
+</Callout>
+
+## Observable stochastic UCT
+
+Samples chance at observable-state edges, avoiding determinization and strategy fusion.
+
+**Status: Rejected** (ledger-recorded). it missed the frozen held-out top-action gate by one root.
+
+## Confidence-gated MCTS
+
+Allows MCTS to override fair D3 only with Q and visit-share confidence.
+
+**Status: Rejected** (ledger-recorded). held-out pairwise accuracy and regret worsened.
+
+## Scaled observable MCTS
+
+Re-runs observable MCTS at larger simulation/horizon scale on locked root artifacts.
+
+**Status: Rejected** (ledger-recorded). larger search worsened long-outcome ranking.
+
+## Sources
+
+- `fair-mcts-confidence.cpp`
+- `observable-mcts-lab.cpp`
+- `observable-mcts-scaled-audit.cpp`
+
+## More evidence
+
+- [Experiment index](/docs/research/experiment-index)
+- [Full research ledger](/docs/research/history)
+- [Family overview](/approaches/tree-search)

@@ -1,0 +1,31 @@
+---
+title: N-tuple and reinforcement learning
+summary: N-tuple value tables, TD/Q-learning, PPO — the reinforcement-learning line of attack.
+---
+
+N-tuple learning values a board by summing many small lookup tables, each
+indexing a handful of cells (a "tuple"). It is the classic approach for games
+like 2048, and it was the **first learned-policy line** tried here: a
+hierarchical 5.45-million-weight model trained over half a million games, then
+a long series of TD, Q-learning, and PPO variants.
+
+<Board
+  cells="00000000000000000000000000000000003420008888888"
+  highlight={[37, 38, 44, 45]}
+  size={240}
+  caption="One n-tuple might read these four cells; hundreds of such tuples vote on the board's value."
+/>
+
+## What the evidence showed
+
+- Sparse learned-value search over the n-tuple improved the learned greedy
+  baseline — real progress — but was not selected over the later fair-D4
+  reference.
+- The RL variants (rainbow Q, native and torch PPO, primal-dual actor-critic)
+  repeatedly plateaued below fair search or failed their Stage-A floors.
+- A subtle, instructive bug class lives here: shared-parameter TD updates
+  needed temporal-coherence corrections, and even after the fix the policy
+  gates did not pass.
+
+The family's `native-suite` also houses the native engine benchmark and
+self-tests that anchor the repository's native/TypeScript parity checks.

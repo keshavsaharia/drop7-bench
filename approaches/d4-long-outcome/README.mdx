@@ -1,0 +1,26 @@
+---
+title: D4 and long-outcome research
+summary: Teachers built from exact D4 search and 25-move outcomes — and the veto that almost worked.
+---
+
+Fair D4 is strong but sees only four plies. This family asks what lies beyond:
+label root actions by their **long outcomes** (25-move continuations, terminal
+results), then distill, rank, or veto.
+
+## The headline experiment
+
+The exact D4 + 25-move D2 rollout veto let a costly common-tape comparison
+overrule fair D4 only when the long evidence disagreed. One pilot reached a
+**404,047-point** mean with quality gates passed — but it missed its runtime
+limit by a wide margin, and the frozen replication later failed its gates.
+Signal existed; it did not survive contact with confirmation.
+
+## What the evidence showed
+
+- Long-outcome labels carry real signal that D4 cannot see (rise-boundary
+  fragility, slow-burn structure).
+- Distilling that signal into a fast student kept failing sibling-ranking
+  gates — the same trap documented in
+  [value and policy learning](/approaches/value-policy-learning).
+- A cheaper exact veto that preserves the original intervention decisions is
+  still an open direction.

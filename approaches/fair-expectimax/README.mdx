@@ -1,0 +1,35 @@
+---
+title: Fair expectimax
+summary: The reference line — search that averages chance honestly instead of hoping or fearing.
+---
+
+Expectimax treats Drop7 as what it is: a game of alternating **choices** and
+**chance**. At choice nodes it takes the best column; at chance nodes — the
+next disc, the gray reveals — it takes the probability-weighted average. That
+fairness is the whole idea, and the ledger shows it beats optimistic,
+worst-case, and under-sampled chance handling.
+
+## The landscape
+
+This family holds the reference policy and its close variants:
+
+- **The reference itself** — completed full-width depth 3 (D3) and depth 4
+  (D4) with the fair leaf. D4 is the strongest dependable public policy found
+  so far.
+- **Leaf tuning** — the fair evaluator's coefficients were fitted by sweeps
+  and CEM over complete games.
+- **Depth and chance variants** — selective D5, full D5, seven-stratum chance
+  coverage, root risk shaping. All were rejected or runtime-paused: more
+  depth did not reliably mean more strength.
+
+## The one picture to remember
+
+<div className="my-4 grid gap-3 sm:grid-cols-3">
+  <Stat label="Fair D3 mean" value="235,071" hint="8-game corrected cohort" />
+  <Stat label="Fair D4 mean" value="400,675" hint="same cohort, 7/8 wins" />
+  <Stat label="Target" value="1,000,000+" hint="mean, not best game" />
+</div>
+
+The gap between D4 and the target is the size of the research problem. Depth
+alone will not close it — the open directions are cheaper chance handling and
+better leaf/continuation knowledge.

@@ -6,3 +6,15 @@ __pycache__/
 *.py[cod]
 .venv/
 research/generated/index.json
+web/.next/
+web/data/
+
+# Python virtual environments created by tooling (multi-GB; never committed).
+# The bare `.venv/` rule above does not match suffixed names.
+.venv*/
+
+# Nested package installs and build output under web/ are also covered by
+# web/.gitignore; listed here so the rule survives if that file is edited.
+web/node_modules/
+web/out/
+web/*.tsbuildinfo

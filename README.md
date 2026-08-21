@@ -116,6 +116,24 @@ human-style rise-cycle structure, and GPU-batched neural evaluation. The
 [benchmark contract](docs/benchmarks.md) standardizes strength, runtime, memory,
 GPU, and evidence reporting.
 
+## Research console (web app)
+
+A local Next.js console renders the research program: theories, experiments,
+approach documentation (MDX), and a deterministic scripted-round leaderboard.
+
+```sh
+npm run bench   # run policies over the scripted Gauntlet rounds (deterministic)
+npm run web     # serve the console at http://localhost:3000
+```
+
+The benchmark uses scripted rounds (`drop7-scripted-round-v1`): the visible
+disc sequence is fixed by move number and every gray disc carries a
+predetermined hidden value, so policies face identical randomness. Policies
+are wrapped through the D7P policy protocol — see
+[docs/d7p-protocol.md](docs/d7p-protocol.md). Scripted rounds are a public
+playground, not a research tier; they consume no seed lease and support no
+qualification claim.
+
 ## Reproduce the core checks
 
 Requirements are Node.js 22.6 or newer, Python 3.10 or newer, a C++20 compiler,
@@ -149,7 +167,9 @@ interpreting or resuming one.
 
 ```text
 src/core/                 Shared TypeScript and C++ game engines
+src/bench/                Scripted-round benchmark, D7P policy protocol, registry
 approaches/               One directory per strategy or diagnostic approach
+web/                      Next.js research console (MDX docs, leaderboard, replays)
 artifacts/models/         Small, retained model artifacts
 artifacts/protocols/      Frozen validation and experiment records
 artifacts/results/        Promoted compact run evidence

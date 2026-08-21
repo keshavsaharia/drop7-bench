@@ -1,0 +1,48 @@
+---
+title: Afterstate learning
+summary: Value the position a move leaves behind, not the move itself — with labels for every legal sibling.
+---
+
+The newest research line, built to break the sibling-extrapolation trap. An
+**afterstate** is the board after a move resolves but before chance speaks
+again. An action-free afterstate evaluator never sees which action produced
+the state, so it cannot learn action-identity shortcuts — and a
+**successor-closed** corpus labels *every* legal sibling, so deployment never
+asks for an unsupported ranking.
+
+<svg viewBox="0 0 640 110" className="my-4 w-full max-w-2xl rounded-xl border border-zinc-800 bg-zinc-900/40" role="img" aria-label="Afterstate evaluation">
+  <g fontSize="11" fill="#e4e4e7">
+    <rect x="15" y="30" width="110" height="44" rx="8" fill="#1e3a8a" />
+    <text x="70" y="49" textAnchor="middle" fontWeight="700">root state</text>
+    <text x="70" y="64" textAnchor="middle" fontSize="10" fill="#bfdbfe">7 legal columns</text>
+    <rect x="185" y="10" width="130" height="36" rx="8" fill="#14532d" />
+    <text x="250" y="33" textAnchor="middle">afterstate col 1</text>
+    <rect x="185" y="60" width="130" height="36" rx="8" fill="#14532d" />
+    <text x="250" y="83" textAnchor="middle">afterstate col 2 …</text>
+    <rect x="370" y="30" width="120" height="44" rx="8" fill="#78350f" />
+    <text x="430" y="49" textAnchor="middle" fontWeight="700">one evaluator</text>
+    <text x="430" y="64" textAnchor="middle" fontSize="10" fill="#fde68a">action-free</text>
+    <rect x="540" y="30" width="90" height="44" rx="8" fill="#4c1d95" />
+    <text x="585" y="49" textAnchor="middle" fontWeight="700">rank all</text>
+    <text x="585" y="64" textAnchor="middle" fontSize="10" fill="#ddd6fe">siblings</text>
+    <g stroke="#3f3f46" strokeWidth="1.5">
+      <line x1="125" y1="45" x2="185" y2="28" />
+      <line x1="125" y1="60" x2="185" y2="78" />
+      <line x1="315" y1="28" x2="370" y2="45" />
+      <line x1="315" y1="78" x2="370" y2="60" />
+      <line x1="490" y1="52" x2="540" y2="52" />
+    </g>
+  </g>
+</svg>
+
+## What the evidence showed
+
+Three preregistered pilots (K=8, K=64, K=256 aligned chance scenarios) form a
+model sequence of scientific records: two inconclusive label-stability
+results, then a **valid negative** at K=256 — the calibrated model beat its D1
+teacher but trailed fair D4 on every preregistered ranking metric in both
+fresh held-out folds. A follow-up near-tie override gate produced the first
+preregistered held-out improvement over D4 at all, yet still missed its frozen
+margin. The full records are linked from the
+[distributional-afterstate approach](/approaches/afterstate-learning/distributional-afterstate)
+and the [experiments page](/experiments).

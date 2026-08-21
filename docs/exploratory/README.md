@@ -53,6 +53,19 @@ claimed here, and protected and final seeds remain unopened.
 | [`finding-04-terminal-utility-saturated.md`](finding-04-terminal-utility-saturated.md) | Valid negative: D4's death penalty is at its stop and is not a lever |
 | [`finding-05-chance-strata.md`](finding-05-chance-strata.md) | Positive, replicated: exact chance enumeration unlocks the fourth ply |
 | [`lease-map.md`](lease-map.md) | Seed allocation table and the lease-overlap incident |
+| [`finding-06-flow-ceiling.md`](finding-06-flow-ceiling.md) | Flow balance is achievable clairvoyantly; the occupancy equilibrium at ~20 cells |
+| [`finding-07-fair-planning-ceiling.md`](finding-07-fair-planning-ceiling.md) | Splitting the clairvoyant advantage into planning vs hidden information |
+| [`finding-08-learned-leaf.md`](finding-08-learned-leaf.md) | Learned survival leaf inside the search; a preregistered prediction refuted |
+| [`finding-09-reveal-sampling.md`](finding-09-reveal-sampling.md) | Chance-node decorrelation is exchangeable with search depth |
+| [`finding-10-suite-validation.md`](finding-10-suite-validation.md) | The scenario suite fails its own validation gate; leaf weights point the wrong way |
+| [`finding-11-planner-distillation.md`](finding-11-planner-distillation.md) | Distilling a legal planner; negative, and the 8-tape cohort correction |
+| [`finding-12-fair-planner-ceiling-extended.md`](finding-12-fair-planner-ceiling-extended.md) | Pushing the legal planner's ceiling, and re-baselining it |
+| [`finding-13-fast-engine.md`](finding-13-fast-engine.md) | 3.08x bit-exact engine speedup, and a 10.4x error in the cost model |
+| `finding-14-leaf-reweight.md` *(in progress)* | Refitting the frozen leaf's weights toward achievable clear rate |
+| [`gpu-02-openblas-sgemm-race.md`](gpu-02-openblas-sgemm-race.md) | numpy float32 matmul is silently corrupt on this host |
+| [`gpu-03-onednn-conv-nondeterminism.md`](gpu-03-onednn-conv-nondeterminism.md) | torch Conv2d is nondeterministic on this host's CPU |
+| [`reconciliation-01.md`](reconciliation-01.md) | Which contributor owns what, and every seed lease |
+| [`proposed-status-corrections.md`](proposed-status-corrections.md) | Proposed edits to the main record, split safe-now vs needs-replication |
 | [`design-01-benchmark-suite.md`](design-01-benchmark-suite.md) | Design of the fully-specified scenario benchmark and its validity gates |
 | `gpu-01-rocm-enablement.md` *(in progress)* | Whether the gfx1151 iGPU is usable for training, with benchmarks |
 | [`finding-02-scenario-benchmark.md`](finding-02-scenario-benchmark.md) | Scenario engine parity, exact solver, and board-clear reachability |

@@ -1,0 +1,52 @@
+---
+title: Tree search
+summary: MCTS, PUCT, and observable-state tree search — sampling futures instead of enumerating them.
+---
+
+Where expectimax enumerates chance exactly, Monte Carlo tree search **samples**
+it: play many randomized futures, remember which root actions do well, and
+concentrate sampling there.
+
+<svg viewBox="0 0 640 120" className="my-4 w-full max-w-2xl rounded-xl border border-zinc-800 bg-zinc-900/40" role="img" aria-label="The four MCTS phases">
+  <g fontSize="12" fill="#e4e4e7">
+    <g>
+      <rect x="10" y="35" width="140" height="50" rx="8" fill="#1e3a8a" />
+      <text x="80" y="57" textAnchor="middle" fontWeight="700">1. Select</text>
+      <text x="80" y="73" textAnchor="middle" fontSize="10" fill="#bfdbfe">walk down by UCB</text>
+    </g>
+    <g>
+      <rect x="170" y="35" width="140" height="50" rx="8" fill="#78350f" />
+      <text x="240" y="57" textAnchor="middle" fontWeight="700">2. Expand</text>
+      <text x="240" y="73" textAnchor="middle" fontSize="10" fill="#fde68a">add a new node</text>
+    </g>
+    <g>
+      <rect x="330" y="35" width="140" height="50" rx="8" fill="#14532d" />
+      <text x="400" y="57" textAnchor="middle" fontWeight="700">3. Simulate</text>
+      <text x="400" y="73" textAnchor="middle" fontSize="10" fill="#bbf7d0">roll out a future</text>
+    </g>
+    <g>
+      <rect x="490" y="35" width="140" height="50" rx="8" fill="#4c1d95" />
+      <text x="560" y="57" textAnchor="middle" fontWeight="700">4. Back up</text>
+      <text x="560" y="73" textAnchor="middle" fontSize="10" fill="#ddd6fe">update the path</text>
+    </g>
+    <g stroke="#3f3f46" strokeWidth="2">
+      <line x1="150" y1="60" x2="170" y2="60" />
+      <line x1="310" y1="60" x2="330" y2="60" />
+      <line x1="470" y1="60" x2="490" y2="60" />
+    </g>
+  </g>
+</svg>
+
+## The Drop7 twist
+
+Drop7's chance nodes break the usual MCTS assumptions. The repository's
+observable-state variant samples chance at the edges where it actually
+happens, avoiding "strategy fusion" (planning as if hidden information will be
+known later). Even so, the ledger verdicts were consistent: ordinary MCTS did
+not establish whole-game improvement, confidence-gated overrides worsened
+ranking, and scaling simulations made long-outcome ranking **worse**, not
+better. The diagnosed bottleneck is the weak continuation policy inside the
+rollouts — replace the continuation, not the budget.
+
+A bounded TypeScript MCTS is in the benchmark registry, so you can see its
+behavior on the [leaderboard](/leaderboard).

@@ -1,0 +1,48 @@
+---
+title: Value and policy learning
+summary: Learned evaluators and policy networks — and the sibling-extrapolation trap that kept defeating them.
+---
+
+Train a model to answer "how good is this board?" or "which column here?" from
+example games, then play by its judgment. This family tried value models,
+policy networks, DQN variants, distillation from stronger teachers, and
+sibling-advantage rankers.
+
+## The recurring failure: sibling extrapolation
+
+A model trained on played games learns the outcome of the action that **was**
+played. At deployment it must rank several actions it has **never** seen
+equally well. Low error on visited states did not translate into good
+root-action ranking:
+
+<svg viewBox="0 0 640 170" className="my-4 w-full max-w-2xl rounded-xl border border-zinc-800 bg-zinc-900/40" role="img" aria-label="Sibling extrapolation">
+  <g fontSize="11" fill="#e4e4e7">
+    <text x="20" y="24" fontSize="13" fontWeight="700">Training data</text>
+    <rect x="20" y="40" width="60" height="100" rx="6" fill="#14532d" />
+    <text x="50" y="95" textAnchor="middle">played</text>
+    <text x="50" y="110" textAnchor="middle">action ✓</text>
+    <rect x="90" y="90" width="46" height="50" rx="6" fill="#27272a" />
+    <rect x="144" y="90" width="46" height="50" rx="6" fill="#27272a" />
+    <rect x="198" y="90" width="46" height="50" rx="6" fill="#27272a" />
+    <text x="167" y="118" textAnchor="middle" fill="#71717a">siblings</text>
+    <text x="330" y="24" fontSize="13" fontWeight="700">Deployment asks</text>
+    <rect x="330" y="90" width="60" height="50" rx="6" fill="#27272a" />
+    <rect x="398" y="40" width="60" height="100" rx="6" fill="#7f1d1d" />
+    <text x="428" y="90" textAnchor="middle">rank all</text>
+    <text x="428" y="105" textAnchor="middle">seven</text>
+    <rect x="466" y="70" width="60" height="70" rx="6" fill="#27272a" />
+    <rect x="534" y="95" width="60" height="45" rx="6" fill="#27272a" />
+  </g>
+</svg>
+
+## What the evidence showed
+
+- Played-action value error is **not** action-ranking accuracy. Training data
+  must cover every legal sibling, or the objective must target relative action
+  value directly.
+- The denoised public value passed its prediction gates and produced a small
+  confirmation gain — the best learned-value result — but confidence stayed
+  weak and no protected cohort was opened.
+- This failure mode is exactly what the
+  [afterstate-learning](/approaches/afterstate-learning) family was designed
+  to fix with successor-closed, action-complete labels.

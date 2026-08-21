@@ -1,0 +1,32 @@
+{
+  "$schema": "../schemas/dataset-v1.schema.json",
+  "format": "drop7-dataset-v1",
+  "datasetId": "DS-20260820-afterstate-h40-k256-corpus-d-4e71b903",
+  "title": "Action-complete H40 afterstate corpus, K=256 aligned scenarios, phase-greedy D1 continuation; fresh held-out origins 0x5da70300-0x5da7033f for the top-two override gate",
+  "dataRole": "public-development",
+  "informationClass": "public-only",
+  "originUnit": "whole-game",
+  "originCount": 64,
+  "rowCount": 4858880,
+  "wholeOriginSplit": true,
+  "seedLeaseRefs": [
+    "SL-20260820T083000Z-5da70000"
+  ],
+  "parentDatasetRefs": [],
+  "fields": [
+    "identical schema to DS-20260820-afterstate-h40-k8-3f2f6d29; all rows held-out"
+  ],
+  "privilegedFields": [
+    "originSeed",
+    "moveIndex"
+  ],
+  "allowedConsumers": [
+    "afterstate-ranker training and offline ranking evaluation"
+  ],
+  "artifact": {
+    "path": "runs/RUN-20260820T175726Z-f4f86d62/corpus-d/corpus.ndjson",
+    "sha256": "a138ae80f88aad1f5186d25dbf292001bf4fa02590cdbd8df6d02fd47ea76d3b",
+    "bytes": 2041785468
+  },
+  "createdAt": "2026-08-20T18:40:00Z"
+}

@@ -1,0 +1,49 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260820T190031Z-48aff910",
+  "actor": {
+    "kind": "model",
+    "platform": "OpenCode",
+    "model": "moonshotai/Kimi-K3",
+    "agentId": null
+  },
+  "level": "L3",
+  "roles": [
+    {
+      "role": "software",
+      "degree": "lead"
+    },
+    {
+      "role": "visualization",
+      "degree": "substantial"
+    },
+    {
+      "role": "writing",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Built the scripted-round benchmark playground and research console: (1) optional latent-board mode in the TypeScript engine (predetermined gray-disc values carried through gravity/rises; default random-reveal behavior byte-identical, verified by the 256-seed parity sweep); (2) src/bench/ with the drop7-scripted-round-v1 format, eight generated Gauntlet rounds from the dedicated 0x5eed**** domain, a deterministic D7P policy registry and runner, CLI, and stdin/stdout D7P server per docs/d7p-protocol.md; (3) a Next.js console in web/ rendering research records, the leaderboard with move-by-move replays, repo docs, and MDX approach documentation (12 hand-written family guides, 3 visual learn pages, 91 generated approach starter pages). No gameplay tiers opened; scripted rounds are playground evidence only.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "src/core/typescript/engine.ts",
+    "src/bench",
+    "docs/d7p-protocol.md",
+    "web"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "npm test (134 tests incl. latent-mode and bench determinism)",
+    "make test (native self-tests + 256-seed native/TypeScript parity: exact)",
+    "make research-validate",
+    "next build + HTTP smoke test of all console routes"
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-20T19:00:31Z"
+}

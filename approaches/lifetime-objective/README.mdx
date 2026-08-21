@@ -1,0 +1,21 @@
+---
+title: Lifetime objective
+summary: Optimize how long the game survives and how much flow it sustains, not just the next clear.
+---
+
+Score is a lagging indicator: the games that score a million points are first
+the games that **refuse to die**. This family optimizes lifetime directly —
+survival milestones, clear/reveal flow ceilings, risk calibration, and
+score decomposition — on the theory that a policy which sustains the
+approximately 2.4-clears and 1.4-reveals-per-move regime will collect chain
+opportunities as they come.
+
+## What the evidence showed
+
+- Flow is a real constraint: policies that crack covers without sustaining
+  reveals clog the board and die early, however good their tactics look.
+- The family's preregistered 17k-scoring rollout-veto line is documented from
+  its preregistration onward — see the approach pages for the current record.
+- As with constructive reservoirs, lifetime signals look most promising as
+  **bounded corrections** to a strong tactical fallback rather than as
+  whole-game controllers.

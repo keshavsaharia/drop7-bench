@@ -1,0 +1,35 @@
+---
+title: Rainbow Q
+family: ntuple-rl
+status: Rejected
+evidence: ledger-recorded
+generated: true
+---
+
+<Callout title="Generated starter page" tone="info">
+This page was generated from the experiment index. Expand it with a visual
+explanation of the mechanism when you work on this approach.
+</Callout>
+
+## Rainbow-lite n-tuple Q
+
+Uses replay, multi-step off-policy targets, and a compact n-tuple Q function under corrected scoring.
+
+**Status: Rejected** (ledger-recorded). it passed random play but failed the fair-D1 gate at one million transitions.
+
+## Flow-curriculum Rainbow
+
+Continues the frozen Q checkpoint with balanced initial and sustainable-oracle restart states.
+
+**Status: Rejected** (task-record only). the fixed 16-million-transition Stage A failed all absolute floors.
+
+## Sources
+
+- `flow-curriculum-rainbow.cpp`
+- `rainbow-ntuple-q.cpp`
+
+## More evidence
+
+- [Experiment index](/docs/research/experiment-index)
+- [Full research ledger](/docs/research/history)
+- [Family overview](/approaches/ntuple-rl)

@@ -1,0 +1,117 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  background: #09090b;
+  color: #e4e4e7;
+}
+
+/* Markdown/MDX prose styling (local, dependency-free alternative to the
+   typography plugin, tuned for the dark research-console theme). */
+.prose-drop7 {
+  max-width: 46rem;
+  line-height: 1.7;
+  font-size: 0.95rem;
+  color: #d4d4d8;
+}
+.prose-drop7 h1 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #fafafa;
+  margin: 1.6em 0 0.6em;
+}
+.prose-drop7 h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #f4f4f5;
+  margin: 1.8em 0 0.5em;
+  padding-bottom: 0.2em;
+  border-bottom: 1px solid #27272a;
+}
+.prose-drop7 h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #e4e4e7;
+  margin: 1.4em 0 0.4em;
+}
+.prose-drop7 p {
+  margin: 0.7em 0;
+}
+.prose-drop7 a {
+  color: #7dd3fc;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.prose-drop7 a:hover {
+  color: #bae6fd;
+}
+.prose-drop7 ul,
+.prose-drop7 ol {
+  margin: 0.7em 0;
+  padding-left: 1.4em;
+}
+.prose-drop7 ul {
+  list-style: disc;
+}
+.prose-drop7 ol {
+  list-style: decimal;
+}
+.prose-drop7 li {
+  margin: 0.25em 0;
+}
+.prose-drop7 code {
+  background: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 0.3rem;
+  padding: 0.1em 0.35em;
+  font-size: 0.85em;
+  color: #fbbf24;
+}
+.prose-drop7 pre {
+  background: #101014;
+  border: 1px solid #27272a;
+  border-radius: 0.6rem;
+  padding: 0.9rem 1rem;
+  overflow-x: auto;
+  margin: 1em 0;
+}
+.prose-drop7 pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #e4e4e7;
+  font-size: 0.82rem;
+}
+.prose-drop7 table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+  font-size: 0.85rem;
+}
+.prose-drop7 th,
+.prose-drop7 td {
+  border: 1px solid #27272a;
+  padding: 0.4rem 0.6rem;
+  text-align: left;
+}
+.prose-drop7 th {
+  background: #18181b;
+  color: #fafafa;
+  font-weight: 600;
+}
+.prose-drop7 blockquote {
+  border-left: 3px solid #3f3f46;
+  padding-left: 1em;
+  color: #a1a1aa;
+  margin: 1em 0;
+}
+.prose-drop7 hr {
+  border-color: #27272a;
+  margin: 2em 0;
+}
+.prose-drop7 strong {
+  color: #fafafa;
+}

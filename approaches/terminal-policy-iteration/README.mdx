@@ -1,0 +1,25 @@
+---
+title: Terminal policy iteration
+summary: Judge actions by how whole games actually end, and override the baseline only with statistical confidence.
+---
+
+Instead of trusting a heuristic leaf, run each candidate root action through
+many long continuations — hundreds of moves, sometimes to the game's end — and
+compare the distributions. Then, crucially, only override the baseline policy
+when the improvement is statistically supported; otherwise keep the safe
+choice.
+
+## Why it matters
+
+This family produced the repository's most careful **offline** evaluation
+asset: a locked panel of 477 public roots with every legal sibling labeled by
+long continuations. On that panel the latest completed work found:
+
+- a martingale-dual ranker underperformed fair D4 (28.93% vs 38.16% top-1
+  accuracy);
+- a regenerative policy-iteration variant was nearly identical to D4,
+  overriding only 11 roots — six helped, but confidence bounds were negative.
+
+Neither justified a gameplay run, and both were recorded as valid negatives.
+The lesson generalizes: **conservative overrides need overwhelming evidence**,
+because a wrong override costs more than a right one gains.

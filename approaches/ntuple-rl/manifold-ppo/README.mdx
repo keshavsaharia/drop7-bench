@@ -1,0 +1,49 @@
+---
+title: Manifold Ppo
+family: ntuple-rl
+status: Rejected
+evidence: ledger-recorded
+generated: true
+---
+
+<Callout title="Generated starter page" tone="info">
+This page was generated from the experiment index. Expand it with a visual
+explanation of the mechanism when you work on this approach.
+</Callout>
+
+## Oracle-manifold discriminator
+
+Learns a public classifier for states resembling privileged long-lived trajectories.
+
+**Status: Rejected** (ledger-recorded). the original coverage gate stopped the policy experiment.
+
+## Manifold root prior
+
+Uses the frozen manifold scalar only as a near-tied D3 root prior.
+
+**Status: Rejected** (ledger-recorded). it reduced score, survival, and flow.
+
+## Manifold GAIL development
+
+Shapes a fixed PPO run with the already-matched public oracle-manifold discriminator.
+
+**Status: Rejected** (task-record only). modest training improvement still missed every Stage-A floor.
+
+## Scaled manifold GAIL
+
+Increases only the frozen manifold shaping coefficients on a disjoint lane.
+
+**Status: Rejected** (task-record only). stronger shaping materially regressed Stage A.
+
+## Sources
+
+- `manifold-gail-development.cpp`
+- `manifold-gail-scaled.cpp`
+- `manifold-root-prior.cpp`
+- `oracle-manifold-ppo.cpp`
+
+## More evidence
+
+- [Experiment index](/docs/research/experiment-index)
+- [Full research ledger](/docs/research/history)
+- [Family overview](/approaches/ntuple-rl)

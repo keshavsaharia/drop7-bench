@@ -1,0 +1,35 @@
+---
+title: Monte Carlo Value
+family: value-policy-learning
+status: Rejected
+evidence: ledger-recorded
+generated: true
+---
+
+<Callout title="Generated starter page" tone="info">
+This page was generated from the experiment index. Expand it with a visual
+explanation of the mechanism when you work on this approach.
+</Callout>
+
+## Direct Monte Carlo state value
+
+Labels public states with terminal behavior returns, then compares sibling successors conservatively.
+
+**Status: Rejected** (ledger-recorded). the first held-out stage collapsed.
+
+## Scaled survival value
+
+Tests more terminal behavior data with whole-game holdouts and strict AUC/rank gates.
+
+**Status: Rejected** (ledger-recorded). held-out lifetime ranking missed its gate.
+
+## Sources
+
+- `mc-value-policy.cpp`
+- `survival-value-scale.cpp`
+
+## More evidence
+
+- [Experiment index](/docs/research/experiment-index)
+- [Full research ledger](/docs/research/history)
+- [Family overview](/approaches/value-policy-learning)

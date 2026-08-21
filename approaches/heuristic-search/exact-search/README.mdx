@@ -1,0 +1,36 @@
+---
+title: Exact Search
+family: heuristic-search
+status: Rejected
+evidence: ledger-recorded
+generated: true
+---
+
+<Callout title="Generated starter page" tone="info">
+This page was generated from the experiment index. Expand it with a visual
+explanation of the mechanism when you work on this approach.
+</Callout>
+
+## Exact root quadrature and historical D4
+
+Tests independent root quadratures and a fully completed extra ply with the older leaf.
+
+**Status: Rejected** (ledger-recorded). both were slower and worse, showing that depth alone cannot repair a biased leaf.
+
+## Three-member exact policy ensemble
+
+Votes or aggregates independent complete root searches, falling back when they split.
+
+**Status: Completed** (task-record only). a small replicated gain was reported against its comparator, but it was not qualified against the strongest D3/D4 reference.
+
+## Sources
+
+- `exact-depth4.cpp`
+- `exact-root-ensemble.cpp`
+- `policy-ensemble.cpp`
+
+## More evidence
+
+- [Experiment index](/docs/research/experiment-index)
+- [Full research ledger](/docs/research/history)
+- [Family overview](/approaches/heuristic-search)

@@ -1,0 +1,20 @@
+---
+title: Baselines and diagnostics
+summary: The measurement layer — parity checks, flow audits, and reference benchmarks that keep everyone honest.
+---
+
+Not every program is a candidate policy. This family holds the instruments:
+
+- **Native parity** — compares native and TypeScript traces byte for byte
+  (256 seeds, 6,852 transitions matched in this checkout).
+- **Heuristic benchmark** — paired complete-game comparisons among the named
+  hand evaluators.
+- **Flow audits** — per-move geometry, clear/reveal flow, and root-value
+  traces that produced the 2.4-clears / 1.4-reveals diagnostic targets.
+- **Throughput probes** — how fast the engines actually run, so work budgets
+  are set from measurement instead of guesses.
+
+Diagnostics produce evidence about *other* approaches, so their own status is
+"support-only": they are the scales, not the contestants. The scripted-round
+leaderboard in this console (`src/bench/`) follows the same philosophy — a
+fixed measuring instrument that any policy can be benched against.

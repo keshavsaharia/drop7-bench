@@ -29,7 +29,16 @@ constants anywhere in the repository are `0xa511e9b3`, `0xa54ff53a` and
 | `SEEDLEASE-A52` d1 | `0xa5210000`–`0xa5213fff` | 16,384 | **training** | corpus, depth-1 behaviour, ε=0.15 | opened |
 | `SEEDLEASE-A52` d3 | `0xa5214000`–`0xa5214fff` | 4,096 | **training** | corpus, depth-3 behaviour, ε=0.05 | opened |
 | `SEEDLEASE-A52` d4 | `0xa5215000`–`0xa52152ff` | 768 | **training** | corpus, depth-4 behaviour, ε=0.03 | opened |
-| `SEEDLEASE-A52` reserve | `0xa5216000`–`0xa52fffff` | — | training, unallocated | — | reserved |
+| `SEEDLEASE-A51D` confirm | `0xa51d1000`–`0xa51d103f` | 64 | development, paired evaluation | **shared evaluation cohort** — fresh-seed 7-strata confirmation, depth x strata factorial, learned-leaf 2x2 | opened |
+| `SEEDLEASE-A52-FLOW` | `0xa5230000`–`0xa5233fff` | 16,384 | development, diagnostic | flow-ceiling clairvoyant planner | opened (8 seeds read) |
+| `SEEDLEASE-A52-FLOW2` | `0xa5234000`–`0xa5237fff` | 16,384 | development, diagnostic | fair planner, information-vs-planning decomposition | opened |
+| `SEEDLEASE-A52-FLOW3` | `0xa5238000`–`0xa523bfff` | 16,384 | development, diagnostic | fair-planner ceiling extension (K=1024) | opened |
+| `SEEDLEASE-A52-LEAF` | `0xa5240000`–`0xa5247fff` | 32,768 | development, tuning | learned-leaf blend tuning (disjoint from evaluation) | opened |
+| `SEEDLEASE-A52-REVEAL` | `0xa5250000`–`0xa5257fff` | 32,768 | development, tuning | reveal-vs-next-disc sampling split | opened |
+| `SEEDLEASE-A52-SUITE` | `0xa5258000`–`0xa525bfff` | 16,384 | development, diagnostic | scenario-suite validation, position mode | opened |
+| `SEEDLEASE-A52-DISTILL` | `0xa5260000`–`0xa526ffff` | 65,536 | **training** | fair-planner distillation corpus | opened |
+| `SEEDLEASE-A52-FAST` | `0xa5270000`–`0xa5277fff` | 32,768 | development, equivalence gates | semantics-preserving engine optimisation | opened |
+| `SEEDLEASE-A52` reserve | `0xa5216000`–`0xa522ffff` and `0xa5278000`–`0xa52fffff` | — | unallocated | — | reserved |
 | `SL-…-5da70000` | `0x5da70000`–`0x5da70fff` | 4,096 | public-development | a concurrent agent's afterstate track | **state disputed — under review** |
 
 Training and evaluation ranges are disjoint by construction: evaluation lives
@@ -63,3 +72,26 @@ training so that no future run reuses them for that purpose.
 **Process change.** Every block in `SEEDLEASE-A52` starts exactly where the
 previous one ends, the arithmetic is printed and checked before launch, and the
 generation script records the consumed end address for each block.
+
+## Incident 2: sub-leases declared outside this file, 2026-08-21
+
+**What happened.** Nine sub-leases were issued to delegated agents in their task
+briefs and recorded only in those agents' own READMEs and finding headers. They
+were absent from this table and from `research/seeds/leases/`, so for several
+hours the authoritative allocation map was incomplete. An independent
+reconciliation pass found four of them; the remainder were added at the same
+time.
+
+**Why it mattered.** No collision resulted — the ranges were issued sequentially
+from a single coordinator and are disjoint, and a check against the concurrent
+OpenCode contributor's ranges (`0x5da70000`–`0x5da70fff` and
+`0x5eed0001`–`0x5eed0008`) confirms no overlap in either direction. But the
+protection was luck plus sequential issuance, not a record. The first incident in
+this file was caused by exactly that failure mode: arithmetic done at launch time
+rather than checked against a table.
+
+**Resolution.** Every range is now listed above. Machine-readable
+`research/seeds/leases/` records remain outstanding for the `0xa5……` family and
+are owed before any of this work is promoted beyond the exploratory namespace.
+
+**Process change.** A sub-lease is not issued until it appears in this table.

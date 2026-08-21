@@ -1,0 +1,63 @@
+---
+title: Long Outcome
+family: d4-long-outcome
+status: Rejected
+evidence: ledger-recorded
+generated: true
+---
+
+<Callout title="Generated starter page" tone="info">
+This page was generated from the experiment index. Expand it with a visual
+explanation of the mechanism when you work on this approach.
+</Callout>
+
+## D2 long-outcome ranker
+
+Learns 25-move public-D2 sibling returns from grouped root panels.
+
+**Status: Rejected** (ledger-recorded). held-out ranking and regret did not beat exact D2/D4 comparators.
+
+## Long-outcome feature audit
+
+Measures survival, flow, downside, and ladder features against the same long-outcome panels.
+
+**Status: Rejected** (ledger-recorded). the feature conjunction did not pass.
+
+## Curriculum long-outcome NNUE
+
+Artifact-only H100 multi-head model over frozen public curriculum states.
+
+**Status: Rejected** (task-record only). survival prediction was useful, but action ordering regressed versus exact search.
+
+## Scaled long-outcome NNUE
+
+Tests whether more labels and capacity fix the earlier long-outcome sample bottleneck.
+
+**Status: Rejected** (ledger-recorded). no whole-origin fold fully non-regressed.
+
+## D4 veto classifier
+
+Uses long-outcome heads only to veto fragile D4 actions.
+
+**Status: Rejected** (ledger-recorded). override precision and downside gates failed.
+
+## Relaxed chain-potential audit
+
+Broadens the literal ladder feature into relaxed reachable chain potential.
+
+**Status: Rejected** (ledger-recorded). every material transfer gate failed.
+
+## Sources
+
+- `curriculum-long-outcome-nnue.cpp`
+- `d2-long-outcome-feature-audit.cpp`
+- `d2-long-outcome-ranker.cpp`
+- `d4-long-outcome-veto-classifier.cpp`
+- `relaxed-chain-potential-audit.cpp`
+- `scaled-long-outcome-nnue.cpp`
+
+## More evidence
+
+- [Experiment index](/docs/research/experiment-index)
+- [Full research ledger](/docs/research/history)
+- [Family overview](/approaches/d4-long-outcome)

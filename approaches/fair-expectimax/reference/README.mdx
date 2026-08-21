@@ -1,0 +1,81 @@
+---
+title: Fair expectimax reference (D3/D4)
+family: fair-expectimax
+status: Completed
+evidence: ledger-recorded
+---
+
+The strongest dependable public-information policy in this repository. It is
+the comparator every new candidate must beat, and the teacher behind most
+label-generation experiments.
+
+## The idea
+
+At each move, fair expectimax builds a tree that alternates between **player
+choices** (take the best) and **chance events** (take the average):
+
+<svg viewBox="0 0 640 210" className="my-4 w-full max-w-2xl rounded-xl border border-zinc-800 bg-zinc-900/40" role="img" aria-label="Expectimax tree">
+  <g fontSize="11" fill="#e4e4e7">
+    <rect x="270" y="12" width="100" height="30" rx="6" fill="#1e3a8a" />
+    <text x="320" y="31" textAnchor="middle" fontWeight="700">MAX: column</text>
+    <rect x="60" y="72" width="130" height="30" rx="6" fill="#78350f" />
+    <text x="125" y="91" textAnchor="middle">CHANCE: reveal/next disc</text>
+    <rect x="250" y="72" width="130" height="30" rx="6" fill="#78350f" />
+    <text x="315" y="91" textAnchor="middle">CHANCE: reveal/next disc</text>
+    <rect x="440" y="72" width="130" height="30" rx="6" fill="#78350f" />
+    <text x="505" y="91" textAnchor="middle">CHANCE: …</text>
+    <rect x="40" y="142" width="80" height="26" rx="6" fill="#1e3a8a" />
+    <text x="80" y="159" textAnchor="middle">MAX</text>
+    <rect x="150" y="142" width="80" height="26" rx="6" fill="#1e3a8a" />
+    <text x="190" y="159" textAnchor="middle">MAX</text>
+    <rect x="280" y="142" width="80" height="26" rx="6" fill="#14532d" />
+    <text x="320" y="159" textAnchor="middle">leaf value</text>
+    <rect x="460" y="142" width="80" height="26" rx="6" fill="#14532d" />
+    <text x="500" y="159" textAnchor="middle">leaf value</text>
+    <g stroke="#3f3f46" strokeWidth="1.5">
+      <line x1="300" y1="42" x2="135" y2="72" />
+      <line x1="320" y1="42" x2="315" y2="72" />
+      <line x1="340" y1="42" x2="495" y2="72" />
+      <line x1="110" y1="102" x2="80" y2="142" />
+      <line x1="140" y1="102" x2="190" y2="142" />
+      <line x1="310" y1="102" x2="320" y2="142" />
+      <line x1="500" y1="102" x2="500" y2="142" />
+    </g>
+  </g>
+</svg>
+
+"Fair" means the chance nodes **average over what can actually happen** —
+every legal next disc, and the possible gray-disc reveals — instead of hoping
+for the best reveal or fearing the worst. Depth 4 (D4) completes four full
+max/chance layers; the leaf is a hand-tuned public evaluator.
+
+## Why averaging matters
+
+A hidden gray disc can become anything from a 1 to a 7. An optimistic search
+assumes the reveal you want; a pessimistic one assumes the reveal you fear.
+Both mis-rank moves, and the ledger confirms it: fair chance handling beats
+optimistic, worst-case, and tiny reused reveal samples. The price is work —
+the tree grows by roughly an order of magnitude per ply.
+
+## What the evidence showed
+
+| Configuration | Games | Mean score | Mean moves | Note |
+| --- | ---: | ---: | ---: | --- |
+| Fair D3 | 8 | 235,071 | 71.0 | comparison policy |
+| **Fair D4** | 8 | **400,675** | 116.4 | won 7 of 8 paired games |
+| Fair D4 (broad cohort) | 64 | 308,296 | 90.0 | the reference mean |
+
+- Deeper is **not** automatically better: selective D5, full D5, and
+  cycle-boundary variants all failed their gates (see the sibling approaches).
+- One D4 game scored 1,246,684 points — an anecdote, not an average. The
+  million-point target requires the **mean** to exceed one million.
+- D4 is a strong tactical fallback and teacher, but its average is far below
+  the target. Every serious candidate keeps an exact D4 fallback.
+
+## Sources
+
+- `fair-only-horizon.cpp` — the fair-only depth-3 evaluator.
+- `fair-only-depth4.cpp` — the depth-4 reference build (`make native` produces
+  `build/fair-depth4`).
+- The TypeScript counterpart used by the benchmark registry is
+  `evaluateMoves` in `src/core/typescript/solver.ts` with the combined leaf.

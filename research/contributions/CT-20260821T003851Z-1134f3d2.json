@@ -1,0 +1,68 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260821T003851Z-1134f3d2",
+  "actor": {
+    "kind": "model",
+    "platform": "claude-code",
+    "model": "claude-opus-5[1m]",
+    "agentId": "delegated/flow-ceiling"
+  },
+  "level": "L3",
+  "roles": [
+    {
+      "role": "software",
+      "degree": "lead"
+    },
+    {
+      "role": "investigation",
+      "degree": "lead"
+    },
+    {
+      "role": "formal-analysis",
+      "degree": "substantial"
+    },
+    {
+      "role": "methodology",
+      "degree": "substantial"
+    },
+    {
+      "role": "writing",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Bounded work package: decided whether the disc-conservation requirement of finding-01 (2.400 numbered clears and 1.400 covered reveals per move) is reachable by any line of play, and then separated how much of the resulting gap is planning and how much is hidden information. Built approaches/lifetime-objective/flow-ceiling/ on top of the existing scenario engine rather than re-deriving the game: a per-game fixed-future MasterTape and long-game driver with per-move score/flow decomposition and occupancy tracking (flow-common.hpp), a single-threaded exact window solver with a pluggable per-move objective of points or numbered clears whose root call returns the exact value of every legal opening move (flow-solver.hpp), a principal-variation replayer (pv-replay.cpp), and the run driver, controls, self-test and solver cross-check (flow-run.cpp). Measured that a clairvoyant receding-horizon planner sustains 2.3875 clears and 1.3963 reveals per move over 6,000 moves (2.4023 clears over the second half), holds occupancy flat near 20 of 49 cells for 200 rise cycles, and reached the 1,000-move cap alive in 6 of 6 games, while fair depth 4 on the identical futures died at a mean of 117.75 moves; identified the mechanism as an occupancy equilibrium, the achievable clear rate rising with occupancy and crossing 2.400 near 20 cells, against fair D4 whose clear rate peaks near 27 cells and then falls. Then built fair-planner.hpp, the same planner with the hidden board and/or the future replaced by K sampled determinizations solved exactly under common random numbers, to decompose the gap: at H=7, K=256 the legal arm reaches 2.2309 clears and 1.2782 reveals per move, 93.0% of the requirement and 58.8% of the clairvoyant-minus-D4 gap, so at most 41.2% of that gap is hidden information and knowing the future disc tape is worth nothing. Swept K over three orders of magnitude and showed a small-K answer would have inverted the finding. Wrote the two reports, including a correction notice on the earlier one retracting an unsupported control-gap sentence and recording that no legal policy tested reached flow balance. Run output was written to runs/RUN-FLOW-044da902f8e8/ (git-ignored) under leases SEEDLEASE-A52-FLOW = 0xa5230000-0xa5233fff and SEEDLEASE-A52-FLOW2 = 0xa5234000-0xa5237fff.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "approaches/lifetime-objective/flow-ceiling/",
+    "docs/exploratory/finding-06-flow-ceiling.md",
+    "docs/exploratory/finding-07-fair-planning-ceiling.md"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "flow-run --self-test, seven gates, all passing: master tape determinism; a cut window reproduces the long game move for move over 24 windows x 6 moves; the per-move score identity delta = 17,000 x rise + 70,000 x clears + sum of wave points; each objective's optimum dominates on its own quantity over 8 windows; root-move values from solveWindowRoot agree with the window optimum under both objectives; the information-boundary gate; and the privileged arm reproducing the clairvoyant optimum at K=1.",
+    "INFORMATION BOUNDARY gate: over 20+ consecutive real decisions, replacing every hidden value under every covered cell and substituting a completely different future disc tape and rise sequence leaves the fair planner's chosen column identical given the same sampler stream.",
+    "flow-run --cross-check against the frozen exact solver over all 128 scenarios of approaches/lifetime-objective/scenario/data/suite-h9-v1.jsonl at H=9: 0 mismatches, 0 incomplete, still 0 after the solver changes made for finding-07.",
+    "Per-move score identity asserted on every move of every game measured: 0 violations in 19,610 moves.",
+    "Every solved window's principal variation replayed through the engine must earn its reported value: 0 mismatches over 9,175 windows across the two primary cohorts.",
+    "Public-policy controls reproduced against finding-01 on the base engine: lowest-column 33.12 moves / 97,110 points here vs 33.28 / 100,050 there; fair-d4 1.9808 clears and 1.0896 reveals per move here vs 1.973 / 1.090 there.",
+    "Seed-lease enforcement: flow-run refuses to start outside SEEDLEASE-A52-FLOW and SEEDLEASE-A52-FLOW2."
+  ],
+  "limitations": [
+    "Recorded by the records archivist on the delegated agent's behalf; the agent had no write access to research/ and did not review this transcription. Every figure above is transcribed from docs/exploratory/finding-06-flow-ceiling.md and docs/exploratory/finding-07-fair-planning-ceiling.md and from the flow-ceiling README, not re-measured.",
+    "Not independently reviewed.",
+    "Exploratory. Evidence tier is at most development/pilot: 6 to 8 master tapes per arm and 87 fair-planner games in total, which is below every gameplay tier in docs/benchmarks.md and supports no strength claim.",
+    "The headline clairvoyant planner is privileged and is a teacher and ceiling measurement, never a deployable policy. No policy measured in this directory is proposed for deployment.",
+    "All measurement runs inside the scenario engine's LatentRevealSource, whose reveal dynamics differ from the base engine by design, so absolute scores are not bit-comparable to base-engine runs.",
+    "No legal policy tested reached flow balance: all 87 fair-planner games ended, none reached the move cap, and every fair arm's board filled monotonically. The 41.2% hidden-information share is an upper bound that was still falling when the compute budget ran out.",
+    "finding-06 as published contains a sentence in section 3 that its own evidence does not support; it is left in place and superseded by a correction notice and by finding-07 rather than edited out.",
+    "No theory, experiment, dataset, result, run, or seed-lease record exists in research/ for this work, so the machine-readable record is incomplete and the leases used are documented only in prose.",
+    "No protected or final seed was opened and no qualification claim is made.",
+    "No machine profile was attached to the timing figures in these reports, so they carry no resource-performance claim under docs/benchmarks.md."
+  ],
+  "selfReported": false,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-21T00:38:51Z"
+}

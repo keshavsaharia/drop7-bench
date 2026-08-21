@@ -57,11 +57,36 @@ export interface MoveResult {
   animation: readonly MoveAnimationFrame[];
   clearedBoard: boolean;
   levelAdvanced: boolean;
+  /** Updated latent board when `PlayMoveOptions.latent` was supplied. */
+  latentValues?: readonly (DiscValue | null)[];
+}
+
+/**
+ * Predetermined hidden values carried by covered cells, aligned with board
+ * indexes. Numbered and empty cells always hold `null`. This is the
+ * deterministic "latent board" used by scripted benchmark rounds: a gray disc
+ * has one fixed value that takes its place when the disc is revealed, instead
+ * of drawing the reveal from a random source at that moment.
+ */
+export type LatentValues = (DiscValue | null)[];
+
+export interface LatentBoardOptions {
+  /** Hidden values aligned with board indexes. Copied on entry; never mutated. */
+  values: readonly (DiscValue | null)[];
+  /** Supplies the seven hidden values for each newly risen covered row, in column order. */
+  nextCoveredRow: () => readonly DiscValue[];
 }
 
 export interface PlayMoveOptions {
   /** Interactive moves capture presentation snapshots; headless callers may skip them. */
   captureAnimation?: boolean;
+  /**
+   * Optional latent board. When present, reveals consume the predetermined
+   * value of the revealed cell and rises draw their new covered row from
+   * `nextCoveredRow`; the move's random source is then used only for the next
+   * visible disc. The updated values are returned as `MoveResult.latentValues`.
+   */
+  latent?: LatentBoardOptions;
 }
 
 export interface CascadeOutcome {
@@ -205,16 +230,30 @@ export function placeDisc(
   return null;
 }
 
-export function applyGravity(board: Board): Board {
+export function applyGravity(
+  board: Board,
+  latent?: LatentValues | null,
+): Board {
   assertBoard(board);
   const next = emptyBoard().slice();
+  const nextLatent = latent
+    ? Array<DiscValue | null>(BOARD_SIZE * BOARD_SIZE).fill(null)
+    : null;
   for (let column = 0; column < BOARD_SIZE; column += 1) {
     let destinationRow = BOARD_SIZE - 1;
     for (let row = BOARD_SIZE - 1; row >= 0; row -= 1) {
       const cell = board[indexOf(row, column)];
       if (cell === EMPTY) continue;
       next[indexOf(destinationRow, column)] = cell;
+      if (latent && nextLatent) {
+        nextLatent[indexOf(destinationRow, column)] = latent[indexOf(row, column)];
+      }
       destinationRow -= 1;
+    }
+  }
+  if (latent && nextLatent) {
+    for (let index = 0; index < latent.length; index += 1) {
+      latent[index] = nextLatent[index];
     }
   }
   return next;
@@ -333,6 +372,7 @@ function resolveCascadeWithAnimation(
   random: RandomSource,
   startingDepth: number,
   captureAnimation: boolean,
+  latent?: LatentValues | null,
 ): {
   board: Board;
   score: number;
@@ -364,7 +404,16 @@ function resolveCascadeWithAnimation(
 
     const cleared = clearWave(current, poppers);
     for (const index of cleared.revealIndexes) {
-      cleared.board[index] = randomDisc(random);
+      if (latent) {
+        const value = latent[index];
+        if (value === null || value === undefined || !isNumbered(value)) {
+          throw new Error("A revealed covered cell has no valid latent value");
+        }
+        cleared.board[index] = value;
+        latent[index] = null;
+      } else {
+        cleared.board[index] = randomDisc(random);
+      }
     }
     const points = poppers.length * scoreForWave(depth);
     score += points;
@@ -387,7 +436,7 @@ function resolveCascadeWithAnimation(
       });
     }
 
-    const settled = applyGravity(cleared.board);
+    const settled = applyGravity(cleared.board, latent);
     if (captureAnimation && !boardsEqual(cleared.board, settled)) {
       animation.push({
         kind: "settle",
@@ -494,7 +543,11 @@ export function forEachCascadeOutcome(
   visit(board, startingDepth, 0, 1, []);
 }
 
-export function raiseCoveredRow(board: Board): Board | null {
+export function raiseCoveredRow(
+  board: Board,
+  latent?: LatentValues | null,
+  nextCoveredRow?: () => readonly DiscValue[],
+): Board | null {
   assertBoard(board);
   for (let column = 0; column < BOARD_SIZE; column += 1) {
     if (board[indexOf(0, column)] !== EMPTY) return null;
@@ -509,7 +562,48 @@ export function raiseCoveredRow(board: Board): Board | null {
   for (let column = 0; column < BOARD_SIZE; column += 1) {
     raised[indexOf(BOARD_SIZE - 1, column)] = SOLID;
   }
+  if (latent) {
+    if (!nextCoveredRow) {
+      throw new Error("A latent board rise needs a covered-row source");
+    }
+    const shifted = Array<DiscValue | null>(BOARD_SIZE * BOARD_SIZE).fill(null);
+    for (let row = 0; row < BOARD_SIZE - 1; row += 1) {
+      for (let column = 0; column < BOARD_SIZE; column += 1) {
+        shifted[indexOf(row, column)] = latent[indexOf(row + 1, column)];
+      }
+    }
+    const freshRow = nextCoveredRow();
+    if (
+      freshRow.length !== BOARD_SIZE ||
+      freshRow.some((value) => !isNumbered(value))
+    ) {
+      throw new Error("A covered row needs exactly seven latent disc values");
+    }
+    for (let column = 0; column < BOARD_SIZE; column += 1) {
+      shifted[indexOf(BOARD_SIZE - 1, column)] = freshRow[column];
+    }
+    for (let index = 0; index < latent.length; index += 1) {
+      latent[index] = shifted[index];
+    }
+  }
   return raised;
+}
+
+/** Hidden values for the starting position: one covered row along the bottom. */
+export function createInitialLatentValues(
+  bottomRow: readonly DiscValue[],
+): LatentValues {
+  if (
+    bottomRow.length !== BOARD_SIZE ||
+    bottomRow.some((value) => !isNumbered(value))
+  ) {
+    throw new Error("The initial covered row needs exactly seven latent disc values");
+  }
+  const values = Array<DiscValue | null>(BOARD_SIZE * BOARD_SIZE).fill(null);
+  for (let column = 0; column < BOARD_SIZE; column += 1) {
+    values[indexOf(BOARD_SIZE - 1, column)] = bottomRow[column];
+  }
+  return values;
 }
 
 export function playMove(
@@ -523,9 +617,14 @@ export function playMove(
   if (!placed) return null;
 
   const captureAnimation = options.captureAnimation ?? true;
+  const latent = options.latent ? options.latent.values.slice() : null;
+  if (latent && latent.length !== BOARD_SIZE * BOARD_SIZE) {
+    throw new Error("A latent board must contain exactly 49 cells");
+  }
   const animation: MoveAnimationFrame[] = [];
+  const droppedIndex = changedIndexes(state.board, placed)[0];
+  if (latent) latent[droppedIndex] = null;
   if (captureAnimation) {
-    const droppedIndex = changedIndexes(state.board, placed)[0];
     animation.push({ kind: "drop", board: placed, indexes: [droppedIndex] });
   }
   const firstCascade = resolveCascadeWithAnimation(
@@ -533,6 +632,7 @@ export function playMove(
     random,
     1,
     captureAnimation,
+    latent,
   );
   animation.push(...firstCascade.animation);
   let board = firstCascade.board;
@@ -547,7 +647,7 @@ export function playMove(
   if (clearedBoard) scoreDelta += CLEAR_BONUS;
 
   if (movesRemaining === 0) {
-    const raised = raiseCoveredRow(board);
+    const raised = raiseCoveredRow(board, latent, options.latent?.nextCoveredRow);
     if (!raised) {
       gameOver = true;
     } else {
@@ -567,6 +667,7 @@ export function playMove(
         random,
         firstCascade.waves.length + 1,
         captureAnimation,
+        latent,
       );
       board = levelCascade.board;
       scoreDelta += levelCascade.score;
@@ -596,6 +697,7 @@ export function playMove(
     animation,
     clearedBoard,
     levelAdvanced,
+    ...(latent ? { latentValues: latent } : {}),
   };
 }
 

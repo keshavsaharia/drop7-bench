@@ -1,0 +1,88 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260820T184500Z-63c0a8e2",
+  "theoryIds": [
+    "TH-20260820-distributional-afterstate-ranker-7aba7fb3"
+  ],
+  "experimentId": "EX-20260820-d4-toptwo-override-gate-0bdb39a1",
+  "runIds": [
+    "RUN-20260820T175726Z-f4f86d62"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "fail",
+  "assessment": "not-supported-as-tested",
+  "evidenceTier": "pilot",
+  "summary": "The calibrated top-two near-tie override of fair D4 by the frozen iteration-3 afterstate model FAILED its frozen gate by a narrow margin, with genuinely positive signal. On 2,689 fresh held-out roots, 1,030 (38.3%) were near-tied at the frozen 500-point threshold and the override fired on 37.0% of those. On eligible roots the override reduced mean normalized regret versus unchanged D4 in both half-folds (half1 0.2484 vs 0.2835, +0.0351; half2 0.2343 vs 0.2418, +0.0075; pooled +0.0214), but the frozen criterion required at least +0.01 in EACH half-fold, and half2 fell short. On the 84 decisive eligible roots the improvement was larger (+0.0426: 0.0880 vs 0.1306). Label stability passed (decisive Spearman 0.814), model quantile calibration passed (0.861), the gate is deterministic (byte-identical repeated reports), and the corpus is successor-closed. Interpretation: the conservative-override MECHANISM works as designed (fires often, calibrated, positive in both halves) and this is the first preregistered held-out test in this repository where a learned model's intervention improved on fair D4 at all; the CHECKPOINT's ranking quality is the bottleneck, consistent with the model being undertrained (11 of 20 epochs) and trained on a weak D1-continuation teacher. Per the frozen failure action, no further override variants of this same checkpoint are opened; a retry requires new evidence such as a fully trained or stronger-teacher model under the same frozen rule.",
+  "metrics": {
+    "roots": 2689,
+    "eligibleRoots": 1030,
+    "nearTieRate": 0.3830,
+    "overrideRateEligible": 0.3699,
+    "d4RegretEligiblePooled": 0.2629,
+    "overrideRegretEligiblePooled": 0.2414,
+    "regretGainHalf1": 0.0351,
+    "regretGainHalf2": 0.0075,
+    "regretGainDecisive": 0.0426,
+    "d4RegretWholeSet": 0.1932,
+    "overrideRegretWholeSet": 0.1850,
+    "labelStabilityDecisiveSpearman": 0.8144,
+    "quantileIntervalCoverage": 0.8606
+  },
+  "gateChecks": [
+    {
+      "criterion": "Successor-closed corpus (all legal siblings x 256 scenarios)",
+      "passed": true,
+      "observed": "4,858,880 rows over 2,793 roots; completeness 1.0"
+    },
+    {
+      "criterion": "Label stability floor: decisive-root scenario-half Spearman >= 0.5",
+      "passed": true,
+      "observed": "0.8144"
+    },
+    {
+      "criterion": "Eligible-root override regret <= D4 regret - 0.01 in EACH half-fold",
+      "passed": false,
+      "observed": "half1 +0.0351 (passes); half2 +0.0075 (below the frozen 0.01 margin); pooled +0.0214"
+    },
+    {
+      "criterion": "Override rate >= 5% of eligible roots",
+      "passed": true,
+      "observed": "37.0%"
+    },
+    {
+      "criterion": "Quantile interval coverage within [0.66, 0.87]",
+      "passed": true,
+      "observed": "0.8606"
+    },
+    {
+      "criterion": "Gate script deterministic (byte-identical repeated reports)",
+      "passed": true,
+      "observed": "two runs byte-identical after moving wall time out of the report"
+    },
+    {
+      "criterion": "All existing CHECK-tier self-tests pass before any label is inspected",
+      "passed": true,
+      "observed": "SELFTEST OK (9 checks)"
+    }
+  ],
+  "perGameArtifact": {
+    "path": "runs/RUN-20260820T175726Z-f4f86d62/gate/override-gate-report.json",
+    "sha256": "de6e7b70dacc8ccdfa95c8486d941b9249ce28675e96daa45d4460618f7582df",
+    "recordCount": 1
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260820T080056Z-376ada90.json"
+  ],
+  "artifactManifestRef": null,
+  "limitations": [
+    "The evaluation target is the H40 phase-greedy-D1 continuation outcome - the same label family the model was trained to predict; D4 is compared against the same target, but the offline gate cannot measure real gameplay interaction, which only a SCREEN tier can.",
+    "The model was undertrained (11 of 20 epochs) and used a weak D1-continuation teacher; both are documented as the likely bottleneck and motivate any retry.",
+    "The near-tie threshold (500) and regret margin (0.01) were frozen choices; the half2 miss (0.0075) is close to the margin and the result should be read as a narrow failure, not as evidence of no effect.",
+    "Single machine profile; FP32 on the shared-memory iGPU."
+  ],
+  "contributionIds": [
+    "CT-20260820T140540Z-f8458dc0"
+  ],
+  "recordedAt": "2026-08-20T18:45:00Z"
+}

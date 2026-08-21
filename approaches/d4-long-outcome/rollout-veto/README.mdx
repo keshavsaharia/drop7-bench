@@ -1,0 +1,50 @@
+---
+title: Rollout Veto
+family: d4-long-outcome
+status: Runtime-paused
+evidence: ledger-recorded
+generated: true
+---
+
+<Callout title="Generated starter page" tone="info">
+This page was generated from the experiment index. Expand it with a visual
+explanation of the mechanism when you work on this approach.
+</Callout>
+
+## Exact D4 + 25-move D2 rollout veto
+
+Lets a costly common-tape H25/D2 comparison veto fair D4.
+
+**Status: Runtime-paused** (ledger-recorded). one promising pilot passed quality gates but missed the runtime limit by a wide margin.
+
+## Exact compression variants
+
+Preserve decisions while deduplicating suffixes or removing low-value D2 caches.
+
+**Status: Runtime-paused** (ledger-recorded). parity held, but wall-time savings were immaterial.
+
+## Rollout quality extension
+
+Runs more complete games to test whether the original 404,000-point pilot replicates.
+
+**Status: Rejected** (ledger-recorded). the frozen replication and robustness gates failed.
+
+## Teacher compression
+
+Tests cheaper continuation teachers against the exact rollout's beneficial interventions.
+
+**Status: Rejected** (ledger-recorded). none recovered enough good vetoes.
+
+## Sources
+
+- `d2-rollout-teacher-compression.cpp`
+- `d4-d2-rollout-veto-cache-free.cpp`
+- `d4-d2-rollout-veto-exact-compressed.cpp`
+- `d4-d2-rollout-veto-quality-extension.cpp`
+- `d4-d2-rollout-veto.cpp`
+
+## More evidence
+
+- [Experiment index](/docs/research/experiment-index)
+- [Full research ledger](/docs/research/history)
+- [Family overview](/approaches/d4-long-outcome)

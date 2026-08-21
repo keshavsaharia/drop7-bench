@@ -1,0 +1,42 @@
+---
+title: Deployment Panel
+family: terminal-policy-iteration
+status: Completed
+evidence: task-record only diagnostic
+generated: true
+---
+
+<Callout title="Generated starter page" tone="info">
+This page was generated from the experiment index. Expand it with a visual
+explanation of the mechanism when you work on this approach.
+</Callout>
+
+## H200 D1/D4 signal audit
+
+Recomputes exact D1 and D4 rankings on the locked 477-root H200 corpus.
+
+**Status: Completed** (task-record only diagnostic). D4 materially beat D1 on top-action, pairwise ranking, regret, and every origin.
+
+## Full-panel conservative preflight
+
+Tests nested 7/21/35/63-scenario sibling labels with whole-origin cross-validation before any gameplay.
+
+**Status: Rejected** (ledger-recorded). stability, precision, recall, ranking, regret, and origin gates all failed.
+
+## Martingale-dual ranker
+
+Charges a bounded hindsight beam for future-information advantage on the locked H200 panel.
+
+**Status: Rejected** (ledger-recorded). it ranked siblings materially worse than fair D4.
+
+## Sources
+
+- `full-panel-cpi-preflight.cpp`
+- `martingale-dual-b0.cpp`
+- `terminal-panel-d4-signal-audit.cpp`
+
+## More evidence
+
+- [Experiment index](/docs/research/experiment-index)
+- [Full research ledger](/docs/research/history)
+- [Family overview](/approaches/terminal-policy-iteration)

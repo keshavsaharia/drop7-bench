@@ -1,0 +1,35 @@
+---
+title: Phase Distillation
+family: value-policy-learning
+status: Rejected
+evidence: task-record only
+generated: true
+---
+
+<Callout title="Generated starter page" tone="info">
+This page was generated from the experiment index. Expand it with a visual
+explanation of the mechanism when you work on this approach.
+</Callout>
+
+## Policy distillation
+
+Clones the exact phase D3/s5 action policy from public board tokens.
+
+**Status: Rejected** (task-record only). held-out top-action agreement and whole-game play were poor.
+
+## Q distillation
+
+Regresses scalar teacher Q from phase features and common one-ply successor summaries.
+
+**Status: Rejected** (task-record only). training fit did not translate to a viable standalone policy.
+
+## Sources
+
+- `phase-q-student.cpp`
+- `phase-student.cpp`
+
+## More evidence
+
+- [Experiment index](/docs/research/experiment-index)
+- [Full research ledger](/docs/research/history)
+- [Family overview](/approaches/value-policy-learning)

@@ -1,0 +1,35 @@
+---
+title: Rollout
+family: heuristic-search
+status: Rejected
+evidence: task-record only
+generated: true
+---
+
+<Callout title="Generated starter page" tone="info">
+This page was generated from the experiment index. Expand it with a visual
+explanation of the mechanism when you work on this approach.
+</Callout>
+
+## Native rollout planner
+
+Evaluates root actions with bounded public continuations and configurable horizons/scenarios.
+
+**Status: Rejected** (task-record only). the tested 25-move control reproduced the weak continuation policy's mistakes.
+
+## Native rollout teacher
+
+Produces higher-cost common-tape action labels for rollout and distillation studies.
+
+**Status: Completed** (task-record only). useful as a teacher/benchmark, not a deployable policy.
+
+## Sources
+
+- `rollout.cpp`
+- `teacher.cpp`
+
+## More evidence
+
+- [Experiment index](/docs/research/experiment-index)
+- [Full research ledger](/docs/research/history)
+- [Family overview](/approaches/heuristic-search)

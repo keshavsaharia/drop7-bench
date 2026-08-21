@@ -1,0 +1,76 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260821T004637Z-e804cca0",
+  "actor": {
+    "kind": "model",
+    "platform": "claude-code",
+    "model": "claude-opus-5[1m]",
+    "agentId": "delegated/learned-leaf"
+  },
+  "level": "L3",
+  "roles": [
+    {
+      "role": "software",
+      "degree": "lead"
+    },
+    {
+      "role": "investigation",
+      "degree": "lead"
+    },
+    {
+      "role": "validation",
+      "degree": "lead"
+    },
+    {
+      "role": "methodology",
+      "degree": "substantial"
+    },
+    {
+      "role": "formal-analysis",
+      "degree": "substantial"
+    },
+    {
+      "role": "writing",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Bounded work package: preregistered and then tested whether chance-node bias caps what a learned survival evaluator can contribute when it is injected at the leaf of fair depth 4, rather than as extra lookahead. Wrote the preregistration before any gameplay cohort was run. Built a dependency-free C++ inference path for the trained checkpoint: a versioned self-describing D7NET binary writer (export_net.py, export_leaf.py) and a reader/evaluator with no libtorch, no BLAS, no dynamic library and no hot-path allocation (net.hpp, leafnet.hpp), NHWC throughout with weights repacked once at load; plus stated-tolerance PyTorch-versus-C++ parity gates (parity_net.py, parity_leaf.py, net-check.cpp, leaf-check.cpp) and a leaf-scale diagnostic (leaf-probe.cpp). Measured the affordability wall directly rather than assuming it: a depth-4 fair expectimax evaluates 615,090 leaves per decision at five chance strata and 2,271,280 at seven, so the 3,006,543-parameter CNN at 4,122 microseconds per state in the exported path is about 2,860x over budget, 2,535 seconds per decision against a 0.887-second reference decision. Trained and substituted an NNUE-shaped student on the same corpus and the same whole-origin split reaching 0.8564 held-out lifetime Pearson against the CNN's 0.8646 at 1/3,109th the cost, establishing that leaf arity and not model capacity was binding. Ran a 2x2 of leaf (frozen vs learned) by chance strata (five vs seven), 64 paired whole games per arm: the learned leaf is worth +39,105 points and +11.13 moves at five strata (one-sided 95% bootstrap lower bound +1,138, 37-0-27) and +17,281 at seven (lower bound -55,892), a difference-in-differences of -21,824 (lower bound -105,254), which refutes the preregistered prediction that the effect would be larger with an exact chance estimator; the measured relationship between estimator quality and a learned leaf is substitution, not amplification. Separately identified, characterised and wrote up a host defect found while building the parity gate: torch.nn.Conv2d on this machine's CPU is nondeterministic under oneDNN even single-threaded with every thread environment variable pinned, about 6.25% of output elements differing per repeat, which silently invalidated an earlier parity comparison, and established the fix (disable the mkldnn path) and the general rule (prove a CPU PyTorch reference repeats before gating against it). Run output was written to runs/RUN-A52-LEAF/ (git-ignored) under lease SEEDLEASE-A52-LEAF = 0xa5240000-0xa5247fff for pilot and tuning, with the 2x2 evaluated on the previously read cohort 0xa51d1000-0xa51d103f.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "approaches/lifetime-objective/learned-leaf/",
+    "approaches/lifetime-objective/learned-leaf/PREREGISTRATION.md",
+    "docs/exploratory/finding-08-learned-leaf.md",
+    "docs/exploratory/gpu-03-onednn-conv-nondeterminism.md"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "Preregistration written and the prediction stated verbatim before any gameplay cohort was opened; the reported verdict is against that stated criterion.",
+    "CHECK parity gate: with the blend weight w=0 the candidate short-circuits to the frozen fair leaf before the model is touched, and matches the frozen reference on 50 of 50 compared moves (--parity --seed-start 0xa5240100 --parity-games 2).",
+    "Comparability gate: both w=0 reference arms reproduced finding-05's published confirmation cohort to every reported digit, including mean, median, Q25, min, max, sd, moves, clears and reveals per move, and work per move, for both the five- and seven-stratum arms.",
+    "Completed-depth gate: the seven-stratum arms ran at --max-work 16000000 and their measured 4,956,614 logical work per move confirms a completed depth 4 rather than a silent degradation to depth 3 at the frozen 3,200,000 bound.",
+    "Export/inference parity gate with a tolerance declared before the comparison (2e-3 absolute or 2e-3 relative per head, relative measured with a 1.0 floor), over 4,096 real board states drawn by a deterministic stride computed independently on both sides: worst head 4.900e-05 absolute, a pass by roughly 40x; lifetime Pearson 1 - 4e-13; one adjacent inversion in 4,095 and it sits at an exact tie in the reference. In the unit the search consumes, the largest disagreement across all 4,096 states is 0.22 points against a 17,000-point row-rise bonus.",
+    "The parity reference itself was proved bit-repeatable over three trials before anything was compared to it, after the oneDNN nondeterminism was discovered; parity_net.py enforces this with --determinism-trials and exits non-zero on drift.",
+    "Score identity asserted per decision: 0 violations in 26,934 decisions across all four arms. 0 censored games in 256.",
+    "Seed-lease enforcement: the search binary refuses to start outside SEEDLEASE-A52-LEAF (0xa5240000-0xa5247fff) and the declared fixed evaluation cohort (0xa51d1000-0xa51d103f); tuning used a cohort disjoint from evaluation."
+  ],
+  "limitations": [
+    "Recorded by the records archivist on the delegated agent's behalf; the agent had no write access to research/ and did not review this transcription. Every figure above is transcribed from docs/exploratory/finding-08-learned-leaf.md, docs/exploratory/gpu-03-onednn-conv-nondeterminism.md and the package's preregistration and README, not re-measured. The finding document was published at 17:41 local on 2026-08-20, after this session's first two validation runs, so the transcription is of a document that may still be edited by its author.",
+    "Not independently reviewed.",
+    "Exploratory. Evidence tier is development for the gameplay arms and CHECK for the export, parity and feasibility gates. No qualification claim; no protected or final seed opened.",
+    "64 paired games per arm, with score standard deviation 51-67% of the mean. The five-stratum lower bound of +1,138 clears zero by very little and wants replication on a fresh cohort before it is leaned on.",
+    "The evaluation cohort 0xa51d1000-0xa51d103f is previously read development data, deliberately reused so the arms are directly comparable to finding-05's published figures. It is now doubly read and can never serve as fresh confirmation.",
+    "The difference-in-differences interval is wide (point -21,824, lower bound -105,254). The result refutes the preregistered positive interaction at the stated criterion; it does not establish that the true interaction is negative.",
+    "The model that plays is not the model the brief specified: the CNN was exported and gated but never played a move, and an NNUE-shaped student was substituted for affordability. A result about that student is not literally a result about the CNN.",
+    "The blend weight, scale and head were tuned only at five strata on 32 games whose bounds all include zero. The preregistered seven-stratum tuning confirmation (TUNE-B) was not run; the compute went to the 2x2 instead.",
+    "No fixed-time comparison and no timing-grade measurement. Every arm ran on a machine shared with other jobs at load averages of 11-19 using at most 12 threads, so no performance claim is made; node, leaf and model-evaluation counts are exact and machine-independent, the seconds are not. No machine profile is attached.",
+    "The five- and seven-stratum arms are not equal-compute comparisons, and no equal-compute variant of the learned leaf was run.",
+    "The oneDNN Conv2d defect is characterised on one host and one torch build, the offending kernel was not identified, no upstream report was filed, and only Conv2d was tested among the convolution family, so the 6.25% figure describes one shape and is not the defect's general magnitude.",
+    "No theory, experiment, dataset, result, run, or seed-lease record exists in research/ for this work, so the machine-readable record is incomplete and the lease is documented only in prose and in a source-level guard."
+  ],
+  "selfReported": false,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-21T00:46:37Z"
+}

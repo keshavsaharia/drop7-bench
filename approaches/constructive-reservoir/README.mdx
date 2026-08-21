@@ -1,0 +1,26 @@
+---
+title: Constructive and reservoir policies
+summary: Don't wait for chains — build chain structures deliberately across row rises.
+---
+
+Most policies react to the board in front of them. Constructive policies try
+to **manufacture** future chains: stack a high number where a later clear will
+drop matching partners onto it, keep the trigger reachable, and survive the
+rises in between. The standing structure is the "reservoir."
+
+<Board
+  cells="00000000000000000000000000000000006060008888888"
+  highlight={[38, 40]}
+  size={240}
+  caption="A tiny reservoir: two 6s held apart, waiting for a drop that links them into a group of six."
+/>
+
+## What the evidence showed
+
+- The constructive-spectrum planner materially beat fair D1 and remains a
+  useful fast continuation — but applying it as an override on top of D4
+  destabilized score, survival, and flow.
+- A 12-move constructive horizon improved on a 7-move one, yet longer horizons
+  were not monotonic. Planning further is not automatically planning better.
+- The family verdict: a valuable **feature or option** inside a larger policy,
+  not yet a standalone controller.

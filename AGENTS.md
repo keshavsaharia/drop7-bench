@@ -21,6 +21,15 @@ million-point claim, also read
 `.agents/skills/audit-drop7-experiment/SKILL.md` completely and keep the audit
 separate from candidate repair or new data collection.
 
+To run the scripted-round benchmark, register a policy on the leaderboard,
+drive a policy over the D7P wire protocol, or generate scripted rounds, read
+`.agents/skills/drop7-benchmark-playground/SKILL.md`. Read it before quoting any
+leaderboard number: scripted rounds are a playground and are never tier
+evidence.
+
+To add to or change the Next.js research console under `web/`, read
+`.agents/skills/drop7-web-console/SKILL.md`.
+
 For a narrow documentation or code-maintenance task, follow the constraints
 below without opening gameplay data or starting a research run.
 
@@ -116,6 +125,33 @@ When the user/platform workflow authorizes commits, use the repository commit
 template and validated trailers. Use the configured human/bot Git author; model
 attribution belongs in contribution records and trailers. Never invent a SHA
 when Git is absent or work is uncommitted.
+
+## Tooling: benchmark playground and web console
+
+`src/bench/` implements scripted deterministic rounds (fixed disc tape plus
+predetermined latent gray-disc values, via the engine's optional latent mode)
+and the D7P policy protocol (`docs/d7p-protocol.md`). `web/` is a Next.js
+console rendering research records, approach MDX docs, and the leaderboard.
+Scripted rounds are a public playground: they consume no seed lease, and their
+results are never tier evidence. The engine's latent mode is optional and must
+leave default random-reveal behavior byte-identical; `npm test` covers both.
+
+Eight fixed rounds cannot separate policies whose scores are heavy-tailed, so a
+leaderboard total is a smoke test and a demonstration, not a measurement. Never
+tune a research candidate against the gauntlet rounds; they are visible in the
+repository and are an overfitting target. Scripted-round generators use the
+dedicated `0x5eed****` domain, which overlaps no research range.
+
+The native engine has no latent mode and draws a covered disc's value at reveal
+time, so latent-mode behavior is not cross-engine verified. For research that
+needs both a hidden board and a native solver, use the C++ scenario engine under
+`approaches/lifetime-objective/scenario/`, which is proven trajectory-identical
+to the native engine in stream mode.
+
+`web/` reads the repository directly and has no database or API server. It must
+render on a checkout with no `web/data/` and no research results, must never
+compute or infer a number that is not recorded, and must carry run validity,
+scientific outcome, and evidence tier through to the interface unchanged.
 
 ## Definition of done
 

@@ -1,0 +1,110 @@
+---
+title: How Drop7 works
+summary: The rules of five-move Hardcore Drop7, shown board by board — clears, chain reactions, gray discs, row rises, and scoring.
+order: 1
+---
+
+Drop7 is played on a 7×7 board. You drop one numbered disc at a time into a
+column, and it falls to the lowest empty cell. The number on a disc is a rule
+about **group size**: a disc disappears when the unbroken horizontal or
+vertical group it sits in has a length exactly equal to its number. Gray discs
+count as occupied cells, so a group that touches a gray disc is longer than it
+looks.
+
+## A disc clears when its group matches its number
+
+Here the bottom row holds two 3s with empty cells on both sides. Dropping a
+third <Disc n={3} /> in column 5 completes a group of exactly three, so all
+three discs clear — and the gray disc resting on them takes a hit, cracks, and
+drops:
+
+<BoardCompare
+  before="0000000000000000000000000000000000000080000033000"
+  after="0000000000000000000000000000000000000000000009000"
+  beforeLabel="Drop a 3 in column 5"
+  afterLabel="All three 3s clear"
+  caption="Three 3s in a contiguous run of exactly three pop. The gray disc above them takes one hit and cracks."
+/>
+
+## Clears cascade into chain reactions
+
+When discs clear, everything above them falls. If the fall creates a new
+match, those discs clear too — a chain. Here, clearing the three 3s lets two
+2s drop together into a vertical pair:
+
+<BoardCompare
+  before="0000000000000000000000000000002000000200000033008"
+  after="0000000000000000000000000000000000000000000000008"
+  beforeLabel="Two 2s rest on the 3s"
+  afterLabel="Wave 2: the fallen 2s also clear"
+  caption="Wave 1 clears the 3s, the 2s fall into a column of exactly two, and wave 2 clears them. Chains are where big scores live."
+/>
+
+## Gray discs hide fixed numbers
+
+A solid gray disc <Disc solid /> hides a number. It takes **two** neighboring
+clears to open: the first hit cracks it <Disc cracked />, the second reveals
+the number underneath. Here two 1s — each sitting in a group of one — pop and
+their two hits open the gray disc between them:
+
+<BoardCompare
+  before="0000000000000000000000000000000000000010000008100"
+  after="0000000000000000000000000000000000000000007005000"
+  beforeLabel="Drop a 7 in column 1"
+  afterLabel="The gray disc reveals its 5"
+  caption="The two 1s clear, and their two hits on the gray disc reveal the number hidden inside."
+/>
+
+In the scripted benchmark rounds used by the leaderboard, that hidden number
+is **predetermined**: the 5 was fixed when the covered row appeared, and every
+policy that opens this disc finds the same 5.
+
+## Every five drops, a covered row rises
+
+The rise clock ticks down from 5. When it reaches zero, the whole board rises
+one row and a **new covered row** appears at the bottom, with a 17,000-point
+level bonus:
+
+<BoardCompare
+  before="0000000000000000000000000000000000000040008888888"
+  after="0000000000000000000000000000700400088888888888888"
+  beforeLabel="The fifth drop lands"
+  afterLabel="The board rises"
+  caption="Everything shifts up one row and a fresh row of gray discs appears below. If any cell blocks the top row, the rise fails and the game ends."
+/>
+
+The game ends when a row cannot rise, or when no column can accept another
+disc.
+
+## Scoring rewards deep chains
+
+Each disc cleared in chain wave `d` awards `floor(7 × d^2.5)` points, so late
+waves are worth far more than early ones:
+
+| Chain wave | Points per disc | Feel |
+| --- | ---: | --- |
+| 1 | 7 | routine clear |
+| 2 | 39 | nice follow-up |
+| 3 | 109 | real chain |
+| 4 | 224 | big cascade |
+| 6 | 617 | spectacular |
+| 8 | 1,267 | board-shaking |
+
+Clearing the entire board awards **70,000** points, and each row rise awards
+**17,000** points. This is the corrected five-move Hardcore scoring used
+throughout the repository (historical runs with a 7,000-point level bonus are
+archival only).
+
+## Why the strategy is hard
+
+A move is never just its immediate clear: it changes which gray discs get
+cracked, which numbers fall together, and what the board looks like after the
+next rise. The research question — which column should receive the next disc,
+using only what a player can see — is what every approach in this repository
+tries to answer.
+
+<Callout title="The public information boundary" tone="info">
+A legal policy may use only the visible board, the visible next disc, the
+moves until the next rise, and whether the game is over. Never the seed,
+future discs, hidden gray-disc values, the score, or the level.
+</Callout>

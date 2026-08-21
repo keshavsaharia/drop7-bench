@@ -1,0 +1,36 @@
+---
+title: Dqn
+family: value-policy-learning
+status: Completed
+evidence: task-record only
+generated: true
+---
+
+<Callout title="Generated starter page" tone="info">
+This page was generated from the experiment index. Expand it with a visual
+explanation of the mechanism when you work on this approach.
+</Callout>
+
+## Double-DQN and continuation
+
+Trains a public Double-DQN and evaluates it with bounded six-move continuations.
+
+**Status: Completed** (task-record only). continuation improved the frozen DQN over 64 games, but remained far below the research target.
+
+## DQN v2
+
+Adds five-step credit, prioritized trajectory replay, and optional privileged demonstrations.
+
+**Status: Rejected** (task-record only). the first fixed five-step/prioritized ablation regressed.
+
+## Sources
+
+- `continuation-benchmark.ts`
+- `train-v2.ts`
+- `train.ts`
+
+## More evidence
+
+- [Experiment index](/docs/research/experiment-index)
+- [Full research ledger](/docs/research/history)
+- [Family overview](/approaches/value-policy-learning)

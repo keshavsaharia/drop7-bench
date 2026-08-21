@@ -205,7 +205,6 @@ def main():
         "nearTieEpsilon": NEAR_TIE_EPSILON,
         "bootstrapResamples": BOOTSTRAP_RESAMPLES,
         "device": torch.cuda.get_device_name(0) if device == "cuda" else "cpu",
-        "wallSeconds": time.time() - started,
     }
     os.makedirs(args.out, exist_ok=True)
     path = os.path.join(args.out, "override-gate-report.json")
@@ -213,6 +212,7 @@ def main():
         json.dump(report, handle, indent=1, sort_keys=True)
         handle.write("\n")
     print(json.dumps(report, indent=1, sort_keys=True))
+    print(f"wallSeconds {time.time() - started:.1f}")
 
 
 if __name__ == "__main__":

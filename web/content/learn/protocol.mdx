@@ -1,0 +1,77 @@
+---
+title: The D7P policy protocol
+summary: A UCI-style standard interface that lets any Drop7 strategy be benched and reported the same way.
+order: 3
+---
+
+Chess engines speak UCI; Drop7 policies here speak **D7P**. The protocol is
+the contract that makes the leaderboard possible: wrap a strategy once, and
+any harness can drive it over the same predetermined rounds.
+
+## The shape of a policy
+
+A policy answers exactly one question, using exactly four inputs:
+
+<div className="my-4 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 font-mono text-sm">
+  <span className="text-zinc-500">{"//"} the only legal inputs</span>
+  <br />
+  (board, nextDisc, movesUntilRise, gameOver)
+  <span className="text-sky-400">{" → "}</span>
+  column
+</div>
+
+Everything else — the seed, future discs, hidden gray-disc values, the score,
+the level, the move number — is privileged. Teachers may use privileged
+information to *train* a policy, but the deployed policy must play without it.
+
+## A wire session
+
+Any language can speak D7P over stdin/stdout. A complete session looks like
+this:
+
+```text
+-> d7p
+<- id name Expectimax D2
+<- id family fair-expectimax
+<- id public-information true
+<- d7pok
+-> isready
+<- readyok
+-> position board 00000000000000000000000000000000000000008888888 next 4 rise 5
+-> go
+<- bestmove 3
+-> quit
+```
+
+The board travels as a 49-character string: `0` empty, `1`–`7` numbered, `8`
+solid gray, `9` cracked gray, row-major from the top. `bestmove` answers with
+a 0-indexed column.
+
+## Try it against the registry
+
+Every policy on the leaderboard ships with a D7P server:
+
+```sh
+node --experimental-strip-types src/bench/d7p-server.ts --policy greedy
+```
+
+```text
+d7p
+isready
+position startpos next 4 rise 5
+go
+```
+
+## Adding your own policy
+
+1. Implement `chooseColumn(state)` — see `src/bench/policies.ts` for the
+   `BenchPolicy` interface and the existing registry entries.
+2. Keep it deterministic: the same public state must always produce the same
+   column. Solver seeds derive from the policy id, never from game data.
+3. Register it, then run `npm run bench -- --policies your-policy`.
+4. If your policy reads level or move number, mark it
+   `publicInformation: false` — it will be badged "extended state" on the
+   leaderboard.
+
+The normative specification lives in
+[docs/d7p-protocol.md](/docs/d7p-protocol).
