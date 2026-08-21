@@ -78,8 +78,11 @@ function main() {
     for (const slug of readdirSync(familyDir).sort()) {
       const dir = join(familyDir, slug);
       if (!statSync(dir).isDirectory()) continue;
+      const mdxPath = join(dir, "README.mdx");
+      const existing = existsSync(mdxPath) ? readFileSync(mdxPath, "utf8") : null;
+      const machineMade = existing !== null && /^(generated|draft): true$/m.test(existing.slice(0, 600));
       if (
-        existsSync(join(dir, "README.mdx")) ||
+        (existing !== null && !machineMade) ||
         existsSync(join(dir, "README.md")) ||
         existsSync(join(dir, "PREREGISTRATION.md"))
       ) {
@@ -90,18 +93,50 @@ function main() {
       const sources = readdirSync(dir)
         .filter((file) => /\.(ts|cpp|hpp|py|json)$/.test(file))
         .sort();
+      // First comment block of each source file, as the code's own description.
+      const headers = sources
+        .map((file) => {
+          const text = readFileSync(join(dir, file), "utf8").slice(0, 4000);
+          let block = null;
+          const star = text.match(/\/\*\*?([\s\S]*?)\*\//);
+          const hash = text.match(/^((?:#(?!!)[^\n]*\n){2,})/m);
+          const slash = text.match(/^((?:\/\/[^\n]*\n){2,})/m);
+          const doc = text.match(/^"""([\s\S]*?)"""/m);
+          if (star) block = star[1].split("\n").map((l) => l.replace(/^\s*\*\s?/, "")).join(" ");
+          else if (doc) block = doc[1];
+          else if (slash) block = slash[1].split("\n").map((l) => l.replace(/^\/\/\s?/, "")).join(" ");
+          else if (hash) block = hash[1].split("\n").map((l) => l.replace(/^#\s?/, "")).join(" ");
+          if (!block) return null;
+          const clean = block.replace(/\s+/g, " ").trim();
+          if (clean.length < 40) return null;
+          return { file, text: clean.length > 600 ? clean.slice(0, 600) + "…" : clean };
+        })
+        .filter(Boolean);
       const primary = rows[0] ? parseStatus(rows[0].status) : null;
       const statuses = [...new Set(rows.map((row) => parseStatus(row.status).status))];
       const evidences = [...new Set(rows.map((row) => parseStatus(row.status).evidence))];
 
       const body = [];
+      body.push(
+        '<Callout title="Draft page — generated from the repository\'s records" tone="warn">',
+        "This page was assembled automatically from the experiment index and the",
+        "source files' own comments. It has not been reviewed or rewritten for a",
+        "general reader yet, and it makes no claim beyond what those records say.",
+        "See the family page for the idea in context.",
+        "</Callout>",
+        "",
+      );
       if (rows.length === 0) {
         body.push(
-          "This approach is not yet listed in the experiment index. Read the",
-          "source files below and the family page for context, and expand this",
-          "page when the approach is understood.",
+          "## What the records say",
+          "",
+          "This approach has no row in the experiment index and no ledger entry,",
+          "so there is **no retained result** for it. What follows is taken from",
+          "the source files themselves.",
+          "",
         );
       } else {
+        body.push("## What the records say", "");
         for (const row of rows) {
           const parsed = parseStatus(row.status);
           body.push(`## ${mdxText(row.title)}`, "");
@@ -113,29 +148,38 @@ function main() {
         }
       }
 
+      if (headers.length > 0) {
+        body.push("## What the code says about itself", "");
+        for (const h of headers) {
+          body.push(`**\`${h.file}\`** — ${mdxText(h.text)}`, "");
+        }
+      }
+      body.push(
+        "## Where to look next",
+        "",
+        `- The [${family} family page](/approaches/${family}) for the idea in plain language.`,
+        "- The [experiment index](/docs/research/experiment-index) and [full ledger](/docs/research/history) for the recorded evidence.",
+        "- The [concepts primer](/learn/concepts) for the search and learning ideas this approach uses.",
+        "",
+      );
+
+      const summarySource = rows[0]
+        ? mdxText(rows[0].purpose).replace(/\s+/g, " ").trim()
+        : "No retained result; the page describes what the source files say they do.";
+      const summary = summarySource.replace(/"/g, "'").slice(0, 240);
       const mdx = `---
 title: ${titleCase(slug)}
 family: ${family}
-status: ${statuses[0] ?? "Unknown"}
+summary: "${summary}"
+status: ${(statuses[0] ?? "unknown").toLowerCase()}
 evidence: ${evidences[0] ?? "unknown"}
-generated: true
+draft: true
 ---
-
-<Callout title="Generated starter page" tone="info">
-This page was generated from the experiment index. Expand it with a visual
-explanation of the mechanism when you work on this approach.
-</Callout>
 
 ${body.join("\n")}
 ## Sources
 
 ${sources.map((file) => `- \`${file}\``).join("\n")}
-
-## More evidence
-
-- [Experiment index](/docs/research/experiment-index)
-- [Full research ledger](/docs/research/history)
-- [Family overview](/approaches/${family})
 `;
       writeFileSync(join(dir, "README.mdx"), mdx);
       created += 1;
