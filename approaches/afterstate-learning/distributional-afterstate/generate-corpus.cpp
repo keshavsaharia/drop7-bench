@@ -46,6 +46,7 @@ struct Options {
   std::string out_dir;
   std::string run_id;
   std::string fold_force;  // if set, every root gets this fold
+  afterstate::Continuation continuation = afterstate::Continuation::kD1;
 };
 
 Options parseArgs(int argc, char** argv) {
@@ -69,6 +70,15 @@ Options parseArgs(int argc, char** argv) {
       }
     } else if (arg == "--fold-force") {
       options.fold_force = next();
+    } else if (arg == "--continuation") {
+      const std::string value = next();
+      if (value == "d1") {
+        options.continuation = afterstate::Continuation::kD1;
+      } else if (value == "d2") {
+        options.continuation = afterstate::Continuation::kD2;
+      } else {
+        throw std::runtime_error("unknown --continuation: " + value);
+      }
     } else if (arg == "--threads") {
       options.threads = std::stoi(next());
     } else if (arg == "--wall-seconds") {
@@ -216,7 +226,8 @@ int main(int argc, char** argv) {
         return;
       }
       per_root_labels[index] =
-          afterstate::labelRoot(roots[index], options.scenarios);
+          afterstate::labelRoot(roots[index], options.scenarios,
+                                options.continuation);
       if ((index + 1) % 500 == 0) {
         std::lock_guard<std::mutex> lock(log_mutex);
         std::cerr << "labeled " << (index + 1) << "/" << roots.size()
@@ -279,7 +290,11 @@ int main(int argc, char** argv) {
            << "  \"rows\": " << rows << ",\n"
            << "  \"scenarios\": " << options.scenarios << ",\n"
            << "  \"horizon\": " << afterstate::kHorizon << ",\n"
-           << "  \"continuationPolicy\": \"phase-greedy-d1\",\n"
+           << "  \"continuationPolicy\": \""
+           << (options.continuation == afterstate::Continuation::kD2
+                   ? "fair-d2-s5"
+                   : "phase-greedy-d1")
+           << "\",\n"
            << "  \"harvestPolicy\": \"phase-greedy-d1\",\n"
            << "  \"droppedCrossFoldDuplicateRoots\": " << dropped_cross_fold
            << ",\n"

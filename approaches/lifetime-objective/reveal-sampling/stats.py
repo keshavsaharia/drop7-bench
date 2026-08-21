@@ -7,8 +7,16 @@ arm row, and takes an explicit comparator per comparison rather than always
 using the first arm).
 
 Usage:
-  stats.py rows   label=path ...
-  stats.py delta  candidate=path comparator=path ...   (pairs, in order)
+  stats.py rows    label=path ...
+  stats.py delta   candidate=path comparator=path ...   (pairs, in order)
+  stats.py partial candidate=path comparator=path ...   (pairs, in order)
+
+`delta` requires the two cohorts to hold exactly the same games and refuses
+anything else, which is the right rule for two finished arms.  `partial` pairs
+on the intersection of the two seed sets instead, so an arm that is still
+running can be compared honestly against a finished comparator; it prints the
+paired n and both subset means so the reader can never mistake the subset for a
+full cohort.
 """
 import json
 import random
@@ -92,10 +100,45 @@ def delta(specs):
               f"{a['meanOccupiedCells']-b['meanOccupiedCells']:+.2f} | {w}-{t}-{l} |")
 
 
+def partial(specs):
+    """Paired delta over the seeds the two cohorts share.
+
+    Used only when one arm is incomplete.  A partial arm's finished games are
+    not a random subset of its cohort -- chunked runners finish whole seed
+    blocks in order and, within a block, short games first -- so the subset mean
+    of the candidate is not an estimate of its 64-game mean.  The paired delta
+    on the shared seeds is still a fair paired comparison over those seeds.
+    """
+    print("| comparison | paired n | d score | 95% lower bound | d moves | W-T-L | "
+          "candidate subset mean | comparator subset mean |")
+    print("| --- |" + " ---: |" * 4 + " :---: |" + " ---: |" * 2)
+    for i in range(0, len(specs), 2):
+        alabel, apath = specs[i].split("=", 1)
+        blabel, bpath = specs[i + 1].split("=", 1)
+        a, b = load(apath), load(bpath)
+        sa = {x["seedHex"]: x for x in a["gamesDetail"]}
+        sb = {x["seedHex"]: x for x in b["gamesDetail"]}
+        seeds = sorted(set(sa) & set(sb))
+        if not seeds:
+            raise SystemExit(f"{alabel} and {blabel} share no seed")
+        diffs = [sa[s]["score"] - sb[s]["score"] for s in seeds]
+        mdiffs = [sa[s]["moves"] - sb[s]["moves"] for s in seeds]
+        w = sum(1 for x in diffs if x > 0)
+        t = sum(1 for x in diffs if x == 0)
+        l = sum(1 for x in diffs if x < 0)
+        ma = sum(sa[s]["score"] for s in seeds) / len(seeds)
+        mb = sum(sb[s]["score"] for s in seeds) / len(seeds)
+        print(f"| {alabel} - {blabel} | {len(seeds)} of {max(len(sa), len(sb))} | "
+              f"{sum(diffs)/len(diffs):+,.0f} | {bootstrap_lower(diffs):+,.0f} | "
+              f"{sum(mdiffs)/len(mdiffs):+.2f} | {w}-{t}-{l} | {ma:,.0f} | {mb:,.0f} |")
+
+
 if __name__ == "__main__":
     if sys.argv[1] == "rows":
         rows(sys.argv[2:])
     elif sys.argv[1] == "delta":
         delta(sys.argv[2:])
+    elif sys.argv[1] == "partial":
+        partial(sys.argv[2:])
     else:
         raise SystemExit(__doc__)

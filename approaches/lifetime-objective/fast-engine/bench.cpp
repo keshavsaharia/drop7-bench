@@ -262,6 +262,90 @@ int main(int argc, char** argv) {
     return 0;
   }
 
+  if (mode == "cacheinv") {
+    // Does the declared transposition capacity change any decision?
+    //
+    // It cannot, by construction: a cached value is exactly what expand() would
+    // recompute for the same (state, depth) key, because the search is
+    // deterministic and every chance seed derives from the state and the
+    // remaining depth.  Capacity therefore moves `work`, `nodes` and
+    // `cacheHits` and nothing else.  That is a strong claim about cost, so it
+    // is checked rather than asserted: two FastSearch instances differing only
+    // in capacity must select the same column at every move of a real game.
+    std::vector<std::size_t> capacities;
+    for (std::size_t value : {std::size_t{4'000}, std::size_t{60'000},
+                              std::size_t{200'000}, std::size_t{1'000'000}}) {
+      capacities.push_back(value);
+    }
+    FastSearchParameters base;
+    base.depth = probe_depth;
+    base.chance_samples = probe_strata;
+    base.maximum_work = workBoundFor(probe_depth, probe_strata) + 1;
+    std::cout << "cache invariance: depth " << probe_depth << ", strata "
+              << probe_strata << ", " << games << " games x " << maximum_moves
+              << " moves\n";
+    std::cout << "capacity      moves  action mismatches   work/move   "
+                 "cache hits/move  relative work\n";
+    std::uint64_t reference_work = 0;
+    std::vector<std::vector<int>> reference_actions;
+    bool ok = true;
+    for (std::size_t capacity : capacities) {
+      FastSearchParameters parameters = base;
+      parameters.maximum_cache_entries = capacity;
+      FastSearch search{parameters};
+      std::vector<std::vector<int>> actions;
+      std::uint64_t work = 0;
+      std::uint64_t hits = 0;
+      std::uint64_t moves = 0;
+      std::uint64_t incomplete = 0;
+      for (int game = 0; game < games; ++game) {
+        const std::uint32_t seed = kBenchmarkSeeds + 0x200u +
+                                   static_cast<std::uint32_t>(game);
+        requireLease(seed);
+        State state = initialHeadlessState(seed);
+        actions.emplace_back();
+        while (!state.game_over && state.moves_played < maximum_moves) {
+          FastSearchMetrics metrics;
+          const int column = search.chooseAction(state, metrics);
+          work += metrics.work;
+          hits += metrics.cache_hits;
+          if (metrics.completed_depth != probe_depth) ++incomplete;
+          ++moves;
+          actions.back().push_back(column);
+          MoveResult move;
+          if (!playHeadlessMove(state, seed, column, move)) break;
+        }
+      }
+      std::uint64_t mismatches = 0;
+      if (reference_actions.empty()) {
+        reference_actions = actions;
+        reference_work = work;
+      } else {
+        for (std::size_t g = 0; g < actions.size(); ++g) {
+          const std::size_t n =
+              std::min(actions[g].size(), reference_actions[g].size());
+          if (actions[g].size() != reference_actions[g].size()) ++mismatches;
+          for (std::size_t m = 0; m < n; ++m) {
+            if (actions[g][m] != reference_actions[g][m]) ++mismatches;
+          }
+        }
+      }
+      std::cout << std::setw(9) << capacity << std::setw(11) << moves
+                << std::setw(20) << mismatches << std::setw(12)
+                << (moves ? work / moves : 0) << std::setw(17)
+                << (moves ? hits / moves : 0) << std::setw(15)
+                << std::setprecision(3)
+                << (reference_work ? static_cast<double>(work) /
+                                         static_cast<double>(reference_work)
+                                   : 1.0)
+                << (incomplete ? "  WORK BOUND BOUND" : "") << '\n';
+      ok &= mismatches == 0 && incomplete == 0;
+    }
+    std::cout << (ok ? "CACHE INVARIANCE HOLDS: capacity moves cost only\n"
+                     : "CACHE INVARIANCE VIOLATED\n");
+    return ok ? 0 : 1;
+  }
+
   std::cerr << "unknown mode " << mode << '\n';
   return 2;
 }

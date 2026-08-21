@@ -21,6 +21,7 @@ sha256sum "${REFERENCE}/fair-only-depth4.cpp" \
           "${HERE}/common.hpp" \
           "${HERE}/generate-corpus.cpp" \
           "${HERE}/label-d4.cpp" \
+          "${HERE}/label-d4q.cpp" \
           "${HERE}/self-test.cpp" > "${OUT}/sources.sha256"
 
 sed 's/^int main(int argc, char\*\* argv) {$/int drop7_afterstate_unused_entrypoint(int argc, char** argv) {/' \
@@ -45,4 +46,9 @@ fi
   -o "${OUT}/label-d4" \
   "${HERE}/label-d4.cpp"
 
-echo "built ${OUT}/{self-test,generate-corpus,label-d4} with ${CXX}"
+"${CXX}" -O3 -std=c++20 -pthread -Wall -Wextra \
+  -I "${REFERENCE}" -I "${OUT}" \
+  -o "${OUT}/label-d4q" \
+  "${HERE}/label-d4q.cpp"
+
+echo "built ${OUT}/{self-test,generate-corpus,label-d4,label-d4q} with ${CXX}"

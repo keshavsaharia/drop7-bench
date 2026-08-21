@@ -22,6 +22,7 @@
   "notes": [
     "Conservative import before proposing this range: every 8-hex-digit constant in docs/, approaches/, src/, research/, artifacts/, and runs/ was enumerated. Historical gameplay seeds cluster in 0x3d000000-0x3ebfffff with additional blocks at 0x3f******, 0x4d******, 0x6d000000, 0x6e000000-0x6e000100, and 0xa5700000; protected is 0x7d000000-0x7d00ffff; final is 0xd7000000-0xd70000ff; the concurrent exploratory workspace holds 0xa51d0000-0xa51dffff. The prefix 0x5da7 appears nowhere in the repository.",
     "Role is public-development: once read, these seeds are development data forever and can never become confirmation evidence. The pilot opens at most the first 256 seeds for corpus harvesting; any later stage names its subrange in its own run record before opening it.",
-    "Draft pending owner/coordinator authorization. Not opened."
+    "Authorized by the repository owner on 2026-08-20 (explicit owner approval in the coordinating session) before any seed was read; reservedAt 08:35Z, openedAt 08:45Z. This note supersedes an earlier stale draft note that said authorization was pending.",
+    "Sub-block allocation within the lease (all public-development, whole-origin use): 0x5da70000-0x5da700ff training harvest (iterations 1-3); 0x5da70100-0x5da7013f iteration-2 held-out; 0x5da70200-0x5da7023f iteration-3 held-out; 0x5da70300-0x5da7033f override gate corpus D; 0x5da70400-0x5da7043f full-training override gate; 0x5da70500-0x5da7053f D2-teacher ranking gate; 0x5da70600-0x5da7063f D2-teacher override gate; 0x5da70700-0x5da7073f search-value (D4-Q) agreement gate. Remainder 0x5da70740-0x5da70fff unallocated."
   ]
 }

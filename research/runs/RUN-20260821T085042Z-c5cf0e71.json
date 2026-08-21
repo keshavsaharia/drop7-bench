@@ -1,0 +1,51 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260821T085042Z-c5cf0e71",
+  "experimentId": "EX-20260821-afterstate-d4q-stage1-40136e9e",
+  "lifecycle": "completed",
+  "runValidity": "valid",
+  "startedAt": "2026-08-21T08:50:42Z",
+  "endedAt": "2026-08-21T10:35:00Z",
+  "protocolSha256": "9641df72c64fb44ef3a40acccae44dc35b5868e57b573e1fd6c63883e73d530b",
+  "machineProfileRef": "research/system-profiles/MACH-20260820T080056Z-376ada90.json",
+  "sourceState": {
+    "gitCommit": "2386224f31e4528922bfff93a36f85847e314a1f",
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "build/afterstate/label-d4q --roots runs/RUN-20260820T111656Z-f771f173/corpus-a/roots.tsv --folds train,calibration --threads 20 --out runs/RUN-20260821T085042Z-c5cf0e71/d4q-labels/d4q-labels.tsv",
+    "build/afterstate/generate-corpus --seed-start 0x5da70700 --games 64 --roots 8000 --scenarios 2 --threads 8 --fold-force heldout --out runs/RUN-20260821T085042Z-c5cf0e71/corpus-gate",
+    "build/afterstate/label-d4q --roots runs/RUN-20260821T085042Z-c5cf0e71/corpus-gate/roots.tsv --folds heldout --threads 8 --out runs/RUN-20260821T085042Z-c5cf0e71/d4q-labels-gate/d4q-labels.tsv",
+    "PYTHONUNBUFFERED=1 .venv-afterstate/bin/python approaches/afterstate-learning/distributional-afterstate/d4q.py --train-labels runs/RUN-20260821T085042Z-c5cf0e71/d4q-labels/d4q-labels.tsv --heldout-labels runs/RUN-20260821T085042Z-c5cf0e71/d4q-labels-gate/d4q-labels.tsv --heldout-roots-tsv runs/RUN-20260821T085042Z-c5cf0e71/corpus-gate/roots.tsv --out runs/RUN-20260821T085042Z-c5cf0e71/model --epochs 30 --max-train-seconds 10800"
+  ],
+  "seedLeaseRefs": [
+    "SL-20260820T083000Z-5da70000"
+  ],
+  "resourceLimits": {
+    "wallSeconds": 28800,
+    "cpuThreads": 24,
+    "maxHostBytes": 51539607552,
+    "maxGpuBytes": 32212254720
+  },
+  "resourceObserved": {
+    "wallSeconds": 6300,
+    "cpuSeconds": 50000,
+    "peakHostBytes": null,
+    "peakGpuBytes": 1914780160,
+    "measurementNotes": "D4Q labeling: 8,639 train roots (291,890 afterstate values) in 2,215s at 20 threads, plus 3,030 fresh held-out roots (102,960 values) in 2,038s at 8 threads; each label is the pinned reference's exact depth-3 value of a canonical successor under its own five-stratum quadrature. Training: 30 epochs in 894s on the Radeon 8060S."
+  },
+  "exitCode": 0,
+  "stopReason": null,
+  "artifactRefs": [
+    "runs/RUN-20260821T085042Z-c5cf0e71/d4q-labels/d4q-labels.tsv",
+    "runs/RUN-20260821T085042Z-c5cf0e71/d4q-labels-gate/d4q-labels.tsv",
+    "runs/RUN-20260821T085042Z-c5cf0e71/model/model-d4q.pt",
+    "runs/RUN-20260821T085042Z-c5cf0e71/model/d4q-gate-report.json"
+  ],
+  "contributionIds": [
+    "CT-20260820T140540Z-f8458dc0"
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260821-afterstate-d4q-stage1-40136e9e",
+  "theoryIds": [
+    "TH-20260821-search-guided-self-play-at-scale-299ed02f"
+  ],
+  "title": "Scale-out stage 1: successor-closed fair-D4 search-value labels; held-out D4-ranking agreement",
+  "classification": "algorithmic",
+  "hypothesis": "A successor-closed corpus of exact fair-D4 per-action search values (every legal sibling labeled by the pinned reference itself) lets the action-free afterstate model learn fair D4's within-root ordering well enough to reach preregistered agreement thresholds on fresh held-out roots - the stage-1 prerequisite of the registered search-guided self-play loop (TH-20260821-search-guided-self-play-at-scale-299ed02f). Prior D4 clones failed on played-action or sparse-sibling data; this configuration is successor-closed.",
+  "candidate": {
+    "name": "afterstate-d4q-student",
+    "entryPoint": "approaches/afterstate-learning/distributional-afterstate/train.py",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "fair-d4",
+    "entryPoint": "approaches/fair-expectimax/reference/fair-only-depth4.cpp",
+    "manifestRef": null
+  },
+  "informationBoundary": "public-policy",
+  "benchmarkTier": "CHECK",
+  "data": {
+    "role": "public-development",
+    "seedLeaseRefs": [
+      "SL-20260820T083000Z-5da70000"
+    ],
+    "wholeOriginSplit": true,
+    "datasetRefs": [],
+    "reuseDisclosure": "Training: exact fair-D4 per-action values computed by the pinned reference on training roots harvested from seeds 0x5da70000-0x5da700ff (training-role). Agreement gate: fresh seeds 0x5da70700-0x5da7073f (64 origins); only D4 comparator labels are computed there - the target is D4's own ordering, so no continuation corpus is needed for this gate."
+  },
+  "metrics": {
+    "primary": "Held-out top-1 agreement between the model's within-root ordering and exact fair D4's ordering on fresh roots.",
+    "secondary": [
+      "pairwise agreement",
+      "normalized regret against D4's value ordering",
+      "per half-fold stability",
+      "model value calibration (Pearson) on held-out roots"
+    ],
+    "statisticalUnit": "whole-origin",
+    "uncertaintyMethod": "Two deterministic held-out half-folds by origin-game hash; thresholds must hold in both halves."
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "Successor-closed D4-value labels on >= 8,000 training roots with completeness 1.0.",
+      "Held-out top-1 agreement >= 0.60 on each half-fold (for scale: exact D1 agrees with D4 at 0.486 and exact D2 at 0.568 on the historical 1,508/465-root panel; 0.60 is beyond D2).",
+      "Held-out pairwise agreement >= 0.78 on each half-fold (D2: 0.767).",
+      "Normalized regret <= 0.13 on each half-fold (D2: 0.141).",
+      "All CHECK-tier self-tests pass before any label is inspected."
+    ],
+    "failureAction": "Record a valid negative; the scale-out loop's stage 1 is blocked and the registered theory's first falsification condition is engaged.",
+    "passAction": "Register stage 2: use the frozen student as the leaf of a bounded search and compare against fair D2/D4 on paired development games."
+  },
+  "resources": {
+    "wallSeconds": 28800,
+    "cpuThreads": 24,
+    "maxHostBytes": 51539607552,
+    "maxGpuBytes": 32212254720,
+    "gpuDevices": [
+      "gfx1151"
+    ]
+  },
+  "stopConditions": [
+    "Stop on any rules, information-boundary, legality, determinism, or parity failure.",
+    "Stop immediately on out-of-memory or on host available memory falling below 16 GiB.",
+    "Stop on any read of a seed outside the named lease.",
+    "Stop D4 labeling after 4 hours wall.",
+    "Stop training after 3 hours GPU wall or 30 epochs."
+  ],
+  "expectedArtifacts": [
+    "runs/<run-id>/d4q-labels/*.tsv",
+    "runs/<run-id>/model/*.pt",
+    "runs/<run-id>/gate/*.json",
+    "research/results/<result-id>.json"
+  ],
+  "lifecycle": "completed",
+  "protocolSha256": "9641df72c64fb44ef3a40acccae44dc35b5868e57b573e1fd6c63883e73d530b",
+  "amendments": [
+    {
+      "timestamp": "2026-08-21T10:45:00Z",
+      "beforeControlledData": false,
+      "reason": "lifecycle advanced preregistered -> completed after the run and result records were written; protocol content otherwise unchanged."
+    }
+  ],
+  "createdBy": {
+    "platform": "OpenCode",
+    "model": "moonshotai/Kimi-K3",
+    "agentId": null
+  },
+  "createdAt": "2026-08-21T08:45:05Z",
+  "updatedAt": "2026-08-21T08:45:38Z"
+}

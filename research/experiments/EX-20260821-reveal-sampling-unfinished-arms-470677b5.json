@@ -1,0 +1,101 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260821-reveal-sampling-unfinished-arms-470677b5",
+  "theoryIds": [
+    "TH-20260821-factored-chance-depth-compounding-aca01725"
+  ],
+  "title": "The two arms finding-09 left unfinished: reveal sampling on top of the fourth ply, and the depth-3 ladder at full joint coverage",
+  "classification": "algorithmic",
+  "hypothesis": "On the shared 64-game development cohort 0xa51d1000-0xa51d103f, factoring the chance node keeps paying when it is applied on top of the fourth ply: depth 4 with seven disc samples and two reveal samples beats depth 4 with seven disc samples and one reveal sample with a one-sided 95% whole-game bootstrap lower bound above zero. Separately, the depth-3 ladder continues to order with joint (disc, reveal) coverage: twelve reveal samples (100% joint coverage) is at least as strong as six (85.7%).",
+  "candidate": {
+    "name": "factored-chance-fair-search, arms d4 N=7 M=2 and d3 N=7 M=12",
+    "entryPoint": "approaches/lifetime-objective/reveal-sampling/search.cpp",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "the recorded single-reveal-sample arms on the same seeds (d4 N=7 M=1 = runs/RUN-A51D-s7confirm/fresh-s7.json; d4 N=5 M=1 = runs/RUN-A51D-s7confirm/fresh-s5.json) and finding-09's completed depth-3 ladder (M=1, 3, 6)",
+    "entryPoint": "approaches/lifetime-objective/risk-calibration/search.cpp",
+    "manifestRef": null
+  },
+  "informationBoundary": "public-policy",
+  "benchmarkTier": "STANDARD",
+  "data": {
+    "role": "previously-evaluated-development",
+    "seedLeaseRefs": [
+      "SEEDLEASE-A51D confirm (0xa51d1000-0xa51d103f; docs/exploratory/lease-map.md)"
+    ],
+    "datasetRefs": [],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "The 64 evaluation seeds 0xa51d1000-0xa51d103f were opened by finding-05's fresh-seed confirmation and read again by finding-09; they are permanently development data and are reused here so the new arms pair seed-for-seed with the recorded ones. Nothing here is confirmation evidence and no protected or final seed is read. Each arm is run as four sequential 16-game chunks at seed starts +0x00, +0x10, +0x20, +0x30, which plays exactly the 64 cohort seeds once each. No machine-readable seed-lease record exists for the 0xa5 family; the authoritative allocation is docs/exploratory/lease-map.md."
+  },
+  "metrics": {
+    "primary": "Paired candidate-minus-comparator mean score over whole games with a one-sided 95% percentile-bootstrap lower bound (20,000 resamples, seed 0xb0075eed).",
+    "secondary": [
+      "paired move delta and wins-ties-losses",
+      "numbered clears per move, covered reveals per move and mean occupied cells",
+      "logical work per move and the work multiplier against each comparator",
+      "score at near-equal work: depth 3 with six reveal samples against depth 4 with one",
+      "bound diagnostics: decisions, decisions below target depth, work-limit events, minimum completed depth, maximum work in one decision",
+      "pooling validity: four pooled 16-game chunks must reproduce a single 64-game run field-for-field, including summed logical work",
+      "censored games and score-decomposition identity failures"
+    ],
+    "statisticalUnit": "whole-game",
+    "uncertaintyMethod": "One-sided percentile bootstrap over whole paired games, 20,000 resamples, seed 0xb0075eed, as implemented in approaches/lifetime-objective/reveal-sampling/stats.py. An incomplete arm is paired only on the seeds it shares with its comparator and the paired n is printed with every such row."
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "Pooling validity: pooling four 16-game chunks reproduces the corresponding single 64-game artifact on all 13 recorded per-game fields with 0 mismatches and identical summed logical work.",
+      "Bound diagnostics: 0 decisions below target depth and 0 work-limit events in every arm; an arm that completed a shallower depth than requested is void.",
+      "Depth 4 with two reveal samples beats depth 4 with one reveal sample on the complete 64-game cohort with a one-sided 95% bootstrap lower bound above zero.",
+      "Depth 3 with twelve reveal samples is at least as strong as depth 3 with six on the seeds they share.",
+      "0 censored games and 0 score-decomposition identity failures in every arm."
+    ],
+    "failureAction": "Record a valid negative for the exact dose tested and state the dose explicitly: a failure at two reveal samples is not a failure of reveal sampling at depth 4, because two samples is a smaller joint-coverage increment than the six that first cleared noise at depth 3. Do not launch a wider depth-4 arm without a cost estimate from measured work.",
+    "passAction": "Preregister a fresh-seed replication of the compounding configuration on an unread development block, and only then consider it a candidate reference."
+  },
+  "resources": {
+    "wallSeconds": 172800,
+    "cpuThreads": 12,
+    "maxHostBytes": 34359738368,
+    "maxGpuBytes": null,
+    "gpuDevices": []
+  },
+  "stopConditions": [
+    "Stop an arm if any decision completes below its requested depth or a work-limit event occurs; the arm is void.",
+    "Stop on any score-decomposition identity failure or illegal move.",
+    "Stop on any read of a seed outside 0xa51d1000-0xa51d103f.",
+    "Back off while the machine's one-minute load exceeds 26, and after a bounded grace period proceed at a reduced thread count rather than surrendering the arm.",
+    "Stop on out-of-memory or on host available memory falling below 16 GiB."
+  ],
+  "expectedArtifacts": [
+    "runs/RUN-A525-reveal/d4-n7-m2-c{0,1,2,3}.json and .log",
+    "runs/RUN-A525-reveal/d3-n7-m12-c{0,1,2,3}.json and .log",
+    "runs/RUN-A525-reveal/d4-n7-m2-pooled.json and runs/RUN-A525-reveal/d3-n7-m12-pooled.json",
+    "runs/<run-id>/reveal-report.txt (the idempotent analysis driver's output)",
+    "docs/exploratory/finding-16-factored-reveal-sampling.md",
+    "research/results/<result-id>.json"
+  ],
+  "lifecycle": "running",
+  "protocolSha256": "d00f6f55d52ad77dc22268bf901b0d635f17e1f79533717b598bfe0733c6f6a8",
+  "amendments": [
+    {
+      "timestamp": "2026-08-21T18:25:00Z",
+      "beforeControlledData": false,
+      "reason": "Registered retroactively. The two arms are the ones finding-09 explicitly left open: docs/exploratory/finding-09-reveal-sampling.md names the depth-4 two-reveal-sample arm as 'the highest-value open arm, because it is the only way to learn whether the two axes compound rather than substitute' and the depth-3 twelve-reveal-sample arm as a deliberate no-run, both written before either arm produced a game. The launch protocol - four sequential 16-game chunks over the shared cohort, an explicit per-configuration --max-work, and the auto-sized cache - is fixed in approaches/lifetime-objective/reveal-sampling/run-arms.sh, which predates the data. This machine-readable record was written after execution by a different agent than the one that ran them; the comparison rule is the standing paired whole-game bootstrap implemented in approaches/lifetime-objective/reveal-sampling/stats.py."
+    },
+    {
+      "timestamp": "2026-08-21T18:25:00Z",
+      "beforeControlledData": false,
+      "reason": "lifecycle set to running, not completed: the depth-3 twelve-reveal-sample arm was on its third chunk (32 of 64 games pooled) when the result record was written. The depth-4 two-reveal-sample arm is complete at 64 of 64."
+    }
+  ],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-opus-5[1m]",
+    "agentId": null
+  },
+  "createdAt": "2026-08-21T18:25:00Z",
+  "updatedAt": "2026-08-21T18:25:00Z"
+}

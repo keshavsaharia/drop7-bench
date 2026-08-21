@@ -32,6 +32,27 @@ approach source was modified by this work.** The only files created are under
 > is the *reachability* of that ceiling by a legal policy, which this document
 > did not measure.
 
+> **SECOND CORRECTION NOTICE (added after publication).** The eight master
+> tapes used below are **unrepresentative — they favour long games** — and every
+> absolute figure measured on them is inflated in proportion to how long the
+> policy survives.
+> [`finding-12`](finding-12-fair-planner-ceiling-extended.md) §2 measures the
+> size: fair depth 4 drops from **117.75 to 93.56 mean moves** on 128 fresh
+> tapes, lowest column drops only 3.7%.
+>
+> **The clairvoyant results in this document are not affected.** Re-run on 64
+> fresh tapes, the clairvoyant planner at H = 7 measures **2.3663 clears and
+> 1.3832 reveals per move against 2.3601 and 1.3785 here** — a shift of +0.006,
+> in the opposite direction to fair D4's −0.060 — with 59 of 64 fresh games
+> reaching the move cap alive against 6 of 8. A policy that is censored at the
+> cap on both cohorts has no room to be inflated by an easy tape draw, which is
+> why the ceiling is robust and the comparator is not.
+>
+> The one thing to re-read: **every comparison against fair depth 4 below uses a
+> D4 baseline that is 26% too generous on lifetime.** "396.88 moves against fair
+> depth 4's 117.75" should be read as "against 93.56", which makes the contrast
+> larger, not smaller. No clairvoyant figure needs revision.
+
 ## The question
 
 [`finding-01`](finding-01-score-is-survival.md) establishes two measured facts.

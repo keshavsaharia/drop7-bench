@@ -62,6 +62,8 @@ claimed here, and protected and final seeds remain unopened.
 | [`finding-12-fair-planner-ceiling-extended.md`](finding-12-fair-planner-ceiling-extended.md) | Pushing the legal planner's ceiling, and re-baselining it |
 | [`finding-13-fast-engine.md`](finding-13-fast-engine.md) | 3.08x bit-exact engine speedup, and a 10.4x error in the cost model |
 | `finding-14-leaf-reweight.md` *(in progress)* | Refitting the frozen leaf's weights toward achievable clear rate |
+| [`finding-15-depth5-exact-estimator.md`](finding-15-depth5-exact-estimator.md) | Depth 5 buys nothing at either stratum count; the interim "reversal" is withdrawn as completion-order bias (see its §8) |
+| [`finding-16-factored-reveal-sampling.md`](finding-16-factored-reveal-sampling.md) | Depth and chance resolution substitute rather than compound; the budget frontier is flat on top near fair D4 |
 | [`gpu-02-openblas-sgemm-race.md`](gpu-02-openblas-sgemm-race.md) | numpy float32 matmul is silently corrupt on this host |
 | [`gpu-03-onednn-conv-nondeterminism.md`](gpu-03-onednn-conv-nondeterminism.md) | torch Conv2d is nondeterministic on this host's CPU |
 | [`reconciliation-01.md`](reconciliation-01.md) | Which contributor owns what, and every seed lease |

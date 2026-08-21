@@ -1,6 +1,10 @@
 .DS_Store
-build/
-runs/
+# Anchored to the repository root on purpose. `runs/` unanchored also matched
+# `research/runs/`, which silently excluded every machine-readable run record
+# that result records cite by id — a fresh clone could not resolve its own
+# provenance. The bulk gameplay output under /runs/ (tens of GB) stays ignored.
+/build/
+/runs/
 node_modules/
 __pycache__/
 *.py[cod]

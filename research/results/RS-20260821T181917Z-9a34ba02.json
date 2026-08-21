@@ -1,0 +1,178 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260821T181917Z-9a34ba02",
+  "theoryIds": [
+    "TH-20260821-depth-gradient-beyond-fair-d4-034314fc"
+  ],
+  "experimentId": "EX-20260821-depth5-chance-exactness-factorial-a6a604fd",
+  "runIds": [
+    "RUN-20260821T045349Z-73f29417",
+    "RUN-20260821T060358Z-895d0a79"
+  ],
+  "runValidity": "partial",
+  "scientificOutcome": "fail",
+  "assessment": "not-supported-as-tested",
+  "evidenceTier": "public-development",
+  "summary": "The fifth ply buys nothing at either chance resolution, and the earlier interim reading that it was actively harmful is withdrawn. Complete leg, 64 of 64 games: depth 5 at five strata scores 288,704 against depth 4 at five strata's 297,327, a paired -8,624 with a one-sided 95% whole-game bootstrap lower bound of -55,134 and W-T-L 33-0-31, for 23.29x the logical work per move. That is a wash, not a reversal. Partial leg, 16 of 64 games and still running: depth 5 at seven strata is -1,581 against the depth-4 seven-stratum control (95% lower bound -173,154, W-T-L 7-0-9) at 34.32x the work, and +16,622 against depth 3 at seven strata (95% lower bound -130,027, W-T-L 8-0-8) at 1,084.78x the work. At a fixed stratum count, depth 3 -> 4 -> 5 does not separate. READ THIS BEFORE QUOTING THE MEANS: the eye-catching gap between the 398,498 of d4s7 and the 288,704 of d5s5 is a chance-samples effect and not a depth effect, because those two arms differ in both factors; the correct paired depth contrasts at fixed chance resolution are d5s5 - d4s5 = -8,624 and d5s7 - d4s7 = -1,581, both indistinguishable from zero, and the correct paired stratum contrast at fixed depth is finding-05's d4s7 - d4s5 = +101,171. The interim slice reported in finding-15 section 2.2 (-268,611 over 8 paired games) was completion-order biased against depth 5 exactly as that section warned; at 16 games the bias is gone and the delta is -1,581. The engine control is clean and is the other retained result here: the fast engine's depth-4 seven-stratum arm reproduces the recorded unoptimised arm over 64 paired games x 11 fields with 0 mismatches, and the depth-5 five-stratum arm reproduces the recorded 32-game unoptimised arm over 32 paired games x 11 fields with 0 mismatches across two binaries and two different cache capacities. Every arm audited 0 incomplete decisions at its requested depth, 0 censored games and 0 score-decomposition identity failures. Flow rates fall with depth at five strata (1.9387 clears and 1.0651 reveals per move against depth 4's 1.9489 and 1.0697, and against the 2.400 and 1.400 indefinite survival needs), so nothing here moves toward the target.",
+  "metrics": {
+    "cohort": "0xa51d1000-0xa51d103f, 2,000-move cap, corrected 17,000-point Hardcore scoring",
+    "d4s7ControlGames": 64,
+    "d4s7ControlMeanScore": 398498.234375,
+    "d4s7ControlMeanMoves": 114.65625,
+    "d4s7ControlWorkPerMove": 4956614.26519,
+    "d5s5Games": 64,
+    "d5s5MeanScore": 288703.671875,
+    "d5s5MeanMoves": 84.6875,
+    "d5s5WorkPerMove": 30183227.0,
+    "d5s5ClearsPerMove": 1.9387,
+    "d5s5RevealsPerMove": 1.0651,
+    "d5s7Games": 16,
+    "d5s7GamesPlanned": 64,
+    "d5s7MeanScoreOn16": 383691.1875,
+    "d5s7MeanMovesOn16": 110.0,
+    "d5s7WorkPerMove": 170131134.0,
+    "pairedD5s5MinusD4s5": {
+      "n": 64,
+      "meanScoreDelta": -8623.7,
+      "lowerBound95": -55133.7,
+      "meanMoveDelta": -2.47,
+      "winTieLoss": "33-0-31",
+      "medianDelta": 349.0,
+      "workRatio": 23.29
+    },
+    "pairedD5s7MinusD4s7": {
+      "n": 16,
+      "meanScoreDelta": -1581.1,
+      "lowerBound95": -173154.2,
+      "meanMoveDelta": -0.88,
+      "winTieLoss": "7-0-9",
+      "medianDelta": -39660.5,
+      "workRatio": 34.32
+    },
+    "pairedD5s7MinusD3s7": {
+      "n": 16,
+      "meanScoreDelta": 16622.4,
+      "lowerBound95": -130026.9,
+      "meanMoveDelta": 3.25,
+      "winTieLoss": "8-0-8",
+      "medianDelta": -8539.0,
+      "workRatio": 1084.78
+    },
+    "pairedD5s7MinusD5s5": {
+      "n": 16,
+      "meanScoreDelta": 114640.3,
+      "lowerBound95": -7279.5,
+      "meanMoveDelta": 30.56,
+      "winTieLoss": "8-0-8",
+      "medianDelta": 14763.0,
+      "workRatio": 5.64
+    },
+    "pairedD4s7MinusD4s5": {
+      "n": 64,
+      "meanScoreDelta": 101170.8,
+      "lowerBound95": 47446.8,
+      "meanMoveDelta": 27.5,
+      "winTieLoss": "41-0-23",
+      "medianDelta": 55416.5,
+      "workRatio": 3.82,
+      "note": "the stratum contrast at fixed depth 4 - this is the significant effect the 398,498-vs-288,704 gap is actually made of, not depth"
+    },
+    "reproductionD4s7": {
+      "pairedGames": 64,
+      "fields": 11,
+      "comparisons": 704,
+      "mismatches": 0
+    },
+    "reproductionD5s5": {
+      "pairedGames": 32,
+      "fields": 11,
+      "comparisons": 352,
+      "mismatches": 0
+    },
+    "auditD4s7": {
+      "decisions": 7338,
+      "incompleteDecisions": 0,
+      "minimumCompletedDepth": 4,
+      "maxWorkPerDecision": 10639860,
+      "declaredBound": 11892399,
+      "declaredCacheEntries": 60000
+    },
+    "auditD5s5": {
+      "decisions": 5420,
+      "incompleteDecisions": 0,
+      "minimumCompletedDepth": 5,
+      "maxWorkPerDecision": 78537460,
+      "declaredBound": 109723461,
+      "declaredCacheEntries": 200000
+    },
+    "auditD5s7Partial": {
+      "decisions": 1760,
+      "incompleteDecisions": 0,
+      "minimumCompletedDepth": 5,
+      "maxWorkPerDecision": 441657335,
+      "declaredBound": 582727797,
+      "declaredCacheEntries": 200000
+    },
+    "censoredGamesAllArms": 0,
+    "scoreIdentityFailuresAllArms": 0,
+    "bootstrap": "one-sided 95% percentile bootstrap over whole paired games, 20,000 resamples, Mulberry32 domain 0xb0075eed (analyze.py)",
+    "twoSidedContext": "the same estimator's one-sided 95% upper bounds are +39,052 for d5s5-d4s5 and +166,299 for d5s7-d4s7, so neither delta is distinguishable from zero in either direction"
+  },
+  "gateChecks": [
+    {
+      "criterion": "Control: the fast engine's depth-4 seven-stratum arm reproduces the recorded unoptimised arm on all 11 per-game fields",
+      "passed": true,
+      "observed": "64 paired games x 11 fields = 704 comparisons, 0 mismatches; a second, unplanned reproduction fell out of d5s5 against the recorded 32-game arm (352 comparisons, 0 mismatches) across two binaries and cache capacities 60,000 vs 200,000"
+    },
+    {
+      "criterion": "Audit: 0 incomplete decisions and minimum completed depth equal to the requested depth in every arm",
+      "passed": true,
+      "observed": "d4s7 7,338 decisions minCompletedDepth 4; d5s5 5,420 decisions minCompletedDepth 5; d5s7 (partial) 1,760 decisions minCompletedDepth 5; 0 incomplete decisions everywhere, busiest decision at 76% (d5s7), 72% (d5s5) and 89% (d4s7) of its declared bound"
+    },
+    {
+      "criterion": "Depth 5 beats depth 4 at seven strata with a one-sided 95% bootstrap lower bound above zero, on 64 complete games",
+      "passed": null,
+      "observed": "undecidable as run: the arm holds 16 of 64 games and is still executing. On the 16 paired games the delta is -1,581 with a 95% lower bound of -173,154 and W-T-L 7-0-9 - no gradient is visible, but 16 games cannot decide this criterion and no claim is made that they do"
+    },
+    {
+      "criterion": "Depth 5 is at least not worse than depth 4 at five strata, on 64 complete games",
+      "passed": false,
+      "observed": "-8,624 with a 95% lower bound of -55,134, W-T-L 33-0-31, median paired delta +349, at 23.29x the logical work per move; a wash that costs 23x"
+    },
+    {
+      "criterion": "Clears per move, reveals per move and occupancy all move toward the survival requirement from depth 4 to depth 5 at the same stratum count",
+      "passed": false,
+      "observed": "at five strata clears/move 1.9387 vs 1.9489, reveals/move 1.0651 vs 1.0697 and occupancy 24.1886 vs 24.2880 - two of three move away from the 2.400/1.400 requirement"
+    },
+    {
+      "criterion": "0 censored games and 0 score-decomposition identity failures in every arm",
+      "passed": true,
+      "observed": "0 and 0 in all three arms"
+    }
+  ],
+  "perGameArtifact": {
+    "path": "approaches/lifetime-objective/fast-engine/cohorts/d5s5.json",
+    "sha256": "04c2cd0ae5bf4ebb058677a64104bc845c0d393f143dfa3759109c02193aee05",
+    "recordCount": 64
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260820T080056Z-376ada90.json"
+  ],
+  "artifactManifestRef": "runs/RUN-20260821T045349Z-73f29417/manifest.json",
+  "limitations": [
+    "PARTIAL ARM: the depth-5 seven-stratum arm holds 16 of 64 games and was still executing (process 127323) when this result was written. Every seven-stratum number here is over those 16 paired games and none of them can decide the primary gate. The frozen snapshot assessed is runs/RUN-20260821T060358Z-895d0a79/d5s7-partial-16games.json; the live artifact will be rewritten to 32 games and beyond and will no longer match this record's hash.",
+    "The 16 finished games are the cohort's first 16 seeds (0xa51d1000-0xa51d100f) because the runner completes whole 16-game chunks, so they are a fixed block rather than a random subset; they are paired seed-for-seed against comparators recorded on exactly those seeds, which is what makes the paired delta fair even though the 16-game mean is not an estimate of the arm's 64-game mean.",
+    "64 paired games with a score standard deviation of 38-64% of the mean; at this sample size a true depth effect smaller than roughly 55,000 points cannot be resolved, so 'no gradient' means 'no gradient this cohort can see', not 'exactly zero'.",
+    "The cohort 0xa51d1000-0xa51d103f was opened by finding-05 and is permanently development data. This is a diagnostic comparison at STANDARD tier; it is not a freeze gate and can never become confirmation evidence.",
+    "The depth-5 arms declare a 200,000-entry transposition cache and the depth-4 comparators 60,000. Capacity provably cannot change play (verified three ways in finding-15 section 3, including whole-game agreement across two binaries) but work per move is not comparable across capacities and each figure must be read with its capacity.",
+    "The experiment record was written after the runs, by a different agent than the one that executed them. The comparison rule predates the arms and is implemented in analyze.py, but this is retroactive registration and not a preregistration; the amendment on the experiment record says so.",
+    "Wall-clock figures are not timing-grade: the machine carried a one-minute load average of 12-63 from other agents' jobs throughout. Scores, moves and logical work are deterministic and unaffected.",
+    "This rejects the exact configurations tested - depth 5 at five and seven strata, this leaf, this terminal utility, these work bounds. It does not show that no five-ply search can help. finding-15 section 5 names two mechanisms that would predict exactly this outcome (the terminal utility has no death-depth shaping, and the leaf is an uncalibrated potential); neither was tested here.",
+    "Cost model correction, recorded because it changes what is affordable rather than what is true: the 78-wall-hour projection that once cancelled this experiment used worst-case iterative-deepening work. Measured work at depth 5 with seven strata is about 10x below that bound, and the arms ran in hours."
+  ],
+  "contributionIds": [
+    "CT-20260821T181919Z-05882e86"
+  ],
+  "recordedAt": "2026-08-21T18:25:00Z"
+}

@@ -1,0 +1,32 @@
+{
+  "$schema": "../schemas/dataset-v1.schema.json",
+  "format": "drop7-dataset-v1",
+  "datasetId": "DS-20260821-afterstate-h40-k256-rank-7d3ea2f6",
+  "title": "Fresh held-out ranking-gate corpus (0x5da70500-0x5da7053f), K=256, D1 continuation",
+  "dataRole": "public-development",
+  "informationClass": "public-only",
+  "originUnit": "whole-game",
+  "originCount": 64,
+  "rowCount": 4862720,
+  "wholeOriginSplit": true,
+  "seedLeaseRefs": [
+    "SL-20260820T083000Z-5da70000"
+  ],
+  "parentDatasetRefs": [],
+  "fields": [
+    "identical schema to DS-20260820-afterstate-h40-k8-3f2f6d29; all rows held-out"
+  ],
+  "privilegedFields": [
+    "originSeed",
+    "moveIndex"
+  ],
+  "allowedConsumers": [
+    "afterstate-ranker training and offline ranking evaluation"
+  ],
+  "artifact": {
+    "path": "runs/RUN-20260821T084812Z-0d366205/corpus-rank/corpus.ndjson",
+    "sha256": "59fa7a59b64372dd6a2430eefebf64cbbcaf324c2f33266003458051e67cecb5",
+    "bytes": 2043365975
+  },
+  "createdAt": "2026-08-21T10:50:00Z"
+}

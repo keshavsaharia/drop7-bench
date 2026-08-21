@@ -1,0 +1,43 @@
+---
+title: Training it to completion made it worse — the narrow miss was a ceiling, not a shortfall
+---
+
+The [near-tie override gate](/experiments/EX-20260820-d4-toptwo-override-gate-0bdb39a1)
+missed by a quarter of a percentage point, and its own record named the
+bottleneck: the network's ranking quality. The obvious next move is the one
+every practitioner reaches for. The checkpoint had been trained for 11 epochs on
+a bounded pilot budget. Perhaps it was simply undertrained.
+
+This experiment removes that explanation. The same architecture, the same data,
+double the budget: 22 epochs over the two-million-row subsample, 44 million
+row-updates, a cosine schedule carried to completion. About five and a half
+hours on the machine's integrated GPU.
+
+**Training worked exactly as intended.** The ranking loss fell from 0.630 to
+0.584 — the model learned what it was being taught, more thoroughly than before.
+
+**On held-out positions it got worse.** Scored on the *same* roots as the
+earlier checkpoint, top-1 accuracy fell from 0.424 to 0.361 and normalized
+regret rose from 0.241 to 0.281. Training loss down, held-out ranking down. That
+is the textbook signature of overfitting, and it means the extra epochs were
+spent memorising the teacher's labels rather than learning the function behind
+them.
+
+The frozen gate then failed on fresh data, and failed in an informative way. The
+override fired on 41.1% of eligible near-ties and cut regret by 0.0228 in the
+first half-fold — but *raised* it by 0.0297 in the second, where the
+intervention was actively harmful. Pooled, it is +0.0018: indistinguishable from
+doing nothing. Determinism, calibration and label stability all passed; the
+failure is entirely in generalization.
+
+**What this closes.** Direct action-override by this model family is shut, per
+the frozen failure action. Not because the idea is wrong — the previous
+experiment showed the mechanism firing correctly and helping in both halves —
+but because the thing being consulted cannot be made reliable by training it
+harder. The limitation that matters is stated in the record: the student is a
+compact 3.4M-parameter network, and the claim established here is about compact
+students, not about learned evaluators in general.
+
+The companion experiment run the same night,
+[the stage-1 ordering test](/experiments/EX-20260821-afterstate-d4q-stage1-40136e9e),
+takes that limitation and makes it precise.

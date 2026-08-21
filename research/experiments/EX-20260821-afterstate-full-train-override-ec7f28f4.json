@@ -1,0 +1,107 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260821-afterstate-full-train-override-ec7f28f4",
+  "theoryIds": [
+    "TH-20260820-distributional-afterstate-ranker-7aba7fb3"
+  ],
+  "title": "Full training of the K=256 afterstate model, then the frozen top-two override rule on fresh origins",
+  "classification": "algorithmic",
+  "hypothesis": "The iteration-3 model was stopped at epoch 11 of 20 with its ranking loss still decreasing, so it was undertrained. Fully training the identical architecture on the identical K=256 successor-closed corpus (up to 40 epochs, 4M-row deterministic subsample, 6h GPU budget) improves its calibrated ranking enough that the FROZEN top-two near-tie override rule (epsilon=500, paired-bootstrap 95% lower bound > 0, 1000 resamples, domain 0x4f565252) passes its frozen margin on fresh held-out origins.",
+  "candidate": {
+    "name": "distributional-afterstate-ranker",
+    "entryPoint": "approaches/afterstate-learning/distributional-afterstate/train.py",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "fair-d4",
+    "entryPoint": "approaches/fair-expectimax/reference/fair-only-depth4.cpp",
+    "manifestRef": null
+  },
+  "informationBoundary": "public-policy",
+  "benchmarkTier": "CHECK",
+  "data": {
+    "role": "public-development",
+    "seedLeaseRefs": [
+      "SL-20260820T083000Z-5da70000"
+    ],
+    "wholeOriginSplit": true,
+    "datasetRefs": [
+      "DS-20260820-afterstate-h40-k256-9d31c47a"
+    ],
+    "reuseDisclosure": "Training corpus: the existing K=256 corpus-A (seeds 0x5da70000-0x5da700ff, training-role). Evaluation: fresh seeds 0x5da70400-0x5da7043f (64 origins), read once by this experiment's gate. The override RULE is frozen from EX-20260820-d4-toptwo-override-gate-0bdb39a1; only the model changes."
+  },
+  "metrics": {
+    "primary": "Eligible-root mean normalized regret of the override policy vs unchanged fair D4 on fresh held-out roots (scenario-mean H40 D1-continuation target, K=256), per origin-hash half-fold.",
+    "secondary": [
+      "override rate among eligible roots",
+      "whole-set regret",
+      "decisive-root breakdown",
+      "decisive-root label stability (floor 0.5)",
+      "quantile coverage in [0.66,0.87]",
+      "byte-identical repeated gate reports",
+      "training epochs completed and final ranking loss"
+    ],
+    "statisticalUnit": "whole-origin",
+    "uncertaintyMethod": "Two deterministic held-out half-folds by origin-game hash (mix32 of origin seed); the primary comparison must hold in both halves."
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "Training completes 22 epochs on the 2M-row deterministic subsample within the 6h GPU budget (44M row-updates, 2x iteration 3's 22M), with the cosine LR schedule completing.",
+      "Eligible-root override regret <= D4 regret - 0.01 in EACH half-fold.",
+      "Override rate >= 5% of eligible roots.",
+      "Decisive-root label stability >= 0.5 (else inconclusive).",
+      "Quantile coverage within [0.66, 0.87].",
+      "Gate report byte-identical across two runs."
+    ],
+    "failureAction": "Record a valid negative. If full training still fails the frozen margin, the direct-override use of this model family is closed and the line's remaining value is the corpus infrastructure.",
+    "passAction": "Preregister a SCREEN gameplay experiment (32 paired development games) with the frozen rule and this checkpoint."
+  },
+  "resources": {
+    "wallSeconds": 28800,
+    "cpuThreads": 24,
+    "maxHostBytes": 51539607552,
+    "maxGpuBytes": 32212254720,
+    "gpuDevices": [
+      "gfx1151"
+    ]
+  },
+  "stopConditions": [
+    "Stop on any rules, information-boundary, legality, determinism, or parity failure.",
+    "Stop immediately on out-of-memory or on host available memory falling below 16 GiB.",
+    "Stop on any read of a seed outside the named lease.",
+    "Stop training after 6 hours GPU wall or 40 epochs, whichever comes first."
+  ],
+  "expectedArtifacts": [
+    "runs/<run-id>/model/*.pt",
+    "runs/<run-id>/gate/override-gate-report.json (x2 byte-identical)",
+    "research/results/<result-id>.json"
+  ],
+  "lifecycle": "completed",
+  "protocolSha256": "720733b8b618314cd535f7e2bb54bae653151cb50ceb7aa31df77e29b5eb7339",
+  "amendments": [
+    {
+      "timestamp": "2026-08-21T03:25:00Z",
+      "beforeControlledData": true,
+      "reason": "Training-completeness criterion redefined in row-update terms before this experiment's controlled corpus (0x5da70400-0x5da7043f) was generated: the iGPU sustains ~28 min/epoch on 4M rows, so a fixed 30-epoch requirement was not reachable in the 6h GPU budget. The undertraining hypothesis is tested against iteration 3's 11-epoch/2M-row checkpoint by total row-updates instead."
+    },
+    {
+      "timestamp": "2026-08-21T03:50:00Z",
+      "beforeControlledData": true,
+      "reason": "Row-update target rescaled to measured iGPU throughput (~1.7k rows/s FP32, compute-bound; 512-group batches measured slower than 256) before the controlled corpus was generated: 2M-row subsample (matching iteration 3's training set size) x 22 epochs = 44M row-updates = 2x iteration 3, with the cosine schedule completing."
+    },
+    {
+      "timestamp": "2026-08-21T09:45:00Z",
+      "beforeControlledData": false,
+      "reason": "lifecycle advanced preregistered -> completed after the run and result records were written; protocol content otherwise unchanged."
+    }
+  ],
+  "createdBy": {
+    "platform": "OpenCode",
+    "model": "moonshotai/Kimi-K3",
+    "agentId": null
+  },
+  "createdAt": "2026-08-21T08:45:04Z",
+  "updatedAt": "2026-08-21T08:45:38Z"
+}

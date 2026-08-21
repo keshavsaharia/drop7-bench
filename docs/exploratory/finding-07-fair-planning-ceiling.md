@@ -12,6 +12,34 @@ or any existing approach source was modified by this work.** Files were created
 or edited only under `approaches/lifetime-objective/flow-ceiling/`,
 `build/flow-ceiling/`, `runs/RUN-FLOW-*/` and `docs/exploratory/`.
 
+> **CORRECTION NOTICE (added after publication).** The eight master tapes this
+> document is measured on are **unrepresentative**. They favour long games, and
+> the bias scales with how long a policy survives.
+> [`finding-12`](finding-12-fair-planner-ceiling-extended.md) re-ran every arm on
+> 128 fresh tapes: fair depth 4, whose configuration never changed, drops from
+> **117.75 to 93.56 mean moves** (the fresh figure matching finding-01's
+> independent 94.06 and a separate agent's 93.78), while the clairvoyant planner
+> — censored at the move cap on both cohorts — is unaffected.
+>
+> Consequently the **central quantitative claim of this document is withdrawn as
+> stated**: "fair planning closes 58.8% of the clairvoyant-minus-D4 gap" becomes
+> **27.1%** at H = 7 on a matched fresh cohort (22.2% at H = 5), because D4's
+> baseline was inflated while the clairvoyant ceiling was not, making the true
+> gap 21% larger and the fair planner's share of it roughly half what is
+> reported below. The summary line "at least 59% planning, at most 41%
+> information" is **withdrawn**; the corrected reading is that at most about 27%
+> is recovered by fair planning of this kind.
+>
+> Also superseded: §1's reading that the K series was "still climbing" at
+> K = 256. K = 1024 is **worse** on five of six paired tapes — the series has an
+> interior maximum near K = 256, not an asymptote.
+>
+> What stands unchanged: the method, the information-boundary gate, the arm A
+> result that the future disc tape is worth nothing, the finding that every fair
+> game ends (reinforced — 0 of 160 fresh-tape fair games survived), and the
+> qualitative conclusion that the residual is concentrated where the hidden state
+> is large. The original text below is left exactly as written.
+
 ## What this corrects in finding-06
 
 [`finding-06`](finding-06-flow-ceiling.md) §3 ends with this sentence, which is

@@ -1,0 +1,31 @@
+{
+  "$schema": "../schemas/theory-v1.schema.json",
+  "format": "drop7-theory-v1",
+  "theoryId": "TH-20260821-factored-chance-depth-compounding-aca01725",
+  "title": "Chance-node decorrelation and search depth compound rather than substitute",
+  "claim": "Factoring the fair search's chance node into independent next-disc and reveal draws pays at every depth, so applying it on top of the fourth ply raises mean score over the same four-ply search with a single reveal sample by a paired margin whose one-sided 95% whole-game bootstrap lower bound is above zero. The depth-3 gain finding-09 measured (+64,116 with a lower bound of +7,475 from one to six reveal samples) is therefore an increment that adds to depth rather than an alternative way of buying the same thing.",
+  "mechanism": "finding-09 diagnosed a specific defect: the reference search indexed the next-disc draw and the covered-disc reveal with the same counter, so with seven samples it saw seven of the 49 joint outcomes and those seven were perfectly correlated. A move whose value depends on the combination could not be evaluated. That defect is a property of the chance node, not of the horizon, and the frozen four-ply search contains exactly the same defective node. If the defect is what the extra reveal samples repair, repairing it inside a deeper search should be worth at least as much as repairing it inside a shallower one, and the two axes should add. The competing account is that depth and chance-estimator quality are exchangeable ways of spending one budget - both ultimately buy a less biased estimate of the same expectation - in which case paying for both at once buys little beyond paying for either.",
+  "falsificationCriteria": [
+    "The paired depth-4 (N=7, M=2) minus depth-4 (N=7, M=1) score delta over the complete 64-game cohort has a one-sided 95% whole-game bootstrap lower bound at or below zero.",
+    "The depth-3 reveal ladder stops ordering with joint chance coverage: taking reveal samples from six to twelve (85.7% to 100% joint coverage) does not raise the paired mean over the six-sample arm.",
+    "Any arm completes a decision below its requested depth, which voids that arm.",
+    "The joint-coverage attribution fails: an arm with higher joint (disc, reveal) coverage scores below one with lower coverage at the same depth and the same work bound."
+  ],
+  "informationClass": "public-policy",
+  "lifecycle": "assessed",
+  "assessment": "not-supported-as-tested",
+  "evidenceTier": "public-development",
+  "dependencies": [],
+  "evidenceRefs": [
+    "research/results/RS-20260821T181918Z-ea7076a3.json",
+    "docs/exploratory/finding-16-factored-reveal-sampling.md",
+    "docs/exploratory/finding-09-reveal-sampling.md"
+  ],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-opus-5[1m]",
+    "agentId": null
+  },
+  "createdAt": "2026-08-21T18:25:00Z",
+  "updatedAt": "2026-08-21T18:25:00Z"
+}

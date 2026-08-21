@@ -1,0 +1,32 @@
+{
+  "$schema": "../schemas/dataset-v1.schema.json",
+  "format": "drop7-dataset-v1",
+  "datasetId": "DS-20260821-afterstate-h40-d2k64-train-6c2d91e5",
+  "title": "D2-teacher training corpus (0x5da70000-0x5da700ff training roots), K=64, fair-D2-s5 continuation, H=40; partial at the 4h generator default wall stop (6,535 unique roots)",
+  "dataRole": "public-development",
+  "informationClass": "public-only",
+  "originUnit": "whole-game",
+  "originCount": 64,
+  "rowCount": 2884224,
+  "wholeOriginSplit": true,
+  "seedLeaseRefs": [
+    "SL-20260820T083000Z-5da70000"
+  ],
+  "parentDatasetRefs": [],
+  "fields": [
+    "identical schema; all rows training-role"
+  ],
+  "privilegedFields": [
+    "originSeed",
+    "moveIndex"
+  ],
+  "allowedConsumers": [
+    "afterstate-ranker training and offline ranking evaluation"
+  ],
+  "artifact": {
+    "path": "runs/RUN-20260821T084812Z-0d366205/corpus-d2/corpus.ndjson",
+    "sha256": "0ac77596932824afbb1c40e2afcd168d0aeed9f4d178daac2fef7189e5de9cc7",
+    "bytes": 1210263292
+  },
+  "createdAt": "2026-08-21T10:50:00Z"
+}

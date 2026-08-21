@@ -89,6 +89,17 @@ void testDeterminism() {
                 first[i].max_chain == second[i].max_chain;
   }
   check(identical, "determinism: repeated labeling is byte-identical");
+
+  const auto d2_first = afterstate::labelRoot(root, afterstate::kScenarios,
+                                              afterstate::Continuation::kD2);
+  const auto d2_second = afterstate::labelRoot(root, afterstate::kScenarios,
+                                               afterstate::Continuation::kD2);
+  bool d2_identical = d2_first.size() == d2_second.size();
+  for (std::size_t i = 0; d2_identical && i < d2_first.size(); ++i) {
+    d2_identical = d2_first[i].score_gained == d2_second[i].score_gained &&
+                   d2_first[i].afterstate == d2_second[i].afterstate;
+  }
+  check(d2_identical, "determinism: D2-continuation labeling is byte-identical");
 }
 
 void testReflection() {

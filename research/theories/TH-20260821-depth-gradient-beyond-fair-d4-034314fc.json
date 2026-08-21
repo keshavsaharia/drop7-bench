@@ -1,0 +1,31 @@
+{
+  "$schema": "../schemas/theory-v1.schema.json",
+  "format": "drop7-theory-v1",
+  "theoryId": "TH-20260821-depth-gradient-beyond-fair-d4-034314fc",
+  "title": "The fair search's depth gradient continues past the fourth ply once the chance estimator is exact",
+  "claim": "With seven chance strata (one stratum per disc value, so every individual chance marginal is exact), adding a fifth ply of look-ahead to the fair expectimax search raises mean score on the shared 64-game development cohort by a paired margin whose one-sided 95% whole-game bootstrap lower bound is above zero, as the third-to-fourth ply does (+86,172 with a lower bound of +26,468, finding-05). With five strata, where the third-to-fourth ply gradient is absent (-7,723, not significant), no fourth-to-fifth ply gradient is expected either. Depth and chance-estimator exactness are therefore complements, and the fourth ply is not a special stopping point.",
+  "mechanism": "finding-05 measured a depth gradient that exists only at the higher stratum count: at five strata the search's chance estimate is biased enough that a deeper horizon compounds the bias faster than it adds information, while at seven strata the estimate's marginals are exact and the extra ply pays. If that is the whole mechanism, the same exchange should continue at the fifth ply, which is also the first depth that always contains a row rise (a rise happens every five placed discs), so a five-ply search is the shallowest one that can never be surprised by the rise schedule. The competing account is that the fair search's terminal utility has no death-depth shaping - bestFutureValue returns the same -1,000,000 whether the game ends at ply 1 or ply 5 - so a deeper horizon finds more within-horizon deaths, flattens the sibling value surface, and hands the decision to column-order tie-breaking. The two accounts differ in sign at the fifth ply, which is what makes this worth the compute.",
+  "falsificationCriteria": [
+    "At seven strata, the paired depth-5 minus depth-4 score delta over the complete 64-game cohort has a one-sided 95% whole-game bootstrap lower bound at or below zero.",
+    "At five strata, the paired depth-5 minus depth-4 score delta over the complete 64-game cohort has a one-sided 95% whole-game bootstrap lower bound at or below zero.",
+    "Numbered clears per move, covered reveals per move and mean occupancy do not all move toward the survival requirement (2.400 clears and 1.400 reveals per move) from depth 4 to depth 5 at the same stratum count.",
+    "A depth-5 arm cannot complete its declared depth within its work bound (any decision below the requested depth voids the arm rather than falsifying the theory)."
+  ],
+  "informationClass": "public-policy",
+  "lifecycle": "assessed",
+  "assessment": "not-supported-as-tested",
+  "evidenceTier": "public-development",
+  "dependencies": [],
+  "evidenceRefs": [
+    "research/results/RS-20260821T181917Z-9a34ba02.json",
+    "docs/exploratory/finding-15-depth5-exact-estimator.md",
+    "docs/exploratory/finding-05-chance-strata.md"
+  ],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-opus-5[1m]",
+    "agentId": null
+  },
+  "createdAt": "2026-08-21T18:25:00Z",
+  "updatedAt": "2026-08-21T18:25:00Z"
+}

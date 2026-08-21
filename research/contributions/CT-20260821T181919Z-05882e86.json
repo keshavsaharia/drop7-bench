@@ -1,0 +1,78 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260821T181919Z-05882e86",
+  "actor": {
+    "kind": "model",
+    "platform": "Claude Code",
+    "model": "claude-opus-5[1m]",
+    "agentId": null
+  },
+  "level": "L2",
+  "roles": [
+    { "role": "formal-analysis", "degree": "lead" },
+    { "role": "writing", "degree": "lead" },
+    { "role": "data-curation", "degree": "substantial" },
+    { "role": "validation", "degree": "substantial" },
+    { "role": "software", "degree": "supporting" }
+  ],
+  "summary": "Wrote the missing scientific records for two overnight experiment families that had artifacts and no assessment, and finished their exploratory findings. Ran no gameplay: every number was recomputed from the retained artifacts with the repository's own analysis tools (approaches/lifetime-objective/fast-engine/analyze.py through finish.sh, and approaches/lifetime-objective/reveal-sampling/{pool,compare,stats}.py). Family 1, the depth x chance-exactness factorial: verified the fast engine's depth-4 seven-stratum control reproduces the recorded unoptimised arm over 704 field comparisons with 0 mismatches and that the depth-5 five-stratum arm reproduces its recorded 32-game predecessor over 352 comparisons with 0 mismatches across two binaries and two cache capacities; recomputed the paired contrasts (d5s5-d4s5 -8,624 [-55,134] W-T-L 33-0-31 at 23.29x work over 64 complete games; d5s7-d4s7 -1,581 [-173,154] and d5s7-d3s7 +16,622 [-130,027] over the 16 games the still-running arm has written); and established that the apparent 398,498-versus-288,704 gap is the stratum contrast (+101,171 [+47,447] at fixed depth 4), not a depth effect. Family 2, factored reveal sampling: recomputed the depth-4 two-reveal-sample arm at -41,950 [-100,137] W-T-L 28-0-36 for 4.07x the work against the one-sample arm and +59,221 [+9,134] against the frozen five-stratum reference, the near-equal-work equivalence between depth 3 with six reveal samples and depth 4 with one (-22,056 [-89,867], indistinguishable), and the partial twelve-sample arm's -4,495 [-91,425] on its 32 shared seeds. Created the theory, experiment, run and result records for both families with retroactive-registration amendments, froze snapshots of both still-running arms so the records reference immutable bytes, wrote content manifests, extended docs/exploratory/finding-15-depth5-exact-estimator.md with a completion section that withdraws its interim 'depth 5 reverses' verdict as completion-order bias while leaving the original text standing, wrote docs/exploratory/finding-16-factored-reveal-sampling.md, and indexed both. Added a read-only idempotent analysis driver for the reveal-sampling family (finish.sh) and a `partial` mode to its stats.py that pairs an incomplete arm on shared seeds and prints the paired n on every row. Did not kill, wait on, or start any run; did not touch coordinator-owned status documents.",
+  "theoryIds": [
+    "TH-20260821-depth-gradient-beyond-fair-d4-034314fc",
+    "TH-20260821-factored-chance-depth-compounding-aca01725"
+  ],
+  "experimentIds": [
+    "EX-20260821-depth5-chance-exactness-factorial-a6a604fd",
+    "EX-20260821-reveal-sampling-unfinished-arms-470677b5"
+  ],
+  "runIds": [
+    "RUN-20260821T045349Z-73f29417",
+    "RUN-20260821T060358Z-895d0a79",
+    "RUN-20260821T035407Z-00483c6c",
+    "RUN-20260821T143541Z-4c4370b6"
+  ],
+  "artifactPaths": [
+    "research/theories/TH-20260821-depth-gradient-beyond-fair-d4-034314fc.json",
+    "research/theories/TH-20260821-factored-chance-depth-compounding-aca01725.json",
+    "research/experiments/EX-20260821-depth5-chance-exactness-factorial-a6a604fd.json",
+    "research/experiments/EX-20260821-reveal-sampling-unfinished-arms-470677b5.json",
+    "research/runs/RUN-20260821T045349Z-73f29417.json",
+    "research/runs/RUN-20260821T060358Z-895d0a79.json",
+    "research/runs/RUN-20260821T035407Z-00483c6c.json",
+    "research/runs/RUN-20260821T143541Z-4c4370b6.json",
+    "research/results/RS-20260821T181917Z-9a34ba02.json",
+    "research/results/RS-20260821T181918Z-ea7076a3.json",
+    "docs/exploratory/finding-15-depth5-exact-estimator.md",
+    "docs/exploratory/finding-16-factored-reveal-sampling.md",
+    "docs/exploratory/README.md",
+    "approaches/lifetime-objective/reveal-sampling/finish.sh",
+    "approaches/lifetime-objective/reveal-sampling/stats.py",
+    "runs/RUN-20260821T045349Z-73f29417/manifest.json",
+    "runs/RUN-20260821T045349Z-73f29417/finish-report.txt",
+    "runs/RUN-20260821T060358Z-895d0a79/d5s7-partial-16games.json",
+    "runs/RUN-20260821T035407Z-00483c6c/manifest.json",
+    "runs/RUN-20260821T035407Z-00483c6c/reveal-report.txt",
+    "runs/RUN-20260821T143541Z-4c4370b6/d3-n7-m12-partial-32games.json"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "make research-validate: schema, ID, cross-reference, per-game artifact hash, machine-profile, seed-lease and markdown-link checks, plus the research unit tests",
+    "Re-ran approaches/lifetime-objective/fast-engine/finish.sh end to end and took every family-1 number from its output rather than from the task brief; output retained verbatim at runs/RUN-20260821T045349Z-73f29417/finish-report.txt",
+    "Ran the new approaches/lifetime-objective/reveal-sampling/finish.sh end to end and took every family-2 number from its output; output retained at runs/RUN-20260821T035407Z-00483c6c/reveal-report.txt",
+    "Independently recomputed the one-sided 95% upper bounds for the key deltas to check that 'no gain' was not being reported as 'harm': d4 M=2 minus M=1 upper bound +17,541; d5s5 minus d4s5 upper bound +39,052; d5s7 minus d4s7 upper bound +166,299",
+    "Confirmed the completed-depth and work-bound audits directly from each artifact's config block: 0 incomplete decisions, 0 decisions below target depth, 0 work-limit events, 0 censored games and 0 score-decomposition identity failures in every arm",
+    "Confirmed pooling validity from the retained control: four pooled 16-game chunks reproduce the single 64-game run on all 13 per-game fields with identical summed logical work (312,966,881)",
+    "Verified that the pooled depth-4 artifact re-pools byte-identically, and that the two still-running arms' snapshots match the live artifacts at snapshot time"
+  ],
+  "limitations": [
+    "Self-reported contribution; not independently reviewed.",
+    "Analysis and record-writing only. The gameplay, the search implementations, the chunked runner and the original finding-09 and finding-15 drafts are other contributors' work and are not claimed here.",
+    "Two of the four runs assessed were still executing when the records were written; both are recorded as partial with their game counts, and neither was killed nor waited on.",
+    "The two experiment records are retroactive registrations, disclosed as amendments on the records themselves.",
+    "No machine-readable seed-lease record exists for the 0xa5 family; the records point at the prose allocation table in docs/exploratory/lease-map.md. Creating those lease records was outside this work package.",
+    "gitCommit is null on all four run records because the commit the arms ran at cannot be reconstructed from an uncommitted working tree; a source-closure hash is recorded instead."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-21T18:19:19Z"
+}

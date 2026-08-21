@@ -1,0 +1,102 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260821-depth5-chance-exactness-factorial-a6a604fd",
+  "theoryIds": [
+    "TH-20260821-depth-gradient-beyond-fair-d4-034314fc"
+  ],
+  "title": "Depth x chance-exactness factorial: the fifth ply at five and at seven strata, with an end-to-end reproduction control",
+  "classification": "algorithmic",
+  "hypothesis": "On the shared 64-game development cohort 0xa51d1000-0xa51d103f, a five-ply fair search beats the same search at four plies at the same stratum count, with a one-sided 95% whole-game bootstrap lower bound above zero at seven strata (where finding-05 measured a +86,172 [+26,468] third-to-fourth ply gradient) and no requirement at five strata (where finding-05 measured none). The fast engine's depth-4 seven-stratum arm must first reproduce the recorded unoptimised arm field-for-field, so that any depth-5 difference is a depth difference and not an engine difference.",
+  "candidate": {
+    "name": "fast-engine-parameterized-fair-search, depth 5 (arms d5s7 and d5s5)",
+    "entryPoint": "approaches/lifetime-objective/fast-engine/cohort.cpp",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "the recorded depth-4 arms on the same seeds (d4s7 = runs/RUN-A51D-s7confirm/fresh-s7.json, d4s5 = runs/RUN-A51D-s7confirm/fresh-s5.json), plus a same-cohort fast-engine reproduction of d4s7 as the control",
+    "entryPoint": "approaches/lifetime-objective/risk-calibration/search.cpp",
+    "manifestRef": null
+  },
+  "informationBoundary": "public-policy",
+  "benchmarkTier": "STANDARD",
+  "data": {
+    "role": "previously-evaluated-development",
+    "seedLeaseRefs": [
+      "SEEDLEASE-A51D confirm (0xa51d1000-0xa51d103f; docs/exploratory/lease-map.md)"
+    ],
+    "datasetRefs": [],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "The 64 evaluation seeds 0xa51d1000-0xa51d103f were opened by finding-05's fresh-seed confirmation and are permanently development data. They are reused here as a paired diagnostic against arms recorded on exactly those seeds. This cohort can never serve as confirmation evidence and no protected or final seed is read. No machine-readable seed-lease record exists for the 0xa5 family; the authoritative allocation is the table in docs/exploratory/lease-map.md."
+  },
+  "metrics": {
+    "primary": "Paired depth-5 minus depth-4 mean score at a fixed stratum count over whole games, with a one-sided 95% percentile-bootstrap lower bound (20,000 resamples, Mulberry32 domain 0xb0075eed).",
+    "secondary": [
+      "paired move delta and its lower bound",
+      "wins-ties-losses and median paired delta",
+      "numbered clears per move, covered reveals per move and mean occupied cells against the 2.400/1.400 survival requirement",
+      "logical work per move and the work multiplier against the comparator",
+      "completed-depth audit: decisions, incomplete decisions, minimum completed depth, maximum work in one decision against the declared bound",
+      "score-decomposition identity failures and censored games",
+      "field-for-field reproduction of the recorded arms by the fast engine"
+    ],
+    "statisticalUnit": "whole-game",
+    "uncertaintyMethod": "One-sided percentile bootstrap over whole paired games, 20,000 resamples, Mulberry32 seeded 0xb0075eed, as implemented in approaches/lifetime-objective/fast-engine/analyze.py. No bound is quoted below 16 paired games."
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "Control: the fast engine's depth-4 seven-stratum arm reproduces runs/RUN-A51D-s7confirm/fresh-s7.json on all 11 recorded per-game fields with 0 mismatches.",
+      "Audit: every arm reports 0 incomplete decisions and a minimum completed depth equal to its requested depth; an arm with any incomplete decision is void, not negative.",
+      "Depth-5 at seven strata beats depth-4 at seven strata on the complete 64-game cohort with a one-sided 95% bootstrap lower bound above zero.",
+      "Depth-5 at five strata is at least not worse than depth-4 at five strata (lower bound above zero is not required at this stratum count).",
+      "Numbered clears per move, covered reveals per move and mean occupancy all move toward the survival requirement from depth 4 to depth 5 at the same stratum count.",
+      "0 censored games and 0 score-decomposition identity failures in every arm."
+    ],
+    "failureAction": "Record a valid negative for the exact depths, stratum counts, work bounds and cache capacities tested. Do not run depth 6. The named next question becomes the terminal-utility sweep at depth 5, which separates the death-penalty-flattening mechanism from the leaf-calibration mechanism.",
+    "passAction": "Preregister a fresh-seed replication of the winning depth-5 configuration on an unread development block before any promotion, and re-price the cost model with measured rather than worst-case work."
+  },
+  "resources": {
+    "wallSeconds": 172800,
+    "cpuThreads": 14,
+    "maxHostBytes": 34359738368,
+    "maxGpuBytes": null,
+    "gpuDevices": []
+  },
+  "stopConditions": [
+    "Stop an arm immediately if any decision completes below its requested depth; the arm is void.",
+    "Stop on any score-decomposition identity failure or illegal move.",
+    "Stop on any read of a seed outside 0xa51d1000-0xa51d103f.",
+    "Stop on out-of-memory or on host available memory falling below 16 GiB.",
+    "Do not extend an arm past 64 games or past the 2,000-move cap."
+  ],
+  "expectedArtifacts": [
+    "approaches/lifetime-objective/fast-engine/cohorts/d4s7-control.json and .log",
+    "approaches/lifetime-objective/fast-engine/cohorts/d5s5.json and .log",
+    "approaches/lifetime-objective/fast-engine/cohorts/d5s7.json and .log",
+    "runs/<run-id>/finish-report.txt (the idempotent analysis driver's output)",
+    "docs/exploratory/finding-15-depth5-exact-estimator.md",
+    "research/results/<result-id>.json"
+  ],
+  "lifecycle": "running",
+  "protocolSha256": "cf7f2ba30d205bddd20340d39dbdef4a5950f792510776a7fbfd477aefea1c18",
+  "amendments": [
+    {
+      "timestamp": "2026-08-21T18:25:00Z",
+      "beforeControlledData": false,
+      "reason": "Registered retroactively. The arms were launched under the exploratory prose protocol in docs/exploratory/finding-15-depth5-exact-estimator.md (arm table, work bounds and the reproduce block) and this machine-readable record was written after execution, by a different agent than the one that ran them. Nothing in the comparison rule was chosen after seeing these arms' results: the paired mean delta with a one-sided 95% percentile bootstrap lower bound over whole games (20,000 resamples, Mulberry32 domain 0xb0075eed) is the repository's standing rule for this cohort and is implemented in approaches/lifetime-objective/fast-engine/analyze.py, which predates the arms. The cohort, the seeds, the depths, the stratum counts, the work bounds and the cache capacities are read from the artifacts, not chosen here."
+    },
+    {
+      "timestamp": "2026-08-21T18:25:00Z",
+      "beforeControlledData": false,
+      "reason": "lifecycle set to running, not completed: the depth-5 seven-stratum arm was still executing (pid 127323, 16 of 64 games in its artifact, 24 finished in its log) when the first result record was written. The result for the finished portion is recorded as partial rather than withheld."
+    }
+  ],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-opus-5[1m]",
+    "agentId": null
+  },
+  "createdAt": "2026-08-21T18:25:00Z",
+  "updatedAt": "2026-08-21T18:25:00Z"
+}

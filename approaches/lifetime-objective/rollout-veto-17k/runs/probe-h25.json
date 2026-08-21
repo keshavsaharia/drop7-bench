@@ -1,0 +1,21 @@
+{
+  "format": "drop7-rollout-veto-17k-paired-v1",
+  "experiment": "rollout-veto-17k",
+  "seedLease": "SEEDLEASE-A51D-VETO",
+  "dataRole": "exploratory-development-diagnostic",
+  "seedStartHex": "0xa51e3f00",
+  "games": 1,
+  "maximumMoves": 40,
+  "threads": 1,
+  "config": {"horizon": 25, "scenarios": 7, "continuationDepth": 2, "dangerHeight": 4, "maximumRootQLoss": 17000, "levelBonus": 17000, "pairedT975Df6": 2.446912},
+  "baselineWallSeconds": 0,
+  "candidateWallSeconds": 122.334049053,
+  "totalWallSeconds": 122.334430199,
+  "baselineFailures": 0,
+  "candidateFailures": 0,
+  "candidateCounters": {"decisions": 40, "dangerDecisions": 25, "vetoOpportunities": 25, "alternativesConsidered": 150, "vetoesTaken": 0, "passingAlternatives": 0, "survivorRejections": 66, "clearRejections": 104, "returnRejections": 150, "rootQRejections": 15, "d2Calls": 24115, "d2Work": 43953949, "d4Work": 46947047, "syntheticTransitions": 25340, "d4Seconds": 66.289334125, "rolloutSeconds": 56.04263435},
+  "baselineCounters": {"decisions": 0, "dangerDecisions": 0, "vetoOpportunities": 0, "alternativesConsidered": 0, "vetoesTaken": 0, "passingAlternatives": 0, "survivorRejections": 0, "clearRejections": 0, "returnRejections": 0, "rootQRejections": 0, "d2Calls": 0, "d2Work": 0, "d4Work": 0, "syntheticTransitions": 0, "d4Seconds": 0, "rolloutSeconds": 0},
+  "perGame": [
+    {"seedHex": "0xa51e3f00", "candidate": {"score": 138689, "moves": 40, "censored": true, "rises": 8, "boardClears": 0, "numberedCleared": 63, "coversRevealed": 33, "maxChainDepth": 5, "wallSeconds": 122.332196253}, "veto": {"decisions": 40, "dangerDecisions": 25, "vetoOpportunities": 25, "alternativesConsidered": 150, "vetoesTaken": 0, "passingAlternatives": 0, "survivorRejections": 66, "clearRejections": 104, "returnRejections": 150, "rootQRejections": 15, "d2Calls": 24115, "d2Work": 43953949, "d4Work": 46947047, "syntheticTransitions": 25340, "d4Seconds": 66.289334125, "rolloutSeconds": 56.04263435}}
+  ]
+}

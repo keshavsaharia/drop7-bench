@@ -184,3 +184,80 @@ body {
   .engine-pulse { animation: none; opacity: 1; }
   .engine-motion { display: none; }
 }
+
+/* Daily research log (web/components/ResearchLog.tsx, /log).
+   Written unlayered and after the prose rules above so the log cards keep
+   their own heading, list, quote and table rhythm when they are rendered
+   inside .prose-drop7 — Tailwind utilities live in a cascade layer and would
+   otherwise lose to the prose element selectors. */
+.log-card h3 {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #f4f4f5;
+}
+.log-body > :first-child {
+  margin-top: 0;
+}
+.log-body > :last-child {
+  margin-bottom: 0;
+}
+.log-timeline ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.log-timeline li {
+  margin: 0;
+}
+.log-quote blockquote {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: inherit;
+}
+
+/* Experiment-arm comparison tables. Every cell is a pre-formatted string the
+   entry's author wrote; the table computes nothing. */
+.arm-table {
+  margin: 1.1rem 0;
+}
+.arm-table-scroll {
+  overflow-x: auto;
+}
+.arm-table table {
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+.arm-table th,
+.arm-table td {
+  border: 0;
+  border-bottom: 1px solid #27272a;
+  padding: 0.4rem 0.7rem;
+  text-align: left;
+  vertical-align: baseline;
+  white-space: nowrap;
+}
+.arm-table thead th {
+  background: none;
+  border-bottom-color: #3f3f46;
+  color: #a1a1aa;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.arm-table th.num,
+.arm-table td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.arm-table tbody tr.is-highlight td {
+  background: #18181b;
+  color: #fafafa;
+}
+.arm-table tbody tr:last-child td {
+  border-bottom: 0;
+}

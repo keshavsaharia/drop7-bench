@@ -674,11 +674,14 @@ void applyWeightsFile(SearchParameters& parameters, const std::string& path) {
   std::string name;
   double value = 0.0;
   int applied = 0;
-  while (file >> name >> value) {
+  while (file >> name) {
     if (name.size() && name[0] == '#') {
       std::string rest;
       std::getline(file, rest);
       continue;
+    }
+    if (!(file >> value)) {
+      throw std::runtime_error("weights file: no value for " + name);
     }
     if (name == "bias") {
       parameters.weights.bias = value;

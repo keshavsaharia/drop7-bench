@@ -1,0 +1,32 @@
+{
+  "$schema": "../schemas/dataset-v1.schema.json",
+  "format": "drop7-dataset-v1",
+  "datasetId": "DS-20260821-afterstate-h40-k256-ovr-8e4fb307",
+  "title": "Fresh held-out override-gate corpus (0x5da70600-0x5da7063f), K=256, D1 continuation",
+  "dataRole": "public-development",
+  "informationClass": "public-only",
+  "originUnit": "whole-game",
+  "originCount": 64,
+  "rowCount": 4934912,
+  "wholeOriginSplit": true,
+  "seedLeaseRefs": [
+    "SL-20260820T083000Z-5da70000"
+  ],
+  "parentDatasetRefs": [],
+  "fields": [
+    "identical schema to DS-20260820-afterstate-h40-k8-3f2f6d29; all rows held-out"
+  ],
+  "privilegedFields": [
+    "originSeed",
+    "moveIndex"
+  ],
+  "allowedConsumers": [
+    "afterstate-ranker training and offline ranking evaluation"
+  ],
+  "artifact": {
+    "path": "runs/RUN-20260821T084812Z-0d366205/corpus-override/corpus.ndjson",
+    "sha256": "934e8040d117c022787226841845875b308781d7e66aa3630e4e05b37444cf84",
+    "bytes": 2074063326
+  },
+  "createdAt": "2026-08-21T10:50:00Z"
+}

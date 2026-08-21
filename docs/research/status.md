@@ -5,8 +5,27 @@
 The simulator and reference searches are mature enough to support reproducible
 research, but the strategy problem is unsolved. Corrected-score fair depth-4
 expectimax is the strongest dependable reference found so far. Its broader
-64-game recorded mean is about 308,296 points, far below the required
+64-game ledger mean is about 308,296 points, far below the required
 one-million-point average.
+
+Exploratory work on 2026-08-20/21 reproduced that reference on fresh seeds and
+completed the depth-by-chance-resolution factorial that the roadmap had listed
+as priority 8. Two results from it are load-bearing for what to do next, and
+both are single-cohort *development* tier — they do not upgrade the ledger:
+
+- **The fourth ply is worth +86,172 points, but only with an exact chance
+  model** (95% lower bound +26,605, 40-0-24 over 64 paired games). With an
+  approximate five-stratum model the same fourth ply is worth −7,723. Chance
+  resolution does not merely add points; it changes the sign of the depth
+  gradient.
+- **The fifth ply is worth nothing at either chance resolution** (−1,581 at
+  seven strata over 16 paired games; −8,624 at five strata over 64), at 23x to
+  34x the work. Neither is significantly negative — the one-sided 95% upper
+  bounds are +166,299 and +39,052 — so the finding is "does not pay for
+  itself", not "is harmful". Combined with a factored reveal-sampling ladder,
+  no arm above roughly five million work units per move is distinguishable from
+  depth 4, and the budget frontier is flat on top at the fair-D4 operating
+  point, reachable from either axis.
 
 No candidate has qualified for the protected validation protocol. The frozen
 record marks both the protected and one-shot final cohorts as unopened.
@@ -19,7 +38,10 @@ record marks both the protected and one-shot final cohorts as unopened.
 | Native engine and n-tuple checks | Gradient and self-tests | Reproduced in this checkout |
 | Native/TypeScript trajectory agreement | Deterministic parity sweep | Reproduced; see reproducibility notes |
 | Fair D4 vs D3: 400,675.25/116.375 vs 235,071.25/71 over 8 games | Detailed ledger | Recorded, small confirmation cohort |
-| Fair D4: 308,295.578 points and 90.031 moves over 64 games | Detailed ledger | Recorded broader reference cohort |
+| Fair D4: 308,295.578 points and 90.031 moves over 64 games | Detailed ledger; the 64 seeds, dispersion, censoring, and flow statistics required by `methodology.md` were not retained | Provisional reference mean pending a re-run under the benchmark contract |
+| Fair D4 reproduced: 321,992 points and 94.06 moves over 64 games | Fresh exploratory seeds `0xa51d0000`+, unmodified frozen source | Development tier; single cohort, consistent with the ledger figure |
+| Depth x chance-resolution factorial, depths 2-5 x 5/7 strata | 64 paired games per cell on `0xa51d1000`+, bit-exact accelerated engine | Development tier; the depth-5 cells are partial (32 and 16 games) |
+| Score is 94.29% row-rise bonus; r = 0.9995 with game length | 64-game decomposition with a per-game score identity check | Development tier; reframes the objective as survival |
 | One D4 game scored 1,246,684 | Task-record only | Anecdote; not an average or qualification |
 | Million-point candidate exists | Frozen validation protocol | No |
 | AFBR-40 afterstate idea | Task-record only | Proposal; no source, checkpoint, or result |
@@ -93,7 +115,16 @@ run.
 - **Fair chance handling matters.** Optimistic, worst-case, or tiny reused
   reveal samples can rank moves incorrectly.
 - **More depth is not automatically more strength.** Horizon, continuation
-  quality, chance variance, and work budget interact.
+  quality, chance variance, and work budget interact. The 2026-08-21 factorial
+  makes the interaction concrete: with an approximate chance model the best
+  depth is three and deeper search actively loses; with an exact chance model
+  the best depth is four. Depth and chance resolution *substitute* rather than
+  compound: at equal work, depth 3 with six-fold reveal sampling (4.24M per
+  move, 376,442) and depth 4 with single-sample reveals (4.96M, 398,498) are
+  statistically indistinguishable, and doubling reveal samples on top of ply 4
+  buys nothing measurable for 4.07x the work. Refining the reveal distribution
+  is itself worth +64,116 at depth 3 (95% lower bound +7,475) and saturates
+  before full joint coverage.
 - **Flow matters before spectacular chains.** The task record repeatedly used
   roughly 2.4 numbered clears and 1.4 reveals per move as the region associated
   with stable long games. Treat these as diagnostic targets from limited runs,
@@ -103,10 +134,48 @@ run.
   evolve across rises.
 - **State-value accuracy is not action-ranking accuracy.** Training data must
   cover legal siblings or use an objective designed for relative action value.
+  As of 2026-08-21 this is necessary but demonstrably not sufficient: a student
+  given successor-closed coverage, every legal sibling, and exact search-value
+  labels still ranked worse than a one-ply exact search.
 - **Score is heavy-tailed.** One million-point game can coexist with a much
   lower average; paired whole-game cohorts and confidence bounds are essential.
 - **D4 is useful but not the answer.** It is a strong tactical fallback and
   teacher, yet its average is not close enough to qualify.
+- **The leaf evaluation prices what search cannot see.** Refitting it toward a
+  quantity the search already computes exactly — achievable clears over the next
+  few moves — loses monotonically, and loses by destroying the upper tail rather
+  than the lower one. A leaf that correlates weakly with short-horizon clear
+  rate is behaving correctly, not failing.
+- **Cheap proxies for this game invert.** Three independent times a short-horizon
+  screen has ranked configurations in the opposite order from complete games: the
+  `suite-h9-v1` scenario suite, a depth-3 screening run, and an eight-move
+  achievable-clear label. Screen at the depth you intend to deploy, or do not
+  screen.
+
+## Directions closed by exploratory evidence, 2026-08-20/21
+
+Each entry rejects the exact configuration tested, at *development* or *pilot*
+tier. None of them is a proof that the underlying idea is impossible, and each
+names what would reopen it.
+
+| Direction | Result | Reopens if |
+| --- | --- | --- |
+| Search depth beyond four plies | −1,581 (7 strata) and −8,624 (5 strata), neither significantly negative, 23-34x work | A different leaf or a non-uniform depth schedule changes the ply-5 gradient |
+| Stacking reveal sampling on top of the fourth ply | −41,950 at M=2 (95% upper bound +17,541), 4.07x work | A wider dose is tested; only 28.6% joint coverage was affordable at depth 4, and the dose that worked at depth 3 was 85.7% |
+| Harsher terminal (death) utility | Parameter saturated; play is identical past the current value | Never, for this parameterization |
+| 25-move rollout veto | −21,887 points per veto | A lower-variance rollout estimator |
+| Refitting the leaf toward achievable clear rate | Monotone loss across six arms; fully-fitted vector −237,182 | A refit against remaining lifetime rather than achievable clears |
+| Direct action override by the compact afterstate model | Override gate failed; harmful in one half-fold | A materially larger student, or a stronger teacher than D1-continuation |
+| Compact afterstate model reproducing D4's ordering | Top-1 0.375 against a 0.60 gate; exact D1 scores 0.486 | A materially larger model; the claim is only established for compact evaluators |
+| The `suite-h9-v1` scenario benchmark as a strength measure | Ranked policies backwards, Spearman −0.257 | A validated longer horizon; it remains usable as a diagnostic |
+
+The two afterstate rows matter more than their tier suggests. The program's
+standing explanation for every failed learned policy was insufficient sibling
+coverage. The 2026-08-21 experiment supplied successor-closed coverage, every
+legal sibling, exact search-value labels, and completeness 1.0 — and the student
+still ranked worse than a one-ply exact search. That relocates the obstacle from
+the training data to the capacity of a compact board evaluator, and it makes
+"train a bigger student" a falsifiable next step rather than a hopeful one.
 
 ## Open work
 
@@ -115,20 +184,23 @@ architecture sweep:
 
 1. Re-register any resumed SHA-locked experiment against the reorganized source
    tree and rerun cross-engine parity.
-2. Determine whether the existing public-root data can form a truly
-   successor-closed, action-balanced training set without reading new gameplay
-   seeds.
-3. Only if that audit passes, implement the proposed action-free afterstate
-   value model (AFBR-40) with D4 as a conservative fallback.
-4. If closure is impossible, collect a new, explicitly partitioned corpus that
-   evaluates every legal sibling and records successor states under common
-   random scenarios.
-5. Test long-cycle features as bounded corrections to D4 before allowing them
+2. Refit the search leaf against remaining lifetime, the quantity that
+   correlates with score at r = 0.9995, rather than against achievable clears.
+3. Test whether student capacity is the binding constraint, since that is now
+   the explicit claim on the table and the cheapest one to falsify.
+4. Test long-cycle features as bounded corrections to D4 before allowing them
    to control an entire game.
+5. Resolve the three recorded divergences between this simulator and the
+   shipped game, which is an owner decision and not an agent decision.
 
-AFBR-40 was interrupted at the data-feasibility stage. It has no implementation,
-protocol, model, or measurements in this repository and must not appear in a
-list of attempted results.
+Items 1, 4 and 5 are unchanged. Items 2 and 3 replace the AFBR-40 closure
+sequence, whose data-feasibility question was answered directly: closure was
+achieved and did not rescue the model.
+
+AFBR-40 as originally proposed has no implementation, protocol, model, or
+measurements in this repository and must not appear in a list of attempted
+results. The action-free afterstate models that *were* built and measured on
+2026-08-20/21 are separate, separately recorded, and are not AFBR-40.
 
 For configurations and every retained entry point, use the
 [experiment index](experiment-index.md). For the unabridged chronological

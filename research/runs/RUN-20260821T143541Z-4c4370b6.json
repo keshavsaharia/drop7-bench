@@ -1,0 +1,50 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260821T143541Z-4c4370b6",
+  "experimentId": "EX-20260821-reveal-sampling-unfinished-arms-470677b5",
+  "lifecycle": "running",
+  "runValidity": "partial",
+  "startedAt": "2026-08-21T14:35:41Z",
+  "endedAt": null,
+  "protocolSha256": "d00f6f55d52ad77dc22268bf901b0d635f17e1f79533717b598bfe0733c6f6a8",
+  "machineProfileRef": "research/system-profiles/MACH-20260820T080056Z-376ada90.json",
+  "sourceState": {
+    "gitCommit": null,
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": "d81af1acc5f11c060ce88b9940308f40a1299785a5fb947851dd1baa5c26e9c8"
+  },
+  "command": [
+    "approaches/lifetime-objective/reveal-sampling/run-arms.sh arm2",
+    "build/reveal-sampling/reveal-sampling --depth 3 --disc-samples 7 --reveal-samples 12 --max-work 407634528 --auto-cache --seed-start 0xa51d1000|0xa51d1010|0xa51d1020 --games 16 --threads 12 --output runs/RUN-A525-reveal/d3-n7-m12-c{0,1,2}.json",
+    "python3 approaches/lifetime-objective/reveal-sampling/pool.py runs/RUN-A525-reveal/d3-n7-m12-pooled.json runs/RUN-A525-reveal/d3-n7-m12-c0.json runs/RUN-A525-reveal/d3-n7-m12-c1.json"
+  ],
+  "seedLeaseRefs": [
+    "SEEDLEASE-A51D confirm (0xa51d1000-0xa51d103f; docs/exploratory/lease-map.md)"
+  ],
+  "resourceLimits": {
+    "wallSeconds": 172800,
+    "cpuThreads": 12,
+    "maxHostBytes": 34359738368,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": 10282.8,
+    "cpuSeconds": null,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "Two of four chunks complete (32 of 64 games) when this record was written; the third chunk started at 17:27:03Z and was still executing. Wall seconds are the sum of the two finished chunks. Because whole chunks are pooled, the 32 games are exactly the cohort's first two 16-seed blocks and each is paired seed-for-seed against its comparator, so the paired delta over those 32 seeds is unbiased even though the arm's 32-game mean is not an estimate of its 64-game mean. 3,335 decisions, 0 below target depth, 0 work-limit events, work/move 13,575,768. gitCommit is null on purpose: the arms ran from an uncommitted working tree and the commit they ran at cannot be reconstructed, so no SHA is invented. sourceArchiveSha256 is instead the SHA-256 of the newline-joined '<path> <sha256>' lines of this approach's source closure, taken after the runs and listed in the run's manifest.json."
+  },
+  "exitCode": null,
+  "stopReason": "still running at snapshot time; 32 of 64 games pooled (chunks 0 and 1 of 4)",
+  "artifactRefs": [
+    "runs/RUN-20260821T143541Z-4c4370b6/d3-n7-m12-partial-32games.json",
+    "runs/RUN-A525-reveal/d3-n7-m12-c0.json",
+    "runs/RUN-A525-reveal/d3-n7-m12-c1.json",
+    "runs/RUN-A525-reveal/cont-arm2-driver.log"
+  ],
+  "contributionIds": [
+    "CT-20260821T181919Z-05882e86"
+  ]
+}

@@ -21,10 +21,24 @@ reaches 2.2309 clears and 1.2782 reveals per move at H = 7, K = 256 — 93.0% of
 the requirement — closing 58.8% of the clairvoyant-minus-D4 gap. Knowing the
 future disc tape closes none of it. Every fair game still died.
 
+**Both of those numbers are measured on eight master tapes, which are
+unrepresentative — they favour long games.** On 128 fresh tapes fair depth 4
+drops from 117.75 to **93.56** mean moves while the clairvoyant planner, censored
+at the move cap, is unchanged. Re-baselined, the fair planner reaches **2.0260
+clears per move at H = 7, K = 256** (32 fresh tapes) and **2.0445 at H = 5,
+K = 256** (128 fresh tapes) against fair D4's **1.9865**, closing 27.1% of the
+clairvoyant gap rather than the 58.8% first reported. The K series also **turns
+over**: K = 1024 is worse than K = 256 on five of six paired tapes, so the fair
+ceiling is an interior optimum near 2.03, not an asymptote near 2.40.
+
 The results are written up in
 [`docs/exploratory/finding-06-flow-ceiling.md`](../../../docs/exploratory/finding-06-flow-ceiling.md)
+,
+[`docs/exploratory/finding-07-fair-planning-ceiling.md`](../../../docs/exploratory/finding-07-fair-planning-ceiling.md)
 and
-[`docs/exploratory/finding-07-fair-planning-ceiling.md`](../../../docs/exploratory/finding-07-fair-planning-ceiling.md).
+[`docs/exploratory/finding-12-fair-planner-ceiling-extended.md`](../../../docs/exploratory/finding-12-fair-planner-ceiling-extended.md),
+which carries the re-baselining and supersedes the eight-tape figures in the
+first two.
 
 Nothing outside this directory, `build/flow-ceiling/`, `runs/RUN-FLOW-*/` and
 `docs/exploratory/` is written by this work.
@@ -35,7 +49,10 @@ Nothing outside this directory, `build/flow-ceiling/`, `runs/RUN-FLOW-*/` and
 | --- | --- |
 | `flow-common.hpp` | The `MasterTape` (one fixed future for a whole game), the long-game driver, per-move score/flow decomposition, occupancy tracking, and JSON emission |
 | `flow-solver.hpp` | A single-threaded exact window solver with a pluggable per-move objective: **points** (the frozen solver's objective) or **clears** (numbered discs removed). `runRoot()` returns the exact value of every legal opening move |
-| `fair-planner.hpp` | The same planner with the hidden board and/or the future removed and replaced by `K` sampled determinizations — a legal public-information policy |
+| `fair-planner.hpp` | The same planner with the hidden board and/or the future removed and replaced by `K` sampled determinizations — a legal public-information policy. `--sample-threads` solves the K windows in parallel without changing the decision |
+| `analyze.py`, `compare.py` | Per-cohort tables, and side-by-side clears/reveals by occupancy band |
+| `paired.py` | Paired whole-game comparison on shared master tapes, with one-sided 95% bootstrap lower bounds |
+| `extrapolate.py` | Fits the K series and reports honestly when no finite asymptote is identified |
 | `pv-replay.cpp` | Replays a solved principal variation through the scenario engine and reports its flow rates, wave depths, score composition and occupancy |
 | `flow-run.cpp` | Receding-horizon clairvoyant long games, the public-policy controls, the self-test and the solver cross-check |
 | `build.sh` | `clang++` build |
@@ -115,8 +132,16 @@ proposed for deployment.
 
 ## Seed lease
 
-`SEEDLEASE-A52-FLOW` = `0xa5230000`–`0xa5233fff` for game seeds and
-`SEEDLEASE-A52-FLOW2` = `0xa5234000`–`0xa5237fff` for the fair planner's
-hidden-board sampler, both exploratory development diagnostics. `flow-run`
-refuses to start outside them. Once read these seeds are development data
-permanently.
+`SEEDLEASE-A52-FLOW` = `0xa5230000`–`0xa5233fff` for the original eight master
+tapes, `SEEDLEASE-A52-FLOW2` = `0xa5234000`–`0xa5237fff` for the original K
+series' hidden-board sampler, and `SEEDLEASE-A52-FLOW3` =
+`0xa5238000`–`0xa523bfff` for everything added later — partitioned so a
+master-tape seed and a sampler seed can never collide: fresh game tapes take
+`0xa5239000`–`0xa5239fff`, samplers take `0xa523a000`–`0xa523bfff`. All are
+exploratory development diagnostics; `flow-run` refuses to start outside them.
+Once read these seeds are development data permanently.
+
+**A note for anyone reusing this directory: use a large tape cohort.** Eight
+tapes gave fair depth 4 a mean lifetime 26% above its true value. 64 is the
+minimum for a paired claim and 128 is cheap for anything that is not a full
+window solve.

@@ -1,0 +1,53 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260820T082542Z-7866d15c",
+  "experimentId": "EX-20260820-afterstate-pilot-h40-29b8588a",
+  "lifecycle": "completed",
+  "runValidity": "valid",
+  "startedAt": "2026-08-20T08:25:42Z",
+  "endedAt": "2026-08-20T09:35:00Z",
+  "protocolSha256": "4fe8992ced7f1ba6a369910beb83219b95fdfeb006127e6ea480650021c981ea",
+  "machineProfileRef": "research/system-profiles/MACH-20260820T080056Z-376ada90.json",
+  "sourceState": {
+    "gitCommit": "ac7f04e3d7d6243c2e2831b433ae9c4d599d7b28",
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "build/afterstate/generate-corpus --seed-start 0x5da70000 --games 256 --roots 16000 --threads 16 --out runs/RUN-20260820T082542Z-7866d15c/corpus",
+    "build/afterstate/label-d4 --roots runs/RUN-20260820T082542Z-7866d15c/corpus/roots.tsv --out runs/RUN-20260820T082542Z-7866d15c/d4-labels/comparator-labels.tsv --threads 24",
+    ".venv-afterstate/bin/python approaches/afterstate-learning/distributional-afterstate/train.py --corpus runs/RUN-20260820T082542Z-7866d15c/corpus/corpus.ndjson --comparator-labels runs/RUN-20260820T082542Z-7866d15c/d4-labels/comparator-labels.tsv --out runs/RUN-20260820T082542Z-7866d15c/model --epochs 30"
+  ],
+  "seedLeaseRefs": [
+    "SL-20260820T083000Z-5da70000"
+  ],
+  "resourceLimits": {
+    "wallSeconds": 36000,
+    "cpuThreads": 24,
+    "maxHostBytes": 34359738368,
+    "maxGpuBytes": 21474836480
+  },
+  "resourceObserved": {
+    "wallSeconds": 2160,
+    "cpuSeconds": 7800,
+    "peakHostBytes": null,
+    "peakGpuBytes": 880590336,
+    "measurementNotes": "Corpus generation 28.7s (16 threads), D4 comparator labeling 329s (24 threads; one earlier labeling pass lost its output to a missing-directory bug, fixed and deterministically regenerated), training+gate 1160s on the Radeon 8060S (ROCm 7.13 TheRock wheel, FP32). Peak host RSS was not instrumented; host pressure stayed far below the 32 GiB limit (corpus 258 MB, packed training tensors ~0.4 GB). Procedural disclosure: the experiment protocol text was authored before any data access and frozen with researchctl freeze after the run; the frozen hash identifies the exact preregistered content, which did not change during the run. Protocol hash updated to the completed-lifecycle rehash of the same protocol text; the only content changes were the lifecycle field and, for the K=8 experiment, a cosmetic entryPoint path correction."
+  },
+  "exitCode": 0,
+  "stopReason": null,
+  "artifactRefs": [
+    "runs/RUN-20260820T082542Z-7866d15c/corpus/corpus.ndjson",
+    "runs/RUN-20260820T082542Z-7866d15c/corpus/manifest.json",
+    "runs/RUN-20260820T082542Z-7866d15c/d4-labels/comparator-labels.tsv",
+    "runs/RUN-20260820T082542Z-7866d15c/model/model.pt",
+    "runs/RUN-20260820T082542Z-7866d15c/model/training-log.json",
+    "runs/RUN-20260820T082542Z-7866d15c/model/gate-report.json",
+    "build/afterstate/sources.sha256"
+  ],
+  "contributionIds": [
+    "CT-20260820T140540Z-f8458dc0"
+  ]
+}

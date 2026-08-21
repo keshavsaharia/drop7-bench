@@ -1,0 +1,52 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260820T111656Z-f771f173",
+  "experimentId": "EX-20260820-afterstate-pilot-h40-k256-65a05477",
+  "lifecycle": "completed",
+  "runValidity": "valid",
+  "startedAt": "2026-08-20T11:16:56Z",
+  "endedAt": "2026-08-20T14:15:00Z",
+  "protocolSha256": "325a96f742382e18dcee7d105d343f56047b98948ee8adaba19469b1ddd29efa",
+  "machineProfileRef": "research/system-profiles/MACH-20260820T080056Z-376ada90.json",
+  "sourceState": {
+    "gitCommit": "ac7f04e3d7d6243c2e2831b433ae9c4d599d7b28",
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "build/afterstate/generate-corpus --seed-start 0x5da70000 --games 256 --roots 16000 --scenarios 256 --threads 24 --out runs/RUN-20260820T111656Z-f771f173/corpus-a",
+    "build/afterstate/generate-corpus --seed-start 0x5da70200 --games 64 --roots 8000 --scenarios 256 --threads 24 --fold-force heldout --out runs/RUN-20260820T111656Z-f771f173/corpus-c",
+    "build/afterstate/label-d4 --roots runs/RUN-20260820T111656Z-f771f173/corpus-c/roots.tsv --out runs/RUN-20260820T111656Z-f771f173/d4-labels-c/comparator-labels.tsv --threads 24",
+    ".venv-afterstate/bin/python approaches/afterstate-learning/distributional-afterstate/train.py --corpus runs/RUN-20260820T111656Z-f771f173/corpus-a/corpus.ndjson --heldout-corpus runs/RUN-20260820T111656Z-f771f173/corpus-c/corpus.ndjson --comparator-labels runs/RUN-20260820T111656Z-f771f173/d4-labels-c/comparator-labels.tsv --out runs/RUN-20260820T111656Z-f771f173/model --epochs 20 --max-train-rows 2000000"
+  ],
+  "seedLeaseRefs": [
+    "SL-20260820T083000Z-5da70000"
+  ],
+  "resourceLimits": {
+    "wallSeconds": 21600,
+    "cpuThreads": 24,
+    "maxHostBytes": 34359738368,
+    "maxGpuBytes": 21474836480
+  },
+  "resourceObserved": {
+    "wallSeconds": 10600,
+    "cpuSeconds": 20000,
+    "peakHostBytes": null,
+    "peakGpuBytes": 2984175616,
+    "measurementNotes": "Corpus A 871s + corpus C 201s (24 threads), D4 labels 316s, training+gate 7612s on the Radeon 8060S (FP32). Training reached epoch 11 of 20 at the 2h GPU budget stop; rank loss still decreasing (0.672 to 0.630), so the model remains undertrained. Peak host RSS not instrumented; corpus A 8.3 GB, packed GPU-resident planes 2.2 GB. Protocol hash updated to the completed-lifecycle rehash of the same protocol text; the only content changes were the lifecycle field and, for the K=8 experiment, a cosmetic entryPoint path correction."
+  },
+  "exitCode": 0,
+  "stopReason": "training time budget reached at epoch 11 of 20",
+  "artifactRefs": [
+    "runs/RUN-20260820T111656Z-f771f173/corpus-a/corpus.ndjson",
+    "runs/RUN-20260820T111656Z-f771f173/corpus-c/corpus.ndjson",
+    "runs/RUN-20260820T111656Z-f771f173/d4-labels-c/comparator-labels.tsv",
+    "runs/RUN-20260820T111656Z-f771f173/model/model.pt",
+    "runs/RUN-20260820T111656Z-f771f173/model/gate-report.json"
+  ],
+  "contributionIds": [
+    "CT-20260820T140540Z-f8458dc0"
+  ]
+}

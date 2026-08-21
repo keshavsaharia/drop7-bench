@@ -1,0 +1,75 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260821T104500Z-77d21e90",
+  "theoryIds": [
+    "TH-20260821-search-guided-self-play-at-scale-299ed02f"
+  ],
+  "experimentId": "EX-20260821-afterstate-d4q-stage1-40136e9e",
+  "runIds": [
+    "RUN-20260821T085042Z-c5cf0e71"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "fail",
+  "assessment": "not-supported-as-tested",
+  "evidenceTier": "pilot",
+  "summary": "Scale-out stage 1 fails its prerequisite: a compact action-free afterstate model cannot learn fair D4's within-root ordering even from successor-closed, exactly-labeled search values. Training labels were the pinned reference's own depth-3 values of every legal sibling's resolved afterstate under its own five-stratum quadrature (291,890 labeled afterstates over 8,639 training roots, completeness 1.0). On 3,030 fresh held-out roots the model's one-ply chance-averaged ordering agreed with exact fair D4 at top-1 0.375 (frozen threshold >= 0.60), pairwise 0.643 (>= 0.78), normalized regret 0.291 (<= 0.13), failing every criterion in both origin-hash half-folds. For scale, exact fair D1 agrees with D4 at 0.486 top-1 on the historical panel - the learned student is WORSE than the cheapest exact search. Combined with the repository's prior played-action distillation failures, this strengthens the conclusion to: the obstacle to learning D4's ranking is not sibling coverage but the representational capacity of a compact board evaluator for the 4-ply search-value function. The registered self-play loop's stage-1 prerequisite is not met at this model scale.",
+  "metrics": {
+    "trainRoots": 8639,
+    "trainAfterstateLabels": 291890,
+    "heldoutRoots": 3030,
+    "top1Pooled": 0.3752,
+    "top1Half1": 0.3628,
+    "top1Half2": 0.3864,
+    "pairwisePooled": 0.6426,
+    "regretPooled": 0.2909,
+    "referenceD1Top1": 0.486,
+    "referenceD2Top1": 0.568
+  },
+  "gateChecks": [
+    {
+      "criterion": "Successor-closed D4-value labels on >= 8,000 training roots, completeness 1.0",
+      "passed": true,
+      "observed": "8,639 roots, 291,890 afterstate labels, every legal sibling x 5 strata"
+    },
+    {
+      "criterion": "Held-out top-1 agreement >= 0.60 on each half-fold",
+      "passed": false,
+      "observed": "half1 0.3628, half2 0.3864"
+    },
+    {
+      "criterion": "Held-out pairwise agreement >= 0.78 on each half-fold",
+      "passed": false,
+      "observed": "half1 0.6375, half2 0.6473"
+    },
+    {
+      "criterion": "Normalized regret <= 0.13 on each half-fold",
+      "passed": false,
+      "observed": "half1 0.3055, half2 0.2778"
+    },
+    {
+      "criterion": "All CHECK-tier self-tests pass before any label is inspected",
+      "passed": true,
+      "observed": "SELFTEST OK (10 checks including D2-continuation determinism)"
+    }
+  ],
+  "perGameArtifact": {
+    "path": "runs/RUN-20260821T085042Z-c5cf0e71/model/d4q-gate-report.json",
+    "sha256": "65ee634b97d8e99dccaca40cf392efe65f90be4f41be39e293f43a60fb3e7850",
+    "recordCount": 1
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260820T080056Z-376ada90.json"
+  ],
+  "artifactManifestRef": null,
+  "limitations": [
+    "The student is the compact 3.4M-param ResNet; a materially larger model was not tested (the iGPU's FP32 throughput bounds what is trainable overnight).",
+    "Labels are the depth-3 value of afterstates (the value one ply below the D4 root), so the student approximates D4's search through its own horizon, not an oracle's.",
+    "The gate measures agreement with D4's ordering, which is itself a strong-but-not-optimal reference; a student below D4's agreement could in principle still add value inside a different search, which this experiment does not test.",
+    "Single machine profile; FP32 on the shared-memory iGPU."
+  ],
+  "contributionIds": [
+    "CT-20260820T140540Z-f8458dc0"
+  ],
+  "recordedAt": "2026-08-21T10:45:00Z"
+}

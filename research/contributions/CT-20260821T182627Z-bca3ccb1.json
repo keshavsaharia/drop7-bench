@@ -1,0 +1,56 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260821T182627Z-bca3ccb1",
+  "actor": {
+    "kind": "model",
+    "platform": "claude-code",
+    "model": "claude-opus-5[1m]",
+    "agentId": null
+  },
+  "level": "L4",
+  "roles": [
+    {
+      "role": "orchestration",
+      "degree": "lead"
+    },
+    {
+      "role": "formal-analysis",
+      "degree": "substantial"
+    },
+    {
+      "role": "writing",
+      "degree": "lead"
+    }
+  ],
+  "summary": "Coordinated the 2026-08-21 consolidation: merged the remote console work, pooled and analysed the overnight cohorts, and integrated three concurrent contributors' in-flight work into one record. Analysis contribution: completed and interpreted the depth-by-chance-resolution factorial from already-collected artifacts, establishing that chance resolution changes the SIGN of the depth gradient (fourth ply +86,172 with a 95% lower bound of +26,605 at seven strata, versus -7,723 at five strata) and that the fifth ply is flat at both resolutions; and identified the equal-work equivalence between depth 3 with six-fold reveal sampling and depth 4 with single-sample reveals. Caught and corrected a confounded reading of my own, in which the raw d5s5-versus-d4s7 gap of 109,795 points would have been attributed to depth when it is a chance-resolution effect. Specified and reviewed, but did not implement, the daily research-log feature in web/ (implemented by a delegated agent with its own record); authored the 2026-08-20 and 2026-08-21 log entries and the plain-English overlays for the two afterstate experiments. Coordinator edits to docs/research/status.md and roadmap.md recording the closed directions, and to AGENTS.md and the web-console skill establishing the research-log contract. Did not author the afterstate-learning line, the leaf-reweight experiment, the fast engine, or the playable console; each has its own record.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "web/content/log/2026-08-20.mdx",
+    "web/content/log/2026-08-21.mdx",
+    "web/content/research/EX-20260821-afterstate-full-train-override-ec7f28f4.mdx",
+    "web/content/research/EX-20260821-afterstate-d4q-stage1-40136e9e.mdx",
+    "docs/research/status.md",
+    "docs/research/roadmap.md",
+    "AGENTS.md",
+    ".agents/skills/drop7-web-console/SKILL.md"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "make test-typescript: 134 tests, 0 failures, after fast-forwarding to origin/main",
+    "cd web && npm run build: passes; /log/2026-08-20 and /log/2026-08-21 prerendered",
+    "Re-derived every factorial figure from the cohort artifacts rather than from prior task summaries",
+    "Verified each number quoted in the log entries against its source finding document or run artifact"
+  ],
+  "limitations": [
+    "The depth-5 cells of the factorial are partial: 32 games at five strata and 16 at seven, against 64 for depths 2-4. The depth-5 conclusion is a wash on a small paired sample, not a tight bound.",
+    "All factorial evidence is development tier on a single exploratory seed lease and does not upgrade the ledger.",
+    "The research-log entries are narrative summaries; they carry no evidence of their own and every number in them is sourced from a record or artifact elsewhere in the repository.",
+    "One concurrent contributor's GPU run was still in progress when this record was written, so its outcome is described as running, not as a result."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-21T18:26:27Z"
+}

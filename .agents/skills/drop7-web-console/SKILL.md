@@ -135,6 +135,55 @@ describe it as the C++ fair-D4 reference whose cohort numbers the docs quote.
 MDX needs JSX expression props; do not re-enable the default, which silently
 strips every `{...}` attribute.
 
+## The daily research log
+
+`web/content/log/YYYY-MM-DD.mdx` is one entry per calendar day, rendered at
+`/log` and `/log/<date>`. **The filename stem is the canonical date** — routing
+never reads the frontmatter `date`, because unquoted YAML dates parse to a JS
+`Date` and would be fragile. Everything except `date:` and `title:` in the
+frontmatter is optional.
+
+```yaml
+---
+date: 2026-08-21
+title: The search plateau
+summary: One or two sentences, plain English, shown on the index.
+contributors: [claude-opus-5 (Claude Code), kimi-k3 (OpenCode)]
+tags: [fair-planner, depth]
+outcomes: { negative: 5, positive: 1, open: 2 }
+---
+```
+
+Six components are registered for log MDX (`web/components/ResearchLog.tsx`):
+
+| Component | Props |
+| --- | --- |
+| `Finding` | `title`, `kind?` = positive/negative/neutral/open, `metric?` |
+| `DeadEnd` | `title`, `cost?`, `verdict?` = `closed` \| `configuration-rejected` |
+| `Direction` | `title`, `status?` = proposed/running/blocked/closed, `owner?` |
+| `ArmTable` | `columns={[{key,label?,numeric?,delta?}]}`, `rows={[{…,highlight?}]}`, `caption?` |
+| `Timeline` | `entries={[{time,text,kind?}]}`, `caption?` |
+| `LogQuote` | `who?` |
+
+`ArmTable` cells are **pre-formatted strings**; the component parses no
+quantity. `delta: true` reads only a leading `+`/`-`/`−` to tint the cell. A
+missing cell renders an em dash, an explicit `""` renders blank. Rows are
+marked with `highlight: true` — there is no `highlight` prop on the table.
+
+Writing rules for the log itself:
+
+- It is a journal for someone following the project from outside, not a second
+  results database. Every number in it must already exist in a result record,
+  run artifact or finding document — the log reports, it does not measure.
+- Record what failed as prominently as what worked. `DeadEnd`'s `verdict`
+  carries the `AGENTS.md` rule that a failed experiment rejects only the exact
+  configuration tested; use `closed` only when the direction itself is shut.
+- Say who did what. Several contributors work in this repository concurrently
+  and the log is where a reader learns which line of work a result came from.
+- Corrections to the project's own earlier claims belong here explicitly. A
+  withdrawn claim is part of the record, not an embarrassment to omit.
+- Only the coordinator merges a day that several contributors worked on.
+
 ## Adding a record type
 
 1. Add the interface and a `listJsonRecords<T>("<subdir>")` helper to
@@ -186,6 +235,13 @@ cd web && npm test            # browser-solver parity gates (web/lib/play)
 npm test                      # repo tests, from the root
 ```
 
-Check the console renders on a checkout with **no** `web/data/` and with an
-empty `research/results/`. Those are the states a collaborator will actually
-clone into.
+Check the console renders on a checkout with **no** `web/data/`, an empty
+`research/results/`, and **no** `web/content/log/`. Those are the states a
+collaborator will actually clone into.
+
+One cascade gotcha, learned the hard way: `.prose-drop7` element rules in
+`globals.css` are **unlayered**, and Tailwind v4 utilities live in a cascade
+layer, so those prose rules beat every Tailwind class inside MDX regardless of
+specificity. Style MDX-rendered components with a scoped class block in
+`globals.css` — see `.engine-fig`, `.engine-table`, `.log-card`, `.arm-table` —
+not with utility classes.

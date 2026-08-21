@@ -39,6 +39,14 @@ stages that start on one workstation; a cluster never skips those stages.
 To add to or change the Next.js research console under `web/`, read
 `.agents/skills/drop7-web-console/SKILL.md`.
 
+At the end of any session that produced or consumed evidence, append to the
+daily research log at `web/content/log/YYYY-MM-DD.mdx` (one file per calendar
+day, UTC-local date of the work). The log is a readable journal for someone
+following the project from outside, not a second results database: it must
+record what was tried and failed as prominently as what worked, and it may not
+state a number that is not already in a result record or run artifact. Only the
+coordinator merges entries for a day that several contributors worked on.
+
 For a narrow documentation or code-maintenance task, follow the constraints
 below without opening gameplay data or starting a research run.
 
@@ -167,3 +175,6 @@ scientific outcome, and evidence tier through to the interface unchanged.
 A research change is not done until its source, protocol or theory record,
 result or explicit no-run status, validation commands, limitations, and model
 contribution record agree. A performance claim also requires a machine profile.
+Evidence that changed what the program believes is not done until the day's
+research-log entry reflects it, including when the change was a negative result
+or a withdrawn claim of our own.

@@ -1,0 +1,82 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260821T094500Z-1a7e3c55",
+  "theoryIds": [
+    "TH-20260820-distributional-afterstate-ranker-7aba7fb3"
+  ],
+  "experimentId": "EX-20260821-afterstate-full-train-override-ec7f28f4",
+  "runIds": [
+    "RUN-20260821T084551Z-a5050ee5"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "fail",
+  "assessment": "not-supported-as-tested",
+  "evidenceTier": "pilot",
+  "summary": "Full training does not rescue the afterstate model; it overfits. The model was trained to 22 epochs on the 2M-row K=256 subsample (44M row-updates, 2x iteration 3, cosine schedule completed, ranking loss 0.584 vs iteration 3's 0.630). On the SAME held-out roots as iteration 3 (corpus-C, a labeled diagnostic reuse), the fully-trained model ranks WORSE than iteration 3's 11-epoch checkpoint (top-1 0.361 vs 0.424, pairwise 0.658 vs 0.685, regret 0.281 vs 0.241) - training loss improved while held-out ranking degraded, a textbook overfitting signature against the D1-continuation H40 labels. The frozen override gate on fresh corpus-E (2,867 roots, 1,106 near-tie eligible, 41% override rate) then FAILED: eligible-root regret half1 0.2289 vs D4 0.2517 (+0.0228) but half2 0.2778 vs 0.2481 (-0.0297, the override is actively harmful there), pooled +0.0018. Stability (0.824), calibration (0.800), determinism (byte-identical) all passed. Conclusion: the model's limitation is not training completeness but generalization to held-out roots under a weak D1 teacher; the direct-override use of this model family is closed per the frozen failure action.",
+  "metrics": {
+    "epochsCompleted": 22,
+    "rowUpdates": 44000000,
+    "finalRankLoss": 0.5838,
+    "diagnosticTop1VsIter3": "0.3611 vs 0.4245 (same roots)",
+    "diagnosticRegretVsIter3": "0.2807 vs 0.2408 (same roots)",
+    "overrideEligibleRoots": 1106,
+    "overrideRate": 0.4114,
+    "overrideRegretGainHalf1": 0.0228,
+    "overrideRegretGainHalf2": -0.0297,
+    "overrideRegretGainPooled": 0.0018,
+    "labelStabilityDecisiveSpearman": 0.8244,
+    "quantileIntervalCoverage": 0.7997
+  },
+  "gateChecks": [
+    {
+      "criterion": "Training completes 22 epochs on the 2M-row subsample within budget (44M row-updates, 2x iteration 3)",
+      "passed": true,
+      "observed": "22 epochs, cosine schedule completed, ~5.5h GPU"
+    },
+    {
+      "criterion": "Eligible-root override regret <= D4 regret - 0.01 in EACH half-fold",
+      "passed": false,
+      "observed": "half1 +0.0228 (passes); half2 -0.0297 (override harmful); pooled +0.0018"
+    },
+    {
+      "criterion": "Override rate >= 5% of eligible roots",
+      "passed": true,
+      "observed": "41.1%"
+    },
+    {
+      "criterion": "Decisive-root label stability >= 0.5",
+      "passed": true,
+      "observed": "0.8244"
+    },
+    {
+      "criterion": "Quantile coverage within [0.66, 0.87]",
+      "passed": true,
+      "observed": "0.7997"
+    },
+    {
+      "criterion": "Gate report byte-identical across two runs",
+      "passed": true,
+      "observed": "byte-identical"
+    }
+  ],
+  "perGameArtifact": {
+    "path": "runs/RUN-20260821T084551Z-a5050ee5/gate/override-gate-report.json",
+    "sha256": "67b15841e6cf3a580fca03df17c4aefc6d12687c42a526a216609bc24aab5863",
+    "recordCount": 1
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260820T080056Z-376ada90.json"
+  ],
+  "artifactManifestRef": null,
+  "limitations": [
+    "The diagnostic comparison to iteration 3 reuses corpus-C (iteration 3's held-out), a labeled diagnostic; the frozen override gate used fresh corpus-E.",
+    "The model family evaluated is the compact 3.4M-param ResNet over D1-continuation H40 labels; the result does not bound a stronger-teacher or different-architecture variant.",
+    "The iGPU is compute-bound for this model (~2-3k rows/s FP32); larger-scale training was not attempted within the overnight budget.",
+    "Two killed training attempts (tooling: memory blowup, output buffering) preceded the recorded run; they produced no artifacts and are disclosed in the run record."
+  ],
+  "contributionIds": [
+    "CT-20260820T140540Z-f8458dc0"
+  ],
+  "recordedAt": "2026-08-21T09:45:00Z"
+}

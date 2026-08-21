@@ -1,0 +1,191 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260821T181918Z-ea7076a3",
+  "theoryIds": [
+    "TH-20260821-factored-chance-depth-compounding-aca01725"
+  ],
+  "experimentId": "EX-20260821-reveal-sampling-unfinished-arms-470677b5",
+  "runIds": [
+    "RUN-20260821T035407Z-00483c6c",
+    "RUN-20260821T143541Z-4c4370b6"
+  ],
+  "runValidity": "partial",
+  "scientificOutcome": "fail",
+  "assessment": "not-supported-as-tested",
+  "evidenceTier": "public-development",
+  "summary": "Chance-node decorrelation and search depth do not compound; they substitute. The primary arm is complete at 64 of 64 games: depth 4 with seven disc samples and two reveal samples scores 356,548 against the 398,498 of the same search with one reveal sample, a paired -41,950 with a one-sided 95% whole-game bootstrap lower bound of -100,137 and W-T-L 28-0-36, for 4.07x the logical work per move. The gate asked for a lower bound above zero and got a negative point estimate, so the compounding theory is rejected as tested. STATE THE DOSE WHEN QUOTING THIS: two reveal samples raises joint (disc, reveal) coverage from 14.3% to 28.6%, which is a smaller increment than the six samples (85.7%) that first cleared noise at depth 3; at depth 3 the three-sample dose (42.9%) was also not significant (+24,980, lower bound -23,451). This result therefore rejects a doubling of reveal samples on top of the fourth ply, and does not establish that a wide reveal estimator at depth 4 would fail - that arm was never affordable. What the arm does establish is that the depth-4 search is not starved for the thing the extra samples supply. The striking positive finding is an equivalence at near-equal work: depth 3 with six reveal samples costs 4,244,020 work per move and scores 376,442, while depth 4 with one reveal sample costs 4,956,614 and scores 398,498, and the paired delta between them is -22,056 with a lower bound of -89,867 and W-T-L 30-0-34 - two different ways of spending the same budget landing in the same place, which is the same exchangeability the depth factorial shows from the other side. The new arm is not worthless: against the frozen five-stratum depth-4 reference it is +59,221 with a lower bound of +9,134 and W-T-L 37-0-27, so the gain comes from the seven disc samples, not from the reveal samples. Second arm, partial at 32 of 64 games and still running: depth 3 with twelve reveal samples takes joint coverage to 100% and scores -4,495 against the six-sample arm on the 32 shared seeds (lower bound -91,425, W-T-L 15-0-17) and +31,413 against the one-sample arm (lower bound -70,729), so the ladder that ordered with coverage from M=1 to M=6 stops ordering at M=12. Every arm audited 0 decisions below target depth, 0 work-limit events, 0 censored games and 0 score-decomposition identity failures, and the chunk-pooling used to survive interruption was verified to reproduce a single 64-game run field-for-field with identical summed logical work.",
+  "metrics": {
+    "cohort": "0xa51d1000-0xa51d103f, 2,000-move cap, corrected 17,000-point Hardcore scoring",
+    "d4N7M2Games": 64,
+    "d4N7M2MeanScore": 356548.0,
+    "d4N7M2MedianScore": 305167.0,
+    "d4N7M2MeanMoves": 103.64,
+    "d4N7M2WorkPerMove": 20178327,
+    "d4N7M2ClearsPerMove": 2.0306,
+    "d4N7M2RevealsPerMove": 1.1358,
+    "d4N7M2Occupied": 23.35,
+    "d3N7M12Games": 32,
+    "d3N7M12GamesPlanned": 64,
+    "d3N7M12MeanScoreOn32": 356890.0,
+    "d3N7M12WorkPerMove": 13575768,
+    "ladderD3N7": {
+      "M1": 312327,
+      "M3": 337306,
+      "M6": 376442,
+      "M12partial32": 356890
+    },
+    "jointCoverageByM": {
+      "M1": 0.143,
+      "M2": 0.286,
+      "M3": 0.429,
+      "M6": 0.857,
+      "M12": 1.0
+    },
+    "pairedD4M2MinusD4M1": {
+      "n": 64,
+      "meanScoreDelta": -41950,
+      "lowerBound95": -100137,
+      "upperBound95": 17541,
+      "meanMoveDelta": -11.02,
+      "winTieLoss": "28-0-36",
+      "workRatio": 4.07
+    },
+    "pairedD4M2MinusD4N5M1": {
+      "n": 64,
+      "meanScoreDelta": 59221,
+      "lowerBound95": 9134,
+      "meanMoveDelta": 16.48,
+      "winTieLoss": "37-0-27",
+      "workRatio": 15.57
+    },
+    "pairedD4M2MinusD3M6": {
+      "n": 64,
+      "meanScoreDelta": -19894,
+      "lowerBound95": -76456,
+      "meanMoveDelta": -5.81,
+      "winTieLoss": "37-0-27",
+      "workRatio": 4.75
+    },
+    "pairedD3M6MinusD4M1": {
+      "n": 64,
+      "meanScoreDelta": -22056,
+      "lowerBound95": -89867,
+      "meanMoveDelta": -5.2,
+      "winTieLoss": "30-0-34",
+      "workRatio": 0.86
+    },
+    "pairedD3M3MinusD3M1": {
+      "n": 64,
+      "meanScoreDelta": 24980,
+      "lowerBound95": -23451,
+      "winTieLoss": "32-0-32"
+    },
+    "pairedD3M6MinusD3M1": {
+      "n": 64,
+      "meanScoreDelta": 64116,
+      "lowerBound95": 7475,
+      "winTieLoss": "36-0-28"
+    },
+    "pairedD3M12MinusD3M6": {
+      "n": 32,
+      "meanScoreDelta": -4495,
+      "lowerBound95": -91425,
+      "winTieLoss": "15-0-17",
+      "note": "partial arm, paired on the 32 shared seeds"
+    },
+    "pairedD3M12MinusD3M1": {
+      "n": 32,
+      "meanScoreDelta": 31413,
+      "lowerBound95": -70729,
+      "winTieLoss": "15-0-17",
+      "note": "partial arm, paired on the 32 shared seeds"
+    },
+    "pairedD3M12MinusD4M1": {
+      "n": 32,
+      "meanScoreDelta": -31616,
+      "lowerBound95": -143344,
+      "winTieLoss": "12-0-20",
+      "note": "partial arm, paired on the 32 shared seeds"
+    },
+    "boundDiagnosticsD4N7M2": {
+      "decisions": 6633,
+      "decisionsBelowTargetDepth": 0,
+      "workLimitEvents": 0,
+      "minCompletedDepth": 4,
+      "maxDecisionWork": 81686570,
+      "declaredBound": 187336114
+    },
+    "boundDiagnosticsD3N7M12": {
+      "decisions": 3335,
+      "decisionsBelowTargetDepth": 0,
+      "workLimitEvents": 0,
+      "minCompletedDepth": 3,
+      "maxDecisionWork": 128386272,
+      "declaredBound": 407634528
+    },
+    "poolingValidity": {
+      "games": 64,
+      "fieldMismatches": 0,
+      "summedLogicalWorkCandidate": 312966881,
+      "summedLogicalWorkComparator": 312966881,
+      "note": "four pooled 16-game chunks against the single 64-game d3 N=5 M=1 run"
+    },
+    "censoredGamesAllArms": 0,
+    "scoreIdentityFailuresAllArms": 0,
+    "bootstrap": "one-sided 95% percentile bootstrap over whole paired games, 20,000 resamples, seed 0xb0075eed (stats.py)"
+  },
+  "gateChecks": [
+    {
+      "criterion": "Pooling validity: four pooled 16-game chunks reproduce a single 64-game run on all 13 per-game fields with identical summed logical work",
+      "passed": true,
+      "observed": "64 games, 0 field mismatches, logical work 312,966,881 vs 312,966,881 (equal)"
+    },
+    {
+      "criterion": "Bound diagnostics: 0 decisions below target depth and 0 work-limit events in every arm",
+      "passed": true,
+      "observed": "d4 N=7 M=2: 6,633 decisions, 0 below target, 0 work-limit events, busiest decision at 44% of its bound; d3 N=7 M=12 (partial): 3,335 decisions, 0 below target, 0 work-limit events, busiest at 31% of its bound"
+    },
+    {
+      "criterion": "Depth 4 with two reveal samples beats depth 4 with one reveal sample, 95% bootstrap lower bound above zero, 64 complete games",
+      "passed": false,
+      "observed": "-41,950 with a 95% lower bound of -100,137 (upper bound +17,541), W-T-L 28-0-36, at 4.07x the logical work per move; negative point estimate, and not distinguishable from zero in either direction"
+    },
+    {
+      "criterion": "Depth 3 with twelve reveal samples is at least as strong as depth 3 with six",
+      "passed": null,
+      "observed": "undecidable as run: the arm holds 32 of 64 games and is still executing. On the 32 shared seeds the delta is -4,495 with a 95% lower bound of -91,425 and W-T-L 15-0-17 - the coverage ladder has stopped ordering, but 32 games cannot decide this criterion"
+    },
+    {
+      "criterion": "0 censored games and 0 score-decomposition identity failures in every arm",
+      "passed": true,
+      "observed": "0 and 0 in both new arms and in every comparator arm re-read here"
+    }
+  ],
+  "perGameArtifact": {
+    "path": "runs/RUN-A525-reveal/d4-n7-m2-pooled.json",
+    "sha256": "06fc7bdacb9849962e7369515a8084afd3d1b6e4b9a92b7b0cb9c5526384d861",
+    "recordCount": 64
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260820T080056Z-376ada90.json"
+  ],
+  "artifactManifestRef": "runs/RUN-20260821T035407Z-00483c6c/manifest.json",
+  "limitations": [
+    "PARTIAL ARM: the depth-3 twelve-reveal-sample arm holds 32 of 64 games (chunks 0 and 1 of 4) and was still executing when this result was written. Every M=12 number here is over those 32 paired seeds, none of them decides its gate, and the arm's 32-game mean is not an estimate of its 64-game mean. The frozen snapshot assessed is runs/RUN-20260821T143541Z-4c4370b6/d3-n7-m12-partial-32games.json; re-pooling the live artifact after chunk 2 will change its bytes.",
+    "DOSE, NOT AXIS: the depth-4 arm tested two reveal samples (28.6% joint coverage), which is below the depth-3 dose that first cleared noise (six samples, 85.7%). The negative result is about that dose at that depth. A wide depth-4 reveal estimator was not run and remains unmeasured; at the observed 20.2M work per move for M=2, an M=6 depth-4 arm would be roughly another 3x on top and was not affordable on a shared machine.",
+    "The depth-4 M=2 delta is negative but not significantly negative: the same estimator's one-sided 95% upper bound is +17,541. The honest reading is 'buys nothing measurable for 4.07x the work', not 'harms'.",
+    "The comparator arms for the M ladder (d3 M=1, M=3, M=6) and the two depth-4 single-sample arms come from finding-09 and from the earlier chance-strata study; they were re-read here from their retained artifacts but have no machine-readable run record of their own, so this result's run records cover only the two new arms.",
+    "64 paired games with a score standard deviation of 55-62% of the mean. Effects smaller than roughly 60,000 points are invisible at this sample size.",
+    "The cohort 0xa51d1000-0xa51d103f was opened by finding-05 and read again by finding-09; it is permanently development data. STANDARD tier, diagnostic only, never a freeze gate and never confirmation evidence.",
+    "Each arm ran as four sequential 16-game chunks so it could survive interruption. Pooling was verified to reproduce a single run exactly, but chunking does change thread scheduling and wall time, and chunk 1 of the depth-4 arm ran at 8 threads rather than 12 after a load back-off.",
+    "Work per move is not comparable across arms with different declared cache capacities. The new arms auto-size their cache from their branching factor (960,695 and 346,921 entries) while the recorded comparators declare 60,000; every work figure must be read with its capacity.",
+    "The experiment record was written after the runs, by a different agent than the one that executed them. The two arms and their launch protocol were fixed in prose in finding-09 and in run-arms.sh before either produced a game, but this is retroactive registration and the amendment on the experiment record says so.",
+    "All artifacts for this family live under runs/, which is gitignored, so the evidence is not committed with the record. The frozen snapshots and the content manifest under the two run directories are the durable reference.",
+    "This rejects compounding at the tested dose only. It says nothing about the reveal-by-reveal correlation, which finding-09 identified as untouched by this knob and which no arm here attacks."
+  ],
+  "contributionIds": [
+    "CT-20260821T181919Z-05882e86"
+  ],
+  "recordedAt": "2026-08-21T18:25:01Z"
+}

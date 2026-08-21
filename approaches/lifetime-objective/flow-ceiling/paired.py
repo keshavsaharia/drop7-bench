@@ -97,12 +97,18 @@ def main():
         d = sorted(draws[key])
         lo = d[int(0.05 * replicates)]
         delta = sa[key] - sb[key]
-        if lo > 0:
+        # For occupancy slope a *lower* value is better: it is the rate at
+        # which the board fills, so a reliably negative delta is an advantage.
+        lower_is_better = key == "occSlope"
+        hi = d[int(0.95 * replicates) - 1]
+        if (lo > 0) != lower_is_better and (lo > 0 or hi < 0):
             verdict = "advantage established"
-        elif d[int(0.95 * replicates)] < 0:
+        elif (lo > 0 or hi < 0):
             verdict = "DISADVANTAGE established"
         else:
             verdict = "straddles zero"
+        if lower_is_better:
+            verdict += " (lower is better)"
         print(f"{name:<24}{sa[key]:>15.4f}{sb[key]:>15.4f}{delta:>+13.4f}"
               f"{lo:>+13.4f}   {verdict}")
 

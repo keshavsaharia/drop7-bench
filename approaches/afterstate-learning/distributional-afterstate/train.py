@@ -17,6 +17,15 @@ import os
 import time
 
 import numpy as np
+
+try:
+    import orjson
+    def loads_line(line):
+        return orjson.loads(line)
+except ImportError:  # pragma: no cover
+    def loads_line(line):
+        return json.loads(line)
+
 import torch
 import torch.nn as nn
 
@@ -60,9 +69,39 @@ def fnv1a(text):
     return h
 
 
-def load_corpus(path):
-    with open(path) as handle:
-        return [json.loads(line) for line in handle]
+def load_corpus(path, max_rows=None, expected_rows=None):
+    """Streams the corpus. With max_rows, keeps a deterministic subsample by
+    content-hash threshold (crc32 of the raw line) so memory never scales with
+    the full corpus. The kept set is the rows with the smallest content hashes,
+    identical to hashing and sorting all rows."""
+    import zlib
+    if max_rows is not None and expected_rows is None:
+        manifest_path = os.path.join(os.path.dirname(path), "manifest.json")
+        if os.path.exists(manifest_path):
+            with open(manifest_path) as handle:
+                expected_rows = json.load(handle)["rows"]
+    if max_rows is not None and expected_rows and expected_rows > max_rows:
+        # 1.25x headroom so the kept set almost surely covers max_rows.
+        threshold = int(2**32 * min(1.0, 1.25 * max_rows / expected_rows))
+    else:
+        threshold = None
+    rows = []
+    hashes = []
+    with open(path, "rb") as handle:
+        for line in handle:
+            if threshold is not None:
+                h = zlib.crc32(line)
+                if h >= threshold:
+                    continue
+                hashes.append(h)
+                rows.append(loads_line(line))
+            else:
+                rows.append(loads_line(line))
+    if threshold is not None and len(rows) > max_rows:
+        order = np.argsort(np.array(hashes, dtype=np.uint32),
+                           kind="stable")[:max_rows]
+        rows = [rows[i] for i in order]
+    return rows
 
 
 class ResBlock(nn.Module):
@@ -109,6 +148,10 @@ def pinball_loss(pred, target):
     return torch.maximum(taus * diff, (taus - 1.0) * diff).mean()
 
 
+_CELL_ROW = np.arange(49) // 7
+_CELL_COL = np.arange(49) % 7
+
+
 def pack(subset):
     """Packs rows into arrays plus (root, scenario) group structure.
 
@@ -131,16 +174,26 @@ def pack(subset):
     survived = np.empty(n, dtype=np.float32)
     flow = np.empty((n, 2), dtype=np.float32)
     groups = {}
+
+    # Vectorized board encoding: one bytes object per row -> cell matrix.
+    cells = np.empty((n, 49), dtype=np.uint8)
+    nexts = np.empty(n, dtype=np.int64)
+    movess = np.empty(n, dtype=np.int64)
     for i, r in enumerate(subset):
-        for c, ch in enumerate(r["afterstateBoard"]):
-            planes[i, int(ch), c // 7, c % 7] = 1
-        planes[i, BOARD_PLANES + r["afterstateNextDisc"] - 1] = 1
-        planes[i, BOARD_PLANES + 7 + r["afterstateMovesRemaining"] - 1] = 1
+        cells[i] = np.frombuffer(r["afterstateBoard"].encode(), dtype=np.uint8) - 48
+        nexts[i] = r["afterstateNextDisc"]
+        movess[i] = r["afterstateMovesRemaining"]
         score[i] = r["scoreGained"] / SCORE_SCALE
         survived[i] = float(not r["terminal"])
         played = 1 + r["movesSurvived"]
         flow[i] = (r["clears"] / played, r["reveals"] / played)
         groups.setdefault((root_uid(r), r["scenario"]), []).append(i)
+    rows_idx = np.repeat(np.arange(n), 49)
+    planes[rows_idx, cells.reshape(-1), np.tile(_CELL_ROW, n),
+           np.tile(_CELL_COL, n)] = 1
+    planes[np.arange(n), BOARD_PLANES + nexts - 1] = 1
+    planes[np.arange(n), BOARD_PLANES + 7 + movess - 1] = 1
+
     # Padded group views for the vectorized pairwise loss.
     g = len(groups)
     g_index = np.full((g, MAX_ACTIONS), -1, dtype=np.int64)
@@ -167,21 +220,26 @@ def group_batches(packed, groups_per_batch, shuffle):
         yield (planes, score, mask, flat)
 
 
-def train_epoch(model, opt, packed, device, planes_gpu, groups_per_batch=128):
+def train_epoch(model, opt, packed, device, planes_gpu, taus, groups_per_batch=256):
     model.train()
     totals = {"pinball": 0.0, "rank": 0.0, "bce": 0.0, "flow": 0.0, "n": 0}
+    survived_gpu = torch.from_numpy(packed["survived"]).to(device)
+    flow_gpu = torch.from_numpy(packed["flow"]).to(device)
+    # Loss accumulators stay on the GPU; one host sync per epoch, not per batch.
+    device_totals = {k: torch.zeros((), device=device)
+                     for k in ("pinball", "rank", "bce", "flow")}
+    count = 0
     for _, score, mask, flat in group_batches(packed, groups_per_batch, True):
-        flat_t = torch.from_numpy(flat).to(device)
+        flat_t = torch.from_numpy(flat).to(device, non_blocking=True)
         planes = planes_gpu[flat_t].float()  # [G*A, planes, 7, 7]
-        score = score.to(device)
-        mask_t = torch.from_numpy(mask).to(device)
+        score = score.to(device, non_blocking=True)
+        mask_t = torch.from_numpy(mask).to(device, non_blocking=True)
         groups = mask_t.shape[0]
         out = model(planes)
         q = out["quantiles"].reshape(groups, MAX_ACTIONS, N_QUANTILES)
         values = q.mean(dim=-1)
 
         diff = score.unsqueeze(-1) - q
-        taus = torch.tensor(QUANTILES, device=device).view(1, 1, -1)
         pin = torch.maximum(taus * diff, (taus - 1.0) * diff)
         l_pin = (pin * mask_t.unsqueeze(-1)).sum() / mask_t.sum().clamp(min=1)
 
@@ -192,20 +250,22 @@ def train_epoch(model, opt, packed, device, planes_gpu, groups_per_batch=128):
         pair = torch.nn.functional.softplus(-dv * sign)
         l_rank = (pair * valid).sum() / valid.sum().clamp(min=1)
 
-        surv = torch.from_numpy(packed["survived"][flat]).to(device)
-        flow_y = torch.from_numpy(packed["flow"][flat]).to(device)
         l_bce = torch.nn.functional.binary_cross_entropy_with_logits(
-            out["survival"], surv)
-        l_flow = torch.nn.functional.mse_loss(out["flow"], flow_y)
+            out["survival"], survived_gpu[flat_t])
+        l_flow = torch.nn.functional.mse_loss(out["flow"], flow_gpu[flat_t])
 
         loss = l_pin + l_rank + 0.3 * l_bce + 0.1 * l_flow
         opt.zero_grad()
         loss.backward()
         opt.step()
+        n = len(flat)
         for k, v in (("pinball", l_pin), ("rank", l_rank),
                      ("bce", l_bce), ("flow", l_flow)):
-            totals[k] += float(v) * len(flat)
-        totals["n"] += len(flat)
+            device_totals[k] += v.detach() * n
+        count += n
+    for k in device_totals:
+        totals[k] = float(device_totals[k].cpu())
+    totals["n"] = count
     return {k: v / max(totals["n"], 1) for k, v in totals.items() if k != "n"}
 
 
@@ -240,14 +300,22 @@ def ranking_metrics(model_values, target_values):
     }
 
 
-def batched_values(model, rows, device, batch=4096):
+def batched_values(model, rows, device, batch=8192):
     """Predicts mean-quantile values and outer interval for afterstate rows."""
-    planes = np.zeros((len(rows), IN_PLANES, 7, 7), dtype=np.uint8)
+    n = len(rows)
+    planes = np.zeros((n, IN_PLANES, 7, 7), dtype=np.uint8)
+    cells = np.empty((n, 49), dtype=np.uint8)
+    nexts = np.empty(n, dtype=np.int64)
+    movess = np.empty(n, dtype=np.int64)
     for i, r in enumerate(rows):
-        for c, ch in enumerate(r["afterstateBoard"]):
-            planes[i, int(ch), c // 7, c % 7] = 1
-        planes[i, BOARD_PLANES + r["afterstateNextDisc"] - 1] = 1
-        planes[i, BOARD_PLANES + 7 + r["afterstateMovesRemaining"] - 1] = 1
+        cells[i] = np.frombuffer(r["afterstateBoard"].encode(), dtype=np.uint8) - 48
+        nexts[i] = r["afterstateNextDisc"]
+        movess[i] = r["afterstateMovesRemaining"]
+    rows_idx = np.repeat(np.arange(n), 49)
+    planes[rows_idx, cells.reshape(-1), np.tile(_CELL_ROW, n),
+           np.tile(_CELL_COL, n)] = 1
+    planes[np.arange(n), BOARD_PLANES + nexts - 1] = 1
+    planes[np.arange(n), BOARD_PLANES + 7 + movess - 1] = 1
     values = np.empty(len(rows))
     lo = np.empty(len(rows))
     hi = np.empty(len(rows))
@@ -365,6 +433,7 @@ def main():
     parser.add_argument("--channels", type=int, default=96)
     parser.add_argument("--blocks", type=int, default=6)
     parser.add_argument("--max-train-rows", type=int, default=1_000_000)
+    parser.add_argument("--groups-per-batch", type=int, default=256)
     parser.add_argument("--max-train-seconds", type=float, default=2 * 3600)
     parser.add_argument("--seed", type=int, default=20260820)
     args = parser.parse_args()
@@ -375,10 +444,10 @@ def main():
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     started = time.time()
-    rows = load_corpus(args.corpus)
-    heldout_rows = load_corpus(args.heldout_corpus)
-    print(f"training corpus rows {len(rows)} "
-          f"held-out corpus rows {len(heldout_rows)}")
+    # Streaming deterministic subsample at load time: memory never scales with
+    # the full corpus. The held-out corpus is loaded only after training.
+    rows = load_corpus(args.corpus, max_rows=args.max_train_rows)
+    print(f"training rows {len(rows)} (streamed subsample of corpus)")
 
     comparator = {}
     if args.comparator_labels:
@@ -391,15 +460,7 @@ def main():
                 entry["d1"][int(action)] = float(d1)
         print(f"comparator roots {len(comparator)}")
 
-    # Every training-corpus row is training-role. Subsample deterministically
-    # by content hash if the corpus exceeds the frozen training budget.
     train_rows = rows
-    if len(train_rows) > args.max_train_rows:
-        keyed = sorted(
-            train_rows,
-            key=lambda r: mix32(fnv1a(f"{root_uid(r)}|{r['action']}|{r['scenario']}")))
-        train_rows = keyed[: args.max_train_rows]
-    print(f"train rows {len(train_rows)} held-out rows {len(heldout_rows)}")
 
     packed = pack(train_rows)
     # Keep the one-hot planes resident on the GPU as uint8; per-batch gather and
@@ -411,9 +472,11 @@ def main():
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=1e-4)
     sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=args.epochs)
 
+    taus = torch.tensor(QUANTILES, device=device).view(1, 1, -1)
     log = []
     for epoch in range(args.epochs):
-        metrics = train_epoch(model, opt, packed, device, planes_gpu)
+        metrics = train_epoch(model, opt, packed, device, planes_gpu, taus,
+                              groups_per_batch=args.groups_per_batch)
         sched.step()
         line = {"epoch": epoch, **metrics, "elapsed": time.time() - started}
         log.append(line)
@@ -429,6 +492,11 @@ def main():
     with open(os.path.join(args.out, "training-log.json"), "w") as handle:
         json.dump(log, handle, indent=1)
 
+    # Free training tensors before loading the held-out corpus.
+    del packed, planes_gpu
+    torch.cuda.empty_cache()
+    heldout_rows = load_corpus(args.heldout_corpus)
+    print(f"held-out rows {len(heldout_rows)}")
     report = evaluate_gate(model, heldout_rows, comparator, device)
     report["wallSeconds"] = time.time() - started
     report["device"] = torch.cuda.get_device_name(0) if device == "cuda" else "cpu"

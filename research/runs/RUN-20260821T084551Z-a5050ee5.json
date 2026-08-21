@@ -1,0 +1,54 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260821T084551Z-a5050ee5",
+  "experimentId": "EX-20260821-afterstate-full-train-override-ec7f28f4",
+  "lifecycle": "completed",
+  "runValidity": "valid",
+  "startedAt": "2026-08-21T08:45:51Z",
+  "endedAt": "2026-08-21T09:35:00Z",
+  "protocolSha256": "720733b8b618314cd535f7e2bb54bae653151cb50ceb7aa31df77e29b5eb7339",
+  "machineProfileRef": "research/system-profiles/MACH-20260820T080056Z-376ada90.json",
+  "sourceState": {
+    "gitCommit": "2386224f31e4528922bfff93a36f85847e314a1f",
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "build/afterstate/generate-corpus --seed-start 0x5da70400 --games 64 --roots 8000 --scenarios 256 --threads 12 --fold-force heldout --out runs/RUN-20260821T084551Z-a5050ee5/corpus-e",
+    "build/afterstate/label-d4 --roots runs/RUN-20260821T084551Z-a5050ee5/corpus-e/roots.tsv --out runs/RUN-20260821T084551Z-a5050ee5/corpus-e-labels/comparator-labels.tsv --threads 12",
+    "PYTHONUNBUFFERED=1 .venv-afterstate/bin/python approaches/afterstate-learning/distributional-afterstate/train.py --corpus runs/RUN-20260820T111656Z-f771f173/corpus-a/corpus.ndjson --heldout-corpus runs/RUN-20260820T111656Z-f771f173/corpus-c/corpus.ndjson --comparator-labels runs/RUN-20260820T111656Z-f771f173/d4-labels-c/comparator-labels.tsv --out runs/RUN-20260821T084551Z-a5050ee5/model --epochs 22 --max-train-rows 2000000 --groups-per-batch 256 --max-train-seconds 21600",
+    "override-gate.py --model runs/RUN-20260821T084551Z-a5050ee5/model/model.pt --heldout-corpus runs/RUN-20260821T084551Z-a5050ee5/corpus-e/corpus.ndjson --comparator-labels runs/RUN-20260821T084551Z-a5050ee5/corpus-e-labels/comparator-labels.tsv (run twice; byte-identical)"
+  ],
+  "seedLeaseRefs": [
+    "SL-20260820T083000Z-5da70000"
+  ],
+  "resourceLimits": {
+    "wallSeconds": 28800,
+    "cpuThreads": 24,
+    "maxHostBytes": 51539607552,
+    "maxGpuBytes": 32212254720
+  },
+  "resourceObserved": {
+    "wallSeconds": 19800,
+    "cpuSeconds": 30000,
+    "peakHostBytes": null,
+    "peakGpuBytes": 3737333248,
+    "measurementNotes": "Training: 22 epochs on the 2M-row streamed subsample (44M row-updates, 2x iteration 3), ~610-970s/epoch on the Radeon 8060S (FP32, compute-bound; the iGPU sustains ~2-3k rows/s for this 3.4M-param ResNet). Two earlier training attempts were killed before producing any artifact: one exhausted memory loading the 19.7M-row corpus as Python objects (fixed by a streaming crc32-hash subsample loader), one was output-buffered and then restarted for observability (PYTHONUNBUFFERED). The final run is the recorded one. The built-in diagnostic gate reuses iteration-3's held-out corpus-C (labeled diagnostic, not this experiment's gate). The frozen override gate ran on fresh corpus-E (2,867 roots) twice, byte-identical. Gate corpora and D4 labels were generated at 6-12 threads interleaved with other CPU work."
+  },
+  "exitCode": 0,
+  "stopReason": null,
+  "artifactRefs": [
+    "runs/RUN-20260821T084551Z-a5050ee5/model/model.pt",
+    "runs/RUN-20260821T084551Z-a5050ee5/model/training-log.json",
+    "runs/RUN-20260821T084551Z-a5050ee5/model/gate-report.json",
+    "runs/RUN-20260821T084551Z-a5050ee5/corpus-e/corpus.ndjson",
+    "runs/RUN-20260821T084551Z-a5050ee5/corpus-e-labels/comparator-labels.tsv",
+    "runs/RUN-20260821T084551Z-a5050ee5/gate/override-gate-report.json",
+    "runs/RUN-20260821T084551Z-a5050ee5/gate-repeat/override-gate-report.json"
+  ],
+  "contributionIds": [
+    "CT-20260820T140540Z-f8458dc0"
+  ]
+}

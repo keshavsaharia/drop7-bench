@@ -8,9 +8,10 @@ import * as Concepts from "./Concepts";
 import * as ConceptsB from "./ConceptsB";
 import * as ConceptsC from "./ConceptsC";
 import { EvidenceLabel, ExperimentSummary, ResultSummary, TechnicalDetails, TheorySummary } from "./Research";
+import { ArmTable, DeadEnd, Direction, Finding, LogQuote, Timeline } from "./ResearchLog";
 import remarkGfm from "remark-gfm";
 
-const components = { Board, BoardCompare, Callout, Disc, Drop7Board, Drop7Game, Stat, ...Engine, ...Rules, ...Concepts, ...ConceptsB, ...ConceptsC, EvidenceLabel, ExperimentSummary, ResultSummary, TechnicalDetails, TheorySummary };
+const components = { Board, BoardCompare, Callout, Disc, Drop7Board, Drop7Game, Stat, ...Engine, ...Rules, ...Concepts, ...ConceptsB, ...ConceptsC, EvidenceLabel, ExperimentSummary, ResultSummary, TechnicalDetails, TheorySummary, ArmTable, DeadEnd, Direction, Finding, LogQuote, Timeline };
 
 /** Renders an MDX document (already stripped of frontmatter) with the Drop7 visual components available. */
 export function Mdx({ source }: { source: string }) {

@@ -1,0 +1,50 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260820T175726Z-f4f86d62",
+  "experimentId": "EX-20260820-d4-toptwo-override-gate-0bdb39a1",
+  "lifecycle": "completed",
+  "runValidity": "valid",
+  "startedAt": "2026-08-20T17:57:26Z",
+  "endedAt": "2026-08-20T18:40:00Z",
+  "protocolSha256": "f23b2e04102038d5c281757e2ba72df689c52f8eef51d95a8c2b3502eccb63a7",
+  "machineProfileRef": "research/system-profiles/MACH-20260820T080056Z-376ada90.json",
+  "sourceState": {
+    "gitCommit": "ac7f04e3d7d6243c2e2831b433ae9c4d599d7b28",
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "build/afterstate/generate-corpus --seed-start 0x5da70300 --games 64 --roots 8000 --scenarios 256 --threads 24 --fold-force heldout --out runs/RUN-20260820T175726Z-f4f86d62/corpus-d",
+    "build/afterstate/label-d4 --roots runs/RUN-20260820T175726Z-f4f86d62/corpus-d/roots.tsv --out runs/RUN-20260820T175726Z-f4f86d62/d4-labels-d/comparator-labels.tsv --threads 24",
+    ".venv-afterstate/bin/python approaches/afterstate-learning/distributional-afterstate/override-gate.py --model runs/RUN-20260820T111656Z-f771f173/model/model.pt --heldout-corpus runs/RUN-20260820T175726Z-f4f86d62/corpus-d/corpus.ndjson --comparator-labels runs/RUN-20260820T175726Z-f4f86d62/d4-labels-d/comparator-labels.tsv --out runs/RUN-20260820T175726Z-f4f86d62/gate (run twice; reports byte-identical)"
+  ],
+  "seedLeaseRefs": [
+    "SL-20260820T083000Z-5da70000"
+  ],
+  "resourceLimits": {
+    "wallSeconds": 10800,
+    "cpuThreads": 24,
+    "maxHostBytes": 34359738368,
+    "maxGpuBytes": 21474836480
+  },
+  "resourceObserved": {
+    "wallSeconds": 2600,
+    "cpuSeconds": 7000,
+    "peakHostBytes": null,
+    "peakGpuBytes": 2984175616,
+    "measurementNotes": "Corpus D 110s (24 threads), D4 labels 171s, gate evaluation 284s x2 on the Radeon 8060S (FP32, deterministic cudnn). The gate report initially embedded wall time, breaking the byte-identical determinism check; wallSeconds was moved to stdout (measurement-tool fix, no gate or data change) and the rerun pair is byte-identical."
+  },
+  "exitCode": 0,
+  "stopReason": null,
+  "artifactRefs": [
+    "runs/RUN-20260820T175726Z-f4f86d62/corpus-d/corpus.ndjson",
+    "runs/RUN-20260820T175726Z-f4f86d62/d4-labels-d/comparator-labels.tsv",
+    "runs/RUN-20260820T175726Z-f4f86d62/gate/override-gate-report.json",
+    "runs/RUN-20260820T175726Z-f4f86d62/gate-repeat/override-gate-report.json"
+  ],
+  "contributionIds": [
+    "CT-20260820T140540Z-f8458dc0"
+  ]
+}

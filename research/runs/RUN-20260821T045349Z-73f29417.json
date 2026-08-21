@@ -1,0 +1,52 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260821T045349Z-73f29417",
+  "experimentId": "EX-20260821-depth5-chance-exactness-factorial-a6a604fd",
+  "lifecycle": "completed",
+  "runValidity": "valid",
+  "startedAt": "2026-08-21T04:53:49Z",
+  "endedAt": "2026-08-21T13:39:20Z",
+  "protocolSha256": "cf7f2ba30d205bddd20340d39dbdef4a5950f792510776a7fbfd477aefea1c18",
+  "machineProfileRef": "research/system-profiles/MACH-20260820T080056Z-376ada90.json",
+  "sourceState": {
+    "gitCommit": null,
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": "62abbb743684436d72f3e4616107dcbf72f90301879e7b1d3c518f5e8259b60d"
+  },
+  "command": [
+    "./build/fast-engine/cohort --seed-start 0xa51d1000 --games 64 --threads 6 --depth 4 --chance-samples 7 --cache 60000 --chunk 16 --max-moves 2000 --label d4s7-control --output approaches/lifetime-objective/fast-engine/cohorts/d4s7-control.json",
+    "./build/fast-engine/cohort --seed-start 0xa51d1000 --games 64 --threads 6 --depth 5 --chance-samples 5 --cache 200000 --chunk 16 --max-moves 2000 --label d5s5 --output approaches/lifetime-objective/fast-engine/cohorts/d5s5.json",
+    "bash approaches/lifetime-objective/fast-engine/finish.sh"
+  ],
+  "seedLeaseRefs": [
+    "SEEDLEASE-A51D confirm (0xa51d1000-0xa51d103f; docs/exploratory/lease-map.md)"
+  ],
+  "resourceLimits": {
+    "wallSeconds": 172800,
+    "cpuThreads": 6,
+    "maxHostBytes": 34359738368,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": 31479.6,
+    "cpuSeconds": null,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "Two complete 64-game arms: d4s7-control 4,324.8 s at 6 threads (7,338 decisions, work/move 4,956,614, declared cache 60,000 entries) and d5s5 27,154.8 s at 6 threads (5,420 decisions, work/move 30,183,227, declared cache 200,000 entries). Wall seconds are the runner's own totals and are not a timing-grade measurement: the machine carried a one-minute load average of 12-63 from other agents' jobs throughout. Scores and moves are deterministic functions of the seed, policy, depth, stratum count and work bound and are unaffected by load or by cache capacity. Host and GPU peak memory were not instrumented; this is a CPU-only search whose declared cache capacity bounds its footprint. gitCommit is null on purpose: the arms ran from an uncommitted working tree and the commit they ran at cannot be reconstructed, so no SHA is invented. sourceArchiveSha256 is instead the SHA-256 of the newline-joined '<path> <sha256>' lines of this approach's source closure, taken after the runs and listed in the run's manifest.json."
+  },
+  "exitCode": 0,
+  "stopReason": null,
+  "artifactRefs": [
+    "approaches/lifetime-objective/fast-engine/cohorts/d4s7-control.json",
+    "approaches/lifetime-objective/fast-engine/cohorts/d4s7-control.log",
+    "approaches/lifetime-objective/fast-engine/cohorts/d5s5.json",
+    "approaches/lifetime-objective/fast-engine/cohorts/d5s5.log",
+    "runs/RUN-20260821T045349Z-73f29417/finish-report.txt",
+    "runs/RUN-20260821T045349Z-73f29417/manifest.json"
+  ],
+  "contributionIds": [
+    "CT-20260821T181919Z-05882e86"
+  ]
+}

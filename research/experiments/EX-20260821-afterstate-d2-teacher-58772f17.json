@@ -1,0 +1,91 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260821-afterstate-d2-teacher-58772f17",
+  "theoryIds": [
+    "TH-20260820-distributional-afterstate-ranker-7aba7fb3"
+  ],
+  "title": "Stronger-teacher (D2 continuation) afterstate corpus: ranking gate and frozen override rule",
+  "classification": "algorithmic",
+  "hypothesis": "The iteration-3 valid negative used a weak phase-greedy D1 continuation for its H40 labels. Regenerating the successor-closed corpus with a stronger public teacher (fair D2, five chance samples) at K=64 over the same training roots produces labels whose trained model ranks fresh held-out siblings closer to fair D4 than the D1-teacher model did (top-1 gap to D4 shrinks by at least half), and the frozen override rule then passes on fresh origins.",
+  "candidate": {
+    "name": "distributional-afterstate-ranker-d2",
+    "entryPoint": "approaches/afterstate-learning/distributional-afterstate/common.hpp",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "fair-d4",
+    "entryPoint": "approaches/fair-expectimax/reference/fair-only-depth4.cpp",
+    "manifestRef": null
+  },
+  "informationBoundary": "public-policy",
+  "benchmarkTier": "CHECK",
+  "data": {
+    "role": "public-development",
+    "seedLeaseRefs": [
+      "SL-20260820T083000Z-5da70000"
+    ],
+    "wholeOriginSplit": true,
+    "datasetRefs": [
+      "DS-20260820-afterstate-h40-k256-9d31c47a"
+    ],
+    "reuseDisclosure": "Training: the same harvested training roots (seeds 0x5da70000-0x5da700ff) relabeled with the D2 teacher at K=64, H=40. Ranking gate: fresh seeds 0x5da70500-0x5da7053f (64 origins, D1-continuation K=256 target for cross-model comparability). Override gate: fresh seeds 0x5da70600-0x5da7063f (64 origins, same frozen rule and target as EX-20260820-d4-toptwo-override-gate-0bdb39a1)."
+  },
+  "metrics": {
+    "primary": "Fresh held-out top-1 accuracy vs fair D4 against the scenario-mean H40 D1-continuation target (K=256), compared with the D1-teacher model's iteration-3 result (0.4245 vs D4 0.4986).",
+    "secondary": [
+      "pairwise accuracy and normalized regret vs D4",
+      "eligible-root override regret vs D4 per half-fold under the frozen rule",
+      "override rate",
+      "decisive-root label stability (floor 0.5)",
+      "quantile coverage",
+      "corpus generation wall time and work per root"
+    ],
+    "statisticalUnit": "whole-origin",
+    "uncertaintyMethod": "Two deterministic held-out half-folds by origin-game hash; comparisons must hold in both halves."
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "Corpus successor-closed at K=64 with the D2 teacher; completeness 1.0.",
+      "Ranking gate: model top-1 >= (0.4245 + 0.5 * (0.4986 - 0.4245)) = 0.4616 on each half-fold, i.e. the D1-teacher gap to D4 shrinks by at least half.",
+      "Override gate: eligible-root override regret <= D4 regret - 0.01 in EACH half-fold, with override rate >= 5%.",
+      "Decisive-root label stability >= 0.5 for both evaluation corpora (else inconclusive).",
+      "Quantile coverage within [0.66, 0.87]."
+    ],
+    "failureAction": "Record a valid negative. If a stronger teacher does not shrink the gap, the label-quality hypothesis is weakened and the afterstate line is parked.",
+    "passAction": "Preregister a SCREEN gameplay experiment with the frozen override rule and the D2-teacher checkpoint."
+  },
+  "resources": {
+    "wallSeconds": 28800,
+    "cpuThreads": 24,
+    "maxHostBytes": 51539607552,
+    "maxGpuBytes": 32212254720,
+    "gpuDevices": [
+      "gfx1151"
+    ]
+  },
+  "stopConditions": [
+    "Stop on any rules, information-boundary, legality, determinism, or parity failure.",
+    "Stop immediately on out-of-memory or on host available memory falling below 16 GiB.",
+    "Stop on any read of a seed outside the named lease.",
+    "Stop corpus generation after 6 hours wall.",
+    "Stop training after 3 hours GPU wall or 30 epochs."
+  ],
+  "expectedArtifacts": [
+    "runs/<run-id>/corpus-d2/*.ndjson",
+    "runs/<run-id>/model/*.pt",
+    "runs/<run-id>/gate/*.json",
+    "research/results/<result-id>.json"
+  ],
+  "lifecycle": "preregistered",
+  "protocolSha256": "75904aa25ca93ed3f941d35392883c1125b6317c288fa7cb8680f32687f21a19",
+  "amendments": [],
+  "createdBy": {
+    "platform": "OpenCode",
+    "model": "moonshotai/Kimi-K3",
+    "agentId": null
+  },
+  "createdAt": "2026-08-21T08:45:04Z",
+  "updatedAt": "2026-08-21T08:45:38Z"
+}

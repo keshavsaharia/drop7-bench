@@ -89,11 +89,29 @@ inline std::string foldForSeed(std::uint32_t seed) {
   return "heldout";
 }
 
+// Continuation teacher for labels. kD1 is the phase-greedy depth-1 policy used
+// in iterations 1-3; kD2 is the fair depth-2 policy with five chance samples
+// (a stronger public teacher for experiment EX-20260821-afterstate-d2-teacher).
+enum class Continuation { kD1, kD2 };
+
+inline int continuationAction(const State& state, Continuation continuation) {
+  if (continuation == Continuation::kD1) {
+    return cfpi::choosePhaseGreedyAction(state, 1);
+  }
+  cfpi::BehaviorOptions options;
+  options.max_depth = 2;
+  options.chance_samples = 5;
+  options.max_work = 20'000;
+  options.max_cache_entries = 4'000;
+  return cfpi::chooseBehaviorAction(state, options);
+}
+
 // Labels one legal sibling of a root under one aligned scenario: resolve the
-// placement, then continue with the fixed public phase-greedy D1 policy for
+// placement, then continue with the fixed public continuation policy for
 // up to kHorizon moves, all randomness drawn from the scenario stream.
 inline SiblingLabel labelSibling(const RootRecord& root, int action,
-                                 int scenario) {
+                                 int scenario,
+                                 Continuation continuation = Continuation::kD1) {
   SiblingLabel label;
   label.action = action;
   label.scenario = scenario;
@@ -134,10 +152,10 @@ inline SiblingLabel labelSibling(const RootRecord& root, int action,
   label.terminal = state.game_over;
 
   for (int step = 0; step < kHorizon && !state.game_over; ++step) {
-    const int continuation = cfpi::choosePhaseGreedyAction(state, 1);
-    if (continuation < 0) break;
+    const int continuation_action = continuationAction(state, continuation);
+    if (continuation_action < 0) break;
     MoveResult follow;
-    if (!cfpi::detail::playMoveSampled(state, continuation, random, follow)) break;
+    if (!cfpi::detail::playMoveSampled(state, continuation_action, random, follow)) break;
     label.score_gained += static_cast<double>(follow.score_delta);
     accumulate(follow);
     state = follow.state;
@@ -151,12 +169,13 @@ inline SiblingLabel labelSibling(const RootRecord& root, int action,
 // Successor closure is structural: the loop covers root.legal_actions
 // completely, so a missing label indicates an engine failure, not a gap.
 inline std::vector<SiblingLabel> labelRoot(const RootRecord& root,
-                                           int scenario_count = kScenarios) {
+                                           int scenario_count = kScenarios,
+                                           Continuation continuation = Continuation::kD1) {
   std::vector<SiblingLabel> labels;
   labels.reserve(root.legal_actions.size() * scenario_count);
   for (const int action : root.legal_actions) {
     for (int scenario = 0; scenario < scenario_count; ++scenario) {
-      labels.push_back(labelSibling(root, action, scenario));
+      labels.push_back(labelSibling(root, action, scenario, continuation));
     }
   }
   return labels;

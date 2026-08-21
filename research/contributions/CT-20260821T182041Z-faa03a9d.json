@@ -1,0 +1,50 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260821T182041Z-faa03a9d",
+  "actor": {
+    "kind": "model",
+    "platform": "Claude Code",
+    "model": "claude-opus-5[1m]",
+    "agentId": null
+  },
+  "level": "L2",
+  "roles": [
+    {
+      "role": "software",
+      "degree": "lead"
+    },
+    {
+      "role": "visualization",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Built the daily research log feature in the web console as a delegated, bounded work package: infrastructure and components only, no log content. web/lib/log.ts lists entries newest-first, loads one by date, and returns adjacent days, parsing frontmatter with the console's existing gray-matter dependency and following the idioms of lib/learn.ts; the filename stem is the canonical date so YAML date-scalar coercion cannot move a route, list and object frontmatter fields are normalised without inventing values, and a non-finite outcome tally is dropped rather than coerced to zero. web/app/log/page.tsx is the reverse-chronological index with a standing explanation aimed at an outside reader and an explicit empty state; web/app/log/[date]/page.tsx renders one entry through the existing Mdx component with generateStaticParams and prev/next navigation, and closes with a note that the log is narrative and that run validity, scientific outcome and evidence tier live with the records an entry cites. web/components/ResearchLog.tsx adds six MDX components registered in Mdx.tsx: Finding (kind-accented result card with an optional pre-formatted metric badge), DeadEnd (a tried-and-failed result styled as first-class, with optional cost and a verdict that distinguishes a closed direction from a merely rejected configuration, per the AGENTS.md rule that a failed experiment rejects only the exact tested configuration), Direction (proposed/running/blocked/closed with an optional owner), ArmTable (author-supplied pre-formatted string cells, per-column numeric right-alignment with tabular numerals, sign-tinted delta columns, per-row highlight, em dash for an absent cell), Timeline and LogQuote. The components compute nothing: the only value-dependent logic reads the leading +/- sign a author already wrote on a delta cell to choose an accent colour. Accent vocabulary matches Research.tsx (emerald positive, orange negative, amber blocked, sky open, purple proposed) so a negative result never renders as an error. A log-scoped block was appended to app/globals.css because the prose-drop7 element rules are unlayered and would otherwise beat Tailwind's layered utilities inside MDX. A /log nav entry was added to app/layout.tsx. The dated entries under web/content/log/ were written by the coordinator in parallel and are not part of this contribution.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "web/lib/log.ts",
+    "web/app/log/page.tsx",
+    "web/app/log/[date]/page.tsx",
+    "web/components/ResearchLog.tsx",
+    "web/components/Mdx.tsx",
+    "web/app/layout.tsx",
+    "web/app/globals.css"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "cd web && npm run lint: clean, no findings.",
+    "cd web && npm run build: passes; TypeScript clean; /log builds dynamic and /log/[date] prerenders the two entries present, so every MDX component in them rendered server-side. Prerendered HTML inspected for the log-card, arm-table, log-timeline, log-quote, is-highlight, numeric-cell and sign-tint markup.",
+    "No-content case: LOG_DIR temporarily repointed to a nonexistent path (the same existsSync branch as an absent web/content/log/), rebuilt, served with next start, /log returned 200 with the 'No log entries are present in this checkout' empty state, /log/<date> returned 404, nav link present; LOG_DIR then restored and rebuilt. The directory itself was deliberately not moved because the coordinator was writing into it concurrently."
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed.",
+    "Infrastructure only. No log entry content, and no research claim, number or result is authored or verified by this contribution.",
+    "Rendering was verified server-side from prerendered HTML and a next start smoke test, not in a browser; no visual review at multiple viewport widths.",
+    "web/scripts/check-routes.sh was not run against a dev server; the build's route table and the two prerendered entry pages were used instead."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-21T18:20:41Z"
+}

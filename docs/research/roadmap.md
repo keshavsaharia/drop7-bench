@@ -48,7 +48,7 @@ that AFBR-40 has been implemented.
 | 5 | Distributional afterstate ranker | Learn long survival/score potential, not only behavior imitation | Beats fixed D4 ranking metrics on disjoint origins | ROCm training, batched GPU |
 | 6 | Conservative neural-guided D4 | Limit harm while testing useful overrides | Calibrated top-two overrides pass offline and gameplay gates | CPU search + GPU leaf batches |
 | 7 | Human-style rise-cycle options | Represent build, protect, crack, release, stabilize | Ablations improve origin-level ranking and complete games | GPU training, CPU option search |
-| 8 | Controlled D5/tree-search factorial | Separate depth, chance variance, leaf bias, and cache | Fixed-work and fixed-time comparisons both reported | CPU/RAM plus GPU leaves |
+| ~~8~~ | ~~Controlled D5/tree-search factorial~~ **— done 2026-08-21** | Separated depth from chance variance | Ran; see §8 below. Depth 5 rejected at both stratum counts | CPU/RAM plus GPU leaves |
 | 9 | All-sibling policy iteration | Improve on states the new policy actually visits | Every round passes unchanged origin folds | Parallel CPU generation + GPU training |
 | 10 | Formal qualification | Establish the actual claim | Frozen 256/256/256 protocol gates | Exclusive machine profile |
 
@@ -164,20 +164,50 @@ Compare an eight-cycle option search against a primitive H40 search at equal
 logical work. This directly tests whether human-like temporal abstraction makes
 long-horizon planning easier.
 
-## 8. Revisit depth and stochastic tree search as a factorial
+## 8. Revisit depth and stochastic tree search as a factorial — RUN, 2026-08-21
 
-After acceleration and a validated leaf exist, vary one declared factor at a
-time:
+This item has been executed at *development* tier and is closed. The factorial
+varied depth (2, 3, 4, 5) against chance strata (5, 7), plus a factored ladder
+over reveal-sample count, on 64 paired games per cell using the bit-exact
+accelerated engine.
 
-- D4 versus D5;
-- chance strata 3, 5, and 7;
-- reference leaf versus validated learned leaf;
-- transposition-table size; and
-- fixed logical work versus separately reported fixed wall time.
+**Depth and chance resolution interact, and the interaction has a sign.** With
+five strata the best depth is three, and the fourth ply is worth −7,723. With
+seven strata the fourth ply is worth +86,172 (95% lower bound +26,605, 40-0-24)
+— the largest verified improvement in the repository. The fifth ply is worth
+nothing at either resolution: −1,581 at seven strata, −8,624 at five, for 23x to
+34x the work.
 
-This distinguishes depth value from chance noise, leaf bias, and cache effects.
-Past work shows that deeper search is not monotonically stronger, so D5 advances
-only through the same ranking and whole-game gates.
+**Depth and chance resolution substitute rather than compound.** Depth 3 with
+six-fold reveal sampling (4.24M work per move, 376,442 points) and depth 4 with
+single-sample reveals (4.96M, 398,498) are the same policy strength bought two
+different ways, and doubling reveal samples on top of the fourth ply buys
+nothing measurable for 4.07x the work. Across a 1,085x range of work per move,
+every arm using the exact chance model falls between 312,327 and 398,498,
+non-monotonically. **The budget frontier has a flat top at the fair-D4
+operating point, reachable from either axis.**
+
+**Consequences for the rest of this roadmap.** Priority 2's acceleration goal is
+met and no longer unlocks strength — it unlocks *data rate*, which is still
+valuable. Any future search change must be argued on a mechanism other than
+"more plies" or "more samples", because both axes are measured and flat. The
+remaining untested factors from the original list are the learned leaf inside
+the search (tried, negative) and transposition-table size (untested, and now low
+priority given that the table is 1.01x of a decision).
+
+Deeper search is not merely "not monotonically stronger" — past ply four it is
+measurably not stronger at all in this family. Note the precise claim: none of
+the ply-5 contrasts is *significantly negative* either, so the correct reading
+is that the fifth ply does not pay for itself, not that it is harmful.
+
+**What a flat top implies for priority.** When both estimate-quality axes are
+exhausted, the binding constraint has moved from the estimate to the objective
+being estimated. The two named candidates are in `finding-15` §5: the terminal
+utility supplies no death-depth shaping, and the leaf is an uncalibrated
+potential. Those are one constant and one function. A terminal-utility sweep at
+depth 5 with seven strata separates them, and is the recommended next
+consumer of serious machine time — not another point on the depth or
+chance-resolution axis.
 
 ## 9. Iterate with every sibling, not only the played action
 

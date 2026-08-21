@@ -36,6 +36,7 @@ b6dcde5f…3090   src/core/native/engine.hpp
 | Logical work identical | yes, at every one of nine (depth, strata) configurations |
 | Completed depth identical | yes |
 | `fairLeaf` return value | identical **bit pattern**, 225,183 real leaf states |
+| **Whole-game outcomes on a real 64-game cohort** | **identical**, 704 field comparisons, 0 mismatches ([`finding-14`](finding-15-depth5-exact-estimator.md) §1) |
 
 **The measured speedup is about 3x, not the 5–10x the brief hoped for, and the
 reason is structural rather than a failure of effort.** 96.1 % of the search's
@@ -50,6 +51,15 @@ likely the single largest win" — *is* 5.8x faster per operation, and is worth
 **0.6 % of a depth-4 decision** (1.01x measured on its own), because only 3.9 %
 of nodes ever touch it. Every one of the four remaining leads was real but
 small; the win came from the fifth, the leaf.
+
+**The strongest equivalence evidence is not in this document.**
+[`finding-14`](finding-15-depth5-exact-estimator.md) §1 re-runs the depth-4
+seven-stratum arm on the fast engine over the shared 64-game evaluation cohort
+and reproduces the unoptimised binary's recorded result exactly — mean score,
+mean moves, clears per move, reveals per move, occupancy and work per move all
+identical to every printed digit, and 704 per-game field comparisons with zero
+mismatches. That is the end-to-end proof; everything in section 4 below is the
+mechanism behind it.
 
 **Depth 5 with seven strata is affordable now, and most of the reason is not
 this work.** See section 6: the 75-hour figure is a worst-case-work projection,
@@ -710,6 +720,11 @@ workflow does not catch.
   `fastFairLeaf` and cannot affect engine mechanics; the leaf's bit-exactness
   after it is separately gated on all 225,183 corpus leaves, and the depth-4
   arm ran on the final build.
+- Section 6's 55,765,609 work/move for depth 5 at seven strata was measured at a
+  declared cache capacity of 200,000 entries. Capacity changes work by up to
+  2.2x at that configuration without changing any decision; see
+  [`finding-14`](finding-15-depth5-exact-estimator.md) §3. Never compare work
+  across capacities.
 - The 30-thread figures in section 6 are arithmetic, not measurement. No
   parallel scaling preflight was run, as `docs/benchmarks.md` §"Using the
   operating system well" requires before a throughput claim.

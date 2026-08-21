@@ -1,0 +1,174 @@
+---
+date: 2026-08-20
+title: The day the objective changed
+summary: An audit of eighteen months of prior work turned into a measurement that reframed the goal — Drop7 Hardcore score is almost entirely survival, not spectacle. One search change paid off; five ideas were closed.
+contributors:
+  - claude-opus-5 (Claude Code)
+  - kimi-k3 (OpenCode)
+tags: [audit, fair-planner, chance-exactness, flow-balance, engine]
+outcomes:
+  positive: 2
+  negative: 5
+  open: 3
+---
+
+The instruction that started this was not "find a better policy". It was closer
+to the opposite: *go back over what has already been tried and check that it
+makes sense.* Prefer a second set of eyes on an old idea over a fresh direction.
+
+That turned out to be the right call, because the first thing a careful
+re-measurement found was that the project had been optimising for the wrong
+thing.
+
+<Timeline entries={[
+  { time: "morning", text: "Five independent audits: engine fidelity, the fair-D4 reference, the arithmetic of every historical claim, which past rejections were clean, and whether curriculum ordering was ever actually ablated." },
+  { time: "midday", text: "Score decomposition on 64 fresh whole games.", kind: "positive" },
+  { time: "afternoon", text: "Chance-stratification result found, then replicated on a disjoint cohort.", kind: "positive" },
+  { time: "evening", text: "A 3.08x bit-exact engine speedup lands, unlocking depth-5 experiments overnight." },
+  { time: "late", text: "Four separate ideas fail their preregistered gates. A published claim of our own is withdrawn.", kind: "negative" }
+]} />
+
+## What the score is actually made of
+
+Drop7's exciting moments are chain reactions — a disc lands, clears a row,
+everything above it drops, and that triggers the next clear. It is natural to
+assume that is where the points are. It is not.
+
+<Finding title="Score is survival" kind="positive" metric="94.29% of points">
+Over 64 complete games under the strongest reference policy, **94.29%** of all
+points came from the flat 17,000-point bonus awarded for surviving another row
+rise. Chain scoring contributed about 6%. Score and game length correlate at
+**r = 0.9995**.
+
+The practical consequence: a strategy that stays alive one move longer is worth
+more than almost any chain it could set up. The 70,000-point board-clear bonus —
+the single most dramatic event in the game — is worth about **20.6 moves** of
+ordinary survival, and no game in any cohort we have run has ever achieved one.
+</Finding>
+
+This gave a derivation for a rule of thumb the project had been carrying around
+without justification. Every five moves you place 5 discs and the board rises,
+pushing in 7 more: 12 discs arriving onto 49 cells. To survive indefinitely you
+must clear at least **2.400 discs per move** and reveal at least **1.400**
+covered discs per move. Those are not tuning targets; they are conservation
+laws. Every policy we have measured sits just below them, which is exactly why
+every game eventually ends.
+
+## The one change that worked
+
+<Finding title="Exact chance enumeration unlocks the fourth ply" kind="positive" metric="+101,171 points">
+The planner models the unknown next disc by sampling. Increasing the number of
+chance strata from 5 to 7 — making that model exact rather than approximate —
+was worth **+101,171** points per game, with a one-sided 95% lower bound of
+**+47,457**. It replicated on a second, disjoint cohort.
+
+The mechanism is the interesting part. With a *biased* chance estimator, adding
+a fourth ply of lookahead buys nothing at all: the deeper search just optimises
+against a distribution that is wrong. With an exact estimator, the fourth ply
+pays. Depth and chance-exactness are not independent knobs — the cheap one gates
+the expensive one.
+</Finding>
+
+<Finding title="A 3.08x bit-exact engine speedup" kind="neutral" metric="3.08x">
+The rewritten search produces **byte-identical** decisions to the frozen
+reference — verified across 936,612 real board states with zero differing bits,
+and by reproducing an entire 64-game cohort field-for-field.
+
+Two things about it were instructive. The speedup is 3x, not the 5–10x the brief
+optimistically predicted. And the brief's ranked guess about *where* the time
+was going was simply wrong: the transposition table, expected to dominate, was
+worth 1.01x on its own, because it touches only 3.9% of the work. The leaf
+evaluation, ranked lower, was worth 2.61x.
+</Finding>
+
+## Things that did not work
+
+This is the part of a research log that is usually missing, and it is the part
+worth reading. None of these were sloppy ideas; each had a plausible mechanism
+and each was killed by its own preregistered gate.
+
+<DeadEnd title="Making the planner more afraid of dying" verdict="configuration-rejected">
+The search assigns a large negative utility to a losing position. If survival is
+94% of the score, making that penalty harsher should help. It does nothing: the
+parameter is already saturated. Every value past the current one produces
+identical play, because the penalty is already so much larger than any
+achievable score difference that its exact magnitude cannot change a ranking.
+</DeadEnd>
+
+<DeadEnd title="Vetoing moves that lose a 25-move rollout" verdict="configuration-rejected">
+A previously reported technique, retested under corrected scoring. Each veto
+costs **−21,887 points** on average. The rollout is noisy enough that it
+overrides more good moves than bad ones.
+</DeadEnd>
+
+<DeadEnd title="A learned survival head inside the search" verdict="configuration-rejected">
+A network trained to predict remaining lifetime, dropped in as the search's leaf
+evaluation. We preregistered the prediction that it would help. It did not, and
+recording the refuted prediction is the point of preregistering it.
+</DeadEnd>
+
+<DeadEnd title="Distilling the planner into a policy network" verdict="configuration-rejected">
+The classic move: run an expensive search, train a cheap network to imitate its
+choices, deploy the cheap network. It underperformed the search it was copying.
+</DeadEnd>
+
+<DeadEnd title="Our own scenario benchmark suite" verdict="configuration-rejected">
+We built a fixed suite of 128 positions to compare policies cheaply, then ran
+its own validation gate: does the suite rank policies the same way whole games
+do? At a 9-move horizon it ranked them **backwards** — Spearman **−0.257**. The
+suite is now labelled a diagnostic and may not be cited as evidence of strength.
+</DeadEnd>
+
+## A correction we had to publish against ourselves
+
+Mid-afternoon we reported a clean split of the gap between a clairvoyant planner
+(one that can see the future) and a legal one, and attributed a specific share of
+it to planning rather than hidden information.
+
+That number was measured on eight fixed disc "tapes", and those eight tapes turn
+out to favour long games — with a bias that grows the longer a policy survives,
+so it does not cancel between arms. Re-running every arm on 128 fresh tapes moved
+the reference policy's mean game length from **117.75 to 93.56 moves** while
+leaving the clairvoyant arm untouched.
+
+<LogQuote who="claude-opus-5">
+The central quantitative claim of that document is withdrawn. The finding that
+replaced it is smaller, less exciting, and correct.
+</LogQuote>
+
+## Two hazards that had nothing to do with Drop7
+
+Worth recording because they would silently corrupt any result computed on this
+machine:
+
+<Finding title="numpy float32 matmul is silently wrong on this host" kind="negative">
+A race in the installed OpenBLAS produces incorrect single-precision matrix
+products under threading — no error, no warning, just wrong numbers. Pinning the
+thread count before importing numpy is now mandatory in every script here.
+</Finding>
+
+<Finding title="PyTorch Conv2d is nondeterministic on this host's CPU" kind="negative">
+Repeated identical forward passes disagree. Any experiment claiming byte-identical
+reproduction has to avoid that path or pin the backend.
+</Finding>
+
+## Where this left the program
+
+<Direction title="Push the fair planner to depth 5" status="running" owner="Claude Code">
+Chance-exactness unlocked the fourth ply. The obvious question is whether it also
+unlocks the fifth. The new engine makes this affordable for the first time; the
+cohorts were launched overnight.
+</Direction>
+
+<Direction title="Train a long-horizon evaluator on the GPU" status="running" owner="OpenCode / kimi-k3">
+A separate contributor is training an action-free afterstate model — one that
+scores a board position rather than a move — on labelled search values. The
+premise is that a network might see structure several row-rises out that a
+4-ply search cannot.
+</Direction>
+
+<Direction title="Correct three engine divergences from real Drop7" status="blocked" owner="awaiting owner decision">
+The audit found three places where the simulator differs from the shipped game.
+Fixing them changes every number in the repository; not fixing them means the
+target is a slightly different game. This is the owner's call, not ours.
+</Direction>

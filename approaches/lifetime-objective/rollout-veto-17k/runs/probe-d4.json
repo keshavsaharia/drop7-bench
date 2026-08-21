@@ -1,0 +1,21 @@
+{
+  "format": "drop7-rollout-veto-17k-paired-v1",
+  "experiment": "rollout-veto-17k",
+  "seedLease": "SEEDLEASE-A51D-VETO",
+  "dataRole": "exploratory-development-diagnostic",
+  "seedStartHex": "0xa51e3f10",
+  "games": 1,
+  "maximumMoves": 2000,
+  "threads": 1,
+  "config": {"horizon": 25, "scenarios": 7, "continuationDepth": 2, "dangerHeight": 4, "maximumRootQLoss": 17000, "levelBonus": 17000, "pairedT975Df6": 2.446912},
+  "baselineWallSeconds": 198.48179023,
+  "candidateWallSeconds": 0,
+  "totalWallSeconds": 198.482046078,
+  "baselineFailures": 0,
+  "candidateFailures": 0,
+  "candidateCounters": {"decisions": 0, "dangerDecisions": 0, "vetoOpportunities": 0, "alternativesConsidered": 0, "vetoesTaken": 0, "passingAlternatives": 0, "survivorRejections": 0, "clearRejections": 0, "returnRejections": 0, "rootQRejections": 0, "d2Calls": 0, "d2Work": 0, "d4Work": 0, "syntheticTransitions": 0, "d4Seconds": 0, "rolloutSeconds": 0},
+  "baselineCounters": {"decisions": 75, "dangerDecisions": 50, "vetoOpportunities": 0, "alternativesConsidered": 0, "vetoesTaken": 0, "passingAlternatives": 0, "survivorRejections": 0, "clearRejections": 0, "returnRejections": 0, "rootQRejections": 0, "d2Calls": 0, "d2Work": 0, "d4Work": 105574413, "syntheticTransitions": 0, "d4Seconds": 198.47720566, "rolloutSeconds": 0},
+  "perGame": [
+    {"seedHex": "0xa51e3f10", "baseline": {"score": 257911, "moves": 75, "censored": false, "rises": 14, "boardClears": 0, "numberedCleared": 145, "coversRevealed": 84, "maxChainDepth": 9, "wallSeconds": 198.477607028}}
+  ]
+}

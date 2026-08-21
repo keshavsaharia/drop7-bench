@@ -1,0 +1,47 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260821T060358Z-895d0a79",
+  "experimentId": "EX-20260821-depth5-chance-exactness-factorial-a6a604fd",
+  "lifecycle": "running",
+  "runValidity": "partial",
+  "startedAt": "2026-08-21T06:03:58Z",
+  "endedAt": null,
+  "protocolSha256": "cf7f2ba30d205bddd20340d39dbdef4a5950f792510776a7fbfd477aefea1c18",
+  "machineProfileRef": "research/system-profiles/MACH-20260820T080056Z-376ada90.json",
+  "sourceState": {
+    "gitCommit": null,
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": "62abbb743684436d72f3e4616107dcbf72f90301879e7b1d3c518f5e8259b60d"
+  },
+  "command": [
+    "./build/fast-engine/cohort --seed-start 0xa51d1000 --games 64 --threads 14 --depth 5 --chance-samples 7 --cache 200000 --chunk 16 --max-moves 2000 --label d5s7 --output approaches/lifetime-objective/fast-engine/cohorts/d5s7.json"
+  ],
+  "seedLeaseRefs": [
+    "SEEDLEASE-A51D confirm (0xa51d1000-0xa51d103f; docs/exploratory/lease-map.md)"
+  ],
+  "resourceLimits": {
+    "wallSeconds": 172800,
+    "cpuThreads": 14,
+    "maxHostBytes": 34359738368,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": 44333.0,
+    "cpuSeconds": null,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "Still executing when this record was written (process 127323, 44,333 s elapsed at 2026-08-21T18:22:52Z). The runner rewrites its artifact after every 16-game chunk: chunk 1 finished in 36,888.4 s and wrote 16 games, chunk 2 had 8 further games in its log and nothing in the artifact. Because games are dispatched to 14 threads and completion order is length order, a mid-chunk log slice is biased toward short games and is not used. The frozen 16-game snapshot in this run directory is what the result record assesses. Work/move on the finished chunk is 170,131,134 at a declared cache of 200,000 entries, 34.3x the depth-4 seven-stratum arm. The run was neither killed nor waited on by the analysis. gitCommit is null on purpose: the arms ran from an uncommitted working tree and the commit they ran at cannot be reconstructed, so no SHA is invented. sourceArchiveSha256 is instead the SHA-256 of the newline-joined '<path> <sha256>' lines of this approach's source closure, taken after the runs and listed in the run's manifest.json."
+  },
+  "exitCode": null,
+  "stopReason": "still running at snapshot time; 16 of 64 games in the artifact, 24 finished in the log",
+  "artifactRefs": [
+    "runs/RUN-20260821T060358Z-895d0a79/d5s7-partial-16games.json",
+    "runs/RUN-20260821T060358Z-895d0a79/d5s7-partial-16games.log",
+    "approaches/lifetime-objective/fast-engine/cohorts/d5s7.json"
+  ],
+  "contributionIds": [
+    "CT-20260821T181919Z-05882e86"
+  ]
+}

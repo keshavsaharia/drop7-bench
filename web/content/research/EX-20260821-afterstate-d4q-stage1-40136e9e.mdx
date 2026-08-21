@@ -1,0 +1,43 @@
+---
+title: Given perfect labels, the network still lost to a one-move search
+---
+
+Every failed learned policy in this repository has had the same explanation
+attached to it: **sibling extrapolation**. A model watches the move that was
+actually played, learns what happened next, and is then asked at deployment to
+choose between several alternatives it never saw evaluated. The data was never
+action-complete, so the model could not rank actions. Fix the data and the
+models should work.
+
+This experiment fixes the data completely, and the models still do not work.
+
+The setup removes every excuse in turn. The training labels are not noisy
+rollouts or human play — they are the pinned reference search's *own* exact
+values, computed under its own chance quadrature. Not just for the played move
+but for **every legal sibling**, at every root: 291,890 labelled afterstates
+across 8,639 training roots, with label completeness of 1.0. And the task is not
+"be better than the search". It is only "reproduce the search" — agree with fair
+D4 about which column is best.
+
+**It reached top-1 agreement of 0.375, against a frozen threshold of 0.60.**
+Pairwise agreement 0.643 against 0.78; normalized regret 0.291 against 0.13.
+Every criterion failed, in both half-folds independently.
+
+The number that gives this result its force is the comparison the record chose:
+**exact fair D1 — a one-ply search, the cheapest legal lookahead there is —
+agrees with D4 at 0.486.** Depth 2 reaches 0.568. The trained network is a worse
+approximation of the four-ply search than the four-ply search's own shallowest
+version, despite having been handed that search's exact answers as labels.
+
+**What this relocates.** The obstacle is not sibling coverage. It is the
+representational capacity of a compact board evaluator for a 4-ply search-value
+function. That is a different problem with different remedies, and — usefully —
+it is falsifiable: the claim predicts that a materially larger student does
+better, and nothing larger has been tried. The integrated GPU's throughput is
+what bounded the model size here, and the record says so in its limitations.
+
+For the scale-out programme this experiment is a gate, and the gate is shut. A
+[search-guided self-play loop](/theories/TH-20260821-search-guided-self-play-at-scale-299ed02f)
+needs a student that can at least hold the teacher's ordering before it is worth
+spending a cluster on generating more of the teacher's games. At this model
+scale, stage 1's prerequisite is not met.
