@@ -1,0 +1,38 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260821T065242Z-ee3fd78a",
+  "actor": {
+    "kind": "model",
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": null
+  },
+  "level": "L2",
+  "roles": [
+    {
+      "role": "visualization",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Rewrote the 'How Drop7 works' learn page (web/content/learn/rules.mdx) as a complete animated rulebook: board and pieces, player view / information boundary, drops and legal columns, the exact-run clearing rule (row, column, mismatch, gray discs counting), cracking, revealing and double hits, gravity and chains, scoring curve and bonuses, the five-drop rise, and both game-over conditions, ending in a one-table rulebook. Added web/scripts/generate-rules-scenarios.ts, which plays every scenario through the TypeScript engine in latent mode and writes web/content/learn/rules-scenarios.json, so all animated boards are engine output; and web/components/Rules.tsx (RulesScenario playback with HUD and static filmstrip, DropPhysics, RunCounter, RiseClock, ScoreCurve, PlayerView, LegalColumns, DiscLegend). Added a 'How Drop7 works' guide card and GitHub repository links (https://github.com/keshavsaharia/drop7-bench) to the console homepage, header and footer. Fixed a pre-existing renderer defect: next-mdx-remote's default blockJS stripped every JSX expression prop from MDX.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "web/content/learn/rules.mdx",
+    "web/components/Rules.tsx",
+    "web/scripts/generate-rules-scenarios.ts",
+    "web/content/learn/rules-scenarios.json"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "cd web && npm run rules:scenarios; cd web && npx tsc --noEmit; cd web && npx eslint on changed files; cd web && npm run build; rendered /learn/rules, /, /learn via next start + curl and inspected full-page chromium screenshots"
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-21T06:52:42Z"
+}

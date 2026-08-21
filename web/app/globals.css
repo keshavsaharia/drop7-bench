@@ -115,3 +115,72 @@ body {
 .prose-drop7 strong {
   color: #fafafa;
 }
+
+/* Engine explainer figures (web/components/Engine.tsx). Motion is decorative:
+   every animated figure also renders a static equivalent, and all CSS motion
+   stops under prefers-reduced-motion. */
+.engine-fig {
+  margin: 1.2rem 0;
+  border: 1px solid #27272a;
+  border-radius: 0.75rem;
+  background: #101014;
+  padding: 1rem;
+}
+.engine-fig svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+.engine-fig figcaption,
+.engine-caption {
+  margin-top: 0.6rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #a1a1aa;
+}
+.engine-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  margin-top: 0.5rem;
+  font-size: 0.78rem;
+  color: #d4d4d8;
+}
+.engine-legend span::before {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  margin-right: 0.4rem;
+  background: var(--swatch, #3987e5);
+  vertical-align: -1px;
+}
+.engine-table summary {
+  cursor: pointer;
+  font-size: 0.78rem;
+  color: #a1a1aa;
+  margin-top: 0.5rem;
+}
+.engine-table table {
+  font-size: 0.8rem;
+  margin-top: 0.4rem;
+}
+.engine-table td:not(:first-child),
+.engine-table th:not(:first-child) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+@keyframes engine-pulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+@keyframes engine-sweep {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(var(--sweep, 0px)); }
+}
+.engine-pulse { animation: engine-pulse 1.8s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .engine-pulse { animation: none; opacity: 1; }
+  .engine-motion { display: none; }
+}

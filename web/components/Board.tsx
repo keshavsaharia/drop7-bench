@@ -20,7 +20,7 @@ export function parseBoard(cells: string | readonly number[]): number[] {
   return [...cells].map((char) => Number(char));
 }
 
-function CellGlyph({ cell, x, y, s }: { cell: number; x: number; y: number; s: number }) {
+export function CellGlyph({ cell, x, y, s }: { cell: number; x: number; y: number; s: number }) {
   const pad = s * 0.08;
   if (cell === 0) {
     return (
