@@ -38,13 +38,14 @@
     "cpuSeconds": 36,
     "peakHostBytes": null,
     "peakGpuBytes": null,
-    "measurementNotes": "leafdump 7.3 s, analyze.py 31.6 s, single-threaded numpy, while the 30-thread evolution run shared the machine."
+    "measurementNotes": "leafdump 7.3 s, analyze.py 31.6 s, single-threaded numpy, while the 30-thread evolution run shared the machine. A post-hoc pattern diagnostic (patterns.py, 13 human-observed patterns such as a 1 adjacent to a solid gray) was added to the same run directory; it is exploratory, ungated, and not part of the result record's gate."
   },
   "exitCode": 0,
   "stopReason": "completed",
   "artifactRefs": [
     "runs/RUN-20260822T051517Z-eecf1098/analysis.json",
-    "runs/RUN-20260822T051517Z-eecf1098/leaf.f32"
+    "runs/RUN-20260822T051517Z-eecf1098/leaf.f32",
+    "runs/RUN-20260822T051517Z-eecf1098/patterns.json"
   ],
   "contributionIds": [
     "CT-20260822T051732Z-a0507c6b"

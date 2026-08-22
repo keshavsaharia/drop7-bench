@@ -584,3 +584,19 @@ the lifetime difference. If the alternative lives longer, an emergency mode
 is a move filter with a real trigger; if not, the entombing move was already
 the least bad option and the problem is two rises older than it looks.
 </Direction>
+
+<Finding title="Human danger patterns are real, and the hand-written leaf already holds them" kind="neutral" metric="1-next-to-gray: −6.7 moves at equal occupancy, partial r +0.01">
+A follow-up question from the owner: a 1 sitting next to a solid gray "spells
+disaster" — would evolved weights or a neural net capture such patterns? A
+post-hoc pass over thirteen such patterns (`patterns.py`, same corpus, no
+gate, so exploratory) says the eye is right about the patterns and wrong about
+what is missing. A 1 adjacent to a solid gray is on the board in 90% of
+depth-4 states within five moves of death, and at equal occupancy it costs
+6.7 moves of life (34.7 vs 41.4 at 24–27 cells) — three times the entombed
+disc's cost. But its held-out partial correlation with lifetime *beyond the
+eighteen leaf features* is +0.01, and no pattern in the set exceeds |0.04|:
+the leaf's dead-low-number, adjacent-ones, cover-exposure and height terms are
+these human observations, already written down. What a neural leaf adds on top
+is measurable and small: held-out lifetime correlation 0.856 (NNUE, cell and
+pair features) against 0.834 for the linear leaf on the same split.
+</Finding>
