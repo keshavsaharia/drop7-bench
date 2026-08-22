@@ -1,0 +1,90 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260822-leaf-cmaes-d4s7-4f5f462a",
+  "theoryIds": [
+    "TH-20260822-depth-native-leaf-weights-caa6f8ba"
+  ],
+  "title": "CMA-ES over the eighteen fair-leaf weights inside the fast depth-4 five-stratum search, fresh training seeds per generation, one held-out paired screen",
+  "classification": "algorithmic",
+  "hypothesis": "Starting from the frozen vector in sign-normalised coordinates (sigma0 = 0.25 relative), a (8/8_w, 16)-CMA-ES with mirrored sampling whose fitness is the mean score of 32 complete depth-4 five-stratum games on a fresh contiguous block of the training lease per generation (the frozen vector played on every block as a control) produces, after at most 40 generations, a distribution mean whose 64-game held-out paired delta against the frozen leaf passes the gate below. Tuning and deployment use the same search: the bit-exact fast engine (finding-13) with the leaf weights as data, depth 4, five strata, cache 60,000, worst-case-bound work, terminal utility -1,000,000, policy seed 0xd7075eed.",
+  "candidate": {
+    "name": "fast-d4s5-evolved-leaf",
+    "entryPoint": "approaches/lifetime-objective/leaf-evolution/evolve.py",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "fair-d4",
+    "entryPoint": "approaches/fair-expectimax/reference/fair-only-depth4.cpp",
+    "manifestRef": "research/benchmarks/baselines-v1.json"
+  },
+  "informationBoundary": "public-policy",
+  "benchmarkTier": "SCREEN",
+  "data": {
+    "role": "public-development",
+    "seedLeaseRefs": [
+      "SL-20260822T020000Z-a5290000",
+      "SL-20260822T020000Z-a52b0000"
+    ],
+    "datasetRefs": [],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "CHECK gates read previously opened development probe seeds 0xa5278000-0xa52784ff (leaf-reweight CHECK probes) and the PILOT read the first 16 seeds of the already-opened shared evaluation cohort 0xa51d1000 (runtime projection and exact-reproduction check only; no strength claim). Training uses the new lease 0xa5290000+ in contiguous 32-seed blocks, one block per generation, never replayed. The held-out screen uses the new, never-read lease 0xa52b0000-0xa52b003f, which is disjoint from every training block and from every range in docs/exploratory/lease-map.md. The 7-stratum transfer arm replays the same held-out seeds and is a secondary diagnostic on already-read data."
+  },
+  "metrics": {
+    "primary": "paired mean whole-game score delta, candidate minus frozen leaf, depth 4 five strata, 64 held-out games",
+    "secondary": [
+      "paired mean moves delta",
+      "numbered clears per move and cover reveals per move",
+      "mean occupied cells",
+      "lower quartile, median, maximum score",
+      "first-half and second-half paired mean deltas (seeds 0-31 and 32-63)",
+      "W-T-L",
+      "paired population-mean-minus-control trajectory over generations (training blocks, monitoring only)",
+      "secondary transfer: paired delta of the same candidate at depth 4 seven strata on the same held-out seeds (diagnostic)"
+    ],
+    "statisticalUnit": "whole-game",
+    "uncertaintyMethod": "one-sided 95% percentile bootstrap over whole games, 20,000 resamples, RNG seed 0xb0071eaf (compare.py), plus a one-sided 95% Student-t lower bound; detection floor 1.645*sd/sqrt(n) reported"
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "All CHECK gates passed before the first training seed was read: leaf bit-identity (0 mismatches), search parity with FastSearch (0 action/work/node/cache/depth mismatches), determinism across 1 and N threads, reflection, metadata blindness, completed depth and legality under perturbed weights.",
+      "Every generation artifact and the screen artifact have incompleteDecisionsTotal 0, illegalDecisionsTotal 0 and no score-identity failures.",
+      "Held-out screen, depth 4 five strata, 64 paired games on 0xa52b0000-0xa52b003f: bootstrap 95% lower bound of the paired score delta > 0 AND Student-t 95% lower bound > 0.",
+      "Held-out screen: candidate lower-quartile score >= frozen lower-quartile score.",
+      "Held-out screen: paired mean score delta > 0 in both halves (seeds 0-31 and 32-63).",
+      "The candidate evaluated is the CMA distribution mean written to candidate-weights.txt before the held-out lease is opened; no other vector is screened."
+    ],
+    "failureAction": "Record a valid run with scientific outcome fail for this exact configuration (optimiser, budget, depth, strata, fitness); do not adopt the vector; report the 7-stratum transfer arm as diagnostic only; open no further cohort for this candidate.",
+    "passAction": "Freeze candidate-weights.txt with its SHA-256; register a fresh-block replication by a different runner and a seven-stratum-native evolution as successor experiments; do not open protected or final seeds."
+  },
+  "resources": {
+    "wallSeconds": 57600,
+    "cpuThreads": 30,
+    "maxHostBytes": 17179869184,
+    "maxGpuBytes": null,
+    "gpuDevices": []
+  },
+  "stopConditions": [
+    "Stop on any rules, information-boundary, legality, determinism, or parity failure.",
+    "Evolution stops at 40 generations, at 14 wall-hours, when sigma < 0.02, when the training lease is exhausted, or when a STOP file appears in the run directory; the candidate is the distribution mean at the last completed generation in every case.",
+    "A generation artifact with incomplete decisions voids the run (invalid), not the candidate.",
+    "The screen is evaluated exactly once; no re-run on the same or a different held-out block without a new experiment record."
+  ],
+  "expectedArtifacts": [
+    "runs/<evolution-run-id>/config.json, progress.jsonl, cma-state.json, gen-NNN/population.{txt,json}, candidate-weights.txt, final.json",
+    "runs/<screen-run-id>/heldout-d4s5.json and heldout-d4s7.json (population artifacts with frozen and candidate on 0xa52b0000+64)",
+    "runs/<screen-run-id>/compare-d4s5.json and compare-d4s7.json",
+    "runs/RUN-20260822T013756Z-0f7ab038/gates.log (CHECK) and runs/RUN-20260822T013250Z-cb282a1c/ (PILOT)"
+  ],
+  "lifecycle": "preregistered",
+  "protocolSha256": "87d2d15dadd49e84e3fd8e86168cc1fe00b4eeb28f8d56aacd9ac0f7f02ddca7",
+  "amendments": [],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": null
+  },
+  "createdAt": "2026-08-22T01:33:17Z",
+  "updatedAt": "2026-08-22T01:49:00Z"
+}

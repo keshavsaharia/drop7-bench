@@ -1,0 +1,39 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260822T015542Z-028e9222",
+  "actor": {
+    "kind": "model",
+    "platform": "OpenCode",
+    "model": "baseten/moonshotai/Kimi-K3",
+    "agentId": null
+  },
+  "level": "L1",
+  "roles": [
+    {
+      "role": "review",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Pre-run adversarial review of the leaf-evolution preregistration: traced the information boundary through evaluate.cpp and the generated search (no violation), verified block arithmetic and seed-role disjointness, verified the pilot's exact reproduction of the reference cohorts, checked every CMA-ES constant and update against Hansen's tutorial (no bug), confirmed the generated-search diff is exactly the declared 16 lines; flagged the lease-map table omission, the unscripted screen command, the z-quantile labelled Student-t in compare.py, FP-contraction fragility if -march is ever added, and the selection-noise argument (paired sd ~360k from finding-14) with a stated P(gate passes) of about 0.10.",
+  "theoryIds": [
+    "TH-20260822-depth-native-leaf-weights-caa6f8ba"
+  ],
+  "experimentIds": [
+    "EX-20260822-leaf-cmaes-d4s7-4f5f462a"
+  ],
+  "runIds": [],
+  "artifactPaths": [
+    "runs/RUN-20260822T014331Z-1803c746/kimi-k3-review.md"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "Read-only adversarial review before the training lease was opened (prompt in runs/RUN-20260822T014331Z-1803c746/prompt.md); no file modified"
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-22T01:55:42Z"
+}

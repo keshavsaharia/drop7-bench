@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Autonomous Drop7 research loop. See scripts/do-research/README.md.
+set -euo pipefail
+cd "$(dirname "${BASH_SOURCE[0]}")"
+exec node --experimental-strip-types scripts/do-research/main.ts "$@"

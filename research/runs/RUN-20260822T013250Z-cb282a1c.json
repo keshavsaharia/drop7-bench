@@ -1,0 +1,43 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260822T013250Z-cb282a1c",
+  "experimentId": "EX-20260822-leaf-cmaes-d4s7-4f5f462a",
+  "lifecycle": "completed",
+  "runValidity": "valid",
+  "startedAt": "2026-08-22T01:32:50Z",
+  "endedAt": "2026-08-22T01:39:34Z",
+  "protocolSha256": "87d2d15dadd49e84e3fd8e86168cc1fe00b4eeb28f8d56aacd9ac0f7f02ddca7",
+  "machineProfileRef": "research/system-profiles/MACH-20260820T080056Z-376ada90.json",
+  "sourceState": {
+    "gitCommit": "62345ad6963b59dcb0566460799292d5f666d92d",
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "runs/RUN-20260822T013250Z-cb282a1c/pilot.sh"
+  ],
+  "seedLeaseRefs": [],
+  "resourceLimits": {
+    "wallSeconds": 600,
+    "cpuThreads": 16,
+    "maxHostBytes": null,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": 404,
+    "cpuSeconds": null,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "Pilot tier; seeds 0xa51d1000-0xa51d100f are the already-opened shared evaluation cohort (SEEDLEASE-A51D confirm). Fast-engine cohort at depth 4: 7 strata 16 games, sum of per-game wall 1,823 s over 1,774 decisions (1.027 s/decision, 113.9 s/game); 5 strata 16 games, 425 s over 1,481 decisions (0.287 s/decision, 26.6 s/game); 16 threads on an idle machine. All 32 games reproduce the slow-engine reference cohort runs/RUN-A51D-s7confirm/fresh-s7.json and fresh-s5.json score and move counts exactly. Runtime projection only; no strength claim."
+  },
+  "exitCode": 0,
+  "stopReason": "completed",
+  "artifactRefs": [
+    "runs/RUN-20260822T013250Z-cb282a1c/d4s7-16.json",
+    "runs/RUN-20260822T013250Z-cb282a1c/d4s5-16.json",
+    "runs/RUN-20260822T013250Z-cb282a1c/pilot.out"
+  ],
+  "contributionIds": []
+}

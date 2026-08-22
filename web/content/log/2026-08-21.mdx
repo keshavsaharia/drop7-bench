@@ -6,11 +6,12 @@ contributors:
   - claude-opus-5 (Claude Code)
   - kimi-k3 (OpenCode)
   - GPT-5 (Codex)
-tags: [fair-planner, depth, chance-exactness, afterstate-model, negative-result, competition]
+  - claude-fable-5 (Claude Code)
+tags: [fair-planner, depth, chance-exactness, afterstate-model, negative-result, competition, leaf-evolution, orchestrator]
 outcomes:
   positive: 2
   negative: 5
-  open: 3
+  open: 4
 ---
 
 Yesterday ended with three bets running overnight on a saturated machine. All
@@ -410,4 +411,68 @@ does not overwrite its immutable seeded record.
 
 These are still single scripted-game playground entries. Deployment changes
 their visibility, not their scientific evidence tier.
+</Direction>
+
+## Evening: evolving the leaf at the depth it is used
+
+A new line of work opened in the evening, on the `dev` branch, from a
+different model (claude-fable-5 in Claude Code) with Kimi K3 as its
+adversarial reviewer. The question it takes up is the one this morning's leaf
+finding left standing: the nineteen leaf weights were hand-set for a depth-3
+search under the old scoring and have never been refitted at depth 4. Two
+earlier tuning attempts failed under conditions that each explain failure on
+their own — a depth-3 fit transferred to depth 4 unchanged, and fixed tuning
+games that a heavy-tailed optimiser can memorise. Both channels can be removed
+at once: evaluate fitness with complete depth-4 games, and give every
+generation a fresh block of seeds.
+
+<Direction title="CMA-ES over the eighteen active leaf weights, depth-4 fitness, fresh seeds per generation" status="running" owner="claude-fable-5 (Claude Code)">
+Theory `TH-20260822-depth-native-leaf-weights-caa6f8ba`, experiment
+`EX-20260822-leaf-cmaes-d4s7-4f5f462a`, frozen before the first training seed
+was read. The fast engine's leaf now takes its weights as data
+(`approaches/lifetime-objective/leaf-evolution/`), with the search generated
+from `fast-search.hpp` by a checked substitution. Six CHECK gates passed with
+zero mismatches, and a pilot reproduced the recorded reference cohorts seed for
+seed while measuring the cost of a decision on this machine: about 0.29
+CPU-seconds at depth 4 with five chance samples, 1.03 with seven. The run
+(`RUN-20260822T014412Z-a0c63063`) evolves at the five-sample configuration —
+the contract comparator, and 3.7× cheaper per game, which buys roughly forty
+generations overnight instead of twelve — with a preregistered seven-sample
+transfer arm on the same held-out seeds as a secondary diagnostic. The
+candidate is the CMA distribution mean at the last generation, never the best
+sampled individual, and it meets one 64-game held-out screen
+(`0xa52b0000`+) exactly once.
+</Direction>
+
+<LogQuote who="kimi-k3">
+Fresh blocks per generation correctly prevent seed overfitting — but they
+convert overfitting into drift, not into signal.
+</LogQuote>
+
+Kimi's pre-run review (`runs/RUN-20260822T014331Z-1803c746/kimi-k3-review.md`)
+found no information-boundary or seed-role violation, checked every CMA-ES
+constant against Hansen's tutorial, and verified the pilot's reproduction
+claim. It then put the odds of the gate passing at about one in ten, for a
+reason worth recording before the data arrive: finding-14's perturbation arms
+at depth 4 had a paired standard deviation near 360,000 points, so a 32-game
+fitness estimate is far noisier than the differences CMA-ES needs to rank, and
+the only direct measurement of the local surface at deployment depth was flat
+to negative. It also caught three process defects, all fixed before the first
+seed was opened: the new leases were missing from the lease map's table, the
+held-out screen command was not scripted (`screen.sh` now is), and the
+"Student-t" bound in `compare.py` was using the normal quantile. Two of its
+alternatives are recorded as follow-ups — a two-stage allocation inside each
+generation, and perturbing in units of feature standard deviation rather than
+of the frozen weight — and one is declined: ranking candidates by paired
+wins would change the estimand away from the mean score the theory is about.
+
+<Direction title="An orchestrator for this loop" status="proposed" owner="claude-fable-5 (Claude Code)">
+`./do-research` (in `scripts/do-research/`) turns the contract into a loop a
+machine can run unattended: a planner model proposes one preregisterable
+experiment from the repository's own records, a second model family critiques
+it, the orchestrator registers theory, experiment and seed leases through the
+allocator — which can never touch a protected or final range — a headless
+`claude -p` implements and runs it inside hard caps, `opencode` audits the
+result, and the planner decides whether to continue. Untested on a full
+iteration as of this entry; the first end-to-end run is owed.
 </Direction>
