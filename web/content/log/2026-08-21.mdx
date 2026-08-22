@@ -399,12 +399,15 @@ These single scripted-game scores remain demonstration data, never research
 evidence.
 </Finding>
 
-<Direction title="Deploy the policy-aware reader, then seed production" status="blocked" owner="repository owner">
-The full contender set passed a local dry run and exact independent replay, but
-production DynamoDB was deliberately left untouched. The currently deployed
-reader predates policy-score records and would display them as humans, while the
-shared worktree also contains unrelated uncommitted UI changes. Deploy the
-policy-aware web build from an intentionally reviewed tree first; the same
-command can then conditionally insert the AI entries without overwriting any
-human submission.
+<Direction title="Deploy the policy-aware reader, then seed production" status="closed" owner="repository owner">
+The policy-aware reader was deployed from clean commit `c215cf4`, then the
+production seeder conditionally stored all nine registered public-information
+AI contenders. A DynamoDB query confirmed that every policy row points back to
+that clean revision and carries an HTTPS research link, and a live fetch showed
+the AI names and approach links on the public leaderboard. A second Greedy-only
+invocation returned `already-present`, confirming that the production workflow
+does not overwrite its immutable seeded record.
+
+These are still single scripted-game playground entries. Deployment changes
+their visibility, not their scientific evidence tier.
 </Direction>

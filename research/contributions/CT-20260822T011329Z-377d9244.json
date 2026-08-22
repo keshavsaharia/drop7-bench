@@ -1,0 +1,45 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260822T011329Z-377d9244",
+  "actor": {
+    "kind": "model",
+    "platform": "Codex",
+    "model": "GPT-5",
+    "agentId": "/root"
+  },
+  "level": "L0",
+  "roles": [
+    {
+      "role": "validation",
+      "degree": "supporting"
+    }
+  ],
+  "summary": "Executed the production deployment of commit c215cf4, seeded all nine registered public-information policy-score entries through exact replay validation, verified their clean source revision and HTTPS research links in DynamoDB and the live leaderboard, and confirmed idempotency with an already-present production rerun.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "sst.config.ts",
+    "web/scripts/competition.ts",
+    "web/lib/competition/ledger.ts"
+  ],
+  "commitShas": [
+    "c215cf433e7a342fdea968326b7630ab94a61bbb"
+  ],
+  "validationPerformed": [
+    "env AWS_PROFILE=personal-deploy SST_TELEMETRY_DISABLED=1 npm run infra:prod (completed; https://drop7.dev)",
+    "npm run competition -- seed --stage production --profile personal-deploy --write (9 policy-score records stored)",
+    "aws dynamodb query on LeaderboardByScore filtered to policy-score (Count 9; all publicInformation true, HTTPS researchUrl, policySourceDirty false, revision c215cf4)",
+    "curl production leaderboard with cache bypass (HTTP 200; AI names and approach URLs rendered)",
+    "production greedy-only seed rerun (already-present; no overwrite)"
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed.",
+    "The seeded values are single scripted-game playground results and are never research-tier evidence.",
+    "The TypeScript Expectimax D4 entry is a playground analogue, not a source-identical port of the frozen native fair-D4 comparator."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-22T01:13:29Z"
+}
