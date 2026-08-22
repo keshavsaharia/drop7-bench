@@ -86,27 +86,31 @@ export class ClaudeCliPlanner implements Planner {
   }
 
   async complete(request: PlannerRequest) {
+    // The brief goes through stdin (it can be tens of kilobytes); the planner
+    // gets no tools, so the only thing it can do is answer.
     const args = [
-      "-p", request.user,
+      "-p",
       "--output-format", "json",
       "--model", this.model,
-      "--max-turns", "1",
+      "--max-turns", "3",
       "--max-budget-usd", String(this.maxBudgetUsd),
       "--system-prompt", request.system,
-      "--permission-mode", "plan",
+      "--tools", "",
     ];
     if (request.schema) args.push("--json-schema", JSON.stringify(request.schema));
     // A nested Claude Code session refuses to start while CLAUDECODE is set.
     const env = { ...process.env };
     delete env.CLAUDECODE;
-    const { code, stdout, stderr } = await runProcess("claude", args, undefined, env, this.timeoutMs);
+    const { code, stdout, stderr } = await runProcess("claude", args, request.user, env, this.timeoutMs);
     let payload: Record<string, unknown>;
     try {
       payload = JSON.parse(stdout) as Record<string, unknown>;
     } catch {
       throw new Error(`claude -p did not return JSON (exit ${code}): ${stderr.slice(0, 500)} ${stdout.slice(0, 500)}`);
     }
-    if (payload.is_error) throw new Error(`claude -p error: ${String(payload.result).slice(0, 500)}`);
+    if (payload.is_error) {
+      throw new Error(`claude -p error: ${String(payload.result)} | ${JSON.stringify(payload).slice(0, 1500)} | stderr: ${stderr.slice(0, 500)}`);
+    }
     const text = typeof payload.result === "string" ? payload.result : JSON.stringify(payload.result);
     const json = request.schema ? (payload.structured_output ?? extractJson(text)) : undefined;
     return { text, json, costUsd: typeof payload.total_cost_usd === "number" ? payload.total_cost_usd : undefined };

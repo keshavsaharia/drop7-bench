@@ -1,0 +1,57 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260822T024228Z-9b2ce42c",
+  "actor": {
+    "kind": "model",
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": null
+  },
+  "level": "L3",
+  "roles": [
+    {
+      "role": "conceptualization",
+      "degree": "lead"
+    },
+    {
+      "role": "software",
+      "degree": "lead"
+    },
+    {
+      "role": "formal-analysis",
+      "degree": "lead"
+    },
+    {
+      "role": "compute",
+      "degree": "supporting"
+    }
+  ],
+  "summary": "Authored and ran EX-20260822-nnue-leaf-capacity-sweep-79632fd9: a 13-run offline capacity/training sweep of the NNUE-shaped survival leaf (train_leaf.py unchanged) on the existing corpus with a seed-replicated, preregistered gate; wrote sweep.sh, summarize.py, the approach page and result RS-20260822T024228Z-94090db1. Verdict supported-as-tested: accuracy saturates near 0.856 and wider students overfit.",
+  "theoryIds": [
+    "TH-20260822-nnue-leaf-capacity-saturation-9c45e42e"
+  ],
+  "experimentIds": [
+    "EX-20260822-nnue-leaf-capacity-sweep-79632fd9"
+  ],
+  "runIds": [
+    "RUN-20260822T020655Z-feaf4331"
+  ],
+  "artifactPaths": [
+    "approaches/lifetime-objective/leaf-capacity-sweep/",
+    "runs/RUN-20260822T020655Z-feaf4331/summary.json",
+    "research/results/RS-20260822T024228Z-94090db1.json"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "13/13 runs completed, 0 failures (runs/.../sweep.log)",
+    "summarize.py gate evaluated once; summary.json sha256 2d9912b6cbcca39f8b24cc78396c9839853cde1795181082f8fd141ce53fa706",
+    "make research-validate"
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-22T02:42:28Z"
+}

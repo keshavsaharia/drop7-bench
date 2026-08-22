@@ -1,0 +1,261 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260822T024228Z-94090db1",
+  "theoryIds": [
+    "TH-20260822-nnue-leaf-capacity-saturation-9c45e42e"
+  ],
+  "experimentId": "EX-20260822-nnue-leaf-capacity-sweep-79632fd9",
+  "runIds": [
+    "RUN-20260822T020655Z-feaf4331"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "pass",
+  "assessment": "supported-as-tested",
+  "evidenceTier": "mechanics-only",
+  "summary": "Offline capacity/training sweep of the NNUE-shaped survival leaf on runs/RUN-A51D-corpus/all.states (13 runs, same whole-origin test split, 486,819 held-out examples). Baseline h64/m32/e10/lr3e-3 held-out lifetime Pearson 0.8546 (finding-08 recorded 0.8564 on an earlier torch build); seed-to-seed spread 0.0023 over three seeds. Best configuration h64-m64-e10-lr3e3-s0 at 0.8568, delta +0.0022 <= max(0.005, 2 x spread): gate verdict supported-as-tested. Width hurts: Pearson by width (params, Pearson, final train loss) h32-m32-e10-lr3e3-s0 (286,447 params: 0.855, loss 0.5238); h64-m32-e10-lr3e3-s0 (572,367 params: 0.8546, loss 0.511); h128-m32-e10-lr3e3-s0 (1,144,207 params: 0.8543, loss 0.5006); h256-m32-e10-lr3e3-s0 (2,287,887 params: 0.8515, loss 0.4857); h256-m64-e20-lr3e3-s0 (2,296,591 params: 0.8446, loss 0.4596); h512-m64-e20-lr3e3-s0 (4,592,143 params: 0.8378, loss 0.4197). Training loss falls monotonically with width while held-out accuracy falls, i.e. larger students overfit this corpus; 20 epochs change nothing at h64 and hurt at h128/h256; lr 1e-3 and mid 16/64 are within spread. The accuracy of this feature space on this corpus is saturated near 0.855-0.857; it is not limited by hidden width, middle width, epochs or learning rate.",
+  "metrics": {
+    "basePearson": 0.8545509371145168,
+    "seedSpread": 0.0023246953871802756,
+    "bestTag": "h64-m64-e10-lr3e3-s0",
+    "bestPearson": 0.8567621915810519,
+    "deltaBestMinusBase": 0.0022112544665351397,
+    "gateVerdict": "supported-as-tested",
+    "runs": [
+      {
+        "tag": "h128-m32-e10-lr3e3-s0",
+        "hidden": 128,
+        "mid": 32,
+        "epochs": 10,
+        "lr": 0.003,
+        "seed": 42282,
+        "parameters": 1144207,
+        "lifetimePearson": 0.8542799723438079,
+        "mirroredPearson": 0.854117999747679,
+        "lifetimeMAE": 14.442317962646484,
+        "hazardAccMean": 0.8386780644688615,
+        "finalTrainLoss": 0.5005894043571071,
+        "trainWallSeconds": 10.738157987594604
+      },
+      {
+        "tag": "h128-m32-e20-lr3e3-s0",
+        "hidden": 128,
+        "mid": 32,
+        "epochs": 20,
+        "lr": 0.003,
+        "seed": 42282,
+        "parameters": 1144207,
+        "lifetimePearson": 0.852006052511487,
+        "mirroredPearson": 0.8516067810384742,
+        "lifetimeMAE": 14.50258731842041,
+        "hazardAccMean": 0.837364948095014,
+        "finalTrainLoss": 0.4887095180310701,
+        "trainWallSeconds": 10.746062755584717
+      },
+      {
+        "tag": "h256-m32-e10-lr3e3-s0",
+        "hidden": 256,
+        "mid": 32,
+        "epochs": 10,
+        "lr": 0.003,
+        "seed": 42282,
+        "parameters": 2287887,
+        "lifetimePearson": 0.8515371438735411,
+        "mirroredPearson": 0.8512144544678937,
+        "lifetimeMAE": 14.544559478759766,
+        "hazardAccMean": 0.8364636891055334,
+        "finalTrainLoss": 0.48571398885626543,
+        "trainWallSeconds": 15.563645839691162
+      },
+      {
+        "tag": "h256-m64-e20-lr3e3-s0",
+        "hidden": 256,
+        "mid": 64,
+        "epochs": 20,
+        "lr": 0.003,
+        "seed": 42282,
+        "parameters": 2296591,
+        "lifetimePearson": 0.8446430977050945,
+        "mirroredPearson": 0.8443735090222336,
+        "lifetimeMAE": 14.763751983642578,
+        "hazardAccMean": 0.8321516826582364,
+        "finalTrainLoss": 0.45959651507829363,
+        "trainWallSeconds": 15.25481653213501
+      },
+      {
+        "tag": "h32-m32-e10-lr3e3-s0",
+        "hidden": 32,
+        "mid": 32,
+        "epochs": 10,
+        "lr": 0.003,
+        "seed": 42282,
+        "parameters": 286447,
+        "lifetimePearson": 0.8549722659614793,
+        "mirroredPearson": 0.8548237323474224,
+        "lifetimeMAE": 14.487908363342285,
+        "hazardAccMean": 0.8383521390907093,
+        "finalTrainLoss": 0.5238180736491554,
+        "trainWallSeconds": 7.584959983825684
+      },
+      {
+        "tag": "h512-m64-e20-lr3e3-s0",
+        "hidden": 512,
+        "mid": 64,
+        "epochs": 20,
+        "lr": 0.003,
+        "seed": 42282,
+        "parameters": 4592143,
+        "lifetimePearson": 0.8377842001738248,
+        "mirroredPearson": 0.837852020872922,
+        "lifetimeMAE": 15.188538551330566,
+        "hazardAccMean": 0.825601506925572,
+        "finalTrainLoss": 0.41973095918956554,
+        "trainWallSeconds": 13.964840412139893
+      },
+      {
+        "tag": "h64-m16-e10-lr3e3-s0",
+        "hidden": 64,
+        "mid": 16,
+        "epochs": 10,
+        "lr": 0.003,
+        "seed": 42282,
+        "parameters": 571087,
+        "lifetimePearson": 0.85415718875151,
+        "mirroredPearson": 0.8542769520959226,
+        "lifetimeMAE": 14.447550773620605,
+        "hazardAccMean": 0.8388167196980123,
+        "finalTrainLoss": 0.5150537952623869,
+        "trainWallSeconds": 8.370679378509521
+      },
+      {
+        "tag": "h64-m32-e10-lr1e3-s0",
+        "hidden": 64,
+        "mid": 32,
+        "epochs": 10,
+        "lr": 0.001,
+        "seed": 42282,
+        "parameters": 572367,
+        "lifetimePearson": 0.8552214811114937,
+        "mirroredPearson": 0.855152267917884,
+        "lifetimeMAE": 14.47567367553711,
+        "hazardAccMean": 0.8386291071904205,
+        "finalTrainLoss": 0.5219161113939788,
+        "trainWallSeconds": 3.262876033782959
+      },
+      {
+        "tag": "h64-m32-e10-lr3e3-s0",
+        "hidden": 64,
+        "mid": 32,
+        "epochs": 10,
+        "lr": 0.003,
+        "seed": 42282,
+        "parameters": 572367,
+        "lifetimePearson": 0.8545509371145168,
+        "mirroredPearson": 0.8545566820646149,
+        "lifetimeMAE": 14.4144926071167,
+        "hazardAccMean": 0.8389646186091065,
+        "finalTrainLoss": 0.5109645719904649,
+        "trainWallSeconds": 8.544713020324707
+      },
+      {
+        "tag": "h64-m32-e10-lr3e3-s1",
+        "hidden": 64,
+        "mid": 32,
+        "epochs": 10,
+        "lr": 0.003,
+        "seed": 42283,
+        "parameters": 572367,
+        "lifetimePearson": 0.8567075771754976,
+        "mirroredPearson": 0.8565258108907993,
+        "lifetimeMAE": 14.45248031616211,
+        "hazardAccMean": 0.8390625331659884,
+        "finalTrainLoss": 0.5113966390333677,
+        "trainWallSeconds": 7.2194664478302
+      },
+      {
+        "tag": "h64-m32-e10-lr3e3-s2",
+        "hidden": 64,
+        "mid": 32,
+        "epochs": 10,
+        "lr": 0.003,
+        "seed": 42284,
+        "parameters": 572367,
+        "lifetimePearson": 0.8568756325016971,
+        "mirroredPearson": 0.856921415852653,
+        "lifetimeMAE": 14.441094398498535,
+        "hazardAccMean": 0.8390885524188662,
+        "finalTrainLoss": 0.5130817028095848,
+        "trainWallSeconds": 8.838861465454102
+      },
+      {
+        "tag": "h64-m32-e20-lr3e3-s0",
+        "hidden": 64,
+        "mid": 32,
+        "epochs": 20,
+        "lr": 0.003,
+        "seed": 42282,
+        "parameters": 572367,
+        "lifetimePearson": 0.8563811160597995,
+        "mirroredPearson": 0.8562520954741651,
+        "lifetimeMAE": 14.444799423217773,
+        "hazardAccMean": 0.8388803983958445,
+        "finalTrainLoss": 0.5051078670275839,
+        "trainWallSeconds": 8.466121435165405
+      },
+      {
+        "tag": "h64-m64-e10-lr3e3-s0",
+        "hidden": 64,
+        "mid": 64,
+        "epochs": 10,
+        "lr": 0.003,
+        "seed": 42282,
+        "parameters": 574927,
+        "lifetimePearson": 0.8567621915810519,
+        "mirroredPearson": 0.8566545398820545,
+        "lifetimeMAE": 14.42985725402832,
+        "hazardAccMean": 0.8390972825629238,
+        "finalTrainLoss": 0.5097369859093114,
+        "trainWallSeconds": 5.219187498092651
+      }
+    ],
+    "environment": "python 3.13.5 torch 2.13.0+rocm7.1 hip 7.1.52802 device Radeon 8060S Graphics"
+  },
+  "gateChecks": [
+    {
+      "criterion": "All 13 runs complete with finite metrics on the same split",
+      "passed": true,
+      "observed": "13 rows, 0 FAILED lines in sweep.log"
+    },
+    {
+      "criterion": "Gate verdict from summarize.py",
+      "passed": true,
+      "observed": "delta +0.0022 vs threshold max(0.005, 2 x 0.0023) -> supported-as-tested"
+    },
+    {
+      "criterion": "Every number copied from the trainer's own <tag>.json output",
+      "passed": true,
+      "observed": "summarize.py reads heldOut/heldOutMirrored/history fields verbatim"
+    }
+  ],
+  "perGameArtifact": {
+    "path": null,
+    "sha256": null,
+    "recordCount": null
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260820T080056Z-376ada90.json"
+  ],
+  "artifactManifestRef": "runs/RUN-20260822T020655Z-feaf4331/inputs.sha256",
+  "limitations": [
+    "Offline diagnostic on teacher labels from already-played games; says nothing about playing strength (finding-08: a 0.008 Pearson gap did not separate two models in play).",
+    "Single corpus (5.26M records, whole-origin split); a corpus several times larger could move the saturation point and is the natural follow-up, since the wider models overfit rather than underfit.",
+    "Per-board inference cost was not measured; irrelevant to the verdict because no wider model won.",
+    "GPU ran concurrently with a 30-thread CPU evolution; wall times are not timing-grade; metrics are unaffected.",
+    "The baseline reproduction differs from finding-08's 0.8564 by 0.0018 on a newer torch build; within the measured seed spread."
+  ],
+  "contributionIds": [
+    "CT-20260822T024228Z-9b2ce42c",
+    "CT-20260822T015730Z-eb02ae84"
+  ],
+  "recordedAt": "2026-08-22T02:42:28Z"
+}

@@ -10,7 +10,7 @@ contributors:
 tags: [fair-planner, depth, chance-exactness, afterstate-model, negative-result, competition, leaf-evolution, orchestrator]
 outcomes:
   positive: 2
-  negative: 5
+  negative: 6
   open: 4
 ---
 
@@ -466,13 +466,67 @@ generation, and perturbing in units of feature standard deviation rather than
 of the frozen weight — and one is declined: ranking candidates by paired
 wins would change the estimand away from the mean score the theory is about.
 
-<Direction title="An orchestrator for this loop" status="proposed" owner="claude-fable-5 (Claude Code)">
+<Direction title="An orchestrator for this loop" status="running" owner="claude-fable-5 (Claude Code)">
 `./do-research` (in `scripts/do-research/`) turns the contract into a loop a
 machine can run unattended: a planner model proposes one preregisterable
 experiment from the repository's own records, a second model family critiques
 it, the orchestrator registers theory, experiment and seed leases through the
 allocator — which can never touch a protected or final range — a headless
 `claude -p` implements and runs it inside hard caps, `opencode` audits the
-result, and the planner decides whether to continue. Untested on a full
-iteration as of this entry; the first end-to-end run is owed.
+result, and the planner decides whether to continue. A dry run (plan and critique only) completed: the planner's first proposal
+needed about 21 GPU-hours against a 5-hour budget, Kimi's critique flagged that
+as critical, and the revised proposal came back as a conditional, corpus-only
+analysis. The first end-to-end iteration with implementation is still owed.
 </Direction>
+
+## Evening, continued: the small survival network is as accurate as it gets
+
+While the evolution ran on the CPU, the idle GPU answered a question the
+learned-leaf page left as an assertion: that "the accuracy is not there to be
+had" for the small survival network, a claim resting on one comparison with a
+much larger convolutional model. Thirteen retrainings of the same network at
+widths from 32 to 512, two training lengths and two learning rates, each on
+the same corpus and the same held-out games, settle it.
+
+<ArmTable
+  caption="Held-out lifetime correlation by width (10 epochs unless noted). Baseline h64 is the network that played in the learned-leaf experiment; the three seed replicas of it span 0.8546–0.8569."
+  columns={[
+    { key: "cfg", label: "Configuration" },
+    { key: "params", label: "Parameters", numeric: true },
+    { key: "pearson", label: "Held-out Pearson", numeric: true },
+    { key: "loss", label: "Final train loss", numeric: true }
+  ]}
+  rows={[
+    { cfg: "h32 / m32", params: "286,447", pearson: "0.8550", loss: "0.5238" },
+    { cfg: "h64 / m32 (baseline)", params: "572,367", pearson: "0.8546", loss: "0.5110", highlight: true },
+    { cfg: "h128 / m32", params: "1,144,207", pearson: "0.8543", loss: "0.5006" },
+    { cfg: "h256 / m32", params: "2,287,887", pearson: "0.8515", loss: "0.4857" },
+    { cfg: "h256 / m64, 20 epochs", params: "2,296,591", pearson: "0.8446", loss: "0.4596" },
+    { cfg: "h512 / m64, 20 epochs", params: "4,592,143", pearson: "0.8378", loss: "0.4197" }
+  ]}
+/>
+
+<Finding title="Capacity is not the constraint; wider students overfit" kind="negative" metric="best +0.0022, spread 0.0023">
+The best of thirteen configurations beat the baseline by 0.0022 — inside the
+seed-to-seed spread of 0.0023 — so the preregistered gate of
+`EX-20260822-nnue-leaf-capacity-sweep-79632fd9` reads *supported-as-tested*:
+the network's accuracy on this corpus is saturated near 0.856. The more
+interesting row is the direction of the failure. Training loss falls
+monotonically with width while held-out accuracy falls with it; the eight-times
+wider network is the worst predictor on games it has not seen. That is
+overfitting, not underfitting, which points the next learned-leaf experiment at
+the corpus and the target rather than the architecture. None of this says
+anything about play: the learned-leaf page already showed a 0.008 gap in this
+metric did not separate two models on the board.
+</Finding>
+
+A note on the other idea on the table tonight — evolving the network's weights
+directly with a population, the way the leaf weights are being evolved. The
+arithmetic rules it out at this scale: the fitness of one candidate costs a
+block of complete depth-4 games (about 14 CPU-minutes per candidate at 32
+games), and CMA-ES needs on the order of hundreds of evaluations to make
+progress in eighteen dimensions; the network has 572,367. Gradient training on
+recorded futures reaches the same accuracy ceiling in thirty seconds. What
+*could* be evolved at game cost is a handful of numbers on top of such a
+network — the blend weight, the scale, the eighteen leaf coefficients — and
+that is the registered extension of tonight's evolution, not a separate run.

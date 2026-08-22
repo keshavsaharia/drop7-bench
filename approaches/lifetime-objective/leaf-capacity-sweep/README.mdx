@@ -2,8 +2,8 @@
 title: Is the small survival network as accurate as it can be?
 family: lifetime-objective
 summary: Retrain the tiny board-scoring network that already fits inside the search at several widths, depths of training and learning rates, and ask whether any of them predicts remaining lifetime better than the one that played — without playing a single game.
-status: preregistered
-evidence: none
+status: completed
+evidence: repository-verified
 reads: teacher
 ---
 
@@ -12,7 +12,36 @@ several widths, training lengths and learning rates, and ask whether any of
 them predicts remaining lifetime better than the one that played — without
 playing a single game.
 
-<EvidenceLabel status="preregistered" evidence="none" reads="teacher" />
+<EvidenceLabel status="completed" evidence="repository-verified" reads="teacher" />
+
+## What happened, in plain English
+
+Nothing beat the network that already played. Across thirteen retrainings the
+best configuration was 0.0022 more accurate than the baseline, and the three
+training seeds of the baseline itself spread by 0.0023 — so the difference is
+training noise, and the gate fixed in advance reads *supported-as-tested*: the
+network's accuracy on this corpus is saturated. The revealing part is the
+shape of the failure. Making the network wider lowered its training loss step
+by step and lowered its held-out accuracy step by step; the eight-times wider
+version was the worst predictor of games it had not seen. That is a network
+memorising a corpus that is too small for it, not one that is too small for
+the job. The next learned-leaf experiment should change the data or the
+target, not the width.
+
+<TechnicalDetails title="The result">
+
+Result `RS-20260822T024228Z-94090db1` for `EX-20260822-nnue-leaf-capacity-sweep-79632fd9`, run
+`RUN-20260822T020655Z-feaf4331`, valid, pass (supported-as-tested), evidence
+tier mechanics-only (offline, no game played). Held-out lifetime Pearson on
+the whole-origin test split (486,819 examples): baseline h64/m32/10 epochs
+0.8546 (seeds 42283 and 42284: 0.8567, 0.8569; spread 0.0023); h32 0.8550;
+h128 0.8543; h256 0.8515; h256/m64/20 epochs 0.8446; h512/m64/20 epochs
+0.8378 (final training loss 0.5110 → 0.4197 over that ladder); h64 at 20
+epochs 0.8564; mid 16 / mid 64 0.8542 / 0.8568; lr 1e-3 0.8552. Mirrored-board
+Pearson matches each row within 0.0004. The recorded finding-08 baseline was
+0.8564 on an earlier torch build. Full table in `runs/RUN-20260822T020655Z-feaf4331/summary.json`.
+
+</TechnicalDetails>
 
 <Callout title="What this can and cannot say" tone="warn">
 This is an offline diagnostic. Its labels come from the futures of already
