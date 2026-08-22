@@ -23,6 +23,8 @@ term also has a one-line entry in the [glossary](/learn/glossary).
 
 ## What there is to look at
 
+<GameTreeFigure seed={0x5eed1003} moves={14} leafDepth={0} height={600} caption="Where the leaf does its job: the boards at the bottom of a one-move look-ahead. Each outcome shows the scorer's number for the board it leaves; the column's value is the probability-weighted average of points gained plus that number. Expand a column and compare what the scorer says about boards that look alike." />
+
 Here is a real position — a board the rules engine actually reached — with the
 *kinds* of thing an evaluator counts marked on it. Nothing here uses the
 evaluator itself: every annotation was recomputed by dropping discs into the

@@ -23,6 +23,8 @@ by way of `../risk-calibration/search.cpp`, which is already proved
 decision-identical to the reference. The only degree of freedom is the weight
 vector.
 
+<GameTreeFigure seed={0x5eed1007} moves={20} caption="Reweighting changes only the numbers on the outcome boards at the bottom of this tree; the chance branches, their probabilities and the search above them are untouched. That is why a refit can be tested with nothing else about the search changed." />
+
 ## The CHECK gate
 
 With the frozen weight vector the local leaf must return values whose raw

@@ -443,3 +443,243 @@ body {
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
+
+/* Interactive game-tree explorer (web/components/GameTreeExplorer.tsx,
+   wrapped for MDX by GameTree.tsx). React Flow supplies the pane; every
+   rule here is scoped under .tree-fig / .tree-* so it cannot leak. Per-cell
+   motion reuses Drop7Game.module.css and stops under prefers-reduced-motion
+   there; the explorer also skips frames when the media query matches. */
+.tree-fig {
+  margin: 1.2rem 0;
+  border: 1px solid #27272a;
+  border-radius: 0.75rem;
+  background: #101014;
+  padding: 1rem;
+}
+.tree-fig figcaption {
+  margin-top: 0.6rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #a1a1aa;
+}
+.tree-explorer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.tree-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.9rem;
+  font-size: 0.75rem;
+  color: #a1a1aa;
+}
+.tree-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.tree-control > span:first-child {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #71717a;
+}
+.tree-control__value {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  min-width: 1.6rem;
+  color: #e4e4e7;
+}
+.tree-input {
+  border: 1px solid #3f3f46;
+  border-radius: 0.375rem;
+  background: #18181b;
+  color: #e4e4e7;
+  padding: 0.2rem 0.45rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem;
+  width: 7.2rem;
+}
+select.tree-input {
+  width: auto;
+  font-family: inherit;
+}
+.tree-button {
+  border: 1px solid #3f3f46;
+  border-radius: 0.375rem;
+  background: #18181b;
+  color: #e4e4e7;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+.tree-button:hover:not(:disabled) {
+  border-color: rgba(139, 92, 246, 0.6);
+  background: rgba(167, 139, 250, 0.1);
+}
+.tree-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.tree-canvas {
+  position: relative;
+  border: 1px solid #27272a;
+  border-radius: 0.6rem;
+  overflow: hidden;
+  background: #09090b;
+}
+.tree-canvas .react-flow__attribution {
+  display: none;
+}
+.tree-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(9, 9, 11, 0.55);
+  color: #d4d4d8;
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+.tree-node {
+  width: max-content;
+  border: 1px solid #3f3f46;
+  border-radius: 0.6rem;
+  background: #18181b;
+  padding: 0.45rem 0.55rem;
+  color: #e4e4e7;
+  font-size: 0.7rem;
+  line-height: 1.35;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+.tree-node--root {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+}
+.tree-node--choice {
+  min-width: 11rem;
+  text-align: center;
+}
+.tree-node--best {
+  border-color: #a78bfa;
+  background: rgba(167, 139, 250, 0.08);
+}
+.tree-node--expanded {
+  box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.35);
+}
+.tree-node--outcome.tree-node--clickable {
+  cursor: pointer;
+}
+.tree-node--outcome.tree-node--clickable:hover {
+  border-color: #38bdf8;
+}
+.tree-node--more {
+  max-width: 11rem;
+  color: #a1a1aa;
+  text-align: center;
+  font-style: italic;
+}
+.tree-node__title {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #a1a1aa;
+}
+.tree-node__subtitle {
+  color: #a1a1aa;
+  text-align: center;
+}
+.tree-node__value {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  color: #38bdf8;
+}
+.tree-node__value--over {
+  color: #f87171;
+}
+.tree-node__big {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #f4f4f5;
+}
+.tree-node__meta {
+  color: #71717a;
+}
+.tree-node__tag {
+  margin-top: 0.15rem;
+  border-radius: 999px;
+  background: #7c3aed;
+  color: #fff;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.tree-handle {
+  width: 6px;
+  height: 6px;
+  background: #52525b;
+  border: none;
+}
+.tree-canvas .react-flow__edge-path {
+  stroke: #3f3f46;
+  stroke-width: 1.5;
+}
+.tree-canvas .tree-edge--best .react-flow__edge-path {
+  stroke: #a78bfa;
+  stroke-width: 2;
+}
+.tree-canvas .tree-edge--chance .react-flow__edge-path {
+  stroke: #0ea5e9;
+  stroke-dasharray: 4 3;
+}
+.tree-canvas .tree-edge--more .react-flow__edge-path {
+  stroke: #3f3f46;
+}
+.tree-canvas .react-flow__edge-textbg {
+  fill: #18181b;
+}
+.tree-canvas .react-flow__edge-text {
+  fill: #d4d4d8;
+  font-size: 0.65rem;
+}
+.tree-status {
+  font-size: 0.75rem;
+  color: #a1a1aa;
+  font-variant-numeric: tabular-nums;
+}
+.tree-status__note {
+  color: #71717a;
+}
+.tree-legend {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: #a1a1aa;
+}
+.tree-legend b {
+  color: #e4e4e7;
+  font-weight: 600;
+}
+.tree-legend__muted {
+  color: #71717a;
+}
+.tree-legend a {
+  color: #a78bfa;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tree-canvas .react-flow__edge.animated .react-flow__edge-path {
+    animation: none;
+  }
+}

@@ -23,6 +23,7 @@ const KNOWN = new Set([
   "LeafXray","LeafTerms","BoardLookalikes","GameTimeline","FlowBalance","ScoreSources","ScoreStrip","CohortScale",
   "OracleSplit","TeacherStudentFlow","NTupleWindows","ValueNetShape","PolicyNetShape","MctsTreeGrowth",
   "EvidenceLabel","ExperimentSummary","ResultSummary","TechnicalDetails","TheorySummary",
+  "GameTreeFigure","Drop7Board","Drop7Game","ArmTable","DeadEnd","Direction","Finding","LogQuote","Timeline",
 ]);
 
 function* walk(path) {

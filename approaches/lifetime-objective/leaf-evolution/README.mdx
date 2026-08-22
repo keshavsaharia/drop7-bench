@@ -48,6 +48,8 @@ the policy is deployed in. And every generation plays a block of seeds that no
 earlier generation saw, so the optimiser cannot memorise games; it can only move
 toward weights that are better on average.
 
+<GameTreeFigure seed={0x5eed1005} moves={16} caption="What the evolution is tuning: the numbers on the outcome boards. Change the weights and every leaf value moves, the averages move, and a different column can win — which is why the weights must be tested by whole games rather than by how sensible the numbers look." />
+
 ## How it works, step by step
 
 1. **Weights become data.** The bit-exact fast engine's leaf
