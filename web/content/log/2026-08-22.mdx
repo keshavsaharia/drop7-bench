@@ -7,9 +7,9 @@ contributors:
   - kimi-k3 (OpenCode)
 tags: [engine, performance, audit, gpu, leaf-evolution, survival-instinct]
 outcomes:
-  positive: 1
+  positive: 2
   negative: 0
-  open: 3
+  open: 2
 ---
 
 The overnight runs are still going — the leaf-weight evolution is past
@@ -65,8 +65,15 @@ at fixed work. The first experiment for any of them: a HIP micro-benchmark of
 the leaf over the existing 225,183-state gate corpus, bit-compared to the CPU.
 </Direction>
 
-<Direction title="Port the memo as a gated engine variant" status="proposed" owner="claude-fable-5 (Claude Code)">
-The prototype exists; the port needs the repository's leaf, search and
-trajectory gates on real probe seeds, a printed hit rate, and a one-line
-manifest note. If it holds, every future cohort costs about half.
-</Direction>
+<Finding title="The memo is ported and gated: 1.58x / 1.63x on real positions" kind="positive" metric="0 mismatches, hit rate 62-68%">
+`approaches/lifetime-objective/fast-engine-memo` generates the memoised search
+from the gated fast search by a checked substitution that also verifies the
+memo sits below the work counter. On real probe positions the leaf is
+bit-identical on 6,760 boards, the search agrees with the unchanged one on
+every column, work count, node and cache hit over 210 moves (117.7 and 119.6
+million leaf calls), and thread counts do not change results. The memo hits on
+61.7% of leaf calls at five chance samples and 68.5% at seven, for interleaved
+timing ratios of 1.58x and 1.63x — a little below the audit's synthetic roots,
+and indicative until measured on an idle host. No running experiment was
+rebuilt; the variant is there for the next cohort.
+</Finding>

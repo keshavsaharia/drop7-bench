@@ -1,0 +1,49 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260822T074159Z-247f2f1b",
+  "actor": {
+    "kind": "model",
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": null
+  },
+  "level": "L2",
+  "roles": [
+    {
+      "role": "software",
+      "degree": "lead"
+    },
+    {
+      "role": "validation",
+      "degree": "lead"
+    }
+  ],
+  "summary": "Ported audit-06's one-entry leaf memo as the gated engine variant approaches/lifetime-objective/fast-engine-memo (memo-leaf.hpp; MemoSearch generated from fast-search.hpp with a 15-line diff guard and a check that the memo call sits directly below ++work_; -ffp-contract=off pinned). Gates on real probe seeds: leaf bits 0/4,260 (d4s5) and 0/2,500 (d4s7) mismatches in the search's feeding order; search parity 0 mismatches over 160 (d4s5) and 50 (d4s7) moves, 117.7M/119.6M leaf calls, memo hit rates 61.7%/68.5%; determinism 0 mismatches at 1 vs 4 threads; interleaved timing plain/memo 1.58x (d4s5, 12 real roots x 3 reps) and 1.63x (d4s7, 6 roots x 2 reps), indicative under a 30-thread load. The prototype and the measurement method came from the audit subagent (CT-20260822T073043Z-f8dcf45a); the placement requirement from Kimi K3's review (CT-20260822T073043Z-6aa6d992).",
+  "theoryIds": [
+    "TH-20260822-leaf-memo-semantics-preserving-3bb0ac6b"
+  ],
+  "experimentIds": [
+    "EX-20260822-leaf-memo-gates-b31e4e7f"
+  ],
+  "runIds": [
+    "RUN-20260822T073338Z-48e4df54"
+  ],
+  "artifactPaths": [
+    "approaches/lifetime-objective/fast-engine-memo/",
+    "runs/RUN-20260822T073338Z-48e4df54/gates.log"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "runs/RUN-20260822T073338Z-48e4df54/gates.log: 7 of 7 gates GATE PASS",
+    "build.sh diff guard (15 lines) and ++work_ placement check"
+  ],
+  "limitations": [
+    "Self-reported.",
+    "Timing ratios are indicative (host at load ~30); an idle-host, three-repeat measurement is owed before any throughput claim.",
+    "Not yet used by any cohort runner: the in-flight experiments keep their gated binaries; adopting the memo in evaluate.cpp/run.cpp is a one-line substitution in their build scripts plus a re-run of their gates."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-22T07:41:59Z"
+}

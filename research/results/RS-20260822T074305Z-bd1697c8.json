@@ -1,0 +1,111 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260822T074305Z-bd1697c8",
+  "theoryIds": [
+    "TH-20260822-leaf-memo-semantics-preserving-3bb0ac6b"
+  ],
+  "experimentId": "EX-20260822-leaf-memo-gates-b31e4e7f",
+  "runIds": [
+    "RUN-20260822T073338Z-48e4df54"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "pass",
+  "assessment": "supported-as-tested",
+  "evidenceTier": "mechanics-only",
+  "summary": "One-entry leaf memo (fast-engine-memo/MemoSearch) on real probe seeds: leaf bits 0/4,260 (d4s5) and 0/2,500 (d4s7) mismatches in the search's feeding order; parity with FastSearch 0 action/work/node/cache-hit/completed-depth mismatches over 160 (d4s5, 117,732,775 leaf calls) and 50 (d4s7, 119,607,901 leaf calls) moves; determinism 0 mismatches at 1 vs 4 threads; memo hit rate 61.74% (d4s5) and 68.47% (d4s7); interleaved timing plain/memo 1.581x (d4s5, 12 real roots x 3 reps) and 1.634x (d4s7, 6 roots x 2 reps) under load ~31, indicative. Engineering result: semantics-preserving; no strength claim.",
+  "metrics": {
+    "leafBits": {
+      "d4s5": {
+        "boards": 4260,
+        "mismatches": 0,
+        "hitRateFeedOrder": 0.565493
+      },
+      "d4s7": {
+        "boards": 2500,
+        "mismatches": 0,
+        "hitRateFeedOrder": 0.6392
+      }
+    },
+    "parity": {
+      "d4s5": {
+        "moves": 160,
+        "mismatches": 0,
+        "leafCalls": 117732775,
+        "hitRate": 0.617377
+      },
+      "d4s7": {
+        "moves": 50,
+        "mismatches": 0,
+        "leafCalls": 119607901,
+        "hitRate": 0.684696
+      }
+    },
+    "determinism": {
+      "games": 4,
+      "threads": [
+        1,
+        4
+      ],
+      "mismatches": 0
+    },
+    "timingIndicative": {
+      "d4s5": {
+        "roots": 12,
+        "reps": 3,
+        "plainSeconds": 7.1319,
+        "memoSeconds": 4.50984,
+        "ratio": 1.58141
+      },
+      "d4s7": {
+        "roots": 6,
+        "reps": 2,
+        "plainSeconds": 12.5726,
+        "memoSeconds": 7.69515,
+        "ratio": 1.63383
+      }
+    }
+  },
+  "gateChecks": [
+    {
+      "criterion": "0 leaf bit mismatches at d4s5 and d4s7",
+      "passed": true,
+      "observed": "0/4,260 and 0/2,500"
+    },
+    {
+      "criterion": "0 parity mismatches vs FastSearch",
+      "passed": true,
+      "observed": "0 over 160 and 50 moves"
+    },
+    {
+      "criterion": "0 determinism mismatches",
+      "passed": true,
+      "observed": "0 over 4 games"
+    },
+    {
+      "criterion": "timing ratio >= 1.5 at both strata (indicative)",
+      "passed": true,
+      "observed": "1.581 and 1.634 under load"
+    }
+  ],
+  "perGameArtifact": {
+    "path": null,
+    "sha256": null,
+    "recordCount": null
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260820T080056Z-376ada90.json"
+  ],
+  "artifactManifestRef": "runs/RUN-20260822T073338Z-48e4df54/gates.log",
+  "limitations": [
+    "Timing ratios were measured on a host at load ~31 and are indicative; an idle-host, three-repeat measurement is owed before any throughput claim.",
+    "Probe cohorts are small (210 parity moves); the bit-identity argument is structural and the gates are confirmation, not the proof.",
+    "Not adopted by any cohort runner yet."
+  ],
+  "contributionIds": [
+    "CT-20260822T074159Z-247f2f1b",
+    "CT-20260822T073043Z-f8dcf45a",
+    "CT-20260822T073043Z-6aa6d992"
+  ],
+  "recordedAt": "2026-08-22T07:43:05Z"
+}

@@ -1,0 +1,29 @@
+{
+  "$schema": "../schemas/theory-v1.schema.json",
+  "format": "drop7-theory-v1",
+  "theoryId": "TH-20260822-leaf-memo-semantics-preserving-3bb0ac6b",
+  "title": "A one-entry leaf memo across chance strata is a semantics-preserving speedup of the fast fair-D4 search",
+  "claim": "Memoising the fast fair leaf's eighteen board-only features across consecutive leaf calls with the same (board, moves_remaining), recomputing only next_disc_vertical_options, produces bit-identical leaf values, identical actions, logical work, nodes, cache hits and completed depth, and reduces the wall time of a depth-4 decision by at least 1.5x at five and seven chance strata.",
+  "mechanism": "Within one chance node the strata share the post-move board whenever the cascade consumed no reveal draw; only the sampled next disc differs, and fast-leaf.hpp reads next_disc in exactly one term. Identical inputs give identical doubles; the dot product is re-run in the frozen order; the memo sits below the search's work increment so no recorded observable changes (audit-06 and its adversarial review).",
+  "falsificationCriteria": [
+    "Any leaf-value bit mismatch, any action/work/node/cache-hit/completed-depth mismatch against FastSearch, or any thread-count-dependent result on the probe games: not semantics-preserving.",
+    "Interleaved timing ratio below 1.5x on real roots at either strata setting: the speedup claim is not supported as tested."
+  ],
+  "informationClass": "engineering",
+  "lifecycle": "assessed",
+  "assessment": "supported-as-tested",
+  "evidenceTier": "mechanics-only",
+  "dependencies": [],
+  "evidenceRefs": [
+    "docs/exploratory/audit-06-engine-efficiency.md",
+    "runs/RUN-20260822T072033Z-510cf15e/kimi-k3-audit-review.md",
+    "runs/RUN-20260822T073338Z-48e4df54/gates.log"
+  ],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": null
+  },
+  "createdAt": "2026-08-22T07:43:04Z",
+  "updatedAt": "2026-08-22T07:43:05Z"
+}

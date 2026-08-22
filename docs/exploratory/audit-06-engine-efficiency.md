@@ -300,3 +300,23 @@ audit's findings with the following corrections, which the coordinator adopts:
   scalar dependency-chain latency (zero semantic risk, 1.2-1.5x plausible,
   measure in the thread preflight); (3) a bounded multi-entry leaf memo for
   non-consecutive repeats, capped by finding-13 §8.4's eviction objection.
+
+## D.2 Ported and gated (coordinator, 2026-08-22)
+
+The memo is now `approaches/lifetime-objective/fast-engine-memo/` (`memo-leaf.hpp`,
+`MemoSearch` generated from `fast-search.hpp` with a 15-line diff guard and a
+build-time check that the memo call sits directly below `++work_`;
+`-ffp-contract=off` pinned). Gates on real probe seeds
+(`runs/RUN-20260822T073338Z-48e4df54/gates.log`, load ~30):
+
+| gate | result |
+| --- | --- |
+| leaf bits, d4s5 / d4s7, search feeding order | 0 / 4,260 and 0 / 2,500 mismatches; memo hits 56.5 % / 63.9 % |
+| search parity vs `FastSearch`, d4s5 160 moves / d4s7 50 moves | 0 action/work/node/hit/depth mismatches; 117.7 M / 119.6 M leaf calls; hit rate **61.7 % / 68.5 %** |
+| determinism, 4 games, 1 vs 4 threads | 0 mismatches |
+| interleaved timing, real roots (indicative) | **1.58x** (d4s5, 12 roots × 3 reps), **1.63x** (d4s7, 6 roots × 2 reps) |
+
+The real-root ratios sit below the synthetic 1.64x / 1.87x, as the review
+anticipated (consecutive-hit rate, not distinct-board rate, is what the
+one-entry memo captures). Not yet adopted by any cohort runner; the in-flight
+experiments keep their gated binaries.

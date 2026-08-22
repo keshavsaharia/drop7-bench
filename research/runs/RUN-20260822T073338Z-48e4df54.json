@@ -1,0 +1,43 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260822T073338Z-48e4df54",
+  "experimentId": "EX-20260822-leaf-memo-gates-b31e4e7f",
+  "lifecycle": "completed",
+  "runValidity": "valid",
+  "startedAt": "2026-08-22T07:33:38Z",
+  "endedAt": "2026-08-22T07:41:16Z",
+  "protocolSha256": "90b1bf1822f53069221b1eea42a51d95f7416dca6762a4f637873cb23ed6e42a",
+  "machineProfileRef": "research/system-profiles/MACH-20260820T080056Z-376ada90.json",
+  "sourceState": {
+    "gitCommit": "32722cbb818e94924d57948d7894bfb5e39e8eb5",
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "runs/RUN-20260822T073338Z-48e4df54/gates.sh"
+  ],
+  "seedLeaseRefs": [],
+  "resourceLimits": {
+    "wallSeconds": 1800,
+    "cpuThreads": 4,
+    "maxHostBytes": 4294967296,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": 458,
+    "cpuSeconds": null,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "Run under the 30-thread evolution's load (load ~31); the timing ratios are interleaved best-of-reps and indicative only. The protocol was written down (audit-06, reviewed) before the gates ran but the record was frozen after; the gates' pass criteria are the audit's stated criteria. Freeze-time protocol hash 952d56423462e6e820e84c5068f5c3fb82cdb6bb43cc2e774f2165e6da8ddd25; re-hashed 90b1bf1822f53069221b1eea42a51d95f7416dca6762a4f637873cb23ed6e42a when the experiment lifecycle moved to completed (repository convention)."
+  },
+  "exitCode": 0,
+  "stopReason": "completed",
+  "artifactRefs": [
+    "runs/RUN-20260822T073338Z-48e4df54/gates.log"
+  ],
+  "contributionIds": [
+    "CT-20260822T074159Z-247f2f1b"
+  ]
+}
