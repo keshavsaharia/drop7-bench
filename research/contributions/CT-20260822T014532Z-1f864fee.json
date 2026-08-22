@@ -1,0 +1,43 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260822T014532Z-1f864fee",
+  "actor": {
+    "kind": "model",
+    "platform": "Codex",
+    "model": "GPT-5",
+    "agentId": "/root"
+  },
+  "level": "L1",
+  "roles": [
+    {
+      "role": "software",
+      "degree": "substantial"
+    },
+    {
+      "role": "validation",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Fixed the leaderboard replay animation switch by anchoring its thumb to the left edge of the track, restoring correct off and on positioning while preserving its accessible checked state and label.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "web/components/ReplayPlayer.tsx"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "npm --prefix web test: 20 tests passed",
+    "npm --prefix web run build: Next.js webpack production build passed",
+    "npm test: 136 tests passed",
+    "Browser verification on a leaderboard replay: off thumb inset 2px from the left and on thumb inset 2px from the right; aria-checked and visible labels matched both states",
+    "git diff --check: passed"
+  ],
+  "limitations": [
+    "Self-reported contribution; not independently reviewed."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-22T01:45:32Z"
+}
