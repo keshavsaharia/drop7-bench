@@ -17,6 +17,7 @@ import {
 import { playScriptedGame } from "./runner.ts";
 import { validateScriptedRound } from "./rounds.ts";
 import { parsePosition, stateFromPosition } from "./d7p-server.ts";
+import { NATIVE_DECIDE_BINARY, nativeBinaryAvailable } from "./native-policy.ts";
 
 const BENCH_DIR = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(BENCH_DIR, "..", "..");
@@ -149,3 +150,22 @@ test("d7p positions become a public-only game state that policies can answer", (
     "policy answered with a column",
   );
 });
+
+test(
+  "the native decision binary, when built, answers a public position deterministically",
+  { skip: !nativeBinaryAvailable() && `${NATIVE_DECIDE_BINARY} is not built` },
+  () => {
+    const state: GameState = stateFromPosition(
+      parsePosition(["startpos", "next", "4", "rise", "5"]),
+    );
+    const policy = getPolicy("native-fair-d4-s7");
+    const first = policy.chooseColumn(state);
+    const second = policy.chooseColumn(state);
+    assert.equal(first, second, "same public state, same column");
+    assert.ok(
+      first !== null && first >= 0 && first < BOARD_SIZE,
+      "native policy answered with a column",
+    );
+    assert.equal(policy.publicInformation, true);
+  },
+);

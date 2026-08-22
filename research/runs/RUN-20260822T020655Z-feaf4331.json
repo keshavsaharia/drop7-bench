@@ -1,0 +1,43 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260822T020655Z-feaf4331",
+  "experimentId": "EX-20260822-nnue-leaf-capacity-sweep-79632fd9",
+  "lifecycle": "running",
+  "runValidity": "pending",
+  "startedAt": "2026-08-22T02:06:55Z",
+  "endedAt": null,
+  "protocolSha256": "8e38473a52bc956da3917a312a1747d4d2795e9bf473df0220275409097ec030",
+  "machineProfileRef": "research/system-profiles/MACH-20260820T080056Z-376ada90.json",
+  "sourceState": {
+    "gitCommit": "31d25e189ccc983943e034fbd6d2216bfc2e453b",
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "approaches/lifetime-objective/leaf-capacity-sweep/sweep.sh",
+    "runs/RUN-20260822T020655Z-feaf4331"
+  ],
+  "seedLeaseRefs": [],
+  "resourceLimits": {
+    "wallSeconds": 3600,
+    "cpuThreads": 2,
+    "maxHostBytes": 17179869184,
+    "maxGpuBytes": 17179869184
+  },
+  "resourceObserved": {
+    "wallSeconds": null,
+    "cpuSeconds": null,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "Running on the integrated GPU concurrently with the CPU-bound evolution run RUN-20260822T014412Z-a0c63063 (30 threads); OMP_NUM_THREADS=2. Training wall times are therefore not timing-grade."
+  },
+  "exitCode": null,
+  "stopReason": null,
+  "artifactRefs": [
+    "runs/RUN-20260822T020655Z-feaf4331/summary.json",
+    "runs/RUN-20260822T020655Z-feaf4331/models/"
+  ],
+  "contributionIds": []
+}

@@ -117,3 +117,10 @@ winner is a preregistered secondary measurement on the same held-out seeds.
 - `weighted-leaf.hpp`, `build.sh` — the weighted leaf and the generated search
 - `gate.cpp`, `evaluate.cpp` — CHECK gates and the population evaluator
 - `evolve.py`, `compare.py` — the optimiser and the paired held-out comparison
+- `screen.sh` — the once-only held-out screen, scripted before the candidate
+  existed so the most safety-critical command is reviewed rather than typed
+- `decide.cpp` — a one-shot decision binary for the benchmark playground:
+  `src/bench/native-policy.ts` bridges it into the leaderboard as
+  `native-fair-d4-s7` (frozen leaf) so the research search itself, and later
+  an evolved leaf, can play the scripted rounds. Scripted-round scores are a
+  demonstration, never evidence.

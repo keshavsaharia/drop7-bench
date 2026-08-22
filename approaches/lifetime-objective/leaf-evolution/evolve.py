@@ -64,7 +64,9 @@ def write_weights(path: Path, w: np.ndarray, header: str) -> None:
     with path.open("w") as f:
         f.write(f"# {header}\n")
         for name, value in zip(NAMES, w):
-            f.write(f"{name} {value!r}\n")
+            # float() first: repr(np.float64(x)) is "np.float64(x)" under numpy 2,
+            # which the C++ reader rejects.
+            f.write(f"{name} {float(value)!r}\n")
 
 
 class CMA:

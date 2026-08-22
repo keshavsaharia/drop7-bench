@@ -55,7 +55,7 @@ done
 FLAGS=(-O3 -std=c++20 -pthread -Wall -Wextra -Werror
        -I "${FAST}" -I "${HERE}" -I "${OUT}" -I "${REFERENCE}" -I "${ROOT}/build/fast-engine")
 
-for program in gate evaluate; do
+for program in gate evaluate decide; do
   if [ "$#" -gt 0 ] && [ "$1" != "${program}" ]; then continue; fi
   echo "compiling ${program}..."
   "${CXX}" "${FLAGS[@]}" -o "${OUT}/${program}" "${HERE}/${program}.cpp"
