@@ -1,0 +1,71 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260822T005716Z-2689923c",
+  "actor": {
+    "kind": "model",
+    "platform": "Codex",
+    "model": "GPT-5",
+    "agentId": "/root"
+  },
+  "level": "L2",
+  "roles": [
+    {
+      "role": "software",
+      "degree": "lead"
+    },
+    {
+      "role": "validation",
+      "degree": "substantial"
+    },
+    {
+      "role": "writing",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Implemented reusable competition lifecycle and AI contender seeding for the web console: a versioned current/archive catalog, catalog-driven SST artifact uploads, immutable DynamoDB policy-score records with exact replay validation, persisted research URLs, archived leaderboard selection, and preview-first list/start/activate/archive/seed commands. The standard seed set includes all registered public-information TypeScript contenders, including D4. No production deploy or DynamoDB write was performed because the live site must first understand policy-score records and the shared dirty worktree contains unrelated changes.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "infra/README.md",
+    "package.json",
+    "src/bench/bench.test.ts",
+    "src/bench/cli.ts",
+    "src/bench/policies.ts",
+    "sst.config.ts",
+    "web/app/leaderboard/page.tsx",
+    "web/app/leaderboard/human/[submission]/page.tsx",
+    "web/content/competition/catalog.json",
+    "web/lib/competition/competition.test.ts",
+    "web/lib/competition/game.ts",
+    "web/lib/competition/ledger.ts",
+    "web/lib/competition/registry.ts",
+    "web/lib/leaderboard.ts",
+    "web/package.json",
+    "web/scripts/competition.ts",
+    "web/scripts/stage-repo-content.mjs"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "npm test: 136 tests passed",
+    "npm test --prefix web: 20 competition and browser-solver parity tests passed",
+    "npm run build --prefix web: Next.js webpack production build passed",
+    "npm run competition -- seed --stage production --profile personal-deploy: nine-policy dry run completed, including D4, with exact independent replay validation and no illegal moves",
+    "npm run competition -- start preview: immutable manifest and archive/current catalog update rendered without writing files",
+    "SST production diff: catalog-driven configuration and OpenNext bundle completed without deployment",
+    "Empty-checkout fixture with no web/data, empty research/results, and no web/content/log: root, leaderboard, research, and log routes returned HTTP 200",
+    "git diff --check: passed"
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed.",
+    "The seeded expectimax-d4 entry is the existing TypeScript D4 playground policy, not a source-identical port of approaches/fair-expectimax/reference/fair-only-depth4.cpp; the UI and policy description disclose that boundary.",
+    "All competition scores are single scripted-game playground results and are never research-tier evidence.",
+    "Production DynamoDB was intentionally left unchanged until the corresponding web code is deployed; the current deployed mapper would otherwise misclassify policy-score records as humans.",
+    "The shared worktree contains unrelated uncommitted changes, so deploying it would exceed this task's safe scope.",
+    "make research-validate remains blocked by 26 pre-existing references to locally absent ignored run artifacts."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-22T00:57:16Z"
+}

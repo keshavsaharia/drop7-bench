@@ -4,6 +4,7 @@ import {
   createInitialBoard,
   createInitialLatentValues,
   legalColumns,
+  placeDisc,
   playMove,
   type DiscValue,
   type GameState,
@@ -22,6 +23,8 @@ export interface BenchFrame {
   column: number;
   scoreDelta: number;
   score: number;
+  /** Serialized board immediately after the disc lands, before resolution. */
+  placedBoard: string;
   /** Serialized 49-character board after the move resolves. */
   board: string;
   /** The visible next disc after the move; null when the game is over. */
@@ -32,6 +35,19 @@ export interface BenchFrame {
   cleared: number;
   revealed: number;
   levelAdvanced: boolean;
+  /** Optional presentation snapshots when a replay artifact is requested. */
+  animation?: BenchAnimationFrame[];
+}
+
+export interface BenchAnimationFrame {
+  kind: "drop" | "burst" | "impact" | "settle" | "rise";
+  board: string;
+  indexes: number[];
+  chainDepth?: number;
+}
+
+export interface BenchRunOptions {
+  captureAnimation?: boolean;
 }
 
 export interface BenchGameResult {
@@ -62,6 +78,7 @@ const CONSTANT_RANDOM = () => 0.5;
 export function playScriptedGame(
   policy: BenchPolicy,
   round: ScriptedRound,
+  options: BenchRunOptions = {},
 ): BenchGameResult {
   const startedAt = performance.now();
   let rowCursor = 1;
@@ -91,8 +108,12 @@ export function playScriptedGame(
       column = legal[0];
     }
     const disc = state.nextDisc;
+    const placedBoard = placeDisc(state.board, column, disc);
+    if (!placedBoard) {
+      throw new Error(`Legal column ${column} could not place its disc`);
+    }
     const move = playMove(state, column, CONSTANT_RANDOM, {
-      captureAnimation: false,
+      captureAnimation: options.captureAnimation ?? false,
       latent: {
         values: latent as LatentValues,
         nextCoveredRow: () => {
@@ -130,6 +151,7 @@ export function playScriptedGame(
       column,
       scoreDelta: move.scoreDelta,
       score: state.score,
+      placedBoard: placedBoard.join(""),
       board: state.board.join(""),
       nextDisc: state.gameOver ? null : state.nextDisc,
       movesRemaining: state.movesRemaining,
@@ -137,6 +159,18 @@ export function playScriptedGame(
       cleared,
       revealed,
       levelAdvanced: move.levelAdvanced,
+      ...(options.captureAnimation
+        ? {
+            animation: move.animation.map((animationFrame) => ({
+              kind: animationFrame.kind,
+              board: animationFrame.board.join(""),
+              indexes: [...animationFrame.indexes],
+              ...(animationFrame.chainDepth === undefined
+                ? {}
+                : { chainDepth: animationFrame.chainDepth }),
+            })),
+          }
+        : {}),
     });
   }
 

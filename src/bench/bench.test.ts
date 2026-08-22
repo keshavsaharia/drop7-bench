@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -9,12 +9,18 @@ import {
   createInitialBoard,
   type GameState,
 } from "../core/typescript/engine.ts";
-import { getPolicy } from "./policies.ts";
+import {
+  BENCH_POLICIES,
+  COMPETITION_POLICY_IDS,
+  getPolicy,
+} from "./policies.ts";
 import { playScriptedGame } from "./runner.ts";
 import { validateScriptedRound } from "./rounds.ts";
 import { parsePosition, stateFromPosition } from "./d7p-server.ts";
 
-const ROUNDS_DIR = join(dirname(fileURLToPath(import.meta.url)), "rounds");
+const BENCH_DIR = dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = join(BENCH_DIR, "..", "..");
+const ROUNDS_DIR = join(BENCH_DIR, "rounds");
 
 function loadRound(id: string) {
   return validateScriptedRound(
@@ -39,6 +45,20 @@ test("every checked-in scripted round is valid and self-consistent", () => {
   }
 });
 
+test("competition policies are public and link to checked-in approach pages", () => {
+  assert.ok(COMPETITION_POLICY_IDS.includes("expectimax-d4"));
+  for (const policy of BENCH_POLICIES) {
+    const relative = policy.researchPath.replace(/^\//, "");
+    assert.ok(
+      existsSync(join(REPO_ROOT, relative, "README.mdx")),
+      `${policy.id} research page exists`,
+    );
+  }
+  for (const policyId of COMPETITION_POLICY_IDS) {
+    assert.equal(getPolicy(policyId).publicInformation, true);
+  }
+});
+
 test("scripted games are exactly deterministic across repeated runs", () => {
   const round = loadRound("gauntlet-01");
   const policy = getPolicy("expectimax-d2");
@@ -51,6 +71,27 @@ test("scripted games are exactly deterministic across repeated runs", () => {
     second.frames.map((frame) => frame.board),
   );
   assert.ok(first.moves > 10, "the game should survive a while");
+});
+
+test("replay capture serializes each complete move animation", () => {
+  const round = loadRound("gauntlet-01");
+  const game = playScriptedGame(getPolicy("greedy"), round, {
+    captureAnimation: true,
+  });
+
+  for (const frame of game.frames) {
+    assert.equal(frame.animation?.[0]?.kind, "drop");
+    assert.equal(frame.animation?.[0]?.board, frame.placedBoard);
+    assert.equal(frame.animation?.at(-1)?.board, frame.board);
+  }
+  const levelFrames = game.frames.filter((frame) => frame.levelAdvanced);
+  assert.ok(levelFrames.length > 0);
+  assert.equal(
+    levelFrames.every((frame) =>
+      frame.animation?.some((animationFrame) => animationFrame.kind === "rise"),
+    ),
+    true,
+  );
 });
 
 test("two different policies consume the same disc tape and latent rows", () => {
@@ -72,6 +113,7 @@ test("an illegal policy choice falls back to a legal column and is counted", () 
     name: "Always illegal",
     family: "test",
     description: "test double",
+    researchPath: "/approaches/heuristic-search/policy-comparison" as const,
     publicInformation: true,
     chooseColumn: () => 99,
   };

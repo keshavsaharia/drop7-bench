@@ -24,7 +24,7 @@ export interface CompetitionIdentity {
 
 export interface CompetitionSubmissionRecord {
   submissionId: string;
-  recordType: "validated-score";
+  recordType: "validated-score" | "policy-score";
   gameKey: string;
   competitionId: string;
   gameVersion: string;
@@ -43,16 +43,29 @@ export interface CompetitionSubmissionRecord {
   censored: boolean;
   submittedAt: string;
   validatedAt: string;
+  policyId?: string;
+  policyFamily?: string;
+  policyDescription?: string;
+  publicInformation?: boolean;
+  researchUrl?: string;
+  trajectoryChecksum?: string;
+  policySourceRevision?: string;
+  policySourceDirty?: boolean;
 }
 
-export interface HumanLeaderboardEntry {
+export interface CompetitionLeaderboardEntry {
   submissionId: string;
+  kind: "human" | "ai";
   displayName: string;
   provider: string;
   verifiedScore: number;
   moveCount: number;
   scoreMismatch: boolean;
   submittedAt: string;
+  policyId: string | null;
+  policyFamily: string | null;
+  publicInformation: boolean | null;
+  researchUrl: string | null;
 }
 
 const documentClient = DynamoDBDocumentClient.from(new DynamoDBClient({}), {
@@ -119,9 +132,10 @@ export async function storeValidatedSubmission(input: {
   }
 }
 
-export async function loadHumanLeaderboard(
+export async function loadCompetitionLeaderboard(
+  gameKey: string,
   limit = 100,
-): Promise<{ available: boolean; entries: HumanLeaderboardEntry[] }> {
+): Promise<{ available: boolean; entries: CompetitionLeaderboardEntry[] }> {
   const tableName = process.env.DROP7_COMPETITION_TABLE;
   if (!tableName) return { available: false, entries: [] };
   try {
@@ -130,7 +144,7 @@ export async function loadHumanLeaderboard(
         TableName: tableName,
         IndexName: LEADERBOARD_INDEX,
         KeyConditionExpression: "gameKey = :gameKey",
-        ExpressionAttributeValues: { ":gameKey": COMPETITION_GAME_KEY },
+        ExpressionAttributeValues: { ":gameKey": gameKey },
         ScanIndexForward: false,
         Limit: Math.min(250, Math.max(1, Math.trunc(limit))),
       }),
@@ -143,12 +157,23 @@ export async function loadHumanLeaderboard(
     console.error(
       JSON.stringify({
         event: "competition_leaderboard_read_failed",
-        gameKey: COMPETITION_GAME_KEY,
+        gameKey,
         error: error instanceof Error ? error.name : "unknown",
       }),
     );
     return { available: false, entries: [] };
   }
+}
+
+export async function loadHumanLeaderboard(limit = 100) {
+  const leaderboard = await loadCompetitionLeaderboard(
+    COMPETITION_GAME_KEY,
+    limit,
+  );
+  return {
+    ...leaderboard,
+    entries: leaderboard.entries.filter((entry) => entry.kind === "human"),
+  };
 }
 
 export async function getSubmissionRecord(
@@ -189,16 +214,38 @@ function normalizeRecord(record: CompetitionSubmissionRecord) {
   };
 }
 
-function toLeaderboardEntry(item: Record<string, unknown>): HumanLeaderboardEntry {
+function toLeaderboardEntry(
+  item: Record<string, unknown>,
+): CompetitionLeaderboardEntry {
+  const ai = item.recordType === "policy-score";
   return {
     submissionId: String(item.submissionId),
+    kind: ai ? "ai" : "human",
     displayName: String(item.displayName ?? "player"),
     provider: String(item.provider ?? "oauth"),
     verifiedScore: Number(item.verifiedScore),
     moveCount: Number(item.moveCount),
     scoreMismatch: Boolean(item.scoreMismatch),
     submittedAt: String(item.submittedAt),
+    policyId: ai && typeof item.policyId === "string" ? item.policyId : null,
+    policyFamily:
+      ai && typeof item.policyFamily === "string" ? item.policyFamily : null,
+    publicInformation:
+      ai && typeof item.publicInformation === "boolean"
+        ? item.publicInformation
+        : null,
+    researchUrl: safeResearchUrl(item.researchUrl),
   };
+}
+
+function safeResearchUrl(value: unknown) {
+  if (typeof value !== "string") return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" ? url.toString() : null;
+  } catch {
+    return null;
+  }
 }
 
 function isConditionalFailure(error: unknown) {

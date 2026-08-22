@@ -1,0 +1,54 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260821T230218Z-7c2f5475",
+  "actor": {
+    "kind": "model",
+    "platform": "Codex",
+    "model": "GPT-5",
+    "agentId": null
+  },
+  "level": "L2",
+  "roles": [
+    { "role": "visualization", "degree": "lead" },
+    { "role": "software", "degree": "lead" },
+    { "role": "validation", "degree": "substantial" }
+  ],
+  "summary": "Created a reusable Drop7 disc-7 brand asset that matches the navbar palette, typography, outline, and lower inset shading. Replaced the favicon with 16, 32, and 48 pixel frames; added Next.js app and Apple touch icons; exported transparent 128, 256, 512, and 1024 pixel PNGs plus an SVG master; and added a deterministic generator for rebuilding every raster asset from the SVG.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "web/app/favicon.ico",
+    "web/app/icon.png",
+    "web/app/apple-icon.png",
+    "web/public/brand/drop7-icon.svg",
+    "web/public/brand/drop7-icon-128.png",
+    "web/public/brand/drop7-icon-256.png",
+    "web/public/brand/drop7-icon-512.png",
+    "web/public/brand/drop7-icon-1024.png",
+    "web/scripts/generate-brand-icons.mjs",
+    "web/package.json"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "npm run brand:icons --prefix web: rebuilt every raster and ICO asset from the SVG master",
+    "npm run lint --prefix web -- scripts/generate-brand-icons.mjs: passed",
+    "npm test --prefix web: 18 tests passed",
+    "npm run build --prefix web: Next.js webpack production build passed and emitted /icon.png and /apple-icon.png routes",
+    "npm test: 134 repository tests passed",
+    "xmllint --noout web/public/brand/drop7-icon.svg: passed",
+    "Pillow inspection: every public PNG has RGBA encoding, exact square dimensions, and transparent corner pixels",
+    "Visual inspection: 512 pixel export and 16, 32, and 48 pixel favicon frames preserve the disc silhouette and legible 7",
+    "git diff --check: passed",
+    "make research-validate: this contribution passed schema and artifact checks; the repository-wide command remained nonzero on 26 pre-existing references to locally absent ignored run artifacts"
+  ],
+  "limitations": [
+    "Self-reported contribution; not independently reviewed.",
+    "The SVG intentionally uses the same system-font stack as the navbar, so its live text rendering can vary slightly by operating system; the committed PNG and ICO exports have fixed rendering.",
+    "Repository-wide research validation remains blocked by 26 pre-existing references to ignored run artifacts that are absent from this checkout."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-21T23:02:18Z"
+}

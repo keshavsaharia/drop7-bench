@@ -1,0 +1,38 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260821T231608Z-1047ab6a",
+  "actor": {
+    "kind": "model",
+    "platform": "Codex",
+    "model": "GPT-5",
+    "agentId": null
+  },
+  "level": "L2",
+  "roles": [
+    { "role": "software", "degree": "substantial" },
+    { "role": "validation", "degree": "supporting" }
+  ],
+  "summary": "Enabled competition-game presentation animation without changing its fixed scripted game semantics: the client now captures the TypeScript engine's move frames, displays each frame with the shared playable-game CSS, blocks input until the move commits, and continues to replay local drafts without rendering frames.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "web/components/CompetitionGame.tsx"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "npm test --prefix web: 18 tests passed",
+    "npm run build --prefix web: Next.js webpack production build passed",
+    "git diff --check: passed",
+    "make research-validate: ran; failed on 26 pre-existing missing historical run and dataset artifacts, none attributed to this change"
+  ],
+  "limitations": [
+    "Self-reported contribution; not independently reviewed.",
+    "No browser interaction test was added; engine frame generation and the production build cover the integration contract.",
+    "Repository-wide research validation remains blocked by missing historical artifacts outside this change."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-21T23:16:08Z"
+}

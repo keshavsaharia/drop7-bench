@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Drop7Game } from "@/components/Drop7Game";
 
 export const metadata: Metadata = {
-  title: "Play Drop7 — Drop7 Research Console",
+  title: "Play Drop7",
   description:
     "Play five-move Hardcore Drop7 in the browser with the repository's rules engine, or watch the depth-4 expectimax play it.",
 };
@@ -33,13 +33,10 @@ export default async function PlayPage({
       <section>
         <h1 className="text-2xl font-black text-zinc-50">Play Drop7</h1>
         <p className="mt-2 max-w-3xl text-sm text-zinc-400">
-          The game this whole repository studies, playable with the same rules engine the
-          research runs on. Drop the incoming disc into a column; a disc clears when the
-          unbroken run it sits in — across or down — is exactly its number long. Clears set
-          off chains, chains open gray discs, and every fifth drop pushes a fresh gray row up
-          from the bottom. The game ends when a column overflows.{" "}
+          Everything runs locally in your browser.
+          If you don&apos;t know the rules of the game, you can{' '}
           <Link href="/learn/rules" className="text-sky-400 hover:text-sky-300">
-            Every rule, animated →
+            learn them here →
           </Link>
         </p>
       </section>

@@ -5,7 +5,8 @@ summary: "Completing the depth-by-chance factorial showed that exact chance mode
 contributors:
   - claude-opus-5 (Claude Code)
   - kimi-k3 (OpenCode)
-tags: [fair-planner, depth, chance-exactness, afterstate-model, negative-result]
+  - GPT-5 (Codex)
+tags: [fair-planner, depth, chance-exactness, afterstate-model, negative-result, competition]
 outcomes:
   positive: 2
   negative: 5
@@ -380,4 +381,30 @@ cohort, and depth 5 costs 35x the work to produce an effect we could not
 measure. Either find effects large enough to see, or find a lower-variance
 measurement than complete games. Both are better uses of the machine than
 another point on the depth axis.
+</Direction>
+
+## Making the public competition reproducible
+
+<Finding title="Competition lifecycle and AI seeding are now scripted" kind="positive">
+Codex added a checked-in catalog for the current and archived public games, a
+preview-first command for starting, activating, archiving, and listing games,
+and an idempotent DynamoDB seeder for the registered public-information AI
+contenders. Every AI record carries its packed moves, exact replay checksum,
+information-boundary flag, and a persisted HTTPS link to the approach page that
+explains it. Archived leaderboards remain queryable by their immutable game key.
+
+The D4 entry here is explicitly the existing TypeScript playground analogue,
+not a source-identical port of the frozen native fair-D4 research comparator.
+These single scripted-game scores remain demonstration data, never research
+evidence.
+</Finding>
+
+<Direction title="Deploy the policy-aware reader, then seed production" status="blocked" owner="repository owner">
+The full contender set passed a local dry run and exact independent replay, but
+production DynamoDB was deliberately left untouched. The currently deployed
+reader predates policy-score records and would display them as humans, while the
+shared worktree also contains unrelated uncommitted UI changes. Deploy the
+policy-aware web build from an intentionally reviewed tree first; the same
+command can then conditionally insert the AI entries without overwriting any
+human submission.
 </Direction>

@@ -3,6 +3,7 @@ import {
   createInitialBoard,
   createInitialLatentValues,
   legalColumns,
+  placeDisc,
   playMove,
   type DiscValue,
   type GameState,
@@ -29,12 +30,18 @@ export interface CompetitionReplayResult {
   frames: ReplayFrame[];
 }
 
+export interface CompetitionReplayOptions {
+  /** Capture presentation snapshots for an interactive replay viewer. */
+  captureAnimation?: boolean;
+}
+
 const CONSTANT_RANDOM = () => 0.5;
 
 /** Replays exactly the submitted choices; invalid choices never receive a fallback. */
 export function replayCompetitionColumns(
   round: ScriptedRound,
   columns: readonly number[],
+  options: CompetitionReplayOptions = {},
 ): CompetitionReplayResult {
   if (columns.length === 0) return failure("empty");
   if (columns.length > round.maximumMoves) return failure("too-many-moves");
@@ -66,8 +73,12 @@ export function replayCompetitionColumns(
     }
 
     const disc = state.nextDisc;
+    const placedBoard = placeDisc(state.board, column, disc);
+    if (!placedBoard) {
+      return result(false, "engine-rejected", state, frames, round);
+    }
     const move = playMove(state, column, CONSTANT_RANDOM, {
-      captureAnimation: false,
+      captureAnimation: options.captureAnimation ?? false,
       latent: {
         values: latent as LatentValues,
         nextCoveredRow: () => round.latentRows[rowCursor++],
@@ -93,6 +104,7 @@ export function replayCompetitionColumns(
       column,
       scoreDelta: move.scoreDelta,
       score: state.score,
+      placedBoard: placedBoard.join(""),
       board: state.board.join(""),
       nextDisc: state.gameOver ? null : state.nextDisc,
       movesRemaining: state.movesRemaining,
@@ -100,6 +112,18 @@ export function replayCompetitionColumns(
       cleared,
       revealed,
       levelAdvanced: move.levelAdvanced,
+      ...(options.captureAnimation
+        ? {
+            animation: move.animation.map((animationFrame) => ({
+              kind: animationFrame.kind,
+              board: animationFrame.board.join(""),
+              indexes: [...animationFrame.indexes],
+              ...(animationFrame.chainDepth === undefined
+                ? {}
+                : { chainDepth: animationFrame.chainDepth }),
+            })),
+          }
+        : {}),
     });
   }
 

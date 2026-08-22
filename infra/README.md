@@ -104,17 +104,35 @@ fields do not need a schema migration.
 
 ## Competition data
 
-The manifest at web/content/competition/global-2026-08-v1.json pins the current
-scripted-round format, round ID, ruleset, object key, and SHA-256 digest. SST uploads that
-exact round to the stage's versioned artifact bucket. The build fails if the checked-in
-round no longer matches the manifest digest. The object upload explicitly depends on the
-bucket component so its first write cannot race ahead of S3 versioning, and the pinned digest
-is also retained as object metadata.
+`web/content/competition/catalog.json` names the current game and retains every archived
+game. Each referenced manifest pins the scripted-round format, round ID, ruleset, object key,
+and SHA-256 digest. SST uploads every catalogued round to the stage's versioned artifact
+bucket. The build fails if any checked-in round no longer matches its manifest digest. Each
+object upload explicitly depends on the bucket component so its first write cannot race ahead
+of S3 versioning, and the pinned digest is also retained as object metadata.
 
-To promote a future global game, add a new immutable manifest and round, retain the old
-definition in the application registry so historical submissions remain replayable, upload
-it under a new S3 object key, and then change the current-game pointer. Never edit an old
-game in place.
+Use the competition CLI to preview and perform those lifecycle changes:
+
+```sh
+npm run competition -- list
+npm run competition -- start \
+  --version 2026-09-v1 \
+  --round gauntlet-02 \
+  --name "Global Game · September 2026"
+npm run competition -- start \
+  --version 2026-09-v1 \
+  --round gauntlet-02 \
+  --name "Global Game · September 2026" \
+  --write
+npm run competition -- activate --game-key 'global#2026-08-v1' --write
+```
+
+`start` creates an immutable manifest, archives the previous current entry, and advances the
+catalog pointer. `activate` can reopen a catalogued game; `archive` marks a non-current game
+with an archive timestamp. Mutations preview by default and require `--write`. Deploy after a
+catalog change so the site and S3 artifact registry advance together. Never edit an old game
+or its round in place. Archived leaderboards remain selectable in `/leaderboard` and their
+packed submissions remain replayable through the catalog.
 
 The DynamoDB table is an append-only validated-score ledger:
 
@@ -123,6 +141,32 @@ The DynamoDB table is an append-only validated-score ledger:
 - attribution: OAuth provider, provider account ID, and public display handle;
 - moves: dense drop7-columns-3bit-v1 binary, with a separate move count;
 - audit fields: client score, replayed score, mismatch flag, artifact digest, and timestamps.
+
+AI contenders use the same immutable ledger and packed-move replay path with
+`recordType=policy-score`. Their records additionally retain the stable policy id, family,
+public-information flag, trajectory checksum, Git revision/dirty disclosure, and an HTTPS URL
+to the exact approach page. The leaderboard reads those stored fields, so an archived result
+does not silently acquire a different attribution when the policy registry changes later.
+
+Preview or seed the standard public-information contender set with:
+
+```sh
+npm run competition -- seed \
+  --stage production \
+  --profile personal-deploy
+npm run competition -- seed \
+  --stage production \
+  --profile personal-deploy \
+  --write
+```
+
+The default set includes the TypeScript D4/D3/D2 expectimax line and the registered public
+rollout, MCTS, sparse, risk-sensitive, open-loop, and greedy policies. Use `--policies` for an
+explicit comma-separated subset or `--game-key` to seed an archived game. The command runs
+each policy on the immutable round, rejects illegal play, independently replays the packed
+columns, and uses a conditional DynamoDB insert. Re-running an identical seed is idempotent;
+a changed result under the same policy id is rejected and must use a versioned id. These
+single scripted-game scores are playground demonstrations, never research-tier evidence.
 
 The API rejects illegal, incomplete, or trailing choices. It conditionally inserts each
 validated run so the same user/game/move stream is idempotent. Client/server score

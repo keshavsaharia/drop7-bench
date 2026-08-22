@@ -4,7 +4,7 @@ import { RESEARCH_DOCS } from "@/lib/docs";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Docs · Drop7 Research Console",
+  title: "Docs · Drop7 Research",
   description:
     "Repository documents for the Drop7 million-point research program: status, methodology, benchmarks, and the experiment ledger.",
 };

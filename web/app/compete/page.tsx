@@ -31,22 +31,22 @@ export default function CompetePage() {
 
       <section className="grid gap-4 text-sm md:grid-cols-3">
         <InfoCard
-          title="One public future"
+          title="One global game"
           body={
             "Game " +
             COMPETITION_GAME.gameVersion +
             " pins " +
             COMPETITION_GAME.roundId +
-            " and its SHA-256 digest. It is reproducible and inspectable, so it is a competition playground—not research-tier evidence."
+            " and its SHA-256 digest. It is open-source, and can be used by anyone to determine an optimal strategy using any language or framework, and submit their results to the competition leaderboard."
           }
         />
         <InfoCard
           title="Three bits per move"
-          body="Submitted columns 0–6 are packed into a dense 3-bit stream in DynamoDB. The original JSON move array is not retained."
+          body="Your column sequence of 0-6 is packed into a bit stream (3 bits per move). These streams are completely anonymous, and will be publicly released at the end of the competition for anyone to use them in research."
         />
         <InfoCard
           title="Server score wins"
-          body="The Lambda replay rejects illegal, incomplete, or trailing moves. A client/server score mismatch is logged and stored, and only the server score appears in rankings."
+          body="The submitted columns are replayed in a cloud environment which rejects illegal, incomplete, or trailing moves. Only a server-validated score can appear in rankings."
         />
       </section>
     </div>

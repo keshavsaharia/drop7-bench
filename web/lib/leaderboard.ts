@@ -43,6 +43,7 @@ export interface LeaderboardData {
     family: string;
     description: string;
     publicInformation: boolean;
+    researchPath?: string;
   }[];
   games: LeaderboardGame[];
   summaries: LeaderboardSummary[];
@@ -54,6 +55,8 @@ export interface ReplayFrame {
   column: number;
   scoreDelta: number;
   score: number;
+  /** Position immediately after the chosen disc lands, before resolution. */
+  placedBoard?: string;
   board: string;
   nextDisc: number | null;
   movesRemaining: number;
@@ -61,6 +64,15 @@ export interface ReplayFrame {
   cleared: number;
   revealed: number;
   levelAdvanced: boolean;
+  /** Presentation-only engine snapshots. Competition replays include these. */
+  animation?: ReplayAnimationFrame[];
+}
+
+export interface ReplayAnimationFrame {
+  kind: "drop" | "burst" | "impact" | "settle" | "rise";
+  board: string;
+  indexes: number[];
+  chainDepth?: number;
 }
 
 export interface ReplayData extends LeaderboardGame {

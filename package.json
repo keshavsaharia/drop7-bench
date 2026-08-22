@@ -13,6 +13,7 @@
     "parity": "node --experimental-strip-types approaches/baselines-diagnostics/native-parity/main.ts --native build/native-suite --seed-start 762314752 --seed-count 256",
     "bench": "node --experimental-strip-types src/bench/cli.ts",
     "bench:rounds": "node --experimental-strip-types src/bench/generate-rounds.ts",
+    "competition": "npm --prefix web run competition --",
     "web": "npm --prefix web run dev",
     "infra:dev": "sst deploy --stage dev",
     "infra:prod": "sst deploy --stage production",

@@ -125,7 +125,7 @@ function main() {
   for (const policy of policies) {
     for (const round of rounds) {
       const startedAt = Date.now();
-      const game = playScriptedGame(policy, round);
+      const game = playScriptedGame(policy, round, { captureAnimation: true });
       games.push(game);
       writeFileSync(
         join(replayDir, `${policy.id}--${round.id}.json`),
@@ -156,6 +156,7 @@ function main() {
       family: policy.family,
       description: policy.description,
       publicInformation: policy.publicInformation,
+      researchPath: policy.researchPath,
     })),
     games: games.map(({ frames: _frames, ...game }) => game),
     summaries: policies.map((policy) => ({

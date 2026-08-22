@@ -11,7 +11,7 @@ import {
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Research · Drop7 Research Console",
+  title: "Research · Drop7",
   description:
     "Approaches, theories, experiments, and the daily research log for the Drop7 million-point program.",
 };

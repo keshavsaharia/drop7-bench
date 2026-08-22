@@ -21,12 +21,15 @@ export default async function HumanReplayPage({
   const { submission } = await params;
   const record = await getSubmissionRecord(submission);
   if (!record) notFound();
+  const isPolicy = record.recordType === "policy-score";
   const competition = getCompetitionGame(record.gameKey);
   if (!competition) {
     throw new Error("This submission's immutable game is not in the registry");
   }
   const columns = columnsFromRecord(record);
-  const replay = replayCompetitionColumns(competition.round, columns);
+  const replay = replayCompetitionColumns(competition.round, columns, {
+    captureAnimation: true,
+  });
   if (!replay.valid || replay.score !== record.verifiedScore) {
     throw new Error("Stored competition submission failed its integrity replay");
   }
@@ -38,7 +41,7 @@ export default async function HumanReplayPage({
     0,
   );
   const replayData: ReplayData = {
-    policyId: "human-" + record.submissionId.slice(0, 12),
+    policyId: record.policyId ?? "human-" + record.submissionId.slice(0, 12),
     roundId: record.roundId,
     score: record.verifiedScore,
     moves: record.moveCount,
@@ -59,16 +62,27 @@ export default async function HumanReplayPage({
           ← Leaderboard
         </Link>
         <p className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-violet-400">
-          Human submission · {competition.manifest.gameVersion}
+          {isPolicy ? "Research policy" : "Human submission"} ·{" "}
+          {competition.manifest.gameVersion}
         </p>
         <h1 className="mt-2 text-2xl font-black text-zinc-50">
           {record.displayName} · {record.verifiedScore.toLocaleString()} points
         </h1>
         <p className="mt-2 text-sm text-zinc-500">
           Verified by replaying {record.moveCount} packed column choices against{" "}
-          {record.roundId}. Submitted {new Date(record.submittedAt).toLocaleString()} via{" "}
-          {record.provider}.
+          {record.roundId}. {isPolicy ? "Seeded" : "Submitted"}{" "}
+          {new Date(record.submittedAt).toLocaleString()} via {record.provider}.
         </p>
+        {isPolicy && record.researchUrl && (
+          <p className="mt-2 text-sm">
+            <a
+              href={record.researchUrl}
+              className="text-sky-400 hover:text-sky-300"
+            >
+              Read the underlying research →
+            </a>
+          </p>
+        )}
         {record.scoreMismatch && (
           <p className="mt-2 text-sm text-amber-300">
             Client reported {record.clientScore.toLocaleString()}; the independently replayed{" "}

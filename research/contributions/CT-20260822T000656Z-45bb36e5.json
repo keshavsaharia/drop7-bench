@@ -1,0 +1,52 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260822T000656Z-45bb36e5",
+  "actor": {
+    "kind": "model",
+    "platform": "Codex",
+    "model": "GPT-5",
+    "agentId": null
+  },
+  "level": "L2",
+  "roles": [
+    { "role": "software", "degree": "substantial" },
+    { "role": "visualization", "degree": "substantial" },
+    { "role": "validation", "degree": "substantial" }
+  ],
+  "summary": "Redesigned competition result replays around one compact animated board with deterministic landing and resolved states, a larger left playback panel, and a smaller right score and metrics panel. Added complete engine presentation-frame capture to human and generated benchmark replays, sped-up replay-specific motion timing, a shared AbortController-based loop for cancellable manual steps and continuous playback, simplified paging controls, and a clearer post-submission confirmation with a prominent fresh-game reset that clears locally persisted choices.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "src/bench/bench.test.ts",
+    "src/bench/cli.ts",
+    "src/bench/runner.ts",
+    "web/app/leaderboard/human/[submission]/page.tsx",
+    "web/components/CompetitionGame.tsx",
+    "web/components/Drop7Game.module.css",
+    "web/components/ReplayPlayer.tsx",
+    "web/lib/competition/competition.test.ts",
+    "web/lib/competition/replay.ts",
+    "web/lib/leaderboard.ts"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "npm run lint -- targeted competition replay, submission, and result-view files: passed",
+    "npm test from the repository root: 136 tests passed",
+    "node --experimental-strip-types --test src/bench/*.test.ts: 7 tests passed, including complete replay-animation serialization",
+    "npm test from web/: 19 tests passed",
+    "node --experimental-strip-types --test lib/competition/*.test.ts: 5 tests passed, including landing-position, resolved-frame identity, and level-rise animation assertions",
+    "npm run build: Next.js webpack production build passed",
+    "In-app browser visual QA on a regenerated 75-move replay: manual steps animated, rapid Next/Next/Previous resolved to the last request, continuous Play advanced through one board, Pause prevented stale updates, and a fifth-move rise reached the recorded final board",
+    "git diff --check on changed task files: passed"
+  ],
+  "limitations": [
+    "Self-reported contribution; not independently reviewed.",
+    "The human-submission result route requires a stored DynamoDB entry; browser layout and controls were exercised with equivalent scripted AI replay data, while human-only animation capture was covered by an engine-level test.",
+    "make research-validate remains blocked by 26 pre-existing missing run artifacts outside this web task."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-22T00:06:56Z"
+}

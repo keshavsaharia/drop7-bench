@@ -5,7 +5,7 @@ import { formatLogDate, listLogEntries } from "@/lib/log";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Research log · Drop7 Research Console",
+  title: "Research log · Drop7 Research",
   description:
     "A dated, plain-English account of what was tried each day in the Drop7 million-point research program, including the things that did not work.",
 };

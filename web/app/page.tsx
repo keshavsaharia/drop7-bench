@@ -45,15 +45,14 @@ export default function OverviewPage() {
     <div className="space-y-10">
       <section>
         <h1 className="text-3xl font-black text-zinc-50">
-          The million-point Drop7 program
+          Searching for an optimal Drop7 strategy
         </h1>
         <p className="mt-2 max-w-3xl text-zinc-400">
-          The goal is a public-information policy whose{" "}
-          <strong className="text-zinc-200">mean</strong> score exceeds one
-          million points in corrected five-move Hardcore mode. The strongest
-          dependable reference, fair depth-4 expectimax, averages about 309k —
-          the problem is open. This console tracks every theory, experiment,
-          and benchmark in the repository.
+          The goal is a public-information policy whose average score exceeds one
+          million points. The strongest
+          dependable reference, fair depth-4 expectimax, averages about 309k points, so
+          the problem is still open. This console tracks every theory, experiment,
+          and benchmark in this research project.
         </p>
       </section>
 

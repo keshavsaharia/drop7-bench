@@ -1,5 +1,12 @@
 /// <reference path="./.sst/platform/config.d.ts" />
 
+interface CompetitionArtifact {
+  gameKey: string;
+  artifactPath: string;
+  artifactS3Key: string;
+  artifactSha256: string;
+}
+
 const deployments = {
   production: {
     domain: "drop7.dev",
@@ -30,6 +37,43 @@ export default $config({
     };
   },
   async run() {
+    const { createHash } = await import("node:crypto");
+    const { readFileSync } = await import("node:fs");
+    const competitionCatalog = JSON.parse(
+      readFileSync("web/content/competition/catalog.json", "utf8"),
+    ) as {
+      games: { gameKey: string; manifestPath: string }[];
+    };
+    const competitionGameArtifacts: CompetitionArtifact[] =
+      competitionCatalog.games.map((entry) => {
+        const manifest = JSON.parse(
+          readFileSync(entry.manifestPath, "utf8"),
+        ) as {
+          competitionId: string;
+          gameVersion: string;
+          artifactPath: string;
+          artifactS3Key: string;
+          artifactSha256: string;
+        };
+        const gameKey = `${manifest.competitionId}#${manifest.gameVersion}`;
+        if (gameKey !== entry.gameKey) {
+          throw new Error(
+            `Competition catalog key mismatch for ${entry.manifestPath}`,
+          );
+        }
+        const actualSha256 = createHash("sha256")
+          .update(readFileSync(manifest.artifactPath))
+          .digest("hex");
+        if (actualSha256 !== manifest.artifactSha256) {
+          throw new Error(`Competition artifact hash mismatch for ${gameKey}`);
+        }
+        return {
+          gameKey,
+          artifactPath: manifest.artifactPath,
+          artifactS3Key: manifest.artifactS3Key,
+          artifactSha256: manifest.artifactSha256,
+        };
+      });
     const deployment = deployments[$app.stage as keyof typeof deployments];
     const isProduction = $app.stage === "production";
     const competitionLedger = new sst.aws.Dynamo("CompetitionLedger", {
@@ -57,16 +101,28 @@ export default $config({
         bucket: deployment ? { bucket: deployment.artifactBucket } : undefined,
       },
     });
-    new aws.s3.BucketObjectv2("GlobalCompetitionGame202608V1", {
-      bucket: competitionArtifacts.name,
-      key: "games/global/2026-08-v1.json",
-      contentType: "application/json",
-      metadata: {
-        "drop7-artifact-sha256":
-          "edb288f628f4191d91d4de36d042cea14a9cf1a84d19156b1b8e6117f1463832",
-      },
-      source: $asset("src/bench/rounds/gauntlet-01.json"),
-    }, { dependsOn: [competitionArtifacts] });
+    for (const game of competitionGameArtifacts) {
+      const legacyName =
+        game.gameKey === "global#2026-08-v1"
+          ? "GlobalCompetitionGame202608V1"
+          : null;
+      const resourceName =
+        legacyName ??
+        `CompetitionGame${createHash("sha256").update(game.gameKey).digest("hex").slice(0, 12)}`;
+      new aws.s3.BucketObjectv2(
+        resourceName,
+        {
+          bucket: competitionArtifacts.name,
+          key: game.artifactS3Key,
+          contentType: "application/json",
+          metadata: {
+            "drop7-artifact-sha256": game.artifactSha256,
+          },
+          source: $asset(game.artifactPath),
+        },
+        { dependsOn: [competitionArtifacts] },
+      );
+    }
     const caller = aws.getCallerIdentityOutput({});
     const githubSecretArn = caller.accountId.apply(
       (accountId) =>

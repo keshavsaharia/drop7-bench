@@ -2,8 +2,16 @@
 
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
+import {
+  BOARD_SIZE,
   MOVES_PER_LEVEL,
   createInitialBoard,
   createInitialLatentValues,
@@ -12,16 +20,23 @@ import {
   type DiscValue,
   type GameState,
   type LatentValues,
+  type MoveAnimationFrame,
 } from "../../src/core/typescript/engine.ts";
 import type { ScriptedRound } from "../../src/bench/rounds.ts";
 import type { CompetitionGameManifest } from "@/lib/competition/game";
 import { Drop7Board } from "./Drop7Board";
 import { DiscFace } from "./discs";
+import styles from "./Drop7Game.module.css";
 
 interface ScriptedSnapshot {
   state: GameState;
   latent: readonly (DiscValue | null)[];
   rowCursor: number;
+}
+
+interface AnimatedMove {
+  snapshot: ScriptedSnapshot;
+  animation: readonly MoveAnimationFrame[];
 }
 
 interface SubmissionResult {
@@ -34,6 +49,13 @@ interface SubmissionResult {
 
 const LABEL = "text-[0.625rem] font-semibold uppercase tracking-[0.12em]";
 const CONSTANT_RANDOM = () => 0.5;
+const FRAME_DURATION_MS = {
+  drop: 380,
+  burst: 175,
+  impact: 130,
+  settle: 210,
+  rise: 280,
+} satisfies Record<MoveAnimationFrame["kind"], number>;
 
 export function CompetitionGame({
   manifest,
@@ -45,6 +67,10 @@ export function CompetitionGame({
   const [snapshot, setSnapshot] = useState(() => createStart(round));
   const snapshotRef = useRef(snapshot);
   const columnsRef = useRef<number[]>([]);
+  const [animating, setAnimating] = useState(false);
+  const animatingRef = useRef(false);
+  const [animationFrame, setAnimationFrame] = useState<MoveAnimationFrame | null>(null);
+  const animationRunRef = useRef(0);
   const [submitting, setSubmitting] = useState(false);
   const [needsAuth, setNeedsAuth] = useState(false);
   const [submission, setSubmission] = useState<SubmissionResult | null>(null);
@@ -62,6 +88,14 @@ export function CompetitionGame({
   useEffect(() => {
     snapshotRef.current = snapshot;
   }, [snapshot]);
+
+  useEffect(
+    () => () => {
+      animationRunRef.current += 1;
+      animatingRef.current = false;
+    },
+    [],
+  );
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -92,32 +126,63 @@ export function CompetitionGame({
 
   const commitMove = useCallback(
     (column: number) => {
-      if (submission || submitting) return;
+      if (submission || submitting || animatingRef.current) return;
       const current = snapshotRef.current;
-      const next = advance(round, current, column);
-      if (!next) return;
+      const move = advance(round, current, column, true);
+      if (!move) return;
       const nextColumns = [...columnsRef.current, column];
-      snapshotRef.current = next;
       columnsRef.current = nextColumns;
-      setSnapshot(next);
       setNeedsAuth(false);
       setSubmitError(null);
       try {
         window.localStorage.setItem(storageKey, JSON.stringify({ columns: nextColumns }));
-        if (next.state.gameOver || next.state.movesPlayed >= round.maximumMoves) {
+        if (move.snapshot.state.gameOver || move.snapshot.state.movesPlayed >= round.maximumMoves) {
           const prior = Number(window.localStorage.getItem(bestKey) ?? -1);
-          if (next.state.score > prior) {
-            window.localStorage.setItem(bestKey, String(next.state.score));
+          if (move.snapshot.state.score > prior) {
+            window.localStorage.setItem(bestKey, String(move.snapshot.state.score));
           }
         }
       } catch {
         // Local persistence is optional; play remains functional without it.
       }
+
+      const run = animationRunRef.current + 1;
+      animationRunRef.current = run;
+      animatingRef.current = true;
+      setAnimating(true);
+      setAnimationFrame(null);
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const frames = reducedMotion ? [] : move.animation;
+
+      const finishMove = () => {
+        if (animationRunRef.current !== run) return;
+        snapshotRef.current = move.snapshot;
+        animatingRef.current = false;
+        setSnapshot(move.snapshot);
+        setAnimationFrame(null);
+        setAnimating(false);
+      };
+
+      if (frames.length === 0) {
+        finishMove();
+        return;
+      }
+
+      void (async () => {
+        for (const frame of frames) {
+          if (animationRunRef.current !== run) return;
+          setAnimationFrame(frame);
+          await wait(FRAME_DURATION_MS[frame.kind]);
+        }
+        finishMove();
+      })();
     },
     [bestKey, round, storageKey, submission, submitting],
   );
 
   const restart = useCallback(() => {
+    animationRunRef.current += 1;
+    animatingRef.current = false;
     const start = createStart(round);
     snapshotRef.current = start;
     columnsRef.current = [];
@@ -125,12 +190,24 @@ export function CompetitionGame({
     setSubmission(null);
     setSubmitError(null);
     setNeedsAuth(false);
+    setAnimationFrame(null);
+    setAnimating(false);
     try {
       window.localStorage.removeItem(storageKey);
     } catch {
       // Ignore browsers that deny localStorage.
     }
   }, [round, storageKey]);
+
+  const displayBoard = animationFrame?.board ?? snapshot.state.board;
+  const animatedIndexes = useMemo(
+    () => new Set(animationFrame?.indexes ?? []),
+    [animationFrame],
+  );
+  const cellMotion = (index: number) =>
+    animatedIndexes.has(index) && animationFrame ? styles[animationFrame.kind] : undefined;
+  const cellStyle = (index: number) =>
+    ({ "--drop7-rows": Math.floor(index / BOARD_SIZE) + 1 }) as CSSProperties;
 
   const submit = useCallback(async () => {
     if (!completed || submitting || submission) return;
@@ -192,14 +269,16 @@ export function CompetitionGame({
             </span>
           </div>
           <span className={LABEL + " text-zinc-500"}>
-            {completed ? "run complete" : "tap a column"}
+            {completed ? "run complete" : animating ? animationLabel(animationFrame) : "tap a column"}
           </span>
         </div>
 
         <Drop7Board
-          cells={snapshot.state.board}
+          cells={displayBoard}
           size="100%"
           label={snapshot.state.movesPlayed + " moves played in " + manifest.name}
+          cellClassName={cellMotion}
+          cellStyle={cellStyle}
           overlay={
             <>
               <div className="absolute inset-1.5 grid grid-cols-7">
@@ -207,7 +286,7 @@ export function CompetitionGame({
                   <button
                     key={column}
                     type="button"
-                    disabled={completed || !legal.has(column)}
+                    disabled={completed || animating || !legal.has(column)}
                     onClick={() => commitMove(column)}
                     aria-label={
                       legal.has(column)
@@ -237,54 +316,83 @@ export function CompetitionGame({
 
       <div className="mt-5 border-t border-zinc-800 pt-4">
         {completed ? (
-          <div className="space-y-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={() => void submit()}
-                disabled={submitting || Boolean(submission)}
-                className="rounded-md border border-violet-500 bg-violet-500 px-3 py-2 text-xs font-bold uppercase tracking-wide text-white transition-colors hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-50"
+          submission ? (
+            <div className="space-y-3">
+              <div
+                role="status"
+                className="w-full rounded-lg border border-emerald-500/50 bg-emerald-500/15 px-4 py-4 text-emerald-100"
               >
-                {submitting ? "validating…" : submission ? "submitted" : "submit verified run"}
-              </button>
+                <div className="flex items-start gap-3">
+                  <span
+                    aria-hidden="true"
+                    className="flex size-7 shrink-0 items-center justify-center rounded-full bg-emerald-400 font-black text-emerald-950"
+                  >
+                    ✓
+                  </span>
+                  <div className="min-w-0">
+                    <p className="font-bold">Your most recent run was submitted.</p>
+                    <p className="mt-1 text-sm text-emerald-200/80">
+                      {formatInteger(submission.verifiedScore)} points are now recorded for this game.
+                    </p>
+                    {submission.scoreMismatch && (
+                      <p className="mt-1 text-sm text-amber-200">
+                        The reported score differed from the replayed score and was flagged; the replayed score ranks.
+                      </p>
+                    )}
+                    <Link
+                      href={"/leaderboard/human/" + submission.submissionId}
+                      className="mt-2 inline-block text-sm font-semibold underline underline-offset-2 hover:text-white"
+                    >
+                      View submitted replay →
+                    </Link>
+                  </div>
+                </div>
+              </div>
               <button
                 type="button"
                 onClick={restart}
-                className="rounded-md border border-zinc-700 px-3 py-2 text-xs font-bold uppercase tracking-wide text-zinc-300 hover:border-zinc-500 hover:text-zinc-50"
+                className="w-full rounded-lg border border-violet-400 bg-violet-500 px-4 py-3 text-sm font-black uppercase tracking-[0.08em] text-white shadow-lg shadow-violet-950/30 transition-colors hover:bg-violet-400"
               >
-                play again
+                Play again
               </button>
+              <p className="text-center text-xs text-zinc-500">
+                Starts a fresh local game and clears the saved choices from this run.
+              </p>
             </div>
-            {needsAuth && (
-              <p className="text-sm text-amber-200">
-                Sign in explicitly before sharing this run. Nothing has been uploaded yet.{" "}
+          ) : (
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => void signIn("github", { redirectTo: "/compete" })}
-                  className="font-semibold underline underline-offset-2"
+                  onClick={() => void submit()}
+                  disabled={submitting}
+                  className="rounded-md border border-violet-500 bg-violet-500 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-white transition-colors hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  Sign in with GitHub to contribute →
+                  {submitting ? "validating…" : "submit verified run"}
                 </button>
-              </p>
-            )}
-            {submission && (
-              <p className="text-sm text-emerald-300">
-                Lambda replay verified {formatInteger(submission.verifiedScore)} points.
-                {submission.scoreMismatch && (
-                  <span className="ml-1 text-amber-300">
-                    The client score differed and was flagged; the replayed score ranks.
-                  </span>
-                )}{" "}
-                <Link
-                  href={"/leaderboard/human/" + submission.submissionId}
-                  className="font-semibold underline underline-offset-2"
+                <button
+                  type="button"
+                  onClick={restart}
+                  className="rounded-md border border-zinc-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-zinc-200 transition-colors hover:border-violet-400 hover:bg-violet-500/10 hover:text-white"
                 >
-                  View replay →
-                </Link>
-              </p>
-            )}
-            {submitError && <p className="text-sm text-red-300">{submitError}</p>}
-          </div>
+                  Play again
+                </button>
+              </div>
+              {needsAuth && (
+                <p className="text-sm text-amber-200">
+                  Sign in explicitly before sharing this run. Nothing has been uploaded yet.{" "}
+                  <button
+                    type="button"
+                    onClick={() => void signIn("github", { redirectTo: "/compete" })}
+                    className="font-semibold underline underline-offset-2"
+                  >
+                    Sign in with GitHub to contribute →
+                  </button>
+                </p>
+              )}
+              {submitError && <p className="text-sm text-red-300">{submitError}</p>}
+            </div>
+          )
         ) : (
           <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-zinc-500">
             <p>This run is local-only. No game data is sent while you play.</p>
@@ -322,10 +430,11 @@ function advance(
   round: ScriptedRound,
   snapshot: ScriptedSnapshot,
   column: number,
-): ScriptedSnapshot | null {
+  captureAnimation: boolean,
+): AnimatedMove | null {
   let nextRowCursor = snapshot.rowCursor;
   const move = playMove(snapshot.state, column, CONSTANT_RANDOM, {
-    captureAnimation: false,
+    captureAnimation,
     latent: {
       values: snapshot.latent as LatentValues,
       nextCoveredRow: () => round.latentRows[nextRowCursor++],
@@ -337,9 +446,12 @@ function advance(
     state = { ...state, nextDisc: round.discs[state.movesPlayed] };
   }
   return {
-    state,
-    latent: move.latentValues ?? snapshot.latent,
-    rowCursor: nextRowCursor,
+    snapshot: {
+      state,
+      latent: move.latentValues ?? snapshot.latent,
+      rowCursor: nextRowCursor,
+    },
+    animation: move.animation,
   };
 }
 
@@ -351,9 +463,9 @@ function replayLocal(
   let snapshot = createStart(round);
   for (const column of columns) {
     if (!legalColumns(snapshot.state.board).includes(column)) return null;
-    const next = advance(round, snapshot, column);
+    const next = advance(round, snapshot, column, false);
     if (!next) return null;
-    snapshot = next;
+    snapshot = next.snapshot;
   }
   return snapshot;
 }
@@ -369,4 +481,17 @@ function Stat({ label, value }: { label: string; value: string }) {
 
 function formatInteger(value: number) {
   return Math.round(value).toLocaleString("en-US");
+}
+
+function animationLabel(frame: MoveAnimationFrame | null) {
+  if (!frame) return "moving";
+  if (frame.kind === "drop") return "dropping";
+  if (frame.kind === "rise") return "level up";
+  if (frame.kind === "settle") return "settling";
+  if (frame.kind === "burst") return `chain ${frame.chainDepth ?? 1}`;
+  return "burst";
+}
+
+function wait(milliseconds: number) {
+  return new Promise<void>((resolve) => window.setTimeout(resolve, milliseconds));
 }

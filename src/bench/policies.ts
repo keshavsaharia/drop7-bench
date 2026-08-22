@@ -31,6 +31,8 @@ export interface BenchPolicy {
   name: string;
   family: string;
   description: string;
+  /** Repository-backed page explaining the exact strategy family/configuration. */
+  researchPath: `/approaches/${string}`;
   /**
    * True when the decision depends only on the legal public state. Policies
    * that additionally read level or move number (which the research contract
@@ -80,6 +82,7 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
     family: "heuristic-search",
     description:
       "Exact chance average over the immediate move, scored by the combined hand evaluator. The fast baseline.",
+    researchPath: "/approaches/fair-expectimax/fair-policy",
     publicInformation: true,
     chooseColumn: (state) =>
       evaluateMoves(publicOnly(state), { maxDepth: 1, maxWork: 100_000 })
@@ -91,6 +94,7 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
     family: "fair-expectimax",
     description:
       "Full-width expectimax, two completed plies, combined leaf, fixed work bound.",
+    researchPath: "/approaches/fair-expectimax/reference",
     publicInformation: true,
     chooseColumn: (state) =>
       evaluateMoves(publicOnly(state), { maxDepth: 2, maxWork: 100_000 })
@@ -98,10 +102,11 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
   }),
   define({
     id: "expectimax-d3",
-    name: "Expectimax D3",
+    name: "TypeScript Expectimax D3",
     family: "fair-expectimax",
     description:
       "Full-width expectimax, three completed plies. The affordable end of the reference line.",
+    researchPath: "/approaches/fair-expectimax/reference",
     publicInformation: true,
     slow: true,
     chooseColumn: (state) =>
@@ -110,10 +115,11 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
   }),
   define({
     id: "expectimax-d4",
-    name: "Expectimax D4 (reference)",
+    name: "TypeScript Expectimax D4",
     family: "fair-expectimax",
     description:
-      "Completed full-width depth 4 with the fair leaf at the reference work bound. The strongest dependable reference; slow in TypeScript.",
+      "Completed full-width TypeScript depth 4 with exact engine outcomes and the combined leaf. A playground analogue of the native research reference, not a source-identical port.",
+    researchPath: "/approaches/fair-expectimax/reference",
     publicInformation: true,
     slow: true,
     chooseColumn: (state) =>
@@ -126,6 +132,7 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
     family: "heuristic-search",
     description:
       "Rule policy prioritizing cracks, reveals, cover altitude, and occupancy flow.",
+    researchPath: "/approaches/heuristic-search/gray-throughput",
     publicInformation: false,
     chooseColumn: (state) => evaluateGrayThroughputMoves(state).bestColumn,
   }),
@@ -135,6 +142,7 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
     family: "heuristic-search",
     description:
       "Eight paired rollouts per root column over an eight-move horizon with a greedy continuation.",
+    researchPath: "/approaches/heuristic-search/rollout",
     publicInformation: true,
     chooseColumn: (state) =>
       evaluateRolloutMoves(publicOnly(state), {
@@ -149,6 +157,7 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
     family: "tree-search",
     description:
       "Chance-sampled Monte Carlo tree search, 400 simulations, 16-move horizon, heuristic leaf.",
+    researchPath: "/approaches/tree-search/mcts",
     publicInformation: true,
     chooseColumn: (state) =>
       evaluateMctsMoves(publicOnly(state), {
@@ -163,6 +172,7 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
     family: "heuristic-search",
     description:
       "Iterative-deepening expectimax with five stratified chance samples per branch, two plies.",
+    researchPath: "/approaches/heuristic-search/sparse-expectimax",
     publicInformation: true,
     chooseColumn: (state) =>
       evaluateSparseExpectimaxMoves(publicOnly(state), {
@@ -177,6 +187,7 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
     family: "heuristic-search",
     description:
       "CVaR-weighted root over a two-ply expectimax continuation; trades mean for a safer lower tail.",
+    researchPath: "/approaches/heuristic-search/risk-sensitive",
     publicInformation: true,
     chooseColumn: (state) =>
       evaluateRiskSensitiveMoves(publicOnly(state), {
@@ -194,6 +205,7 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
     family: "heuristic-search",
     description:
       "Replanning open-loop prefix beam over twelve shared scenarios, bounded by logical work (the wall-clock cap is a loose safety net).",
+    researchPath: "/approaches/heuristic-search/open-loop",
     publicInformation: true,
     chooseColumn: (state) =>
       evaluateRobustOpenLoopBeam(publicOnly(state), {
@@ -210,6 +222,19 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
 export const DEFAULT_POLICY_IDS = BENCH_POLICIES.filter(
   (policy) => !policy.slow,
 ).map((policy) => policy.id);
+
+/** Public-information policies seeded into each human competition by default. */
+export const COMPETITION_POLICY_IDS = [
+  "expectimax-d4",
+  "expectimax-d3",
+  "expectimax-d2",
+  "greedy",
+  "open-loop-beam",
+  "risk-d2",
+  "sparse-d2",
+  "rollout-h8",
+  "mcts",
+] as const;
 
 export function getPolicy(id: string): BenchPolicy {
   const policy = BENCH_POLICIES.find((candidate) => candidate.id === id);

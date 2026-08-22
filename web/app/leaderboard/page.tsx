@@ -1,9 +1,16 @@
 import Link from "next/link";
 import {
-  loadHumanLeaderboard,
-  type HumanLeaderboardEntry,
+  loadCompetitionLeaderboard,
+  type CompetitionLeaderboardEntry,
 } from "@/lib/competition/ledger";
-import { COMPETITION_GAME } from "@/lib/competition/game";
+import {
+  COMPETITION_GAME_KEY,
+  type CompetitionGameDefinition,
+} from "@/lib/competition/game";
+import {
+  getCompetitionGame,
+  listCompetitionGames,
+} from "@/lib/competition/registry";
 import { loadLeaderboard, type LeaderboardData } from "@/lib/leaderboard";
 
 export const dynamic = "force-dynamic";
@@ -14,11 +21,16 @@ const fmt = (value: number | null) =>
 export default async function LeaderboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ players?: string }>;
+  searchParams: Promise<{ players?: string; game?: string }>;
 }) {
   const data = loadLeaderboard();
-  const human = await loadHumanLeaderboard();
-  const requestedFilter = (await searchParams).players;
+  const requested = await searchParams;
+  const selectedGame =
+    (requested.game && getCompetitionGame(requested.game)) ||
+    getCompetitionGame(COMPETITION_GAME_KEY);
+  if (!selectedGame) throw new Error("Current competition is not registered");
+  const ledger = await loadCompetitionLeaderboard(selectedGame.gameKey);
+  const requestedFilter = requested.players;
   const playerFilter =
     requestedFilter === "human" || requestedFilter === "ai"
       ? requestedFilter
@@ -26,9 +38,11 @@ export default async function LeaderboardPage({
   const competition = (
     <CompetitionLeaderboard
       data={data}
-      humanEntries={human.entries}
-      humanAvailable={human.available}
+      ledgerEntries={ledger.entries}
+      ledgerAvailable={ledger.available}
       filter={playerFilter}
+      selectedGame={selectedGame}
+      games={listCompetitionGames()}
     />
   );
 
@@ -130,6 +144,14 @@ export default async function LeaderboardPage({
                       )}
                     </div>
                     <div className="text-xs text-zinc-500">{policy?.family}</div>
+                    {policy?.researchPath && (
+                      <Link
+                        href={policy.researchPath}
+                        className="text-xs text-sky-500 hover:text-sky-300"
+                      >
+                        Research →
+                      </Link>
+                    )}
                   </td>
                   <td className="px-3 py-2 text-right font-bold text-zinc-50">
                     {fmt(summary.meanScore)}
@@ -243,46 +265,71 @@ interface CompetitionEntry {
   href: string;
   detail: string;
   scoreMismatch: boolean;
+  researchUrl: string | null;
 }
 
 function CompetitionLeaderboard({
   data,
-  humanEntries,
-  humanAvailable,
+  ledgerEntries,
+  ledgerAvailable,
   filter,
+  selectedGame,
+  games,
 }: {
   data: LeaderboardData | null;
-  humanEntries: HumanLeaderboardEntry[];
-  humanAvailable: boolean;
+  ledgerEntries: CompetitionLeaderboardEntry[];
+  ledgerAvailable: boolean;
   filter: PlayerFilter;
+  selectedGame: CompetitionGameDefinition;
+  games: CompetitionGameDefinition[];
 }) {
   const policies = new Map(data?.policies.map((policy) => [policy.id, policy]) ?? []);
-  const aiEntries: CompetitionEntry[] = (data?.games ?? [])
-    .filter((game) => game.roundId === COMPETITION_GAME.roundId)
+  const persistedPolicyIds = new Set(
+    ledgerEntries
+      .filter((entry) => entry.kind === "ai")
+      .map((entry) => entry.policyId)
+      .filter((policyId): policyId is string => policyId !== null),
+  );
+  const localAiEntries: CompetitionEntry[] = (data?.games ?? [])
+    .filter(
+      (game) =>
+        game.roundId === selectedGame.manifest.roundId &&
+        !persistedPolicyIds.has(game.policyId),
+    )
     .map((game) => {
       const policy = policies.get(game.policyId);
       return {
-        id: "ai:" + game.policyId,
+        id: "local-ai:" + game.policyId,
         name: policy?.name ?? game.policyId,
         kind: "ai",
         score: game.score,
         moves: game.moves,
         href: "/leaderboard/" + game.policyId + "/" + game.roundId,
-        detail: policy?.publicInformation === false ? "extended-state policy" : "public policy",
+        detail:
+          (policy?.publicInformation === false
+            ? "extended-state policy"
+            : "public policy") + " · local artifact",
         scoreMismatch: false,
+        researchUrl: policy?.researchPath ?? null,
       };
     });
-  const humans: CompetitionEntry[] = humanEntries.map((entry) => ({
-    id: "human:" + entry.submissionId,
+  const persistedEntries: CompetitionEntry[] = ledgerEntries.map((entry) => ({
+    id: entry.kind + ":" + entry.submissionId,
     name: entry.displayName,
-    kind: "human",
+    kind: entry.kind,
     score: entry.verifiedScore,
     moves: entry.moveCount,
     href: "/leaderboard/human/" + entry.submissionId,
-    detail: entry.provider + " · " + new Date(entry.submittedAt).toLocaleDateString(),
+    detail:
+      (entry.kind === "ai"
+        ? `${entry.policyFamily ?? "research"} · ${entry.publicInformation === false ? "extended state" : "public policy"}`
+        : entry.provider) +
+      " · " +
+      new Date(entry.submittedAt).toLocaleDateString(),
     scoreMismatch: entry.scoreMismatch,
+    researchUrl: entry.researchUrl,
   }));
-  const entries = [...humans, ...aiEntries]
+  const entries = [...persistedEntries, ...localAiEntries]
     .filter((entry) => filter === "all" || entry.kind === filter)
     .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
 
@@ -290,31 +337,58 @@ function CompetitionLeaderboard({
     <section className="space-y-4">
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-400">
-          Global competition · {COMPETITION_GAME.gameVersion}
+          {selectedGame.manifest.name} · {selectedGame.manifest.gameVersion}
         </p>
         <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="text-2xl font-black text-zinc-50">Human + AI leaderboard</h1>
             <p className="mt-2 max-w-3xl text-sm text-zinc-400">
-              Every entry is scored on {COMPETITION_GAME.roundId}. Human scores come from
+              Every entry is scored on {selectedGame.manifest.roundId}. Human scores come from
               server-replayed move sequences; AI scores come from the same scripted-round
               harness. This is a reproducible playground, not research-tier evidence.
             </p>
           </div>
           <Link
-            href="/compete"
+            href={
+              selectedGame.gameKey === COMPETITION_GAME_KEY
+                ? "/compete"
+                : "/leaderboard"
+            }
             className="rounded-md border border-violet-500/60 px-3 py-2 text-sm font-semibold text-violet-300 hover:bg-violet-500/10"
           >
-            Play this game →
+            {selectedGame.gameKey === COMPETITION_GAME_KEY
+              ? "Play this game →"
+              : "Current competition →"}
           </Link>
         </div>
       </div>
+
+      {games.length > 1 && (
+        <div className="flex flex-wrap gap-2" aria-label="Competition game">
+          {games.map((game) => (
+            <Link
+              key={game.gameKey}
+              href={leaderboardHref(filter, game.gameKey)}
+              aria-current={game.gameKey === selectedGame.gameKey ? "page" : undefined}
+              className={
+                "rounded-md border px-3 py-2 text-xs " +
+                (game.gameKey === selectedGame.gameKey
+                  ? "border-sky-500/70 bg-sky-500/10 text-sky-200"
+                  : "border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300")
+              }
+            >
+              {game.manifest.name}
+              {game.gameKey !== COMPETITION_GAME_KEY ? " · archived" : " · current"}
+            </Link>
+          ))}
+        </div>
+      )}
 
       <div className="flex flex-wrap gap-2" aria-label="Leaderboard player filter">
         {(["all", "human", "ai"] as const).map((option) => (
           <Link
             key={option}
-            href={option === "all" ? "/leaderboard" : "/leaderboard?players=" + option}
+            href={leaderboardHref(option, selectedGame.gameKey)}
             aria-current={filter === option ? "page" : undefined}
             className={
               "rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide " +
@@ -348,6 +422,14 @@ function CompetitionLeaderboard({
                     {entry.name}
                   </Link>
                   <div className="text-xs text-zinc-600">{entry.detail}</div>
+                  {entry.researchUrl && (
+                    <a
+                      href={entry.researchUrl}
+                      className="text-xs text-sky-500 hover:text-sky-300"
+                    >
+                      Research →
+                    </a>
+                  )}
                 </td>
                 <td className="px-3 py-2">
                   <span
@@ -375,8 +457,8 @@ function CompetitionLeaderboard({
             {entries.length === 0 && (
               <tr className="border-t border-zinc-800">
                 <td colSpan={5} className="px-3 py-8 text-center text-zinc-500">
-                  {filter === "human" && !humanAvailable
-                    ? "The human ledger is unavailable in this local checkout."
+                  {!ledgerAvailable
+                    ? "The competition ledger is unavailable in this local checkout."
                     : "No entries in this filter yet."}
                 </td>
               </tr>
@@ -386,4 +468,12 @@ function CompetitionLeaderboard({
       </div>
     </section>
   );
+}
+
+function leaderboardHref(filter: PlayerFilter, gameKey: string) {
+  const params = new URLSearchParams();
+  if (filter !== "all") params.set("players", filter);
+  if (gameKey !== COMPETITION_GAME_KEY) params.set("game", gameKey);
+  const query = params.toString();
+  return query ? `/leaderboard?${query}` : "/leaderboard";
 }
