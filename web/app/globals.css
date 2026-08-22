@@ -321,3 +321,62 @@ body {
 .arm-table tbody tr:last-child td {
   border-bottom: 0;
 }
+
+/* Live visual intro on the rules page (web/components/Drop7Intro.tsx).
+   Unlayered so it wins inside .prose-drop7 the same way .engine-fig does. */
+.drop7-intro {
+  margin: 1.2rem 0;
+  border: 1px solid #27272a;
+  border-radius: 0.75rem;
+  background: #101014;
+  padding: 1.25rem 1rem 1rem;
+}
+.drop7-intro-board {
+  display: flex;
+  justify-content: center;
+}
+.drop7-intro figcaption {
+  margin: 0.7rem 0 0;
+  text-align: center;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: #71717a;
+}
+.drop7-intro-columns {
+  position: absolute;
+  inset: 0.375rem;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+.drop7-intro-col {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-left: 2px solid transparent;
+  border-right: 2px solid transparent;
+  background: transparent;
+  cursor: pointer;
+}
+.drop7-intro-col:hover:enabled,
+.drop7-intro-col.is-aim {
+  background: rgba(56, 189, 248, 0.1);
+  border-color: rgba(56, 189, 248, 0.5);
+}
+.drop7-intro-col:disabled {
+  cursor: default;
+}
+.drop7-intro-ended {
+  position: absolute;
+  inset: 0.375rem;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.25rem;
+  background: rgba(9, 9, 11, 0.78);
+  color: #fafafa;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}

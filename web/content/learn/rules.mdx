@@ -6,34 +6,27 @@ order: 1
 
 Drop7 is a one-player puzzle on a 7 by 7 grid. Each turn you are handed a numbered disc
 to drop in an available column. The disc falls, can explode based on rules described below,
-and can set off a chain reaction of explosions as falling discs rearrange themselves. Every 
-five turns, the whole board is pushed up one row by a fresh row of gray "hidden discs".
+and can set off a chain reaction of explosions as falling discs rearrange themselves.
+
+<Drop7Intro />
+
+Every five turns, the whole board is pushed up one row by a fresh row of gray "hidden discs".
 Creating explosions near the hidden discs cracks and reveals a number. Keep the board from
 overflowing for as long as you can, and score as much as you can on the way.
 
-The rest of this page makes that short description more precise.
+## The board and the pieces
 
-<Callout title="How to read the animations" tone="info">
-Each animation steps through a single move of the game: the user chooses a column to drop
-a particular incoming disc, and then the result plays out. Below each animation, each step
-of a multi-stage explosion might also be laid out as a filmstrip. The panels on the right
-show the score earned from the move.
-</Callout>
-
-## 1. The board and the pieces
-
-There are only three kinds of thing on the board, plus empty space:
+On a Drop7 board, there are four possible states of any given cell: empty, a numbered disc, a gray disc, or a cracked gray disc.
 
 <DiscLegend />
 
-This is what the player sees when playing the game.
+During a game, a player sees the next numbered disc to drop in the board, and the current state of the board itself. This is all the information that would be available to a "fair" computer player that is determining the optimal move in the game.
 
 <PlayerView caption="The visible board, the next disc, and the rise clock are public. What is under a gray disc is unknowable until it is opened, and nobody knows which discs are coming after the next one." />
 
-## 2. A turn: pick a column
+## Pick a column each turn
 
-You do not place the disc in a cell; you choose one of the seven columns and
-gravity does the rest.
+Choose one of the seven columns, and gravity does the rest.
 
 <DropPhysics />
 
@@ -47,34 +40,39 @@ gravity does the rest.
   caption="The simplest possible move: the disc lands and nothing matches."
 />
 
-A column is legal only while its top cell is empty. A full column cannot take a
-disc, and it matters for the rise too (section 7):
+A column can only accept a new disc if its top cell is empty.
 
 <LegalColumns />
 
-## 3. The one rule: a disc clears when its run equals its number
+## A disc explodes when its number matches its run
 
-A numbered disc disappears when the unbroken line of occupied cells through it —
-counted along its **row**, or along its **column** — has a length exactly equal
-to its number. Count the run, compare it to the disc, done.
+Count the unbroken occupied cells through the disc in its row and its column,
+including the disc itself. It explodes if either run length exactly equals its number.
 
 <RunCounter
-  row="0033300"
-  focus={3}
-  caption="Three occupied cells in a row through this 3. The run is exactly 3, so it clears — and so do the other two 3s in the run, because their own runs are also 3."
+  row="0056300"
+  focus={4}
+  caption="The 3 sits beside a 5 and a 6, making a run of three occupied cells. The 3 clears because its own number matches that run; the 5 and 6 stay."
 />
 
 <RulesScenario
   id="row-clear"
   notes={[
-    "Two 3s sit side by side with an empty cell to their right. The 6 in the corner is a bystander.",
+    "A 5 and a 6 sit side by side. The 4 in the corner is a bystander.",
     "The 3 lands next to them, making a horizontal run of three occupied cells.",
-    "Each of the three 3s now sits in a row-run of length 3, so all three clear in the same wave: 3 discs × 7 points.",
-    "They are removed together. The 6 is untouched: its row-run was 1 and its column-run was 1.",
-    "The board settles. Nothing was above the cleared discs, so nothing falls.",
+    "The run length matches the 3, so that disc clears for 7 points. The neighboring 5 and 6 compare the same run with their own numbers and stay.",
+    "The 3 is removed. Every numbered disc is judged independently, even when several share the same run.",
+    "The board settles. Nothing was above the cleared disc, so nothing falls.",
   ]}
-  caption="A horizontal clear. The wave clears every matching disc at once — it is never one disc at a time."
+  caption="A horizontal clear. The neighboring numbers can be anything stable; only the disc whose own number matches the run explodes."
 />
+
+<Callout title="How to read the animations" tone="info">
+Each animation steps through a single move of the game: the user chooses a column to drop
+a particular incoming disc, and then the result plays out. Below each animation, each step
+of a multi-stage explosion might also be laid out as a filmstrip. The panels on the right
+show the score earned from the move.
+</Callout>
 
 The same rule reads downwards. A column-run counts the occupied cells stacked
 directly above and below the disc:
@@ -82,11 +80,11 @@ directly above and below the disc:
 <RulesScenario
   id="column-clear"
   notes={[
-    "Two 3s are stacked in column 2.",
-    "A third 3 lands on top of them.",
-    "Each 3 is now in a column-run of exactly 3. All three clear.",
-    "Removed together: 3 × 7 = 21 points.",
-    "Settled.",
+    "A 5 rests on a 6 in column 2.",
+    "The 3 lands on top, making a vertical run of three occupied cells.",
+    "The run length matches the 3, so that disc clears. The 5 and 6 stay because neither number matches 3.",
+    "The 3 is removed for 7 points.",
+    "Settled. The 5 and 6 remain stacked.",
   ]}
   caption="A vertical clear. A disc only needs one of its two runs to match."
 />
@@ -94,44 +92,44 @@ directly above and below the disc:
 The match has to be **exact**. A run that is too long does nothing:
 
 <RunCounter
-  row="0222000"
-  focus={2}
+  row="0652000"
+  focus={3}
   caption="This 2 sits in a run of three. 3 is not 2, so it stays. A disc is never cleared for being in a run longer than its number."
 />
 
 <RulesScenario
   id="mismatch"
   notes={[
-    "Three 2s in a row. Each sits in a run of three, and 3 ≠ 2, so they are stable — the run was overbuilt and the 2s are stuck.",
-    "A fourth 2 lands at the end of the run, making it four cells long.",
-    "4 ≠ 2. Nothing clears, nothing moves, and the turn simply ends. The only ways to free these 2s now are to get one of them into a column-run of exactly 2, or to shorten the row from underneath.",
+    "A 6, 5, and 2 form a run of three. None matches that row-run or its column-run, so the board is stable.",
+    "A 7 lands at the end, making the row-run four cells long.",
+    "The 2 still does not clear: 4 ≠ 2. The 6, 5, and 7 are stable too, so nothing moves and the turn ends.",
   ]}
-  caption="Too long is as good as too short. Overbuilding a run is one of the classic ways to lock numbers onto the board."
+  caption="Too long is as good as too short. The surrounding values do not need to match one another; each disc compares its own number with its row-run and column-run."
 />
 
 <Callout title="A subtle but important point" tone="warn">
 Gray discs are occupied cells. They **count toward the length of a run** even
-though they have no visible number to compare. A 3 next to two other 3s and a
-gray disc is in a run of four, not three.
+though they have no visible number to compare. A 3 beside a 5, a 6, and a gray
+disc is in a run of four, not three.
 </Callout>
 
 <RunCounter
-  row="0333800"
+  row="0356800"
   focus={1}
-  caption="Three 3s and a gray disc form a run of four. The gray disc lengthens the run, so the 3s do not clear."
+  caption="The 3, 5, 6, and gray disc form a run of four. The gray disc lengthens the run, so the 3 does not clear."
 />
 
 <RulesScenario
   id="gray-counts"
   notes={[
-    "Two 3s rest against a solid gray disc.",
-    "A 3 lands on their left, and it looks like the three 3s should go.",
-    "They do not: the gray disc extends the run to four. 4 ≠ 3. The board is stuck until something shortens that run or opens the gray.",
+    "A 5 and a 6 rest against a solid gray disc.",
+    "A 3 lands on their left. Without the gray disc, it would sit in a run of three.",
+    "It stays: the gray disc extends the occupied run to four, and 4 ≠ 3. The 5 and 6 are stable too.",
   ]}
-  caption="The same three 3s that cleared in section 3 — blocked by one gray disc counting as a fourth cell."
+  caption="A gray disc has no visible number, but it still counts as an occupied cell when every numbered disc measures its run."
 />
 
-## 4. Gray discs: cracking and revealing
+## Gray discs: cracking and revealing
 
 A solid gray disc <Disc solid /> hides a number from 1 to 7. It opens in two
 steps. Whenever a disc **directly next to it** (above, below, left, or right —
@@ -148,11 +146,10 @@ two clearing neighbours in the same wave opens immediately.
 <RulesScenario
   id="crack"
   notes={[
-    "A solid gray disc rests on the middle 3.",
-    "The dropped 3 completes a run of three.",
-    "All three 3s clear. The gray disc is directly above one of them, so it takes exactly one hit.",
+    "A solid gray disc sits beside the open top of a column. The visible 5, 6, 7, and 4 are all stable supports.",
+    "The 3 lands beside the gray disc and above the 5 and 7, making a column-run of three.",
+    "Only the 3 clears. Because the gray disc is directly beside it, the gray disc takes exactly one hit.",
     "One hit on a solid disc cracks it. Its number is still hidden.",
-    "With nothing under it any more, the cracked disc falls to the bottom row.",
     "Settled. The crack is permanent: the next hit will open it.",
   ]}
   caption="One hit cracks. The disc is still an obstacle, still counts toward runs, and still hides its number."
@@ -161,26 +158,25 @@ two clearing neighbours in the same wave opens immediately.
 <RulesScenario
   id="reveal"
   notes={[
-    "The same position, but the gray disc is already cracked.",
-    "The 3 drops in.",
-    "The three 3s clear, and the cracked disc above them takes its second hit.",
-    "The second hit reveals the hidden number — here a 5 — which is now a normal disc.",
-    "It falls into the gap left by the cleared 3s.",
-    "Settled. The 5 sits alone: row-run 1, column-run 1, neither equals 5, so it stays.",
+    "The same stable supports, but the neighboring gray disc is already cracked.",
+    "The 3 drops in and makes a column-run of three.",
+    "Only the 3 clears, giving the cracked disc beside it another hit.",
+    "The hit reveals the hidden number — here a 5 — which is now a normal disc.",
+    "Settled. The revealed 5 has a row-run of 1 and a column-run of 3, so it stays.",
   ]}
   caption="Two hits open a gray disc. Revealing is how the board gets new numbers — and how it gets new problems."
 />
 
-Those two hits do not have to come on different turns. Place a 3 on each side of a solid gray disc and both numbered discs sit in a row-run of three — so they both clear, and the gray disc is hit from left and right at once:
+Those two hits do not have to come on different turns. In this position, a 3 clears by its row-run while a 2 beside it clears by its column-run. With a solid gray disc between them, both explosions hit it at once:
 
 <RulesScenario
   id="both-sides"
   notes={[
-    "A 3 sits immediately left of a solid gray disc.",
-    "A second 3 drops on the gray disc's right: the row is now 3, gray, 3.",
-    "Each 3 is in a row-run of three occupied cells, so both clear in the same wave. 2 × 7 = 14 points.",
+    "A 3 sits immediately left of a solid gray disc. The 6, 5, and 7 underneath are stable supports.",
+    "A 2 drops on the gray disc's right. The upper row is now 3, gray, 2, and the 2 also has a column-run of two.",
+    "The 3 clears because its row-run is 3; the 2 clears because its column-run is 2. Together they score 14 points.",
     "The gray disc had a clearing neighbour on both sides. Two hits in one wave open it straight to its number — here a 4.",
-    "Settled. The 4 sits alone and stays.",
+    "Settled. The 4 stays on its supporting 5.",
   ]}
   caption="Two neighbours clearing in the same wave skip the cracked state. The gray disc never exists as a cracked disc on this board."
 />
@@ -190,11 +186,11 @@ The same counting works when the two hits are not on opposite sides:
 <RulesScenario
   id="double-hit"
   notes={[
-    "Two gray discs on the floor support two 3s. A lone 2 sits to their right in the bottom row, in a run of three.",
-    "A 3 lands on the 2. Its row now holds 3, 3, 3 — and the 2 underneath it is now in a column-run of exactly 2.",
-    "Four discs clear in one wave: the three 3s and the 2. Each wave clears every matching disc simultaneously.",
-    "Count the hits on the pre-clear board. The right-hand gray disc had a clearing 3 above it and the clearing 2 beside it: two hits in one wave, so it opens straight to its number (a 4). The left-hand gray disc had only the 3 above it: one hit, so it cracks.",
-    "Nothing is left to fall. 4 × 7 = 28 points for the wave; the two revealed or cracked discs are now part of the board.",
+    "A solid gray disc has a 3 above it and a 2 beside it. The nearby 5 and 6 are stable.",
+    "A 7 lands on the 2, completing a three-cell row through the 3 and a two-cell column through the 2.",
+    "The 3 and 2 clear together. The 5 and 7 share the same row but stay because their numbers do not match its length.",
+    "On the pre-clear board, the gray disc had the clearing 3 above it and the clearing 2 beside it. Those two perpendicular hits reveal a 4 immediately.",
+    "Gravity drops the 7 into the cleared 2's space. The wave scores 14 points, and every remaining number is stable.",
   ]}
   caption="Two hits in the same wave open a solid disc at once. Hits are judged on the board before the clear, so a disc that is about to be removed still counts as a neighbour."
 />
@@ -216,32 +212,31 @@ In latent mode, the values are written down in advance, so every legal policy
 that opens the same disc finds the same number.
 </Callout>
 
-## 5. Gravity and chain reactions
+## Gravity and chain reactions
 
-When discs clear, everything above them falls straight down. If the fall
-creates a new match, those discs clear too — that is **wave 2**, and it can go
-on. Each wave is worth more than the last (section 6).
+When discs clear, everything above them falls straight down. If the changed
+board creates a new match, those discs clear too — that is **wave 2**, and it
+can go on. Each successive wave is worth more than the last.
 
 <RulesScenario
   id="chain"
   secondsPerFrame={2}
   notes={[
-    "Two 3s on the floor, a solid gray disc and a cracked gray disc resting on them, and another gray disc further right.",
-    "A 3 drops in on the left, completing a horizontal run of three.",
-    "Wave 1: the three 3s clear. 3 × 7 = 21 points.",
-    "Hits: the solid disc above column 2 had one clearing neighbour below it and cracks; the already-cracked disc above column 3 takes its second hit and reveals a 1. The far-right gray disc had no clearing neighbour and is untouched.",
-    "Gravity: the cracked disc and the new 1 fall into the gap.",
-    "Wave 2: the 1 now stands alone in its column. A run of 1 equals its number, so it clears — the chain continues.",
-    "The cracked disc beside the 1 takes the hit it needed and reveals a 4. 1 disc × 39 points: wave 2 pays more than five times what wave 1 paid per disc.",
-    "Nothing else matches, so the cascade ends. Total for the move: 21 + 39 = 60, and the board has changed shape twice.",
+    "A cracked gray disc and a solid gray disc sit above stable 5, 6, 7, 4, and 5 supports.",
+    "The 3 drops beside the cracked disc. Its row-run and column-run are both three.",
+    "Wave 1: only the 3 clears, scoring 7 points.",
+    "The adjacent cracked disc takes its second hit and reveals a 2. The solid gray disc beside it was not next to the clearing 3, so it is untouched.",
+    "Wave 2: the revealed 2 now has a row-run of two with the solid gray disc, so it clears for 39 points.",
+    "That explosion hits the solid gray disc and cracks it.",
+    "Nothing else matches, so the cascade ends. Total for the move: 7 + 39 = 46.",
   ]}
-  caption="A two-wave chain. Notice that the second wave was caused by a disc that did not exist before the move — the revealed 1 — which is why reveals are the engine of long chains."
+  caption="A two-wave chain. The second wave comes from a newly revealed 2 whose own run happens to match — which is why reveals can keep a cascade going."
 />
 
 Everything inside one move — however many waves — happens before the next disc
 is offered, and the player has no decisions to make during it.
 
-## 6. Scoring
+## Scoring
 
 Each disc cleared in chain wave `d` is worth `floor(7 × d^2.5)` points. The
 curve is steep on purpose: a disc in wave 8 is worth 181 times a disc in wave 1.
@@ -258,16 +253,16 @@ Two bonuses sit on top of the wave points:
 <RulesScenario
   id="board-clear"
   notes={[
-    "Only two 3s remain on the board.",
-    "A third 3 completes the run.",
-    "All three clear: 21 points for the wave.",
-    "Removed — and the board is now completely empty.",
-    "An empty board after a move is worth 70,000 points on top of the 21. It is rare in real play, because the rise keeps adding gray rows, but it is the single largest bonus in the game.",
+    "The board is empty and the next disc is a 1.",
+    "The 1 lands by itself, so both its row-run and column-run have length 1.",
+    "The 1 clears for 7 points.",
+    "Removed — and the board is completely empty again.",
+    "An empty board after a move is worth 70,000 points on top of the 7. It is rare in real play, because the rise keeps adding gray rows, but it is the single largest bonus in the game.",
   ]}
-  caption="Clearing the last discs. The 70,000 is awarded at the end of the move, after every wave has resolved."
+  caption="Clearing the whole board. The 70,000 is awarded at the end of the move, after every wave has resolved."
 />
 
-## 7. Every fifth drop, the board rises
+## Every fifth drop, the board rises
 
 A clock counts down from 5. Each drop ticks it once. When it reaches zero, the
 whole board shifts **up one row** and a new row of seven solid gray discs
@@ -291,7 +286,7 @@ of the move that triggered it, not before; and the seven new gray discs are
 seven more unknown numbers *and* seven more occupied cells, which lengthens
 every vertical run passing through them.
 
-## 8. How a game ends
+## How a game ends
 
 There are exactly two ways for a game to end, and both are about running out of
 room:
@@ -305,7 +300,7 @@ room:
 <RulesScenario
   id="rise-blocked"
   notes={[
-    "Column 3 is stacked to the very top with alternating 5s and 6s, and the clock is on its last drop.",
+    "Column 3 is stacked to the very top with stable mixed values, and the clock is on its last drop.",
     "The 4 lands safely in column 0. Nothing matches.",
     "But the drop was the fifth of the cycle, and the board must now rise. Column 3 has no empty top cell to rise into, so the rise fails and the game ends immediately. The score earned so far is kept.",
   ]}
@@ -316,7 +311,7 @@ Nothing else ends a game: there is no timer, no move limit in the rules
 themselves (the research benchmarks cap games at 2,000 moves and mark those as
 censored), and no way to lose points.
 
-## 9. The whole rulebook in one table
+## The whole rulebook in one table
 
 | Rule | Precisely |
 | --- | --- |
@@ -324,7 +319,7 @@ censored), and no way to lose points.
 | A turn | You are shown the next disc; you choose a column whose top cell is empty; the disc falls to the lowest empty cell in that column. |
 | Clearing | A numbered disc clears when the contiguous run of occupied cells through it, along its row **or** its column, has length **exactly** equal to its number. Gray discs count as occupied. |
 | Waves | All matching discs clear simultaneously; gravity then pulls everything above them down; if new matches exist, the next wave clears them; repeat until nothing matches. |
-| Gray discs | A hit is an orthogonally adjacent disc clearing in the current wave, judged on the pre-clear board. Solid + 1 hit = cracked. Cracked + 1 hit = revealed. Solid + 2 hits in one wave = revealed. The revealed number is uniform on 1–7; this engine draws it at reveal time unless latent mode fixes it in advance (see section 4). |
+| Gray discs | A hit is an orthogonally adjacent disc clearing in the current wave, judged on the pre-clear board. Solid + 1 hit = cracked. Cracked + 1 hit = revealed. Solid + 2 hits in one wave = revealed. The revealed number is uniform on 1–7; this engine draws it at reveal time unless latent mode fixes it in advance. |
 | Wave score | `floor(7 × d^2.5)` points per disc cleared in wave `d`: 7, 39, 109, 224, 391, 617, 907, 1,267, … |
 | Rise | After every fifth drop (and after that move's cascade), the board moves up one row and a row of seven solid gray discs appears at the bottom; **+17,000**. A cascade caused by the new row continues the move's wave count. |
 | Board clear | A move that ends with an empty board earns **+70,000**. |

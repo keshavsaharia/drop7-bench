@@ -27,10 +27,10 @@ export interface ColumnNote {
 
 export interface Drop7BoardProps {
   cells: string | readonly number[];
-  /** Incoming disc, shown above the board. */
-  nextDisc?: number;
-  /** Column (0–6) the incoming disc is headed for; also marks that column. */
-  dropColumn?: number;
+  /** Incoming disc, shown above the board. `null` keeps the row reserved with no disc. */
+  nextDisc?: number | null;
+  /** Column (0–6) the incoming disc is headed for; also marks that column. `null` parks the disc with no column chosen. */
+  dropColumn?: number | null;
   /** Cell indexes (0–48, row-major from the top) to ring. */
   highlight?: readonly number[];
   /** Cell indexes to fade. */
@@ -93,10 +93,10 @@ export function Drop7Board({
   return (
     <figure className={`inline-flex max-w-full flex-col gap-1.5 align-top ${className}`} style={{ width }}>
       {nextDisc !== undefined && (
-        <div className="grid grid-cols-7 px-1.5" aria-label={`next disc ${nextDisc}`}>
+        <div className="grid grid-cols-7 px-1.5" aria-label={nextDisc === null ? "next disc" : `next disc ${nextDisc}`}>
           {Array.from({ length: 7 }, (_, column) => (
             <div key={column} className="flex aspect-square items-center justify-center p-[12%]">
-              {column === (dropColumn ?? 3) ? (
+              {nextDisc !== null && column === (typeof dropColumn === "number" ? dropColumn : 3) ? (
                 <DiscFace cell={nextDisc} className="size-full text-[0.9em]" />
               ) : null}
             </div>
@@ -114,7 +114,7 @@ export function Drop7Board({
             const column = index % 7;
             const ringed = highlight.includes(index);
             const faded = dim.includes(index);
-            const inDrop = dropColumn !== undefined && column === dropColumn;
+            const inDrop = typeof dropColumn === "number" && column === dropColumn;
             return (
               <div
                 key={index}
