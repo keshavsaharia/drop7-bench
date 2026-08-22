@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * Visual introduction to Drop7 for the rules page: a live board with no score,
- * no solver readout, and no chrome. A depth-3 expectimax with a one-second
+ * Visual introduction to Drop7 for the rules page: a live board with a compact
+ * score and rise clock, but no solver readout or game controls. A depth-3 expectimax with a one-second
  * budget chooses each drop unless the reader hovers the board and clicks a
  * column. Same engine, board, animation frames, and worker as `Drop7Game`.
  */
@@ -10,6 +10,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import {
   BOARD_SIZE,
+  MOVES_PER_LEVEL,
   createGame,
   legalColumns,
   playMove,
@@ -21,6 +22,7 @@ import {
 import type { SolverRequest, SolverResponse } from "@/lib/play/solver.protocol";
 import { Drop7Board } from "./Drop7Board";
 import styles from "./Drop7Game.module.css";
+import { useExplosionPoints } from "./useExplosionPoints";
 
 const INITIAL_SEED = 0xd7070017;
 const SEARCH_DEPTH = 3;
@@ -51,6 +53,11 @@ export function Drop7Intro({
   const animatingRef = useRef(false);
   const [animationFrame, setAnimationFrame] = useState<MoveAnimationFrame | null>(null);
   const animationRunRef = useRef(0);
+  const {
+    explosionPoints,
+    captureExplosionFrame,
+    clearExplosionPoints,
+  } = useExplosionPoints();
   const [autoColumn, setAutoColumn] = useState<number | null>(null);
   const [hoverColumn, setHoverColumn] = useState<number | null>(null);
 
@@ -93,9 +100,10 @@ export function Drop7Intro({
     gameRef.current = next;
     setGame(next);
     setAnimationFrame(null);
+    clearExplosionPoints();
     setAnimating(false);
     setAutoColumn(null);
-  }, []);
+  }, [clearExplosionPoints]);
 
   const commitMove = useCallback((column: number, expectedMove?: number) => {
     if (animatingRef.current) return;
@@ -109,6 +117,7 @@ export function Drop7Intro({
     animatingRef.current = true;
     setAnimating(true);
     setAnimationFrame(null);
+    clearExplosionPoints();
     setAutoColumn(null);
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -131,12 +140,13 @@ export function Drop7Intro({
     void (async () => {
       for (const frame of frames) {
         if (animationRunRef.current !== run) return;
+        captureExplosionFrame(frame);
         setAnimationFrame(frame);
         await wait(FRAME_DURATION_MS[frame.kind]);
       }
       finishMove();
     })();
-  }, []);
+  }, [captureExplosionFrame, clearExplosionPoints]);
 
   useEffect(() => {
     if (!active || animating || game.gameOver) return;
@@ -209,6 +219,10 @@ export function Drop7Intro({
   const animatedIndexes = useMemo(() => new Set(animationFrame?.indexes ?? []), [animationFrame]);
   const aimColumn = hoverColumn ?? autoColumn;
   const previewColumn = animating || game.gameOver ? undefined : aimColumn;
+  const risePending = animating && game.movesRemaining === 1;
+  const completedRiseDots = risePending
+    ? MOVES_PER_LEVEL
+    : MOVES_PER_LEVEL - game.movesRemaining;
 
   const cellMotion = (index: number) =>
     animatedIndexes.has(index) && animationFrame ? styles[animationFrame.kind] : undefined;
@@ -223,57 +237,90 @@ export function Drop7Intro({
       aria-busy={animating}
     >
       <div className="drop7-intro-board">
-        <Drop7Board
-          cells={displayBoard}
-          nextDisc={animating || game.gameOver ? null : game.nextDisc}
-          dropColumn={previewColumn}
-          size="min(100%, 24rem)"
-          cellClassName={cellMotion}
-          cellStyle={cellStyle}
-          label="A live Drop7 board. Click a column to drop the next disc."
-          overlay={
-            <>
-              <div
-                className="drop7-intro-columns"
-                onPointerLeave={() => setHoverColumn(null)}
-              >
-                {Array.from({ length: BOARD_SIZE }, (_, column) => {
-                  const aiming = aimColumn === column && !animating && !game.gameOver;
-                  const disabled = game.gameOver || animating || !legal.has(column);
-                  return (
-                    <button
-                      key={column}
-                      type="button"
-                      disabled={disabled}
-                      className={`drop7-intro-col${aiming ? " is-aim" : ""}`}
-                      onPointerEnter={() => {
-                        if (!legal.has(column) || animating || game.gameOver) return;
-                        setHoverColumn(column);
-                      }}
-                      onClick={() => commitMove(column)}
-                      aria-label={
-                        legal.has(column)
-                          ? `Drop ${game.nextDisc} in column ${column + 1}`
-                          : `Column ${column + 1} is full`
-                      }
-                    />
-                  );
-                })}
-              </div>
-              {game.gameOver && (
-                <div className="drop7-intro-ended" aria-live="polite">
-                  the board overflowed
+        <div className="drop7-intro-shell">
+          <div className="drop7-intro-hud">
+            <p className="drop7-intro-score">
+              <span>score</span>
+              <strong aria-live="polite">{formatInteger(game.score)}</strong>
+            </p>
+            <div
+              className="drop7-intro-rise"
+              aria-label={
+                risePending
+                  ? "Board rise in progress"
+                  : `Board rises after ${game.movesRemaining} more drops`
+              }
+            >
+              <span>rise</span>
+              <span className="drop7-intro-rise-dots" aria-hidden="true">
+                {Array.from({ length: MOVES_PER_LEVEL }, (_, index) => (
+                  <span
+                    key={index}
+                    className={`drop7-intro-rise-dot${
+                      index < completedRiseDots ? " is-spent" : ""
+                    }${risePending ? " is-imminent" : ""}`}
+                  />
+                ))}
+              </span>
+            </div>
+          </div>
+          <Drop7Board
+            cells={displayBoard}
+            nextDisc={animating || game.gameOver ? null : game.nextDisc}
+            dropColumn={previewColumn}
+            size="100%"
+            cellClassName={cellMotion}
+            cellStyle={cellStyle}
+            explosionPoints={explosionPoints}
+            label="A live Drop7 board. Click a column to drop the next disc."
+            overlay={
+              <>
+                <div
+                  className="drop7-intro-columns"
+                  onPointerLeave={() => setHoverColumn(null)}
+                >
+                  {Array.from({ length: BOARD_SIZE }, (_, column) => {
+                    const aiming = aimColumn === column && !animating && !game.gameOver;
+                    const disabled = game.gameOver || animating || !legal.has(column);
+                    return (
+                      <button
+                        key={column}
+                        type="button"
+                        disabled={disabled}
+                        className={`drop7-intro-col${aiming ? " is-aim" : ""}`}
+                        onPointerEnter={() => {
+                          if (!legal.has(column) || animating || game.gameOver) return;
+                          setHoverColumn(column);
+                        }}
+                        onClick={() => commitMove(column)}
+                        aria-label={
+                          legal.has(column)
+                            ? `Drop ${game.nextDisc} in column ${column + 1}`
+                            : `Column ${column + 1} is full`
+                        }
+                      />
+                    );
+                  })}
                 </div>
-              )}
-            </>
-          }
-        />
+                {game.gameOver && (
+                  <div className="drop7-intro-ended" aria-live="polite">
+                    the board overflowed
+                  </div>
+                )}
+              </>
+            }
+          />
+        </div>
       </div>
       <figcaption>
         Watch a game, or hover the board and click a column to drop the next disc.
       </figcaption>
     </figure>
   );
+}
+
+function formatInteger(value: number) {
+  return Math.round(value).toLocaleString("en-US");
 }
 
 function wait(milliseconds: number) {

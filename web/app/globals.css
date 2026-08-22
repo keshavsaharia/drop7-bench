@@ -335,6 +335,69 @@ body {
   display: flex;
   justify-content: center;
 }
+.drop7-intro-shell {
+  width: min(100%, 24rem);
+}
+.drop7-intro-hud {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 0.35rem;
+  padding: 0 0.4rem;
+}
+.drop7-intro .drop7-intro-score,
+.drop7-intro-rise {
+  margin: 0;
+}
+.drop7-intro-score > span,
+.drop7-intro-rise > span:first-child {
+  display: block;
+  color: #71717a;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.drop7-intro-score strong {
+  display: block;
+  margin-top: 0.25rem;
+  color: #fafafa;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.drop7-intro-rise {
+  text-align: right;
+}
+.drop7-intro-rise-dots {
+  display: flex;
+  gap: 0.28rem;
+  margin-top: 0.35rem;
+}
+.drop7-intro-rise-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border: 1px solid #52525b;
+  border-radius: 9999px;
+  background: #27272a;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+.drop7-intro-rise-dot.is-spent {
+  border-color: #38bdf8;
+  background: #38bdf8;
+  box-shadow: 0 0 0.35rem rgb(56 189 248 / 45%);
+}
+.drop7-intro-rise-dot.is-imminent {
+  border-color: #fbbf24;
+  background: #fbbf24;
+  box-shadow: 0 0 0.45rem rgb(251 191 36 / 65%);
+}
 .drop7-intro figcaption {
   margin: 0.7rem 0 0;
   text-align: center;

@@ -40,6 +40,7 @@ import type { SolverRequest, SolverResponse } from "@/lib/play/solver.protocol";
 import { Drop7Board, type ColumnNote } from "./Drop7Board";
 import { DiscFace } from "./discs";
 import styles from "./Drop7Game.module.css";
+import { useExplosionPoints } from "./useExplosionPoints";
 
 export type Drop7Mode = "play" | "evaluate" | "auto";
 
@@ -58,6 +59,8 @@ export interface Drop7GameProps {
   bestScoreKey?: string;
   /** Start the solver immediately instead of when the board scrolls into view. */
   eager?: boolean;
+  /** Show each exploding disc's point value rising from the board. Defaults to true. */
+  showExplosionPoints?: boolean;
   caption?: ReactNode;
 }
 
@@ -134,6 +137,7 @@ export function Drop7Game({
   seed: initialSeed = INITIAL_SEED,
   bestScoreKey,
   eager = false,
+  showExplosionPoints = true,
   caption,
 }: Drop7GameProps) {
   const [mode, setMode] = useState<Drop7Mode>(initialMode);
@@ -155,6 +159,11 @@ export function Drop7Game({
   const [animationFrame, setAnimationFrame] = useState<MoveAnimationFrame | null>(null);
   const animationRunRef = useRef(0);
   const [lastMove, setLastMove] = useState<LastMove | null>(null);
+  const {
+    explosionPoints,
+    captureExplosionFrame,
+    clearExplosionPoints,
+  } = useExplosionPoints(showExplosionPoints);
   const bestScore = useSyncExternalStore(
     subscribeBest,
     () => readBest(bestScoreKey),
@@ -209,6 +218,7 @@ export function Drop7Game({
       animatingRef.current = true;
       setAnimating(true);
       setAnimationFrame(null);
+      clearExplosionPoints();
       setEvaluation(null);
       setThinking(false);
       setSearchError(false);
@@ -238,13 +248,20 @@ export function Drop7Game({
       void (async () => {
         for (const frame of frames) {
           if (animationRunRef.current !== run) return;
+          captureExplosionFrame(frame);
           setAnimationFrame(frame);
           await wait(FRAME_DURATION_MS[frame.kind]);
         }
         finishMove();
       })();
     },
-    [active, bestScoreKey, mode],
+    [
+      active,
+      bestScoreKey,
+      captureExplosionFrame,
+      clearExplosionPoints,
+      mode,
+    ],
   );
 
   // One worker per evaluated position; terminated as soon as the position changes.
@@ -327,6 +344,7 @@ export function Drop7Game({
       setSeed(nextSeed);
       setGame(next);
       setAnimationFrame(null);
+      clearExplosionPoints();
       setAnimating(false);
       setEvaluation(null);
       setSearchError(false);
@@ -336,7 +354,7 @@ export function Drop7Game({
       autoRunningRef.current = shouldAutoRun;
       setAutoRunning(shouldAutoRun);
     },
-    [active, mode],
+    [active, clearExplosionPoints, mode],
   );
 
   const newGame = useCallback(() => startGame(randomSeed()), [startGame]);
@@ -485,6 +503,8 @@ export function Drop7Game({
             columns={columnNotes}
             cellClassName={cellMotion}
             cellStyle={cellStyle}
+            explosionPoints={explosionPoints}
+            showExplosionPoints={showExplosionPoints}
             label={`${displayBoard.filter((cell) => cell !== 0).length} occupied cells, including ${
               displayBoard.filter((cell) => cell === SOLID || cell === CRACKED).length
             } gray discs`}

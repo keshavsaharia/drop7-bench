@@ -13,6 +13,7 @@
  */
 import type { CSSProperties, ReactNode } from "react";
 import { DiscFace, cellLabel, parseBoard } from "./discs";
+import styles from "./Drop7Board.module.css";
 
 export interface ColumnNote {
   /** Short text over the value, e.g. "c3" or "best". */
@@ -23,6 +24,15 @@ export interface ColumnNote {
   best?: boolean;
   /** Draws the note faded (an illegal or pruned column). */
   muted?: boolean;
+}
+
+export interface ExplosionPoint {
+  /** Stable for the lifetime of this one floating label. */
+  id: number | string;
+  /** Cell where the disc exploded (0–48, row-major from the top). */
+  index: number;
+  /** Points awarded by this disc's chain wave. */
+  points: number;
 }
 
 export interface Drop7BoardProps {
@@ -46,6 +56,10 @@ export interface Drop7BoardProps {
   /** Extra classes per cell — the game uses this for motion classes. */
   cellClassName?: (index: number, cell: number) => string | undefined;
   cellStyle?: (index: number, cell: number) => CSSProperties | undefined;
+  /** Floating per-disc score labels supplied by an animated viewer. */
+  explosionPoints?: readonly ExplosionPoint[];
+  /** Show floating explosion scores. Defaults to true. */
+  showExplosionPoints?: boolean;
   /** Rendered absolutely over the grid (column buttons, an end-of-game panel). */
   overlay?: ReactNode;
 }
@@ -82,6 +96,8 @@ export function Drop7Board({
   label,
   cellClassName,
   cellStyle,
+  explosionPoints = [],
+  showExplosionPoints = true,
   overlay,
 }: Drop7BoardProps) {
   const board = parseBoard(cells);
@@ -124,6 +140,14 @@ export function Drop7Board({
                 } ${faded ? "opacity-30" : ""}`}
               >
                 <DiscFace cell={cell} className={`size-full ${cellClassName?.(index, cell) ?? ""}`} style={cellStyle?.(index, cell)} />
+                {showExplosionPoints &&
+                  explosionPoints
+                    .filter((point) => point.index === index)
+                    .map((point) => (
+                      <span key={point.id} aria-hidden="true" className={styles.explosionPoint}>
+                        +{formatValue(point.points)}
+                      </span>
+                    ))}
                 {ringed && (
                   <span
                     aria-hidden="true"
