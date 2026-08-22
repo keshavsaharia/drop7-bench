@@ -1,0 +1,39 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260822T063817Z-a5d4c143",
+  "experimentId": "EX-20260822-survival-instinct-root-filter-8531cbd9",
+  "lifecycle": "running",
+  "runValidity": "pending",
+  "startedAt": "2026-08-22T06:38:17Z",
+  "endedAt": null,
+  "protocolSha256": "5b355eba6d139f903a1ee93dd62e9aa05494eae174eda5cdd8ce87f50e389fb5",
+  "machineProfileRef": "research/system-profiles/MACH-20260820T080056Z-376ada90.json",
+  "sourceState": {
+    "gitCommit": "b23ac7de2c0f56fc9298cc7bf5316a4c6255ff44",
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "runs/RUN-20260822T063817Z-a5d4c143/gates.sh"
+  ],
+  "seedLeaseRefs": [],
+  "resourceLimits": {
+    "wallSeconds": 7200,
+    "cpuThreads": 30,
+    "maxHostBytes": 17179869184,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": null,
+    "cpuSeconds": null,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "CHECK gates on previously opened probe seeds 0xa5278000-0xa52784ff; mask-units re-run after correcting a test expectation (gates-rerun.log)."
+  },
+  "exitCode": null,
+  "stopReason": null,
+  "artifactRefs": [],
+  "contributionIds": []
+}

@@ -1,0 +1,61 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260822T063900Z-a4baa04e",
+  "experimentId": "EX-20260822-survival-instinct-root-filter-8531cbd9",
+  "lifecycle": "planned",
+  "runValidity": "pending",
+  "startedAt": null,
+  "endedAt": null,
+  "protocolSha256": "5b355eba6d139f903a1ee93dd62e9aa05494eae174eda5cdd8ce87f50e389fb5",
+  "machineProfileRef": "research/system-profiles/MACH-20260820T080056Z-376ada90.json",
+  "sourceState": {
+    "gitCommit": "b23ac7de2c0f56fc9298cc7bf5316a4c6255ff44",
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "runs/RUN-20260822T063900Z-a4baa04e/watch-and-screen.sh",
+    "->",
+    "build/survival-instinct/run",
+    "--filter",
+    "none",
+    "--filter",
+    "strict",
+    "--filter",
+    "literal",
+    "--seed-start",
+    "0xa52c0000",
+    "--games",
+    "128",
+    "--threads",
+    "30",
+    "--depth",
+    "4",
+    "--chance-samples",
+    "5",
+    "--cache",
+    "60000"
+  ],
+  "seedLeaseRefs": [
+    "SL-20260822T060000Z-a52c0000"
+  ],
+  "resourceLimits": {
+    "wallSeconds": 7200,
+    "cpuThreads": 30,
+    "maxHostBytes": 17179869184,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": null,
+    "cpuSeconds": null,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "Planned: queued behind the leaf-evolution screen's finalize; opens the lease once, runs the three arms, compare.py for strict and literal vs none."
+  },
+  "exitCode": null,
+  "stopReason": null,
+  "artifactRefs": [],
+  "contributionIds": []
+}
