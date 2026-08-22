@@ -1,0 +1,283 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260822T233343Z-12becce9",
+  "theoryIds": [
+    "TH-20260822-survival-instinct-vertical-clear-26f173b5"
+  ],
+  "experimentId": "EX-20260822-survival-instinct-root-filter-8531cbd9",
+  "runIds": [
+    "RUN-20260822T063817Z-a5d4c143",
+    "RUN-20260822T063900Z-a4baa04e"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "inconclusive",
+  "assessment": "mixed",
+  "evidenceTier": "public-development",
+  "summary": "Held-out SCREEN of the survival-instinct root filter, depth 4 five strata, 128 paired never-read games 0xa52c0000+. STRICT (refuse a landing that is vertically dead AND entombed by its row): mean 346838 vs unchanged 348808, paired delta -1970 (bootstrap 95% bounds -27738 to +22313, paired sd 171933, floor 24999), W-T-L 41-26-61, moves 100.95 vs 101.32; the filter refused a column at 811 of 12922 decisions and overrode the unchanged search's column at 254 (1.97%), just under the preregistered 2% coverage bar, so the primary gate is recorded as INCONCLUSIVE by its own rule: the strict rule neither helps nor hurts measurably and rarely applies. LITERAL (the owner's wording, refuse every vertically dead landing that does not clear on arrival; secondary arm): mean 251744, paired delta -97064 (LB -136887, UB -59500), W-T-L 43-0-85, moves 75.67 vs 101.32, overrides 1243 of 9686 (12.8%): a clear, valid negative \u2014 forbidding vertically dead landings outright costs about a quarter of the game's length. Both arms: 0 incomplete and 0 illegal decisions.",
+  "metrics": {
+    "strict": {
+      "candidate": {
+        "name": "strict",
+        "games": 128,
+        "score": {
+          "mean": 346838.4609375,
+          "median": 285244.5,
+          "sd": 234288.60626989143,
+          "q25": 175358.25,
+          "min": 86228.0,
+          "max": 1312546.0
+        },
+        "moves": {
+          "mean": 100.953125,
+          "q25": 55.0
+        },
+        "numberedClearsPerMove": 2.00758396533,
+        "coverRevealsPerMove": 1.1163132642,
+        "maxChainDepth": 13,
+        "meanOccupiedCells": 23.834138203926564,
+        "censoredGames": 0,
+        "incompleteDecisions": 0,
+        "illegalDecisions": 0,
+        "gamesAtOrAboveMillion": 1
+      },
+      "reference": {
+        "name": "none",
+        "games": 128,
+        "score": {
+          "mean": 348808.3046875,
+          "median": 268837.0,
+          "sd": 246206.67670032795,
+          "q25": 188871.5,
+          "min": 103221.0,
+          "max": 1698396.0
+        },
+        "moves": {
+          "mean": 101.3203125,
+          "q25": 55.0
+        },
+        "numberedClearsPerMove": 2.00400956126,
+        "coverRevealsPerMove": 1.11488935153,
+        "maxChainDepth": 13,
+        "meanOccupiedCells": 24.028854315337504,
+        "censoredGames": 0,
+        "incompleteDecisions": 0,
+        "illegalDecisions": 0,
+        "gamesAtOrAboveMillion": 3
+      },
+      "pairedScore": {
+        "n": 128,
+        "meanDelta": -1969.84375,
+        "pairedSd": 171932.7446438368,
+        "bootstrapLower95": -27738.235546875,
+        "bootstrapUpper95": 22313.040624999998,
+        "studentTLower95": -27150.11960745525,
+        "studentTQuantile": 1.656940343536151,
+        "detectionFloor": 24998.820233391318,
+        "detectionFloorNote": "1.645 * sd / sqrt(n), the z-based floor defined in docs/research/status.md",
+        "wins": 41,
+        "ties": 26,
+        "losses": 61,
+        "firstHalfMeanDelta": 1721.03125,
+        "secondHalfMeanDelta": -5660.71875,
+        "q25Delta": -13513.25,
+        "largestSwings": [
+          -844875.0,
+          -805407.0,
+          -548601.0,
+          505964.0,
+          486921.0
+        ],
+        "bootstrapSeedHex": "0xb0071eaf",
+        "resamples": 20000
+      },
+      "pairedMoves": {
+        "n": 128,
+        "meanDelta": -0.3671875,
+        "pairedSd": 46.650294087864566,
+        "bootstrapLower95": -7.3515625,
+        "bootstrapUpper95": 6.2109375,
+        "studentTLower95": -7.19931989221649,
+        "studentTQuantile": 1.656940343536151,
+        "detectionFloor": 6.7828982673031994,
+        "detectionFloorNote": "1.645 * sd / sqrt(n), the z-based floor defined in docs/research/status.md",
+        "wins": 29,
+        "ties": 60,
+        "losses": 39,
+        "firstHalfMeanDelta": 0.703125,
+        "secondHalfMeanDelta": -1.4375,
+        "q25Delta": 0.0,
+        "largestSwings": [
+          -227.0,
+          -220.0,
+          -150.0,
+          135.0,
+          134.0
+        ],
+        "bootstrapSeedHex": "0xb0071eaf",
+        "resamples": 20000
+      },
+      "coverage": {
+        "decisions": 12922,
+        "triggeredDecisions": 811,
+        "overrides": 254,
+        "noColumnFallbacks": 22
+      }
+    },
+    "literal": {
+      "candidate": {
+        "name": "literal",
+        "games": 128,
+        "score": {
+          "mean": 251744.078125,
+          "median": 236792.5,
+          "sd": 112378.77786753922,
+          "q25": 159800.25,
+          "min": 85922.0,
+          "max": 628660.0
+        },
+        "moves": {
+          "mean": 75.671875,
+          "q25": 50.0
+        },
+        "numberedClearsPerMove": 1.87869089407,
+        "coverRevealsPerMove": 1.01971918233,
+        "maxChainDepth": 11,
+        "meanOccupiedCells": 24.657661330947654,
+        "censoredGames": 0,
+        "incompleteDecisions": 0,
+        "illegalDecisions": 0,
+        "gamesAtOrAboveMillion": 0
+      },
+      "reference": {
+        "name": "none",
+        "games": 128,
+        "score": {
+          "mean": 348808.3046875,
+          "median": 268837.0,
+          "sd": 246206.67670032795,
+          "q25": 188871.5,
+          "min": 103221.0,
+          "max": 1698396.0
+        },
+        "moves": {
+          "mean": 101.3203125,
+          "q25": 55.0
+        },
+        "numberedClearsPerMove": 2.00400956126,
+        "coverRevealsPerMove": 1.11488935153,
+        "maxChainDepth": 13,
+        "meanOccupiedCells": 24.028854315337504,
+        "censoredGames": 0,
+        "incompleteDecisions": 0,
+        "illegalDecisions": 0,
+        "gamesAtOrAboveMillion": 3
+      },
+      "pairedScore": {
+        "n": 128,
+        "meanDelta": -97064.2265625,
+        "pairedSd": 265747.38128842757,
+        "bootstrapLower95": -136887.3,
+        "bootstrapUpper95": -59499.60507812501,
+        "studentTLower95": -135984.05177148365,
+        "studentTQuantile": 1.656940343536151,
+        "detectionFloor": 38639.35881490066,
+        "detectionFloorNote": "1.645 * sd / sqrt(n), the z-based floor defined in docs/research/status.md",
+        "wins": 43,
+        "ties": 0,
+        "losses": 85,
+        "firstHalfMeanDelta": -71884.984375,
+        "secondHalfMeanDelta": -122243.46875,
+        "q25Delta": -29071.25,
+        "largestSwings": [
+          -1577399.0,
+          -823508.0,
+          -787758.0,
+          -774508.0,
+          -674807.0
+        ],
+        "bootstrapSeedHex": "0xb0071eaf",
+        "resamples": 20000
+      },
+      "pairedMoves": {
+        "n": 128,
+        "meanDelta": -25.6484375,
+        "pairedSd": 72.19424692368466,
+        "bootstrapLower95": -36.43046875,
+        "bootstrapUpper95": -15.4375,
+        "studentTLower95": -36.22158955794794,
+        "studentTQuantile": 1.656940343536151,
+        "detectionFloor": 10.496959171267157,
+        "detectionFloorNote": "1.645 * sd / sqrt(n), the z-based floor defined in docs/research/status.md",
+        "wins": 42,
+        "ties": 10,
+        "losses": 76,
+        "firstHalfMeanDelta": -18.765625,
+        "secondHalfMeanDelta": -32.53125,
+        "q25Delta": -5.0,
+        "largestSwings": [
+          -425.0,
+          -225.0,
+          -212.0,
+          -210.0,
+          -185.0
+        ],
+        "bootstrapSeedHex": "0xb0071eaf",
+        "resamples": 20000
+      },
+      "coverage": {
+        "decisions": 9686,
+        "triggeredDecisions": 3470,
+        "overrides": 1243,
+        "noColumnFallbacks": 497
+      }
+    }
+  },
+  "gateChecks": [
+    {
+      "criterion": "CHECK gates passed before the lease was opened",
+      "passed": true,
+      "observed": "RUN-20260822T063817Z-a5d4c143: 7 of 7 (mask units re-run after a corrected test expectation)"
+    },
+    {
+      "criterion": "incompleteDecisionsTotal 0 and illegalDecisionsTotal 0",
+      "passed": true,
+      "observed": "0 / 0"
+    },
+    {
+      "criterion": "strict minus none: bootstrap and Student-t 95% lower bounds > 0",
+      "passed": false,
+      "observed": "-27738 / -27150"
+    },
+    {
+      "criterion": "strict minus none: Q25 >= and both halves > 0",
+      "passed": false,
+      "observed": "Q25 delta -13513; halves +1721 / -5661"
+    },
+    {
+      "criterion": "strict arm overrides >= 2% of decisions (else inconclusive)",
+      "passed": false,
+      "observed": "254 of 12922 = 1.97%"
+    }
+  ],
+  "perGameArtifact": {
+    "path": "runs/RUN-20260822T063900Z-a4baa04e/screen-d4s5.json",
+    "sha256": "8f131af8b55db5752c68da554055ac9283db0de1c3b1aea80116752299ccea4f",
+    "recordCount": 384
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260820T080056Z-376ada90.json"
+  ],
+  "artifactManifestRef": "runs/RUN-20260822T063900Z-a4baa04e/artifacts.sha256",
+  "limitations": [
+    "Single 128-game development-tier screen; the strict arm's effect, if any, is below the 25,000-point floor of this cohort.",
+    "The strict coverage of 1.97% is within rounding of the 2% bar; the inconclusive label follows the preregistered rule literally rather than the spirit, and the deltas are reported in full.",
+    "The screen ran after the evolution's own screen on the same otherwise idle machine; decisions are deterministic, wall times are not timing-grade.",
+    "The literal arm's negative rejects the rule as a hard root constraint at depth 4; a soft penalty the search can weigh is a different candidate."
+  ],
+  "contributionIds": [
+    "CT-20260822T233343Z-25ebf3d4",
+    "CT-20260822T051732Z-a0507c6b"
+  ],
+  "recordedAt": "2026-08-22T23:33:43Z"
+}

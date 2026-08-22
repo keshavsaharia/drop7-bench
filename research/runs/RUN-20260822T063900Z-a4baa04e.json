@@ -3,11 +3,11 @@
   "format": "drop7-run-v1",
   "runId": "RUN-20260822T063900Z-a4baa04e",
   "experimentId": "EX-20260822-survival-instinct-root-filter-8531cbd9",
-  "lifecycle": "planned",
-  "runValidity": "pending",
-  "startedAt": null,
-  "endedAt": null,
-  "protocolSha256": "5b355eba6d139f903a1ee93dd62e9aa05494eae174eda5cdd8ce87f50e389fb5",
+  "lifecycle": "completed",
+  "runValidity": "valid",
+  "startedAt": "2026-08-22T12:08:10Z",
+  "endedAt": "2026-08-22T12:19:21Z",
+  "protocolSha256": "a4dbfb041050005c46f5fc43838155967dbf794a5c6c020de10547eb1ee83d0b",
   "machineProfileRef": "research/system-profiles/MACH-20260820T080056Z-376ada90.json",
   "sourceState": {
     "gitCommit": "b23ac7de2c0f56fc9298cc7bf5316a4c6255ff44",
@@ -48,14 +48,20 @@
     "maxGpuBytes": null
   },
   "resourceObserved": {
-    "wallSeconds": null,
+    "wallSeconds": 671,
     "cpuSeconds": null,
     "peakHostBytes": null,
     "peakGpuBytes": null,
-    "measurementNotes": "Planned: queued behind the leaf-evolution screen's finalize; opens the lease once, runs the three arms, compare.py for strict and literal vs none."
+    "measurementNotes": "Planned: queued behind the leaf-evolution screen's finalize; opens the lease once, runs the three arms, compare.py for strict and literal vs none. Freeze-time protocol hash 5b355eba6d139f903a1ee93dd62e9aa05494eae174eda5cdd8ce87f50e389fb5; re-hashed a4dbfb041050005c46f5fc43838155967dbf794a5c6c020de10547eb1ee83d0b at completion (repository convention)."
   },
-  "exitCode": null,
-  "stopReason": null,
-  "artifactRefs": [],
-  "contributionIds": []
+  "exitCode": 0,
+  "stopReason": "completed",
+  "artifactRefs": [
+    "runs/RUN-20260822T063900Z-a4baa04e/screen-d4s5.json",
+    "runs/RUN-20260822T063900Z-a4baa04e/compare-strict.json",
+    "runs/RUN-20260822T063900Z-a4baa04e/compare-literal.json"
+  ],
+  "contributionIds": [
+    "CT-20260822T233343Z-25ebf3d4"
+  ]
 }

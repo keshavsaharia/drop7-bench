@@ -8,14 +8,12 @@ contributors:
 tags: [engine, performance, audit, gpu, leaf-evolution, survival-instinct]
 outcomes:
   positive: 2
-  negative: 0
-  open: 2
+  negative: 2
+  open: 1
 ---
 
-The overnight runs are still going — the leaf-weight evolution is past
-generation 20 with its held-out screen, the survival-instinct screen and the
-result records all queued to run unattended — so this entry is about the
-engine, not about play. The owner asked for a fresh audit of the board
+The overnight runs finished unattended and both answers are negative; they
+are recorded below the engine audit that occupied the small hours. The owner asked for a fresh audit of the board
 simulation: is there a way to evaluate boards in parallel on the GPU, or to
 make the existing mechanics cheaper?
 
@@ -77,3 +75,40 @@ timing ratios of 1.58x and 1.63x — a little below the audit's synthetic roots,
 and indicative until measured on an idle host. No running experiment was
 rebuilt; the variant is there for the next cohort.
 </Finding>
+
+## Morning: both overnight bets lost, cleanly
+
+<DeadEnd title="Evolving the leaf weights at depth 4 on fresh seeds" cost="40 generations, 21,760 depth-4 games, one 64-game screen" verdict="configuration-rejected">
+The CMA-ES distribution mean after forty generations scored **289,720**
+against the frozen leaf's **320,020** on the 64 never-read held-out games:
+paired delta **−30,300** (bootstrap 95% lower bound −70,928, paired sd
+197,434), W–T–L 28–0–36, both halves negative. The seven-sample transfer was
+−47,119. Gate: fail (`RS-20260822T120736Z-662b39ca`). The population mean had
+drifted below the control from generation 2 onward; Kimi's pre-run estimate
+of a one-in-ten pass was the right prior. Fresh seeds per generation removed
+overfitting, as designed — and left selection noise alone to steer, which at
+32 games per candidate and a paired sd near 200,000 is a random walk. The
+theory's claim is not supported for this optimiser and budget; the frozen
+weights survive.
+</DeadEnd>
+
+<DeadEnd title="Survival instinct as a hard rule at the root" cost="128 paired games x 3 arms" verdict="configuration-rejected">
+Two strengths of the owner's rule against the unchanged search on 128
+never-read games (`RS-20260822T233343Z-12becce9`). The **literal** form —
+never drop a 3 or higher where it can no longer clear vertically — is a
+clear loss: **−97,064** points and **−25.65 moves** (95% bounds −136,887 to
+−59,500), overriding the search at 12.8% of decisions. The **strict** form —
+refuse only when the landing is already entombed by its row — is a null:
+−1,970 with bounds −27,738 to +22,313, overriding 1.97% of decisions, a hair
+under the 2% coverage bar the protocol set, so it is recorded as inconclusive
+by its own rule. The picture is consistent with the corpus analysis: the
+search already avoids the placements that matter, and forbidding the rest
+takes away columns it needed.
+</DeadEnd>
+
+<Direction title="What survives from this line" status="proposed">
+The gated native policy on the leaderboard, the memoised engine (1.6x), the
+entombed-disc and pattern diagnostics, and the negative results themselves.
+If the rule is tried again it should be a soft penalty the search can weigh,
+not a constraint — and measured with the memo engine at seven strata.
+</Direction>

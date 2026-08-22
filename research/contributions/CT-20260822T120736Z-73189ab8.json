@@ -1,0 +1,48 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260822T120736Z-73189ab8",
+  "actor": {
+    "kind": "model",
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": null
+  },
+  "level": "L2",
+  "roles": [
+    {
+      "role": "formal-analysis",
+      "degree": "lead"
+    },
+    {
+      "role": "data-curation",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Finalized EX-20260822-leaf-cmaes-d4s7-4f5f462a: evaluated the preregistered gate once from compare-d4s5.json via approaches/lifetime-objective/leaf-evolution/finalize.py, wrote RS-20260822T120736Z-662b39ca, closed the run and lease records. No statistic recomputed.",
+  "theoryIds": [
+    "TH-20260822-depth-native-leaf-weights-caa6f8ba"
+  ],
+  "experimentIds": [
+    "EX-20260822-leaf-cmaes-d4s7-4f5f462a"
+  ],
+  "runIds": [
+    "RUN-20260822T014412Z-a0c63063",
+    "RUN-20260822T020959Z-00fbdc90"
+  ],
+  "artifactPaths": [
+    "research/results/RS-20260822T120736Z-662b39ca.json",
+    "runs/RUN-20260822T020959Z-00fbdc90/compare-d4s5.json",
+    "runs/RUN-20260822T020959Z-00fbdc90/compare-d4s7.json"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "make research-validate (run by the watcher after finalize)"
+  ],
+  "limitations": [
+    "Self-reported contribution; written by a script the same model authored."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-22T12:07:36Z"
+}
