@@ -37,7 +37,10 @@ for needle in "class FilteredFastSearch" "setRootMask" "canonical_allowed_[stati
   grep -q -F "${needle}" "${OUT}/filtered-search.hpp" || { echo "generated header lacks: ${needle}" >&2; exit 1; }
 done
 
-FLAGS=(-O3 -std=c++20 -pthread -Wall -Wextra -Werror -I "${FAST}" -I "${HERE}" -I "${OUT}" -I "${REFERENCE}" -I "${ROOT}/build/fast-engine")
+# -ffp-contract=off pins the bit-exactness of the leaf: clang contracts a*b+c into
+# FMA when the target has it (audit-06), and the leaf's dot product must not be.
+# A no-op on the baseline x86-64 target; load-bearing if -march is ever added.
+FLAGS=(-O3 -std=c++20 -pthread -Wall -Wextra -Werror -ffp-contract=off -I "${FAST}" -I "${HERE}" -I "${OUT}" -I "${REFERENCE}" -I "${ROOT}/build/fast-engine")
 for program in gate run; do
   if [ "$#" -gt 0 ] && [ "$1" != "${program}" ]; then continue; fi
   echo "compiling ${program}..."

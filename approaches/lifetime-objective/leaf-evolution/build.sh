@@ -52,7 +52,10 @@ for needle in "class WeightedFastSearch" "weightedFairLeaf(state, scratch_, weig
   grep -q -F "${needle}" "${OUT}/weighted-search.hpp" || { echo "generated header lacks: ${needle}" >&2; exit 1; }
 done
 
-FLAGS=(-O3 -std=c++20 -pthread -Wall -Wextra -Werror
+# -ffp-contract=off pins the bit-exactness of the leaf: clang contracts a*b+c into
+# FMA when the target has it (audit-06), and the leaf's dot product must not be.
+# A no-op on the baseline x86-64 target; load-bearing if -march is ever added.
+FLAGS=(-O3 -std=c++20 -pthread -Wall -Wextra -Werror -ffp-contract=off
        -I "${FAST}" -I "${HERE}" -I "${OUT}" -I "${REFERENCE}" -I "${ROOT}/build/fast-engine")
 
 for program in gate evaluate decide; do

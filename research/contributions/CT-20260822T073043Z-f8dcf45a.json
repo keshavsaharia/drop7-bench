@@ -1,0 +1,44 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260822T073043Z-f8dcf45a",
+  "actor": {
+    "kind": "model",
+    "platform": "Claude Code",
+    "model": "unknown",
+    "agentId": "general-purpose subagent of the claude-fable-5 coordinator session"
+  },
+  "level": "L2",
+  "roles": [
+    {
+      "role": "investigation",
+      "degree": "lead"
+    },
+    {
+      "role": "formal-analysis",
+      "degree": "substantial"
+    },
+    {
+      "role": "writing",
+      "degree": "lead"
+    }
+  ],
+  "summary": "Read-only performance audit of the fair-D4 hot path (docs/exploratory/audit-06-engine-efficiency.md): census-based Amdahl bounds; a one-entry board memo in the leaf prototyped and measured bit-exact at 1.64x/1.87x per decision on synthetic roots (indicative); -march=native shown to change the leaf's bit pattern via FMA contraction with -ffp-contract=off restoring it; the learned-leaf build's unpinned -march=native verified to alter 17.0% of frozen-leaf values (0 of 13 probe columns); GPU batched-leaf, lockstep-game and NNUE-leaf verdicts with first experiments; memory and cheap-win analysis.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "docs/exploratory/audit-06-engine-efficiency.md"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "All timings taken at load ~30 beside a 30-thread cohort and reported as back-to-back ratios only; synthetic states from the 0x5eed playground domain; no research seed opened; no repository file other than the report modified"
+  ],
+  "limitations": [
+    "Self-reported; the subagent runtime did not expose its model identifier, so it is recorded as unknown (the Agent tool inherits the parent session's model by default).",
+    "Memo ratios are indicative pending real lease roots, a printed hit rate and a 30-way parallel confirmation."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-22T07:30:43Z"
+}

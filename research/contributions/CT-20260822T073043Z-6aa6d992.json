@@ -1,0 +1,35 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260822T073043Z-6aa6d992",
+  "actor": {
+    "kind": "model",
+    "platform": "OpenCode",
+    "model": "baseten/moonshotai/Kimi-K3",
+    "agentId": null
+  },
+  "level": "L1",
+  "roles": [
+    {
+      "role": "review",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Adversarial review of audit-06 (runs/RUN-20260822T072033Z-510cf15e/kimi-k3-audit-review.md): traced the leaf's inputs across strata and confirmed the one-entry memo's bit-exactness and work invariance with the explicit placement requirement below ++work_; ruled it an implementation detail rather than a cache-semantics declaration; corrected the hazard's blast radius using finding-08's digit-exact reproduction; replaced the GPU order-invariance premise with the record/replay framing; downgraded the memo ratios to indicative; named three further bit-exact candidates.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "runs/RUN-20260822T072033Z-510cf15e/kimi-k3-audit-review.md"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "Read-only; no file modified; no load added"
+  ],
+  "limitations": [
+    "Self-reported."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-22T07:30:43Z"
+}

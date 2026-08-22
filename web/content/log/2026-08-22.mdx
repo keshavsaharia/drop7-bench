@@ -1,0 +1,72 @@
+---
+date: 2026-08-22
+title: Where the engine can still go
+summary: "An independent audit of the board simulator found one bit-exact, nearly-2x speedup hiding in the leaf (a one-entry memo across chance strata), a build-flag hazard that changes the frozen leaf's bits without changing any recorded decision, and three GPU verdicts that all say: not yet, and here is the first experiment that would change that."
+contributors:
+  - claude-fable-5 (Claude Code)
+  - kimi-k3 (OpenCode)
+tags: [engine, performance, audit, gpu, leaf-evolution, survival-instinct]
+outcomes:
+  positive: 1
+  negative: 0
+  open: 3
+---
+
+The overnight runs are still going — the leaf-weight evolution is past
+generation 20 with its held-out screen, the survival-instinct screen and the
+result records all queued to run unattended — so this entry is about the
+engine, not about play. The owner asked for a fresh audit of the board
+simulation: is there a way to evaluate boards in parallel on the GPU, or to
+make the existing mechanics cheaper?
+
+## The audit
+
+A read-only subagent audited the fast engine's hot path and wrote
+[`audit-06`](/docs/exploratory/audit-06-engine-efficiency); Kimi K3 then
+reviewed the audit adversarially, and the corrections are folded into it.
+Every timing was taken on a machine running a 30-thread cohort, so the audit
+claims ratios between arms run back to back, never absolute speeds.
+
+<Finding title="A one-entry leaf memo is bit-exact and nearly doubles a decision" kind="positive" metric="1.64x / 1.87x, indicative">
+Inside one chance node the search evaluates the same move under five or seven
+sampled futures, and the only thing that differs between most of them is the
+next visible disc — which the leaf reads in exactly one term. Remembering the
+last board's features and recomputing that one term gives the same bits on
+every leaf (17,045 states compared, 0 mismatches) with identical actions, work,
+nodes and cache hits on 12 synthetic roots, for 1.64x (five strata) to 1.87x
+(seven) per decision; 1.93x with the flag change below. Kimi's review confirmed
+the argument and added the condition that makes it legal: the memo must sit
+below the search's work counter, or it becomes a new algorithmic candidate.
+The ratios are indicative until the port prints its hit rate on real seeds and
+survives thirty-way parallel execution.
+</Finding>
+
+<Finding title="-march=native silently changes the frozen leaf" kind="neutral" metric="17% of leaf values">
+Clang fuses multiply-adds when the target has FMA, and the leaf's dot product
+then rounds differently. The three cohort builds are exact only because they
+target baseline x86-64. One existing build script ships `-march=native`
+unpinned, and a cross-build check showed its copy of the frozen leaf differs in
+17.0% of values — while flipping none of 13 probe decisions, and its recorded
+frozen arms reproduced an earlier 128-game cohort digit for digit, so no
+recorded number is in doubt. `-ffp-contract=off` restores bit-identity and is
+now pinned in the two build scripts this line of work owns; the third is the
+owner's call.
+</Finding>
+
+<Direction title="GPU: not yet, and the experiment that would change that" status="proposed">
+Three verdicts, all accepted by the review. Batched leaf evaluation could be
+bit-exact in double precision but needs a record-and-replay driver, is capped
+near 2.4x per thread by Amdahl, and the integrated GPU's shader clock halves
+under the CPU load a cohort creates — do the CPU memo first, since it removes
+two thirds of the leaves a GPU would batch. Thousands of games in lockstep
+have easy RNG parity but a search that is not a GPU workload. A GPU-hosted
+neural leaf waits until a learned leaf beats the hand-written one on the CPU
+at fixed work. The first experiment for any of them: a HIP micro-benchmark of
+the leaf over the existing 225,183-state gate corpus, bit-compared to the CPU.
+</Direction>
+
+<Direction title="Port the memo as a gated engine variant" status="proposed" owner="claude-fable-5 (Claude Code)">
+The prototype exists; the port needs the repository's leaf, search and
+trajectory gates on real probe seeds, a printed hit rate, and a one-line
+manifest note. If it holds, every future cohort costs about half.
+</Direction>
