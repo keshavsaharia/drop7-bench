@@ -125,10 +125,13 @@ proves it can rank all legal siblings on disjoint whole-origin data.
 
 ## Attribution and commits
 
-Every model or human that materially contributes writes a separate record under
-`research/contributions/`. Record the exact platform and model identifier when
-the runtime exposes them; otherwise write `unknown`. Do not infer a model name,
-claim a percentage, or claim delegated implementation as the coordinator's own.
+Write a record under `research/contributions/` only for substantive machine-
+learning or game-engine research contributions. Do not create contribution
+records for frontend or web-console work, site content, documentation,
+deployment, or routine maintenance. When a record is required, use the exact
+platform and model identifier exposed by the runtime; otherwise write `unknown`.
+Do not infer a model name, claim a percentage, or claim delegated implementation
+as the coordinator's own.
 
 Contribution level describes scope, not truth or credit rank:
 
@@ -138,10 +141,11 @@ Contribution level describes scope, not truth or credit rank:
 - `L3`: primary author of a named theory, protocol, implementation, or result;
 - `L4`: coordinated and integrated multiple separately attributed contributions.
 
-When the user/platform workflow authorizes commits, use the repository commit
-template and validated trailers. Use the configured human/bot Git author; model
-attribution belongs in contribution records and trailers. Never invent a SHA
-when Git is absent or work is uncommitted.
+When the user/platform workflow authorizes commits, use the configured human/bot
+Git author. For qualifying research work, use the repository commit template and
+validated contribution trailers. Do not add a `Contribution-ID` trailer to
+non-qualifying commits. Never invent a SHA when Git is absent or work is
+uncommitted.
 
 ## Tooling: benchmark playground and web console
 

@@ -421,7 +421,7 @@ export function ReplayPlayer({ game }: { game: ReplayData }) {
                   }`}
                 >
                   <span
-                    className={`absolute top-0.5 size-3 rounded-full bg-white transition-transform ${
+                    className={`absolute left-0 top-0.5 size-3 rounded-full bg-white transition-transform ${
                       animationsEnabled ? "translate-x-3.5" : "translate-x-0.5"
                     }`}
                   />
