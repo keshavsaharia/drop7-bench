@@ -1,0 +1,34 @@
+{
+  "$schema": "../schemas/theory-v1.schema.json",
+  "format": "drop7-theory-v1",
+  "theoryId": "TH-20260822-entombed-disc-hazard-61faa529",
+  "title": "Entombed numbered discs are an early, unpriced death predictor for the fair depth-4 search",
+  "claim": "A numbered disc of value n whose column already holds more than n discs and whose horizontal run already exceeds n (an 'entombed' disc; for n >= 3 unpriced by the frozen fair leaf, which has such terms only for 1s and 2s) is an early predictor of death for the fair depth-4 policy: it is present at most deaths, it typically appears well outside the four-ply horizon (more than two rises before death), and it carries lifetime information beyond the eighteen leaf features and occupancy.",
+  "mechanism": "In a gravity-packed column the vertical run through every disc equals the column height, so a disc n in a column taller than n can only clear horizontally, and if its row run already exceeds n it cannot clear at all until neighbours are removed. Such a disc also blocks vertical cracking of every cover beneath it. The harm (unrevealed covers, a column that only grows, rise pressure) arrives many moves later, outside a four-ply search, and the leaf's height terms are value-blind (a 7 and a 3 at height 5 score the same) while its dead-disc terms stop at value 2. The search is therefore not short of fear of death (finding-04: the terminal utility is saturated) but of foresight: the decision that entombs the disc looks harmless at depth 4. A trigger that fires when such a disc appears is a candidate for the 'emergency mode' the owner asked about, and a leaf term for it is a candidate 19th coordinate.",
+  "falsificationCriteria": [
+    "In complete depth-4 behaviour games of the corpus, fewer than half of deaths have an entombed disc of value >= 3 on the board at death: the disc is not the usual way the policy dies.",
+    "The median lead time between the first persistent entombed >= 3 disc and death is under 5 moves (one rise): the signal arrives too late to act on and is not foresight.",
+    "On a whole-origin held-out split, the partial correlation of the entombed count with log remaining lifetime, after the eighteen frozen leaf features, occupancy and the rise clock, is above -0.02, or the incremental held-out R^2 is below 0.005: the leaf already prices it.",
+    "Out of scope: whether pricing it changes play. That is a separate preregistered gameplay experiment."
+  ],
+  "informationClass": "diagnostic",
+  "lifecycle": "assessed",
+  "assessment": "not-supported-as-tested",
+  "evidenceTier": "mechanics-only",
+  "dependencies": [],
+  "evidenceRefs": [
+    "docs/exploratory/finding-04-terminal-utility-saturated.md",
+    "approaches/fair-expectimax/root-risk/README.mdx",
+    "approaches/heuristic-search/risk-sensitive/README.mdx",
+    "src/core/native/public-behavior.hpp",
+    "approaches/fair-expectimax/reference/fair-only-horizon.cpp",
+    "research/results/RS-20260822T051732Z-ceb257d7.json"
+  ],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": null
+  },
+  "createdAt": "2026-08-22T05:12:38Z",
+  "updatedAt": "2026-08-22T05:17:32Z"
+}

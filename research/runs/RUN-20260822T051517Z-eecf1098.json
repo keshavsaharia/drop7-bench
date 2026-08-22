@@ -1,0 +1,52 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260822T051517Z-eecf1098",
+  "experimentId": "EX-20260822-entombed-disc-corpus-analysis-38be404e",
+  "lifecycle": "completed",
+  "runValidity": "valid",
+  "startedAt": "2026-08-22T05:15:17Z",
+  "endedAt": "2026-08-22T05:17:32Z",
+  "protocolSha256": "19b2b3dcce09bb144cc845ec4c5c58843c643b85aebaf8abcb2e1982fd7940db",
+  "machineProfileRef": "research/system-profiles/MACH-20260820T080056Z-376ada90.json",
+  "sourceState": {
+    "gitCommit": "4415d44d0744d5642e00f3672071203f0cc740e6",
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "build/entombed-discs/leafdump",
+    "runs/RUN-A51D-corpus/all.states",
+    "runs/RUN-20260822T051517Z-eecf1098/leaf.f32",
+    "&&",
+    "/usr/bin/python3",
+    "approaches/lifetime-objective/entombed-discs/analyze.py",
+    "runs/RUN-A51D-corpus/all.states",
+    "runs/RUN-20260822T051517Z-eecf1098/leaf.f32",
+    "runs/RUN-20260822T051517Z-eecf1098/analysis.json"
+  ],
+  "seedLeaseRefs": [],
+  "resourceLimits": {
+    "wallSeconds": 1800,
+    "cpuThreads": 4,
+    "maxHostBytes": 34359738368,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": 39,
+    "cpuSeconds": 36,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "leafdump 7.3 s, analyze.py 31.6 s, single-threaded numpy, while the 30-thread evolution run shared the machine."
+  },
+  "exitCode": 0,
+  "stopReason": "completed",
+  "artifactRefs": [
+    "runs/RUN-20260822T051517Z-eecf1098/analysis.json",
+    "runs/RUN-20260822T051517Z-eecf1098/leaf.f32"
+  ],
+  "contributionIds": [
+    "CT-20260822T051732Z-a0507c6b"
+  ]
+}

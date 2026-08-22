@@ -10,8 +10,8 @@ contributors:
 tags: [fair-planner, depth, chance-exactness, afterstate-model, negative-result, competition, leaf-evolution, orchestrator]
 outcomes:
   positive: 2
-  negative: 6
-  open: 4
+  negative: 7
+  open: 5
 ---
 
 Yesterday ended with three bets running overnight on a saturated machine. All
@@ -530,3 +530,57 @@ recorded futures reaches the same accuracy ceiling in thirty seconds. What
 *could* be evolved at game cost is a handful of numbers on top of such a
 network — the blend weight, the scale, the eighteen leaf coefficients — and
 that is the registered extension of tonight's evolution, not a separate run.
+
+## Late evening: the 3 that can never clear
+
+The owner, watching the depth-4 search play, noticed it letting a 3 or a 4 land
+above its "safe zone" — in a column already taller than the disc's number,
+where it can never clear downward — and dying under it a few rises later; and
+asked whether the solver could have an emergency mode that recognises a risk
+to its survival and acts on it. The record answers the second part first: the
+search is not short of fear. Death inside its horizon already costs a million
+points and finding-04 showed a fifty-fold harsher penalty changes not one
+decision; every root-level survival objective tried — worst-case weighting,
+the rollout veto, tail objectives — lost badly. What it lacks is foresight.
+
+So the observation was registered as a theory about foresight
+(`TH-20260822-entombed-disc-hazard-61faa529`): an *entombed* disc — value n,
+column taller than n, row run longer than n, which the leaf prices only for 1s
+and 2s — is an early death predictor the leaf does not carry. Five million
+recorded positions answered in forty seconds.
+
+<ArmTable
+  caption="Depth-4 behaviour games in the corpus (768 complete games). Prevalence of an entombed disc of value 3 or more, by distance from death."
+  columns={[
+    { key: "bucket", label: "Moves to death" },
+    { key: "frac", label: "States with an entombed ≥3", numeric: true },
+    { key: "occ", label: "Mean occupied cells", numeric: true }
+  ]}
+  rows={[
+    { bucket: "more than 40", frac: "7.6%", occ: "20.0" },
+    { bucket: "16–40", frac: "17.8%", occ: "24.9" },
+    { bucket: "6–15", frac: "48.3%", occ: "32.7" },
+    { bucket: "5 or fewer", frac: "69.8%", occ: "40.1", highlight: true }
+  ]}
+/>
+
+<Finding title="Real marker, not a missing term" kind="negative" metric="R² +0.0003">
+Three quarters of depth-4 deaths end with an entombed 3-or-higher on the board,
+and the first persistent one appears a median of 11 moves before the end — the
+two-rise warning the owner saw. But adding the feature to the leaf's eighteen
+moves the held-out fit of remaining lifetime from R² 0.6952 to 0.6955, and at
+equal occupancy an entombed disc costs about two moves (35.0 vs 37.4 at 24–27
+cells). The leaf's value-blind height and cover terms already carry the
+information; the entombed disc marks a board that is already at 31–40 cells.
+Gate: not supported as tested (`EX-20260822-entombed-disc-corpus-analysis-38be404e`).
+</Finding>
+
+<Direction title="Was the entombing move avoidable?" status="proposed">
+This analysis is about values; the owner's question is about actions. The
+test it points at is a counterfactual replay: at each depth-4 root where the
+chosen move entombed a disc and a non-entombing alternative existed, play the
+alternative instead and continue with the same search, paired, and measure
+the lifetime difference. If the alternative lives longer, an emergency mode
+is a move filter with a real trigger; if not, the entombing move was already
+the least bad option and the problem is two rises older than it looks.
+</Direction>

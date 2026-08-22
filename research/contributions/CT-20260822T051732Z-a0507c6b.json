@@ -1,0 +1,53 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260822T051732Z-a0507c6b",
+  "actor": {
+    "kind": "model",
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": null
+  },
+  "level": "L3",
+  "roles": [
+    {
+      "role": "conceptualization",
+      "degree": "substantial"
+    },
+    {
+      "role": "software",
+      "degree": "lead"
+    },
+    {
+      "role": "formal-analysis",
+      "degree": "lead"
+    }
+  ],
+  "summary": "Registered the owner's observation (3s/4s left above their 'safe zone') as TH-20260822-entombed-disc-hazard-61faa529, wrote leafdump.cpp (frozen fast-leaf features for every corpus state) and analyze.py (vectorised entombed-disc features, prevalence, lead time, occupancy-matched lifetime, whole-origin incremental R^2), ran it on the existing corpus, and recorded RS-20260822T051732Z-ceb257d7: valid + fail.",
+  "theoryIds": [
+    "TH-20260822-entombed-disc-hazard-61faa529"
+  ],
+  "experimentIds": [
+    "EX-20260822-entombed-disc-corpus-analysis-38be404e"
+  ],
+  "runIds": [
+    "RUN-20260822T051517Z-eecf1098"
+  ],
+  "artifactPaths": [
+    "approaches/lifetime-objective/entombed-discs/",
+    "runs/RUN-20260822T051517Z-eecf1098/analysis.json",
+    "research/results/RS-20260822T051732Z-ceb257d7.json"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "leafdump: 5,257,181 records, 0 invalid",
+    "analysis on 4,863,627 non-explored records; whole-origin split identical to dataset.py",
+    "make research-validate"
+  ],
+  "limitations": [
+    "Self-reported; the theory was proposed by the repository owner from watching play and formalised by the model."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-22T05:17:32Z"
+}
