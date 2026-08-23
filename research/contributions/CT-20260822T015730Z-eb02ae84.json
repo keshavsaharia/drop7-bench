@@ -1,0 +1,71 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260822T015730Z-eb02ae84",
+  "actor": {
+    "kind": "model",
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": null
+  },
+  "level": "L3",
+  "roles": [
+    {
+      "role": "conceptualization",
+      "degree": "lead"
+    },
+    {
+      "role": "methodology",
+      "degree": "lead"
+    },
+    {
+      "role": "software",
+      "degree": "lead"
+    },
+    {
+      "role": "validation",
+      "degree": "substantial"
+    },
+    {
+      "role": "orchestration",
+      "degree": "substantial"
+    },
+    {
+      "role": "writing",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Authored theory TH-20260822-depth-native-leaf-weights (the frozen fair-leaf weights are not locally optimal at the depth they are deployed in) and its preregistered SCREEN experiment; implemented approaches/lifetime-objective/leaf-evolution (weights-as-data fast leaf, sed-generated WeightedFastSearch with a diff guard, six CHECK gates, population evaluator with common random numbers, numpy CMA-ES with mirrored sampling and resume, paired compare with bootstrap and Student-t bounds, scripted held-out screen); measured the pilot; allocated and recorded the two seed leases; commissioned and acted on Kimi K3's pre-run adversarial review; wrote the ./do-research orchestrator (scripts/do-research: planner backends, lease allocator, headless implementer and reviewer, resumable loop); launched evolution run RUN-20260822T014412Z-a0c63063. No result is claimed; the run is in progress.",
+  "theoryIds": [
+    "TH-20260822-depth-native-leaf-weights-caa6f8ba"
+  ],
+  "experimentIds": [
+    "EX-20260822-leaf-cmaes-d4s7-4f5f462a"
+  ],
+  "runIds": [
+    "RUN-20260822T013250Z-cb282a1c",
+    "RUN-20260822T013756Z-0f7ab038",
+    "RUN-20260822T014412Z-a0c63063"
+  ],
+  "artifactPaths": [
+    "approaches/lifetime-objective/leaf-evolution/",
+    "scripts/do-research/",
+    "do-research",
+    "research/seeds/leases/SL-20260822T020000Z-a5290000.json",
+    "research/seeds/leases/SL-20260822T020000Z-a52b0000.json"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "build.sh: generated weighted-search.hpp differs from fast-search.hpp in exactly 16 lines; gate: leaf-bits 0/2,500 and 0/4,285 mismatches, search-parity 0 mismatches over 50 and 160 moves, perturbed determinism/reflection/metadata/completed-depth 0 mismatches (runs/RUN-20260822T013756Z-0f7ab038/gates.log)",
+    "pilot: 32 games reproduce runs/RUN-A51D-s7confirm/fresh-s7.json and fresh-s5.json exactly; 1.027 and 0.287 CPU-s per decision",
+    "make research-validate passed (109 records); node --experimental-strip-types --check on scripts/do-research/*.ts; node web/scripts/check-mdx.mjs on the approach page"
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed.",
+    "The evolution run had not finished when this record was written; no result record exists yet.",
+    "The ./do-research orchestrator has not yet completed an end-to-end iteration."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-22T01:57:30Z"
+}

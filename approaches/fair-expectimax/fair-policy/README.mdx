@@ -51,6 +51,8 @@ looks like. The ledger describes the resulting behaviour as "knife-edge
 chain-building": capable of entering a self-sustaining clear-and-reveal regime,
 and high variance.
 
+<GameTreeFigure seed={0x5eed1004} moves={12} caption="The evaluator at work: every outcome board at the bottom of the tree gets one number from it, and the search averages those numbers over chance and takes the best column. The browser solver uses the TypeScript combined leaf, a playground analogue of the frozen fair leaf." />
+
 ## How it works, step by step
 
 1. **Extract features** from the visible position: readiness, latent potential,

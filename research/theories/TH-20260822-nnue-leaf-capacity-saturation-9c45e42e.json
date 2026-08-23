@@ -1,0 +1,31 @@
+{
+  "$schema": "../schemas/theory-v1.schema.json",
+  "format": "drop7-theory-v1",
+  "theoryId": "TH-20260822-nnue-leaf-capacity-saturation-9c45e42e",
+  "title": "The NNUE-shaped survival leaf is accuracy-saturated at hidden width 64 on the existing corpus",
+  "claim": "On the existing 5.26M-record training corpus (runs/RUN-A51D-corpus/all.states, whole-origin split of dataset.py), the NNUE-shaped survival leaf's held-out lifetime correlation does not improve by more than 0.01 when hidden width is raised from 64 to 512, the middle layer from 32 to 64, epochs from 10 to 20, or the learning rate is changed: its accuracy is saturated by the feature space and the data, not by capacity or training length.",
+  "mechanism": "finding-08 reports held-out lifetime correlation 0.8564 for the 572k-parameter h64 student against 0.8646 for a 3.0M-parameter convolutional teacher, and concludes that 'the accuracy is not there to be had'. That conclusion rests on one pair of architectures. If the 135-active-feature first layer is the bottleneck, wider hidden layers and longer training will not move the held-out correlation; if the student is under-parameterised or under-trained, they will. Either answer is cheap (about 35 s of GPU per run) and neither requires a game.",
+  "falsificationCriteria": [
+    "The best sweep configuration's held-out lifetime Pearson exceeds the h64/m32/10-epoch/lr 3e-3 baseline by at least 0.02 and by more than three times the seed-to-seed spread of the baseline: the claim is not supported as tested (capacity or training length matters).",
+    "A delta between max(0.005, 2 x seed spread) and that threshold: inconclusive at this corpus size.",
+    "Out of scope: whether a more accurate leaf plays better. finding-08 already shows a 0.008 correlation gap did not separate the CNN from the student in play; a gameplay test is a separate preregistered experiment."
+  ],
+  "informationClass": "diagnostic",
+  "lifecycle": "assessed",
+  "assessment": "supported-as-tested",
+  "evidenceTier": "mechanics-only",
+  "dependencies": [],
+  "evidenceRefs": [
+    "docs/exploratory/finding-08-learned-leaf.md",
+    "approaches/lifetime-objective/learned-leaf/README.mdx",
+    "runs/RUN-A52-LEAF/model/leafnet-h64.json",
+    "research/results/RS-20260822T024228Z-94090db1.json"
+  ],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": null
+  },
+  "createdAt": "2026-08-22T02:04:57Z",
+  "updatedAt": "2026-08-22T02:42:28Z"
+}

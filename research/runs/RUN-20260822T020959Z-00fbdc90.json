@@ -1,0 +1,52 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260822T020959Z-00fbdc90",
+  "experimentId": "EX-20260822-leaf-cmaes-d4s7-4f5f462a",
+  "lifecycle": "completed",
+  "runValidity": "valid",
+  "startedAt": "2026-08-22T11:48:00Z",
+  "endedAt": "2026-08-22T12:07:36Z",
+  "protocolSha256": "8588bd6fde37d385d1cac5db91c2380a82e245ea53e1749b21c23fd44d53f8dd",
+  "machineProfileRef": "research/system-profiles/MACH-20260820T080056Z-376ada90.json",
+  "sourceState": {
+    "gitCommit": "427e34b659da96ddab85733f6254b827eb33bbbd",
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "runs/RUN-20260822T020959Z-00fbdc90/watch-and-screen.sh",
+    "->",
+    "approaches/lifetime-objective/leaf-evolution/screen.sh",
+    "runs/RUN-20260822T014412Z-a0c63063",
+    "RUN-20260822T020959Z-00fbdc90"
+  ],
+  "seedLeaseRefs": [
+    "SL-20260822T020000Z-a52b0000"
+  ],
+  "resourceLimits": {
+    "wallSeconds": 3600,
+    "cpuThreads": 30,
+    "maxHostBytes": 17179869184,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": 1160,
+    "cpuSeconds": null,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "Planned: a watcher waits for runs/RUN-20260822T014412Z-a0c63063/final.json, opens the held-out lease once, and runs the scripted screen (arm 1: d4 s5, the gate; arm 2: d4 s7, diagnostic) on seeds 0xa52b0000-0xa52b003f. Freeze-time protocol hash 87d2d15dadd49e84e3fd8e86168cc1fe00b4eeb28f8d56aacd9ac0f7f02ddca7; re-hashed 8588bd6fde37d385d1cac5db91c2380a82e245ea53e1749b21c23fd44d53f8dd at completion (repository convention)."
+  },
+  "exitCode": 0,
+  "stopReason": "completed",
+  "artifactRefs": [
+    "runs/RUN-20260822T020959Z-00fbdc90/heldout-d4s5.json",
+    "runs/RUN-20260822T020959Z-00fbdc90/compare-d4s5.json",
+    "runs/RUN-20260822T020959Z-00fbdc90/heldout-d4s7.json",
+    "runs/RUN-20260822T020959Z-00fbdc90/compare-d4s7.json"
+  ],
+  "contributionIds": [
+    "CT-20260822T120736Z-73189ab8"
+  ]
+}

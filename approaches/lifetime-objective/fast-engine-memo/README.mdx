@@ -1,0 +1,72 @@
+---
+title: Remembering the last board
+family: lifetime-objective
+summary: Inside one chance node the search scores the same move under several imagined futures that usually leave the board identical; remembering the last board's features and recomputing the one term that depends on the next disc gives exactly the same numbers for a fraction of the work.
+status: completed
+evidence: repository-verified
+reads: public
+---
+
+Inside one chance node the search scores the same move under several imagined
+futures that usually leave the board identical; remembering the last board's
+features and recomputing the one term that depends on the next disc gives
+exactly the same numbers for a fraction of the work.
+
+<EvidenceLabel status="completed" evidence="repository-verified" reads="public" />
+
+<Callout title="An engineering result, not a strength result" tone="info">
+Nothing about play changes: every leaf value is bit-identical, every decision,
+work count, node count and cache hit is the same. This page is about the cost
+of a decision. Its ratios were measured on a machine running a thirty-thread
+cohort and are indicative until repeated on an idle host.
+</Callout>
+
+## The intuition
+
+When the search imagines a move it samples five or seven possible futures:
+which disc comes next, and what the hidden gray discs turn out to be if the
+move cracks them. Most moves crack nothing, so most of those futures share one
+board and differ only in the sampled next disc. The board scorer reads the
+next disc in exactly one of its eighteen terms — the count of columns where
+that disc would land on a run of its own height. Everything else it computes
+depends on the board alone. The search was recomputing all eighteen terms for
+each future; the [engine audit](/docs/exploratory/audit-06-engine-efficiency)
+noticed that about two thirds of those computations repeat the previous one.
+
+## How it works, step by step
+
+1. The leaf keeps a single remembered entry: the last board, its moves until
+   the next rise, its column heights, and its eighteen feature values.
+2. On a call with the same board and rise clock it skips feature extraction,
+   recomputes the next-disc term from the stored heights in the same column
+   order, and runs the weighted sum in the frozen order. Same inputs, same
+   doubles, same bits.
+3. The memo sits *below* the search's work counter, so logical work is
+   counted exactly as before; the search built on it (`MemoSearch`) is
+   generated from the gated fast search by a checked substitution that also
+   verifies that placement.
+4. Gates on real probe positions: leaf values bit-compared in the search's own
+   feeding order (hits and misses alike), search parity with the unchanged
+   fast search on every move (column, work, nodes, cache hits, completed
+   depth), determinism across thread counts, and an interleaved timing ratio.
+
+<TechnicalDetails title="The record">
+
+Origin: `docs/exploratory/audit-06-engine-efficiency.md` (executive item 1)
+and its adversarial review, which supplied the placement requirement and the
+ruling that a capacity-free memo is an implementation detail rather than a
+cache-semantics declaration. Gates (`runs/RUN-20260822T073338Z-48e4df54/gates.log`,
+host at load ~30): leaf bits 0 mismatches over 4,260 boards (depth 4, five
+strata) and 2,500 (seven strata) in the search's feeding order; search parity
+with the unchanged fast search 0 mismatches over 160 and 50 moves (117.7 and
+119.6 million leaf calls); determinism 0 mismatches at 1 versus 4 threads;
+memo hit rate 61.7% (five strata) and 68.5% (seven); interleaved timing ratio
+1.58× and 1.63× on real roots, indicative until measured on an idle host.
+
+</TechnicalDetails>
+
+## Sources
+
+- `memo-leaf.hpp` — the one-entry memo and the frozen dot-product order
+- `build.sh` — generates `MemoSearch` from `fast-search.hpp` with a diff guard and a placement check
+- `gate.cpp` — leaf bits, parity, determinism, timing

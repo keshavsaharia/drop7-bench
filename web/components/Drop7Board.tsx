@@ -13,6 +13,7 @@
  */
 import type { CSSProperties, ReactNode } from "react";
 import { DiscFace, cellLabel, parseBoard } from "./discs";
+import styles from "./Drop7Board.module.css";
 
 export interface ColumnNote {
   /** Short text over the value, e.g. "c3" or "best". */
@@ -25,12 +26,21 @@ export interface ColumnNote {
   muted?: boolean;
 }
 
+export interface ExplosionPoint {
+  /** Stable for the lifetime of this one floating label. */
+  id: number | string;
+  /** Cell where the disc exploded (0–48, row-major from the top). */
+  index: number;
+  /** Points awarded by this disc's chain wave. */
+  points: number;
+}
+
 export interface Drop7BoardProps {
   cells: string | readonly number[];
-  /** Incoming disc, shown above the board. */
-  nextDisc?: number;
-  /** Column (0–6) the incoming disc is headed for; also marks that column. */
-  dropColumn?: number;
+  /** Incoming disc, shown above the board. `null` keeps the row reserved with no disc. */
+  nextDisc?: number | null;
+  /** Column (0–6) the incoming disc is headed for; also marks that column. `null` parks the disc with no column chosen. */
+  dropColumn?: number | null;
   /** Cell indexes (0–48, row-major from the top) to ring. */
   highlight?: readonly number[];
   /** Cell indexes to fade. */
@@ -46,6 +56,10 @@ export interface Drop7BoardProps {
   /** Extra classes per cell — the game uses this for motion classes. */
   cellClassName?: (index: number, cell: number) => string | undefined;
   cellStyle?: (index: number, cell: number) => CSSProperties | undefined;
+  /** Floating per-disc score labels supplied by an animated viewer. */
+  explosionPoints?: readonly ExplosionPoint[];
+  /** Show floating explosion scores. Defaults to true. */
+  showExplosionPoints?: boolean;
   /** Rendered absolutely over the grid (column buttons, an end-of-game panel). */
   overlay?: ReactNode;
 }
@@ -82,6 +96,8 @@ export function Drop7Board({
   label,
   cellClassName,
   cellStyle,
+  explosionPoints = [],
+  showExplosionPoints = true,
   overlay,
 }: Drop7BoardProps) {
   const board = parseBoard(cells);
@@ -93,10 +109,10 @@ export function Drop7Board({
   return (
     <figure className={`inline-flex max-w-full flex-col gap-1.5 align-top ${className}`} style={{ width }}>
       {nextDisc !== undefined && (
-        <div className="grid grid-cols-7 px-1.5" aria-label={`next disc ${nextDisc}`}>
+        <div className="grid grid-cols-7 px-1.5" aria-label={nextDisc === null ? "next disc" : `next disc ${nextDisc}`}>
           {Array.from({ length: 7 }, (_, column) => (
             <div key={column} className="flex aspect-square items-center justify-center p-[12%]">
-              {column === (dropColumn ?? 3) ? (
+              {nextDisc !== null && column === (typeof dropColumn === "number" ? dropColumn : 3) ? (
                 <DiscFace cell={nextDisc} className="size-full text-[0.9em]" />
               ) : null}
             </div>
@@ -114,7 +130,7 @@ export function Drop7Board({
             const column = index % 7;
             const ringed = highlight.includes(index);
             const faded = dim.includes(index);
-            const inDrop = dropColumn !== undefined && column === dropColumn;
+            const inDrop = typeof dropColumn === "number" && column === dropColumn;
             return (
               <div
                 key={index}
@@ -124,6 +140,14 @@ export function Drop7Board({
                 } ${faded ? "opacity-30" : ""}`}
               >
                 <DiscFace cell={cell} className={`size-full ${cellClassName?.(index, cell) ?? ""}`} style={cellStyle?.(index, cell)} />
+                {showExplosionPoints &&
+                  explosionPoints
+                    .filter((point) => point.index === index)
+                    .map((point) => (
+                      <span key={point.id} aria-hidden="true" className={styles.explosionPoint}>
+                        +{formatValue(point.points)}
+                      </span>
+                    ))}
                 {ringed && (
                   <span
                     aria-hidden="true"

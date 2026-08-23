@@ -321,3 +321,365 @@ body {
 .arm-table tbody tr:last-child td {
   border-bottom: 0;
 }
+
+/* Live visual intro on the rules page (web/components/Drop7Intro.tsx).
+   Unlayered so it wins inside .prose-drop7 the same way .engine-fig does. */
+.drop7-intro {
+  margin: 1.2rem 0;
+  border: 1px solid #27272a;
+  border-radius: 0.75rem;
+  background: #101014;
+  padding: 1.25rem 1rem 1rem;
+}
+.drop7-intro-board {
+  display: flex;
+  justify-content: center;
+}
+.drop7-intro-shell {
+  width: min(100%, 24rem);
+}
+.drop7-intro-hud {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 0.35rem;
+  padding: 0 0.4rem;
+}
+.drop7-intro .drop7-intro-score,
+.drop7-intro-rise {
+  margin: 0;
+}
+.drop7-intro-score > span,
+.drop7-intro-rise > span:first-child {
+  display: block;
+  color: #71717a;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.drop7-intro-score strong {
+  display: block;
+  margin-top: 0.25rem;
+  color: #fafafa;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.drop7-intro-rise {
+  text-align: right;
+}
+.drop7-intro-rise-dots {
+  display: flex;
+  gap: 0.28rem;
+  margin-top: 0.35rem;
+}
+.drop7-intro-rise-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border: 1px solid #52525b;
+  border-radius: 9999px;
+  background: #27272a;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+.drop7-intro-rise-dot.is-spent {
+  border-color: #38bdf8;
+  background: #38bdf8;
+  box-shadow: 0 0 0.35rem rgb(56 189 248 / 45%);
+}
+.drop7-intro-rise-dot.is-imminent {
+  border-color: #fbbf24;
+  background: #fbbf24;
+  box-shadow: 0 0 0.45rem rgb(251 191 36 / 65%);
+}
+.drop7-intro figcaption {
+  margin: 0.7rem 0 0;
+  text-align: center;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: #71717a;
+}
+.drop7-intro-columns {
+  position: absolute;
+  inset: 0.375rem;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+.drop7-intro-col {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-left: 2px solid transparent;
+  border-right: 2px solid transparent;
+  background: transparent;
+  cursor: pointer;
+}
+.drop7-intro-col:hover:enabled,
+.drop7-intro-col.is-aim {
+  background: rgba(56, 189, 248, 0.1);
+  border-color: rgba(56, 189, 248, 0.5);
+}
+.drop7-intro-col:disabled {
+  cursor: default;
+}
+.drop7-intro-ended {
+  position: absolute;
+  inset: 0.375rem;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.25rem;
+  background: rgba(9, 9, 11, 0.78);
+  color: #fafafa;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Interactive game-tree explorer (web/components/GameTreeExplorer.tsx,
+   wrapped for MDX by GameTree.tsx). React Flow supplies the pane; every
+   rule here is scoped under .tree-fig / .tree-* so it cannot leak. Per-cell
+   motion reuses Drop7Game.module.css and stops under prefers-reduced-motion
+   there; the explorer also skips frames when the media query matches. */
+.tree-fig {
+  margin: 1.2rem 0;
+  border: 1px solid #27272a;
+  border-radius: 0.75rem;
+  background: #101014;
+  padding: 1rem;
+}
+.tree-fig figcaption {
+  margin-top: 0.6rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #a1a1aa;
+}
+.tree-explorer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.tree-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.9rem;
+  font-size: 0.75rem;
+  color: #a1a1aa;
+}
+.tree-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.tree-control > span:first-child {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #71717a;
+}
+.tree-control__value {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  min-width: 1.6rem;
+  color: #e4e4e7;
+}
+.tree-input {
+  border: 1px solid #3f3f46;
+  border-radius: 0.375rem;
+  background: #18181b;
+  color: #e4e4e7;
+  padding: 0.2rem 0.45rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem;
+  width: 7.2rem;
+}
+select.tree-input {
+  width: auto;
+  font-family: inherit;
+}
+.tree-button {
+  border: 1px solid #3f3f46;
+  border-radius: 0.375rem;
+  background: #18181b;
+  color: #e4e4e7;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+.tree-button:hover:not(:disabled) {
+  border-color: rgba(139, 92, 246, 0.6);
+  background: rgba(167, 139, 250, 0.1);
+}
+.tree-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.tree-canvas {
+  position: relative;
+  border: 1px solid #27272a;
+  border-radius: 0.6rem;
+  overflow: hidden;
+  background: #09090b;
+}
+.tree-canvas .react-flow__attribution {
+  display: none;
+}
+.tree-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(9, 9, 11, 0.55);
+  color: #d4d4d8;
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+.tree-node {
+  width: max-content;
+  border: 1px solid #3f3f46;
+  border-radius: 0.6rem;
+  background: #18181b;
+  padding: 0.45rem 0.55rem;
+  color: #e4e4e7;
+  font-size: 0.7rem;
+  line-height: 1.35;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+.tree-node--root {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+}
+.tree-node--choice {
+  min-width: 11rem;
+  text-align: center;
+}
+.tree-node--best {
+  border-color: #a78bfa;
+  background: rgba(167, 139, 250, 0.08);
+}
+.tree-node--expanded {
+  box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.35);
+}
+.tree-node--outcome.tree-node--clickable {
+  cursor: pointer;
+}
+.tree-node--outcome.tree-node--clickable:hover {
+  border-color: #38bdf8;
+}
+.tree-node--more {
+  max-width: 11rem;
+  color: #a1a1aa;
+  text-align: center;
+  font-style: italic;
+}
+.tree-node__title {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #a1a1aa;
+}
+.tree-node__subtitle {
+  color: #a1a1aa;
+  text-align: center;
+}
+.tree-node__value {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  color: #38bdf8;
+}
+.tree-node__value--over {
+  color: #f87171;
+}
+.tree-node__big {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #f4f4f5;
+}
+.tree-node__meta {
+  color: #71717a;
+}
+.tree-node__tag {
+  margin-top: 0.15rem;
+  border-radius: 999px;
+  background: #7c3aed;
+  color: #fff;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.tree-handle {
+  width: 6px;
+  height: 6px;
+  background: #52525b;
+  border: none;
+}
+.tree-canvas .react-flow__edge-path {
+  stroke: #3f3f46;
+  stroke-width: 1.5;
+}
+.tree-canvas .tree-edge--best .react-flow__edge-path {
+  stroke: #a78bfa;
+  stroke-width: 2;
+}
+.tree-canvas .tree-edge--chance .react-flow__edge-path {
+  stroke: #0ea5e9;
+  stroke-dasharray: 4 3;
+}
+.tree-canvas .tree-edge--more .react-flow__edge-path {
+  stroke: #3f3f46;
+}
+.tree-canvas .react-flow__edge-textbg {
+  fill: #18181b;
+}
+.tree-canvas .react-flow__edge-text {
+  fill: #d4d4d8;
+  font-size: 0.65rem;
+}
+.tree-status {
+  font-size: 0.75rem;
+  color: #a1a1aa;
+  font-variant-numeric: tabular-nums;
+}
+.tree-status__note {
+  color: #71717a;
+}
+.tree-legend {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: #a1a1aa;
+}
+.tree-legend b {
+  color: #e4e4e7;
+  font-weight: 600;
+}
+.tree-legend__muted {
+  color: #71717a;
+}
+.tree-legend a {
+  color: #a78bfa;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tree-canvas .react-flow__edge.animated .react-flow__edge-path {
+    animation: none;
+  }
+}

@@ -1,0 +1,128 @@
+---
+title: Evolving the leaf weights at the depth they are used
+family: lifetime-objective
+summary: Let an evolutionary optimiser adjust the eighteen numbers inside the search's board scorer by playing complete depth-4 games on a fresh block of seeds every generation, then test the frozen winner once on games it has never seen.
+status: preregistered
+evidence: none
+reads: public
+---
+
+Let an evolutionary optimiser adjust the eighteen numbers inside the search's
+board scorer by playing complete depth-4 games on a *fresh* block of seeds every
+generation, then test the frozen winner exactly once on games it has never seen.
+
+<EvidenceLabel status="preregistered" evidence="none" reads="public" />
+
+<Callout title="Status" tone="info">
+The optimisation run is in progress (run `RUN-20260822T014412Z-a0c63063`). No
+score from it is a result until the preregistered held-out screen has been
+evaluated and a result record written. The numbers on this page are the
+pilot's runtime measurements and the CHECK-gate counts, nothing more.
+</Callout>
+
+## The intuition
+
+At the bottom of its four-move look-ahead the search has to say how promising a
+board is. That opinion is the [leaf evaluator](/learn/glossary): nineteen
+hand-written terms — build readiness, latent chain potential, cover access,
+height, danger near a rise — each multiplied by a number someone chose by hand
+for a *three*-move search under the old 7,000-point scoring. Those numbers have
+never been refitted for the four-move search they now live in, or under the
+corrected 17,000-point rules
+([the fair leaf's own page](/approaches/fair-expectimax/fair-policy) says so).
+
+Two earlier attempts to tune them were retired, and each failed in a way that
+does not say the numbers are right: one tuned at depth 3 on three-game batches
+and moved the result to depth 4 unchanged
+([machine-tuning the board evaluator](/approaches/fair-expectimax/cem)); the
+other fitted one-move policies on a fixed set of games and lost on different
+games ([evolution](/approaches/heuristic-search/evolution)). Refitting the
+leaf toward a quantity the search already computes made things much worse
+([leaf reweight](/approaches/lifetime-objective/leaf-reweight)) — which is
+evidence the leaf's job is to price what the search *cannot* see, and a reason
+to let whole games, not a proxy, choose the weights.
+
+So this experiment removes the two known failure channels at once. The fitness
+of a candidate is the mean score of complete depth-4 games, at the configuration
+the policy is deployed in. And every generation plays a block of seeds that no
+earlier generation saw, so the optimiser cannot memorise games; it can only move
+toward weights that are better on average.
+
+<GameTreeFigure seed={0x5eed1005} moves={16} caption="What the evolution is tuning: the numbers on the outcome boards. Change the weights and every leaf value moves, the averages move, and a different column can win — which is why the weights must be tested by whole games rather than by how sensible the numbers look." />
+
+## How it works, step by step
+
+1. **Weights become data.** The bit-exact fast engine's leaf
+   (`fast-leaf.hpp`) is copied with its eighteen constants replaced by an
+   array, in the same accumulation order. At the frozen vector it returns the
+   same bits; the search built on it (`WeightedFastSearch`, generated from
+   `fast-search.hpp` by a checked substitution in `build.sh`) selects the same
+   column with the same work.
+2. **Gates before any seed.** `gate.cpp` checks leaf bit-identity on every board
+   a real search visits, search parity with the frozen fast search, determinism
+   across thread counts, mirror symmetry, blindness to score/level/move number,
+   and that perturbed weights still complete depth 4 with legal moves.
+3. **Population evaluation.** `evaluate.cpp` plays every individual on the same
+   ordered block of seeds (common random numbers) and writes one row per game.
+   The frozen vector is played on every block as a control.
+4. **CMA-ES.** `evolve.py` runs a (8/8, 16) covariance-matrix-adaptation
+   strategy with mirrored sampling in sign-normalised coordinates (the frozen
+   vector is ±1 on every axis; one step of σ is a relative change). Generation
+   *g* plays seeds `0xa5290000 + 32g` … `+31`. The candidate is the
+   distribution **mean** at the last generation — not the best sampled
+   individual, whose fitness is inflated by having been selected on its own
+   noise.
+5. **One held-out screen.** `compare.py` evaluates the frozen candidate against
+   the frozen leaf on 64 never-read seeds (`0xa52b0000+`), paired, with a
+   one-sided 95% bootstrap lower bound, both halves, and the lower quartile.
+   The gate was fixed and hashed before the first training seed was read.
+
+The policy reads only the visible board, the visible next disc and the moves
+until the next rise, exactly as the reference does.
+
+## What has happened so far
+
+The pilot measured the cost of a decision on this machine with the fast engine:
+about 0.29 CPU-seconds at depth 4 with five chance samples and about 1.03 with
+seven, and it reproduced the recorded seven-sample and five-sample reference
+cohorts seed for seed on the first sixteen games. The six CHECK gates passed
+with zero mismatches (2,500 and 4,285 leaf boards; 50 and 160 parity moves).
+The evolution then started on the five-sample configuration — the contract
+comparator — because at 3.7× less per game it affords roughly forty
+generations overnight instead of twelve, and the seven-sample transfer of the
+winner is a preregistered secondary measurement on the same held-out seeds.
+
+<TechnicalDetails title="The record">
+
+- Theory `TH-20260822-depth-native-leaf-weights-caa6f8ba`; experiment
+  `EX-20260822-leaf-cmaes-d4s7-4f5f462a` (frozen, SCREEN tier, protocol
+  SHA-256 `87d2d15d…`); leases `SL-20260822T020000Z-a5290000` (training,
+  opened) and `SL-20260822T020000Z-a52b0000` (held-out, reserved).
+- Pilot run `RUN-20260822T013250Z-cb282a1c` (seeds `0xa51d1000`+16, already
+  opened development data; runtime projection only). CHECK run
+  `RUN-20260822T013756Z-0f7ab038`. Evolution run
+  `RUN-20260822T014412Z-a0c63063`: λ = 16, μ = 8, σ₀ = 0.25, 32 games per
+  individual per generation, depth 4, 5 strata, cache 60,000, work bound at
+  the worst case, at most 40 generations or 14 wall-hours.
+- Gate: bootstrap and Student-t 95% lower bounds of the paired score delta
+  above zero, lower-quartile non-regression, both halves positive, zero
+  incomplete or illegal decisions. Failure records `valid` + `fail` for this
+  exact configuration and adopts nothing.
+- Honest limit stated in advance: a 64-game paired cohort cannot see an effect
+  below roughly 50,000 points. A null here is a non-measurement for smaller
+  effects, not evidence that the frozen weights are optimal.
+
+</TechnicalDetails>
+
+## Sources
+
+- `weighted-leaf.hpp`, `build.sh` — the weighted leaf and the generated search
+- `gate.cpp`, `evaluate.cpp` — CHECK gates and the population evaluator
+- `evolve.py`, `compare.py` — the optimiser and the paired held-out comparison
+- `screen.sh` — the once-only held-out screen, scripted before the candidate
+  existed so the most safety-critical command is reviewed rather than typed
+- `decide.cpp` — a one-shot decision binary for the benchmark playground:
+  `src/bench/native-policy.ts` bridges it into the leaderboard as
+  `native-fair-d4-s7` (frozen leaf) so the research search itself, and later
+  an evolved leaf, can play the scripted rounds. Scripted-round scores are a
+  demonstration, never evidence.

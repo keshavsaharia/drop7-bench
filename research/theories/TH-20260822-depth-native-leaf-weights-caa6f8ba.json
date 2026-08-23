@@ -1,0 +1,35 @@
+{
+  "$schema": "../schemas/theory-v1.schema.json",
+  "format": "drop7-theory-v1",
+  "theoryId": "TH-20260822-depth-native-leaf-weights-caa6f8ba",
+  "title": "The frozen fair-leaf weights are not locally optimal for the corrected-score depth-4 search they are deployed in",
+  "claim": "For the corrected-score fair depth-4 search with the frozen five-stratum chance model (the contract comparator fair-d4), there exists a vector for the eighteen active fair-leaf weights whose mean whole-game score on fresh development seeds exceeds the frozen vector's by more than a 64-game paired cohort's detection floor, and a derivative-free optimiser that evaluates candidates by complete depth-4 games on a fresh seed block every generation can find such a vector within 40 generations of 16 candidates.",
+  "mechanism": "The leaf prices what four plies of search cannot see (finding-14). The frozen weights were hand-set for a depth-3 search under historical 7,000-point scoring and have never been refitted under corrected scoring or at the depth they are used at (approaches/fair-expectimax/fair-policy/README.mdx). The two prior weight optimisations failed under conditions that each independently explain failure without implying optimality: the CEM run tuned at depth 3 on rotating three-game batches and transferred its vector to depth 4 unchanged; the heuristic-search evolutions fitted one-ply policies on a fixed seed set and regressed on disjoint seeds. Fresh seeds every generation remove the seed-overfitting channel by construction; depth-native fitness removes the depth-transfer confound; common random numbers within a generation let small perturbations of one policy be ranked with far less variance than two unrelated policies. If the frozen point were a local optimum of mean score at depth 4, the population mean would show no paired gain over the control on fresh seeds and the frozen candidate would fail the held-out screen.",
+  "falsificationCriteria": [
+    "The preregistered held-out paired screen (64 never-read development games at depth 4, five strata) of the frozen final candidate against the frozen leaf has a one-sided 95% bootstrap lower bound on the mean score delta at or below zero, a Student-t lower bound at or below zero, a lower-quartile regression, or opposite-sign halves: the claim is not supported as tested.",
+    "The paired population-mean-minus-control score delta on fresh training blocks does not exceed +20,000 in any of the last ten completed generations: no measurable gradient exists at this budget, and the claim is not supported as tested.",
+    "Any generation artifact or screen artifact records an incomplete decision, an illegal decision, or a score-identity failure: the run is invalid and cannot support or reject the claim.",
+    "Out of scope and explicitly not tested by this theory: transfer of a five-stratum-evolved vector to the seven-stratum search is measured as a secondary, diagnostic quantity only."
+  ],
+  "informationClass": "public-policy",
+  "lifecycle": "assessed",
+  "assessment": "not-supported-as-tested",
+  "evidenceTier": "public-development",
+  "dependencies": [],
+  "evidenceRefs": [
+    "docs/exploratory/finding-14-leaf-reweight.md",
+    "docs/exploratory/finding-13-fast-engine.md",
+    "approaches/fair-expectimax/cem/README.mdx",
+    "approaches/heuristic-search/evolution/README.mdx",
+    "approaches/fair-expectimax/fair-policy/README.mdx",
+    "docs/research/status.md",
+    "research/results/RS-20260822T120736Z-662b39ca.json"
+  ],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": null
+  },
+  "createdAt": "2026-08-22T01:32:50Z",
+  "updatedAt": "2026-08-22T23:33:44Z"
+}

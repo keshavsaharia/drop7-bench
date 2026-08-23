@@ -1,0 +1,74 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260822-leaf-memo-gates-b31e4e7f",
+  "theoryIds": [
+    "TH-20260822-leaf-memo-semantics-preserving-3bb0ac6b"
+  ],
+  "title": "CHECK gates for the one-entry leaf memo: bit identity, search parity, determinism, interleaved timing on real probe seeds",
+  "classification": "engineering",
+  "hypothesis": "MemoSearch (fast-search.hpp with the leaf call replaced by fastFairLeafMemo below ++work_) passes: leaf bit identity in the search's feeding order on probe games at d4s5 and d4s7; parity with FastSearch on every move (column, work, nodes, cache hits, completed depth); identical results at 1 and 4 threads; interleaved timing ratio >= 1.5x on real roots.",
+  "candidate": {
+    "name": "fast-engine-memo MemoSearch",
+    "entryPoint": "approaches/lifetime-objective/fast-engine-memo/gate.cpp",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "fair-d4",
+    "entryPoint": "approaches/fair-expectimax/reference/fair-only-depth4.cpp",
+    "manifestRef": null
+  },
+  "informationBoundary": "seed-free",
+  "benchmarkTier": "CHECK",
+  "data": {
+    "role": "previously-evaluated-development",
+    "seedLeaseRefs": [],
+    "datasetRefs": [],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "Probe games on previously opened development seeds 0xa5278000-0xa52784ff only (CHECK probes); no strength data; no new seed."
+  },
+  "metrics": {
+    "primary": "leaf bit mismatches and search parity mismatches (must be zero)",
+    "secondary": [
+      "memo hit rate",
+      "interleaved timing ratio plain/memo (indicative under load)",
+      "determinism mismatches"
+    ],
+    "statisticalUnit": "not-applicable",
+    "uncertaintyMethod": "not-applicable"
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "0 leaf bit mismatches at d4s5 and d4s7",
+      "0 action/work/node/hit/depth mismatches vs FastSearch",
+      "0 determinism mismatches across thread counts",
+      "timing ratio >= 1.5 at both strata settings (indicative)"
+    ],
+    "failureAction": "Record fail; do not adopt the memo in any cohort runner.",
+    "passAction": "Record pass (engineering, mechanics-only); the memo may be adopted by cohort runners after their own gates are re-run; an idle-host timing measurement is owed before any throughput claim."
+  },
+  "resources": {
+    "wallSeconds": 1800,
+    "cpuThreads": 4,
+    "maxHostBytes": 4294967296,
+    "maxGpuBytes": null,
+    "gpuDevices": []
+  },
+  "stopConditions": [
+    "Stop on any rules, information-boundary, legality, determinism, or parity failure."
+  ],
+  "expectedArtifacts": [
+    "runs/RUN-20260822T073338Z-48e4df54/gates.log"
+  ],
+  "lifecycle": "completed",
+  "protocolSha256": "90b1bf1822f53069221b1eea42a51d95f7416dca6762a4f637873cb23ed6e42a",
+  "amendments": [],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": null
+  },
+  "createdAt": "2026-08-22T07:43:05Z",
+  "updatedAt": "2026-08-22T07:43:05Z"
+}

@@ -1,0 +1,114 @@
+---
+date: 2026-08-22
+title: Where the engine can still go
+summary: "An independent audit of the board simulator found one bit-exact, nearly-2x speedup hiding in the leaf (a one-entry memo across chance strata), a build-flag hazard that changes the frozen leaf's bits without changing any recorded decision, and three GPU verdicts that all say: not yet, and here is the first experiment that would change that."
+contributors:
+  - claude-fable-5 (Claude Code)
+  - kimi-k3 (OpenCode)
+tags: [engine, performance, audit, gpu, leaf-evolution, survival-instinct]
+outcomes:
+  positive: 2
+  negative: 2
+  open: 1
+---
+
+The overnight runs finished unattended and both answers are negative; they
+are recorded below the engine audit that occupied the small hours. The owner asked for a fresh audit of the board
+simulation: is there a way to evaluate boards in parallel on the GPU, or to
+make the existing mechanics cheaper?
+
+## The audit
+
+A read-only subagent audited the fast engine's hot path and wrote
+[`audit-06`](/docs/exploratory/audit-06-engine-efficiency); Kimi K3 then
+reviewed the audit adversarially, and the corrections are folded into it.
+Every timing was taken on a machine running a 30-thread cohort, so the audit
+claims ratios between arms run back to back, never absolute speeds.
+
+<Finding title="A one-entry leaf memo is bit-exact and nearly doubles a decision" kind="positive" metric="1.64x / 1.87x, indicative">
+Inside one chance node the search evaluates the same move under five or seven
+sampled futures, and the only thing that differs between most of them is the
+next visible disc — which the leaf reads in exactly one term. Remembering the
+last board's features and recomputing that one term gives the same bits on
+every leaf (17,045 states compared, 0 mismatches) with identical actions, work,
+nodes and cache hits on 12 synthetic roots, for 1.64x (five strata) to 1.87x
+(seven) per decision; 1.93x with the flag change below. Kimi's review confirmed
+the argument and added the condition that makes it legal: the memo must sit
+below the search's work counter, or it becomes a new algorithmic candidate.
+The ratios are indicative until the port prints its hit rate on real seeds and
+survives thirty-way parallel execution.
+</Finding>
+
+<Finding title="-march=native silently changes the frozen leaf" kind="neutral" metric="17% of leaf values">
+Clang fuses multiply-adds when the target has FMA, and the leaf's dot product
+then rounds differently. The three cohort builds are exact only because they
+target baseline x86-64. One existing build script ships `-march=native`
+unpinned, and a cross-build check showed its copy of the frozen leaf differs in
+17.0% of values — while flipping none of 13 probe decisions, and its recorded
+frozen arms reproduced an earlier 128-game cohort digit for digit, so no
+recorded number is in doubt. `-ffp-contract=off` restores bit-identity and is
+now pinned in the two build scripts this line of work owns; the third is the
+owner's call.
+</Finding>
+
+<Direction title="GPU: not yet, and the experiment that would change that" status="proposed">
+Three verdicts, all accepted by the review. Batched leaf evaluation could be
+bit-exact in double precision but needs a record-and-replay driver, is capped
+near 2.4x per thread by Amdahl, and the integrated GPU's shader clock halves
+under the CPU load a cohort creates — do the CPU memo first, since it removes
+two thirds of the leaves a GPU would batch. Thousands of games in lockstep
+have easy RNG parity but a search that is not a GPU workload. A GPU-hosted
+neural leaf waits until a learned leaf beats the hand-written one on the CPU
+at fixed work. The first experiment for any of them: a HIP micro-benchmark of
+the leaf over the existing 225,183-state gate corpus, bit-compared to the CPU.
+</Direction>
+
+<Finding title="The memo is ported and gated: 1.58x / 1.63x on real positions" kind="positive" metric="0 mismatches, hit rate 62-68%">
+`approaches/lifetime-objective/fast-engine-memo` generates the memoised search
+from the gated fast search by a checked substitution that also verifies the
+memo sits below the work counter. On real probe positions the leaf is
+bit-identical on 6,760 boards, the search agrees with the unchanged one on
+every column, work count, node and cache hit over 210 moves (117.7 and 119.6
+million leaf calls), and thread counts do not change results. The memo hits on
+61.7% of leaf calls at five chance samples and 68.5% at seven, for interleaved
+timing ratios of 1.58x and 1.63x — a little below the audit's synthetic roots,
+and indicative until measured on an idle host. No running experiment was
+rebuilt; the variant is there for the next cohort.
+</Finding>
+
+## Morning: both overnight bets lost, cleanly
+
+<DeadEnd title="Evolving the leaf weights at depth 4 on fresh seeds" cost="40 generations, 21,760 depth-4 games, one 64-game screen" verdict="configuration-rejected">
+The CMA-ES distribution mean after forty generations scored **289,720**
+against the frozen leaf's **320,020** on the 64 never-read held-out games:
+paired delta **−30,300** (bootstrap 95% lower bound −70,928, paired sd
+197,434), W–T–L 28–0–36, both halves negative. The seven-sample transfer was
+−47,119. Gate: fail (`RS-20260822T120736Z-662b39ca`). The population mean had
+drifted below the control from generation 2 onward; Kimi's pre-run estimate
+of a one-in-ten pass was the right prior. Fresh seeds per generation removed
+overfitting, as designed — and left selection noise alone to steer, which at
+32 games per candidate and a paired sd near 200,000 is a random walk. The
+theory's claim is not supported for this optimiser and budget; the frozen
+weights survive.
+</DeadEnd>
+
+<DeadEnd title="Survival instinct as a hard rule at the root" cost="128 paired games x 3 arms" verdict="configuration-rejected">
+Two strengths of the owner's rule against the unchanged search on 128
+never-read games (`RS-20260822T233343Z-12becce9`). The **literal** form —
+never drop a 3 or higher where it can no longer clear vertically — is a
+clear loss: **−97,064** points and **−25.65 moves** (95% bounds −136,887 to
+−59,500), overriding the search at 12.8% of decisions. The **strict** form —
+refuse only when the landing is already entombed by its row — is a null:
+−1,970 with bounds −27,738 to +22,313, overriding 1.97% of decisions, a hair
+under the 2% coverage bar the protocol set, so it is recorded as inconclusive
+by its own rule. The picture is consistent with the corpus analysis: the
+search already avoids the placements that matter, and forbidding the rest
+takes away columns it needed.
+</DeadEnd>
+
+<Direction title="What survives from this line" status="proposed">
+The gated native policy on the leaderboard, the memoised engine (1.6x), the
+entombed-disc and pattern diagnostics, and the negative results themselves.
+If the rule is tried again it should be a soft penalty the search can weigh,
+not a constraint — and measured with the memo engine at seven strata.
+</Direction>

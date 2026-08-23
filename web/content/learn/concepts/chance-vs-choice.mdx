@@ -87,6 +87,20 @@ Because the tree explodes, two tricks are universal:
   per chance node — the repository calls these **strata**, usually five or seven.
   Fewer strata is faster and noisier.
 
+## A live tree you can search yourself
+
+Everything above was drawn from one recorded position. The explorer below
+builds the same kind of tree **live, in your browser**, for any seeded game:
+the position is the MAX node, each legal column is a choice whose number is
+the exact average over every chance outcome of that drop, and the outcomes
+under the expanded column are real boards the engine produced, each with its
+probability and the leaf's opinion of it. Click a column to expand it, click
+an outcome to watch the engine play that transition and carry on from the
+board it leaves behind. Set "below each outcome" to one or two plies to see
+the values move as the search looks further.
+
+<GameTreeFigure seed={0x5eed1001} moves={8} caption="A live expectimax tree on a seeded game, built by the browser solver. The column with the highest expected value is the one a fair search plays; the chance branches carry exact probabilities — one in seven for each next disc, one in seven again for each gray disc a move cracks." />
+
 ## Walk the tree yourself
 
 Pick a column, then a next disc, then see every reply ranked. This is exactly

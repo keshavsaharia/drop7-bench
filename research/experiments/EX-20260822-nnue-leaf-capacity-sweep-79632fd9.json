@@ -1,0 +1,82 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260822-nnue-leaf-capacity-sweep-79632fd9",
+  "theoryIds": [
+    "TH-20260822-nnue-leaf-capacity-saturation-9c45e42e"
+  ],
+  "title": "Offline capacity and training sweep of the NNUE-shaped survival leaf on the existing corpus",
+  "classification": "diagnostic",
+  "hypothesis": "Training approaches/lifetime-objective/learned-leaf/train_leaf.py unchanged on runs/RUN-A51D-corpus/all.states (explored == 0 records, whole-origin split seed 0x59117000) over the 13-configuration grid in sweep.sh — hidden 32/64/128/256/512, mid 16/32/64, 10 or 20 epochs, lr 1e-3 or 3e-3, plus three training seeds at the baseline — yields a best held-out lifetime Pearson within 0.01 of the h64/m32/e10/lr3e-3 baseline (finding-08 recorded 0.8564 on the same split).",
+  "candidate": {
+    "name": "leafnet-capacity-grid",
+    "entryPoint": "approaches/lifetime-objective/leaf-capacity-sweep/sweep.sh",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "fair-d4",
+    "entryPoint": "approaches/fair-expectimax/reference/fair-only-depth4.cpp",
+    "manifestRef": null
+  },
+  "informationBoundary": "privileged-teacher",
+  "benchmarkTier": "CHECK",
+  "data": {
+    "role": "previously-evaluated-development",
+    "seedLeaseRefs": [],
+    "datasetRefs": [],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "Reads only the existing training corpus runs/RUN-A51D-corpus/all.states (SEEDLEASE-A52 training ranges 0xa5200000-0xa52152ff as recorded in runs/RUN-A51D-corpus/gen.sh; the same file finding-08 trained on). No seed is opened and no game is played. Held-out metrics use the corpus's own whole-origin test split, which finding-08 also reported on; they are diagnostic, never strength evidence."
+  },
+  "metrics": {
+    "primary": "held-out lifetime Pearson correlation on the whole-origin test split (486,819 examples), best configuration minus baseline",
+    "secondary": [
+      "held-out lifetime mean absolute error in moves",
+      "mean hazard accuracy over 12 rises",
+      "mirrored-board Pearson",
+      "parameter count",
+      "training wall seconds per run",
+      "seed-to-seed spread of the baseline over three training seeds"
+    ],
+    "statisticalUnit": "whole-origin",
+    "uncertaintyMethod": "seed-to-seed spread of the baseline configuration over three training seeds (0xA52A, 0xA52B, 0xA52C); no bootstrap"
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "All 13 runs complete with finite metrics on the same split (summary.json lists 13 rows).",
+      "Gate verdict from summarize.py: supported-as-tested if delta <= max(0.005, 2 x seed spread); not-supported-as-tested if delta >= 0.02 and delta > 3 x spread; otherwise inconclusive.",
+      "Every reported number is copied from the trainer's own <tag>.json output; nothing is recomputed."
+    ],
+    "failureAction": "Record valid + fail (capacity or training length does matter offline); register a separate gameplay experiment before any strength claim; do not adopt any model.",
+    "passAction": "Record valid + pass (saturated); the next learned-leaf experiment must change the target or the feature space, not the width."
+  },
+  "resources": {
+    "wallSeconds": 3600,
+    "cpuThreads": 2,
+    "maxHostBytes": 17179869184,
+    "maxGpuBytes": 17179869184,
+    "gpuDevices": [
+      "Radeon 8060S (gfx1151), ROCm 7.13, torch 2.13.0+rocm7.1 in .venv-rocm"
+    ]
+  },
+  "stopConditions": [
+    "Stop on any rules, information-boundary, legality, determinism, or parity failure.",
+    "Stop at 3,600 wall-seconds; a partial grid is recorded as partial.",
+    "A failed training run is recorded with its log and the grid continues; the gate needs all 13 rows."
+  ],
+  "expectedArtifacts": [
+    "runs/<sweep-run-id>/models/<tag>.json and .pt for 13 tags",
+    "runs/<sweep-run-id>/summary.json",
+    "runs/<sweep-run-id>/inputs.sha256 and environment.txt"
+  ],
+  "lifecycle": "preregistered",
+  "protocolSha256": "8e38473a52bc956da3917a312a1747d4d2795e9bf473df0220275409097ec030",
+  "amendments": [],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": null
+  },
+  "createdAt": "2026-08-22T02:05:48Z",
+  "updatedAt": "2026-08-22T02:06:23Z"
+}

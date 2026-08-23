@@ -1,0 +1,25 @@
+{
+  "$schema": "../schemas/seed-lease-v1.schema.json",
+  "format": "drop7-seed-lease-v1",
+  "seedLeaseId": "SL-20260822T060000Z-a52c0000",
+  "experimentId": "EX-20260822-survival-instinct-root-filter-8531cbd9",
+  "rngAlgorithm": "mulberry32 with mix32 domain separation (src/core/native/engine.hpp); headless disc stream kNextDiscDomain, reveal stream kRevealDomain; fast engine proven trajectory-identical (finding-13)",
+  "domain": "environment",
+  "role": "public-development",
+  "rangeStartHex": "0xa52c0000",
+  "rangeEndExclusiveHex": "0xa52c0100",
+  "cohortManifestSha256": null,
+  "state": "opened",
+  "reservedAt": "2026-08-22T06:39:00Z",
+  "openedAt": "2026-08-22T12:08:10Z",
+  "closedAt": "2026-08-22T23:33:43Z",
+  "protocolSha256": "5b355eba6d139f903a1ee93dd62e9aa05494eae174eda5cdd8ce87f50e389fb5",
+  "runIds": [
+    "RUN-20260822T063900Z-a4baa04e"
+  ],
+  "notes": [
+    "Conservative import: no 0xa52c**** constant exists anywhere under docs/, approaches/, src/, research/ or artifacts/; the range lies inside the unallocated SEEDLEASE-A52 reserve and at the start of the ./do-research allocator pool, whose allocator skips every lease record, so later grants cannot overlap it.",
+    "The first 128 seeds (0xa52c0000-0xa52c007f) are opened exactly once by the preregistered screen; the remaining 128 stay reserved for a replication. Once read, development data forever.",
+    "Opened at 2026-08-22T12:08:10Z by screen run RUN-20260822T063900Z-a4baa04e; only 0xa52c0000-0xa52c007f are read."
+  ]
+}

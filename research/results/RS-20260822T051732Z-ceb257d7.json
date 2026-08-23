@@ -1,0 +1,361 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260822T051732Z-ceb257d7",
+  "theoryIds": [
+    "TH-20260822-entombed-disc-hazard-61faa529"
+  ],
+  "experimentId": "EX-20260822-entombed-disc-corpus-analysis-38be404e",
+  "runIds": [
+    "RUN-20260822T051517Z-eecf1098"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "fail",
+  "assessment": "not-supported-as-tested",
+  "evidenceTier": "mechanics-only",
+  "summary": "Corpus analysis of entombed numbered discs (value n with column height > n and horizontal run > n) over 4,863,627 non-explored positions. Prevalence: an entombed disc of value >= 3 is on the board in 19.1% of depth-4 behaviour states overall, rising from 7.6% more than 40 moves before death to 69.8% within 5 moves of it. At death: 579 of 768 complete depth-4 games (75.4%) end with one on the board (criterion 1 holds). Lead time from first persistent appearance to death: median 11 moves, quartiles 5.5-15, 57% at least 10 moves, 8% at least 20 (criterion 2 holds, narrowly). Incremental signal: held-out R^2 for log1p(moves to death) is 0.6952 with the 18 frozen leaf features + occupancy + rise clock and 0.6955 with the entombed features added (+0.0003); the held-out partial correlation of the entombed count is -0.023 (threshold -0.05). Criterion 3 fails. Occupancy-matched, an entombed >= 3 disc shortens mean remaining life by about two moves (e.g. 35.0 vs 37.4 at 24-27 occupied cells; 24.6 vs 26.3 at 28-31). Reading: the disc is a reliable marker of the policy's last two rises, but the leaf's value-blind height and cover terms already carry almost all of its lifetime information; as a static foresight term it is not what the search is missing. Gate: FAIL (not-supported-as-tested).",
+  "metrics": {
+    "prevalence": {
+      "depth1": {
+        "states": 664432,
+        "fracWithEntombedGe3": 0.2290994413273292,
+        "fracWithEntombedLe2": 0.7340088978255112,
+        "byMovesToDeath": {
+          "death<=5": {
+            "states": 70086,
+            "fracWithEntombedGe3": 0.6572496646976571,
+            "meanEntombedGe3": 1.527451992034912,
+            "meanOccupancy": 38.01005907028508,
+            "fracWithEntombed34": 0.6525411637131524
+          },
+          "death6-15": {
+            "states": 142831,
+            "fracWithEntombedGe3": 0.43389740322479015,
+            "meanEntombedGe3": 0.7168751955032349,
+            "meanOccupancy": 31.220918428072338,
+            "fracWithEntombed34": 0.4324061303218489
+          },
+          "death16-40": {
+            "states": 323577,
+            "fracWithEntombedGe3": 0.11767214604251848,
+            "meanEntombedGe3": 0.14828619360923767,
+            "meanOccupancy": 22.104797312540754,
+            "fracWithEntombed34": 0.11740018604536169
+          },
+          "death>40": {
+            "states": 127938,
+            "fracWithEntombedGe3": 0.04773405868467539,
+            "meanEntombedGe3": 0.057957760989665985,
+            "meanOccupancy": 17.337515046350575,
+            "fracWithEntombed34": 0.0476949772546077
+          }
+        }
+      },
+      "depth2": {
+        "states": 3840470,
+        "fracWithEntombedGe3": 0.20560504313274156,
+        "fracWithEntombedLe2": 0.7730946993466945,
+        "byMovesToDeath": {
+          "death<=5": {
+            "states": 302037,
+            "fracWithEntombedGe3": 0.6639848760251228,
+            "meanEntombedGe3": 1.5442711114883423,
+            "meanOccupancy": 38.61157407867248,
+            "fracWithEntombed34": 0.6587735939636534
+          },
+          "death6-15": {
+            "states": 609783,
+            "fracWithEntombedGe3": 0.45418452137891674,
+            "meanEntombedGe3": 0.7615692615509033,
+            "meanOccupancy": 31.7454045127529,
+            "fracWithEntombed34": 0.4526708681612967
+          },
+          "death16-40": {
+            "states": 1472663,
+            "fracWithEntombedGe3": 0.14866333981365729,
+            "meanEntombedGe3": 0.1932845413684845,
+            "meanOccupancy": 23.852439424362533,
+            "fracWithEntombed34": 0.14836795655217794
+          },
+          "death>40": {
+            "states": 1455987,
+            "fracWithEntombedGe3": 0.0640026318916309,
+            "meanEntombedGe3": 0.07866622507572174,
+            "meanOccupancy": 19.200867178072333,
+            "fracWithEntombed34": 0.06387557031759213
+          }
+        }
+      },
+      "depth3": {
+        "states": 295894,
+        "fracWithEntombedGe3": 0.19810472669266696,
+        "fracWithEntombedLe2": 0.7870656383704976,
+        "byMovesToDeath": {
+          "death<=5": {
+            "states": 19429,
+            "fracWithEntombedGe3": 0.6914920994389829,
+            "meanEntombedGe3": 1.571825623512268,
+            "meanOccupancy": 39.27299397807401,
+            "fracWithEntombed34": 0.6840290287714241
+          },
+          "death6-15": {
+            "states": 39219,
+            "fracWithEntombedGe3": 0.47413243580917414,
+            "meanEntombedGe3": 0.80547696352005,
+            "meanOccupancy": 32.234962645656445,
+            "fracWithEntombed34": 0.4726790586195466
+          },
+          "death16-40": {
+            "states": 95924,
+            "fracWithEntombedGe3": 0.1716358784037363,
+            "meanEntombedGe3": 0.22728410363197327,
+            "meanOccupancy": 24.51490763521121,
+            "fracWithEntombed34": 0.17137525541053333
+          },
+          "death>40": {
+            "states": 141322,
+            "fracWithEntombedGe3": 0.07163782001386904,
+            "meanEntombedGe3": 0.08830896764993668,
+            "meanOccupancy": 19.70037219965752,
+            "fracWithEntombed34": 0.07155998358358925
+          }
+        }
+      },
+      "depth4": {
+        "states": 62831,
+        "fracWithEntombedGe3": 0.1912113447183715,
+        "fracWithEntombedLe2": 0.795976508411453,
+        "byMovesToDeath": {
+          "death<=5": {
+            "states": 3709,
+            "fracWithEntombedGe3": 0.6983014289565921,
+            "meanEntombedGe3": 1.5980048179626465,
+            "meanOccupancy": 40.07684011863036,
+            "fracWithEntombed34": 0.6945268266379078
+          },
+          "death6-15": {
+            "states": 7461,
+            "fracWithEntombedGe3": 0.48317919849886076,
+            "meanEntombedGe3": 0.8127596974372864,
+            "meanOccupancy": 32.733011660635306,
+            "fracWithEntombed34": 0.48009650180940894
+          },
+          "death16-40": {
+            "states": 18403,
+            "fracWithEntombedGe3": 0.17828614899744608,
+            "meanEntombedGe3": 0.2424604743719101,
+            "meanOccupancy": 24.88132369722328,
+            "fracWithEntombed34": 0.1777427593327175
+          },
+          "death>40": {
+            "states": 33258,
+            "fracWithEntombedGe3": 0.07631246617355222,
+            "meanEntombedGe3": 0.09408262372016907,
+            "meanOccupancy": 20.01374105478381,
+            "fracWithEntombed34": 0.07613205845210175
+          }
+        }
+      }
+    },
+    "occupancyMatched": {
+      "occ12-15": {
+        "with": 513,
+        "without": 186855,
+        "meanMovesToDeathWith": 63.05458089668616,
+        "meanMovesToDeathWithout": 61.10563806159857,
+        "medianWith": 57.0,
+        "medianWithout": 53.0
+      },
+      "occ16-19": {
+        "with": 6583,
+        "without": 658931,
+        "meanMovesToDeathWith": 55.462403159653654,
+        "meanMovesToDeathWithout": 54.86822140709725,
+        "medianWith": 48.0,
+        "medianWithout": 47.0
+      },
+      "occ20-23": {
+        "with": 43236,
+        "without": 856842,
+        "meanMovesToDeathWith": 45.52898047923027,
+        "meanMovesToDeathWithout": 47.75734966306507,
+        "medianWith": 38.0,
+        "medianWithout": 40.0
+      },
+      "occ24-27": {
+        "with": 142959,
+        "without": 845929,
+        "meanMovesToDeathWith": 35.018305947859176,
+        "meanMovesToDeathWithout": 37.3720170368908,
+        "medianWith": 28.0,
+        "medianWithout": 30.0
+      },
+      "occ28-31": {
+        "with": 233244,
+        "without": 541605,
+        "meanMovesToDeathWith": 24.6264984308278,
+        "meanMovesToDeathWithout": 26.303952142243887,
+        "medianWith": 18.0,
+        "medianWithout": 20.0
+      },
+      "occ32-35": {
+        "with": 232362,
+        "without": 235132,
+        "meanMovesToDeathWith": 14.634527160206918,
+        "meanMovesToDeathWithout": 15.7091208342548,
+        "medianWith": 11.0,
+        "medianWithout": 12.0
+      },
+      "occ36-39": {
+        "with": 168268,
+        "without": 78623,
+        "meanMovesToDeathWith": 8.239106663180165,
+        "meanMovesToDeathWithout": 8.40684023758951,
+        "medianWith": 7.0,
+        "medianWithout": 7.0
+      }
+    },
+    "leadTime": {
+      "depth3": {
+        "completeGames": 4096,
+        "gamesWithEntombedGe3AtDeath": 3011,
+        "fracAtDeath": 0.735107421875,
+        "leadTimeMoves": {
+          "median": 10.0,
+          "q25": 6.0,
+          "q75": 15.0,
+          "mean": 11.065094652939223,
+          "fracAtLeast10": 0.5738957157090667,
+          "fracAtLeast20": 0.09730986383261375
+        },
+        "meanGameLength": 75.48046875
+      },
+      "depth4": {
+        "completeGames": 768,
+        "gamesWithEntombedGe3AtDeath": 579,
+        "fracAtDeath": 0.75390625,
+        "leadTimeMoves": {
+          "median": 11.0,
+          "q25": 5.5,
+          "q75": 15.0,
+          "mean": 10.837651122625216,
+          "fracAtLeast10": 0.5664939550949913,
+          "fracAtLeast20": 0.07944732297063903
+        },
+        "meanGameLength": 84.01822916666667
+      }
+    },
+    "incrementalSignal": {
+      "leafScalar+occupancy": {
+        "heldOutR2": 0.6592725650363903,
+        "heldOutPearson": 0.8119575903395743,
+        "train": 3891854,
+        "test": 486819
+      },
+      "leafFeatures18+occupancy": {
+        "heldOutR2": 0.6951591619479548,
+        "heldOutPearson": 0.8337670172624738,
+        "train": 3891854,
+        "test": 486819
+      },
+      "leafFeatures18+occupancy+entombed": {
+        "heldOutR2": 0.6954668138741636,
+        "heldOutPearson": 0.8339512494153829,
+        "train": 3891854,
+        "test": 486819
+      },
+      "entombedOnly+occupancy": {
+        "heldOutR2": 0.5588469625356923,
+        "heldOutPearson": 0.7475656066101687,
+        "train": 3891854,
+        "test": 486819
+      },
+      "depth4only": {
+        "leafFeatures18+occupancy": {
+          "heldOutR2": 0.6483227567169099,
+          "heldOutPearson": 0.8062419027247264,
+          "train": 50003,
+          "test": 5528
+        },
+        "leafFeatures18+occupancy+entombed": {
+          "heldOutR2": 0.6487511688238121,
+          "heldOutPearson": 0.8064962104732599,
+          "train": 50003,
+          "test": 5528
+        }
+      },
+      "depth3only": {
+        "leafFeatures18+occupancy": {
+          "heldOutR2": 0.6656511017460989,
+          "heldOutPearson": 0.8162410795562728,
+          "train": 235370,
+          "test": 28612
+        },
+        "leafFeatures18+occupancy+entombed": {
+          "heldOutR2": 0.6661623156224371,
+          "heldOutPearson": 0.8165423399150119,
+          "train": 235370,
+          "test": 28612
+        }
+      },
+      "partialCorrelationHeldOut": {
+        "ent_count_ge3": -0.023371980594663062,
+        "ent_mass_ge3": -0.01556728149196492,
+        "ent_covers_ge3": -0.016230847367881353,
+        "ent_top_ge3": -0.02411270743291343,
+        "ent_count_34": -0.023416892049322135
+      }
+    },
+    "featureMeans": {
+      "ent_count_ge3": 0.35176095366477966,
+      "ent_mass_ge3": 8.104286193847656,
+      "ent_covers_ge3": 1.1874206066131592,
+      "ent_top_ge3": 0.19587233662605286,
+      "ent_count_le2": 2.3535361289978027,
+      "ent_count_34": 0.3464827835559845
+    }
+  },
+  "gateChecks": [
+    {
+      "criterion": "analysis completes on all non-explored records with finite leaf values",
+      "passed": true,
+      "observed": "4863627 records analysed, 393554 explored records excluded, 0 invalid leaf rows"
+    },
+    {
+      "criterion": "depth-4 fracAtDeath >= 0.5",
+      "passed": true,
+      "observed": "0.7539"
+    },
+    {
+      "criterion": "depth-4 lead-time median >= 10 moves",
+      "passed": true,
+      "observed": "median 11.0, q25 5.5, q75 15.0"
+    },
+    {
+      "criterion": "held-out partial correlation <= -0.05 AND incremental R^2 >= 0.005",
+      "passed": false,
+      "observed": "partial -0.0234; incremental R^2 0.00031; depth-4-only incremental R^2 0.00043"
+    }
+  ],
+  "perGameArtifact": {
+    "path": null,
+    "sha256": null,
+    "recordCount": null
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260820T080056Z-376ada90.json"
+  ],
+  "artifactManifestRef": "runs/RUN-20260822T051517Z-eecf1098/analysis.json",
+  "limitations": [
+    "Offline, teacher-labelled diagnostic on already-played behaviour games; says nothing about whether avoiding the entombing move would have extended life (a counterfactual replay is the natural follow-up).",
+    "Linear incremental test: a nonlinear interaction with height could still carry signal a linear leaf cannot use; the NNUE leaf sees cell/pair features and could learn it.",
+    "The structural definition ignores release readiness (whether a neighbouring clear could free the disc); dead_low_numbers discounts by readiness and this feature does not.",
+    "Depth-4 behaviour games are 768 of the corpus's 86,784 games; depth-3 (4,096 games) agrees on every quantity.",
+    "The corpus seeds are training-role data; the numbers are development diagnostics and not strength evidence."
+  ],
+  "contributionIds": [
+    "CT-20260822T051732Z-a0507c6b",
+    "CT-20260822T015730Z-eb02ae84"
+  ],
+  "recordedAt": "2026-08-22T05:17:32Z"
+}

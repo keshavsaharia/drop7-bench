@@ -16,13 +16,14 @@ const matter = require("gray-matter");
 const remarkGfm = (await import(require.resolve("remark-gfm"))).default;
 
 const KNOWN = new Set([
-  "Board","BoardCompare","Callout","Disc","Stat",
+  "Board","BoardCompare","Callout","Disc","Drop7Intro","Stat",
   "BitboardScan","RunLengthLookup","CascadeAnimation","MovePipeline","TreeShape","AttributionBar","SpeedupBars","PackedKey","GateLadder","BatchLayout","LeverList","Num","MiniBoard",
   "RulesScenario","DropPhysics","RunCounter","RiseClock","ScoreCurve","PlayerView","LegalColumns","DiscLegend",
   "RootAndChoices","ChanceNode","ChanceStyles","TreeGrowth","SiblingTrap","TreeExplorerSection",
   "LeafXray","LeafTerms","BoardLookalikes","GameTimeline","FlowBalance","ScoreSources","ScoreStrip","CohortScale",
   "OracleSplit","TeacherStudentFlow","NTupleWindows","ValueNetShape","PolicyNetShape","MctsTreeGrowth",
   "EvidenceLabel","ExperimentSummary","ResultSummary","TechnicalDetails","TheorySummary",
+  "GameTreeFigure","Drop7Board","Drop7Game","ArmTable","DeadEnd","Direction","Finding","LogQuote","Timeline",
 ]);
 
 function* walk(path) {

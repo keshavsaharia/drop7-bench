@@ -1,0 +1,77 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260822-entombed-disc-corpus-analysis-38be404e",
+  "theoryIds": [
+    "TH-20260822-entombed-disc-hazard-61faa529"
+  ],
+  "title": "Prevalence, lead time and incremental lifetime signal of entombed numbered discs in the existing training corpus",
+  "classification": "diagnostic",
+  "hypothesis": "On runs/RUN-A51D-corpus/all.states (5.26M positions from depth-1..4 behaviour policies with epsilon exploration, explored records excluded), computing the structural entombed-disc features defined in analyze.py and the frozen fast leaf's 18 features via leafdump.cpp: (1) at least half of complete depth-4 games end with an entombed >= 3 disc on the board; (2) the median lead time from first persistent appearance to death is at least 10 moves; (3) the held-out partial correlation of ent_count_ge3 with log1p(movesToDeath) beyond the 18 leaf features + occupancy + rise clock is at most -0.05 and the incremental held-out R^2 is at least 0.005.",
+  "candidate": {
+    "name": "entombed-disc-features",
+    "entryPoint": "approaches/lifetime-objective/entombed-discs/analyze.py",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "fair-d4",
+    "entryPoint": "approaches/fair-expectimax/reference/fair-only-depth4.cpp",
+    "manifestRef": null
+  },
+  "informationBoundary": "privileged-teacher",
+  "benchmarkTier": "CHECK",
+  "data": {
+    "role": "previously-evaluated-development",
+    "seedLeaseRefs": [],
+    "datasetRefs": [],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "Reads only the existing training corpus runs/RUN-A51D-corpus/all.states (SEEDLEASE-A52 training ranges, already used by finding-08 and the capacity sweep). No seed is opened and no game is played. Labels (movesToDeath) are teacher labels from already-played futures; the split is dataset.py's whole-origin split."
+  },
+  "metrics": {
+    "primary": "held-out partial correlation of ent_count_ge3 with log1p(movesToDeath) after the 18 frozen leaf features, occupancy and rise clock (whole-origin test split)",
+    "secondary": [
+      "incremental held-out R^2 (18 features+occupancy vs +entombed), overall and depth-4-only",
+      "fraction of complete depth-3/4 games with an entombed >= 3 disc at death",
+      "lead-time distribution (median, quartiles, fraction >= 10 and >= 20 moves)",
+      "prevalence by moves-to-death bucket and by occupancy band (occupancy-matched mean lifetime with vs without)"
+    ],
+    "statisticalUnit": "whole-origin",
+    "uncertaintyMethod": "held-out evaluation on the whole-origin test split; no bootstrap (diagnostic)"
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "analysis completes on all non-explored records with finite leaf values (analysis.json written with records, prevalence, leadTime, incrementalSignal)",
+      "supported-as-tested if ALL of: depth-4 fracAtDeath >= 0.5; depth-4 lead-time median >= 10 moves; held-out partial correlation of ent_count_ge3 <= -0.05 AND incremental held-out R^2 >= 0.005",
+      "not-supported-as-tested if ANY of: fracAtDeath < 0.5; lead-time median < 5; partial correlation > -0.02 or incremental R^2 < 0.005",
+      "inconclusive otherwise"
+    ],
+    "failureAction": "Record valid + fail; the feature is not the missing foresight term and no leaf experiment is registered on it.",
+    "passAction": "Record valid + pass; register a gameplay experiment adding the feature as a 19th weighted-leaf coordinate (bit-exact at weight 0) with a paired d4s5 SCREEN, and note the trigger as a candidate for a gated survival mode."
+  },
+  "resources": {
+    "wallSeconds": 1800,
+    "cpuThreads": 4,
+    "maxHostBytes": 34359738368,
+    "maxGpuBytes": null,
+    "gpuDevices": []
+  },
+  "stopConditions": [
+    "Stop on any rules, information-boundary, legality, determinism, or parity failure.",
+    "Stop at 1,800 wall-seconds or if the dump reports invalid records above 1% of the corpus."
+  ],
+  "expectedArtifacts": [
+    "runs/<run-id>/leaf.f32 (5.26M x 19 float32)",
+    "runs/<run-id>/analysis.json"
+  ],
+  "lifecycle": "preregistered",
+  "protocolSha256": "19b2b3dcce09bb144cc845ec4c5c58843c643b85aebaf8abcb2e1982fd7940db",
+  "amendments": [],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": null
+  },
+  "createdAt": "2026-08-22T05:14:21Z",
+  "updatedAt": "2026-08-22T05:15:06Z"
+}

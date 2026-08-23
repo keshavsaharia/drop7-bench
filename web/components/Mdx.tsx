@@ -2,6 +2,8 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import { Board, BoardCompare, Callout, Disc, Stat } from "./Board";
 import { Drop7Board } from "./Drop7Board";
 import { Drop7Game } from "./Drop7Game";
+import { Drop7Intro } from "./Drop7Intro";
+import { GameTreeFigure } from "./GameTree";
 import * as Engine from "./Engine";
 import * as Rules from "./Rules";
 import * as Concepts from "./Concepts";
@@ -11,7 +13,7 @@ import { EvidenceLabel, ExperimentSummary, ResultSummary, TechnicalDetails, Theo
 import { ArmTable, DeadEnd, Direction, Finding, LogQuote, Timeline } from "./ResearchLog";
 import remarkGfm from "remark-gfm";
 
-const components = { Board, BoardCompare, Callout, Disc, Drop7Board, Drop7Game, Stat, ...Engine, ...Rules, ...Concepts, ...ConceptsB, ...ConceptsC, EvidenceLabel, ExperimentSummary, ResultSummary, TechnicalDetails, TheorySummary, ArmTable, DeadEnd, Direction, Finding, LogQuote, Timeline };
+const components = { Board, BoardCompare, Callout, Disc, Drop7Board, Drop7Game, Drop7Intro, GameTreeFigure, Stat, ...Engine, ...Rules, ...Concepts, ...ConceptsB, ...ConceptsC, EvidenceLabel, ExperimentSummary, ResultSummary, TechnicalDetails, TheorySummary, ArmTable, DeadEnd, Direction, Finding, LogQuote, Timeline };
 
 /** Renders an MDX document (already stripped of frontmatter) with the Drop7 visual components available. */
 export function Mdx({ source }: { source: string }) {

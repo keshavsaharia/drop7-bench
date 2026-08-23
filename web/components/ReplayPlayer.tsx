@@ -16,6 +16,7 @@ import type {
   ReplayFrame,
 } from "@/lib/leaderboard";
 import styles from "./Drop7Game.module.css";
+import { useExplosionPoints } from "./useExplosionPoints";
 
 const REPLAY_FRAME_DURATION_MS = {
   drop: 220,
@@ -159,7 +160,14 @@ function ScoreChart({
   );
 }
 
-export function ReplayPlayer({ game }: { game: ReplayData }) {
+export function ReplayPlayer({
+  game,
+  showExplosionPoints = true,
+}: {
+  game: ReplayData;
+  /** Show each exploding disc's point value rising from the board. Defaults to true. */
+  showExplosionPoints?: boolean;
+}) {
   const frames = game.frames;
   const [cursor, setCursor] = useState(0);
   const [phase, setPhase] = useState<ReplayPhase>("landing");
@@ -174,6 +182,11 @@ export function ReplayPlayer({ game }: { game: ReplayData }) {
   const [animationsEnabled, setAnimationsEnabled] = useState(hasAnimations);
   const animationsEnabledRef = useRef(hasAnimations);
   const activeRunRef = useRef<AbortController | null>(null);
+  const {
+    explosionPoints,
+    captureExplosionFrame,
+    clearExplosionPoints,
+  } = useExplosionPoints(showExplosionPoints);
   const frame = frames[cursor];
 
   const cancelActiveRun = useCallback(() => {
@@ -182,15 +195,17 @@ export function ReplayPlayer({ game }: { game: ReplayData }) {
     setAnimating(false);
     setPhase("paused");
     setPresentation((current) => stillPresentation(current.board));
-  }, []);
+    clearExplosionPoints();
+  }, [clearExplosionPoints]);
 
   const beginRun = useCallback(() => {
     activeRunRef.current?.abort();
     const controller = new AbortController();
     activeRunRef.current = controller;
+    clearExplosionPoints();
     setAnimating(true);
     return controller;
-  }, []);
+  }, [clearExplosionPoints]);
 
   const finishRun = useCallback((controller: AbortController) => {
     if (activeRunRef.current !== controller) return;
@@ -220,6 +235,7 @@ export function ReplayPlayer({ game }: { game: ReplayData }) {
 
       for (const animationFrame of animation) {
         if (signal.aborted) return false;
+        captureExplosionFrame(animationFrame);
         setPresentation({
           board: animationFrame.board,
           kind: animationFrame.kind,
@@ -240,7 +256,7 @@ export function ReplayPlayer({ game }: { game: ReplayData }) {
       setPhase("resolved");
       return true;
     },
-    [frames],
+    [captureExplosionFrame, frames],
   );
 
   const step = useCallback(
@@ -371,6 +387,8 @@ export function ReplayPlayer({ game }: { game: ReplayData }) {
             label={`Move ${frame.move}: disc ${frame.disc} placed in column ${frame.column + 1}`}
             cellClassName={cellMotion}
             cellStyle={cellStyle}
+            explosionPoints={explosionPoints}
+            showExplosionPoints={showExplosionPoints}
           />
         </div>
 
@@ -421,7 +439,7 @@ export function ReplayPlayer({ game }: { game: ReplayData }) {
                   }`}
                 >
                   <span
-                    className={`absolute top-0.5 size-3 rounded-full bg-white transition-transform ${
+                    className={`absolute left-0 top-0.5 size-3 rounded-full bg-white transition-transform ${
                       animationsEnabled ? "translate-x-3.5" : "translate-x-0.5"
                     }`}
                   />

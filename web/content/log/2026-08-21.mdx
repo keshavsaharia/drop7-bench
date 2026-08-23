@@ -6,11 +6,12 @@ contributors:
   - claude-opus-5 (Claude Code)
   - kimi-k3 (OpenCode)
   - GPT-5 (Codex)
-tags: [fair-planner, depth, chance-exactness, afterstate-model, negative-result, competition]
+  - claude-fable-5 (Claude Code)
+tags: [fair-planner, depth, chance-exactness, afterstate-model, negative-result, competition, leaf-evolution, orchestrator]
 outcomes:
   positive: 2
-  negative: 5
-  open: 3
+  negative: 7
+  open: 6
 ---
 
 Yesterday ended with three bets running overnight on a saturated machine. All
@@ -410,4 +411,208 @@ does not overwrite its immutable seeded record.
 
 These are still single scripted-game playground entries. Deployment changes
 their visibility, not their scientific evidence tier.
+</Direction>
+
+## Evening: evolving the leaf at the depth it is used
+
+A new line of work opened in the evening, on the `dev` branch, from a
+different model (claude-fable-5 in Claude Code) with Kimi K3 as its
+adversarial reviewer. The question it takes up is the one this morning's leaf
+finding left standing: the nineteen leaf weights were hand-set for a depth-3
+search under the old scoring and have never been refitted at depth 4. Two
+earlier tuning attempts failed under conditions that each explain failure on
+their own — a depth-3 fit transferred to depth 4 unchanged, and fixed tuning
+games that a heavy-tailed optimiser can memorise. Both channels can be removed
+at once: evaluate fitness with complete depth-4 games, and give every
+generation a fresh block of seeds.
+
+<Direction title="CMA-ES over the eighteen active leaf weights, depth-4 fitness, fresh seeds per generation" status="running" owner="claude-fable-5 (Claude Code)">
+Theory `TH-20260822-depth-native-leaf-weights-caa6f8ba`, experiment
+`EX-20260822-leaf-cmaes-d4s7-4f5f462a`, frozen before the first training seed
+was read. The fast engine's leaf now takes its weights as data
+(`approaches/lifetime-objective/leaf-evolution/`), with the search generated
+from `fast-search.hpp` by a checked substitution. Six CHECK gates passed with
+zero mismatches, and a pilot reproduced the recorded reference cohorts seed for
+seed while measuring the cost of a decision on this machine: about 0.29
+CPU-seconds at depth 4 with five chance samples, 1.03 with seven. The run
+(`RUN-20260822T014412Z-a0c63063`) evolves at the five-sample configuration —
+the contract comparator, and 3.7× cheaper per game, which buys roughly forty
+generations overnight instead of twelve — with a preregistered seven-sample
+transfer arm on the same held-out seeds as a secondary diagnostic. The
+candidate is the CMA distribution mean at the last generation, never the best
+sampled individual, and it meets one 64-game held-out screen
+(`0xa52b0000`+) exactly once.
+</Direction>
+
+<LogQuote who="kimi-k3">
+Fresh blocks per generation correctly prevent seed overfitting — but they
+convert overfitting into drift, not into signal.
+</LogQuote>
+
+Kimi's pre-run review (`runs/RUN-20260822T014331Z-1803c746/kimi-k3-review.md`)
+found no information-boundary or seed-role violation, checked every CMA-ES
+constant against Hansen's tutorial, and verified the pilot's reproduction
+claim. It then put the odds of the gate passing at about one in ten, for a
+reason worth recording before the data arrive: finding-14's perturbation arms
+at depth 4 had a paired standard deviation near 360,000 points, so a 32-game
+fitness estimate is far noisier than the differences CMA-ES needs to rank, and
+the only direct measurement of the local surface at deployment depth was flat
+to negative. It also caught three process defects, all fixed before the first
+seed was opened: the new leases were missing from the lease map's table, the
+held-out screen command was not scripted (`screen.sh` now is), and the
+"Student-t" bound in `compare.py` was using the normal quantile. Two of its
+alternatives are recorded as follow-ups — a two-stage allocation inside each
+generation, and perturbing in units of feature standard deviation rather than
+of the frozen weight — and one is declined: ranking candidates by paired
+wins would change the estimand away from the mean score the theory is about.
+
+<Direction title="An orchestrator for this loop" status="running" owner="claude-fable-5 (Claude Code)">
+`./do-research` (in `scripts/do-research/`) turns the contract into a loop a
+machine can run unattended: a planner model proposes one preregisterable
+experiment from the repository's own records, a second model family critiques
+it, the orchestrator registers theory, experiment and seed leases through the
+allocator — which can never touch a protected or final range — a headless
+`claude -p` implements and runs it inside hard caps, `opencode` audits the
+result, and the planner decides whether to continue. A dry run (plan and critique only) completed: the planner's first proposal
+needed about 21 GPU-hours against a 5-hour budget, Kimi's critique flagged that
+as critical, and the revised proposal came back as a conditional, corpus-only
+analysis. The first end-to-end iteration with implementation is still owed.
+</Direction>
+
+## Evening, continued: the small survival network is as accurate as it gets
+
+While the evolution ran on the CPU, the idle GPU answered a question the
+learned-leaf page left as an assertion: that "the accuracy is not there to be
+had" for the small survival network, a claim resting on one comparison with a
+much larger convolutional model. Thirteen retrainings of the same network at
+widths from 32 to 512, two training lengths and two learning rates, each on
+the same corpus and the same held-out games, settle it.
+
+<ArmTable
+  caption="Held-out lifetime correlation by width (10 epochs unless noted). Baseline h64 is the network that played in the learned-leaf experiment; the three seed replicas of it span 0.8546–0.8569."
+  columns={[
+    { key: "cfg", label: "Configuration" },
+    { key: "params", label: "Parameters", numeric: true },
+    { key: "pearson", label: "Held-out Pearson", numeric: true },
+    { key: "loss", label: "Final train loss", numeric: true }
+  ]}
+  rows={[
+    { cfg: "h32 / m32", params: "286,447", pearson: "0.8550", loss: "0.5238" },
+    { cfg: "h64 / m32 (baseline)", params: "572,367", pearson: "0.8546", loss: "0.5110", highlight: true },
+    { cfg: "h128 / m32", params: "1,144,207", pearson: "0.8543", loss: "0.5006" },
+    { cfg: "h256 / m32", params: "2,287,887", pearson: "0.8515", loss: "0.4857" },
+    { cfg: "h256 / m64, 20 epochs", params: "2,296,591", pearson: "0.8446", loss: "0.4596" },
+    { cfg: "h512 / m64, 20 epochs", params: "4,592,143", pearson: "0.8378", loss: "0.4197" }
+  ]}
+/>
+
+<Finding title="Capacity is not the constraint; wider students overfit" kind="negative" metric="best +0.0022, spread 0.0023">
+The best of thirteen configurations beat the baseline by 0.0022 — inside the
+seed-to-seed spread of 0.0023 — so the preregistered gate of
+`EX-20260822-nnue-leaf-capacity-sweep-79632fd9` reads *supported-as-tested*:
+the network's accuracy on this corpus is saturated near 0.856. The more
+interesting row is the direction of the failure. Training loss falls
+monotonically with width while held-out accuracy falls with it; the eight-times
+wider network is the worst predictor on games it has not seen. That is
+overfitting, not underfitting, which points the next learned-leaf experiment at
+the corpus and the target rather than the architecture. None of this says
+anything about play: the learned-leaf page already showed a 0.008 gap in this
+metric did not separate two models on the board.
+</Finding>
+
+A note on the other idea on the table tonight — evolving the network's weights
+directly with a population, the way the leaf weights are being evolved. The
+arithmetic rules it out at this scale: the fitness of one candidate costs a
+block of complete depth-4 games (about 14 CPU-minutes per candidate at 32
+games), and CMA-ES needs on the order of hundreds of evaluations to make
+progress in eighteen dimensions; the network has 572,367. Gradient training on
+recorded futures reaches the same accuracy ceiling in thirty seconds. What
+*could* be evolved at game cost is a handful of numbers on top of such a
+network — the blend weight, the scale, the eighteen leaf coefficients — and
+that is the registered extension of tonight's evolution, not a separate run.
+
+## Late evening: the 3 that can never clear
+
+The owner, watching the depth-4 search play, noticed it letting a 3 or a 4 land
+above its "safe zone" — in a column already taller than the disc's number,
+where it can never clear downward — and dying under it a few rises later; and
+asked whether the solver could have an emergency mode that recognises a risk
+to its survival and acts on it. The record answers the second part first: the
+search is not short of fear. Death inside its horizon already costs a million
+points and finding-04 showed a fifty-fold harsher penalty changes not one
+decision; every root-level survival objective tried — worst-case weighting,
+the rollout veto, tail objectives — lost badly. What it lacks is foresight.
+
+So the observation was registered as a theory about foresight
+(`TH-20260822-entombed-disc-hazard-61faa529`): an *entombed* disc — value n,
+column taller than n, row run longer than n, which the leaf prices only for 1s
+and 2s — is an early death predictor the leaf does not carry. Five million
+recorded positions answered in forty seconds.
+
+<ArmTable
+  caption="Depth-4 behaviour games in the corpus (768 complete games). Prevalence of an entombed disc of value 3 or more, by distance from death."
+  columns={[
+    { key: "bucket", label: "Moves to death" },
+    { key: "frac", label: "States with an entombed ≥3", numeric: true },
+    { key: "occ", label: "Mean occupied cells", numeric: true }
+  ]}
+  rows={[
+    { bucket: "more than 40", frac: "7.6%", occ: "20.0" },
+    { bucket: "16–40", frac: "17.8%", occ: "24.9" },
+    { bucket: "6–15", frac: "48.3%", occ: "32.7" },
+    { bucket: "5 or fewer", frac: "69.8%", occ: "40.1", highlight: true }
+  ]}
+/>
+
+<Finding title="Real marker, not a missing term" kind="negative" metric="R² +0.0003">
+Three quarters of depth-4 deaths end with an entombed 3-or-higher on the board,
+and the first persistent one appears a median of 11 moves before the end — the
+two-rise warning the owner saw. But adding the feature to the leaf's eighteen
+moves the held-out fit of remaining lifetime from R² 0.6952 to 0.6955, and at
+equal occupancy an entombed disc costs about two moves (35.0 vs 37.4 at 24–27
+cells). The leaf's value-blind height and cover terms already carry the
+information; the entombed disc marks a board that is already at 31–40 cells.
+Gate: not supported as tested (`EX-20260822-entombed-disc-corpus-analysis-38be404e`).
+</Finding>
+
+<Direction title="Was the entombing move avoidable?" status="proposed">
+This analysis is about values; the owner's question is about actions. The
+test it points at is a counterfactual replay: at each depth-4 root where the
+chosen move entombed a disc and a non-entombing alternative existed, play the
+alternative instead and continue with the same search, paired, and measure
+the lifetime difference. If the alternative lives longer, an emergency mode
+is a move filter with a real trigger; if not, the entombing move was already
+the least bad option and the problem is two rises older than it looks.
+</Direction>
+
+<Finding title="Human danger patterns are real, and the hand-written leaf already holds them" kind="neutral" metric="1-next-to-gray: −6.7 moves at equal occupancy, partial r +0.01">
+A follow-up question from the owner: a 1 sitting next to a solid gray "spells
+disaster" — would evolved weights or a neural net capture such patterns? A
+post-hoc pass over thirteen such patterns (`patterns.py`, same corpus, no
+gate, so exploratory) says the eye is right about the patterns and wrong about
+what is missing. A 1 adjacent to a solid gray is on the board in 90% of
+depth-4 states within five moves of death, and at equal occupancy it costs
+6.7 moves of life (34.7 vs 41.4 at 24–27 cells) — three times the entombed
+disc's cost. But its held-out partial correlation with lifetime *beyond the
+eighteen leaf features* is +0.01, and no pattern in the set exceeds |0.04|:
+the leaf's dead-low-number, adjacent-ones, cover-exposure and height terms are
+these human observations, already written down. What a neural leaf adds on top
+is measurable and small: held-out lifetime correlation 0.856 (NNUE, cell and
+pair features) against 0.834 for the linear leaf on the same split.
+</Finding>
+
+<Direction title="Survival instinct: refuse to place a 3 or higher where it can never clear vertically" status="running" owner="repository owner (rule), claude-fable-5 (protocol)">
+The owner's rule, registered as `TH-20260822-survival-instinct-vertical-clear-26f173b5`
+and preregistered as a paired SCREEN (`EX-20260822-survival-instinct-root-filter-8531cbd9`).
+The coordinator's two decisions, stated before any seed is read: it is a root
+move filter rather than a leaf term, because the corpus showed the leaf
+already values these positions and the open question is the action; and the
+cohort is 128 paired games rather than 64, with the override rate recorded,
+so a null separates "the rule rarely fires" from "it fires and does not
+help". Two strengths are measured — *strict* (refuse only when the landing
+is already entombed by its row) and the owner's *literal* rule (refuse every
+vertically dead landing that does not clear on arrival) — against the
+unchanged search on seeds `0xa52c0000`+. Prior on record: the occupancy
+arithmetic predicts an effect below the 128-game floor; the owner's eye
+predicts otherwise. The run is queued behind the evolution's screen.
 </Direction>

@@ -10,6 +10,7 @@ import { evaluateMctsMoves } from "../core/typescript/mcts-solver.ts";
 import { evaluateSparseExpectimaxMoves } from "../core/typescript/sparse-expectimax.ts";
 import { evaluateRiskSensitiveMoves } from "../core/typescript/risk-sensitive-planner.ts";
 import { evaluateRobustOpenLoopBeam } from "../core/typescript/robust-open-loop-beam.ts";
+import { nativeDecide } from "./native-policy.ts";
 
 /**
  * The Drop7 Policy Protocol (D7P) TypeScript interface, mirroring the text
@@ -216,6 +217,17 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
         timeLimitMs: 60_000,
         seed: policySeed("open-loop-beam"),
       }).bestColumn,
+  }),
+  define({
+    id: "native-fair-d4-s7",
+    name: "Native fair D4, 7 strata",
+    family: "lifetime-objective",
+    description:
+      "The research search itself: the bit-exact fast engine's completed full-width depth 4 with seven chance strata and the frozen fair leaf, through a one-shot native binary (build it with approaches/lifetime-objective/leaf-evolution/build.sh decide).",
+    researchPath: "/approaches/lifetime-objective/leaf-evolution",
+    publicInformation: true,
+    slow: true,
+    chooseColumn: (state) => nativeDecide(publicOnly(state), { chanceSamples: 7 }),
   }),
 ];
 

@@ -767,7 +767,15 @@ export function PlayerView({ caption }: { caption?: string }) {
 export function LegalColumns({ caption }: { caption?: string }) {
   const s = 34;
   // column 2 is full (top cell occupied); others have room
-  const board = "0050000005000000500000050000005000000500000350000";
+  const board = [
+    "0050000",
+    "0020000",
+    "0060000",
+    "0040000",
+    "0030000",
+    "0050000",
+    "0340000",
+  ].join("");
   const cells = parseBoard(board);
   const legal = Array.from({ length: 7 }, (_, c) => cells[c] === 0);
   const W = 7 * s + 330;
@@ -810,10 +818,10 @@ export function LegalColumns({ caption }: { caption?: string }) {
 export function DiscLegend() {
   const s = 36;
   const entries = [
-    { cell: 4, title: "numbered disc (1–7)", text: "clears when its row-run or column-run is exactly its number" },
-    { cell: 8, title: "solid gray disc", text: "hides a number; counts as occupied; needs two hits to open" },
-    { cell: 9, title: "cracked gray disc", text: "has taken one hit; one more reveals the number underneath" },
-    { cell: 0, title: "empty cell", text: "discs fall through it; a run stops at it" },
+    { cell: 4, title: "numbered disc (1-7)", text: "explodes when its row-run or column-run is exactly equal to its number" },
+    { cell: 8, title: "solid gray disc", text: "hides a number, counts as occupied, needs two adjacent explosions to open" },
+    { cell: 9, title: "cracked gray disc", text: "has taken one explosion, and one more adjacent explosion reveals the number underneath" },
+    { cell: 0, title: "empty cell", text: "discs fall through it, a run stops at it" },
   ];
   return (
     <div className="engine-fig" style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))" }}>
@@ -832,4 +840,3 @@ export function DiscLegend() {
     </div>
   );
 }
-

@@ -8,6 +8,7 @@
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 import {
+  findPoppers,
   playMove,
   serializeBoard,
   type Board,
@@ -36,18 +37,18 @@ interface Frame {
 
 const SPECS: ScenarioSpec[] = [
   { id: "drop", rows: ["0000000","0000000","0000000","0000000","0000000","0006000","0004000"], nextDisc: 5, column: 3 },
-  { id: "row-clear", rows: ["0000000","0000000","0000000","0000000","0000000","0000000","0033006"], nextDisc: 3, column: 4 },
-  { id: "column-clear", rows: ["0000000","0000000","0000000","0000000","0000000","0030000","0030006"], nextDisc: 3, column: 2 },
-  { id: "mismatch", rows: ["0000000","0000000","0000000","0000000","0000000","0000000","0222000"], nextDisc: 2, column: 4 },
-  { id: "gray-counts", rows: ["0000000","0000000","0000000","0000000","0000000","0000000","0033800"], nextDisc: 3, column: 1 },
-  { id: "crack", rows: ["0000000","0000000","0000000","0000000","0000000","0008000","0033000"], nextDisc: 3, column: 4, latent: { 38: 5 } },
-  { id: "reveal", rows: ["0000000","0000000","0000000","0000000","0000000","0009000","0033000"], nextDisc: 3, column: 4, latent: { 38: 5 } },
-  { id: "both-sides", rows: ["0000000","0000000","0000000","0000000","0000000","0000000","0380000"], nextDisc: 3, column: 3, latent: { 44: 4 } },
-  { id: "double-hit", rows: ["0000000","0000000","0000000","0000000","0000000","0330000","0882000"], nextDisc: 3, column: 3, latent: { 43: 6, 44: 4 } },
-  { id: "chain", rows: ["0000000","0000000","0000000","0000000","0000000","0089000","0033080"], nextDisc: 3, column: 1, latent: { 37: 4, 38: 1, 47: 6 } },
+  { id: "row-clear", rows: ["0000000","0000000","0000000","0000000","0000000","0000000","0056004"], nextDisc: 3, column: 4 },
+  { id: "column-clear", rows: ["0000000","0000000","0000000","0000000","0000000","0050000","0060004"], nextDisc: 3, column: 2 },
+  { id: "mismatch", rows: ["0000000","0000000","0000000","0000000","0000000","0000000","0652000"], nextDisc: 7, column: 4 },
+  { id: "gray-counts", rows: ["0000000","0000000","0000000","0000000","0000000","0000000","0056800"], nextDisc: 3, column: 1 },
+  { id: "crack", rows: ["0000000","0000000","0000000","0000000","0000080","0000560","0000740"], nextDisc: 3, column: 4, latent: { 33: 5 } },
+  { id: "reveal", rows: ["0000000","0000000","0000000","0000000","0000090","0000560","0000740"], nextDisc: 3, column: 4, latent: { 33: 5 } },
+  { id: "both-sides", rows: ["0000000","0000000","0000000","0000000","0000000","0038000","0065700"], nextDisc: 2, column: 4, latent: { 38: 4 } },
+  { id: "double-hit", rows: ["0000000","0000000","0000000","0000000","0000000","0530000","0682000"], nextDisc: 7, column: 3, latent: { 44: 4 } },
+  { id: "chain", rows: ["0000000","0000000","0000000","0000000","0000098","0000567","0000745"], nextDisc: 3, column: 4, latent: { 33: 2, 34: 6 } },
   { id: "rise", rows: ["0000000","0000000","0000000","0000000","0000000","0000000","0040000"], nextDisc: 5, column: 5, movesRemaining: 1, nextCoveredRow: [3, 1, 7, 2, 6, 4, 5] },
-  { id: "rise-blocked", rows: ["0005000","0006000","0005000","0006000","0005000","0006000","0005000"], nextDisc: 4, column: 0, movesRemaining: 1, nextCoveredRow: [1, 2, 3, 4, 5, 6, 7] },
-  { id: "board-clear", rows: ["0000000","0000000","0000000","0000000","0000000","0000000","0330000"], nextDisc: 3, column: 3 },
+  { id: "rise-blocked", rows: ["0005000","0002000","0006000","0004000","0003000","0005000","0002000"], nextDisc: 4, column: 0, movesRemaining: 1, nextCoveredRow: [1, 2, 3, 4, 5, 6, 7] },
+  { id: "board-clear", rows: ["0000000","0000000","0000000","0000000","0000000","0000000","0000000"], nextDisc: 1, column: 3 },
 ];
 
 function boardOf(rows: string[]): Board {
@@ -80,6 +81,10 @@ function collapse(animation: readonly MoveAnimationFrame[], start: Board, placed
 const out: Record<string, unknown> = {};
 for (const spec of SPECS) {
   const board = boardOf(spec.rows);
+  const initialPoppers = findPoppers(board);
+  if (initialPoppers.length > 0) {
+    throw new Error(`scenario ${spec.id}: initial board is not explosion-stable (${initialPoppers.join(", ")})`);
+  }
   const latent: LatentValues = new Array(49).fill(null);
   for (const [index, value] of Object.entries(spec.latent ?? {})) latent[Number(index)] = value;
   const state: GameState = {

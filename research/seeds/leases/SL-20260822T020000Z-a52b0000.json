@@ -1,0 +1,25 @@
+{
+  "$schema": "../schemas/seed-lease-v1.schema.json",
+  "format": "drop7-seed-lease-v1",
+  "seedLeaseId": "SL-20260822T020000Z-a52b0000",
+  "experimentId": "EX-20260822-leaf-cmaes-d4s7-4f5f462a",
+  "rngAlgorithm": "mulberry32 with mix32 domain separation (src/core/native/engine.hpp); headless disc stream kNextDiscDomain, reveal stream kRevealDomain; fast engine proven trajectory-identical (finding-13)",
+  "domain": "environment",
+  "role": "public-development",
+  "rangeStartHex": "0xa52b0000",
+  "rangeEndExclusiveHex": "0xa52b0100",
+  "cohortManifestSha256": null,
+  "state": "opened",
+  "reservedAt": "2026-08-22T01:42:04Z",
+  "openedAt": "2026-08-22T11:48:00Z",
+  "closedAt": "2026-08-22T12:07:36Z",
+  "protocolSha256": "87d2d15dadd49e84e3fd8e86168cc1fe00b4eeb28f8d56aacd9ac0f7f02ddca7",
+  "runIds": [
+    "RUN-20260822T020959Z-00fbdc90"
+  ],
+  "notes": [
+    "Conservative import before proposing this range: every 8-hex-digit constant under docs/, approaches/, src/, research/, artifacts/ and runs/ was enumerated (grep -rhoE 0x[0-9a-fA-F]{8}); the only 0xa529*/0xa52a*/0xa52b* constants anywhere are the torch RNG seed 0xA52A and the bootstrap seed 0xa52a1eaf (non-environment domains) and the reserve end marker 0xa52fffff in docs/exploratory/lease-map.md. The range lies inside that file's unallocated SEEDLEASE-A52 reserve (0xa5278000-0xa52fffff) and overlaps no historical, exploratory, scripted-round (0x5eed****), protected (0x7d******) or final (0xd7******) range. Arithmetic of the end address was checked before launch.",
+    "Held-out screen cohort: the first 64 seeds (0xa52b0000-0xa52b003f) are opened exactly once, by the preregistered SCREEN gate of EX-20260822-leaf-cmaes-d4s7-4f5f462a, after the candidate vector is frozen. The remaining 192 seeds stay reserved for a successor replication by a different runner. Never read by any training, tuning or model-selection step.",
+    "Opened at 2026-08-22T11:48:00Z by the screen run RUN-20260822T020959Z-00fbdc90 after the candidate was frozen (runs/RUN-20260822T014412Z-a0c63063/final.json); only seeds 0xa52b0000-0xa52b003f are read."
+  ]
+}

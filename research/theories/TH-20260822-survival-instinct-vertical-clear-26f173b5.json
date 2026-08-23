@@ -1,0 +1,33 @@
+{
+  "$schema": "../schemas/theory-v1.schema.json",
+  "format": "drop7-theory-v1",
+  "theoryId": "TH-20260822-survival-instinct-vertical-clear-26f173b5",
+  "title": "Survival instinct: refusing to place a disc above its vertical-clear height extends life",
+  "claim": "Survival instinct: when the next disc (value n >= 3) would land as the (n+1)-th or higher disc of a column it can never clear vertically, and refusing such placements at the root of the fair depth-4 search \u2014 leaving the search to choose among the remaining legal columns \u2014 extends mean paired lifetime and score on fresh development games relative to the unchanged search, by more than a 128-game paired cohort's detection floor.",
+  "mechanism": "Proposed by the repository owner from watching the depth-4 search: it places 3s and 4s above the row where they could ever clear vertically and dies under them a few rises later, while a human treats such a placement as a danger that must be cracked horizontally and avoids making it. The corpus analysis (RS-20260822T051732Z-ceb257d7) established that an entombed disc is present at 75% of depth-4 deaths with a median 11-move lead, and that the search's leaf already VALUES such positions correctly; what is untested is the ACTION: whether the move that creates the disc was avoidable at acceptable cost. A root-level refusal is the minimal form of an 'emergency mode' \u2014 a trigger computed from public state and a corrective constraint that overrides the search's preferred column \u2014 and its coverage (how often it overrides) is measured alongside its effect.",
+  "falsificationCriteria": [
+    "The strict-filter arm's paired score delta against the unchanged search on 128 fresh development games has a one-sided 95% bootstrap lower bound at or below zero, or a lower-quartile regression, or opposite-sign halves: refusing entombing placements does not help at this budget.",
+    "The filter overrides the unchanged search's column in fewer than 2% of decisions: the rule rarely applies and cannot explain the observed deaths.",
+    "If both arms lose on the mean but raise the lower quartile, the rule trades the upper tail for the floor, which finding-14 showed is the wrong trade for the million-point target; recorded as fail, not mixed.",
+    "Coordinator's prior, stated before the run: the occupancy-matched corpus numbers (about two moves of life per entombed disc) predict an effect below the 128-game floor; a null here is expected and would be a non-measurement for effects under roughly 33,000 points."
+  ],
+  "informationClass": "public-policy",
+  "lifecycle": "assessed",
+  "assessment": "mixed",
+  "evidenceTier": "public-development",
+  "dependencies": [],
+  "evidenceRefs": [
+    "research/results/RS-20260822T051732Z-ceb257d7.json",
+    "docs/exploratory/finding-04-terminal-utility-saturated.md",
+    "approaches/fair-expectimax/root-risk/README.mdx",
+    "docs/exploratory/finding-14-leaf-reweight.md",
+    "research/results/RS-20260822T233343Z-12becce9.json"
+  ],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": null
+  },
+  "createdAt": "2026-08-22T06:35:32Z",
+  "updatedAt": "2026-08-22T23:33:43Z"
+}

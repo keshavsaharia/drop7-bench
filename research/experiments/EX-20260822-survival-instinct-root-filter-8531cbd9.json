@@ -1,0 +1,85 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260822-survival-instinct-root-filter-8531cbd9",
+  "theoryIds": [
+    "TH-20260822-survival-instinct-vertical-clear-26f173b5"
+  ],
+  "title": "Paired SCREEN of fair D4 with the survival-instinct root filter (strict and literal) against unchanged fair D4 on 128 fresh development games",
+  "classification": "algorithmic",
+  "hypothesis": "With the bit-exact fast fair-D4 search at five strata (cache 60,000, worst-case work bound, terminal utility -1,000,000, policy seed 0xd7075eed), three arms play the same 128 ordered seeds 0xa52c0000-0xa52c007f: 'none' (unchanged), 'strict' (refuse a root column when the next disc of value >= 3 would land above its vertical-clear height AND its landing row run already exceeds its value, unless no column remains) and 'literal' (refuse every vertically dead landing that does not clear on arrival). The strict arm's paired score delta versus 'none' passes the gate below; the literal arm is a secondary measurement. Per-arm coverage (triggered decisions, overrides of the unfiltered column, no-column fallbacks) is recorded.",
+  "candidate": {
+    "name": "fast-d4s5-survival-instinct-strict",
+    "entryPoint": "approaches/lifetime-objective/survival-instinct/run.cpp",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "fair-d4",
+    "entryPoint": "approaches/fair-expectimax/reference/fair-only-depth4.cpp",
+    "manifestRef": "research/benchmarks/baselines-v1.json"
+  },
+  "informationBoundary": "public-policy",
+  "benchmarkTier": "SCREEN",
+  "data": {
+    "role": "public-development",
+    "seedLeaseRefs": [
+      "SL-20260822T060000Z-a52c0000"
+    ],
+    "datasetRefs": [],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "CHECK gates read previously opened development probe seeds 0xa5278000-0xa52784ff. The screen opens the new, never-read lease 0xa52c0000-0xa52c007f exactly once; the lease is disjoint from every range in docs/exploratory/lease-map.md and from the ./do-research allocator's future grants (the allocator scans lease records). No other seed is read."
+  },
+  "metrics": {
+    "primary": "paired mean whole-game score delta, strict minus none, 128 games, depth 4 five strata",
+    "secondary": [
+      "paired mean moves delta",
+      "literal minus none (secondary arm)",
+      "lower quartile, median, maximum score",
+      "halves (seeds 0-63 and 64-127)",
+      "W-T-L",
+      "coverage: triggered decisions, overrides, no-column fallbacks per arm",
+      "clears and reveals per move, mean occupancy"
+    ],
+    "statisticalUnit": "whole-game",
+    "uncertaintyMethod": "one-sided 95% percentile bootstrap over whole games (20,000 resamples, seed 0xb0071eaf, compare.py) and Student-t lower bound; detection floor 1.645*sd/sqrt(128) reported"
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "CHECK gates passed before the lease was opened: mask unit cases, parity of the all-allowed filtered search with FastSearch (0 mismatches), mirrored masks and actions, thread-count determinism.",
+      "incompleteDecisionsTotal 0 and illegalDecisionsTotal 0 in the artifact.",
+      "strict minus none: bootstrap 95% lower bound > 0 AND Student-t 95% lower bound > 0.",
+      "strict minus none: candidate Q25 >= comparator Q25 AND both halves > 0.",
+      "strict arm overrides >= 2% of its decisions (otherwise the result is a non-test of the rule and is recorded as inconclusive regardless of the deltas)."
+    ],
+    "failureAction": "Record valid + fail for this exact filter; report the literal arm and coverage as diagnostics; open no further cohort; the theory is not-supported-as-tested.",
+    "passAction": "Record valid + pass; register a fresh-block replication and a seven-stratum arm as successor experiments; register the filter as a candidate leaderboard policy (playground only)."
+  },
+  "resources": {
+    "wallSeconds": 7200,
+    "cpuThreads": 30,
+    "maxHostBytes": 17179869184,
+    "maxGpuBytes": null,
+    "gpuDevices": []
+  },
+  "stopConditions": [
+    "Stop on any rules, information-boundary, legality, determinism, or parity failure.",
+    "Stop at 7,200 wall-seconds; a partial cohort is recorded as partial and the gate is not evaluated.",
+    "The screen runs only after the leaf-evolution screen (RUN-20260822T020959Z-00fbdc90) has finished, so the two never share the machine."
+  ],
+  "expectedArtifacts": [
+    "runs/RUN-20260822T063900Z-a4baa04e/screen-d4s5.json (arms none, strict, literal on 0xa52c0000+128)",
+    "runs/RUN-20260822T063900Z-a4baa04e/compare-strict.json and compare-literal.json",
+    "runs/<gate-run>/gates.log"
+  ],
+  "lifecycle": "completed",
+  "protocolSha256": "a4dbfb041050005c46f5fc43838155967dbf794a5c6c020de10547eb1ee83d0b",
+  "amendments": [],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": null
+  },
+  "createdAt": "2026-08-22T06:37:35Z",
+  "updatedAt": "2026-08-22T23:33:44Z"
+}

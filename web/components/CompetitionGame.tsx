@@ -27,6 +27,7 @@ import type { CompetitionGameManifest } from "@/lib/competition/game";
 import { Drop7Board } from "./Drop7Board";
 import { DiscFace } from "./discs";
 import styles from "./Drop7Game.module.css";
+import { useExplosionPoints } from "./useExplosionPoints";
 
 interface ScriptedSnapshot {
   state: GameState;
@@ -60,9 +61,12 @@ const FRAME_DURATION_MS = {
 export function CompetitionGame({
   manifest,
   round,
+  showExplosionPoints = true,
 }: {
   manifest: CompetitionGameManifest;
   round: ScriptedRound;
+  /** Show each exploding disc's point value rising from the board. Defaults to true. */
+  showExplosionPoints?: boolean;
 }) {
   const [snapshot, setSnapshot] = useState(() => createStart(round));
   const snapshotRef = useRef(snapshot);
@@ -71,6 +75,11 @@ export function CompetitionGame({
   const animatingRef = useRef(false);
   const [animationFrame, setAnimationFrame] = useState<MoveAnimationFrame | null>(null);
   const animationRunRef = useRef(0);
+  const {
+    explosionPoints,
+    captureExplosionFrame,
+    clearExplosionPoints,
+  } = useExplosionPoints(showExplosionPoints);
   const [submitting, setSubmitting] = useState(false);
   const [needsAuth, setNeedsAuth] = useState(false);
   const [submission, setSubmission] = useState<SubmissionResult | null>(null);
@@ -151,6 +160,7 @@ export function CompetitionGame({
       animatingRef.current = true;
       setAnimating(true);
       setAnimationFrame(null);
+      clearExplosionPoints();
       const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const frames = reducedMotion ? [] : move.animation;
 
@@ -171,13 +181,22 @@ export function CompetitionGame({
       void (async () => {
         for (const frame of frames) {
           if (animationRunRef.current !== run) return;
+          captureExplosionFrame(frame);
           setAnimationFrame(frame);
           await wait(FRAME_DURATION_MS[frame.kind]);
         }
         finishMove();
       })();
     },
-    [bestKey, round, storageKey, submission, submitting],
+    [
+      bestKey,
+      captureExplosionFrame,
+      clearExplosionPoints,
+      round,
+      storageKey,
+      submission,
+      submitting,
+    ],
   );
 
   const restart = useCallback(() => {
@@ -191,13 +210,14 @@ export function CompetitionGame({
     setSubmitError(null);
     setNeedsAuth(false);
     setAnimationFrame(null);
+    clearExplosionPoints();
     setAnimating(false);
     try {
       window.localStorage.removeItem(storageKey);
     } catch {
       // Ignore browsers that deny localStorage.
     }
-  }, [round, storageKey]);
+  }, [clearExplosionPoints, round, storageKey]);
 
   const displayBoard = animationFrame?.board ?? snapshot.state.board;
   const animatedIndexes = useMemo(
@@ -279,6 +299,8 @@ export function CompetitionGame({
           label={snapshot.state.movesPlayed + " moves played in " + manifest.name}
           cellClassName={cellMotion}
           cellStyle={cellStyle}
+          explosionPoints={explosionPoints}
+          showExplosionPoints={showExplosionPoints}
           overlay={
             <>
               <div className="absolute inset-1.5 grid grid-cols-7">
