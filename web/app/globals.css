@@ -115,6 +115,41 @@ body {
   outline: 2px solid #a78bfa;
   outline-offset: 2px;
 }
+.github-auth-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+.github-signin-status {
+  cursor: default;
+}
+.github-signin-status:hover {
+  border-color: #3f3f46;
+  background: #18181b;
+}
+.github-signin-status:hover::after {
+  animation: none;
+}
+.github-signout {
+  border-radius: 0.5rem;
+  border: 1px solid #3f3f46;
+  background: transparent;
+  color: #a1a1aa;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.7rem 1.05rem;
+  cursor: pointer;
+}
+.github-signout:hover {
+  border-color: #71717a;
+  color: #fafafa;
+}
+.github-signout:focus-visible {
+  outline: 2px solid #a78bfa;
+  outline-offset: 2px;
+}
 @media (prefers-reduced-motion: reduce) {
   .github-signin:hover::after {
     animation: none;

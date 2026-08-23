@@ -33,7 +33,7 @@ export default async function FamilyPage({
         )}
       </div>
 
-      {doc && <Mdx source={doc.content} />}
+      {doc && <Mdx source={doc.content} fromPath={`approaches/${family}/README.mdx`} />}
 
       <section>
         <h2 className="mb-3 text-lg font-bold text-zinc-100">

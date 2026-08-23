@@ -5,7 +5,8 @@ import matter from "gray-matter";
 import { Mdx } from "@/components/Mdx";
 import { Markdown } from "@/components/Markdown";
 import { Badge } from "@/components/Badge";
-import { approachDocPath, approachOperationalNotes, listApproaches, listFamilies } from "@/lib/repo";
+import { approachDocPath, approachOperationalNotes, listApproaches, listFamilies, REPO_ROOT } from "@/lib/repo";
+import { relative as relativePath } from "node:path";
 
 export const dynamic = "force-dynamic";
 
@@ -92,7 +93,11 @@ export default async function ApproachPage({
         )}
       </div>
 
-      {isMdx ? <Mdx source={parsed!.content} /> : <Markdown source={raw} />}
+      {isMdx ? (
+        <Mdx source={parsed!.content} fromPath={relativePath(REPO_ROOT, docPath).replaceAll("\\", "/")} />
+      ) : (
+        <Markdown source={raw} fromPath={relativePath(REPO_ROOT, docPath).replaceAll("\\", "/")} />
+      )}
 
       {operationalNotes && (
         <section className="rounded-xl border border-zinc-800 bg-zinc-950/40 p-4 text-sm text-zinc-400">

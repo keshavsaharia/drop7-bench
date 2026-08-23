@@ -19,7 +19,7 @@
     "figures:oracle": "node --experimental-strip-types scripts/generate-oracle-scenario.ts",
     "figures:heuristic": "node --experimental-strip-types scripts/generate-heuristic-figures.ts",
     "check:mdx": "node scripts/check-mdx.mjs ../approaches ./content",
-    "test": "node --experimental-strip-types --test lib/play/*.test.ts lib/competition/*.test.ts"
+    "test": "node --experimental-strip-types --test lib/play/*.test.ts lib/competition/*.test.ts lib/doc-links.test.ts"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.1116.0",
