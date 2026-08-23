@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev --webpack",
+    "dev": "next dev --webpack --port 7777",
     "prebuild": "node scripts/stage-repo-content.mjs",
     "build": "next build --webpack",
     "start": "next start",

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Markdown } from "@/components/Markdown";
 import { Stat } from "@/components/Board";
+import { ShimmerButton } from "@/components/ShimmerButton";
 import {
   getExperiments,
   getResults,
@@ -10,6 +11,9 @@ import {
   readRepoFile,
 } from "@/lib/repo";
 import { loadLeaderboard } from "@/lib/leaderboard";
+import { loadCompetitionLeaderboard } from "@/lib/competition/ledger";
+import { COMPETITION_GAME_KEY } from "@/lib/competition/game";
+import { getCompetitionGame } from "@/lib/competition/registry";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +25,7 @@ function GitHubMark() {
   );
 }
 
-export default function OverviewPage() {
+export default async function OverviewPage() {
   const theories = getTheories();
   const experiments = getExperiments();
   const results = getResults();
@@ -31,14 +35,44 @@ export default function OverviewPage() {
     0,
   );
   const leaderboard = loadLeaderboard();
-  const leader = leaderboard
-    ? [...leaderboard.summaries].sort(
-        (a, b) => (b.meanScore ?? 0) - (a.meanScore ?? 0),
-      )[0]
-    : null;
-  const leaderPolicy = leaderboard?.policies.find(
-    (policy) => policy.id === leader?.policyId,
+  const competitionGame = getCompetitionGame(COMPETITION_GAME_KEY);
+  if (!competitionGame) throw new Error("Current competition is not registered");
+  const competitionLeaderboard = await loadCompetitionLeaderboard(
+    COMPETITION_GAME_KEY,
   );
+  const humanLeader = competitionLeaderboard.entries
+    .filter((entry) => entry.kind === "human")
+    .sort((a, b) => b.verifiedScore - a.verifiedScore)[0] ?? null;
+  const persistedPolicyIds = new Set(
+    competitionLeaderboard.entries
+      .filter((entry) => entry.kind === "ai" && entry.policyId !== null)
+      .map((entry) => entry.policyId),
+  );
+  const computerLeader = [
+    ...competitionLeaderboard.entries
+      .filter((entry) => entry.kind === "ai")
+      .map((entry) => ({
+        name: entry.displayName,
+        score: entry.verifiedScore,
+        extendedState: entry.publicInformation === false,
+      })),
+    ...(leaderboard?.games ?? [])
+      .filter(
+        (game) =>
+          game.roundId === competitionGame.manifest.roundId &&
+          !persistedPolicyIds.has(game.policyId),
+      )
+      .map((game) => {
+        const policy = leaderboard?.policies.find(
+          (candidate) => candidate.id === game.policyId,
+        );
+        return {
+          name: policy?.name ?? game.policyId,
+          score: game.score,
+          extendedState: policy?.publicInformation === false,
+        };
+      }),
+  ].sort((a, b) => b.score - a.score)[0] ?? null;
   const status = readRepoFile("docs/research/status.md");
 
   return (
@@ -140,33 +174,81 @@ export default function OverviewPage() {
         />
       </section>
 
-      {leaderboard && leader && (
-        <section className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="text-lg font-bold text-zinc-100">
-              Scripted-round leaderboard
-            </h2>
-            <Link href="/leaderboard" className="text-sm text-sky-400 hover:text-sky-300">
-              View full leaderboard →
-            </Link>
-          </div>
-          <p className="mt-1 text-sm text-zinc-400">
-            {leaderboard.policies.length} policies × {leaderboard.rounds.length}{" "}
-            deterministic gauntlet rounds. Current leader:{" "}
-            <strong className="text-zinc-100">{leaderPolicy?.name ?? leader.policyId}</strong>{" "}
-            with a mean of{" "}
-            <strong className="text-zinc-100">
-              {Math.round(leader.meanScore ?? 0).toLocaleString()}
-            </strong>{" "}
-            across {leader.games} games.
-          </p>
-        </section>
-      )}
+      <section className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-lg font-bold text-zinc-100">
+            Global human-computer competition
+          </h2>
+          <ShimmerButton href="/leaderboard">View leaderboard</ShimmerButton>
+        </div>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <CompetitionLeader
+            label="Current human leader"
+            name={humanLeader?.displayName ?? null}
+            score={humanLeader?.verifiedScore ?? null}
+            empty={
+              competitionLeaderboard.available
+                ? "No verified human score yet"
+                : "Competition ledger unavailable"
+            }
+          />
+          <CompetitionLeader
+            label="Current computer leader"
+            name={computerLeader?.name ?? null}
+            score={computerLeader?.score ?? null}
+            extendedState={computerLeader?.extendedState ?? false}
+            empty="No computer score available"
+          />
+        </div>
+        <p className="mt-3 text-xs text-zinc-500">
+          Both leaders play {competitionGame.manifest.roundId}, with the same
+          visible discs and hidden values.
+        </p>
+      </section>
 
       {status && (
         <section>
           <Markdown source={status} fromPath="docs/research/status.md" />
         </section>
+      )}
+    </div>
+  );
+}
+
+function CompetitionLeader({
+  label,
+  name,
+  score,
+  extendedState = false,
+  empty,
+}: {
+  label: string;
+  name: string | null;
+  score: number | null;
+  extendedState?: boolean;
+  empty: string;
+}) {
+  return (
+    <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 px-4 py-3">
+      <p className="text-xs font-semibold uppercase tracking-wide text-sky-400">
+        {label}
+      </p>
+      {name !== null && score !== null ? (
+        <p className="mt-1 text-sm text-zinc-300">
+          <strong className="text-zinc-100">{name}</strong>
+          {extendedState && (
+            <span
+              className="ml-2 rounded bg-amber-900/60 px-1.5 py-0.5 text-[10px] font-medium text-amber-200"
+              title="Reads level or move number in addition to the strict public state"
+            >
+              extended state
+            </span>
+          )}
+          <span className="text-zinc-500"> · </span>
+          {score.toLocaleString()} points
+        </p>
+      ) : (
+        <p className="mt-1 text-sm text-zinc-500">{empty}</p>
       )}
     </div>
   );

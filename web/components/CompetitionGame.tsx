@@ -266,7 +266,7 @@ export function CompetitionGame({
     <section className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4 text-zinc-300">
       <div className="mb-4 flex flex-wrap items-start justify-between gap-4 border-b border-zinc-800 pb-4">
         <div>
-          <p className={LABEL + " text-violet-400"}>
+          <p className={LABEL + " text-sky-400"}>
             competition · {manifest.gameVersion}
           </p>
           <p className="mt-1.5 text-sm text-zinc-400">
@@ -315,7 +315,7 @@ export function CompetitionGame({
                         ? "Drop " + snapshot.state.nextDisc + " in column " + (column + 1)
                         : "Column " + (column + 1) + " is full"
                     }
-                    className="border-x border-transparent transition-colors enabled:hover:border-violet-500/60 enabled:hover:bg-violet-400/10"
+                    className="border-x border-transparent transition-colors enabled:hover:border-sky-500/60 enabled:hover:bg-sky-400/10"
                   />
                 ))}
               </div>
@@ -373,7 +373,7 @@ export function CompetitionGame({
               <button
                 type="button"
                 onClick={restart}
-                className="w-full rounded-lg border border-violet-400 bg-violet-500 px-4 py-3 text-sm font-black uppercase tracking-[0.08em] text-white shadow-lg shadow-violet-950/30 transition-colors hover:bg-violet-400"
+                className="w-full rounded-lg border border-sky-400 bg-sky-600 px-4 py-3 text-sm font-black uppercase tracking-[0.08em] text-white shadow-lg shadow-sky-950/30 transition-colors hover:bg-sky-500"
               >
                 Play again
               </button>
@@ -388,14 +388,14 @@ export function CompetitionGame({
                   type="button"
                   onClick={() => void submit()}
                   disabled={submitting}
-                  className="rounded-md border border-violet-500 bg-violet-500 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-white transition-colors hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-md border border-sky-500 bg-sky-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-white transition-colors hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {submitting ? "validating…" : "submit verified run"}
                 </button>
                 <button
                   type="button"
                   onClick={restart}
-                  className="rounded-md border border-zinc-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-zinc-200 transition-colors hover:border-violet-400 hover:bg-violet-500/10 hover:text-white"
+                  className="rounded-md border border-zinc-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-zinc-200 transition-colors hover:border-sky-400 hover:bg-sky-500/10 hover:text-white"
                 >
                   Play again
                 </button>

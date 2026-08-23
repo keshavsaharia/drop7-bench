@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ShimmerButton } from "@/components/ShimmerButton";
 import {
   loadCompetitionLeaderboard,
   type CompetitionLeaderboardEntry,
@@ -340,7 +341,7 @@ function CompetitionLeaderboard({
   return (
     <section className="space-y-4">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-400">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-400">
           {selectedGame.manifest.name} · {selectedGame.manifest.gameVersion}
         </p>
         <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
@@ -352,18 +353,17 @@ function CompetitionLeaderboard({
               harness. This is a reproducible playground, not research-tier evidence.
             </p>
           </div>
-          <Link
+          <ShimmerButton
             href={
               selectedGame.gameKey === COMPETITION_GAME_KEY
                 ? "/compete"
                 : "/leaderboard"
             }
-            className="rounded-md border border-violet-500/60 px-3 py-2 text-sm font-semibold text-violet-300 hover:bg-violet-500/10"
           >
             {selectedGame.gameKey === COMPETITION_GAME_KEY
               ? "Play this game →"
               : "Current competition →"}
-          </Link>
+          </ShimmerButton>
         </div>
       </div>
 
@@ -397,7 +397,7 @@ function CompetitionLeaderboard({
             className={
               "rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide " +
               (filter === option
-                ? "border-violet-400 bg-violet-500/15 text-violet-200"
+                ? "border-sky-400 bg-sky-500/15 text-sky-200"
                 : "border-zinc-700 text-zinc-500 hover:border-zinc-500 hover:text-zinc-300")
             }
           >
@@ -440,7 +440,7 @@ function CompetitionLeaderboard({
                     className={
                       "rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide " +
                       (entry.kind === "human"
-                        ? "bg-violet-950 text-violet-300"
+                        ? "bg-blue-950 text-blue-300"
                         : "bg-sky-950 text-sky-300")
                     }
                   >

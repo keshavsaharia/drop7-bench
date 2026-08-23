@@ -24,10 +24,9 @@ body:has(.source-workspace) > main {
   padding: 0;
 }
 
-/* Play CTA in the header. Painted like a numbered disc (disc 7) so it reads
-   as a Drop7 control rather than a text nav link. The shine sweep is hover-only
-   and stops under prefers-reduced-motion. */
-.play-cta {
+/* Shared primary CTA. The optional icon lets the header keep its numbered-disc
+   treatment while pages reuse the same blue shimmer without duplicating it. */
+.shimmer-button {
   position: relative;
   overflow: hidden;
   display: inline-flex;
@@ -40,17 +39,20 @@ body:has(.source-workspace) > main {
   font-size: 0.875rem;
   font-weight: 700;
   line-height: 1;
-  padding: 0.35rem 0.95rem 0.35rem 0.4rem;
+  padding: 0.55rem 0.95rem;
   box-shadow: inset 0 -0.14em 0 rgba(0, 0, 0, 0.22);
   text-decoration: none;
 }
-.play-cta-disc {
+.shimmer-button-with-icon {
+  padding: 0.35rem 0.95rem 0.35rem 0.4rem;
+}
+.shimmer-button-icon {
   display: inline-flex;
   width: 1.35rem;
   height: 1.35rem;
   font-size: 0.7rem;
 }
-.play-cta::after {
+.shimmer-button::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -63,12 +65,16 @@ body:has(.source-workspace) > main {
   transform: translateX(-130%);
   pointer-events: none;
 }
-.play-cta:hover {
+.shimmer-button:hover {
   color: #ffffff;
   filter: brightness(1.12);
 }
-.play-cta:hover::after {
+.shimmer-button:hover::after {
   animation: play-shimmer 0.7s ease-out;
+}
+.shimmer-button:focus-visible {
+  outline: 2px solid #38bdf8;
+  outline-offset: 2px;
 }
 @keyframes play-shimmer {
   to {
@@ -76,16 +82,16 @@ body:has(.source-workspace) > main {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .play-cta:hover {
+  .shimmer-button:hover {
     filter: none;
   }
-  .play-cta:hover::after {
+  .shimmer-button:hover::after {
     animation: none;
   }
 }
 
 /* Compete-page GitHub OAuth button. The shine sweep is hover-only and
-   stops under prefers-reduced-motion, matching .play-cta. */
+   stops under prefers-reduced-motion, matching .shimmer-button. */
 .github-signin {
   position: relative;
   overflow: hidden;
@@ -127,7 +133,7 @@ body:has(.source-workspace) > main {
   animation: play-shimmer 0.7s ease-out;
 }
 .github-signin:focus-visible {
-  outline: 2px solid #a78bfa;
+  outline: 2px solid #38bdf8;
   outline-offset: 2px;
 }
 .github-auth-status {
@@ -162,7 +168,7 @@ body:has(.source-workspace) > main {
   color: #fafafa;
 }
 .github-signout:focus-visible {
-  outline: 2px solid #a78bfa;
+  outline: 2px solid #38bdf8;
   outline-offset: 2px;
 }
 @media (prefers-reduced-motion: reduce) {
