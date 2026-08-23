@@ -45,6 +45,7 @@ constants anywhere in the repository are `0xa511e9b3`, `0xa54ff53a` and
 | `SL-20260822T060000Z-a52c0000` | `0xa52c0000`–`0xa52c00ff` | 256 | public-development, SCREEN | survival-instinct root-filter screen (first 128 seeds, read once after CHECK gates); remainder reserved for replication | reserved |
 | `SL-20260823T100000Z-a52d0000` | `0xa52d0000`–`0xa52d01ff` | 512 | public-development, SCREEN | reveal-construction leaf screen — corpus gate failed, never opened | cancelled-unopened |
 | `SL-20260823T110000Z-a52d0200` | `0xa52d0200`–`0xa52d03ff` | 512 | public-development, SCREEN | reveal-construction leaf successor screen (first 256 seeds read once: frozen, A900 full; A300, B stopped at 39/36 games); remainder reserved | opened |
+| `SL-20260823T200000Z-a52e0000` | `0xa52e0000`–`0xa52e01ff` | 512 | **training**, CHECK diagnostic | H-pool stage D0: 64 oracle games (0xa52e0000–0xa52e003f) and fair-D4 matched pool games (0xa52e0100–0xa52e01ff); public states exported, privileged generator only | reserved |
 
 Training and evaluation ranges are disjoint by construction: evaluation lives
 under `0xa51d`, training under `0xa52`. No model trained on `SEEDLEASE-A52` has

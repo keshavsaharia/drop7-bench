@@ -1,0 +1,42 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260823T193951Z-84693886",
+  "actor": {
+    "kind": "model",
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": "delegated subagent (Agent tool, general-purpose)"
+  },
+  "level": "L2",
+  "roles": [
+    {
+      "role": "formal-analysis",
+      "degree": "lead"
+    }
+  ],
+  "summary": "C0 reanalysis: located the retained per-game records for D3 N7M6 (runs/RUN-A525-reveal/d3-n7-m6.json) and D4 s5 / D4 s7 (runs/RUN-A51D-s7confirm/fresh-s5.json, fresh-s7.json), verified identical 64-seed cohorts and settings, wrote the c0_compare.py wrapper around chain-reveal-leaf/compare.py, registered theory TH-20260823-d3-reveal-quadrature-beats-d4s5-paired-4ee1d5fe and experiment EX-20260823-d3n7m6-vs-d4s5-paired-reanalysis-ea66f4ec, froze the protocol before running the paired bootstrap, and wrote the run, result and c0.md summary.",
+  "theoryIds": [
+    "TH-20260823-d3-reveal-quadrature-beats-d4s5-paired-4ee1d5fe"
+  ],
+  "experimentIds": [
+    "EX-20260823-d3n7m6-vs-d4s5-paired-reanalysis-ea66f4ec"
+  ],
+  "runIds": [
+    "RUN-20260823T193851Z-5076ad9b"
+  ],
+  "artifactPaths": [
+    "runs/RUN-20260823T191900Z-b9f8f80d/c0",
+    "research/results/RS-20260823T194200Z-42b113db.json"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "seed lists of all arms checked equal to 0xa51d1000..0xa51d103f in order; fresh-s5.json and s5-w000.json confirmed game-identical; secondary D3 N7M6 - D4 s7 contrast reproduces finding-16's -22,056 point estimate; researchctl validate"
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-23T19:39:51Z"
+}

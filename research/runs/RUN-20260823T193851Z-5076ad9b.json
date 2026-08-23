@@ -1,0 +1,49 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260823T193851Z-5076ad9b",
+  "experimentId": "EX-20260823-d3n7m6-vs-d4s5-paired-reanalysis-ea66f4ec",
+  "lifecycle": "completed",
+  "runValidity": "valid",
+  "startedAt": "2026-08-23T19:38:51Z",
+  "endedAt": "2026-08-23T19:38:51Z",
+  "protocolSha256": "b276634a2195f78e89c999e5f8b79b3e1fa18d58d3634d6fcea127b4e3de935e",
+  "machineProfileRef": "research/system-profiles/MACH-20260820T080056Z-376ada90.json",
+  "sourceState": {
+    "gitCommit": "be0c3fdfc875b23c40016942b18b8421df8959a2",
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "/usr/bin/python3 runs/RUN-20260823T191900Z-b9f8f80d/c0/c0_compare.py runs/RUN-A525-reveal/d3-n7-m6.json runs/RUN-A51D-s7confirm/fresh-s5.json 'D3 N7M6 - D4 s5' --out runs/RUN-20260823T191900Z-b9f8f80d/c0/compare-d3n7m6-vs-d4s5.json",
+    "/usr/bin/python3 runs/RUN-20260823T191900Z-b9f8f80d/c0/c0_compare.py runs/RUN-A525-reveal/d3-n7-m6.json runs/RUN-A51D-s7confirm/fresh-s7.json 'D3 N7M6 - D4 s7' --out runs/RUN-20260823T191900Z-b9f8f80d/c0/compare-d3n7m6-vs-d4s7.json"
+  ],
+  "seedLeaseRefs": [],
+  "resourceLimits": {
+    "wallSeconds": 60,
+    "cpuThreads": 1,
+    "maxHostBytes": 1073741824,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": 1,
+    "cpuSeconds": null,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "Reanalysis of retained artifacts; both commands completed within the same UTC second. No games played, no seed opened, no lease consumed. Two earlier invocations (19:38:12Z brew python3 without numpy; 19:38:28Z /usr/bin/python3 with the module-name collision) died at import and produced no output; see the experiment amendment."
+  },
+  "exitCode": 0,
+  "stopReason": "completed: both contrasts computed over 64 paired games",
+  "artifactRefs": [
+    "runs/RUN-20260823T191900Z-b9f8f80d/c0/inputs-manifest.json",
+    "runs/RUN-20260823T191900Z-b9f8f80d/c0/compare-d3n7m6-vs-d4s5.json",
+    "runs/RUN-20260823T191900Z-b9f8f80d/c0/compare-d3n7m6-vs-d4s7.json",
+    "runs/RUN-20260823T191900Z-b9f8f80d/c0/c0-stdout.log",
+    "runs/RUN-20260823T191900Z-b9f8f80d/c0/c0_compare.py",
+    "runs/RUN-20260823T191900Z-b9f8f80d/c0/c0.md"
+  ],
+  "contributionIds": [
+    "CT-20260823T193951Z-84693886"
+  ]
+}

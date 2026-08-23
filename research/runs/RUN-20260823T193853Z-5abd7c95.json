@@ -1,0 +1,55 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260823T193853Z-5abd7c95",
+  "experimentId": "EX-20260823-nnue-d4q-ordering-probe-0ca09bb1",
+  "lifecycle": "completed",
+  "runValidity": "valid",
+  "startedAt": "2026-08-23T19:38:53Z",
+  "endedAt": "2026-08-23T19:41:42Z",
+  "protocolSha256": "6c820078c386240d8b69ad74febce7303b040f520db96ad13a3754c3cbe2c376",
+  "machineProfileRef": "research/system-profiles/MACH-20260820T080056Z-376ada90.json",
+  "sourceState": {
+    "gitCommit": "be0c3fdfc875b23c40016942b18b8421df8959a2",
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "approaches/lifetime-objective/nnue-d4q-probe/run.sh runs/RUN-20260823T191900Z-b9f8f80d/probe (artifact directory fixed by the preregistration's expectedArtifacts; this run record carries the run's own ID)",
+    "python approaches/lifetime-objective/nnue-d4q-probe/train_probe.py --out runs/RUN-20260823T191900Z-b9f8f80d/probe --epochs 30 --lr 1e-3 --batch-roots 256 --threads 8 --device cpu --wall-budget 5400 (.venv-rocm torch 2.13.0+rocm7.1 on CPU, OPENBLAS_NUM_THREADS=1)",
+    "python approaches/lifetime-objective/learned-leaf/export_leaf.py --checkpoint runs/RUN-20260823T191900Z-b9f8f80d/probe/model-seedA52E02.pt --out runs/RUN-20260823T191900Z-b9f8f80d/probe/model-seedA52E02.d7leaf",
+    "build/lifetime-leaf/leaf-check --model runs/RUN-20260823T191900Z-b9f8f80d/probe/model-seedA52E02.d7leaf --states runs/RUN-A51D-corpus/mix-d3.states --count 4096 --bench 400000 --threads 1 (informational inference cost)"
+  ],
+  "seedLeaseRefs": [],
+  "resourceLimits": {
+    "wallSeconds": 5400,
+    "cpuThreads": 8,
+    "maxHostBytes": 17179869184,
+    "maxGpuBytes": 8589934592
+  },
+  "resourceObserved": {
+    "wallSeconds": 166.08,
+    "cpuSeconds": null,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "Training plus held-out read 166.08 s on 8 torch CPU threads (about 33 s per seed); export and leaf-check about 3 s more. No GPU used. Host shared with other agent sessions (load average below 1.1 at start)."
+  },
+  "exitCode": 0,
+  "stopReason": "completed: all five seeds trained 30 epochs, no non-finite loss, held-out panel read once",
+  "artifactRefs": [
+    "runs/RUN-20260823T191900Z-b9f8f80d/probe/train.log",
+    "runs/RUN-20260823T191900Z-b9f8f80d/probe/metrics.json",
+    "runs/RUN-20260823T191900Z-b9f8f80d/probe/commands.log",
+    "runs/RUN-20260823T191900Z-b9f8f80d/probe/leaf-check.log",
+    "runs/RUN-20260823T191900Z-b9f8f80d/probe/model-seedA52E01.pt",
+    "runs/RUN-20260823T191900Z-b9f8f80d/probe/model-seedA52E02.pt",
+    "runs/RUN-20260823T191900Z-b9f8f80d/probe/model-seedA52E03.pt",
+    "runs/RUN-20260823T191900Z-b9f8f80d/probe/model-seedA52E04.pt",
+    "runs/RUN-20260823T191900Z-b9f8f80d/probe/model-seedA52E05.pt",
+    "runs/RUN-20260823T191900Z-b9f8f80d/probe/model-seedA52E02.d7leaf"
+  ],
+  "contributionIds": [
+    "CT-20260823T194212Z-bb82cb22"
+  ]
+}

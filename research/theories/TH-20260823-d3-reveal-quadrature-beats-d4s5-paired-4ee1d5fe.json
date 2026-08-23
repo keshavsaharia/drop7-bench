@@ -1,0 +1,31 @@
+{
+  "$schema": "../schemas/theory-v1.schema.json",
+  "format": "drop7-theory-v1",
+  "theoryId": "TH-20260823-d3-reveal-quadrature-beats-d4s5-paired-4ee1d5fe",
+  "title": "Depth-3 factored reveal quadrature (N=7, M=6) beats fair depth-4 five-stratum search on the shared cohort",
+  "claim": "The depth-3 factored-chance fair search with seven disc strata and six reveal samples (D3 N7M6, fair leaf, finding-16) beats the frozen fair depth-4 five-stratum search (D4 s5, N5 M1, finding-05) on the shared development cohort 0xa51d1000-0xa51d103f by a paired per-game score margin whose one-sided 95% whole-game bootstrap lower bound and Student-t lower bound are both above zero.",
+  "mechanism": "finding-16 recorded 376,442 for D3 N7M6 and finding-05 recorded 297,327 for D4 s5 on the same 64 seeds, a +79,115 difference of means, but the two arms were never contrasted as paired per-game deltas: every published bound for D3 N7M6 was taken against D3 M=1, D3 M=12 or D4 N7 arms. The K2 program (runs/RUN-20260823T191900Z-b9f8f80d, section 1.4 and section 8 row C0) leans on this +79k as the head start of its fallback route (c). The mechanism claimed is that decorrelating the reveal draw at depth 3 buys more than the fourth ply buys at five strata (finding-05 measured the fourth ply at -7,723 NS at s5), so the shallower, better-quadratured search should dominate pairwise and not merely in means. If the paired bound does not clear zero the +79k is a heavy-tail artefact of 64 games and cannot be quoted as a head start.",
+  "falsificationCriteria": [
+    "The paired D3 N7M6 minus D4 s5 score delta over the 64 shared seeds has a one-sided 95% percentile bootstrap lower bound (20,000 resamples, seed 0xb0071eaf) at or below zero.",
+    "The paired D3 N7M6 minus D4 s5 Student-t one-sided 95% lower bound is at or below zero.",
+    "The two cohort halves in seed order disagree in sign, or W-T-L shows the mean is carried by fewer than a quarter of the games."
+  ],
+  "informationClass": "public-policy",
+  "lifecycle": "assessed",
+  "assessment": "supported-as-tested",
+  "evidenceTier": "public-development",
+  "dependencies": [],
+  "evidenceRefs": [
+    "research/results/RS-20260823T194200Z-42b113db.json",
+    "runs/RUN-20260823T191900Z-b9f8f80d/c0/c0.md",
+    "docs/exploratory/finding-16-factored-reveal-sampling.md",
+    "docs/exploratory/finding-05-chance-strata.md"
+  ],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": "delegated subagent (Agent tool, general-purpose)"
+  },
+  "createdAt": "2026-08-23T19:36:43Z",
+  "updatedAt": "2026-08-23T19:42:00Z"
+}

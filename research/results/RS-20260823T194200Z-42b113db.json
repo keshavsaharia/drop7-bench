@@ -1,0 +1,139 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260823T194200Z-42b113db",
+  "theoryIds": [
+    "TH-20260823-d3-reveal-quadrature-beats-d4s5-paired-4ee1d5fe"
+  ],
+  "experimentId": "EX-20260823-d3n7m6-vs-d4s5-paired-reanalysis-ea66f4ec",
+  "runIds": [
+    "RUN-20260823T193851Z-5076ad9b"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "pass",
+  "assessment": "supported-as-tested",
+  "evidenceTier": "public-development",
+  "summary": "C0 reanalysis (K2 program section 8 row 0): the paired per-game bound behind the +79,115 head start is now printed, and it clears zero. On the 64 shared seeds 0xa51d1000-0xa51d103f, depth 3 with seven disc strata and six reveal samples (fair leaf, finding-16) scores 376,442 against fair depth 4 at five strata's 297,327 (finding-05): paired +79,115, one-sided 95% percentile bootstrap lower bound +29,033 (upper +129,722; 20,000 resamples, seed 0xb0071eaf), Student-t lower bound +27,548, W-T-L 35-0-29, halves +88,138 / +70,092, Q25 +34,872 (227,224 vs 192,352), median 322,859 vs 260,415, median paired delta +32,926, moves +22.30 (LB +8.67), paired sd 247,113, detection floor 50,813, at 3.27x the logical work per move (4,244,020 vs 1,296,034). Both gate bounds are positive, so the experiment passes and the theory is supported-as-tested at public-development tier. READ THE CAVEATS: the means and their difference were published before this gate was written, so this is a bound attached to a known sign on already-read development data, not a discovery; it is not promotable above this tier on this cohort. The delta is heavy-tailed: the five largest paired gains (seeds 0xa51d1012 +747,416, 0xa51d1020 +684,129, 0xa51d1008 +643,799, 0xa51d1001 +643,344, 0xa51d1033 +558,163) carry 64.7% of the summed delta, the sixteen largest carry 134% (the remaining 48 games net negative), and the worst loss is -332,950 (0xa51d103c); the minimum leave-one-out mean is still +68,507, so no single game is load-bearing, but against a detection floor of 50,813 the mean sits 1.56 floors above zero and the bootstrap lower bound only 0.57 floors above it. The flow statistics move with the score: numbered clears per move 2.0447 vs 1.9489, cover reveals per move 1.1423 vs 1.0697 (paired clears +53.9 per game, LB +21.1; reveals +31.8, LB +12.6), mean occupancy 23.49 vs 24.29. SECONDARY, not gated: against fair depth 4 at seven strata (398,498) the same arm is -22,056 with bounds (-92,005, +45,490), t lower bound -92,330, W-T-L 30-0-34, halves -27,121 / -16,991, Q25 +14,360, moves -5.20, at 0.86x the work; this reproduces finding-16's -22,056 point estimate exactly and its bootstrap lower bound to within 2,138 (finding-16 printed -89,867 from its own resampler; this run's pinned seed gives -92,005), and remains a wash. So the head start the K2 fallback route (c) stands on is real against D4 s5 but the same arm does not separate from D4 s7, which is the stronger comparator and the one the program's end state must beat on the strength-cost frontier.",
+  "metrics": {
+    "cohort": "0xa51d1000-0xa51d103f, 64 games, 2,000-move cap, corrected 17,000-point Hardcore scoring, terminalUtility -1000000, SEEDLEASE-A51D, exploratory-development-diagnostic, already read",
+    "d3n7m6": {
+      "artifact": "runs/RUN-A525-reveal/d3-n7-m6.json",
+      "sha256": "36aa1d0f0ec29b0ec70bd540e7d06758e37147a521f6891c0fde930943aa83fc",
+      "meanScore": 376442.140625,
+      "median": 322859,
+      "q25": 227224.5,
+      "min": 103015,
+      "max": 1002557,
+      "sd": 223365.777338,
+      "meanMoves": 109.453125,
+      "workPerMove": 4244020.08051,
+      "maximumWork": 51084852,
+      "censoredGames": 0,
+      "gamesAtOrAboveMillion": 1
+    },
+    "d4s5": {
+      "artifact": "runs/RUN-A51D-s7confirm/fresh-s5.json",
+      "sha256": "d6c1dbd403dbf5b477f1b0905b4aa440e443c2dfba8eef29085b7f5bee024d9a",
+      "meanScore": 297327.390625,
+      "median": 260415,
+      "q25": 192352,
+      "min": 86935,
+      "max": 836427,
+      "sd": 150549.557387,
+      "meanMoves": 87.15625,
+      "workPerMove": 1296033.6877,
+      "maximumWork": 3200000,
+      "censoredGames": 0,
+      "gamesAtOrAboveMillion": 0
+    },
+    "d4s7": {
+      "artifact": "runs/RUN-A51D-s7confirm/fresh-s7.json",
+      "sha256": "0c95442620a78ef5a928a4b8cdab9f57b3bdb8a3d7df5fcd1a6d818785bd4209",
+      "meanScore": 398498.234375,
+      "median": 344630.5,
+      "q25": 212864,
+      "meanMoves": 114.65625,
+      "workPerMove": 4956614.26519,
+      "maximumWork": 16000000,
+      "censoredGames": 0
+    },
+    "pairedD3n7m6MinusD4s5": {
+      "n": 64,
+      "meanScoreDelta": 79114.75,
+      "pairedSd": 247112.6017462035,
+      "bootstrapLower95": 29032.510156250002,
+      "bootstrapUpper95": 129721.6796875,
+      "studentTLower95": 27548.45921028449,
+      "studentTQuantile": 1.6694022215079607,
+      "detectionFloor": 50812.5287340631,
+      "winTieLoss": "35-0-29",
+      "firstHalfMeanDelta": 88137.84375,
+      "secondHalfMeanDelta": 70091.65625,
+      "q25Delta": 34872.5,
+      "medianPairedDelta": 32925.5,
+      "minLeaveOneOutMeanDelta": 68506.79,
+      "top5Share": 0.647,
+      "top16Share": 1.34,
+      "meanMovesDelta": 22.296875,
+      "movesBootstrapLower95": 8.671875,
+      "movesStudentTLower95": 8.26642002829516,
+      "numberedClearedDelta": 53.9375,
+      "numberedClearedLower95": 21.140625,
+      "coversRevealedDelta": 31.796875,
+      "coversRevealedLower95": 12.609375,
+      "workRatio": 3.2746217330520397,
+      "bootstrapSeedHex": "0xb0071eaf",
+      "resamples": 20000
+    },
+    "pairedD3n7m6MinusD4s7": {
+      "n": 64,
+      "meanScoreDelta": -22056.09375,
+      "pairedSd": 336763.8339941913,
+      "bootstrapLower95": -92004.89296874999,
+      "bootstrapUpper95": 45490.16406249999,
+      "studentTLower95": -92330.38032418014,
+      "detectionFloor": 69247.06336505558,
+      "winTieLoss": "30-0-34",
+      "firstHalfMeanDelta": -27121.125,
+      "secondHalfMeanDelta": -16991.0625,
+      "q25Delta": 14360.5,
+      "meanMovesDelta": -5.203125,
+      "movesBootstrapLower95": -24.03125,
+      "workRatio": 0.8562336815909792,
+      "finding16PointEstimate": -22056,
+      "finding16BootstrapLower95": -89867
+    }
+  },
+  "gateChecks": [
+    {
+      "criterion": "Both arms are drop7-lifetime-cohort-v1 artifacts covering exactly the same 64 seeds 0xa51d1000-0xa51d103f in order, 0 censored games, 2000-move cap, terminalUtility -1000000, seedLease SEEDLEASE-A51D",
+      "passed": true,
+      "observed": "seed lists identical and in order for d3-n7-m6.json, fresh-s5.json, fresh-s7.json and s5-w000.json; censoredGames 0 in all; maximumMoves 2000; terminalUtility -1000000; seedLease SEEDLEASE-A51D; dataRole exploratory-development-diagnostic. Work bounds differ by design (51,084,852 vs 3,200,000 vs 16,000,000): they are the arms' own budgets, not a scoring setting. fresh-s5.json and s5-w000.json carry identical scores and moves on every game."
+    },
+    {
+      "criterion": "D3 N7M6 minus D4 s5: percentile bootstrap 95% lower bound > 0 AND Student-t 95% lower bound > 0",
+      "passed": true,
+      "observed": "bootstrap LB +29,033, Student-t LB +27,548 (t quantile 1.6694, df 63); mean +79,115; W-T-L 35-0-29; halves +88,138 / +70,092"
+    }
+  ],
+  "perGameArtifact": {
+    "path": "runs/RUN-20260823T191900Z-b9f8f80d/c0/compare-d3n7m6-vs-d4s5.json",
+    "sha256": "332b09dcbbce1a45e703a3eb13130f18a35e2d84c5f5e4c23a7af72b5898e3cc",
+    "recordCount": 64
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260820T080056Z-376ada90.json"
+  ],
+  "artifactManifestRef": "runs/RUN-20260823T191900Z-b9f8f80d/c0/inputs-manifest.json",
+  "limitations": [
+    "Bound computation on already-read development data whose means and sign were published (finding-16, finding-05) before the gate was written; diagnostic, not promotable above public-development on this cohort. A fresh-development replication under a new protocol is required before the +79k is used as anything but a planning prior.",
+    "The two arms were played in different runs (RUN-20260821T035407Z-00483c6c for D3 N7M6; the finding-05 fresh-s5 arm) by different binaries (factored-chance-fair-search vs parameterized-fair-search); the seed lists, move cap, terminal utility and scoring are identical but the pairing is across builds, not within one runner invocation. Engine parity between these families was established separately (finding-09/16 checks; finding-15 engine control), not re-run here.",
+    "Heavy tail: five games carry 64.7% of the summed delta; the bootstrap lower bound sits 0.57 detection floors above zero. 64 games cannot resolve anything below about 50,800.",
+    "The arm does not separate from D4 s7 (-22,056, bounds -92,005 to +45,490), so 'beats D4 s5' does not transfer to 'beats the current best fair comparator'.",
+    "The wrapper pinned at freeze failed to import (module-name collision) and was amended before any output existed; the amendment changed no statistic. The first pinned wrapper hash is retained in expectedArtifacts and the amended hash in amendments."
+  ],
+  "contributionIds": [
+    "CT-20260823T193951Z-84693886"
+  ],
+  "recordedAt": "2026-08-23T19:42:00Z"
+}

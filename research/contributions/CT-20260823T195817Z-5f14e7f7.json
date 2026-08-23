@@ -1,0 +1,43 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260823T195817Z-5f14e7f7",
+  "actor": {
+    "kind": "model",
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": "delegated subagent (Agent tool)"
+  },
+  "level": "L2",
+  "roles": [
+    {
+      "role": "investigation",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Implemented approaches/oracle-curriculum/hpool-d0 (stage D0 of the H-pool program): d0.cpp compiled as a privileged generator (oracle depth-4/beam-128 games, stratified per-game state sampling from move 50, lazy fair-D4 comparator games with exact bucket matching on rise phase / occupancy bin / height bin, fair-D4 columns at O roots) and a separate relabel binary that links no oracle symbol and computes R_fair over 32 domain-separated public futures with fair D1 continuation at horizon 25 plus all-legal-sibling values under common futures; gate.sh (privilege boundary, determinism across runs and thread counts, domain separation, exact mirror invariance, label blindness); analyze.py (tau, halves, flow bands, top-1 rates, 10,000-resample cluster bootstrap seed 0xb0071eaf); run.sh; the D0 run itself.",
+  "theoryIds": [
+    "TH-20260823-hpool-optimistic-states-fair-labels-bb707bc9"
+  ],
+  "experimentIds": [
+    "EX-20260823-hpool-stage-d0-e0ad1c65"
+  ],
+  "runIds": [
+    "RUN-20260823T195750Z-1cb2f9de"
+  ],
+  "artifactPaths": [
+    "approaches/oracle-curriculum/hpool-d0",
+    "runs/RUN-20260823T191900Z-b9f8f80d/d0/d0-result.json",
+    "runs/RUN-20260823T191900Z-b9f8f80d/d0/gates.log"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "gate.sh: ALL GATES PASS on probe seeds 0xa5278000-0xa527810f (symbol-table privilege check, generate determinism t16=t4, relabel determinism t1=t8 across two runs, mirror/metadata/sibling/stream self-test 0 failures, label blindness); researchctl validate"
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-23T19:58:17Z"
+}

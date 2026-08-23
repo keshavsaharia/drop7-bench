@@ -1,0 +1,82 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260823T205143Z-ead14c9d",
+  "theoryIds": [
+    "TH-20260823-hpool-optimistic-states-fair-labels-bb707bc9"
+  ],
+  "experimentId": "EX-20260823-hpool-stage-d0-e0ad1c65",
+  "runIds": [
+    "RUN-20260823T195750Z-1cb2f9de"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "fail",
+  "assessment": "not-supported-as-tested",
+  "evidenceTier": "pilot",
+  "summary": "Stage D0 refuses the H-pool theory on two of its three preregistered criteria. Pool O was 1,984 public states sampled from 64 oracle games (depth 4, beam 128; 63 of 64 games reached the 500-move cap); 1,271 were matched 1:1 to fair-D4 states on exact (rise phase, occupancy/4, max-height/2) buckets over all 256 comparator seeds (match rate 0.641; 713 O states dropped and counted). Under 32 common public futures with fair D1 continuation at horizon 25, oracle-visited boards are only marginally better than matched fair boards: R_fair(O) = 24.783 vs R_fair(F) = 24.520 (difference +0.263 moves, cluster bootstrap 95% [+0.156, +0.367], same positive sign in both origin-game halves). The preregistered transferable fraction is negative, tau = -0.959 (95% cluster interval [-3.069, -0.390]), because its denominator degenerates at this horizon: R_tape(O) = 24.338 vs R_real(F) = 24.611 (94-95% of both realised remainders were capped at 25), so the realised-lifetime gap the fraction was defined against is -0.274 moves rather than positive. Independently of that degeneracy, the action-quality criterion fails outright: the oracle's own column is fair-top-1 at its own roots less often than fair D4's column at the same roots (0.766 vs 0.814 over 1,271 roots, difference -0.049, 95% [-0.069, -0.029]; on the 194 unique-maximum roots 0.268 vs 0.387). Blocked-flow-band fraction over matched O states is 0.0047 (F: 0.026). Per the preregistration the theory is assessed not-supported-as-tested, the pool-comparison follow-on is not registered, and audit-05's H-pool program closes.",
+  "metrics": {
+    "tauPooled": -0.9589619252873423,
+    "tau95ClusterBootstrap": [-3.0691149635037016, -0.38969907407407683],
+    "tauByHalves": {"half0": -0.8357263513513502, "half1": -1.1760912698412607},
+    "R_fair_O": {"mean": 24.782626868607394, "seStates": 0.0365394116951423, "seOriginGames": 0.06331454239427009},
+    "R_fair_F": {"mean": 24.52006294256491, "seStates": 0.04910209443129599, "seOriginGames": 0.17719610895316715},
+    "R_tape_O": {"mean": 24.3375295043273, "seStates": 0.0904100882388793, "seOriginGames": 0.08268346890868698},
+    "R_real_F": {"mean": 24.611329661683715, "seStates": 0.052458333225530805, "seOriginGames": 0.21632593233416397},
+    "fairDifference": 0.26256392604248546,
+    "fairDifference95ClusterBootstrap": [0.156103629976581, 0.36703838174273784],
+    "fairDifferenceByHalves": {"half0": 0.23191406249999957, "half1": 0.3146231422505288},
+    "realisedDifference": -0.2738001573564155,
+    "horizon": 25,
+    "scenariosPerState": 32,
+    "poolSizes": {"oStates": 1984, "oMatched": 1271, "oUnmatched": 713, "matchRate": 0.640625, "fStates": 1271, "oOriginGames": 64, "fOriginGames": 101, "bucketsMatched": 63},
+    "censoring": {"R_tape_O_cappedAt25Fraction": 0.9472856018882769, "R_real_F_cappedAt25Fraction": 0.9425649095200629, "R_fair_O_survivedHorizonFraction": 0.9624065696302124, "R_fair_F_survivedHorizonFraction": 0.9166748623131392, "oracleGamesCensoredAt500": 63, "oracleOriginCensoredStates": 62},
+    "flowBands": {"O_matched_blocked": 0.004720691581432730, "O_all_blocked": 0.003024193548387097, "F_blocked": 0.025963808025177025},
+    "top1AtORoots": {"roots": 1271, "subsampled": false, "oracleColumnTop1Rate": 0.7655389457120377, "fairD4ColumnTop1Rate": 0.8143194335169158, "difference": -0.04878048780487809, "difference95ClusterBootstrap": [-0.06912096168294513, -0.02876480541455162], "oracleEqualsD4ColumnRate": 0.3894571203776554, "uniqueMaximumRoots": 194, "oracleColumnTop1RateStrictRoots": 0.26804123711340205, "fairD4ColumnTop1RateStrictRoots": 0.3865979381443299},
+    "bootstrap": {"method": "cluster bootstrap over O origin games carrying matched F partners", "resamples": 10000, "seed": "0xb0071eaf", "clusters": 64, "sensitivityIndependentClustersTau95": [-9.349648858388628, 5.122830501695676]},
+    "wallSecondsMain": 3132,
+    "oracleGameScoresMeanMoves": 495.0
+  },
+  "gateChecks": [
+    {
+      "criterion": "CHECK gates before any seed is read: privilege boundary (relabel binary links no oracle tape accessor), determinism of R_fair across two runs and thread counts, domain separation of restart streams, mirror invariance of R_fair",
+      "passed": true,
+      "observed": "ALL GATES PASS in runs/RUN-20260823T191900Z-b9f8f80d/d0/gates.log on probe seeds 0xa5278000-0xa527810f: 0 oracle symbols in d0-relabel, generate byte-identical at 16 vs 4 threads, relabel byte-identical at 1 vs 8 threads across two runs, 0 mirror/metadata/sibling/stream failures on 47 probe states (mirror invariance is exact: the restart plays in the canonical frame), label edits changed no relabel byte"
+    },
+    {
+      "criterion": "tau >= 0.25 pooled",
+      "passed": false,
+      "observed": "tau = -0.9590, 95% cluster interval [-3.0691, -0.3897]; denominator R_tape(O)-R_real(F) = -0.274 moves is degenerate at horizon 25 (94-95% of both realised remainders capped) while the numerator R_fair(O)-R_fair(F) = +0.263 [+0.156, +0.367]"
+    },
+    {
+      "criterion": "sign of R_fair(O) - R_fair(F) agrees in both origin-game halves",
+      "passed": true,
+      "observed": "half 0 (games 0-31): +0.2319; half 1 (games 32-63): +0.3146; both positive"
+    },
+    {
+      "criterion": "oracle-column fair-top-1 rate at O roots >= fair-D4-column fair-top-1 rate at the same roots",
+      "passed": false,
+      "observed": "oracle 0.7655 vs fair D4 0.8143 over all 1,271 matched O roots under the same 32 common futures (no subsampling; ties count for every tied column); difference -0.0488, 95% cluster interval [-0.0691, -0.0288]; strict-maximum roots only: 0.268 vs 0.387"
+    }
+  ],
+  "perGameArtifact": {
+    "path": "runs/RUN-20260823T191900Z-b9f8f80d/d0/pools.json",
+    "sha256": "257dadcc26611e593350f1498a7dfce3fe476f9f208d801d1b5a69bdc6312d39",
+    "recordCount": 3255
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260820T080056Z-376ada90.json"
+  ],
+  "artifactManifestRef": "runs/RUN-20260823T191900Z-b9f8f80d/d0/d0-result.json",
+  "limitations": [
+    "The preregistered tau is ill-conditioned as measured: with 63 of 64 oracle games censored at the 500-move cap and comparator states drawn from the same shape buckets, both realised remainders sit at the 25-move horizon cap (R_tape(O) 24.34, R_real(F) 24.61, 94-95% capped), so the denominator is -0.274 moves instead of the large positive gap the definition assumed. The tau < 0.25 refusal is therefore driven by a degenerate denominator, not by a negative numerator; the numerator (the fair-value advantage of oracle boards) is positive but small, +0.263 moves on a 25-move horizon.",
+    "The fair-top-1 criterion is unaffected by that degeneracy and fails on its own: the oracle's action is fair-best at its own roots significantly less often than fair D4's action at the same roots.",
+    "Match rate 0.641: the 713 dropped O states skew toward buckets fair D4 rarely visits (matched O states are shape-matched by construction), so the numerator is a lower bound on the raw O-vs-F fair-value difference over all oracle states, and the comparison is conditional on shape overlap as preregistered.",
+    "R_fair uses a fixed public D1 continuation and horizon 25 with 32 futures; 92-96% of futures survive the horizon, so both pools are near the measurement ceiling and the +0.263 difference is compressed by censoring at both ends.",
+    "F origin games contribute clustered states (mean 12.6 matched states over 101 of 256 games); uncertainty uses cluster bootstrap over O origin games carrying matched partners, with the independent-clusters sensitivity interval also recorded (it is much wider: [-9.35, +5.12]).",
+    "Diagnostic tier (CHECK): no gameplay evidence and no policy claim; training-role seeds only, opened once."
+  ],
+  "contributionIds": [
+    "CT-20260823T195817Z-5f14e7f7"
+  ],
+  "recordedAt": "2026-08-23T20:51:43Z"
+}

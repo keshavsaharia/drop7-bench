@@ -1,15 +1,15 @@
 ---
 date: 2026-08-23
 title: The reveal the search leaves on the table
-summary: "The owner's two strategic hypotheses became one structural leaf term; the corpus said it does not predict life, the depth-4 policy leaves 60% of such setups uncollected, and in play the term changed one decision in fifty without adding a single reveal."
+summary: "Morning: the owner's two strategic hypotheses became one structural leaf term that failed its corpus gate and its screen. Evening: a six-brief Kimi drafting fleet, two preregistered cheap experiments (both decisive negatives: no leaf-cost NNUE holds D4's ordering, and the oracle's boards carry no transferable fair value), one retained positive bound (D3 N7M6 beats D4 s5, LB +29,033), and the console learned to draw its own evidence."
 contributors:
   - claude-fable-5 (Claude Code)
   - kimi-k3 (OpenCode)
 tags: [leaf, reveals, chains, corpus-gate, screen, strategy]
 outcomes:
-  positive: 0
-  negative: 2
-  open: 1
+  positive: 1
+  negative: 4
+  open: 2
 ---
 
 The owner brought two hypotheses from watching the search play. First, a
@@ -143,4 +143,88 @@ policy per tape; if it sustains under about 2.25 clears per move, the
 million-point mean is very likely out of reach under these semantics, and
 saying so with a measured bound becomes the program's most valuable result.
 Both are owner-level direction calls and were not started.
+</Direction>
+
+## Evening: a drafting fleet and three cheap answers
+
+The owner widened the directive: keep advancing the learned-model program, with
+Kimi K3 doing the long-horizon design work, toward either depth-3 search with an
+NNUE evaluator or a from-scratch network that reads the board and chooses the
+move. Six Kimi briefs ran in parallel from a coordinator survey of every learned
+attempt in the repository: the main corpus-and-target redesign, a D3+NNUE
+program, a direct-policy program, theory drafts for the remaining open items, a
+sweep for genuinely untried directions, and a figure plan for the documentation.
+The engineering digest that grounded them (runs/RUN-20260823T191900Z-b9f8f80d/substrate-map.md)
+corrected the coordinator's own plan before it ran: the per-rise hazard vector
+is *already* a trained head of the learned leaf, and the sibling panel carries
+only a one-move label per sibling, so the naive "turn the panel on and refit"
+experiment would have measured nothing new.
+
+Kimi's open-items ranking put two nearly free experiments first, and both ran
+to completion tonight.
+
+<Finding title="No leaf-affordable NNUE holds D4's ordering" kind="negative" metric="top-1 0.30 vs gate 0.60">
+The NNUE d4q ordering probe (EX-20260823-nnue-d4q-ordering-probe-0ca09bb1,
+RS-20260823T194142Z-946e3cd1) trained the 572k-parameter, 1.27 µs LeafNet
+architecture directly on the existing successor-closed exact-D4 sibling values
+with a within-root listwise loss, five initialisation seeds, whole-origin
+splits. Held-out top-1 was 0.296/0.301 by half-fold — below the 3.4M-parameter
+CNN's 0.375 and exact D1's 0.486, against a 0.60 gate. Total cost 166 seconds.
+The search-guided self-play loop's drafted form (evaluator as the search leaf)
+is now blocked by evidence at both model scales; any revival is root-prior
+shaped, or needs a different architecture class at leaf cost.
+</Finding>
+
+<Finding title="The oracle's boards are not better boards" kind="negative" metric="tau = -0.96; top-1 76.6% vs 81.4%">
+Stage D0 (EX-20260823-hpool-stage-d0-e0ad1c65, RS-20260823T205143Z-ead14c9d)
+finally measured the number audit-05 called the crux of the optimistic-
+curriculum idea: the fair-relabelled value of oracle-visited states. On a fresh
+training lease (0xa52e0000), 1,984 oracle states matched 1:1 to fair-D4 states
+on phase, occupancy and height, 32 public futures each: the transferable
+fraction came out negative (tau = −0.959, interval [−3.069, −0.390]), with the
+honest caveat that the denominator degenerated — 63 of 64 oracle games hit the
+500-move cap. The criterion the cap cannot excuse also failed: at the oracle's
+own roots, under fair futures, the oracle's chosen column is top-1 less often
+(76.6%) than fair D4's choice at the same board (81.4%). Optimism lives in the
+tape, not the board. The H-pool program closes as preregistered.
+</Finding>
+
+<Finding title="Depth 3 with the full reveal quadrature beats D4 s5, now with a bound" kind="positive" metric="+79,115, LB +29,033">
+The free reanalysis Kimi's D3 program listed as C0
+(EX-20260823-d3n7m6-vs-d4s5-paired-reanalysis-ea66f4ec,
+RS-20260823T194200Z-42b113db) computed the paired bound the +79,115 point
+estimate never had: D3 N7M6 minus D4 s5 on the shared 64-game cohort is
+lower-bound positive (+29,033 bootstrap, +27,548 Student-t, W-T-L 35-0-29,
+both halves positive), and against D4 s7 it is a wash at 0.86x the work.
+Already-read cohort, so diagnostic tier — but it is the first retained
+lower-bound-positive paired contrast for a non-default configuration, and it
+reprices the D3+NNUE program's fallback (T5a/T5b: absorb the disc quadrature,
+keep the reveal quadrature) as the strongest live route.
+</Finding>
+
+<Direction title="What Kimi's drafting fleet concluded" status="proposed" owner="kimi-k3 (OpenCode)">
+The D3+NNUE program (kimi-k3-d3-nnue-program.md) puts its mass on the exact
+control T5a — collapse the leaf-ply disc loop closed-form, D4-s7-shaped
+strength at 0.82x D4 s5 work, prior 0.50 — and stages everything to be killable
+offline. The direct-policy program (kimi-k3-direct-policy-program.md) settles
+the recurrence question: the public state is Markov, a cross-move hidden state
+is illegal as the protocol is written, and what memory would buy is amortised
+computation, which per-decision attention can supply legally; its recommended
+first rung is a sibling-set transformer scored offline. The unexplored-space
+sweep (kimi-k3-unexplored.md) cut ten of thirteen candidate directions as
+already tried and kept three, led by a half-hour board-clear accounting
+measurement. The evening's two negatives sharpen all three documents: the
+set-ranker probe is now the only untried route to a D4-ordering student.
+</Direction>
+
+<Direction title="The console learned to draw its own evidence" status="running" owner="claude-fable-5 (Claude Code), kimi-k3 (OpenCode)">
+A provenance-checked SVG figure toolchain landed in the web console: every
+chart point must name the record it came from or the generator refuses to
+render it, docs pages embed figures with a fenced block, and hover popovers
+carry values, bounds, n and the source record. Kimi authored twelve chart
+specs from the figure plan — resolving two number drifts in status.md's favor
+of the records, including the +26,605/+26,468 discrepancy — and five hand-drawn
+mechanism diagrams (sibling extrapolation, the two-hit reveal rule, strategy
+fusion, the occupancy fixed point, the information ladder). The dense prose
+these figures replace is being condensed next.
 </Direction>

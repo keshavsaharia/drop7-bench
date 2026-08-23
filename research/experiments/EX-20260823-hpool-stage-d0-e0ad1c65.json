@@ -1,0 +1,84 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260823-hpool-stage-d0-e0ad1c65",
+  "theoryIds": [
+    "TH-20260823-hpool-optimistic-states-fair-labels-bb707bc9"
+  ],
+  "title": "Stage D0: fair relabelling of oracle-visited vs matched fair-D4 public states",
+  "classification": "diagnostic",
+  "hypothesis": "Generate 64 perfect-information-oracle games (approaches/oracle-curriculum/perfect-information-oracle semantics as implemented in approaches/oracle-curriculum/state-curriculum/oracle-curriculum.cpp: depth 4, beam 128, 500-move cap, corrected 17,000-point Hardcore scoring) on the fresh training lease 0xa52e0000-0xa52e003f and sample public states from move 50 onward to form pool O (target 2,000 states, capped by availability). Generate fair-D4 (reference, five strata) games on 0xa52e0100-0xa52e01ff and sample public states from move 50 onward to form pool F, matched 1:1 to O on rise phase, occupancy and maximum height (exact-match buckets as in approaches/oracle-curriculum/topology/oracle-topology-audit.cpp; unmatched O states are dropped and counted). Every state is reduced to the public tuple (board, next disc, moves-until-rise) before any label is computed. For each state compute R_fair = mean remaining moves over K=32 independent public futures derived from the public-state hash (domain-separated streams as in oracle-curriculum.cpp, never from the seed) under a fixed public depth-1 fair continuation with horizon 25 (moves capped at 25 count as 25, censor flag kept), and R_tape/R_real = the realised remaining moves on the state's own trajectory capped at the same horizon. Report R_fair(O), R_fair(F), R_tape(O), R_real(F), tau = (R_fair(O)-R_fair(F))/(R_tape(O)-R_real(F)), by origin-game split halves, plus the kBlocked flow-band fraction over O, and at every O root the fair-top-1 rate (under the same 32 common futures over all legal columns) of the oracle's column versus fair D4's column at that root.",
+  "candidate": {
+    "name": "oracle-curriculum state pool relabelled under public randomness",
+    "entryPoint": null,
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "fair-d4 matched state pool",
+    "entryPoint": "approaches/fair-expectimax/reference/fair-only-depth4.cpp",
+    "manifestRef": null
+  },
+  "informationBoundary": "privileged-teacher",
+  "benchmarkTier": "CHECK",
+  "data": {
+    "role": "no-gameplay",
+    "seedLeaseRefs": [
+      "SL-20260823T200000Z-a52e0000"
+    ],
+    "datasetRefs": [],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "Role: training-data generation, no evaluation gameplay. Opens the new training-role lease 0xa52e0000-0xa52e01ff (oracle games 0xa52e0000-0xa52e003f, fair-D4 games 0xa52e0100-0xa52e01ff) exactly once. Seeds are privileged inputs to the oracle generator only; every exported state is public. No development, protected or final seed is read. The range appears nowhere in the tree (grep of 0xa52e on 2026-08-23) and lies inside the SEEDLEASE-A52 reserve 0xa5278000-0xa52fffff."
+  },
+  "metrics": {
+    "primary": "tau = (R_fair(O) - R_fair(F)) / (R_tape(O) - R_real(F)), pooled",
+    "secondary": [
+      "R_fair(O), R_fair(F), R_tape(O), R_real(F) with standard errors over states and over origin games",
+      "tau by origin-game halves",
+      "kBlocked flow-band fraction over O and F",
+      "oracle-column fair-top-1 rate vs fair-D4-column fair-top-1 rate at O roots (common futures)",
+      "pool sizes, match rate, censoring rate at horizon 25"
+    ],
+    "statisticalUnit": "whole-origin",
+    "uncertaintyMethod": "cluster bootstrap over origin games, 10,000 resamples, seed 0xb0071eaf, two-sided 95% interval for tau"
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "CHECK gates before any seed is read: public-state constructor privilege boundary (the relabel binary links no oracle tape accessor), determinism of R_fair across two runs and across thread counts, domain separation of restart streams, mirror invariance of R_fair within floating tolerance.",
+      "tau >= 0.25 pooled.",
+      "Sign of R_fair(O) - R_fair(F) agrees in both origin-game halves.",
+      "Oracle-column fair-top-1 rate at O roots >= fair-D4-column fair-top-1 rate at the same roots."
+    ],
+    "failureAction": "Record valid + fail at CHECK tier; assess the theory not-supported-as-tested; the optimistic-state pool follow-on is not registered; audit-05's H-pool program closes.",
+    "passAction": "Record valid + pass at CHECK tier (diagnostic); register the pool-comparison follow-on (fair / optimistic / mixed pools with fair labels, 5 init seeds each) as a successor experiment. No policy claim."
+  },
+  "resources": {
+    "wallSeconds": 7200,
+    "cpuThreads": 16,
+    "maxHostBytes": 8589934592,
+    "maxGpuBytes": null,
+    "gpuDevices": []
+  },
+  "stopConditions": [
+    "Stop on any privilege-boundary, determinism or domain-separation gate failure before seeds are read.",
+    "Stop at 7,200 wall-seconds; a partial pool is recorded partial and tau is not evaluated.",
+    "If fewer than 500 matched O states are obtained, record partial (underpowered) and do not evaluate the gate.",
+    "Runs with at most 16 threads so it may share the host with the figure build and Kimi agents; no timing claim."
+  ],
+  "expectedArtifacts": [
+    "runs/RUN-20260823T191900Z-b9f8f80d/kimi-k3-open-items.md (design K4-B, Kimi K3)",
+    "runs/RUN-20260823T191900Z-b9f8f80d/d0/gates.log",
+    "runs/RUN-20260823T191900Z-b9f8f80d/d0/pools.json (O and F public states with labels)",
+    "runs/RUN-20260823T191900Z-b9f8f80d/d0/d0-result.json"
+  ],
+  "lifecycle": "completed",
+  "protocolSha256": "2cd947289dbdbdb16a3aa12ded8e93ccd0efbab594f78bb81706ed947a46e752",
+  "amendments": [],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": null
+  },
+  "createdAt": "2026-08-23T19:30:08Z",
+  "updatedAt": "2026-08-23T20:55:00Z"
+}

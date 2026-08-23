@@ -1,0 +1,51 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260823T195750Z-1cb2f9de",
+  "experimentId": "EX-20260823-hpool-stage-d0-e0ad1c65",
+  "lifecycle": "completed",
+  "runValidity": "valid",
+  "startedAt": "2026-08-23T19:57:50Z",
+  "endedAt": "2026-08-23T20:50:15Z",
+  "protocolSha256": "e47b4edd05882a58e9aa9ef433bb6f7ecb61c3a40a0bf6abc8d050b5c6b322a9",
+  "machineProfileRef": "research/system-profiles/MACH-20260820T080056Z-376ada90.json",
+  "sourceState": {
+    "gitCommit": "be0c3fdfc875b23c40016942b18b8421df8959a2",
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "gates (before the lease was opened, probe seeds 0xa5278000-0xa527810f only): approaches/oracle-curriculum/hpool-d0/gate.sh runs/RUN-20260823T191900Z-b9f8f80d/d0 -> ALL GATES PASS (privilege-boundary symbol table, generate determinism 16 vs 4 threads byte-identical, relabel determinism 1 vs 8 threads across two runs byte-identical, mirror/metadata/sibling/stream self-test 0 failures on 47 probe states, label blindness)",
+    "main: approaches/oracle-curriculum/hpool-d0/run.sh runs/RUN-20260823T191900Z-b9f8f80d/d0 16 (d0-generate: 64 oracle games 0xa52e0000-0xa52e003f depth 4 beam 128 cap 500, 1,984 O states sampled 31/game from move 50; fair-D4 columns at all 1,984 O roots; 256 fair-D4 reference games 0xa52e0100-0xa52e01ff in 16 fixed batches, 1,271 F states matched 1:1 on (rise phase, occupancy/4, maxHeight/2), 713 O states unmatched and dropped; d0-relabel: R_fair over 32 domain-separated public futures, fair D1 continuation, horizon 25, all-legal-sibling values under common futures; analyze.py: tau, halves, flow bands, top-1, 10,000-resample cluster bootstrap seed 0xb0071eaf)"
+  ],
+  "seedLeaseRefs": [
+    "SL-20260823T200000Z-a52e0000"
+  ],
+  "resourceLimits": {
+    "wallSeconds": 7200,
+    "cpuThreads": 16,
+    "maxHostBytes": 8589934592,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": 3132,
+    "cpuSeconds": null,
+    "peakHostBytes": 151523328,
+    "peakGpuBytes": null,
+    "measurementNotes": "Main run 2026-08-23T19:57:50Z-20:50:15Z on 16 threads (generate 3,065 s at peak RSS 151.5 MB, relabel 64 s at peak RSS 6.4 MB, analysis 3 s); host shared with other agent sessions, no timing claim. Gates ran 19:52-19:57 on probe seeds before the lease was opened."
+  },
+  "exitCode": 0,
+  "stopReason": "completed: every fair seed consumed (256/256) with 1,271 of 1,984 O states matched (above the 500-matched floor); no wall or RSS stop",
+  "artifactRefs": [
+    "runs/RUN-20260823T191900Z-b9f8f80d/d0/gates.log",
+    "runs/RUN-20260823T191900Z-b9f8f80d/d0/run.log",
+    "runs/RUN-20260823T191900Z-b9f8f80d/d0/records.jsonl",
+    "runs/RUN-20260823T191900Z-b9f8f80d/d0/generate-summary.json",
+    "runs/RUN-20260823T191900Z-b9f8f80d/d0/pools.json",
+    "runs/RUN-20260823T191900Z-b9f8f80d/d0/d0-result.json"
+  ],
+  "contributionIds": [
+    "CT-20260823T195817Z-5f14e7f7"
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "$schema": "../schemas/seed-lease-v1.schema.json",
+  "format": "drop7-seed-lease-v1",
+  "seedLeaseId": "SL-20260823T200000Z-a52e0000",
+  "experimentId": "EX-20260823-hpool-stage-d0-e0ad1c65",
+  "rngAlgorithm": "mulberry32 with mix32 domain separation (src/core/native/engine.hpp); oracle generator and fair-D4 reference as in approaches/oracle-curriculum/state-curriculum/oracle-curriculum.cpp and approaches/fair-expectimax/reference/fair-only-depth4.cpp",
+  "domain": "environment",
+  "role": "training",
+  "rangeStartHex": "0xa52e0000",
+  "rangeEndExclusiveHex": "0xa52e0200",
+  "cohortManifestSha256": null,
+  "state": "opened",
+  "reservedAt": "2026-08-23T19:32:13Z",
+  "openedAt": "2026-08-23T19:57:30Z",
+  "closedAt": "2026-08-23T20:50:15Z",
+  "protocolSha256": "e47b4edd05882a58e9aa9ef433bb6f7ecb61c3a40a0bf6abc8d050b5c6b322a9",
+  "runIds": [
+    "RUN-20260823T195750Z-1cb2f9de"
+  ],
+  "notes": [
+    "Conservative import: grep of 0xa52e over the tree on 2026-08-23 found no constant; the range lies inside the SEEDLEASE-A52 reserve 0xa5278000-0xa52fffff after the opened 0xa52d0200 lease.",
+    "0xa52e0000-0xa52e003f: 64 oracle games (privileged generator, public states exported). 0xa52e0100-0xa52e01ff: fair-D4 games for the matched pool. Training role: once read, never evaluation data.",
+    "Opened 2026-08-23T19:57:30Z and fully read by RUN-20260823T195750Z-1cb2f9de (all 64 oracle seeds and all 256 fair-D4 seeds); closed 2026-08-23T20:50:15Z. Training role: this range is never evaluation data."
+  ]
+}

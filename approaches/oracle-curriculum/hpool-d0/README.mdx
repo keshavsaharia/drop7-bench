@@ -1,0 +1,191 @@
+---
+title: "Stage D0: the fair value of oracle-visited boards"
+family: oracle-curriculum
+summary: Measures whether the boards a clairvoyant oracle chooses to stand on are still good boards when the future is replaced by ordinary public randomness, by re-valuing them and matched fair-search boards under the same 32 independent public futures.
+status: completed
+evidence: ledger-recorded
+reads: teacher
+---
+
+Measures whether the boards a clairvoyant oracle chooses to stand on are
+still good boards when the future is replaced by ordinary public randomness,
+by re-valuing them and matched fair-search boards under the same 32
+independent public futures.
+
+<EvidenceLabel status="completed" evidence="ledger-recorded" reads="teacher" />
+
+## The intuition
+
+The [oracle](/learn/glossary) sees the whole future: every hidden gray-disc
+value and every disc it will be dealt. Its games last far longer than any
+fair policy's. The open question of the oracle-curriculum family (stated as
+"the single missing measurement" in `docs/exploratory/audit-05-optimistic-curriculum.md`
+§5.4) is *why*: does the oracle survive because it builds genuinely better
+boards, or because it knows the tape and threads a needle no public player
+could see?
+
+The two explanations dictate opposite research programs. If the boards are
+genuinely better, a student can be trained on them with honest labels — the
+H-pool idea. If the advantage is the tape, those boards teach nothing
+transferable and the program should close.
+
+Stage D0 separates the two by a controlled measurement, with no model and no
+training:
+
+1. Take boards the oracle actually stood on (pool **O**).
+2. Take boards a [fair depth-4 search](/learn/concepts/expectimax) stood on,
+   matched to pool O on rise phase, occupancy and maximum height (pool **F**),
+   so the comparison is between boards of the same coarse shape.
+3. Strip both to public information only, then re-value every board the same
+   way: play 25 further moves with a fixed public depth-1 fair policy under
+   32 independent futures derived (through domain-separated hash streams)
+   from the board itself — never from the game's seed. The mean number of
+   moves survived is the board's **fair value**, `R_fair`.
+
+If oracle boards are better boards, `R_fair(O)` should exceed `R_fair(F)` by
+a sizable fraction of the realised-lifetime gap the oracle actually enjoyed.
+That fraction is the transferable fraction
+
+> τ = (R_fair(O) − R_fair(F)) / (R_tape(O) − R_real(F)),
+
+where `R_tape`/`R_real` are the remaining moves each board actually had on
+its own trajectory, both capped at the same 25-move horizon.
+
+## How it works
+
+The implementation reuses the repository's frozen machinery rather than
+rewriting it; `d0.cpp` builds into two binaries so that the privilege
+boundary is enforced by the linker, not by discipline.
+
+1. **`d0-generate`** (privileged, teacher-side) plays 64 oracle games
+   (depth 4, beam 128, 500-move cap — the constants of
+   `approaches/oracle-curriculum/state-curriculum/oracle-curriculum.cpp`) on
+   the leased training seeds `0xa52e0000–0xa52e003f`, and samples up to 31
+   public states per game from move 50 onward — one from each of 31 equal
+   stretches of the game, with a seed-keyed offset inside each stretch so the
+   sample cannot alias with the five-move rise cadence. Each state is
+   exported as the public tuple (board, next disc, moves until rise) plus
+   labels: the oracle's column, fair D4's column at the same root (a public
+   computation), and the realised remaining moves.
+2. The same binary then plays fair-D4 reference games
+   (`approaches/fair-expectimax/reference/fair-only-depth4.cpp`: depth 4,
+   five strata) on `0xa52e0100–0xa52e01ff`, lazily in fixed batches of 16
+   seeds, and matches their post-move-50 states 1:1 to pool O on the exact
+   bucket (rise phase, occupancy ÷ 4, maximum height ÷ 2) — the binning of
+   `approaches/oracle-curriculum/topology/oracle-topology-audit.cpp` — at
+   most two per bucket per game, stopping when every O state is matched or
+   the 256 seeds run out. Unmatched O states are dropped and counted.
+3. **`d0-relabel`** (public-only; its symbol table is checked to contain no
+   oracle planner and no headless-tape accessor) reads back only the public
+   tuple of each record and computes `R_fair`: 32 independent restarts at
+   horizon 25 under fair depth-1 continuation, with reveal and visible-disc
+   streams drawn from the domain-separated `"CRRV"`/`"CRVS"` streams of
+   `oracle-curriculum.cpp`, seeded from the canonical public-state hash. It
+   also values **every legal first column** of every O root under the same 32
+   futures (common random numbers), which gives the fair-top-1 comparison:
+   how often the oracle's column is fair-best at its own roots versus how
+   often fair D4's column is.
+4. **`analyze.py`** computes τ, the four R numbers, origin-game halves, the
+   `kBlocked` flow-band fraction, the top-1 rates, and a 10,000-resample
+   cluster bootstrap over origin games (seed `0xb0071eaf`).
+
+Two deliberate differences from the original curriculum relabeller, both
+visible in `d0.cpp`'s header comment: K = 32 scenarios instead of 7, and the
+restart is played in the canonical mirror orientation at every step, which
+makes `R_fair` of a board and of its mirror image equal exactly rather than
+approximately.
+
+The CHECK gates (`gate.sh`) run before any leased seed is read, on the
+already-opened probe range `0xa5278000–0xa52784ff` only: the symbol-table
+privilege check, byte-identical generation at 4 and 16 threads,
+byte-identical relabelling across two runs and thread counts, exact mirror
+invariance, metadata independence (score, level and move counter cannot
+change any restart), domain separation of the streams, and label blindness
+(editing every label field in the input changes no relabel output byte).
+
+## What happened
+
+The measurement came back against the idea, and the H-pool program closed.
+On the same 32 public futures, the boards the oracle stood on were only about
+a quarter of a move better than matched fair-search boards over a 25-move
+lookahead — and the oracle's own choice of column at those boards was fair-best
+*less* often than the fair search's choice at the very same boards. Boards the
+oracle reaches are fine boards; its moves from them are tape-reading, not
+transferable judgement.
+
+All numbers below are from the result record
+`RS-20260823T205143Z-ead14c9d` (run `RUN-20260823T195750Z-1cb2f9de`).
+
+- Pool O: 1,984 states from 64 oracle games (63 of 64 reached the 500-move
+  cap). Pool F: 1,271 matched states from all 256 fair-D4 games (match rate
+  0.641; 713 O states from buckets fair D4 rarely visits were dropped, as
+  preregistered).
+- `R_fair(O)` = 24.783 vs `R_fair(F)` = 24.520: a fair-value advantage of
+  +0.263 moves (cluster bootstrap 95% [+0.156, +0.367]), the same positive
+  sign in both origin-game halves — real, but small, and compressed by the
+  25-move ceiling (92–96% of futures survive the horizon).
+- `R_tape(O)` = 24.338 vs `R_real(F)` = 24.611: with almost every oracle game
+  censored at the 500-move cap, 94–95% of both realised remainders sat at the
+  25-move cap, so the realised-lifetime gap the preregistered τ divides by
+  came out at −0.274 moves instead of the large positive gap the definition
+  assumed. τ = −0.959 (95% [−3.069, −0.390]) — a **fail** against the
+  preregistered τ ≥ 0.25 gate, though a fail driven by a degenerate
+  denominator rather than by a negative fair-value difference; the result
+  record states this limitation explicitly.
+- The action-quality criterion failed on its own, unaffected by the ceiling:
+  the oracle's column was fair-top-1 at its own roots 76.6% of the time
+  against fair D4's 81.4% at the same roots (difference −0.049,
+  95% [−0.069, −0.029]; on the 194 roots with a unique best column, 26.8%
+  vs 38.7%).
+- Under fair randomness almost no oracle board is a trap: 0.5% of matched O
+  states fall in the `blocked` flow band (F: 2.6%).
+
+<TechnicalDetails title="Run record">
+
+Preregistration `EX-20260823-hpool-stage-d0-e0ad1c65` (CHECK tier,
+diagnostic), theory `TH-20260823-hpool-optimistic-states-fair-labels-bb707bc9`,
+lease `SL-20260823T200000Z-a52e0000` (training role, 0xa52e0000–0xa52e01ff,
+opened once). Gates passed before the lease was opened
+(`runs/RUN-20260823T191900Z-b9f8f80d/d0/gates.log`); main run 3,132 wall-
+seconds on 16 threads, peak RSS 152 MB, artifacts under
+`runs/RUN-20260823T191900Z-b9f8f80d/d0/`. Outcome: run valid, scientific
+outcome fail, theory assessed not-supported-as-tested at pilot tier. Two of
+the three preregistered refusal conditions triggered (τ < 0.25; oracle column
+fair-top-1 less often than D4's); the sign-agreement condition passed.
+
+</TechnicalDetails>
+
+<TechnicalDetails title="Preregistered gate">
+
+Stage D0 refuses the H-pool theory
+(`TH-20260823-hpool-optimistic-states-fair-labels-bb707bc9`) if any of:
+
+- τ < 0.25 pooled;
+- the two origin-game halves of pool O disagree in the sign of
+  `R_fair(O) − R_fair(F)`;
+- the oracle's column is fair-top-1 at O roots less often than fair D4's
+  column at the same roots.
+
+A refusal closes the optimistic-teacher program; a pass licenses exactly one
+follow-on (the fair / optimistic / mixed pool-comparison experiment), and is
+itself a diagnostic — never a policy claim.
+
+</TechnicalDetails>
+
+## What this taught us / what is still open
+
+The measurement audit-05 called "the single missing measurement" now exists,
+and it says the oracle's advantage lives overwhelmingly in what it does with
+the tape, not in the boards it builds: the fair value of its boards is only
+marginally above matched fair boards, and its actions are worse than fair
+D4's under honest randomness even on its own boards. Per the preregistration,
+no student is trained on the optimistic state pool and the E1 ordering
+ablation is not run.
+
+Still open, and not answered by this experiment: whether the small but real
++0.26-move board-quality edge would grow at a longer relabelling horizon or a
+deeper continuation policy (the 25-move horizon capped both sides of the
+comparison), and whether the 713 unmatched O states — boards whose shapes
+fair D4 never reaches — are better or worse than the matched ones. Both
+questions would need a new preregistration; neither revives the H-pool
+teacher on this evidence.
