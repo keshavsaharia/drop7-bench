@@ -15,6 +15,11 @@ import type {
   ReplayData,
   ReplayFrame,
 } from "@/lib/leaderboard";
+import {
+  buildExplosionScoreBars,
+  explosionPointsForFrame,
+  type ScoreChartAggregation,
+} from "@/lib/competition/score-chart";
 import styles from "./Drop7Game.module.css";
 import { useExplosionPoints } from "./useExplosionPoints";
 
@@ -81,81 +86,165 @@ function stillPresentation(board: string): ReplayPresentation {
 function ScoreChart({
   frames,
   cursor,
+  aggregation,
+  cumulative,
 }: {
   frames: ReplayData["frames"];
   cursor: number;
+  aggregation: ScoreChartAggregation;
+  cumulative: boolean;
 }) {
   const width = 640;
-  const height = 132;
-  const topPadding = 9;
-  const bottomPadding = 10;
-  const maxScore = Math.max(1, ...frames.map((frame) => frame.score));
-  const xAt = (index: number) =>
-    (index / Math.max(1, frames.length - 1)) * width;
-  const yAt = (score: number) =>
-    height -
-    bottomPadding -
-    (score / maxScore) * (height - topPadding - bottomPadding);
-  const points = frames.map(
-    (frame, index) => `${xAt(index)},${yAt(frame.score)}`,
+  const height = 156;
+  const plot = { left: 44, right: 10, top: 10, bottom: 25 };
+  const bars = buildExplosionScoreBars(frames, aggregation, cumulative);
+  const maxPoints = Math.max(1, ...bars.map((bar) => bar.points));
+  const plotWidth = width - plot.left - plot.right;
+  const plotHeight = height - plot.top - plot.bottom;
+  const baseline = height - plot.bottom;
+  const slotWidth = plotWidth / Math.max(1, bars.length);
+  const barGap = Math.min(7, Math.max(1, slotWidth * 0.22));
+  const barWidth = Math.max(1, slotWidth - barGap);
+  const activeMove = frames[cursor]?.move ?? 1;
+  const activeBarIndex = bars.findIndex(
+    (bar) => activeMove >= bar.startMove && activeMove <= bar.endMove,
   );
-  const cursorX = xAt(cursor);
-  const cursorY = yAt(frames[cursor]?.score ?? 0);
+  const roundSpans = bars.reduce<
+    { round: number; start: number; end: number }[]
+  >((spans, bar, index) => {
+    const current = spans.at(-1);
+    if (current?.round === bar.round) {
+      current.end = index + 1;
+    } else {
+      spans.push({ round: bar.round, start: index, end: index + 1 });
+    }
+    return spans;
+  }, []);
+  const yAt = (points: number) =>
+    baseline - (points / maxPoints) * plotHeight;
+  const labelEvery = Math.max(1, Math.ceil(roundSpans.length / 8));
+  const ariaMode =
+    aggregation === "move"
+      ? "by move"
+      : cumulative
+        ? "as a running total after each five-move round"
+        : "aggregated by five-move round";
 
   return (
     <svg
       viewBox={`0 0 ${width} ${height}`}
       className="w-full rounded-lg border border-zinc-800 bg-zinc-950"
       role="img"
-      aria-label="Score trajectory over the game"
+      aria-label={`Explosion points ${ariaMode}. Level-rise bonuses excluded.`}
     >
       <defs>
-        <linearGradient id="score-trajectory-fill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.28" />
-          <stop offset="100%" stopColor="#38bdf8" stopOpacity="0" />
-        </linearGradient>
+        <pattern
+          id="replay-round-stripes"
+          width="8"
+          height="8"
+          patternUnits="userSpaceOnUse"
+          patternTransform="rotate(35)"
+        >
+          <line
+            x1="0"
+            y1="0"
+            x2="0"
+            y2="8"
+            stroke="#38bdf8"
+            strokeOpacity="0.09"
+            strokeWidth="3"
+          />
+        </pattern>
       </defs>
-      <polygon
-        points={`0,${height} ${points.join(" ")} ${width},${height}`}
-        fill="url(#score-trajectory-fill)"
-      />
-      {frames.map(
-        (frame, index) =>
-          frame.levelAdvanced && (
-            <line
-              key={index}
-              x1={xAt(index)}
-              y1={0}
-              x2={xAt(index)}
-              y2={height}
-              stroke="#3f3f46"
-              strokeDasharray="3 3"
+      {roundSpans.map((span, index) => {
+        const x = plot.left + span.start * slotWidth;
+        const spanWidth = (span.end - span.start) * slotWidth;
+        return (
+          <g key={span.round}>
+            <rect
+              x={x}
+              y={plot.top}
+              width={spanWidth}
+              height={plotHeight}
+              fill={index % 2 === 0 ? "url(#replay-round-stripes)" : "#fff"}
+              fillOpacity={index % 2 === 0 ? 1 : 0.018}
             />
-          ),
-      )}
-      <polyline
-        points={points.join(" ")}
-        fill="none"
-        stroke="#38bdf8"
-        strokeWidth={2.5}
-        strokeLinejoin="round"
+            {index > 0 && (
+              <line
+                x1={x}
+                y1={plot.top}
+                x2={x}
+                y2={baseline}
+                stroke="#3f3f46"
+                strokeWidth={1}
+              />
+            )}
+            {(index % labelEvery === 0 ||
+              span.start <= activeBarIndex && activeBarIndex < span.end) && (
+              <text
+                x={x + spanWidth / 2}
+                y={height - 8}
+                textAnchor="middle"
+                fill="#71717a"
+                fontSize={9}
+              >
+                R{span.round}
+              </text>
+            )}
+          </g>
+        );
+      })}
+      <line
+        x1={plot.left}
+        y1={baseline}
+        x2={width - plot.right}
+        y2={baseline}
+        stroke="#3f3f46"
       />
       <line
-        x1={cursorX}
-        y1={0}
-        x2={cursorX}
-        y2={height}
-        stroke="#facc15"
-        strokeWidth={1.5}
+        x1={plot.left}
+        y1={plot.top}
+        x2={width - plot.right}
+        y2={plot.top}
+        stroke="#27272a"
+        strokeDasharray="3 4"
       />
-      <circle
-        cx={cursorX}
-        cy={cursorY}
-        r={4.5}
-        fill="#facc15"
-        stroke="#18181b"
-        strokeWidth={2}
-      />
+      <text
+        x={plot.left - 7}
+        y={plot.top + 3}
+        textAnchor="end"
+        fill="#71717a"
+        fontSize={9}
+      >
+        {formatCompactInteger(maxPoints)}
+      </text>
+      <text
+        x={plot.left - 7}
+        y={baseline + 3}
+        textAnchor="end"
+        fill="#52525b"
+        fontSize={9}
+      >
+        0
+      </text>
+      {bars.map((bar, index) => {
+        const x = plot.left + index * slotWidth + barGap / 2;
+        const y = yAt(bar.points);
+        const barHeight = Math.max(bar.points === 0 ? 1 : 2, baseline - y);
+        const active = index === activeBarIndex;
+        return (
+          <rect
+            key={`${bar.startMove}-${bar.endMove}`}
+            x={x}
+            y={baseline - barHeight}
+            width={barWidth}
+            height={barHeight}
+            rx={Math.min(2.5, barWidth / 3)}
+            fill={active ? "#facc15" : "#38bdf8"}
+            fillOpacity={active ? 0.95 : 0.78}
+          />
+        );
+      })}
     </svg>
   );
 }
@@ -180,6 +269,9 @@ export function ReplayPlayer({
     [frames],
   );
   const [animationsEnabled, setAnimationsEnabled] = useState(hasAnimations);
+  const [scoreAggregation, setScoreAggregation] =
+    useState<ScoreChartAggregation>("move");
+  const [cumulativeScore, setCumulativeScore] = useState(false);
   const animationsEnabledRef = useRef(hasAnimations);
   const activeRunRef = useRef<AbortController | null>(null);
   const {
@@ -188,6 +280,18 @@ export function ReplayPlayer({
     clearExplosionPoints,
   } = useExplosionPoints(showExplosionPoints);
   const frame = frames[cursor];
+  const chartBars = useMemo(
+    () =>
+      buildExplosionScoreBars(
+        frames,
+        scoreAggregation,
+        scoreAggregation === "round" && cumulativeScore,
+      ),
+    [cumulativeScore, frames, scoreAggregation],
+  );
+  const activeScoreBar = chartBars.find(
+    (bar) => frame && frame.move >= bar.startMove && frame.move <= bar.endMove,
+  );
 
   const cancelActiveRun = useCallback(() => {
     activeRunRef.current?.abort();
@@ -453,17 +557,90 @@ export function ReplayPlayer({
 
       <aside className="space-y-4">
         <section className="rounded-xl border border-zinc-800 bg-zinc-900/45 p-4">
-          <div className="mb-3 flex items-end justify-between gap-3">
+          <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-zinc-500">
-                Score trajectory
+                Explosion points
               </p>
               <p className="mt-1 font-mono text-lg font-bold tabular-nums text-zinc-50">
-                {formatInteger(frame.score)}
+                {cumulativeScore && scoreAggregation === "round" ? "" : "+"}
+                {formatInteger(
+                  activeScoreBar?.points ?? explosionPointsForFrame(frame),
+                )}
+              </p>
+              <p className="text-[0.65rem] text-zinc-500">
+                {scoreAggregation === "move"
+                  ? `move ${frame.move}`
+                  : `round ${activeScoreBar?.round ?? 1}${
+                      cumulativeScore ? " running total" : " total"
+                    }`}
               </p>
             </div>
+            <div
+              className="inline-flex rounded-lg border border-zinc-700 bg-zinc-950/70 p-0.5 text-[0.65rem] font-bold"
+              role="group"
+              aria-label="Explosion score aggregation"
+            >
+              <button
+                type="button"
+                aria-pressed={scoreAggregation === "move"}
+                onClick={() => setScoreAggregation("move")}
+                className={`rounded-md px-2.5 py-1.5 transition-colors ${
+                  scoreAggregation === "move"
+                    ? "bg-zinc-700 text-zinc-50"
+                    : "text-zinc-500 hover:text-zinc-200"
+                }`}
+              >
+                Each move
+              </button>
+              <button
+                type="button"
+                aria-pressed={scoreAggregation === "round"}
+                onClick={() => setScoreAggregation("round")}
+                className={`rounded-md px-2.5 py-1.5 transition-colors ${
+                  scoreAggregation === "round"
+                    ? "bg-zinc-700 text-zinc-50"
+                    : "text-zinc-500 hover:text-zinc-200"
+                }`}
+              >
+                By round
+              </button>
+            </div>
           </div>
-          <ScoreChart frames={frames} cursor={cursor} />
+          <ScoreChart
+            frames={frames}
+            cursor={cursor}
+            aggregation={scoreAggregation}
+            cumulative={scoreAggregation === "round" && cumulativeScore}
+          />
+          <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 text-[0.65rem] text-zinc-500">
+            <span>Level-rise bonuses excluded · stripes mark 5 moves</span>
+            {scoreAggregation === "round" && (
+              <button
+                type="button"
+                role="switch"
+                aria-checked={cumulativeScore}
+                onClick={() => setCumulativeScore((current) => !current)}
+                className="inline-flex items-center gap-2 rounded-full border border-zinc-700 px-2.5 py-1.5 font-semibold text-zinc-300 hover:border-zinc-500"
+              >
+                <span
+                  aria-hidden="true"
+                  className={`relative h-4 w-7 rounded-full transition-colors ${
+                    cumulativeScore ? "bg-sky-500" : "bg-zinc-700"
+                  }`}
+                >
+                  <span
+                    className={`absolute left-0 top-0.5 size-3 rounded-full bg-white transition-transform ${
+                      cumulativeScore
+                        ? "translate-x-3.5"
+                        : "translate-x-0.5"
+                    }`}
+                  />
+                </span>
+                Running total {cumulativeScore ? "on" : "off"}
+              </button>
+            )}
+          </div>
         </section>
 
         <section className="rounded-xl border border-zinc-800 bg-zinc-900/45 p-4">
@@ -516,6 +693,13 @@ function Metric({
 
 function formatInteger(value: number) {
   return Math.round(value).toLocaleString("en-US");
+}
+
+function formatCompactInteger(value: number) {
+  return Intl.NumberFormat("en-US", {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(Math.round(value));
 }
 
 function waitFor(milliseconds: number, signal: AbortSignal) {
