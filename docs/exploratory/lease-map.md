@@ -43,6 +43,8 @@ constants anywhere in the repository are `0xa511e9b3`, `0xa54ff53a` and
 | `SL-20260822T020000Z-a5290000` | `0xa5290000`–`0xa529ffff` | 65,536 | **training** | leaf-evolution CMA-ES fitness blocks, 32 seeds per generation from `0xa5290000` (at most 40 generations authorised: `0xa5290000`–`0xa52904ff`) | opened |
 | `SL-20260822T020000Z-a52b0000` | `0xa52b0000`–`0xa52b00ff` | 256 | public-development, held-out SCREEN | leaf-evolution held-out paired screen (first 64 seeds, read once after the candidate is frozen); remainder reserved for a replication | reserved |
 | `SL-20260822T060000Z-a52c0000` | `0xa52c0000`–`0xa52c00ff` | 256 | public-development, SCREEN | survival-instinct root-filter screen (first 128 seeds, read once after CHECK gates); remainder reserved for replication | reserved |
+| `SL-20260823T100000Z-a52d0000` | `0xa52d0000`–`0xa52d01ff` | 512 | public-development, SCREEN | reveal-construction leaf screen — corpus gate failed, never opened | cancelled-unopened |
+| `SL-20260823T110000Z-a52d0200` | `0xa52d0200`–`0xa52d03ff` | 512 | public-development, SCREEN | reveal-construction leaf successor screen (first 256 seeds read once: frozen, A900 full; A300, B stopped at 39/36 games); remainder reserved | opened |
 
 Training and evaluation ranges are disjoint by construction: evaluation lives
 under `0xa51d`, training under `0xa52`. No model trained on `SEEDLEASE-A52` has

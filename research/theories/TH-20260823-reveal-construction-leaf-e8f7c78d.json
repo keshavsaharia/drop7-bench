@@ -1,0 +1,29 @@
+{
+  "$schema": "../schemas/theory-v1.schema.json",
+  "format": "drop7-theory-v1",
+  "theoryId": "TH-20260823-reveal-construction-leaf-e8f7c78d",
+  "title": "Reveal construction: pricing the aligned same-wave double hit on a solid gray, and chains that terminate on a cover, raises reveal flow and lifetime",
+  "claim": "Adding to the frozen fair-D4 leaf a term that prices the JOINT same-wave readiness of two support-disjoint numbered neighbours of a solid gray (the cheapest reveal in the game: two hits in one cascade, no cracked intermediate), optionally with a second gray-terminating release step (a chain whose release delivers a hit to a cover) and a danger gate that switches these construction terms off when max height exceeds 4, increases cover reveals per move and mean paired lifetime and score against the unchanged search on fresh development games at depth 4 / seven strata, by more than a 256-game paired cohort's detection floor.",
+  "mechanism": "Owner's hypotheses (2026-08-23): (H2) the search does not try to maximise gray reveals, and lining up a chain reaction that fully exposes a gray disc is especially valuable; (H1) the policy should track discs needing resolution and build long chains when no emergency is pending. Kimi K3's design (runs/RUN-20260823T091530Z-cbe65468/kimi-k3-theory-design.md) locates what is structurally missing rather than mis-weighted: the chance model already enumerates reveals inside the 4-ply horizon and the leaf already pays ~+600 to +5,000 per reveal through cell counts and height relief; every prior reveal arm priced the EVENT (fair-reveal-reward) or the MARGINAL neighbour readiness (t1-exposures, -67,719) and achieved fewer reveals. No term expresses the joint same-wave condition of fast-engine.hpp:349-357 (solid_exposure is best*0.35+second*0.65 of marginals), no term extends latent_chain_potential a second release step, and no sum of linear terms expresses the 'no emergency -> build' product. The term pays for a configuration one move before a reveal, at the horizon boundary, adds no chain-depth incentive (finding-06: chain seeking trades lifetime), and is hard to farm without being one move from a reveal. H1's ledger clause is demoted: the entombed-3..7 count has held-out partial r -0.023 beyond the leaf and the hard action filter changed 1.97% of decisions (RS-20260822T233343Z-12becce9); it survives only as a declared-diagnostic fallback soft penalty.",
+  "falsificationCriteria": [
+    "Seed-free corpus gate (runs/RUN-A51D-corpus/all.states, entombed-discs pipeline, thresholds fixed before the dump is read): the candidate term is killed if its held-out partial correlation with log1p remaining lifetime beyond the 18 leaf features, occupancy and rise clock is below +0.05, or incremental R^2 below 0.005, or prevalence below 5% of positions, or (aligned_double_hit) the fraction of live setups (joint readiness >= 0.5) the depth-4 policy fails to convert into a reveal within 2 moves is below 30%. Gameplay gate: arm A (aligned_double_hit +300) minus frozen on 256 fresh paired games at d4s7 has a one-sided 95% bootstrap or Student-t lower bound at or below zero, or Q25 regression, or opposite-sign halves, or root-argmax coverage below 2% (inconclusive by rarity). Predeclared mechanism directions: reveals/move up, clears/move not down, mean occupancy not up; a score gain with reveals/move flat is not support for this mechanism. Designer's prior stated before the run: P(arm A passes) about 0.15; modal outcome a fourth reveal-pricing null."
+  ],
+  "informationClass": "public-policy",
+  "lifecycle": "assessed",
+  "assessment": "not-supported-as-tested",
+  "evidenceTier": "public-development",
+  "dependencies": [],
+  "evidenceRefs": [
+    "research/results/RS-20260823T131226Z-16564ed9.json",
+    "research/results/RS-20260823T110000Z-baecb816.json",
+    "runs/RUN-20260823T091530Z-cbe65468/kimi-k3-theory-design.md",
+    "runs/RUN-20260823T091530Z-cbe65468/kimi-k3-prereg-review.md"
+  ],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": null
+  },
+  "createdAt": "2026-08-23T09:45:55Z",
+  "updatedAt": "2026-08-23T13:12:26Z"
+}

@@ -1,0 +1,26 @@
+{
+  "$schema": "../schemas/seed-lease-v1.schema.json",
+  "format": "drop7-seed-lease-v1",
+  "seedLeaseId": "SL-20260823T110000Z-a52d0200",
+  "experimentId": "EX-20260823-reveal-construction-screen-v2-63d73b6a",
+  "rngAlgorithm": "mulberry32 with mix32 domain separation (src/core/native/engine.hpp); headless disc stream kNextDiscDomain, reveal stream kRevealDomain; fast engine proven trajectory-identical (finding-13); memo engine bit-identical (audit-06 / fast-engine-memo gate)",
+  "domain": "environment",
+  "role": "public-development",
+  "rangeStartHex": "0xa52d0200",
+  "rangeEndExclusiveHex": "0xa52d0400",
+  "cohortManifestSha256": null,
+  "state": "opened",
+  "reservedAt": "2026-08-23T10:57:49Z",
+  "openedAt": "2026-08-23T11:07:35Z",
+  "closedAt": "2026-08-23T13:12:26Z",
+  "protocolSha256": "3e07540ca5e8cf8fb8f9fc3f0072f635ff01cb91836bf3f19828975c63cd8563",
+  "runIds": [
+    "RUN-20260823T110735Z-ba69c025"
+  ],
+  "notes": [
+    "Conservative import: no 0xa52d**** constant exists in the tree other than the cancelled, never-read predecessor lease 0xa52d0000-0xa52d01ff; this range follows it inside the SEEDLEASE-A52 reserve and the ./do-research allocator pool.",
+    "The first 256 seeds (0xa52d0200-0xa52d02ff) are opened exactly once by the preregistered successor screen after CHECK gates; 0xa52d0300-0xa52d03ff stay reserved for a replication under a successor protocol. Once read, development data forever.",
+    "Opened at 2026-08-23T11:07:35Z by screen run RUN-20260823T110735Z-ba69c025; only 0xa52d0200-0xa52d02ff are read.",
+    "Closed 2026-08-23T13:12:26Z: 0xa52d0200-0xa52d02ff read by frozen, A900 (256 games each) and by A300/B (first 39/36 games); 0xa52d0300-0xa52d03ff unread, reserved."
+  ]
+}

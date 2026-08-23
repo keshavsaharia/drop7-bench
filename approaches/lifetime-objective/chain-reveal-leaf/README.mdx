@@ -1,0 +1,176 @@
+---
+title: Chain-reveal leaf substrate
+family: lifetime-objective
+summary: Adds seven reveal-construction terms (aligned double hit, chain-to-crack, entombed high, and their danger-gated forms) on top of the frozen fair leaf through a memoised, generated search whose zero-weight arm is gated bit-identical to the unchanged search.
+status: completed
+evidence: repository-verified
+reads: public
+---
+
+A place to bolt new scoring terms onto the frozen depth-4 board scorer without
+touching it: the frozen sum is computed first, exactly as before, and each
+extra term is added only when its weight is non-zero, so the all-zero arm is
+the unchanged search and every other arm is a paired, measurable deviation.
+The terms it carries are the reveal-construction terms of
+`EX-20260823-reveal-construction-screen-371fd638`.
+
+<EvidenceLabel status="in-progress" evidence="proposal" reads="public" />
+
+## The seven terms
+
+All are computed from the scratch the frozen extractor has just filled, read
+only the board and the rise clock, and are mirror-invariant. `r[x]` is the
+frozen leaf's per-disc readiness (union of addition and release, the quantity
+behind cover exposure); `rel[x]` is the release readiness alone (the per-disc
+summand of latent chain potential: the disc pops because run-mates leave).
+
+1. `aligned_double_hit` — for each unhit gray, the best support-disjoint pair
+   of orthogonal numbered neighbours scored by `r[a]·r[b]`: the joint
+   readiness of a same-wave double hit, the cheapest reveal in the game.
+2. `chain_to_crack_cracked` — for each cracked gray, the noisy-OR of `rel[d]`
+   over numbered neighbours: a wave will deliver the one hit it needs.
+3. `chain_to_crack_solid` — as term 1 with `rel` in place of `r`.
+4. `entombed_high` — for each numbered disc of value 3–7 whose column is
+   taller than its value and whose row run is longer than its value, `1 − r`.
+5–7. terms 1–3 multiplied by `danger_gate`: 1 at maximum column height ≤ 4,
+   0.5 at height 5, 0 at height ≥ 6.
+
+**Support-disjoint rule** (frozen; the full statement is the header comment
+of `extra-terms.hpp`). A neighbour pair of a gray is skipped when (R1) the two
+are on opposite sides — in one run through the gray — and either one's
+readiness is release-dominated (`release > addition`), since its completion
+then needs a run-mate to leave first, a different wave; or (R2) the two are on
+adjacent sides and their completion paths share a cell, where a completion
+path is the empty cells vertical completion would fill plus the union over all
+minimal-cost horizontal windows (the windows the frozen leaf scans) of the
+cells each would fill. The union over all minimal windows, not the first, is
+what keeps the rule mirror-invariant.
+
+<Callout title="What the corpus gate asks before any seed is opened" tone="info">
+`corpus-dump.cpp` and `corpus-gate.py` compute the 18 frozen features and the
+seven terms for every position of the already-opened training corpus and,
+on the depth-4 subset with the whole-origin split of
+[entombed discs](/approaches/lifetime-objective/entombed-discs), report each
+term's held-out partial correlation with remaining lifetime beyond the frozen
+features, its incremental held-out R², its prevalence, and — for the
+double-hit terms — the uncollected-setup rate: how often a live setup (joint
+readiness ≥ 0.5) is not followed by a reveal of that gray within two moves.
+The thresholds are fixed in the experiment record; only `aligned_double_hit`
+gates the screen.
+</Callout>
+
+## What the substrate is
+
+1. **Extra terms** (`extra-terms.hpp`): `kExtraTerms` named features computed
+   from the board and the rise clock only, using the scratch the frozen
+   extractor has just filled (heights, occupancy masks, numbered and covered
+   bitboards, readiness arrays). The extractor's signature is
+   `(const Board&, int moves_remaining, const LeafScratch&)` — no game state —
+   so a read of score, level, move counter or next disc is unrepresentable,
+   not merely forbidden by comment. Terms must be mirror-invariant.
+2. **Augmented leaf** (`augmented-leaf.hpp`): the one-entry board memo of
+   [Remembering the last board](/approaches/lifetime-objective/fast-engine-memo),
+   keyed on (board, moves until rise), now also holding the extra features.
+   `augmentedFairLeaf` reproduces the memo leaf's frozen dot product in the
+   frozen order, then adds `w[i] * v[i]` for each term whose weight is not
+   exactly zero. Weights parse from `name=value,...`; `describe()` writes the
+   canonical string into artifacts.
+3. **Generated search** (`build.sh`): `AugmentedFastSearch` is
+   `fast-search.hpp` with nine checked substitutions — namespace, class and
+   constructor names, the leaf call, two accessors and two members. The build
+   refuses to proceed unless the diff is exactly 19 lines, the expected
+   strings are present, and the leaf call still sits directly below the
+   search's `++work_` line, so logical work, completed depth and cache
+   behaviour cannot change whatever the weights are.
+4. **Gates** (`gate.cpp`), all on the already-opened probe seeds
+   `0xa5278000`–`0xa52784ff` and refusing any other seed: leaf bit identity at
+   zero weights against `fastFairLeaf` on every board a real search visits
+   (roots and every stratified successor, in the search's own feed order so
+   memo hits are exercised); mirror invariance and memo/fresh agreement of
+   the extra features on those same boards; column, work, node, cache-hit and
+   completed-depth parity of the zero-weight search with `FastSearch` at
+   depth 4 with five and seven strata; thread-count determinism; and, with a
+   non-zero weight, at least one decision that differs from the frozen search
+   (the hook is live), reflection consistency, metadata blindness, completed
+   depth and legality; plus hand-built unit boards for the support-disjoint
+   rule, `entombed_high` and the danger gate.
+5. **Paired runner** (`run.cpp`): repeatable `--arm NAME[:name=value,...]`,
+   every arm on the same ordered seeds, worst-case work bound by default,
+   per-decision completed-depth and legality audit, memo hit rate per arm, and
+   `--shadow`, which runs the unmodified `FastSearch` beside each non-frozen
+   arm at every root and counts `divergentDecisions` — the coverage measure
+   that says how often a weight actually changed a choice. One
+   `drop7-lifetime-cohort-v1` file per arm (readable by
+   `fast-engine/analyze.py summary` and `paired`) plus an index with the arms'
+   weights (canonical and verbatim) and counts; all files are rewritten after
+   every chunk of games so an interrupted run leaves a partial artifact marked
+   `complete: false`. The runner refuses to start without `--seed-lease`, and
+   writes that lease and `--data-role` into every file in place of the shared
+   harness writer's fixed labels, so a cohort cannot be mislabelled by
+   omission.
+6. **Pinned analysis** (`compare.py`): pairs two per-arm files by seed and
+   reports the preregistered statistics — per-arm mean / median / Q25 / min /
+   max, paired deltas, the one-sided 95% percentile bootstrap over whole games
+   (20,000 resamples, the same seed as leaf-evolution's `compare.py`, which it
+   imports), the Student-t lower bound, W-T-L, the detection floor, halves in
+   seed order, flow rates, occupancy, chain depth, and coverage from the arms
+   index. `--first N` restricts to the first N games for the manual stop
+   checks. `screen.sh` is the successor screen's exact command line; the
+   coordinator launches it.
+
+## The equivalence contract
+
+At all-zero weights, `augmentedFairLeaf` returns the same 64-bit pattern as
+`fastFairLeaf`; the search generated around it selects the same column with
+the same work, nodes, cache hits and completed depth as the gated fast search.
+The contract rests on the frozen sum being computed first and the extra
+instructions never being emitted for a zero weight — not on the arithmetic
+identity `x + 0.0 * v == x`. With a non-zero weight nothing about the search
+changes except the leaf value, which is the whole point: any difference between
+arms is attributable to the terms and their weights alone.
+
+## What happened
+
+The seed-free corpus gate rejected the primary term as a predictor of remaining
+lifetime (partial correlation −0.044 beyond the frozen leaf) while finding that
+the depth-4 policy leaves 60% of live same-wave setups uncollected; an
+independent review written before that result argued the value criterion was
+the wrong kill for an action term, so a successor screen tested the term in
+play with the corpus result disclosed. On 256 fresh paired games at depth 4,
+seven strata, the +300 dose changed under 1% of decisions and was stopped at
+the 32-game rarity check; the +900 dose changed 2.08% of decisions and scored
++3,204 points against the unchanged search (bootstrap lower bound −26,860,
+halves +48,762 / −42,354) with reveals per move flat at 1.152 versus 1.154.
+Both gates read **fail**; the term re-ranks one decision in fifty and those
+re-rankings add no reveal flow. The frozen arm of that run is the largest
+fresh-seed seven-stratum fair-D4 cohort on record: 386,545 points and 111.59
+moves over 256 games.
+
+<TechnicalDetails title="The record">
+
+Theory `TH-20260823-reveal-construction-leaf-e8f7c78d` (assessed,
+not-supported-as-tested, public-development). Experiments
+`EX-20260823-reveal-construction-screen-371fd638` (corpus gate, result
+`RS-20260823T110000Z-baecb816`, valid + fail, mechanics-only) and
+`EX-20260823-reveal-construction-screen-v2-63d73b6a` (screen, result
+`RS-20260823T131226Z-16564ed9`, valid + fail, public-development). Runs
+`RUN-20260823T091530Z-cbe65468` (design, blind review, portfolio, CHECK gates,
+corpus gate) and `RUN-20260823T110735Z-ba69c025` (screen; stage-1 four-arm
+partials under `stopped-at-32/`, stage-2 frozen + A900 complete). Lease
+`SL-20260823T110000Z-a52d0200`, first 256 seeds read. Design
+`runs/RUN-20260823T091530Z-cbe65468/kimi-k3-theory-design.md`, review
+`kimi-k3-prereg-review.md`, portfolio `kimi-k3-portfolio.md`. The build guard's
+expected diff count (19) and the probe-seed bound are stated in `build.sh` and
+`gate.cpp`. `reads: public` describes the information class the extra terms
+use; the signature admits only the board, the rise clock and the leaf scratch.
+
+</TechnicalDetails>
+
+## Sources
+
+- `extra-terms.hpp` — the seven frozen terms and the support-disjoint rule
+- `augmented-leaf.hpp` — weights, memo and the augmented leaf
+- `build.sh` — generates `AugmentedFastSearch` from `fast-search.hpp` with a diff guard
+- `gate.cpp`, `run.cpp` — CHECK gates and the multi-arm paired cohort runner
+- `corpus-dump.cpp`, `corpus-gate.py` — the seed-free corpus gate
+- `compare.py`, `screen.sh` — the pinned paired analysis and the screen command

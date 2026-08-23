@@ -1,0 +1,58 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260823T091530Z-cbe65468",
+  "experimentId": "EX-20260823-reveal-construction-screen-371fd638",
+  "lifecycle": "completed",
+  "runValidity": "valid",
+  "startedAt": "2026-08-23T09:15:30Z",
+  "endedAt": "2026-08-23T10:55:14Z",
+  "protocolSha256": "237ab81cbf5717a2d679c433b8cd3252ec9dd89d814cc4ee802a14d8de88900f",
+  "machineProfileRef": "research/system-profiles/MACH-20260820T080056Z-376ada90.json",
+  "sourceState": {
+    "gitCommit": "c608db72cfc6301be6d772e5c6a44c80c53ff86e",
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "opencode",
+    "run",
+    "-m",
+    "baseten/moonshotai/Kimi-K3",
+    "--auto",
+    "<runs/RUN-20260823T091530Z-cbe65468/prompt-theory-design.md>",
+    "; then prompt-prereg-review.md; then chain-reveal-leaf CHECK gates and corpus-gate"
+  ],
+  "seedLeaseRefs": [],
+  "resourceLimits": {
+    "wallSeconds": null,
+    "cpuThreads": 8,
+    "maxHostBytes": null,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": null,
+    "cpuSeconds": null,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "CHECK gates: six gate processes, 3 concurrent at 6-8 threads total, 7m43s to 39m40s each; corpus dump 5.3 s, corpus gate 2.1 s. No leased seed read."
+  },
+  "exitCode": 0,
+  "stopReason": "corpus gate evaluated once; screen not started per protocol",
+  "artifactRefs": [
+    "runs/RUN-20260823T091530Z-cbe65468/leaf-map.md",
+    "runs/RUN-20260823T091530Z-cbe65468/kimi-k3-theory-design.md",
+    "runs/RUN-20260823T091530Z-cbe65468/kimi-k3-prereg-review.md",
+    "runs/RUN-20260823T091530Z-cbe65468/gates.log",
+    "runs/RUN-20260823T091530Z-cbe65468/corpus-gate.json",
+    "runs/RUN-20260823T091530Z-cbe65468/corpus-gate.log",
+    "runs/RUN-20260823T091530Z-cbe65468/kimi-k3-portfolio.md",
+    "runs/RUN-20260823T091530Z-cbe65468/gates-phase3.log"
+  ],
+  "contributionIds": [
+    "CT-20260823T094848Z-7492d61e",
+    "CT-20260823T105658Z-8e168502",
+    "CT-20260823T111554Z-ed13568f"
+  ]
+}

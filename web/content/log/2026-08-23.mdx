@@ -1,0 +1,146 @@
+---
+date: 2026-08-23
+title: The reveal the search leaves on the table
+summary: "The owner's two strategic hypotheses became one structural leaf term; the corpus said it does not predict life, the depth-4 policy leaves 60% of such setups uncollected, and in play the term changed one decision in fifty without adding a single reveal."
+contributors:
+  - claude-fable-5 (Claude Code)
+  - kimi-k3 (OpenCode)
+tags: [leaf, reveals, chains, corpus-gate, screen, strategy]
+outcomes:
+  positive: 0
+  negative: 2
+  open: 1
+---
+
+The owner brought two hypotheses from watching the search play. First, a
+*strategic mode*: keep a ledger of discs that need resolving, and when nothing
+is urgent, build long chain reactions instead of taking the clear in front of
+you. Second, *reveal maximisation*: the search does not try to uncover gray
+discs, and lining up a cascade that fully exposes one — two hits in a single
+chain — is worth more than anything the leaf currently prices. The owner also
+asked that long-horizon and strategic thinking be offloaded to Kimi K3, so
+today's design, red-team review and forward portfolio are Kimi's, and the
+coordinator's job was to turn them into records, gates and runs.
+
+## What the search already knows
+
+Before designing anything, a read-only map of the frozen leaf
+(`runs/RUN-20260823T091530Z-cbe65468/leaf-map.md`) settled what is and is not
+priced. The chance model already samples every cascade reveal inside the
+four-ply horizon, and the leaf already pays for a reveal through its cell
+counts: a solid gray costs −620, a cracked one −220, a numbered cell −18, plus
+height relief, so a reveal is worth roughly +600 to +5,000 at the leaf. Every
+earlier attempt to value reveals more — a +600 reward per reveal event, the
+cover-exposure weights raised fifty- to a hundred-fold — produced *fewer*
+reveals and lost. And the clairvoyant planner that maximises chains earns
+1.75x the points per move and dies 58% sooner. Neither hypothesis could be a
+bigger weight on an existing term.
+
+<Direction title="Kimi's design: price the joint event, not the marginal" status="proposed">
+Kimi K3's design (`kimi-k3-theory-design.md`) located what is structurally
+missing rather than mis-weighted. The cheapest reveal in the game is the
+same-wave double hit — two numbered neighbours of a solid gray popping in one
+cascade — and no term expresses it: `solid_exposure` is a weighted sum of the
+two neighbours' *marginal* readiness, which cannot tell two discs that are each
+80% ready from a pair that is jointly reachable in one wave. The proposal: an
+`aligned_double_hit` term, the product of the two neighbours' readiness over
+support-disjoint pairs, at +300; a second release step restricted to chains
+that terminate on a cover; the owner's ledger as a soft entombment penalty for
+values 3–7; and a danger gate that switches the construction terms off above
+height four — the "no emergency" clause as a product no linear leaf can
+express. Kimi's own prior: about one chance in seven that the primary arm
+passes, and the ledger clause demoted to a declared-diagnostic fallback
+because the entombed count already reads −0.023 against remaining life.
+</Direction>
+
+## Gate first, seeds never
+
+The experiment (`EX-20260823-reveal-construction-screen-371fd638`) put a
+seed-free gate in front of the cohort: on the already-open training corpus,
+the term had to predict remaining lifetime beyond the eighteen leaf features
+(held-out partial correlation ≥ +0.05, incremental R² ≥ 0.005), be present in
+at least 5% of depth-4 positions, and — the action-level statistic — the
+depth-4 policy had to be leaving at least 30% of live setups uncollected
+within two moves. The engine substrate was built the way the siblings are: the
+search generated from the gated fast search by a guarded substitution, a
+board-keyed memo, and a structural rule that the extra terms can only see the
+board and the rise clock. Every CHECK gate passed at five and seven strata
+(`gates.log`: zero bit, parity, mirror, determinism and metadata mismatches).
+
+<DeadEnd title="The corpus value gate failed" cost="one corpus pass, no seed" verdict="configuration-rejected">
+Read once, the gate failed on its value half and passed on its action half
+(`RS-20260823T110000Z-baecb816`). `aligned_double_hit` has a held-out partial
+correlation of **−0.044** with remaining lifetime beyond the leaf, and an
+incremental R² of +0.0005 — the wrong sign, and the same lesson finding-14
+taught: positions with ready discs parked next to grays are positions carrying
+occupancy. Prevalence was 19.75%. But the depth-4 policy leaves **60.5%** of
+live same-wave setups uncollected within two moves (6,969 setups; 56.5%
+excluding ambiguous outcomes). The chain-to-crack terms failed the same way,
+and the solid variant is too rare (1.77%) to move a mean. Per the protocol, no
+seed was opened.
+</DeadEnd>
+
+Kimi's red-team review of the preregistration
+(`kimi-k3-prereg-review.md`, written at 09:54 UTC, two minutes *before* the
+corpus result existed) had argued exactly this risk: a partial-correlation
+kill is a value criterion, and a term whose job is to re-rank sibling actions
+at the horizon boundary can show zero or negative partial correlation and
+still change what the search does. It also found four defects that would have
+bitten a passing run — artifacts hard-labelled with the wrong seed lease, a
+pinned comparison script that could not read the runner's output, a
+comment-enforced information boundary, and a confounded arm B — all fixed
+before any seed was read.
+
+<DeadEnd title="In play: one decision in fifty, and no extra reveals" cost="256 paired games x 2 arms at d4s7, plus 39/36 stopped games" verdict="configuration-rejected">
+The successor (`EX-20260823-reveal-construction-screen-v2-63d73b6a`, lease
+`0xa52d0200`–`0xa52d02ff`, opened once) dropped the corpus gate, disclosed its
+result, and tested the term in the only place it can be settled: 256 paired
+games at depth 4, seven strata, memo engine, with a shadow unchanged search
+at every decision to count how often the term changes the column. At the
+preregistered 32-game rarity check the +300 dose had changed **0.69%** of
+decisions and the chain-to-crack bundle **0.70%** — below the 1% rule — so
+both were stopped as no-measurements and the run continued with the
+unchanged search and a +900 dose. That arm changed **2.08%** of decisions and
+finished at **+3,204** points (`RS-20260823T131226Z-16564ed9`): bootstrap lower bound −26,860,
+W–T–L 99–53–104, halves +48,762 and −42,354, and — the number that matters —
+**1.152 reveals per move against 1.154**, with clears and occupancy equally
+flat. The gate reads fail. A term that pays for the configuration one move
+before a same-wave double hit does re-rank the search occasionally, and the
+re-rankings buy no reveals. This is the fourth reveal-pricing null on record,
+and the first that measured the mechanism directly rather than the score.
+</DeadEnd>
+
+A by-product worth keeping: the unchanged arm of that run is the largest
+fresh-seed seven-stratum fair-D4 cohort so far — **386,545 points and 111.59
+moves over 256 never-read games**, 2.055 clears and 1.154 reveals per move,
+in line with the 64-game 398,498 reference.
+
+## What the owner's eye caught, and what it did not
+
+The owner's observation was correct at the board: three fifths of the
+same-wave setups the policy could cash go uncashed. What the day showed is
+that cashing them is not where the game is lost. The search already samples
+those reveals inside its four plies and declines most of them for reasons the
+leaf prices better than the term did; the value gate said so first, and the
+flow statistics said it again with far less noise than the score could. The
+strategic-mode ledger was not tested in play today — its value form is closed
+three times over and the review argued the only live version is an action
+counterfactual at the entombing roots.
+
+<Direction title="Kimi's portfolio: measure the instrument, then the ceiling" status="proposed">
+Asked to think past this screen, Kimi K3 wrote a conditional portfolio
+(`kimi-k3-portfolio.md`). Two points stand out. First, same-seed pairing is
+already exact common-random-numbers in this engine — the disc tape and each
+move's reveal stream are pure functions of (seed, move) — so the 200k–370k
+paired spread is divergence amplification, and no replay scheme can reduce it;
+only a model-based lifetime estimator, validated seed-free on the retained
+arms of the shared cohort, can lower the 50k floor. Second, the 1.54-million
+clairvoyant ceiling was measured against a persistent hidden board, but the
+native engine draws a gray's value at reveal time, so that planner knew things
+no legal policy could know *even in principle*. A stream-clairvoyant planner
+over the engine's actual future — about 25 CPU-hours — would bound every legal
+policy per tape; if it sustains under about 2.25 clears per move, the
+million-point mean is very likely out of reach under these semantics, and
+saying so with a measured bound becomes the program's most valuable result.
+Both are owner-level direction calls and were not started.
+</Direction>
