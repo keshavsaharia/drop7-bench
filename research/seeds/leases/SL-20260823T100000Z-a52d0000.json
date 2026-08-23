@@ -1,0 +1,23 @@
+{
+  "$schema": "../schemas/seed-lease-v1.schema.json",
+  "format": "drop7-seed-lease-v1",
+  "seedLeaseId": "SL-20260823T100000Z-a52d0000",
+  "experimentId": "EX-20260823-reveal-construction-screen-371fd638",
+  "rngAlgorithm": "mulberry32 with mix32 domain separation (src/core/native/engine.hpp); headless disc stream kNextDiscDomain, reveal stream kRevealDomain; fast engine proven trajectory-identical (finding-13); memo engine bit-identical (audit-06 / fast-engine-memo gate)",
+  "domain": "environment",
+  "role": "public-development",
+  "rangeStartHex": "0xa52d0000",
+  "rangeEndExclusiveHex": "0xa52d0200",
+  "cohortManifestSha256": null,
+  "state": "cancelled-unopened",
+  "reservedAt": "2026-08-23T10:00:00Z",
+  "openedAt": null,
+  "closedAt": "2026-08-23T10:55:14Z",
+  "protocolSha256": null,
+  "runIds": [],
+  "notes": [
+    "Conservative import: no 0xa52d**** constant exists anywhere under docs/, approaches/, src/, research/ or artifacts/ (grep 2026-08-23); the range lies inside the unallocated SEEDLEASE-A52 reserve and inside the ./do-research allocator pool, whose allocator skips every lease record. Highest previously used address was 0xa52c007f; 0xa52c0080-0xa52c00ff remains reserved to the survival-instinct lease.",
+    "The first 256 seeds (0xa52d0000-0xa52d00ff) are opened exactly once by the preregistered screen after the seed-free corpus gate passes; the remaining 256 (0xa52d0100-0xa52d01ff) stay reserved for a replication or the predeclared extension under a successor protocol. Once read, development data forever.",
+    "Cancelled unopened at 2026-08-23T10:55:14Z: the corpus gate failed and the screen was not run. No seed in this range was ever read. A successor experiment takes a new lease starting at 0xa52d0200; this range is not regranted."
+  ]
+}

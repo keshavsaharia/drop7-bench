@@ -146,7 +146,7 @@ run.
   achievable-clear label. Screen at the depth you intend to deploy, or do not
   screen.
 
-## Directions closed by exploratory evidence, 2026-08-20/21
+## Directions closed by exploratory evidence, 2026-08-20/23
 
 Each entry rejects the exact configuration tested, at *development* or *pilot*
 tier. None of them is a proof that the underlying idea is impossible, and each
@@ -156,6 +156,7 @@ names what would reopen it.
 | --- | --- | --- |
 | Search depth beyond four plies | Not measurable: +23,367 (7 strata, n=32) and −8,624 (5 strata, n=64), both inside detection floors of 107,988 and 47,052, at 23-36x work | A design that can resolve sub-50k effects, or a mechanism predicting an effect above the floor |
 | Stacking reveal sampling on top of the fourth ply | −41,950 at M=2 (95% upper bound +17,541), 4.07x work | A wider dose is tested; only 28.6% joint coverage was affordable at depth 4, and the dose that worked at depth 3 was 85.7% |
+| Pricing the same-wave double hit on a solid gray (reveal construction) as a leaf term | Corpus: partial r −0.044 with remaining life, yet 60% of live setups uncollected; in play, +300 changed <1% of decisions (rarity null), +900 changed 2.08% and scored +3,204 over 256 fresh paired games (LB −26,860, opposite halves) with reveals/move flat at 1.152 vs 1.154 | A term that raises reveals per move at all; or a per-root counterfactual showing the uncollected setups were worth collecting |
 | Harsher terminal (death) utility | Parameter saturated; play is identical past the current value | Never, for this parameterization |
 | 25-move rollout veto | −21,887 points per veto | A lower-variance rollout estimator |
 | Refitting the leaf toward achievable clear rate | Monotone loss across six arms; fully-fitted vector −237,182 | A refit against remaining lifetime rather than achievable clears |

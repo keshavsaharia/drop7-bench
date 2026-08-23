@@ -1,0 +1,41 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260823T105658Z-8e168502",
+  "actor": {
+    "kind": "model",
+    "platform": "OpenCode",
+    "model": "baseten/moonshotai/Kimi-K3",
+    "agentId": null
+  },
+  "level": "L1",
+  "roles": [
+    {
+      "role": "review",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Blind adversarial review of the preregistration (runs/RUN-20260823T091530Z-cbe65468/kimi-k3-prereg-review.md): found the artifact writer hardcodes the wrong seed-lease label, the preregistered compare.py cannot read the runner's artifact format, the extra-term signature enforces the information boundary by comment only, arm B confounds gating with adding chain_to_crack, the stop rules are manual, and argued that the corpus partial-correlation kill is a value criterion that can reject an action-changing term and that the uncollected-setup rate is measured on the d4s5 epsilon-0.03 corpus policy rather than the d4s7 candidate; P(arm A passes) 0.12.",
+  "theoryIds": [
+    "TH-20260823-reveal-construction-leaf-e8f7c78d"
+  ],
+  "experimentIds": [
+    "EX-20260823-reveal-construction-screen-371fd638"
+  ],
+  "runIds": [
+    "RUN-20260823T091530Z-cbe65468"
+  ],
+  "artifactPaths": [
+    "runs/RUN-20260823T091530Z-cbe65468/kimi-k3-prereg-review.md"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "Read-only; written 2026-08-23T09:54:03Z, before the corpus gate was read at 09:56:27Z"
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-23T10:56:58Z"
+}

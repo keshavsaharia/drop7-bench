@@ -1,0 +1,57 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260823T110735Z-ba69c025",
+  "experimentId": "EX-20260823-reveal-construction-screen-v2-63d73b6a",
+  "lifecycle": "completed",
+  "runValidity": "valid",
+  "startedAt": "2026-08-23T11:07:35Z",
+  "endedAt": "2026-08-23T13:12:26Z",
+  "protocolSha256": "3e07540ca5e8cf8fb8f9fc3f0072f635ff01cb91836bf3f19828975c63cd8563",
+  "machineProfileRef": "research/system-profiles/MACH-20260820T080056Z-376ada90.json",
+  "sourceState": {
+    "gitCommit": "c608db72cfc6301be6d772e5c6a44c80c53ff86e",
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "stage 1: approaches/lifetime-objective/chain-reveal-leaf/screen.sh runs/RUN-20260823T110735Z-ba69c025/screen SL-20260823T110000Z-a52d0200 (four arms; stopped by the operator at 2026-08-23T11:39Z after the preregistered 32-game rarity check: A300 coverage 0.69%, B 0.70%, both below the 1% rule; A900 2.06%; partial artifacts preserved in runs/RUN-20260823T110735Z-ba69c025/stopped-at-32/ with frozen 42, A300 39, A900 35, B 36 completed games)",
+    "stage 2: runs/RUN-20260823T110735Z-ba69c025/screen-stage2.sh runs/RUN-20260823T110735Z-ba69c025/screen SL-20260823T110000Z-a52d0200 (frozen + A900 only, same 256 seeds, identical parameters; the runner has no per-arm stop, so the stopped arms were dropped by relaunch; the frozen arm is deterministic and reproduces stage-1 games exactly)"
+  ],
+  "seedLeaseRefs": [
+    "SL-20260823T110000Z-a52d0200"
+  ],
+  "resourceLimits": {
+    "wallSeconds": 10800,
+    "cpuThreads": 30,
+    "maxHostBytes": 17179869184,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": 5299,
+    "cpuSeconds": null,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "Stage 1 (four arms) ran 2026-08-23T11:08Z-11:39Z on 30 threads; stage 2 (frozen + A900, shadowed) 5,299 wall-seconds on 30 threads; host shared with text-only agent sessions."
+  },
+  "exitCode": 0,
+  "stopReason": "completed 256 games for frozen and A900; A300 and B stopped at the 32-game rarity check",
+  "artifactRefs": [
+    "runs/RUN-20260823T110735Z-ba69c025/checks.log",
+    "runs/RUN-20260823T110735Z-ba69c025/stopped-at-32/screen.json",
+    "runs/RUN-20260823T110735Z-ba69c025/screen.json",
+    "runs/RUN-20260823T110735Z-ba69c025/compare-A900.json",
+    "runs/RUN-20260823T110735Z-ba69c025/screen.frozen.json",
+    "runs/RUN-20260823T110735Z-ba69c025/screen.A900.json",
+    "runs/RUN-20260823T110735Z-ba69c025/stopped-at-32/screen.A300.json",
+    "runs/RUN-20260823T110735Z-ba69c025/stopped-at-32/screen.B.json"
+  ],
+  "contributionIds": [
+    "CT-20260823T094848Z-7492d61e",
+    "CT-20260823T105658Z-8e168502",
+    "CT-20260823T111554Z-ed13568f",
+    "CT-20260823T131255Z-947ede69",
+    "CT-20260823T131256Z-ed38b778"
+  ]
+}
