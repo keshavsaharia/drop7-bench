@@ -1,0 +1,22 @@
+{
+  "$schema": "../schemas/seed-lease-v1.schema.json",
+  "format": "drop7-seed-lease-v1",
+  "seedLeaseId": "SL-20260823T215000Z-a5216000",
+  "experimentId": "EX-20260823-sol-corpus-and-offline-gate-4d3d86e4",
+  "rngAlgorithm": "mulberry32 with mix32 domain separation (src/core/native/engine.hpp); continuation CRN streams derived from public root hashes with dedicated domains (P-SOL-v1 section 3), never from the seed",
+  "domain": "environment",
+  "role": "training",
+  "rangeStartHex": "0xa5216000",
+  "rangeEndExclusiveHex": "0xa5219200",
+  "cohortManifestSha256": null,
+  "state": "reserved",
+  "reservedAt": "2026-08-23T21:19:29Z",
+  "openedAt": null,
+  "closedAt": null,
+  "protocolSha256": "017a6bcd6a44ce65ef961259e10618470213e6494236aeac3a6917d704797a37",
+  "runIds": [],
+  "notes": [
+    "Sub-ranges per P-SOL-v1 section 4: G0 ladder 0xa5216000-0xa52160ff (256), main corpus 0xa5217000-0xa52177ff (2,048), gate set 0xa5219000-0xa52191ff (512); interleaved gaps stay clean. Inside the SEEDLEASE-A52 reserve 0xa5216000-0xa522ffff, which docs/exploratory/lease-map.md lists as unallocated.",
+    "Training role; gate-set origins become development-read on use and never train."
+  ]
+}

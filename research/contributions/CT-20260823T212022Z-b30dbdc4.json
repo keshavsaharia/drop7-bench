@@ -1,0 +1,43 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260823T212022Z-b30dbdc4",
+  "actor": {
+    "kind": "model",
+    "platform": "OpenCode",
+    "model": "baseten/moonshotai/Kimi-K3",
+    "agentId": null
+  },
+  "level": "L3",
+  "roles": [
+    {
+      "role": "conceptualization",
+      "degree": "lead"
+    },
+    {
+      "role": "methodology",
+      "degree": "lead"
+    }
+  ],
+  "summary": "P-SOL-v1 design (runs/RUN-20260823T191900Z-b9f8f80d/kimi-k3-main-design.md): the redesigned main experiment after the substrate map invalidated the naive panel+hazard plan. Specified the PanelRecordV2 layout, the G0 continuation-engine fidelity ladder with its kill rule (Kendall-tau LB >= 0.85) and 64-root mini-ladder, KM hazard/lifetime labels over K=16 CRN continuations at H=48, the within-root pairwise ranking loss on the deployed KM-lifetime scalar with SE-scaled pair weights, the G1 gate calibrated by exact D1/D2 anchors with the incumbent-plus-0.03 McNemar bar, the G2 target-vs-fit decomposition, seed arithmetic and CPU-hour budget (32.45 to the gate), stop rules, the implementer file list, rejected alternatives, scale-out boundary and stated priors (P(G0)=0.90, P(G1|G0)=0.40, overall ~0.20). Produced over four sessions; the first three crashed silently in opencode during file reads and the final design was produced from a fully inlined brief.",
+  "theoryIds": [
+    "TH-20260823-sibling-outcome-labels-fix-leaf-0c3d480d"
+  ],
+  "experimentIds": [
+    "EX-20260823-sol-corpus-and-offline-gate-4d3d86e4"
+  ],
+  "runIds": [],
+  "artifactPaths": [
+    "runs/RUN-20260823T091530Z-cbe65468/kimi-k3-theory-design.md"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "Read-only design session; no file modified, no build, no seed read"
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-23T21:20:22Z"
+}

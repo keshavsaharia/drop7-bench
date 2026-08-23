@@ -1,0 +1,89 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260823-sol-corpus-and-offline-gate-4d3d86e4",
+  "theoryIds": [
+    "TH-20260823-sibling-outcome-labels-fix-leaf-0c3d480d"
+  ],
+  "title": "P-SOL-1: panel2 sibling corpus with CRN Kaplan-Meier outcome labels, NNUE retraining, and the G0/G1/G2 offline gates",
+  "classification": "algorithmic",
+  "hypothesis": "Full protocol: runs/RUN-20260823T191900Z-b9f8f80d/kimi-k3-main-design.md sections 3-7 and 10 (P-SOL-v1), fixed as written; this record freezes its decision structure. Stages: (G0) extend the sibling-corpus generator with a panel2 mode (PanelRecordV2 as specified; v1 output byte-identical, gated) and run the continuation-engine fidelity ladder on 256 D3-N7M6 behaviour games (seeds 0xa5216000-0xa52160ff), K=6, H=48, all three engines on identical roots with identical CRN tapes; mini-ladder of 64 roots (D1 vs D3 arms) runs first. Proceed with the cheapest engine whose within-root Kendall-tau vs D3 N7M6 has 95% LB >= 0.85 (cluster bootstrap by origin, 10,000 resamples, seed 0xb0071eaf); if none, stop (F1). (C) Main corpus 2,048 games on 0xa5217000-0xa52177ff (70% D3 N7M6, 15% D3 N7M6 eps=0.10, 15% D2 behaviour), ~48,000 roots at panel stride, K=16, H=48 continuations with the G0-selected engine; D2 fallback branch preregistered (6,000 roots, K=8, H=40) if the D1 branch is unaffordable. Whole-origin split origin mod 10 -> train 0-7 / val 8 / test 9. (T) Train the unchanged 572k NNUE with L = 1.0 pairwise-logistic ranking on delta KM expected lifetime (pair weight min(1,|delta|/(2*SE_CRN))) + 0.5 censor-aware log-lifetime + 0.25 masked-BCE hazard + 0.25 flow; AdamW 3e-3, wd 1e-4, cosine, batch 512 roots, 30 epochs, early stop and model selection on val within-root tau; 5 init seeds. (G1/G2) Gate set: 512 fresh D3-N7M6 games on 0xa5219000-0xa52191ff, 4,096 roots with exact D4 sibling values (d4-rank.cpp adaptation), exact D1/D2, incumbent LeafNet and student on identical roots.",
+  "candidate": {
+    "name": "panel2-km-label-nnue-leaf",
+    "entryPoint": "approaches/lifetime-objective/sibling-corpus/generate.cpp",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "incumbent played-action LeafNet (finding-08) and exact D1/D2/D4 orderings",
+    "entryPoint": "approaches/lifetime-objective/learned-leaf/train_leaf.py",
+    "manifestRef": null
+  },
+  "informationBoundary": "public-policy",
+  "benchmarkTier": "CHECK",
+  "data": {
+    "role": "no-gameplay",
+    "seedLeaseRefs": [
+      "SL-20260823T215000Z-a5216000"
+    ],
+    "datasetRefs": [],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "Training-lease block only (0xa5216000-0xa52191ff inside the SEEDLEASE-A52 reserve): G0 ladder 256 origins, main corpus 2,048, gate set 512 (gate origins become development-read on use and never train). No development, protected or final cohort is read. The offline gate compares against the incumbent LeafNet checkpoint (runs/RUN-A52-LEAF) without re-reading its cohorts. Gameplay (blend tuning and 256-game screens, including the D3 N7M6 arm) is a successor experiment registered only if G1 passes."
+  },
+  "metrics": {
+    "primary": "G1: student top-1 vs exact-D4 argmax on the 4,096-root gate set (clustered by origin), against 0.55 absolute and incumbent+0.03 (paired McNemar 95% LB > 0)",
+    "secondary": [
+      "G0: per-engine within-root Kendall-tau vs D3 N7M6 with cluster-bootstrap CIs",
+      "G2 target quality: label-argmax top-1 vs exact D4 (>= 0.60 required to call the target right)",
+      "G2 fit quality: student-vs-label within-root tau against 0.7x the split-half label ceiling",
+      "G2 coverage slice: tau by behaviour source (d3 vs d2/eps roots)",
+      "incumbent LeafNet row for every metric; exact D1 (0.486) and D2 (0.568) anchors",
+      "init-seed spread over 5 seeds",
+      "corpus counts, censoring rate at H=48, per-stage CPU-hours"
+    ],
+    "statisticalUnit": "root",
+    "uncertaintyMethod": "cluster bootstrap over origin games (10,000 resamples, seed 0xb0071eaf) for tau and gaps; paired McNemar for the incumbent comparison"
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "Panel2 byte-identity gate: v1 panel and default state output byte-identical with panel2 off; featurizer parity on 1,000 stored RUN-A51D rows.",
+      "G0: cheapest engine tau 95% LB >= 0.85 (else stop, F1).",
+      "G1: student top-1 >= 0.55 AND >= incumbent + 0.03 (McNemar LB > 0). Marginal band [0.52,0.55): proceed to a d4s5-only screen. Below 0.52 or below incumbent+0.01: fail (F2/F3 routed by G2)."
+    ],
+    "failureAction": "Record valid + fail with the G2 decomposition stating whether the target or the fit failed; the label family (F3) or the coverage claim (F2) is closed for this configuration; no gameplay cohort is opened; the D2-fallback and scale-out routes are noted, not run.",
+    "passAction": "Register the successor gameplay experiment exactly as P-SOL-v1 section 8 (blend tuning on reusable-development cohorts; 256-game paired screens at d4s5/d4s7 with rarity and futility stops; the D3 N7M6 deployment arm) before any gameplay seed is opened. No tier above CHECK is claimed by this experiment."
+  },
+  "resources": {
+    "wallSeconds": 18000,
+    "cpuThreads": 26,
+    "maxHostBytes": 34359738368,
+    "maxGpuBytes": 17179869184,
+    "gpuDevices": [
+      "gfx1151"
+    ]
+  },
+  "stopConditions": [
+    "S1: any stage exceeding 1.3x its budget line (32.45 CPU-h total to the gate, cap 35; GPU cap 4 h) halts for coordinator decision; partial recorded.",
+    "S2: G0 kill (F1) stops at ~14 CPU-h.",
+    "S3: G1 fail stops before any gameplay.",
+    "Fallback diagnostic on corpus overrun: halt at the 50% milestone if projection exceeds 1.3x, keep whole completed games, run the fit-quality half of G2 on the partial corpus; a scale-up request routes to the drop7-scale-out skill.",
+    "Mini-ladder first: if D1 tau point estimate < 0.75 on 64 roots, skip full D1 assessment and evaluate D2."
+  ],
+  "expectedArtifacts": [
+    "runs/RUN-20260823T191900Z-b9f8f80d/kimi-k3-main-design.md (design, Kimi K3, P-SOL-v1)",
+    "runs/<sol-run>/g0/ladder.json and gates.log",
+    "runs/<sol-run>/corpus/ (panel2 files + summary)",
+    "runs/<sol-run>/train/ (5 seeds, metrics)",
+    "runs/<sol-run>/gate/g1-g2.json"
+  ],
+  "lifecycle": "preregistered",
+  "amendments": [],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": null
+  },
+  "createdAt": "2026-08-23T21:18:28Z",
+  "updatedAt": "2026-08-23T21:19:58Z",
+  "protocolSha256": "017a6bcd6a44ce65ef961259e10618470213e6494236aeac3a6917d704797a37"
+}
