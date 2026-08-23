@@ -149,6 +149,11 @@ clears per move over all moves of all games.
 | 5 | — | — | 2.0413 | 2.0373 | **2.1680** | 2.1415 | 2.3496 |
 | 7 | 1.5370 | 1.7095 | 1.9279 | 2.1403 | **2.2309** | — | 2.3601 |
 
+```figure
+fair-planner-k-sweep
+caption: The K sweep as a curve, with the clairvoyant ceilings and the 2.400 requirement as reference lines. The figure carries finding-12's correction: the H=7 series turns over at K=1024 (a 6-tape subset), so "still climbing at K=256" is withdrawn — the series is unimodal.
+```
+
 Three things this table settles.
 
 **A small-K answer would have inverted the finding.** At K = 8 in a pilot, and at
@@ -224,6 +229,11 @@ strategy fusion: every sample plans against the same future, so the planner
 commits to a specific line instead of choosing a move that is good on average.
 The safe reading is that **the future disc tape is not the source of the
 clairvoyant planner's advantage; the board under the covers is.**
+
+```diagram
+diagram-strategy-fusion
+caption: Strategy fusion, the mechanism behind arm A's non-monotonicity and the hindsight planner's collapse: averaging clairvoyant values across sampled futures can pick a move that is optimal on no future.
+```
 
 **What is *not* attributable.** The 41.2% residual is an upper
 bound on the value of hidden information, not a measurement of it. It contains

@@ -136,6 +136,11 @@ coverage**:
 | **N=7, M=6** | 85.7% | **376,442** | **109.45** | **2.0447** | **1.1423** | 23.49 |
 | N=7, M=12 | **100.0%** | 349,345 | 101.92 | 2.0231 | 1.1309 | **23.39** |
 
+```figure
+reveal-ladder-saturation
+caption: The table as a curve: mean score against joint (disc, reveal) coverage. The turnover one step before full coverage is the finding; the M=6 to M=12 step is saturation, not regression.
+```
+
 **Say this as saturation, not as regression.** The M=6 → M=12 step is −27,097
 with an interval of **(−83,807, +31,209)** and 28-0-36: it does not clear zero
 in either direction. The data are consistent with the curve being flat from

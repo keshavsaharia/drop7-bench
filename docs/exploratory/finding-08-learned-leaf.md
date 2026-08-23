@@ -321,6 +321,11 @@ tuning cohort of §5.
 | d4 s7, reference leaf | 398,498 | 344,630 | **212,864** | 103,331 | 1,341,287 | 254,414 | 114.66 | 2 |
 | d4 s7, learned leaf | **415,779** | **349,034** | 194,040 | 86,033 | **1,344,732** | 276,636 | **120.75** | **3** |
 
+```figure
+learned-leaf-arms
+caption: The 2x2 as points with paired wins-ties-losses: the learned leaf's gain is significant at five strata, not at seven, and the difference-in-differences refutes the preregistered prediction.
+```
+
 ### Paired deltas, one-sided 95% bootstrap lower bounds over whole games
 
 20,000 percentile-bootstrap resamples, RNG seed `0xa52a1eaf`, resampling

@@ -354,6 +354,16 @@ on this table.
 
 This is the whole finding in one table.
 
+```figure
+occupancy-clear-rate-equilibrium
+caption: The same table as curves: numbered clears per move by occupancy band. The clairvoyant clear-seeker crosses the 2.400 requirement near 20 cells and is pulled back to it; fair D4 peaks just above the requirement at 25–29 cells and then falls.
+```
+
+```diagram
+diagram-occupancy-fixed-point
+caption: The mechanism, schematically: an attracting fixed point where the rising clear-rate curve crosses the 2.400 requirement, and a death spiral where fair D4's hump falls back under it. The measured curves are in the figure above.
+```
+
 **A near-empty board cannot clear.** Drop7 clears a disc when its number equals
 the length of the row or column run it lands in, so a sparse board offers almost
 nothing to match against: at 0–9 occupied cells even a clairvoyant clear-seeker

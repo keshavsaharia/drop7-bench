@@ -233,6 +233,16 @@ Classification scheme as requested:
 | (v) optimization / underfitting / bad basin | **0** | — (and **actively refuted twice**, by 15 and 16) |
 | (0) underpowered or gate-stopped, mechanism untested | **2** | 4, 8 |
 
+```figure
+failure-mode-census
+caption: The census as a chart. The empty class (v) column — the class a curriculum-ordering intervention targets — is the point: zero of seventeen failures are optimization failures, and the class was actively refuted twice.
+```
+
+```diagram
+diagram-sibling-extrapolation
+caption: The mechanism behind the dominant class (iii): training labels the successor of the action that was played; deployment asks the model to rank all seven legal siblings, six of which it never observed equally.
+```
+
 ### What this means for the owner's hypothesis
 
 Curriculum ordering is an intervention on class **(v)**. It changes which basin

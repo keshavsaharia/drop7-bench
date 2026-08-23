@@ -23,7 +23,7 @@ completed the depth-by-chance-resolution factorial. Two results from it strongly
 suggest what to do next:
 
 - **The fourth ply is worth +86,172 points, but only with an exact chance
-  model** (95% lower bound +26,605, 40-0-24 over 64 paired games). With an
+  model** (95% lower bound +26,468, 40-0-24 over 64 paired games). With an
   approximate five-stratum model the same fourth ply is worth −7,723. Chance
   resolution does not merely add points; it changes the sign of the depth
   gradient.
@@ -50,80 +50,62 @@ record marks both the protected and one-shot final cohorts as unopened. See the
 
 ## How the research progressed
 
-### 1. Establishing a trustworthy simulator
+Seven eras, one sentence each; every configuration and outcome below is tabled
+row by row in the [experiment index](experiment-index.md).
 
-The work first aligned TypeScript and native Hardcore rules, chain scoring,
-gray-disc reveals, row rises, and deterministic seed behavior. A scoring audit
-corrected the five-move mode's level award from 7,000 to 17,000. Results made
-with 7,000-point scoring remain historical Sequence-scored evidence and are not
-used for the Hardcore million-point claim.
+1. **A trustworthy simulator.** TypeScript and native Hardcore rules were
+   aligned and a scoring audit corrected the five-move level award from 7,000
+   to 17,000; results made with 7,000-point scoring remain historical
+   Sequence-scored evidence.
+2. **Hand-written policies and shallow lookahead** provided fast baselines and
+   showed that immediate score alone is a poor guide.
+3. **Fair expectimax became the reference**: completed fair D4 consistently
+   improved on D3 in the corrected-score small cohorts, while deeper variants
+   were not automatically better.
+4. **Learning public-state values** repeatedly hit **sibling extrapolation**: a
+   model learned the outcome of the action that was played, then deployment
+   asked it to rank actions it had not observed equally well.
+5. **Oracle and long-outcome teachers** found predictive signal, but students
+   failed held-out sibling ranking or were too slow; oracle strength is an
+   upper-bound teaching signal, not a legal policy result.
+6. **Constructive cycles and explicit reservoirs** look useful as features or
+   options, but no tested controller displaced D4.
+7. **Offline policy improvement around D4** on a locked panel of 477 public
+   roots underperformed or barely overrode D4; neither ranker justified a
+   gameplay run.
 
-### 2. Hand-written policies and shallow lookahead
+```diagram
+diagram-sibling-extrapolation
+caption: The era-4 failure mode: training labels the played action's successor, deployment asks the model to rank all seven siblings — six of which it never observed equally.
+```
 
-Feature-weighted heuristics, open-loop beams, risk penalties, tunneling,
-ignition, evolutionary search, and shallow fair lookahead provided fast
-baselines. They showed that immediate score alone is a poor guide: a policy
-must keep revealing covered numbers and preserve future chain structure.
-
-### 3. Fair expectimax as the reference
-
-Completed fair D4 consistently improved on D3 in the corrected-score small
-cohorts and became the reference for later experiments. Going deeper was not
-automatically better. Selective D5, full D5, and cycle-boundary variants often
-spent much more work, sampled chance outcomes too noisily, or overrode good D4
-actions on unstable estimates.
-
-### 4. Learning public-state values
-
-N-tuples, Monte Carlo values, NNUE-style networks, DQN variants, phase students,
-PPO, and fitted-policy methods explored longer horizons. A repeated problem was
-**sibling extrapolation**: a model learned the outcome of the action that was
-played, then deployment asked it to choose among several actions it had not
-observed equally well. Low value error on visited states did not guarantee good
-root-action ranking.
-
-### 5. Oracle and long-outcome teachers
-
-Privileged future-aware planners, D4 distillation, 25-move outcomes, rollout
-vetoes, and curriculum data were used to build better labels. They found
-predictive signal, but students usually lacked enough diverse successor data,
-failed held-out sibling ranking, or were too slow to improve complete games.
-Oracle strength is an upper-bound teaching signal, not a legal policy result.
-
-### 6. Constructive cycles and explicit reservoirs
-
-Reservoir, viability-controller, constructive-spectrum, and tail-survival
-experiments tried to build chain structures deliberately across row rises. A
-12-move constructive horizon improved over a 7-move version in one development
-comparison, but longer horizons were not monotonic and the policies did not
-displace D4. The idea still appears useful as a feature or option, but not yet
-as a standalone controller.
-
-### 7. Offline policy improvement around D4
-
-The latest completed work evaluated every legal sibling on a locked panel of
-477 public roots. A martingale-dual H12 ranker underperformed D4: 28.93% vs
-38.16% top-1 accuracy, 59.85% vs 66.82% pairwise accuracy, and higher normalized
-regret. A regenerative policy-iteration variant was nearly identical to D4 but
-overrode only 11 roots; six overrides helped, confidence bounds were negative,
-and only five of eight origins did not regress. Neither justified a gameplay
-run.
+```figure
+learned-ranking-metrics
+caption: Every learned evaluator against its panel's exact-search comparator on held-out roots: top-1, pairwise accuracy and normalized regret. Panels differ across points and are named per category; compare within a panel, not across.
+```
 
 ## Most useful conclusions so far
 
 - **Fair chance handling matters.** Optimistic, worst-case, or tiny reused
   reveal samples can rank moves incorrectly.
-- **More depth is not automatically more strength.** Horizon, continuation
-  quality, chance variance, and work budget interact. The 2026-08-21 factorial
-  makes the interaction concrete: with an approximate chance model the best
-  depth is three and deeper search actively loses; with an exact chance model
-  the best depth is four. Depth and chance resolution *substitute* rather than
-  compound: at equal work, depth 3 with six-fold reveal sampling (4.24M per
-  move, 376,442) and depth 4 with single-sample reveals (4.96M, 398,498) are
-  statistically indistinguishable, and doubling reveal samples on top of ply 4
-  buys nothing measurable for 4.07x the work. Refining the reveal distribution
-  is itself worth +64,116 at depth 3 (95% lower bound +7,475) and saturates
-  before full joint coverage.
+- **More depth is not automatically more strength.** Depth and chance
+  resolution *substitute* rather than compound: with an approximate chance
+  model the best depth is three, with an exact chance model it is four, and
+  the budget frontier has a flat top at the fair-D4 operating point, reachable
+  from either axis
+  ([`RS-20260821T192140Z-189fe392`](../../research/results/RS-20260821T192140Z-189fe392.json),
+  [finding-16](../exploratory/finding-16-factored-reveal-sampling.md)).
+
+```figure
+depth-chance-factorial
+caption: Mean score by search depth and chance resolution on the shared cohort. The sign of the depth gradient flips with the stratum count.
+```
+
+```figure
+score-vs-work-frontier
+caption: Mean score against logical work per move. Two different ways of spending the same budget — depth or reveal sampling — land in the same place, and the frontier is flat at the fair-D4 operating point.
+```
+
 - **Flow matters before spectacular chains.** The task record repeatedly used
   roughly 2.4 numbered clears and 1.4 reveals per move as the region associated
   with stable long games. Treat these as diagnostic targets from limited runs,
@@ -137,12 +119,16 @@ run.
   given successor-closed coverage, every legal sibling, and exact search-value
   labels still ranked worse than a one-ply exact search.
 - **Score is heavy-tailed, and this sets a hard measurement floor.** One
-  million-point game can coexist with a much lower average; paired whole-game
-  cohorts and confidence bounds are essential. But pairing does not rescue
-  small effects: single-seed paired deltas in the depth factorial reach
-  −1,002,862 and +958,985, more than twice the cohort mean, so a 64-game
-  cohort resolves nothing below roughly 50,000 points. Before running a cohort,
-  state the effect size the mechanism predicts and check it against the floor.
+  million-point game can coexist with a much lower average, and pairing does
+  not rescue small effects: before running a cohort, state the effect size the
+  mechanism predicts and check it against the detection floor
+  ([`RS-20260821T205102Z-d89df4b5`](../../research/results/RS-20260821T205102Z-d89df4b5.json)).
+
+```figure
+detection-floor-map
+caption: The six paired contrasts of the depth factorial against their detection floors. Every significant result clears its floor; every null sits below it and is a non-measurement, not evidence of no effect.
+```
+
 - **D4 is useful but not the answer.** It is a strong tactical fallback and
   teacher, yet its average is not close enough to qualify.
 - **The leaf evaluation prices what search cannot see.** Refitting it toward a
@@ -161,6 +147,11 @@ run.
 Each entry rejects the exact configuration tested, at *development* or *pilot*
 tier. None of them is a proof that the underlying idea is impossible, and each
 names what would reopen it.
+
+```figure
+screen-deltas-with-bounds
+caption: The score-valued closures at a glance: every screen and confirmation paired delta with its recorded 95% bound. Whiskers are absent, not zero, where a record carries no upper bound.
+```
 
 | Direction | Result | Reopens if |
 | --- | --- | --- |
