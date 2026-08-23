@@ -9,6 +9,21 @@ body {
   color: #e4e4e7;
 }
 
+/* Source routes become a dedicated, viewport-height workspace. The marker is
+   rendered by the server source browser, so the surrounding app chrome is
+   removed before any client JavaScript runs. */
+body:has(.source-workspace) > header,
+body:has(.source-workspace) > footer {
+  display: none;
+}
+body:has(.source-workspace) > main {
+  width: 100%;
+  max-width: none;
+  height: 100dvh;
+  overflow: hidden;
+  padding: 0;
+}
+
 /* Play CTA in the header. Painted like a numbered disc (disc 7) so it reads
    as a Drop7 control rather than a text nav link. The shine sweep is hover-only
    and stops under prefers-reduced-motion. */

@@ -45,7 +45,12 @@ export default async function ApproachPage({
           <ul className="mt-2 space-y-1 text-sm text-zinc-400">
             {entry.sourceFiles.map((file) => (
               <li key={file}>
-                <code className="text-xs">{file}</code>
+                <Link
+                  href={`/approaches/${family}/${approach}/${file}`}
+                  className="font-mono text-xs text-sky-400 hover:text-sky-300"
+                >
+                  {file}
+                </Link>
               </li>
             ))}
           </ul>
@@ -112,8 +117,13 @@ export default async function ApproachPage({
         <h2 className="text-sm font-semibold text-zinc-200">Source files</h2>
         <ul className="mt-2 flex flex-wrap gap-2 text-sm text-zinc-400">
           {entry.sourceFiles.map((file) => (
-            <li key={file} className="rounded bg-zinc-900 px-2 py-0.5">
-              <code className="text-xs">{file}</code>
+            <li key={file}>
+              <Link
+                href={`/approaches/${family}/${approach}/${file}`}
+                className="block rounded bg-zinc-900 px-2 py-0.5 font-mono text-xs hover:bg-sky-950 hover:text-sky-300"
+              >
+                {file}
+              </Link>
             </li>
           ))}
         </ul>

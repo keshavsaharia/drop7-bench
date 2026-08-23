@@ -10,6 +10,7 @@ const NAV = [
   { href: "/leaderboard", label: "Leaderboard" },
   { href: "/research", label: "Research" },
   { href: "/learn", label: "Learn" },
+  { href: "/src", label: "Source" },
 ];
 
 function GitHubMark() {

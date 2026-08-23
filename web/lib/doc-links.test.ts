@@ -39,11 +39,28 @@ test("resolves approach README links into /docs slugs", () => {
   );
 });
 
-test("leaves src/ links untouched", () => {
-  assert.equal(rewriteRepoDocHref("src/core/typescript/engine.ts"), "src/core/typescript/engine.ts");
+test("rewrites src links onto the repository source browser", () => {
+  assert.equal(rewriteRepoDocHref("src/core/typescript/engine.ts"), "/src/core/typescript/engine.ts");
   assert.equal(
     rewriteRepoDocHref("../../src/core/typescript/engine.ts", STATUS),
-    "../../src/core/typescript/engine.ts",
+    "/src/core/typescript/engine.ts",
+  );
+});
+
+test("rewrites approach source files onto their nested viewer route", () => {
+  assert.equal(
+    rewriteRepoDocHref(
+      "../../approaches/d4-long-outcome/rollout-veto/d4-d2-rollout-veto.cpp",
+      "docs/research/experiment-index.md",
+    ),
+    "/approaches/d4-long-outcome/rollout-veto/d4-d2-rollout-veto.cpp",
+  );
+  assert.equal(
+    rewriteRepoDocHref(
+      "../../../src/core/native/engine.hpp#L20",
+      "approaches/fair-expectimax/reference/README.mdx",
+    ),
+    "/src/core/native/engine.hpp#L20",
   );
 });
 
@@ -83,7 +100,7 @@ test("leaves non-docs repository and external hrefs untouched", () => {
       "../../approaches/lifetime-objective/learned-leaf/PREREGISTRATION.md",
       "docs/exploratory/finding-08-learned-leaf.md",
     ),
-    "../../approaches/lifetime-objective/learned-leaf/PREREGISTRATION.md",
+    "/approaches/lifetime-objective/learned-leaf/PREREGISTRATION.md",
   );
   assert.equal(rewriteRepoDocHref("https://example.com/docs/foo.md"), "https://example.com/docs/foo.md");
   assert.equal(rewriteRepoDocHref("#bottom-line"), "#bottom-line");

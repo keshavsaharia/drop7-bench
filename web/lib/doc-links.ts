@@ -40,10 +40,6 @@ function isExternal(path: string): boolean {
   );
 }
 
-function isSrcPath(path: string): boolean {
-  return path === "src" || path.startsWith("src/");
-}
-
 function toDocsHref(repoPath: string, suffix: string): string | null {
   if (!repoPath.startsWith("docs/") || !MARKDOWN_EXT.test(repoPath)) return null;
   return `/docs/${stripMarkdownExt(repoPath.slice("docs/".length))}${suffix}`;
@@ -72,15 +68,25 @@ function toRecordHref(repoPath: string, suffix: string): string | null {
   return null;
 }
 
+function toSourceHref(repoPath: string, suffix: string): string | null {
+  if (repoPath === "src" || repoPath.startsWith("src/")) {
+    return `/${repoPath}${suffix}`;
+  }
+  if (/^approaches\/[^/]+\/[^/]+\/.+/.test(repoPath)) {
+    return `/${repoPath}${suffix}`;
+  }
+  return null;
+}
+
 function toConsoleHref(repoPath: string, suffix: string): string | null {
-  return toDocsHref(repoPath, suffix) ?? toApproachHref(repoPath, suffix) ?? toRecordHref(repoPath, suffix);
+  return toDocsHref(repoPath, suffix) ?? toApproachHref(repoPath, suffix) ?? toRecordHref(repoPath, suffix) ?? toSourceHref(repoPath, suffix);
 }
 
 /**
  * Map a repository Markdown href onto a console route when one exists:
  * `docs/*.md` → `/docs/<slug>`, approach directories → `/approaches/…`,
- * and theory/experiment JSON → `/theories/<id>` or `/experiments/<id>`.
- * Leaves `src/` links untouched.
+ * source files → their repository path, and theory/experiment JSON →
+ * `/theories/<id>` or `/experiments/<id>`.
  */
 export function rewriteRepoDocHref(href: string, fromRepoPath?: string): string {
   if (!href) return href;
@@ -94,14 +100,11 @@ export function rewriteRepoDocHref(href: string, fromRepoPath?: string): string 
 
   if (path.startsWith("/")) return href;
 
-  if (isSrcPath(path)) return href;
-
   const rooted = toConsoleHref(path, suffix);
   if (rooted) return rooted;
 
   if (fromRepoPath) {
     const resolved = resolveRepoRelative(fromRepoPath, path);
-    if (isSrcPath(resolved)) return href;
     const mapped = toConsoleHref(resolved, suffix);
     if (mapped) return mapped;
   }
