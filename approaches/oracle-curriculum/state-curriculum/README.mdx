@@ -19,7 +19,7 @@ manufactures a dataset that several later experiments consumed.
 ## The intuition
 
 A learner that always starts from an empty board spends nearly all of its
-experience on easy, early positions. The interesting decisions — the ones that
+experience on easy, early positions. The interesting decisions: the ones that
 decide whether a game reaches move 200 — happen on crowded boards with tall
 columns, buried gray discs and a rise about to land. Ordinary play reaches those
 positions rarely and briefly; the
@@ -56,10 +56,10 @@ cheating planner achieved from it.
    play, at a 25-move horizon, and attach the flow diagnostics.
 5. Write the file. A separate TypeScript generator produces a sibling format
    that tags each record by where it came from — oracle play, a combined
-   policy, or a safety policy — and stores remaining moves and remaining score
+   policy, or a safety policy, and stores remaining moves and remaining score
    as targets.
 
-## What happened, in plain English
+## What happened
 
 The generator worked and its isolation checks passed: 4,096 restart states were
 produced, and the privilege-isolation tests confirmed that nothing privileged
@@ -79,7 +79,7 @@ vindicates it either.
 
 <Callout title="The measurement that would settle it was never taken" tone="warn">
 The converter computes exactly what is needed to answer "is an oracle-visited
-board actually worth more to a fair player?" — and the aggregate was never
+board actually worth more to a fair player?", and the aggregate was never
 reported. [`audit-05`](/docs/exploratory/audit-05-optimistic-curriculum) §5.4
 calls this "the single missing measurement" and estimates it at about an hour of
 compute: if oracle boards re-labelled fairly are barely better than ordinary
@@ -89,18 +89,18 @@ nothing to teach.
 
 <TechnicalDetails>
 
-- Native converter, `oracle-curriculum.cpp`: **completed — task-record only
+- Native converter, `oracle-curriculum.cpp`: **completed; task-record only
   support**; "4,096 restart states were generated and privilege-isolation checks
   passed" ([experiment index](/docs/research/experiment-index)). No ledger entry
   exists for it.
-- TypeScript generator, `generate.ts`: **support-only — repository-verified**.
+- TypeScript generator, `generate.ts`: **support-only; repository-verified**.
   Emits `D7CURR1` records tagged by source (oracle, combined, phase-safety) with
   remaining-moves and remaining-score targets.
 - Read from the source: 64 generation games from `0x3d660000`, oracle depth 4 /
   beam 128, 500-move cap, first sample at move 50, at most 4,096 states, seven
   restart scenarios at horizon 25, separate reveal and visible-disc random
   domains for the restart futures, and a static assertion that the level bonus
-  is **17,000** — so the restart diagnostics are on corrected Hardcore scoring.
+  is **17,000**, so the restart diagnostics are on corrected Hardcore scoring.
 - Downstream consumers and their recorded outcomes are listed in
   [`audit-05`](/docs/exploratory/audit-05-optimistic-curriculum) §2.1 and §2.4;
   the corpus fingerprints appear there too. §2.5 of the same audit records that

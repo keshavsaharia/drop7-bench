@@ -1,14 +1,14 @@
 ---
 title: Sparse expectimax
 family: heuristic-search
-summary: Look several moves ahead, but instead of considering every disc the game might deal, take a small fixed handful of representative ones — and always finish the depth you promised.
+summary: Look several moves ahead, but instead of considering every disc the game might deal, take a small fixed handful of representative ones, and always finish the depth you promised.
 status: completed
 evidence: task-record only
 reads: public
 ---
 
 Look several moves ahead, but instead of considering every disc the game might
-deal, take a small fixed handful of representative ones — and always finish the
+deal, take a small fixed handful of representative ones, and always finish the
 depth you promised.
 
 <EvidenceLabel status="completed" evidence="task-record only" reads="public" />
@@ -49,11 +49,11 @@ half-finished one.
 5. **Stop on the work or time budget**, and play the best column from the last
    completed depth.
 
-## What happened, in plain English
+## What happened
 
 It works, it is the workhorse of this family, and it is nowhere near strong
 enough on its own. The index calls it a useful bounded-search baseline that
-remains well below the target — which is exactly how it is used everywhere
+remains well below the target, which is exactly how it is used everywhere
 else in the repository: as the search wrapper that other people's evaluators
 get plugged into.
 
@@ -109,7 +109,7 @@ sampling seed is solver-local and never the game seed.
   silently degrades under load is not reproducible, and reproducibility is the
   point.
 - **The interesting variable was never depth.** Across the whole repository,
-  deeper search with the same leaf did not reliably help — the properly
+  deeper search with the same leaf did not reliably help: the properly
   recorded attempts to add a fifth ply to the reference search were rejected
   or stopped by runtime gates. What sits at the bottom of the tree has
   mattered more than how tall it is.

@@ -113,7 +113,7 @@ The marginal is measured, not assumed: 700,000 `Mulberry32::nextDisc()` draws
 give chi-square 2.36 on 6 degrees of freedom, consistent with
 audit-01's 3.59 over 400,000 draws.
 
-Two consequences, stated plainly:
+Two consequences follow:
 
 1. **This is strictly more faithful to real Drop7.** audit-01 M2 documents that
    the cited reference implementation fixes the value when the gray is created
@@ -413,7 +413,7 @@ The correct reading is **not** "clears are impossible". It is:
   about 3.6 clears per move, far above the 2.4 per move that finding-01 derives
   as the steady-state requirement. **The 0% on realistic boards is therefore
   partly a statement about the horizon, not only about the positions.** A larger
-  H would be the honest way to settle it, and H > 11 is not exactly solvable
+  H would be the valid way to settle it, and H > 11 is not exactly solvable
   with this solver.
 
 ### A verified 20-deep cascade, and a confirmed audit-01 divergence
@@ -470,7 +470,7 @@ mechanically available:
 - the same start position can be given a *different horizon* with
   `reHorizonScenario` without regenerating anything.
 
-Until that evaluation exists, the honest statement about the numbers in §5 is:
+Until that evaluation exists, the numbers in §5 support this statement:
 **the mean gap of 21,653 points over nine moves is an upper bound on what
 better fair play could recover, and an unknown fraction of it is unrecoverable
 luck.** The one piece of evidence pointing at "a real planning gap" is that the

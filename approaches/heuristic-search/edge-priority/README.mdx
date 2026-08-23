@@ -1,21 +1,21 @@
 ---
 title: Edge priority
 family: heuristic-search
-summary: Test the two things an experienced human player actually says about this game — attack the high covered discs, and distrust the edge columns — as measurable changes to one term in the evaluator.
+summary: Turn two claims from an experienced player into measurable evaluator changes by attacking high covered discs and distrusting edge columns.
 status: unknown
 evidence: repository-verified
 reads: public
 ---
 
 Test the two things an experienced human player actually says about this game
-— attack the high covered discs, and distrust the edge columns — as measurable
+— attack the high covered discs, and distrust the edge columns, as measurable
 changes to one term in the evaluator.
 
 <EvidenceLabel status="unknown" evidence="repository-verified" reads="public" />
 
 <Callout title="No retained result" tone="warn">
 This lab is complete, gated and buildable, and **no outcome for it exists
-anywhere in this repository** — not in the
+anywhere in this repository**, not in the
 [experiment history](/docs/research/history), not in the machine-readable
 records, not as a task-record note. The
 [experiment index](/docs/research/experiment-index) marks it *unknown*. This
@@ -38,9 +38,9 @@ The two claims have a mechanism behind them that a program can express:
   the ceiling and has few moves left before a [rise](/learn/glossary) pushes it
   higher. The evaluator already charges for that as the square of its height —
   so the question is whether the true penalty is steeper than square.
-- **Edges.** A disc in column 0 or column 6 has only one horizontal neighbour,
+- **Edges.** A disc in column 1 or column 7 has only one horizontal neighbour,
   so there is one fewer direction from which a clearing disc can reach it. The
-  evaluator already applies a 1.3× multiplier there — so the question is
+  evaluator already applies a 1.3× multiplier there, so the question is
   whether it should be larger.
 
 The lab isolates exactly those two constants. Nothing else about the policy
@@ -48,13 +48,13 @@ changes.
 
 ## How it works, step by step
 
-1. **Take the reference behaviour policy unchanged** — a bounded expectimax
+1. **Take the reference behaviour policy unchanged**: a bounded expectimax
    with the phase-safety evaluator, the same one used as the behaviour policy
    in other experiments.
 2. **Replace one term of its evaluator**, the cover-potential term, with a
    parameterised version: penalty proportional to *height raised to the
    altitude exponent*, times an *edge multiplier* on the outer columns.
-3. **Play six profiles on paired games** — the same seeds for all six, so the
+3. **Play six profiles on paired games**: the same seeds for all six, so the
    comparison is game by game:
 
    | Profile | Altitude exponent | Edge multiplier |
@@ -74,7 +74,7 @@ The design is a clean single-variable experiment: the edge rows isolate the
 edge claim, the altitude row isolates the altitude claim, and one joint row
 tests them together.
 
-## What is known, in plain English
+## What is known
 
 That the program exists, that it builds, and that it checks itself. Its
 self-test verifies that the baseline profile reproduces the unchanged

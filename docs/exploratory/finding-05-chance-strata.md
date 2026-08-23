@@ -101,7 +101,7 @@ reverses sign under corrected scoring (−164 → +4,336), there are now two
 independent reasons that rejection is unsafe. This is a hypothesis about the
 historical run, not a claim about it: the original configuration was not re-run.
 
-## Cost, stated plainly
+## Cost
 
 This buys strength with compute. At fixed depth 4 it costs 3.82× the work per
 move. Under [`benchmarks.md`](../benchmarks.md) that makes it a fixed-depth

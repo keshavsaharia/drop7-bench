@@ -1,7 +1,7 @@
 ---
 title: Heuristic benchmark
 family: baselines-diagnostics
-summary: A harness that makes several simple hand-written players play the same games and reports who won each one, so a new idea can be compared against a fixed opponent instead of against luck.
+summary: Runs simple hand-written players on paired games so differences reflect policy rather than luck.
 status: support-only
 evidence: repository-verified
 reads: public
@@ -17,7 +17,7 @@ each individual game.
 
 Drop7 scores are wildly uneven. The same policy can score 40,000 on one seed
 and 1,200,000 on another, so comparing two policies on *different* games tells
-you almost nothing — the difference you measure is mostly which seeds each one
+you almost nothing: the difference you measure is mostly which seeds each one
 happened to get.
 
 The fix is pairing. Both policies play seed 1, both play seed 2, and the thing
@@ -55,13 +55,13 @@ clock. It is not a candidate policy, and the profiles it runs are far below the
 **No retained result.** The [experiment index](/docs/research/experiment-index)
 records this source as support-only and repository-verified; it is listed in
 [audit 04](/docs/exploratory/audit-04-blind-spots) §B.2 among the sources whose
-question — "paired comparisons among named TypeScript heuristic profiles" — has
+question ("paired comparisons among named TypeScript heuristic profiles") has
 no recorded lane and no retained output. This page therefore describes what the
 code does, from the code, and quotes no scores.
 
 <TechnicalDetails title="The technical record">
 
-**Status: support-only — repository-verified.** No ledger entry and no task
+**Status: support-only; repository-verified.** No ledger entry and no task
 record was located for this source, so no number is attributed to it.
 
 Entry point `main.ts`, run with Node's type stripping:
@@ -75,7 +75,7 @@ tournament itself is `runHeadlessTournament` in
 Note on interpretation: a table produced by this harness is a comparison
 between hand-written profiles on whatever seeds were passed in. It carries no
 seed-lease bookkeeping of its own, so a run of it is not automatically
-development-cohort evidence — the caller has to say which seeds were used and
+development-cohort evidence: the caller has to say which seeds were used and
 in what role. See the [methodology](/docs/methodology) for the seed roles and
 [benchmarks](/docs/benchmarks) for the tiers.
 

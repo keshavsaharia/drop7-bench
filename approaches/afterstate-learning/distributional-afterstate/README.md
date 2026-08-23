@@ -12,7 +12,7 @@ Train one **action-free** evaluator of the fully resolved public afterstate
 at every harvested root, *every* legal sibling is labeled under the same
 aligned chance scenarios with a fixed public continuation policy. Because the
 same network scores every candidate afterstate, action identity cannot act as
-a shortcut and no deployment-time action is out of support — the two failure
+a shortcut and no deployment-time action is out of support: the two failure
 modes that defeated earlier played-action and sparse-sibling learners here.
 
 Deployment (later tier, only after the offline gate passes): 1-ply

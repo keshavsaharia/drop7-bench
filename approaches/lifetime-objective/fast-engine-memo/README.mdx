@@ -1,7 +1,7 @@
 ---
 title: Remembering the last board
 family: lifetime-objective
-summary: Inside one chance node the search scores the same move under several imagined futures that usually leave the board identical; remembering the last board's features and recomputing the one term that depends on the next disc gives exactly the same numbers for a fraction of the work.
+summary: Reuses board features across equivalent chance samples and recomputes only the next-disc term, preserving exact values with less work.
 status: completed
 evidence: repository-verified
 reads: public
@@ -27,7 +27,7 @@ When the search imagines a move it samples five or seven possible futures:
 which disc comes next, and what the hidden gray discs turn out to be if the
 move cracks them. Most moves crack nothing, so most of those futures share one
 board and differ only in the sampled next disc. The board scorer reads the
-next disc in exactly one of its eighteen terms — the count of columns where
+next disc in exactly one of its eighteen terms: the count of columns where
 that disc would land on a run of its own height. Everything else it computes
 depends on the board alone. The search was recomputing all eighteen terms for
 each future; the [engine audit](/docs/exploratory/audit-06-engine-efficiency)
@@ -67,6 +67,6 @@ memo hit rate 61.7% (five strata) and 68.5% (seven); interleaved timing ratio
 
 ## Sources
 
-- `memo-leaf.hpp` — the one-entry memo and the frozen dot-product order
+- `memo-leaf.hpp`: the one-entry memo and the frozen dot-product order
 - `build.sh` — generates `MemoSearch` from `fast-search.hpp` with a diff guard and a placement check
 - `gate.cpp` — leaf bits, parity, determinism, timing

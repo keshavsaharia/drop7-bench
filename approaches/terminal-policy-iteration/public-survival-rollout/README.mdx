@@ -1,7 +1,7 @@
 ---
 title: Public survival rollout
 family: terminal-policy-iteration
-summary: Judge each column by how long the game survives afterwards — thirty-one shared imagined futures, a hundred moves each.
+summary: Judge each column by survival over thirty-one shared futures of one hundred moves each.
 status: rejected
 evidence: task-record only
 reads: public
@@ -29,8 +29,8 @@ merely postpones trouble stops looking clever.
 
 1. Read the public position: board, visible next disc, moves until the next
    rise, terminal flag.
-2. Build 31 event-indexed synthetic scenarios — the discs that will be dealt
-   and the hidden numbers that will be shown — and use the same 31 for every
+2. Build 31 event-indexed synthetic scenarios: the discs that will be dealt
+   and the hidden numbers that will be shown, and use the same 31 for every
    sibling column, so the comparison is not decided by luck.
 3. Force the column under test; from then on, every move is chosen by the same
    exact, completed fair one-move-ahead policy. That policy is handed only the
@@ -39,12 +39,12 @@ merely postpones trouble stops looking clever.
    it is inside.
 4. Run to the 100-move horizon and compare columns by their outcomes.
 
-## What happened, in plain English
+## What happened
 
 It was worse than the policy it was built on top of.
 
 The retained verdict is that the longer rollout came out behind plain fair
-one-move-ahead search on the games it was fitted on — a result that sounds
+one-move-ahead search on the games it was fitted on: a result that sounds
 paradoxical and is not. A rollout comparison is only as good as the player
 doing the rolling: if the continuation policy is myopic, then a hundred moves
 of it mostly measures how well a column suits *that* player's weaknesses.
@@ -87,5 +87,5 @@ time.
   long-horizon ranking worse.
 - **Still open:** the same measurement with a stronger continuation — the
   family's later panels moved to a two-move-ahead policy for exactly this
-  reason — and with enough scenarios to say something about a heavy-tailed
+  reason, and with enough scenarios to say something about a heavy-tailed
   quantity.

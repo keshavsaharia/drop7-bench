@@ -1,7 +1,7 @@
 ---
 title: The native suite (engine benchmark, n-tuple trainer, learned-value search)
 family: ntuple-rl
-summary: The single C++ program that trains the original n-tuple evaluator, searches with it, benchmarks the fast rules engine, and runs the self-tests everything else depends on.
+summary: The C++ program trains the original n-tuple evaluator, searches with it, benchmarks the fast engine, and runs the shared self-tests.
 status: completed
 evidence: ledger-recorded
 reads: public
@@ -23,7 +23,7 @@ Early on, everything the learned line needed lived in the same binary: a fast
 rules simulator, a trainer, a search that used the trained values, and the tests
 that proved all three agreed with the TypeScript engine. That coupling is why
 the repository's standard verification recipe still starts by building this
-file — the trajectory-agreement sweep between the native and TypeScript engines
+file: the trajectory-agreement sweep between the native and TypeScript engines
 is run through it.
 
 ## How it works, step by step
@@ -45,11 +45,11 @@ is run through it.
    [stratified](/learn/glossary) gray-disc reveal samples per action, exact
    enumeration of the next visible disc, and a hard work budget.
 
-## What happened, in plain English
+## What happened
 
 The learned evaluator on its own averaged about 182,000 points a game on a fixed
 64-game development probe. Putting a two-move look-ahead on top of it lifted that
-to about 232,000 — a clear, honestly paired improvement, and the best result
+to about 232,000. It was a clear paired improvement and the best result
 anywhere in this family. Going one move deeper made it slightly *worse* and
 twelve times slower, and was rejected rather than adopted for being deeper.
 
@@ -102,7 +102,7 @@ Two things from this experiment survived everything that came after it.
 
 **A learned leaf plus a small search beat the learned leaf alone.** That is the
 strongest evidence in the family that pattern learning has something to
-contribute — as a search evaluator, not as a policy on its own.
+contribute, as a search evaluator, not as a policy on its own.
 
 **Deeper is not automatically better.** Depth 3 searched twelve times harder and
 scored lower. The same result reappears throughout the repository; see

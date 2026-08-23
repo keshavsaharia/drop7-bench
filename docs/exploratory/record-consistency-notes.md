@@ -1,6 +1,6 @@
 # Record consistency notes
 
-Observations made while writing plain-English overlays for the machine-readable
+Observations made while writing narrative summaries for the machine-readable
 records (`web/content/research/*.mdx`). **No record was edited.** These are
 reported so a future auditor can decide whether a successor record is owed;
 under `AGENTS.md` a frozen or promoted record is immutable, so any correction

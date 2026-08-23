@@ -1,7 +1,7 @@
 ---
 title: Fixing the learning rule, and conditioning on the rise clock
 family: ntuple-rl
-summary: A real bug was found in how the n-tuple's weights were updated, and fixed — and the corrected learner was still not good enough, even after being told how close the next row rise was.
+summary: Fixes an n-tuple update bug and adds rise-cycle context. The corrected learner remains too weak.
 status: rejected
 evidence: ledger-recorded
 reads: public
@@ -27,7 +27,7 @@ They are not. On the opening board those 338 placements collapse onto 220
 distinct weights, one weight appears 25 times, and the arithmetic works out so
 that a requested step of one unit actually moved the prediction by 6.787 units.
 That is a genuine implementation defect, and the audit that found it is one of
-the more valuable pieces of work in this family — the learner had been
+the more valuable pieces of work in this family: the learner had been
 overshooting every target it was ever given.
 
 A second, smaller defect was in the ordering of the adaptive learning rate: the
@@ -43,7 +43,7 @@ history and updates afterwards.
    deterministic self-test proves the prediction now moves by exactly the
    requested amount, including the one-step-delayed reaction to a sign flip that
    the original method specifies.
-2. **Retrain.** Learn a chance-state value — the board's worth *before* the next
+2. **Retrain.** Learn a chance-state value: the board's worth *before* the next
    disc is dealt — from complete games, using the corrected update.
 3. **Play.** For each legal column, simulate the drop and score the resulting
    board. The visible disc still affects the choice, because each candidate is
@@ -53,7 +53,7 @@ history and updates afterwards.
    [rise cycle](/learn/glossary), starting at exactly zero so that any gain is
    attributable to the new tables and not to a better starting guess.
 
-## What happened, in plain English
+## What happened
 
 The bug was real and the fix was correct. The policy was not.
 
@@ -96,7 +96,7 @@ to 155 moves, with no censored games. Model size: 9,321,107 general nodes plus
 4,600,000 zero-initialised phase nodes, 159.314 MiB of parameters, 160.828 MiB
 peak resident.
 
-**Scoring mode — important.** These point totals are on the historical
+**Scoring mode: important.** These point totals are on the historical
 7,000-point level-bonus scale, not the corrected 17,000-point Hardcore scale.
 The ledger's comparator inside both runs is a fair depth-4 reference of
 176,925.25 points and 116.375 moves; the corrected-scoring replay of that same
@@ -104,7 +104,7 @@ eight-game confirmation is recorded elsewhere in the ledger as 400,675.25 points
 and 116.375 moves. `docs/exploratory/audit-03-claim-arithmetic.md` lists both
 `ntuple-tc.cpp` and `ntuple-phase-conditioned.cpp` among the sources whose
 ledger results are 7,000-point-scored and which carry no build lock enforcing
-that constant — so **rebuilding them against the current engine will produce
+that constant, so **rebuilding them against the current engine will produce
 numbers that do not match this table**, and none of these scores can be compared
 directly with a corrected-score result.
 
@@ -126,7 +126,7 @@ learning rule matters.
 
 **The rise clock is real but not the missing piece.** The follow-up isolated
 that variable as cleanly as one could ask — new tables, zero-initialised, same
-data, same target — and got almost nothing. Whatever the network is failing to
+data, same target, and got almost nothing. Whatever the network is failing to
 represent, it is not proximity to the next row rise.
 
 **What the ledger itself flags as still open.** Phase enters the base model as a

@@ -1,7 +1,7 @@
 ---
 title: Learning a policy with explicit safety constraints
 family: ntuple-rl
-summary: Learn a small correction to a simple search while being held to hard limits on how fast the board fills up and how often the game ends — the limits were all violated and the run was sealed before any gameplay test.
+summary: Learn a small correction to a simple search under hard safety limits. Every limit failed, so the run stopped before gameplay testing.
 status: rejected
 evidence: ledger-recorded
 reads: public
@@ -15,7 +15,7 @@ how fast the board fills up and how often the game ends.
 ## The intuition
 
 Most reinforcement learning in this repository optimises one number — score, or
-moves survived — and every failure mode looks the same: the policy learns
+moves survived, and every failure mode looks the same: the policy learns
 something locally attractive and dies. But Drop7 has a natural bookkeeping
 rhythm. Every five drops the board rises by a row, so a policy that is going to
 survive must, over each five-move cycle, clear roughly as much as arrives and
@@ -50,11 +50,11 @@ is actually fighting.
    five-move cycles.
 5. **Calibrate per game, then gate.** Confidence estimates are computed per game
    so that a handful of very long trajectories cannot dominate them. One final
-   frozen checkpoint — not an average over training iterations — has to pass
+   frozen checkpoint, not an average over training iterations — has to pass
    support, drift, terminal-risk, and entropy gates before any gameplay screen
    may open.
 
-## What happened, in plain English
+## What happened
 
 Training ran exactly as planned and the result failed everything.
 

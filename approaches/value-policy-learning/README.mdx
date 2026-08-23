@@ -1,6 +1,6 @@
 ---
 title: Value and policy learning
-summary: Instead of searching ahead, train a model on past games to judge a board or pick a column — and learn why that kept failing.
+summary: Instead of searching ahead, train a model on past games to judge a board or pick a column, and learn why that kept failing.
 ---
 
 Searching ahead is expensive: to compare seven columns properly you have to
@@ -9,7 +9,7 @@ on. The alternative is to *learn* the answer. Play a lot of games, write down
 what happened, and fit a model that says "this board is worth about this much"
 or "from here, drop in column 4". This family is twelve attempts at that.
 
-Eleven of them fell short, and — this is the useful part — most of them fell
+Eleven of them fell short, and (this is the useful part) most of them fell
 short for the same reason.
 
 ## The recipe, and where it breaks
@@ -42,7 +42,7 @@ recorded and what the model is asked to output.
 </svg>
 
 The gap in the last box has a name in this repository — **sibling
-extrapolation** — and it has its own page, because it is the single most
+extrapolation**, and it has its own page, because it is the single most
 important lesson in the record:
 [evaluating a board, and the sibling trap](/learn/concepts/ranking-siblings).
 In one line: a model can predict the outcome of played positions very
@@ -79,7 +79,7 @@ Grouped by what the model is asked to produce.
 
 **Learn the value of a move, then take the best one.**
 
-- [Double-DQN](/approaches/value-policy-learning/dqn) — the textbook
+- [Double-DQN](/approaches/value-policy-learning/dqn): the textbook
   reinforcement-learning method, plus a follow-up with longer credit
   assignment and optional privileged demonstrations.
 - [Monte Carlo return](/approaches/value-policy-learning/monte-carlo-return) —
@@ -108,7 +108,7 @@ Grouped by what the model is asked to produce.
   TypeScript workbench for fitting board and policy models from several kinds
   of teacher on separate seed lanes.
 
-## What happened, in plain English
+## What happened
 
 One approach in this family came out ahead of its own baseline: the denoised
 public value, which changed the *labels* rather than the network. It passed

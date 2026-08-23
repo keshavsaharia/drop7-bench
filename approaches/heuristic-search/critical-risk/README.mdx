@@ -1,7 +1,7 @@
 ---
 title: Critical risk
 family: heuristic-search
-summary: Be cautious only when the board is actually in trouble — play the ordinary way on a healthy board, and switch to worst-case thinking when height, crowding, or a backlog of covered discs says the game is close to ending.
+summary: Play normally on a healthy board, then switch to worst-case thinking when height, crowding, or covered discs put the game at risk.
 status: unknown
 evidence: repository-verified
 reads: public
@@ -15,7 +15,7 @@ or a backlog of covered discs says the game is close to ending.
 
 <Callout title="No retained result" tone="warn">
 This lab is complete and gated, and **no outcome for it exists anywhere in
-this repository** — not in the [experiment history](/docs/research/history),
+this repository**, not in the [experiment history](/docs/research/history),
 not in the machine-readable records, not as a task-record note. The
 [experiment index](/docs/research/experiment-index) marks it *unknown*. This
 page describes what the program does, from the program. Nothing on it is a
@@ -40,7 +40,7 @@ three specific things say the game is genuinely close to ending:
 - the board is crowded, **or**
 - there is a **cover backlog**: more closed gray discs than the remaining
   drops before the rise can plausibly open, computed as
-  `covers − 1.4 × drops until the rise` — the same 1.4-reveals-per-move
+  `covers − 1.4 × drops until the rise`: the same 1.4-reveals-per-move
   arithmetic used across this family.
 
 Everywhere else, the policy is the ordinary averaging one.
@@ -62,13 +62,13 @@ Everywhere else, the policy is the ordinary averaging one.
 Five profiles are played on identical paired games: a control with the trigger
 disabled, and early/late triggers at each of the two risk weights.
 
-## What is known, in plain English
+## What is known
 
 That the experiment is designed to answer a sharper question than its
 predecessor did. Because the control profile is included in the same paired
 run, and because switch counts are recorded separately for critical and
 non-critical positions, a completed run would show not just whether the idea
-helps but *how often it intervened* — which is the number that the
+helps but *how often it intervened*, which is the number that the
 conservative-override family has repeatedly needed and repeatedly lacked.
 
 What is not known is any of that. The run is not recorded.
@@ -83,7 +83,7 @@ reading it; it is not a claim that a run occurred.
 Repository-verified from the source: `critical-risk-lab.cpp` defines five
 profiles — `control` (risk weight 0), `early-cvar25`, `early-cvar50` (height
 5, occupancy 20, backlog 4.0) and `late-cvar25`, `late-cvar50` (height 6,
-occupancy 24, backlog 6.0) — a fixed tail fraction of 0.4, and a root
+occupancy 24, backlog 6.0): a fixed tail fraction of 0.4, and a root
 aggregate of `mean × (1 − w) + CVaR × w`. Screen and confirmation cohorts are
 eight games each, from `0x3d700500…` and `0x3d700600…`, at a 500-move cap. The
 underlying policy is the shared bounded phase-safety behaviour search; the

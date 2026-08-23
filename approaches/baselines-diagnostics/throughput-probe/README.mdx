@@ -1,7 +1,7 @@
 ---
 title: Cover-throughput probe
 family: baselines-diagnostics
-summary: Asks whether telling a simple player to care much more about breaking open gray discs makes it live longer — and finds that turning that dial up barely moves anything.
+summary: Asks whether telling a simple player to care much more about breaking open gray discs makes it live longer, and finds that turning that dial up barely moves anything.
 status: rejected
 evidence: task-record only
 reads: public
@@ -54,7 +54,7 @@ The dial did almost nothing. In the recorded reading, the best of the five
 profiles was **nearly flat** against the others, so larger local cover weights
 were not promoted into any policy.
 
-The honest reading is narrow. This rejects *one* mechanism — scaling up
+The conclusion is narrow. This rejects *one* mechanism: scaling up
 immediate, one-move cover rewards inside a shallow hand-written evaluator — and
 it does not reject the underlying idea that reveal flow governs survival. A
 policy can want more reveals per move and still be unable to get them by paying
@@ -66,7 +66,7 @@ from the other direction.
 
 <TechnicalDetails title="The technical record">
 
-**Status: rejected — task-record only.** The
+**Status: rejected; task-record only.** The
 [experiment index](/docs/research/experiment-index) records: "the strongest
 profile was nearly flat, so larger local cover weights were not promoted." No
 per-profile numbers, protocol, artifact hash or per-game data survive, and
@@ -104,5 +104,5 @@ Source: `throughput-probe.cpp`.
   search.
 - The same family's [trajectory throughput](/approaches/baselines-diagnostics/trajectory-throughput)
   study attacks the same question from the measurement side, by asking what
-  clear and reveal rates a much stronger — and privileged — player actually
+  clear and reveal rates a much stronger, and privileged — player actually
   sustains.

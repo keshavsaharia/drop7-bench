@@ -9,7 +9,7 @@ reads: public
 
 Start a network in a state where it *is* the reference search, exactly, then let
 it learn from a locked panel of positions in which every legal column was played
-forward two hundred moves — and see whether training moves it anywhere better.
+forward two hundred moves, and see whether training moves it anywhere better.
 
 <EvidenceLabel status="rejected" evidence="task-record only" reads="public" />
 
@@ -20,7 +20,7 @@ moves worse.
 
 Most learning failures in this repository have an easy excuse available. Either
 the training data only recorded the move that was actually played — the
-[sibling trap](/learn/concepts/ranking-siblings) — or the network started from
+[sibling trap](/learn/concepts/ranking-siblings), or the network started from
 random weights and might simply have landed in a bad place.
 
 This design removes both excuses:
@@ -45,18 +45,18 @@ This design removes both excuses:
 
 1. Load the checksum-locked 477-record panel and verify its hash, its game
    count, and the number of records contributed by each of the 8 origin games.
-2. Encode each position as sparse public features — the 49 cells, the visible
+2. Encode each position as sparse public features: the 49 cells, the visible
    next disc, the rise phase, the candidate column — plus summaries of the
    position after each candidate move.
 3. Train five outputs at once: the residual over depth 4, and four auxiliary
    quantities — mean moves survived, numbered clears, reveals, and a
-   99th-percentile downside — with the ranking losses (pairwise and listwise)
+   99th-percentile downside, with the ranking losses (pairwise and listwise)
    carrying most of the weight and the auxiliaries a small share.
 4. Repeat for each fold, holding out one whole origin game, and compare against
    plain depth 4 on that game's positions: how often the top column matches, how
    often pairs are ordered correctly, and how much value is left on the table.
 
-## What happened, in plain English
+## What happened
 
 The retained outcome is one sentence: it regressed depth-4 search on top-move
 accuracy, pairwise ordering, and leftover value **in every origin fold**.
@@ -77,7 +77,7 @@ here.
 
 <TechnicalDetails>
 
-- Status of record: **rejected — task-record only**
+- Status of record: **rejected; task-record only**
   ([experiment index](/docs/research/experiment-index), "D4 and long-outcome
   research"): "it regressed D4 top-1, pairwise ranking, and regret in every
   origin fold."
@@ -88,14 +88,14 @@ here.
   auxiliary 0.12, one fixed network seed, pool reshuffled every epoch.
 - [`audit-05`](/docs/exploratory/audit-05-optimistic-curriculum) §2.3 quotes the
   source lines that make the zero-initialised residual exact — "the untrained
-  model is exactly always-D4" — and §4 lists this as failure 16 of 17, one of the
+  model is exactly always-D4", and §4 lists this as failure 16 of 17, one of the
   two experiments that actively *refute* the idea that these failures are
   optimisation or initialisation problems.
 - **Scale for the reader.** Two other studies on this same 477-root panel *are*
   recorded with numbers, and they frame what "worse than depth 4" means here: a
   recomputation of exact search on the panel found depth 4 materially better than
   depth 1 on top-move accuracy, pairwise ranking, regret and every origin
-  (completed — task-record only diagnostic), and a hindsight-based ranker charged
+  (completed; task-record only diagnostic), and a hindsight-based ranker charged
   for its information advantage scored **28.93% top-1 against fair depth 4's
   38.16%**, with pairwise 59.85% against 66.82% (ledger-recorded). Both live in
   [terminal policy iteration](/approaches/terminal-policy-iteration).
@@ -112,11 +112,11 @@ here.
 
 - **Sibling coverage alone is not enough.** The repository's most-cited failure
   mode was labelling only the move that was played. Here every move was labelled,
-  and the ranking still regressed — which points at the *labels* rather than at
+  and the ranking still regressed, which points at the *labels* rather than at
   their coverage: at one position, the true long-horizon values of seven columns
   are close together relative to the noise in any affordable measurement of them.
 - **Starting at the answer is not a shortcut.** The zero residual is an elegant
-  safety property — an untrained model that is exactly the reference — but it
+  safety property: an untrained model that is exactly the reference, but it
   does not stop gradient descent from leaving it.
 - **Still open:** whether a label with a smaller noise-to-gap ratio exists at
   all. The strongest signals measured anywhere in this repository are

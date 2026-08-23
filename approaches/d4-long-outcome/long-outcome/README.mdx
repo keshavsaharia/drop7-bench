@@ -1,14 +1,14 @@
 ---
 title: Long outcomes
 family: d4-long-outcome
-summary: Measure what each column is worth by playing it forward twenty-five moves under shared imagined futures, then try five different ways of learning that measurement — all of which ranked moves worse than a cheap exact search.
+summary: Play each column forward for twenty-five moves under shared imagined futures, then learn from those outcomes. All five models ranked moves worse than a cheap exact search.
 status: rejected
 evidence: ledger-recorded
 reads: public
 ---
 
 Measure what each of the seven columns is worth by playing it forward
-twenty-five moves under shared imagined futures — then try to learn that
+twenty-five moves under shared imagined futures. Then try to learn that
 measurement, so a policy can have it without paying for it.
 
 <EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
@@ -37,7 +37,7 @@ splits are always by whole game.
 So the question these experiments ask is narrow and fair: *given a perfect record
 of what each column led to, can a model learn to order them?*
 
-## What happened, in plain English
+## What happened
 
 **Adding a learned correction to exact depth-2 search made the ordering worse.**
 On the fitting positions the correction looked strong — top-move accuracy rose
@@ -47,7 +47,7 @@ overfitting, cleanly caught by splitting on whole games; it failed eight of ten
 component checks.
 
 **The readable feature was real and useless.** A carefully constructed
-"vertical-ladder" measure — how much release potential is stored in a column as
+"vertical-ladder" measure: how much release potential is stored in a column as
 discs are added — correlates with outcomes at roughly 0.01. Fitting it gave it a
 *negative* coefficient in every fold. Stored ladders genuinely exist on these
 boards; they are not what separates a good column from a bad one twenty-five
@@ -56,7 +56,7 @@ moves later.
 **Some things are very learnable, and none of them is the ranking.** The
 multi-output networks predict whether a line survives with a correlation around
 0.85, and numbered clears at around 0.43. The quantity that actually decides the
-move — the return residual — sits at 0.35, downside at 0.33 and variance at 0.14.
+move (the return residual) sits at 0.35, downside at 0.33 and variance at 0.14.
 A shared representation that is good at survival did not become good at choosing.
 
 **More data and more capacity made it worse, not better.** This is the cleanest
@@ -71,7 +71,7 @@ just need a bigger model" hypotheses were both tested here and both failed.
 the trustworthy survival and clear outputs, and only to override depth-4 search
 when an alternative was clearly safer. Of 288 positions, only seven had any
 eligible alternative at all. It made 19 overrides and **zero of them were
-correct**. Its mean return actually rose — by 14,165 — which the ledger flags as
+correct**. Its mean return actually rose — by 14,165, which the ledger flags as
 the exact reason mean-only selection is unsafe here.
 
 **Broadening the readable feature did not help either.** A relaxed version, which
@@ -98,7 +98,7 @@ and later visible discs in independent event-indexed domains. The scaled version
 uses 1,508 fitting roots from 16 whole games (5.236 times the sample) plus 465
 roots from 8 already-burned games.
 
-**Ranker over exact depth 2** (rejected — ledger-recorded):
+**Ranker over exact depth 2** (rejected; ledger-recorded):
 
 | Split / ranker | Top-1 | Top-2 | Pairwise | Normalized regret |
 | --- | ---: | ---: | ---: | ---: |
@@ -110,7 +110,7 @@ roots from 8 already-burned games.
 Failed eight of ten component checks; the first held-out half regressed most
 clearly (top-1 30.56% to 19.44%). No gameplay seed was opened.
 
-**Feature and multi-head audit** (rejected — ledger-recorded, development-only).
+**Feature and multi-head audit** (rejected; ledger-recorded, development-only).
 Ladder alone reached 15.63% fitting top-1; depth 2 + fitted ladder was
 indistinguishable from depth 2; the fitting-only coefficient was −0.02315 and all
 six fold coefficients were negative; ladder pair-difference correlation 0.0133
@@ -122,7 +122,7 @@ on that split: survival 0.854, numbered clears 0.427, return residual 0.350,
 downside 0.325, variance 0.139. A replay verified every persisted scenario return
 with maximum error exactly zero.
 
-**Scaled network** (rejected — ledger-recorded). Only varied factor: 12 against
+**Scaled network** (rejected; ledger-recorded). Only varied factor: 12 against
 48 hidden units, identical epochs, losses, optimizer and folds.
 
 | Split / ranker | Top-1 | Pairwise | Regret | Survival r |
@@ -140,7 +140,7 @@ level bonus, and the source now asserts that dependency so it cannot silently
 rerun against the corrected engine. It is architecture evidence, not
 score-calibrated Hardcore evidence.
 
-**Veto classifier** (rejected — ledger-recorded). Nine public features, balanced
+**Veto classifier** (rejected; ledger-recorded). Nine public features, balanced
 logistic model, switching only above probability 0.90 and only after survival and
 clear prefilters, nested by whole game. Frozen gate: at least 80% precision, 20%
 coverage, 10,000 mean gain, paired-scenario 10th percentile at least −7,000, at
@@ -152,14 +152,14 @@ retention 57.89%; zero of six folds stable. Mean return rose 14,165.41. On the
 burned held-out split: 3 switches against 6 eligible roots, again zero true
 positives, 10th percentile −39,470.31, clear retention 33.33%.
 
-**Curriculum network** (rejected — task-record only; **no ledger entry**).
+**Curriculum network** (rejected; task-record only; **no ledger entry**).
 Artifact-only, 3,072 training and 1,024 held-out states from the frozen 4,096-state
 [public oracle curriculum](/approaches/oracle-curriculum/state-curriculum), every
 action, seven scenarios, horizon 100, five heads, 36 epochs, no gameplay runner
 and no gameplay seed accepted. Retained outcome: survival prediction was useful,
 action ordering regressed versus exact search. No numbers are retained.
 
-**Relaxed chain potential** (rejected — ledger-recorded). Eleven fixed summaries
+**Relaxed chain potential** (rejected; ledger-recorded). Eleven fixed summaries
 over one or two hypothetical drops from each existing first-step outcome, with
 revealed covers becoming inert so no future value is ever queried; ridge residual
 over exact depth 2, six whole-game folds. Raw relaxed pair correlation 0.0505

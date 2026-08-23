@@ -1,7 +1,7 @@
 ---
 title: Constructive spectrum
 family: constructive-reservoir
-summary: Plans a whole five-drop cycle at a time toward a described target board — spread-out heights, reachable covered discs, and stored high numbers that share triggers — and it clearly beat the one-move-ahead reference.
+summary: Plans a five-drop cycle toward a target board with spread-out heights, reachable covered discs, and shared triggers. It clearly beat the one-move-ahead reference.
 status: completed
 evidence: ledger-recorded
 reads: public
@@ -9,7 +9,7 @@ reads: public
 
 Rather than asking "which column scores most now?", this planner asks "what
 should the board look like when the next row rises, and which column heads
-there?" — and on 32 paired games that question was worth 266,696 points against
+there?", and on 32 paired games that question was worth 266,696 points against
 the one-move-ahead reference's 157,198.
 
 <EvidenceLabel status="completed" evidence="ledger-recorded" reads="public" />
@@ -24,7 +24,7 @@ it. Four things make up that picture:
   land;
 - **accessible edge covers** — gray discs that can still be reached and opened,
   rather than buried;
-- **safe caps** — the discs sitting on top of each column should not be ones
+- **safe caps**: the discs sitting on top of each column should not be ones
   that block everything beneath them;
 - **overlapping trigger keys** — stored high-numbered discs whose trigger
   conditions coincide, so that one arriving disc can set off several of them.
@@ -48,7 +48,7 @@ rewarded for simply filling the board.
    one column qualifies, that column is played and no planning happens.
 2. For each shortlisted column, simulate forward to the end of the current
    five-drop cycle plus one further build cycle, with a bounded beam and seven
-   sampled chance outcomes at each step — the horizon adapts between 3 and 7
+   sampled chance outcomes at each step: the horizon adapts between 3 and 7
    moves depending on where in the cycle the position is.
 3. Score the end of each simulated line by the **target picture**, in
    score-like units so that the two rise bonuses inside the horizon still
@@ -81,7 +81,7 @@ and all three were rejected:
   fitting games), but won only 16 joint games and failed the frozen robustness
   gate. Seventeen moves collapsed to 202,634 / 62.0; twenty-seven recovered
   only to 261,633 / 77.9.
-- **Admitting the longer horizon only when it was safe** — a coefficient-free
+- **Admitting the longer horizon only when it was safe**: a coefficient-free
   gate that accepted the 12-move answer over the 7-move one only when it
   dominated on mean return, lower-quartile return, terminal count and flow
   across a shared 21-scenario panel — improved the means again (302,114.9 /
@@ -93,7 +93,7 @@ confirmation cohort.
 
 <TechnicalDetails title="The technical record">
 
-**Status: completed (base planner) — ledger-recorded**, with three rejected
+**Status: completed (base planner); ledger-recorded**, with three rejected
 variants recorded in the same section of the
 [experiment history](/docs/research/history) §"Explicit reservoir and
 constructive-cycle policies (rejected)". All are corrected 17,000-point
@@ -146,4 +146,4 @@ Sources: `constructive-spectrum.cpp`, `constructive-spectrum-depth4.cpp`,
 - The open direction recorded in the [strategy landscape](/docs/strategies) is
   to make multi-cycle comparison between sibling columns affordable and stable
   — cheaper verified continuations, shared random futures across siblings,
-  early elimination — rather than to plan further.
+  early elimination, rather than to plan further.

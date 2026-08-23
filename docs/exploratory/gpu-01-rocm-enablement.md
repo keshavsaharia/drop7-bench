@@ -367,7 +367,7 @@ Two consequences for this document:
 
 ## 7. Verdict: is the iGPU worth using?
 
-**Yes — but be honest about the margin at small scale.**
+**Yes, but the margin is small at this scale.**
 
 - **For 128-channel / 6-block training: use the GPU.** 2-4.5x, with GPU memory a
   non-issue (5.81% of pool at batch 8192) and the gap widening with batch size.

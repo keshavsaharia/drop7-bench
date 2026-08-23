@@ -19,7 +19,7 @@ and `docs/exploratory/` was created or modified.
 | --- | --- |
 | `PREREGISTRATION.md` | the prediction, pass/fail rule, cohorts and budget, written before any gameplay |
 | `build.sh` | builds every target with `clang++` into `build/lifetime-leaf/` |
-| `leaf-probe.cpp` | measures leaf evaluations and distinct leaf states per decision — the feasibility gate that decides which model can play |
+| `leaf-probe.cpp` | measures leaf evaluations and distinct leaf states per decision: the feasibility gate that decides which model can play |
 | `export_net.py`, `net.hpp`, `net-check.cpp` | export the residual CNN to a versioned binary and run it with no libtorch, no BLAS, no dynamic library |
 | `parity_net.py` | numerical parity gate for the CNN, with a determinism guard (see `docs/exploratory/gpu-03-onednn-conv-nondeterminism.md`) |
 | `leaf_features.py`, `train_leaf.py`, `export_leaf.py`, `leafnet.hpp`, `leaf-check.cpp`, `parity_leaf.py` | the leaf-affordable NNUE-shaped student: features, training, export, C++ inference, parity |

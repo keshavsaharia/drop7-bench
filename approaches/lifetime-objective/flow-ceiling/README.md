@@ -13,7 +13,7 @@ which is at the requirement — holds board occupancy flat at ~20 of 49 cells fo
 200 rise cycles, and reached the 1,000-move cap alive in 6 of 6 games. Fair
 depth 4 on identical futures sustains 1.98 and dies at a mean of 117.75 moves.
 
-**But that planner is privileged twice over** — it plans exactly over a window
+**But that planner is privileged twice over**. It plans exactly over a window
 *and* it reads the hidden board. `fair-planner.hpp` removes the two privileges
 one at a time. A **legal** receding-horizon planner (arm B: hidden board and
 future both sampled, `K` determinizations per decision, exact solve of each)
@@ -22,7 +22,7 @@ the requirement — closing 58.8% of the clairvoyant-minus-D4 gap. Knowing the
 future disc tape closes none of it. Every fair game still died.
 
 **Both of those numbers are measured on eight master tapes, which are
-unrepresentative — they favour long games.** On 128 fresh tapes fair depth 4
+unrepresentative. They favour long games.** On 128 fresh tapes fair depth 4
 drops from 117.75 to **93.56** mean moves while the clairvoyant planner, censored
 at the move cap, is unchanged. Re-baselined, the fair planner reaches **2.0260
 clears per move at H = 7, K = 256** (32 fresh tapes) and **2.0445 at H = 5,
@@ -49,10 +49,10 @@ Nothing outside this directory, `build/flow-ceiling/`, `runs/RUN-FLOW-*/` and
 | --- | --- |
 | `flow-common.hpp` | The `MasterTape` (one fixed future for a whole game), the long-game driver, per-move score/flow decomposition, occupancy tracking, and JSON emission |
 | `flow-solver.hpp` | A single-threaded exact window solver with a pluggable per-move objective: **points** (the frozen solver's objective) or **clears** (numbered discs removed). `runRoot()` returns the exact value of every legal opening move |
-| `fair-planner.hpp` | The same planner with the hidden board and/or the future removed and replaced by `K` sampled determinizations — a legal public-information policy. `--sample-threads` solves the K windows in parallel without changing the decision |
+| `fair-planner.hpp` | The same planner with the hidden board and/or the future removed and replaced by `K` sampled determinizations: a legal public-information policy. `--sample-threads` solves the K windows in parallel without changing the decision |
 | `analyze.py`, `compare.py` | Per-cohort tables, and side-by-side clears/reveals by occupancy band |
 | `paired.py` | Paired whole-game comparison on shared master tapes, with one-sided 95% bootstrap lower bounds |
-| `extrapolate.py` | Fits the K series and reports honestly when no finite asymptote is identified |
+| `extrapolate.py` | Fits the K series and reports when no finite asymptote is identified |
 | `pv-replay.cpp` | Replays a solved principal variation through the scenario engine and reports its flow rates, wave depths, score composition and occupancy |
 | `flow-run.cpp` | Receding-horizon clairvoyant long games, the public-policy controls, the self-test and the solver cross-check |
 | `build.sh` | `clang++` build |

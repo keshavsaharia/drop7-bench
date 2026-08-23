@@ -1,7 +1,7 @@
 ---
 title: Evolution
 family: heuristic-search
-summary: Stop arguing about how much each board feature is worth and let a search find the numbers — play thousands of games with slightly different weights, keep the ones that scored best, repeat.
+summary: Let a search tune board-feature weights by playing thousands of games, keeping the best weights, and repeating.
 status: rejected
 evidence: ledger-recorded
 reads: public
@@ -30,9 +30,9 @@ Three programs here try three versions of that:
 
 1. **Linear** — 40 features describing what a move did and what board it left,
    scored as a weighted sum.
-2. **Nonlinear** — the same 40 features fed into a small 12-unit network with
+2. **Nonlinear**: the same 40 features fed into a small 12-unit network with
    505 parameters, first taught to imitate a proper search and then evolved.
-3. **Phase weights** — instead of free parameters, seven interpretable groups
+3. **Phase weights**. Instead of free parameters, seven interpretable groups
    of the existing reference leaf are scaled up or down together.
 
 ## How it works, step by step
@@ -52,13 +52,13 @@ Three programs here try three versions of that:
 
 Step 5 is where all three died.
 
-## What happened, in plain English
+## What happened
 
 Each version learned its training games and gave the gain back on fresh ones.
 
 The nonlinear version failed most informatively, because it was built as a
 funnel that has to pass a checkpoint before it is allowed to spend real
-compute. It first cloned a proper search's decisions — and the clone matched
+compute. It first cloned a proper search's decisions, and the clone matched
 almost all of the actions it was trained on while matching fewer than half of
 the same teacher's actions on states it had not seen. That is a textbook
 distribution shift, caught before a single evolutionary generation ran. It
@@ -128,13 +128,13 @@ during fitting and seven for the final evaluation, and a ranking objective of
   from another weight sweep as a new result without a fresh, paired gate.
 - **A funnel that stops early is a feature.** The nonlinear run cost 30
   seconds because it checked whether its clone generalised *before* spending
-  compute on evolution. That pattern — cheap falsification first — is what the
+  compute on evolution. That pattern (cheap falsification first) is what the
   repository asks of every experiment.
 - **Plausible directions are not a result either.** Two independent methods
   agreed that cover debt and rise readiness are undervalued, and acting on
   that agreement still made the policy worse. Global rescaling of a weight
   group is too blunt an instrument to test the hypothesis it appears to test.
 - **What was ruled out** is these parameterisations, fitted this way. Nothing
-  here rules out learning a leaf — but the successors that tried it, with far
+  here rules out learning a leaf, but the successors that tried it, with far
   more capacity, hit
   [the same wall from the same direction](/learn/concepts/ranking-siblings).

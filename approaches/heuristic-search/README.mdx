@@ -1,6 +1,6 @@
 ---
 title: Hand-built heuristics and shallow search
-summary: Give points to the things about a board that a human would notice — low stacks, open columns, gray discs you can reach, numbers that are nearly ready to clear — add them up, and play the column with the best total.
+summary: Scores visible board traits, adds them together, and plays the highest-valued column.
 ---
 
 Give points to the things about a board that a human would notice — low
@@ -17,7 +17,7 @@ post-mortem almost always ends with a sentence about features.
 ## The intuition, on real boards
 
 Every figure below is the repository's own rules engine playing a scripted
-game — the boards, the points, the clears and the reveals are engine output,
+game: the boards, the points, the clears and the reveals are engine output,
 not drawings. Each one shows a real position and what two of its seven legal
 columns actually do.
 
@@ -31,7 +31,7 @@ drops remain before the next [rise](/learn/glossary) adds seven more.
   before="0000000000000070000068995006888896888888888888888"
   after="0000000000000070000068970006888606888889888888888"
   beforeLabel="Next disc: 5"
-  afterLabel="Column 4"
+  afterLabel="Column 5"
   highlightBefore={[23, 24, 31, 32, 39]}
   highlightAfter={[23, 24, 31, 32, 39]}
   caption="The 5 lands beside another 5 and completes a row-run of exactly five. Two waves follow: three numbered discs clear, three gray discs give up their numbers (one of them is then cleared as well), and one more gray is cracked. 53 points, and the covered count falls from 23 to 20."
@@ -41,10 +41,10 @@ drops remain before the next [rise](/learn/glossary) adds seven more.
   before="0000000000000070000068995006888896888888888888888"
   after="0000000500000070000068995006888896888888888888888"
   beforeLabel="Next disc: 5"
-  afterLabel="Column 0"
+  afterLabel="Column 1"
   highlightBefore={[7]}
   highlightAfter={[7]}
-  caption="The same disc in the leftmost column. Nothing clears, nothing is revealed, no points, and the tallest stack grows from five rows to six — with the rise still coming. A feature-scoring policy is exactly a rule for preferring the first board to this one."
+  caption="The same disc in the leftmost column. Nothing clears, nothing is revealed, no points, and the tallest stack grows from five rows to six, with the rise still coming. A feature-scoring policy is exactly a rule for preferring the first board to this one."
 />
 
 Two features do that work: how tall the stacks are, and how many gray discs
@@ -60,15 +60,15 @@ six of the seven legal columns score zero, and the seventh scores 770.
   before="0000000072320001991007988106888830688888688888888"
   after="0000000002000001302007989106888830688888688888888"
   beforeLabel="Next disc: 6"
-  afterLabel="Column 1"
+  afterLabel="Column 2"
   highlightBefore={[8, 10, 11, 16, 17, 18, 24]}
   highlightAfter={[8, 10, 11, 16, 17, 18, 24]}
-  caption="Five waves from one drop: five numbered discs cleared, two gray discs opened, 770 points, and columns 1, 3 and 4 each fall by one or two rows. The arrangement that made this possible was built several moves earlier — which is why 'chain readiness' is a feature and not just a lucky outcome."
+  caption="Five waves from one drop: five numbered discs cleared, two gray discs opened, and 770 points scored. Columns 2, 4, and 5 each fall by one or two rows. The arrangement was built several moves earlier, which is why 'chain readiness' is a feature and not just a lucky outcome."
 />
 
 ### Where the idea starts to strain
 
-The three jobs — stay alive, open the board, prepare chains — pull against
+The three jobs (stay alive, open the board, prepare chains) pull against
 each other, and a weighted sum has to settle the argument with fixed numbers.
 Here is a position where they disagree. It is three drops from a rise.
 
@@ -76,20 +76,20 @@ Here is a position where they disagree. It is three drops from a rise.
   before="0000000000000000020009006006910601996693588888888"
   after="0000000000000000020009006006910601996610588889098"
   beforeLabel="Next disc: 7"
-  afterLabel="Column 4"
+  afterLabel="Column 5"
   highlightBefore={[38, 39, 45, 46, 47]}
   highlightAfter={[38, 39, 45, 46, 47]}
-  caption="Column 4: three waves, 155 points, three numbered discs cleared and two gray discs opened — one of them in the bottom row. Column 4 empties completely, but the tallest stack is still five rows high."
+  caption="Column 5: three waves, 155 points, three numbered discs cleared, and two gray discs opened. One of them is in the bottom row. Column 5 empties completely, but the tallest stack is still five rows high."
 />
 
 <BoardCompare
   before="0000000000000000020009006006910601996693588888888"
   after="0000000000000000000009007006910201996613588888888"
   beforeLabel="Next disc: 7"
-  afterLabel="Column 3"
+  afterLabel="Column 4"
   highlightBefore={[17, 24, 31, 38]}
   highlightAfter={[17, 24, 31, 38]}
-  caption="Column 3: one wave, 14 points, two numbered discs cleared, one gray opened — and the tallest stack comes down from five rows to four before the rise. The repository's one-ply hand evaluator picks this move over the 155-point one."
+  caption="Column 4: one wave, 14 points, two numbered discs cleared, and one gray disc opened. The tallest stack falls from five rows to four before the rise. The repository's one-ply hand evaluator picks this move over the 155-point one."
 />
 
 Which is right? Nobody in this repository knows. The evaluator traded 141
@@ -109,7 +109,7 @@ demonstration; they are never evidence about a policy's strength.
 ## How a policy in this family works, step by step
 
 1. **Read the public position.** The visible board, the visible next disc, and
-   the [rise clock](/learn/glossary). Nothing else — not the seed, not the
+   the [rise clock](/learn/glossary). Nothing else, not the seed, not the
    hidden gray numbers, not the score. (One member of the family breaks this
    and is flagged where it appears: see [gray throughput](/approaches/heuristic-search/gray-throughput).)
 2. **Simulate each legal column** with the real rules engine. Every disc that
@@ -136,11 +136,11 @@ demonstration; they are never evidence about a policy's strength.
 6. **Play the winning column.** Ties are broken by a fixed order, so the same
    visible position always produces the same move.
 
-Everything the searching members do at chance points — averaging honestly
+Everything the searching members do at chance points, including averaging
 rather than hoping — is explained on the
 [choice-and-chance concept page](/learn/concepts/chance-vs-choice).
 
-## What happened, in plain English
+## What happened
 
 These policies were fast, they were easy to reason about, and several of their
 features survive today inside the reference search's leaf. As complete
@@ -164,7 +164,7 @@ fills needs about **2.4 numbered clears and 1.4 covered reveals per move**.
 winning. The research status page records them as *"diagnostic targets from
 limited runs, not proven universal thresholds"*. The one measurement of the
 gap is exploratory, development tier: over 64 games the depth-4 reference
-sustained **1.973 clears and 1.090 reveals per move** — an 18% and 22%
+sustained **1.973 clears and 1.090 reveals per move**: an 18% and 22%
 shortfall ([finding 01](/docs/exploratory/finding-01-score-is-survival),
 reproduced in this checkout). Several policies in this family were built to
 attack that deficit head-on. None of them closed it.
@@ -220,7 +220,7 @@ this family says which of its numbers are affected.
   lower-quartile survival at all, and its best selective-search wrapper
   reached 272,605.13 points on eight reused fitting games. Rejected before the
   probe cohort was opened.
-- *Exact search* — a three-member root-quadrature ensemble passed a four-game
+- *Exact search*: a three-member root-quadrature ensemble passed a four-game
   screen and then lost its eight-game confirmation 117,066.5 to 162,492.125
   while using about three times the work per move; a fully completed extra ply
   with the older leaf lost its screen 124,172.25 to 149,621.25 at about 24
@@ -244,7 +244,7 @@ this family says which of its numbers are affected.
 - **A whole line of this family is unfinished, not refuted.** Two labs —
   [edge priority](/approaches/heuristic-search/edge-priority) and
   [critical risk](/approaches/heuristic-search/critical-risk) — are complete,
-  gated programs with no located outcome at all. The honest label is
+  gated programs with no located outcome at all. The correct label is
   *unknown*, and running them is cheap.
 - **Human strategy advice has never been tested properly here.** The strategy
   catalog's sixth open direction is to turn plausible human rules — high

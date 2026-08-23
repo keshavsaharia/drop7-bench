@@ -1,4 +1,8 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { DiscFace } from "@/components/discs";
 
 const NAV = [
@@ -16,7 +20,50 @@ function GitHubMark() {
   );
 }
 
+function MenuIcon({ open }: { open: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="24"
+      height="24"
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    >
+      {open ? (
+        <>
+          <path d="M6 6l12 12" />
+          <path d="M18 6L6 18" />
+        </>
+      ) : (
+        <>
+          <path d="M4 6h16" />
+          <path d="M4 12h16" />
+          <path d="M4 18h16" />
+        </>
+      )}
+    </svg>
+  );
+}
+
 export function Header() {
+  const pathname = usePathname();
+  const [openAtPathname, setOpenAtPathname] = useState<string | null>(null);
+  const menuOpen = openAtPathname === pathname;
+
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpenAtPathname(null);
+    }
+
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [menuOpen]);
+
   return (
     <header className="sticky top-0 z-10 border-b border-zinc-800 bg-zinc-950/90 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
@@ -26,7 +73,7 @@ export function Header() {
           </span>
           Drop7 Research
         </Link>
-        <nav className="flex flex-wrap items-center gap-1 text-sm">
+        <nav aria-label="Primary navigation" className="hidden items-center gap-1 text-sm md:flex">
           {NAV.map((item) => (
             <Link
               key={item.href}
@@ -37,11 +84,11 @@ export function Header() {
             </Link>
           ))}
         </nav>
-        <div className="ml-auto flex shrink-0 items-center gap-2">
+        <div className="ml-auto hidden shrink-0 items-center gap-2 md:flex">
           <a
             href="https://github.com/keshavsaharia/drop7-bench"
             rel="noopener noreferrer"
-            className="hidden items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 sm:inline-flex"
+            className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
           >
             <GitHubMark />
             GitHub
@@ -53,7 +100,50 @@ export function Header() {
             Play
           </Link>
         </div>
+        <button
+          type="button"
+          aria-expanded={menuOpen}
+          aria-controls="mobile-navigation"
+          aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
+          className="ml-auto inline-flex size-10 items-center justify-center rounded-md text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400 md:hidden"
+          onClick={() => setOpenAtPathname(menuOpen ? null : pathname)}
+        >
+          <MenuIcon open={menuOpen} />
+        </button>
       </div>
+      <nav
+        id="mobile-navigation"
+        aria-label="Mobile navigation"
+        hidden={!menuOpen}
+        className="border-t border-zinc-800 px-4 pb-4 pt-2 md:hidden"
+      >
+        <div className="mx-auto flex max-w-6xl flex-col gap-1 text-sm">
+          {NAV.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="rounded-md px-3 py-2.5 text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50"
+              onClick={() => setOpenAtPathname(null)}
+            >
+              {item.label}
+            </Link>
+          ))}
+          <a
+            href="https://github.com/keshavsaharia/drop7-bench"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 rounded-md px-3 py-2.5 text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50"
+          >
+            <GitHubMark />
+            GitHub
+          </a>
+          <Link href="/play" className="play-cta mt-2 self-start" onClick={() => setOpenAtPathname(null)}>
+            <span className="play-cta-disc" aria-hidden="true">
+              <DiscFace cell={7} />
+            </span>
+            Play
+          </Link>
+        </div>
+      </nav>
     </header>
   );
 }

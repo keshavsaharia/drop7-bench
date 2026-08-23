@@ -1,14 +1,14 @@
 ---
 title: Fifty million moves, then a two-rise look-ahead
 family: ntuple-rl
-summary: The family's largest training run — a pattern evaluator trained on 50 million moves and searched two row-rises deep — and the search made it worse than just trusting the network.
+summary: The family's largest run trained a pattern evaluator on 50 million moves and searched two row rises deep. Search made it worse than trusting the network alone.
 status: rejected
 evidence: ledger-recorded
 reads: public
 ---
 
 The family's largest training run: a pattern evaluator trained on 50 million
-moves, then searched two row-rises deep — and the search made it worse than just
+moves, then searched two row-rises deep, and the search made it worse than just
 trusting the network.
 
 <EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
@@ -21,7 +21,7 @@ The first is about *what* to learn. Nearly everything else in this family
 regressed the value of the one column the policy happened to play, then had to
 guess about the six it did not. This experiment instead learns the value of a
 position directly, before the next disc is dealt — a
-[chance-state](/learn/concepts/chance-vs-choice) value — so the same learned
+[chance-state](/learn/concepts/chance-vs-choice) value, so the same learned
 number serves every column that leads there. It also starts pooled: all five
 positions in the [rise cycle](/learn/glossary) share one set of tables, and only
 after 20 million moves are the weights copied into five separate phase-specific
@@ -38,7 +38,7 @@ To make two-rise search affordable, it does not average over the whole chance
 tree. For each bundle of sampled outcomes it follows the single sampled outcome
 whose value is closest to the bundle's average, and continues down that line.
 That is a bounded, deterministic **representative-outcome rollout**, not an
-exact fair expectimax — a deliberate approximation, and the one that turned out
+exact fair expectimax: a deliberate approximation, and the one that turned out
 to matter.
 
 ## How it works, step by step
@@ -56,7 +56,7 @@ to matter.
    100,000 simulator calls per decision. A decision that cannot finish is a
    fatal error, not a fallback.
 
-## What happened, in plain English
+## What happened
 
 Training completed exactly as planned: 50 million moves across 1,057,844
 complete games, with no intermediate checkpoint chosen and nothing selected on
@@ -64,7 +64,7 @@ results.
 
 Then the mandatory gate ran, and it rejected the whole family decisively. Just
 playing the network's own first choice scored 181,733 points and 56.4 moves per
-game. Adding the two-rise search — the entire point of the design — dropped it
+game. Adding the two-rise search (the entire point of the design) dropped it
 to 113,644 points and 37.4 moves. It was worse in both halves of the cohort, on
 both score and moves. The gate required at least 300,000 points and 90 moves;
 the search was nowhere near either.
@@ -143,5 +143,5 @@ this family. See
 
 **What it did not rule out.** It rejects this configuration: this target, this
 pooled-then-split schedule, and this representative-outcome rollout. It says
-nothing about a phase-conditioned n-tuple used as the leaf of an honest
+nothing about a phase-conditioned n-tuple used as the leaf of a fair
 [fair search](/approaches/fair-expectimax/reference), which was never run.

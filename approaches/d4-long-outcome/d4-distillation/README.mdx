@@ -1,7 +1,7 @@
 ---
 title: Depth-4 distillation
 family: d4-long-outcome
-summary: Before trying to learn something better than the reference search, check whether a small model can even learn to imitate it — and discover that a cheap exact search does the job better.
+summary: Tests whether a small model can imitate the reference and finds that a cheap exact search does better.
 status: rejected
 evidence: ledger-recorded
 reads: public
@@ -13,7 +13,7 @@ already have?
 
 <EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
 
-The learned part failed. The comparison it was measured against — a plain
+The learned part failed. The comparison it was measured against: a plain
 depth-2 search — turned out to be excellent, and that is the result this
 experiment is actually remembered for.
 
@@ -26,7 +26,7 @@ So it matters a great deal whether depth 4's judgement can be compressed into
 something cheap.
 
 It is also a control experiment. If a model cannot reproduce a deterministic
-function of the public board — which is exactly what depth 4 is — then the
+function of the public board, which is exactly what depth 4 is. Then the
 repeated failures of models trying to learn something *harder* cannot be blamed
 on the horizon or on the noise in long outcomes. Imitation is the easy case.
 
@@ -48,17 +48,17 @@ on the horizon or on the noise in long outcomes. Imitation is the easy case.
    often they order pairs of columns correctly, and how much value they leave on
    the table.
 
-## What happened, in plain English
+## What happened
 
 **The cheap exact search was the surprise.** On held-out games, plain depth-2
 search picked depth-4's own best column **60.5% of the time** and ordered pairs
-of columns correctly **76.7% of the time** — and it costs about 693 times less
+of columns correctly **76.7% of the time**, and it costs about 693 times less
 work per decision than depth 4 does. That is a strong, ledger-recorded ranking
 diagnostic and it is why depth 2 became the standard cheap continuation
 throughout the rest of this family.
 
 **The learned residual added nothing.** It reached 59.4% top-1 and 76.1%
-pairwise — slightly *worse* than the anchor on all three accuracy measures — and
+pairwise (slightly *worse* than the anchor on all three accuracy measures) and
 improved the leftover-value measure by 1.29% against the 5% the protocol had
 demanded in advance. It also failed the required improvements inside each half of
 the held-out games. Its 13,216-byte checkpoint exists and is not worth loading.
@@ -124,8 +124,8 @@ and exact-D2 rollout primitive". Source: `scaled-d4-distill.cpp`.
   reuse the pattern, including one that starts a network as the exact zero
   residual over depth 4 so the untrained model *is* the reference policy.
 - **Learning did not beat searching, even at imitation.** With the easy case set
-  up as favourably as possible — a deterministic target, full valuation vectors,
-  a good anchor — the learned part still could not improve on cheap exact search.
+  up as favourably as possible: a deterministic target, full valuation vectors,
+  a good anchor: the learned part still could not improve on cheap exact search.
   That is a meaningful negative for the whole "compress the search" direction.
 - **Depth 2 is the reusable asset.** It became the continuation inside the
   [rollout veto](/approaches/d4-long-outcome/rollout-veto) and the label

@@ -1,7 +1,7 @@
 ---
 title: Vertical reservoir
 family: constructive-reservoir
-summary: Writes down by hand what a good vertical stack looks like — a ladder of high discs that can be released, a way out if it goes wrong, covered discs still within reach — then tunes those preferences on whole games. It finished behind the one-move-ahead reference.
+summary: Defines a promising vertical stack, tunes those preferences on complete games, and finishes behind the one-move reference.
 status: rejected
 evidence: ledger-recorded
 reads: public
@@ -24,15 +24,15 @@ from the board, without simulating the future at all.
 
 So the evaluator is built out of named, deliberately non-linear quantities:
 
-- **release ladders** — how close a stack is to being exactly releasable by one
+- **release ladders**: how close a stack is to being exactly releasable by one
   more disc, computed exactly rather than approximated;
 - **same-target powers** — several discs sharing one target value, which is
   what makes a stack pay off all at once;
-- **escape wells** — a low, empty column kept as a way out if the structure
+- **escape wells**: a low, empty column kept as a way out if the structure
   goes wrong;
-- **horizontal reachability** and **cover access** — whether covered discs can
+- **horizontal reachability** and **cover access**, whether covered discs can
   still be attacked;
-- **low caps** — the badness of a small number sitting on top of something you
+- **low caps**: the badness of a small number sitting on top of something you
   need.
 
 None of this reads hidden information: it is a description of the visible
@@ -70,7 +70,7 @@ evolve across the rises.
 
 <TechnicalDetails title="The technical record">
 
-**Status: rejected — ledger-recorded.**
+**Status: rejected; ledger-recorded.**
 [Experiment history](/docs/research/history) §"Explicit reservoir and
 constructive-cycle policies (rejected)": 128-game tournament, candidate
 160,498.094 points / 50.891 moves versus fair D1 178,554.438 / 55.750.
@@ -106,5 +106,5 @@ Source: `vertical-reservoir-policy.cpp`.
 - The failure is specific to reading structure from a still board. Simulating
   the cycle forward with the same underlying idea worked much better.
 - This is a valid negative result on one frozen feature set. It does not rule
-  out vertical structure as a *component* — but the one attempt to transfer a
+  out vertical structure as a *component*, but the one attempt to transfer a
   vertical-ladder term into the depth-4 reference also failed.

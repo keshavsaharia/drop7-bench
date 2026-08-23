@@ -206,7 +206,7 @@ clears 2.7444 per move, comfortably above 2.400.
 
 **That 2.7444 is not a sustainable rate.** It is a nine-move number and the
 horizon is doing part of the work: a line ending at move 9 is free to spend
-structure it would otherwise need later. The honest reading is that it is an
+structure it would otherwise need later. The evidence shows that it is an
 upper bracket. The receding-horizon measurement below is the lower bracket, and
 the truth lies between them.
 

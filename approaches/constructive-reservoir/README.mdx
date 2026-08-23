@@ -1,6 +1,6 @@
 ---
 title: Constructive and reservoir policies
-summary: Instead of taking the points that happen to be available, deliberately build a structure that will pay off later — and keep it alive through the rows that keep pushing up from underneath.
+summary: Build structures that pay off later and survive repeated row rises instead of taking only immediate points.
 status: rejected
 evidence: ledger-recorded
 reads: public
@@ -30,7 +30,7 @@ becomes exactly six:
 <BoardCompare
   before="0000000000000000060000006000000600000060008888888"
   after="0000000000000000000000000000000000088898888888888"
-  beforeLabel="the drop stores a 6 — nothing happens"
+  beforeLabel="the drop stores a 6: nothing happens"
   afterLabel="the rise fires the whole stack"
   highlightBefore={[17, 24, 31, 38]}
   highlightAfter={[38]}
@@ -39,7 +39,7 @@ becomes exactly six:
 
 That is the whole family in one picture: a structure that is worthless on the
 move it is built, valuable several moves later, and specifically designed to
-survive — or exploit — the rise in between. The research question is whether a
+survive, or exploit: the rise in between. The research question is whether a
 policy can find and maintain such structures reliably enough to beat a policy
 that simply searches four moves ahead.
 
@@ -68,7 +68,7 @@ rise clock and the terminal flag. Where an oracle appears, it is used to
 ## What happened
 
 The short version: building deliberately across a whole rise cycle really does
-add information that a one-move-ahead policy does not have — and it was still
+add information that a one-move-ahead policy does not have, and it was still
 not enough to displace the four-move search, and made it worse when bolted on
 top of it.
 
@@ -88,7 +88,7 @@ Three results carry most of the weight, all on corrected 17,000-point scoring:
 
 Planning further did not monotonically help either. A 12-move continuation beat
 a 7-move one on the fitting games, but 17 moves was much worse than both and 27
-moves landed back in between — and the 12-move version still failed its
+moves landed back in between, and the 12-move version still failed its
 robustness gate.
 
 <TechnicalDetails title="The technical record">
@@ -132,7 +132,7 @@ deliberately seed-free infrastructure with no gameplay lane at all.
   this, and that a future method "must retain that signal without overriding D4
   on unstable sibling comparisons".
 - **A visible reservoir shape is not a policy.** Making the stored chain
-  explicit — as a feature, as a fitted evaluator, or as a set of discrete
+  explicit, as a feature, as a fitted evaluator, or as a set of discrete
   charge/dig/release options — did not by itself produce one.
 - **Longer sampled rollouts are not automatically more accurate.** Between 7,
   12, 17 and 27 moves of continuation, the ordering was not monotonic; a single

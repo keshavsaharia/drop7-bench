@@ -1,13 +1,13 @@
 ---
 title: Perfect-information oracle
 family: oracle-curriculum
-summary: A planner that is shown the whole future of a game before it plays, to measure what the simulator makes possible — never a policy.
+summary: Show a planner the whole future to measure what the simulator makes possible. It is never a deployable policy.
 status: completed
 evidence: ledger-recorded
 reads: oracle
 ---
 
-A planner that is handed the entire future of a game — every disc that will
+A planner that is handed the entire future of a game: every disc that will
 arrive and every hidden gray number — before it plays, so we can measure how
 long a game *could* last if uncertainty were removed.
 
@@ -31,7 +31,7 @@ third of that. Two very different worlds are consistent with that gap:
 
 Removing uncertainty separates the two. If a planner that knows everything still
 cannot survive, the objective is impossible. If it survives easily, then every
-point of the gap is attributable to not knowing — which is the problem the rest
+point of the gap is attributable to not knowing, which is the problem the rest
 of the repository works on.
 
 ## How it works, step by step
@@ -50,12 +50,12 @@ of the repository works on.
    the planner is effectively told to survive first and score second.
 
 Because chance has been replaced by fact, there are no
-[chance nodes](/learn/concepts/chance-vs-choice) here at all — the whole thing
+[chance nodes](/learn/concepts/chance-vs-choice) here at all: the whole thing
 is a plain search over a known sequence. That is exactly what makes it illegal:
 a real player choosing between seven columns does not know which of them the
 next four discs will reward.
 
-## What happened, in plain English
+## What happened
 
 It survives, comfortably. In a twelve-game cohort it reached the 500-move cap in
 every single game and averaged over a million points, while public depth-3

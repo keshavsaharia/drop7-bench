@@ -7,20 +7,20 @@ order: 1
 Every Drop7 turn is two things glued together. First a **choice**: you pick one
 of seven columns. Then **chance**: the game deals the next disc (any of 1–7,
 equally likely) and, if your move opened a gray disc, shows you a hidden number
-you could not have known. A strategy that only thinks about the choice — "which
-column scores the most right now?" — ignores half the game.
+you could not have known. A strategy that asks only "which column scores the
+most right now?" ignores half the game.
 
-This page builds the idea of *looking ahead* one piece at a time, on a real
+The examples build the idea of *looking ahead* one piece at a time on a real
 position, using numbers computed by the repository's rules engine. The only
 "evaluation" used here is points scored, so you can check every figure by hand.
 
 ## A real position
 
-<RootAndChoices caption="Every board and score on this page is the engine's output for this exact position. The yellow number is the largest immediate score. The position was chosen because the four ways of judging it, shown below, disagree." />
+<RootAndChoices caption="Every board and score is engine output for this exact position. The yellow number is the largest immediate score. The four ways of judging the position disagree, making the tradeoff visible." />
 
-Column 5 looks wonderful: the 1 lands on the stack, clears, the 4 underneath
-finds itself in a column of exactly four and clears too, the 2 falls beside the
-3 and clears as a second wave — 53 points in one move. A player who only looks
+Column 6 looks wonderful: the 1 lands on the stack, clears, the 4 underneath
+finds itself in a column of exactly four and clears too, and the 2 falls beside
+the 3 and clears as a second wave. The move earns 53 points. A player who only looks
 at the present takes it immediately. We will call that player **greedy**.
 
 ## The disc you do not know yet
@@ -28,7 +28,7 @@ at the present takes it immediately. We will call that player **greedy**.
 Now suppose you are a little more patient. You know the *current* disc is a 1.
 You do not know what comes after. But you know the odds exactly: seven
 possibilities, each one in seven. So for each column you could ask: *after I
-play here, what is the best I can do with each possible next disc — and what is
+play here, what is the best I can do with each possible next disc, and what is
 that worth on average?*
 
 That question is a **chance node**, and the average is its **expected value**.
@@ -36,15 +36,15 @@ Here it is for the greedy move:
 
 <ChanceNode column={5} caption="After taking the 53-point chain, the board is almost empty. Whatever disc comes next, the best follow-up is small: the average of the seven best replies is only 14.6 points. The move's fair value is 53 + 14.6 = 67.6." />
 
-And here it is for a quieter move, dropping the 1 in column 0 where it simply
+And here it is for a quieter move, dropping the 1 in column 1 where it simply
 clears on its own for 7 points and leaves the chain structure standing:
 
-<ChanceNode column={0} caption="The board is unchanged except for 7 points banked. Now every possible next disc has a strong follow-up — a 2 sets off a 155-point three-wave chain — and the average reply is worth 69.1. The move's fair value is 7 + 69.1 = 76.1, higher than the 53-point chain." />
+<ChanceNode column={0} caption="The board is unchanged except for 7 points banked. Every possible next disc has a strong follow-up. A 2, for example, starts a 155-point three-wave chain. The average reply is worth 69.1, so the move's fair value is 7 + 69.1 = 76.1. That beats the 53-point chain." />
 
 That is the whole idea of expectimax in one comparison. The greedy move banks
 more now; the patient move is worth more *on average*, because it keeps the
-future open. Neither number required any cleverness — just the willingness to
-enumerate what chance can do.
+future open. Neither number required a clever trick. They came from enumerating
+what chance can do.
 
 ## Four ways to handle the same uncertainty
 
@@ -53,7 +53,7 @@ Averaging is not the only option. You could assume the best disc will come
 (greedy). On this position, these four attitudes pick **three different
 columns**:
 
-<ChanceStyles caption="The same seven columns valued four ways. Greedy and pessimistic both take the 53-point chain (for different reasons: one ignores the future, the other distrusts it). The optimist plays column 3 hoping for a 3 next, which would be worth 155 — and is one chance in seven. The fair player plays column 0 (columns 0, 1 and 2 are identical here; the lowest index is taken)." />
+<ChanceStyles caption="The same seven columns valued four ways. Greedy and pessimistic both take the 53-point chain for different reasons: one ignores the future, while the other distrusts it. The optimist plays column 4 and hopes for a 3 next, a one-in-seven chance worth 155 points. The fair player chooses column 1. Columns 1, 2, and 3 are identical here, so the leftmost tied column wins." />
 
 This is not a toy distinction. Across the research ledger, the repository's
 status summary lists *"fair chance handling matters"* as its first durable
@@ -78,13 +78,13 @@ Because the tree explodes, two tricks are universal:
 
 - **Evaluate, don't finish.** At the bottom of the tree the game is not over, so
   the search needs an opinion about how good each leaf board is. That opinion is
-  the **leaf evaluator** — a hand-written scoring function in the reference
+  the **leaf evaluator**: a hand-written scoring function in the reference
   policy, a learned model in many experiments. The concept page on
   [evaluating a board](/learn/concepts/ranking-siblings) is about how hard that
   opinion is to get right.
 - **Sample the chance.** When enumerating every disc and every hidden reveal is
   too expensive, the search looks at a fixed handful of representative outcomes
-  per chance node — the repository calls these **strata**, usually five or seven.
+  per chance node. The repository calls these samples **strata**, usually five or seven.
   Fewer strata is faster and noisier.
 
 ## A live tree you can search yourself
@@ -99,7 +99,7 @@ an outcome to watch the engine play that transition and carry on from the
 board it leaves behind. Set "below each outcome" to one or two plies to see
 the values move as the search looks further.
 
-<GameTreeFigure seed={0x5eed1001} moves={8} caption="A live expectimax tree on a seeded game, built by the browser solver. The column with the highest expected value is the one a fair search plays; the chance branches carry exact probabilities — one in seven for each next disc, one in seven again for each gray disc a move cracks." />
+<GameTreeFigure seed={0x5eed1001} moves={8} caption="A live expectimax tree on a seeded game, built by the browser solver. A fair search plays the column with the highest expected value. The chance branches carry exact probabilities: one in seven for each next disc, then one in seven for each gray disc the move cracks." />
 
 ## Walk the tree yourself
 
@@ -115,17 +115,17 @@ Put the pieces together and you have the repository's reference policy, **fair
 D4**: a depth-4 search that takes the best column at every choice node, averages
 over chance at every chance node (no optimism, no pessimism), samples five or
 seven strata per chance node, and scores leaves with a hand-tuned evaluator.
-"Fair" also has a second meaning here: it uses only what a real player can see —
-never the hidden gray values, never the random seed.
+"Fair" also means it uses only what a real player can see. It never reads hidden
+gray values or the random seed.
 
-In plain terms, fair D4 is a careful, patient, slightly short-sighted player. On
+Fair D4 is a careful, patient, slightly short-sighted player. On
 its broad reference cohort it averaged about 308,000 points per game over 64
 games, compared with a target of one million. It is the yardstick every other
 idea in this repository is measured against.
 
 ## Why deeper is not automatically better
 
-The natural next question — *so go to depth 5, 6, 7?* — has been asked and
+The natural next question (*so go to depth 5, 6, 7?*) has been asked and
 tested. The status summary records that selective depth 5, full depth 5, and
 cycle-boundary variants *"often spent much more work, sampled chance outcomes
 too noisily, or overrode good D4 actions on unstable estimates."* Deeper trees

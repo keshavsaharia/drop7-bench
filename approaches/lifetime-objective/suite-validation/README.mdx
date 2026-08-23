@@ -1,7 +1,7 @@
 ---
 title: Testing the benchmark instead of the policy
 family: lifetime-objective
-summary: Grade nine policies on a fixed set of 128 saved positions instead of on whole games, then check whether that ranking agrees with how they actually score over complete games — and retire the benchmark when it does not.
+summary: Ranks nine policies on 128 saved positions, compares that ranking with complete games, and retires the benchmark when they disagree.
 status: rejected
 evidence: development-tier exploratory finding
 reads: diagnostic
@@ -48,7 +48,7 @@ So the measurement decomposes like this, over the six real search policies:
 - the rise bonus is **92%** of the scenario score, and across all six policies it
   spans **492 points**;
 - chain reactions are the rest, and span 243 points;
-- board clears — the 70,000-point bonus — contributed **zero**, because in 7,004
+- board clears (the 70,000-point bonus) contributed **zero**, because in 7,004
   scenario plays the board was never emptied.
 
 Meanwhile those same six policies differ by **148,857 points** over complete
@@ -59,15 +59,15 @@ arithmetic fact rather than a noise problem.
 ## How the check works
 
 1. **Build a fair way to score a position.** Hold the board, the hidden numbers
-   underneath it and the rise clock fixed — that is the *position*. Hold the
+   underneath it and the rise clock fixed: that is the *position*. Hold the
    visible next disc fixed too, because a player can see it and it is part of the
-   problem the position poses. Then redraw everything else — every future disc,
+   problem the position poses. Then redraw everything else: every future disc,
    every hidden value of every future risen row — several times, give every policy
    the same redraws, and score a policy by its average.
 2. **Prove it is fair, mechanically.** If a policy leaked any of the redrawn
    future, its first move would change on at least one redraw. Across 8 policies
-   × 24 positions × 4 redraws — **768 decisions — none ever did**.
-3. **Fix the honest half/half split before measuring anything.** The 128
+   × 24 positions × 4 redraws (**768 decisions**), none ever did.
+3. **Fix the half-and-half split before measuring anything.** The 128
    positions are split into a development half and a sealed half by a rule that
    is a pure function of the positions' own content hashes, recorded in a
    manifest with its own hash, so it cannot be quietly reshuffled after a result.
@@ -80,7 +80,7 @@ arithmetic fact rather than a noise problem.
 ## What happened
 
 **The check failed as preregistered.** Rank correlation with whole-game strength
-is **+0.633** across nine policies against a threshold of 0.70 — and across the
+is **+0.633** across nine policies against a threshold of 0.70, and across the
 six real search policies, the ones whose ranking actually matters and which all
 share a single game cohort, it is **−0.257**. The benchmark ranks them slightly
 *backwards*. No secondary metric rescues it: every alternative measure gives a
@@ -90,7 +90,7 @@ correlation between −0.64 and −0.03 on those six.
 every non-searching one by a wide margin, and the three weak baselines come out
 in the right order. Inside the block of real search policies, four of the six
 comparisons have the wrong sign, and the largest whole-game gap in the whole
-set — one policy beating another by **+133,204 points**, a 50% improvement —
+set: one policy beating another by **+133,204 points**, a 50% improvement —
 registers on the benchmark as **minus four points**.
 
 **Its precision makes it more dangerous, not less.** The spread it reports
@@ -122,8 +122,8 @@ whole games ranges from 50× better on one pair of policies to 5,000× worse on
 another, with nothing observable in advance to say which case you are in. **The
 window that makes it valid is the window that makes it expensive.** The
 recommendation is to keep the machinery for the jobs whole games cannot do at
-all — a well-posed clairvoyant optimum, controlled board occupancies, a hidden
-board a teacher can inspect — and retire the ranking claim.
+all: a well-posed clairvoyant optimum, controlled board occupancies, a hidden
+board a teacher can inspect, and retire the ranking claim.
 
 ## The by-product, which may matter more than the check
 
@@ -153,7 +153,7 @@ the *strongest* correlation of all nineteen (+0.627) carries 0.2% of the
 scorer's direction; and two thirds of the direction is spent on a single term
 that the fit wants at essentially zero. The only genuinely absent properties that
 add anything are all one family — **how many gray discs a clearing wave can
-actually reach** — which is the same missing quantity the
+actually reach**, which is the same missing quantity the
 [flow ceiling](/approaches/lifetime-objective/flow-ceiling) work arrived at from
 a completely different direction.
 
@@ -259,7 +259,7 @@ addendum arguing against its own conclusion.
   be uninformative about strength — for a stronger reason than "one sample is
   noisy": the metric does not track the target at that horizon at all.
 - **Horizon is a first-class parameter of a position benchmark**, and this one
-  inherited nine moves from an exact solver's practical limit — a constraint that
+  inherited nine moves from an exact solver's practical limit: a constraint that
   did not apply to the fair evaluation at all. That single inherited choice is
   what broke the check.
 - **Harvest positions from the policy family you intend to rank.** The half of

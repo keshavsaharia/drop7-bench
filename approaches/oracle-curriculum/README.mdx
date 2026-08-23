@@ -1,13 +1,13 @@
 ---
 title: Oracle and curriculum research
-summary: Let a planner cheat — show it the hidden numbers and the discs still to come — then try to teach a player who cannot cheat.
+summary: Let a planner cheat (show it the hidden numbers and the discs still to come) then try to teach a player who cannot cheat.
 ---
 
 Let a planner cheat — show it the hidden gray-disc numbers and the discs that
-are still to come — then try to teach an ordinary player, who sees only the
+are still to come. Then try to teach an ordinary player, who sees only the
 screen, to play the way the cheater did.
 
-A cheating planner is called an **oracle** or a **teacher** — the idea, and the
+A cheating planner is called an **oracle** or a **teacher**: the idea, and the
 line it must never cross, are explained in
 [cheating on purpose](/learn/concepts/oracles-and-teachers) and the
 [glossary](/learn/glossary). It is never a player. Its scores are produced
@@ -75,11 +75,11 @@ move is visible in the narrow slice of information that crosses to the student.
 
 One page here is the odd one out.
 [The hindsight planner](/approaches/oracle-curriculum/hindsight-planner) reads
-no hidden information at all — it *invents* futures from a hash of the public
+no hidden information at all. It *invents* futures from a hash of the public
 board and plans as if each invented future were certain. It sits in this family
 because it fails for the same reason the oracle cannot be copied.
 
-## What happened, in plain English
+## What happened
 
 The cheating planner is enormously strong. On twelve training-only games it hit
 the 500-move cap in every one and averaged more than a million points — under
@@ -115,7 +115,7 @@ cohorts here are also censored at a move cap and scored under the historical
   reveals per move 2.354 / 1.386 against 1.792 / 0.960 (ledger-recorded,
   historical 7,000-point seeds).
 - Action distillation: training cross-entropy 0.480 against held-out top-1
-  **0.218**, top-2 0.386, cross-entropy 3.282 — and the ledger notes the oracle
+  **0.218**, top-2 0.386, cross-entropy 3.282, and the ledger notes the oracle
   and behaviour holdouts were "similarly weak", so this is not merely the
   student visiting unfamiliar boards.
 - [`audit-05`](/docs/exploratory/audit-05-optimistic-curriculum) §5.4 collects
@@ -139,15 +139,15 @@ cohorts here are also censored at a move cap and scored under the historical
 - **State quality and action quality are different measurements.** A separate
   discriminator (in the n-tuple family) separated oracle-visited boards from
   fair boards on public features alone at held-out area-under-curve
-  **0.925 / 0.915**, and the very same scalar, used to rank *moves* as a
-  near-tie tie-break, lost games to plain depth-3 search — 253,798.9 against
+  **0.925 / 0.915**, and the very same scalar, used to break near ties between
+  *moves*, lost games to plain depth-3 search: 253,798.9 against
   301,101.1 points (ledger-recorded, quoted in
   [`audit-05`](/docs/exploratory/audit-05-optimistic-curriculum) §2.4). This is
   the [sibling-ranking problem](/learn/concepts/ranking-siblings) in its
   privileged-teacher form.
 - **Optimism in a label is a trap.** A target realized on a lucky future is not
   a function of the public board, so the best a public model can fit is the
-  average lucky outcome — an over-confident survival estimate, worst exactly on
+  average lucky outcome: an over-confident survival estimate, worst exactly on
   the cluttered boards where confidence kills.
 - **One cheap measurement is still missing.** The restart curriculum re-scores
   every oracle position under independent public futures, but

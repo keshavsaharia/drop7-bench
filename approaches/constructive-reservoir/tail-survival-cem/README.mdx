@@ -1,7 +1,7 @@
 ---
 title: Tail-survival CEM
 family: constructive-reservoir
-summary: Tests whether an existing policy was failing because it was tuned for average score rather than for staying alive — by retuning it, unchanged in every other way, to reach 75, 100, 150, 225 and 300 moves. It barely moved.
+summary: Retunes an existing policy for survival milestones instead of average score while changing nothing else. The result barely moved.
 status: rejected
 evidence: ledger-recorded
 reads: public
@@ -9,7 +9,7 @@ reads: public
 
 If a policy dies too early, perhaps it is because nobody ever asked it to
 survive. This experiment changed one thing about an existing policy — the
-objective it was tuned against — and retuned it to chase survival milestones
+objective it was tuned against, and retuned it to chase survival milestones
 instead of mean score.
 
 <EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
@@ -28,7 +28,7 @@ with rapidly increasing weight for the later milestones. Two details in the
 frozen design are worth noting, because both are aimed at the same failure:
 
 - a milestone's **first** hit in a batch earns only 35% of its rate, with the
-  remaining 65% unlocked by repeated hits — so one lucky game cannot carry a
+  remaining 65% unlocked by repeated hits, so one lucky game cannot carry a
   32-game batch;
 - both mean and lower-quartile survival count, at 55% and 45%, so a policy
   cannot buy its average with a collapsing lower tail.
@@ -62,14 +62,14 @@ games reached 150 moves, and none reached 225**, against an admission floor of
 never opened.
 
 The whole run cost 50,432 complete candidate-games. That is the useful part of
-the result: a large, honest, negative answer to a specific question. Changing
+the result: a large negative answer to a specific question. Changing
 what you ask a fixed linear evaluator to optimise does not make it survive
 longer, because the limit is what that evaluator can express about the board,
 not which summary of the games it is scored by.
 
 <TechnicalDetails title="The technical record">
 
-**Status: rejected — ledger-recorded.**
+**Status: rejected; ledger-recorded.**
 [Experiment history](/docs/research/history) §"Tail-focused complete-game CEM
 (rejected before Stage A)":
 
@@ -82,7 +82,7 @@ Champion detail: lower-quartile lifetime 38.250 moves; clear/reveal flow
 1.800/0.967 per move; 2 of 256 games reached 150 moves; none reached 225.
 Volume: 32 generations, 33,792 fitting candidate-games, plus the re-ranking
 tournament for 50,432 candidate-games in all. Recorded resources: 3,334.006
-seconds and 2,998,272 bytes peak resident memory — as recorded, with no machine
+seconds and 2,998,272 bytes peak resident memory, as recorded, with no machine
 profile attached to it in the ledger. Corrected 17,000-point scoring, checked
 as internally consistent by
 [audit 03](/docs/exploratory/audit-03-claim-arithmetic) rows 4469–4470.
@@ -110,7 +110,7 @@ Source: `tail-survival-cem.cpp`.
 - A different complete-game objective does not rescue an existing linear
   policy. The ledger records this as useful negative evidence, and it is: the
   hypothesis was cheap to state and expensive to test, and it is now closed.
-- Survival milestones remain the right *diagnostic* to report — the fact that
+- Survival milestones remain the right *diagnostic* to report: the fact that
   two games in 256 reached 150 moves is far more informative than the two mean
   scores above.
 - The gap it exposes is between what the objective asks for and what the

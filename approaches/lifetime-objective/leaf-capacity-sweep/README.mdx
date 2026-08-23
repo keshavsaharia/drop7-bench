@@ -1,7 +1,7 @@
 ---
 title: Is the small survival network as accurate as it can be?
 family: lifetime-objective
-summary: Retrain the tiny board-scoring network that already fits inside the search at several widths, depths of training and learning rates, and ask whether any of them predicts remaining lifetime better than the one that played — without playing a single game.
+summary: Retrains the small board evaluator at several sizes and settings to test whether more capacity predicts lifetime better.
 status: completed
 evidence: repository-verified
 reads: teacher
@@ -14,11 +14,11 @@ playing a single game.
 
 <EvidenceLabel status="completed" evidence="repository-verified" reads="teacher" />
 
-## What happened, in plain English
+## What happened
 
 Nothing beat the network that already played. Across thirteen retrainings the
 best configuration was 0.0022 more accurate than the baseline, and the three
-training seeds of the baseline itself spread by 0.0023 — so the difference is
+training seeds of the baseline itself spread by 0.0023, so the difference is
 training noise, and the gate fixed in advance reads *supported-as-tested*: the
 network's accuracy on this corpus is saturated. The revealing part is the
 shape of the failure. Making the network wider lowered its training loss step
@@ -49,7 +49,7 @@ played training games (a teacher signal), and its metric is how well a network
 predicts those futures on games it never saw. It says nothing about playing
 strength: the [learned-leaf experiment](/approaches/lifetime-objective/learned-leaf)
 already found that a 0.008 gap in this metric did not separate two models in
-play. What it can settle is narrower — whether the network's accuracy is
+play. What it can settle is narrower, whether the network's accuracy is
 limited by its size and training, or by what it is shown.
 </Callout>
 
@@ -107,5 +107,5 @@ either way.
 
 ## Sources
 
-- `sweep.sh` — the thirteen-run grid, reading the existing corpus only
-- `summarize.py` — the table and the preregistered gate
+- `sweep.sh`: the thirteen-run grid, reading the existing corpus only
+- `summarize.py`: the table and the preregistered gate

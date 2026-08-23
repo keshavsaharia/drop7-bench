@@ -1,6 +1,6 @@
 ---
 title: Afterstate learning
-summary: Judge the position a move leaves behind rather than the move itself — and build training data in which every column the player could have chosen has been measured, not guessed.
+summary: Judge the position a move leaves behind rather than the move itself, and build training data in which every column the player could have chosen has been measured, not guessed.
 ---
 
 Every earlier learning attempt in this repository was asked, at play time, to
@@ -17,8 +17,8 @@ This family is the direct response to it, and it makes exactly two changes.
 **Change one: value the afterstate, not the action.** An
 [afterstate](/learn/glossary) is the board *after* your disc has landed and all
 the clearing and falling has finished, but *before* the game deals the next
-disc. The evaluator takes only that picture — the board, the next visible disc,
-and how many drops remain before the next rise — and never learns which column
+disc. The evaluator takes only that picture: the board, the next visible disc,
+and how many drops remain before the next rise, and never learns which column
 produced it. A model that cannot see the action cannot take a shortcut through
 the action: it has to judge the position.
 
@@ -61,15 +61,15 @@ measured on equal terms rather than on the luck of seven different futures.
 ## What is in this family
 
 One approach, one registered theory, four preregistered experiments and four
-recorded results — the densest evidence trail in the repository for any recent
+recorded results: the densest evidence trail in the repository for any recent
 idea.
 
-- [Distributional afterstate ranker](/approaches/afterstate-learning/distributional-afterstate)
-  — the corpus builder, the evaluator, and the two questions that were actually
+- [Distributional afterstate ranker](/approaches/afterstate-learning/distributional-afterstate):
+  the corpus builder, the evaluator, and the two questions that were actually
   gated: can this model *replace* the reference search, and can it *correct*
   the reference search where the search is least sure.
 
-## What happened, in plain English
+## What happened
 
 The corpus machinery worked on the first try and kept working: every legal
 sibling received a label in every run, and the mechanics, legality, determinism
@@ -81,7 +81,7 @@ simulate the future, and the future is random, so the label is an average over a
 handful of imagined futures. With too few of them, the "best column" that the
 labels point to is mostly noise: split the futures in half and the two halves
 disagree about which column is best. There is then no trustworthy answer for a
-model to be graded against, and the honest verdict is *inconclusive* rather than
+model to be graded against, and the verdict is *inconclusive* rather than
 pass or fail. It took 256 aligned futures per sibling before the two halves
 agreed well enough for the comparison to mean anything.
 
@@ -95,9 +95,9 @@ A final experiment asked a narrower and more realistic question: leave the
 depth-4 search in charge, and let the model overrule it only where the search
 itself rates its top two columns as nearly equal. That is the first
 preregistered, held-out test in this repository in which a learned model's
-intervention improved on the reference search at all — and it still missed its
+intervention improved on the reference search at all, and it still missed its
 frozen threshold, in one of the two halves, by a small margin. The approach page
-explains why "the mechanism worked and the gate failed" is the honest reading of
+explains why "the mechanism worked and the gate failed" is the supported reading of
 both facts at once.
 
 <Callout title="What this family did and did not settle" tone="info">

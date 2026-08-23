@@ -1,7 +1,7 @@
 ---
 title: Weighting the bad outcomes at the root
 family: fair-expectimax
-summary: Instead of judging a column by its average outcome, judge it partly by its worst outcomes — and find that the resulting policy dies much sooner.
+summary: Instead of judging a column by its average outcome, judge it partly by its worst outcomes, and find that the resulting policy dies much sooner.
 status: rejected
 evidence: ledger-recorded
 reads: public
@@ -18,7 +18,7 @@ cautious player survived longer.
 
 Drop7 scores are heavy-tailed and every game eventually ends. A policy that
 maximises the average can be quietly buying a big average with a small chance
-of dying immediately — and dying immediately costs everything that would have
+of dying immediately, and dying immediately costs everything that would have
 come after. So it is natural to ask the search to be a little afraid: value a
 column not by the mean over the seven futures it examines, but by a blend of
 that mean with the outcomes at the bottom of the distribution.
@@ -37,7 +37,7 @@ result is a clean example of that trade going badly.
 
 1. At the root, take every legal column.
 2. For each, construct exactly seven scenarios from a hash of the public
-   position. A scenario fixes only the **immediate** chance outcome — the next
+   position. A scenario fixes only the **immediate** chance outcome: the next
    disc and any reveal.
 3. Once that outcome is on the board it is observable, so from there the
    unchanged fair search completes two more of the player's moves with the
@@ -49,9 +49,9 @@ result is a clean example of that trade going badly.
    in advance and never retuned.
 5. Play the column with the best blended value.
 
-## What happened, in plain English
+## What happened
 
-The cautious policy was far worse — not marginally, decisively. On the eight
+The cautious policy was decisively worse. On the eight
 fresh games of its screen it scored about 87,000 points and survived 61.5 moves,
 against about 177,000 points and 114 moves for the unchanged search. It lost
 seven of eight games on both score and survival. Its clear and reveal rates per
@@ -100,7 +100,7 @@ blindness, game-seed exclusion, legality, and resource-bound tests all passed.
 
 ## What this taught us, and what is still open
 
-This rejects one specific risk rule — a fixed 75/25 blend of mean and worst-25%,
+This rejects one specific risk rule: a fixed 75/25 blend of mean and worst-25%,
 applied at the root only, over seven immediate-outcome scenarios, on top of the
 depth-3 fair search. It rejects it firmly: the regression is large, consistent,
 and mechanistically legible in the flow numbers.
@@ -119,7 +119,7 @@ is the open experiment; it has not been run.
 
 ## Sources
 
-- `approaches/fair-expectimax/root-risk/fair-root-risk.cpp` — one bounded
+- `approaches/fair-expectimax/root-risk/fair-root-risk.cpp`: one bounded
   risk-sensitive ablation over the reference depth-3 evaluator; seven fixed
   public root scenarios differing only in the immediate chance transition, then
   the exact non-clairvoyant fair continuation for two more moves.

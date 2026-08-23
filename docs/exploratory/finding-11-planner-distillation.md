@@ -332,7 +332,7 @@ Those figures are **optimistic and are not the ceiling**: the half is a subset o
 the whole, so its agreement with the full-256 argmax is nested rather than
 independent. **The independent number is the split-half agreement, 0.8318**, and
 that is what the preregistered gate's ceiling clause uses. The row is quoted for
-its regret column, which is the honest part: half the teacher's compute already
+its regret column, which is the informative part: half the teacher's compute already
 picks columns worth **0.0073** of the root spread less than the best, against the
 student's 0.1915 and fair depth 4's 0.1269.
 
@@ -575,7 +575,7 @@ Evaluated mechanically by `report.py`:
 The preregistered prediction is **refuted on its own terms**: the distilled
 student ranks the fair planner's legal siblings worse than the unmodified fair
 depth-4 search does, on held-out origin games, on all three headline statistics,
-in all five origin folds, at both model sizes. That is the eighteenth honest
+in all five origin folds, at both model sizes. That is the eighteenth recorded
 negative in this repository and it is reported as one.
 
 Stated precisely, with the direction of every bound made explicit:

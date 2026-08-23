@@ -1,13 +1,13 @@
 ---
 title: TypeScript MCTS lab
 family: tree-search
-summary: A small, readable Monte Carlo tree search you can run in a terminal — the one place in the repository where the idea is easy to watch.
+summary: A small Monte Carlo tree search you can run in a terminal and watch one decision at a time.
 status: rejected
 evidence: task-record only
 reads: public
 ---
 
-A small, readable Monte Carlo tree search you can run in a terminal — the one
+A small, readable Monte Carlo tree search you can run in a terminal: the one
 place in the repository where the idea is easy to watch.
 
 <EvidenceLabel status="rejected" evidence="task-record only" reads="public" />
@@ -47,7 +47,7 @@ by the lab in a loop until the game ends.
    least-visited ones. Tree nodes are keyed by the complete visible position,
    so a branch reached by two different routes is the same node, and a
    decision made after a sampled reveal is conditioned on the board that was
-   actually observed — not on a future decided in advance.
+   actually observed, not on a future decided in advance.
 3. When the walk reaches a position the tree has not stored, the simulation is
    finished by a short greedy playout and the resulting board is scored by the
    heuristic evaluator. Dying is charged a large fixed penalty.
@@ -71,16 +71,16 @@ fall back to the bounded playout evaluator rather than growing without bound.
 | `--games` / `--max-moves` | 4 / 1,000 | Size of a run |
 
 The registered playground policy uses a much smaller budget — 400 simulations
-and a sixteen-move horizon — so that a scripted round finishes quickly. Those
+and a sixteen-move horizon, so that a scripted round finishes quickly. Those
 rounds are a demonstration and are never used as research evidence.
 
-## What happened, in plain English
+## What happened
 
 Nothing was retained. The conclusion carried forward from this program is the
 one sentence in the index: ordinary Monte Carlo tree search did not establish a
 whole-game improvement over the reference. That statement is consistent with
 the three ledger-recorded C++ experiments in this family, which failed their
-frozen gates for reasons that were diagnosed in detail — but it is not itself
+frozen gates for reasons that were diagnosed in detail, but it is not itself
 evidence, and it should not be cited as though it were. If this program is ever
 run against fair depth 4 on a paired cohort with a registered protocol, the
 result will be the first real measurement this file has.
@@ -88,7 +88,7 @@ result will be the first real measurement this file has.
 ## What this taught us, and what is still open
 
 - **Provenance is part of a result.** A rejection with no protocol and no data
-  cannot be checked, reproduced, or rescored when the rules change — and the
+  cannot be checked, reproduced, or rescored when the rules change, and the
   scoring rules did change here, from a 7,000-point rise bonus to 17,000.
 - **The cheapest open experiment in this family** is probably not a new idea
   but a registered run of code that already exists: this lab, and the

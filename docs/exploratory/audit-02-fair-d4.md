@@ -314,7 +314,7 @@ score), which from the start of a 308,296-point game is ≈ −308,000 and less
 thereafter. −1,000,000 over-prices death by ≳3.2× at move 0 and by far more
 later.
 
-Two qualifications, stated honestly:
+Two qualifications:
 
 - The over-pricing has **little effect on the score-versus-survival trade-off**,
   because the maximum in-horizon score that could be traded against death is one
@@ -419,7 +419,7 @@ The disc distribution has **7 equiprobable atoms**; the stratification has
   §5's lexicographic risk rule, a missed lethal disc is exactly the error mode
   that flips a decision.
 
-**Fix, with its honest cost.** Setting `chance_samples = 7` makes each stratum
+**Fix and cost.** Setting `chance_samples = 7` makes each stratum
 `[k/7,(k+1)/7)` map to exactly one disc, converting the next-disc chance node
 from a 5-point sample into **exact enumeration with the true 1/7 weights**.
 `validateOptions` already permits up to 32 (`public-behavior.hpp:779`). Worst-case

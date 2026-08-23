@@ -1,14 +1,14 @@
 ---
 title: Adding a rise-cycle residual to the evaluator
 family: fair-expectimax
-summary: Bolt a small extra term onto the board evaluator that cares about where you are in the five-drop cycle before the next row rise — and keep the weights it left behind.
+summary: Adds a small rise-cycle term to board evaluation and preserves the fitted weights for later work.
 status: completed
 evidence: ledger-recorded
 reads: public
 ---
 
-Bolt a small extra term onto the board evaluator — one that cares about where
-you are in the five-drop cycle before the next row rise — and see whether the
+Bolt a small extra term onto the board evaluator: one that cares about where
+you are in the five-drop cycle before the next row rise, and see whether the
 policy plays better. The lasting product of this bench is not the extra term but
 the five frozen evaluator weights it left behind, which the reference search
 still uses.
@@ -19,17 +19,17 @@ still uses.
 
 Drop7's clock is the row rise: every fifth drop, the whole board shifts up and a
 new row of gray discs appears underneath. That means a board is not simply
-"good" or "bad" — it is good or bad *relative to where you are in the cycle*.
+"good" or "bad". It is good or bad *relative to where you are in the cycle*.
 Four drops before a rise, a tall board is survivable and a slow-building plan is
 affordable. One drop before a rise, the same board is an emergency and the same
 plan is worthless.
 
 The evaluator described on the [fair leaf page](/approaches/fair-expectimax/fair-policy)
-has no such clock inside it. This bench adds a **residual** — a separate
+has no such clock inside it. This bench adds a **residual**: a separate
 phase-aware score, added on top of the fixed fair evaluator rather than replacing
 it, so the base behaviour is preserved and only the correction is being tested.
-The residual used here doubles two phase-throughput terms — how ready the board
-is to trigger, and how ready it is to release — so the combined policy pays extra
+The residual used here doubles two phase-throughput terms: how ready the board
+is to trigger, and how ready it is to release, so the combined policy pays extra
 attention to keeping things moving as a rise approaches.
 
 ## How it works, step by step
@@ -38,7 +38,7 @@ attention to keeping things moving as a rise approaches.
    changes.
 2. Compute the phase-aware residual from the same public features plus the
    number of drops remaining before the rise.
-3. Add the residual at one of three fixed scales — 0.25, 0.5, or 1 — chosen
+3. Add the residual at one of three fixed scales (0.25, 0.5, or 1) chosen
    from a menu frozen before any game was played.
 4. Use the combined value as the leaf of a sparse look-ahead search with a
    one-million-unit work limit, a 40,000-entry cache, a 500-move cap, and a flat
@@ -51,7 +51,7 @@ attention to keeping things moving as a rise approaches.
 Everything the policy reads is public: the visible board, the visible next disc,
 and the rise clock.
 
-## What happened, in plain English
+## What happened
 
 Two things, and only one of them is a result.
 
@@ -67,17 +67,17 @@ and no held-out cohort for the residual is retained anywhere in the repository.
 **The bench's weights survived.** In the course of this work the fair evaluator
 was pinned to five explicit overrides, exported from this directory as a named
 constant. The native depth-3 reference imports exactly those five values, and
-everything downstream of it — the four-move reference, and every experiment on
+everything downstream of it: the four-move reference, and every experiment on
 the neighbouring pages — inherits them. The
 [experiment index](/docs/research/experiment-index) records this approach as
-**completed — ledger-recorded**, "it is part of the recovered D3 baseline
-lineage" — that is, the line of work that produced the three-move reference
-search — and that lineage is its real contribution.
+**completed: ledger-recorded**, "it is part of the recovered D3 baseline
+lineage": that is, the line of work that produced the three-move reference
+search, and that lineage is its real contribution.
 
 <TechnicalDetails title="The technical record">
 
 **Source.** `approaches/fair-expectimax/phase-fair-combination/main.ts`.
-Status: **completed — ledger-recorded**.
+Status: **completed; ledger-recorded**.
 
 **The exported constant.** `FAIR_PHASE_BASELINE_WEIGHTS` overrides the
 laboratory's initial fair-policy weights with: direct potential 1,600, latent
@@ -100,7 +100,7 @@ and is inert when the model is used purely as a leaf.
 **What is not retained.** No cohort table, paired comparison, artifact hash or
 confidence bound for the residual itself appears in
 [the ledger](/docs/research/history). The only recorded outcome is the sentence
-quoted above — that every tested residual shortened the two historical
+quoted above: that every tested residual shortened the two historical
 trajectories from 155/160 moves to 55–110 — inside the section describing the
 native recovery of the base evaluator, under historical 7,000-point scoring.
 
@@ -110,7 +110,7 @@ native recovery of the base evaluator, under historical 7,000-point scoring.
 
 The negative half is a useful piece of the family's story: the rise clock is
 obviously important to a human player, and the most direct way of writing it
-into the evaluator — a bolted-on phase term — made the policy die sooner. One
+into the evaluator (a bolted-on phase term) made the policy die sooner. One
 plausible reason is that the searches on these pages already *see* the rise: the
 look-ahead simulates the rise happening, so its consequences are already priced
 into the boards at the bottom of the tree, and an extra phase bonus double-counts

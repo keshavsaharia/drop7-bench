@@ -1,10 +1,10 @@
 ---
 title: Terminal policy iteration
-summary: Choose between moves by actually playing each of them forward many times and seeing which one leads to the longest, highest-scoring games — then change the reference policy's mind only when the evidence is overwhelming.
+summary: Play every move forward many times, then override the reference only when one move produces clearly longer, higher-scoring games.
 ---
 
 Choose between moves by actually playing each of them forward many times and
-seeing which one leads to the longest, highest-scoring games — then change the
+seeing which one leads to the longest, highest-scoring games. Then change the
 reference policy's mind only when the evidence is overwhelming.
 
 ## Why lifetime, and why this family exists
@@ -80,7 +80,7 @@ Do not ask a hand-tuned function how promising a position looks. Play it.
 
 ## How it works, step by step
 
-1. At a position, list **every** legal column — not just the ones a policy
+1. At a position, list **every** legal column, not just the ones a policy
    likes. This is the deliberate cure for the
    [sibling trap](/learn/concepts/ranking-siblings), where a model is trained
    only on moves that were actually played and then asked to rank moves that
@@ -105,7 +105,7 @@ is a classical, well-understood operation; the danger is that noisy measurement
 makes a worse move look better, and a rule that switches on noise is worse than
 no rule at all.
 
-## What happened, in plain English
+## What happened
 
 Every candidate in this family was retired, and the family's most valuable
 output turned out to be a dataset rather than a policy.
@@ -142,19 +142,19 @@ enough to act.
 
 | Approach | Status and evidence | Recorded outcome |
 | --- | --- | --- |
-| [Terminal rollout](/approaches/terminal-policy-iteration/terminal-rollout) | Runtime-paused — task-record only | A faithful full-terminal design projected roughly hundreds of seconds per move |
-| [Public survival rollout](/approaches/terminal-policy-iteration/public-survival-rollout) | Rejected — task-record only | 31 aligned 100-move continuations were worse than fair D1 on fitting games |
-| [Terminal policy iteration](/approaches/terminal-policy-iteration/terminal-policy-iteration) | Rejected — task-record only | 255 aligned 200-move continuations: the gain was real but missed the frozen gates |
-| [Public rollout policy iteration](/approaches/terminal-policy-iteration/public-rollout-policy-iteration) | Rejected — ledger-recorded | 1.0697× score and 1.0256× moves against a 1.20× gate |
-| [Deployment panel](/approaches/terminal-policy-iteration/deployment-panel) | Mixed — see the page | The 477-root corpus, one completed diagnostic, and two rejected rankers |
-| [Public regenerative B0](/approaches/terminal-policy-iteration/public-regenerative-b0) | Rejected — ledger-recorded | Overrode 11 of 477 roots; every gate but one failed |
+| [Terminal rollout](/approaches/terminal-policy-iteration/terminal-rollout) | Runtime-paused; task-record only | A faithful full-terminal design projected roughly hundreds of seconds per move |
+| [Public survival rollout](/approaches/terminal-policy-iteration/public-survival-rollout) | Rejected; task-record only | 31 aligned 100-move continuations were worse than fair D1 on fitting games |
+| [Terminal policy iteration](/approaches/terminal-policy-iteration/terminal-policy-iteration) | Rejected; task-record only | 255 aligned 200-move continuations: the gain was real but missed the frozen gates |
+| [Public rollout policy iteration](/approaches/terminal-policy-iteration/public-rollout-policy-iteration) | Rejected; ledger-recorded | 1.0697× score and 1.0256× moves against a 1.20× gate |
+| [Deployment panel](/approaches/terminal-policy-iteration/deployment-panel) | Mixed. See the page | The 477-root corpus, one completed diagnostic, and two rejected rankers |
+| [Public regenerative B0](/approaches/terminal-policy-iteration/public-regenerative-b0) | Rejected; ledger-recorded | Overrode 11 of 477 roots; every gate but one failed |
 
 **A caveat about the family's name.** The lifetime framing above is the
 motivation, and two of these programs did require a gain in survived moves as
 well as score. But the locked 477-root panel labels siblings by *score return*
 over a truncated continuation, and the panel rankers were judged on how well
 they reproduce that label. Given how tightly score tracks lifetime over whole
-games, these are closely related quantities — but a truncated continuation
+games, these are closely related quantities, but a truncated continuation
 return is not the same thing as a completed game's lifetime, and no experiment
 in this family has ranked siblings by measured lifetime alone.
 
@@ -188,6 +188,6 @@ the summary in [research status](/docs/research/status).
   [strategy catalog](/docs/strategies) calls multi-cycle comparison one of the
   more informative open directions and says the existing implementation is
   neither fast nor robust enough. It also warns that the one striking positive
-  pilot in this line of work — a 25-move rollout veto, which lives in the
+  pilot in this line of work: a 25-move rollout veto, which lives in the
   [D4 and long-outcome](/approaches/d4-long-outcome) family — must not be turned
   into a tuning target.

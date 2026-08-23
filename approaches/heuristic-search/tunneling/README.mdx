@@ -16,7 +16,7 @@ gray discs high up can actually be reached and opened.
 
 A [covered gray disc](/learn/glossary) only opens when a numbered disc clears
 right next to it. A gray disc sitting high on a tall stack, walled in by other
-discs, therefore has nothing that can reach it — and every [rise](/learn/glossary)
+discs, therefore has nothing that can reach it, and every [rise](/learn/glossary)
 pushes it higher and adds seven more underneath it. Human players describe the
 answer as *tunneling*: keep one column low, so its wall of neighbours is
 exposed and you have somewhere to attack from.
@@ -27,7 +27,7 @@ The lab turns that picture into two claims that a program can measure:
   disc on the left or right edge is worse still, because it has one fewer
   horizontal direction from which it can be attacked.
 - A low column earns credit only for the covered cells that can actually be
-  reached from it. A jagged wall of *numbered* discs earns nothing — the source
+  reached from it. A jagged wall of *numbered* discs earns nothing: the source
   comment is explicit that generic board roughness is not the point.
 
 The same file adds a small credit for stacking repeated 5s, 6s and 7s in a
@@ -48,12 +48,12 @@ the same vertical trigger.
    [rollout](/learn/glossary) search over sampled futures.
 5. **Play the best-scoring column.**
 
-## What happened, in plain English
+## What happened
 
 Only half the idea survived its own testing, and the code records which half.
 The **transition** bonus — paying for damage actually done to high or edge
 covers — was supported by paired validation and ships switched on at a quarter
-weight. The **state** residual — scoring the standing shape of the board — was
+weight. The **state** residual (scoring the standing shape of the board) was
 not supported, and ships at weight zero: available for ablations, off by
 default.
 

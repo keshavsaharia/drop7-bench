@@ -8,7 +8,7 @@ reads: public
 ---
 
 The reference [depth-4 search](/approaches/fair-expectimax/reference) is strong
-but slow — it imagines hundreds of thousands of futures per move. This
+but slow. It imagines hundreds of thousands of futures per move. This
 experiment asked whether its *decisions* could be squeezed into a small network
 that reproduces the same ordering of columns in microseconds.
 
@@ -23,7 +23,7 @@ its label gate and never played a game.
 When the depth-4 search finishes a position it has produced more than a chosen
 column: it has a number for every legal column — its **root-Q vector**. A
 learner given the whole vector learns the shape of the decision, not just the
-winner: that column 3 was nearly as good, that column 6 was a disaster.
+winner: that column 4 was nearly as good, while column 7 was a disaster.
 
 The trick that makes this a *ranking* problem rather than a *value* problem is
 normalisation. Each position's vector is rescaled on its own, so a quiet
@@ -33,7 +33,7 @@ scale is deliberately destroyed, because a clone that learned "positions like
 this are worth 40,000 points" would be learning the wrong lesson.
 
 And this is the one place in the family where the training data does *not* have
-[the sibling problem](/learn/concepts/ranking-siblings) — every legal column at
+[the sibling problem](/learn/concepts/ranking-siblings): every legal column at
 every position carries a teacher label, because the search computed them all.
 That makes the outcome below more informative, not less.
 
@@ -67,7 +67,7 @@ so no gameplay run was authorised.
 
 The most useful part of the record is the compounding argument. A policy makes
 hundreds of decisions per game, so a per-move agreement rate is not the thing
-that matters — the ledger works out that at the observed held-out accuracy, a
+that matters: the ledger works out that at the observed held-out accuracy, a
 30-move stretch would contain about 22.6 wrong top choices. The chance of
 matching the teacher across all 30 is effectively zero. A fast approximation of
 a strong search is not a strong policy unless the approximation is *very*
@@ -97,7 +97,7 @@ as well.
 
 Error changed shape rather than disappearing along a trajectory: moves 0–29 gave
 top-1/pairwise 0.20417/0.59128, moves 30+ gave 0.29333/0.55161. Under an
-**explicitly labelled independence proxy — not a real stochastic rollout** — 30
+**explicitly labelled independence proxy, not a real stochastic rollout** — 30
 decisions imply 22.58 wrong top choices on average, a 6.27e-19 chance of
 matching all 30 top choices, 12.79 expected pairwise errors, and 5.70e-8 for
 all-30 pairwise correctness.
@@ -129,7 +129,7 @@ experiment pushed on the data-scale side of that question.
 Note also what the failure is *not*: this training set labelled every legal
 sibling, so the family's usual sibling-extrapolation explanation does not apply
 here. The clone had complete supervision and still could not reproduce the
-teacher on unseen games — which points at capacity and sample count, not at
+teacher on unseen games, which points at capacity and sample count, not at
 data shape.
 
 ## Sources

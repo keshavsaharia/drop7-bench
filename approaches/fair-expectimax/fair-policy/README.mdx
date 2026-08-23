@@ -8,7 +8,7 @@ reads: public
 ---
 
 Every search in this family stops after a few moves and has to say how good the
-board in front of it is. This directory holds that opinion — a hand-written sum
+board in front of it is. This directory holds that opinion: a hand-written sum
 of board features — together with the laboratory it was fitted in and a small
 tool for testing one coefficient at a time on identical games.
 
@@ -28,7 +28,7 @@ board, the visible next disc, and the drops remaining before the next rise.
 A search that looks four moves ahead still has to guess what happens after the
 fourth move. If that guess is "how many points did I score", the policy will
 cash in every chain the moment it can and leave itself an empty board with
-nothing prepared — which the [chance-and-choice walkthrough](/learn/concepts/chance-vs-choice)
+nothing prepared, which the [chance-and-choice walkthrough](/learn/concepts/chance-vs-choice)
 shows losing to a quieter move on a real position.
 
 So the evaluator is written in terms of *what the board can still do*:
@@ -37,14 +37,14 @@ So the evaluator is written in terms of *what the board can still do*:
   positive term, weighted 1,600.
 - **Latent chain potential** — structure that is one step further away,
   weighted 700.
-- **Cover access** — how reachable the buried gray discs are, since revealing
+- **Cover access**: how reachable the buried gray discs are, since revealing
   them is how the board keeps producing usable numbers.
 - and against those, penalties for **height**, for **covered discs sitting high
   up**, for **low numbers clogging** the board, for **danger with a rise
   imminent**, and for other public risks.
 
 The historical recovery notes record one deliberate choice worth calling out:
-the "roughness" penalty — a tidiness term that discourages uneven column
+the "roughness" penalty: a tidiness term that discourages uneven column
 heights — was set to **zero**. The evaluator is allowed to build spiky,
 awkward-looking boards, because that is what a board holding a loaded chain
 looks like. The ledger describes the resulting behaviour as "knife-edge
@@ -71,19 +71,19 @@ and high variance.
    values to test up front, and every candidate is played on exactly the same
    game seeds, so the comparison is paired.
 
-## What happened, in plain English
+## What happened
 
 These runs are the origin of the coefficients everything else in this family
 uses, and the [experiment index](/docs/research/experiment-index) records them
-as **completed — ledger-recorded**, "these runs produced the fair reference
+as **completed; ledger-recorded**, "these runs produced the fair reference
 weights."
 
 Be careful about what that does and does not include. The ledger records the
 *recovery* of the resulting weight vector into the native depth-3 evaluator, and
 the gameplay results of the searches that used it. **It does not retain a result
-record for the tuning runs themselves** — no cohort, no objective value, no
+record for the tuning runs themselves**: no cohort, no objective value, no
 before-and-after comparison for the fitting process. If you want to know how
-strong these weights are, the honest answer is the reference search's numbers on
+strong these weights are, the answer is the reference search's numbers on
 the [reference page](/approaches/fair-expectimax/reference), not anything on
 this page.
 
@@ -99,7 +99,7 @@ mechanism, not a reliable performance mean."
 <TechnicalDetails title="The technical record">
 
 **Sources.** `tune.ts` (the fair-policy laboratory) and `weight-sweep.ts`
-(paired coordinate ablations). Status: **completed — ledger-recorded** in the
+(paired coordinate ablations). Status: **completed; ledger-recorded** in the
 [experiment index](/docs/research/experiment-index).
 
 **Where the weights are pinned.** The native depth-3 evaluator
@@ -154,7 +154,7 @@ Two open items follow directly from what is missing here:
   [transition rewards](/approaches/fair-expectimax/transition-rewards),
   [vertical-ladder energy](/approaches/fair-expectimax/vertical-ladder)) has
   failed on fresh games, which is evidence that the vector is a decent local
-  optimum — not evidence that it is a good one.
+  optimum, not evidence that it is a good one.
 
 ## Sources
 

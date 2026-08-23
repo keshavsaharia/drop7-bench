@@ -1,7 +1,7 @@
 ---
 title: Trajectory throughput
 family: baselines-diagnostics
-summary: Runs a cheating player that can see the hidden numbers alongside honest players on the same games, and compares what each one's board looks like five moves at a time — to find out what a self-sustaining game actually looks like.
+summary: Runs a player that can see hidden numbers beside public-information players on the same games, then compares their boards every five moves to show what self-sustaining play looks like.
 status: completed
 evidence: task-record only
 reads: oracle
@@ -9,7 +9,7 @@ reads: oracle
 
 Line up an ordinary player and a player that is allowed to cheat on the same
 games, chop both games into five-move windows, and compare the windows: what is
-the cheat doing that the honest player is not?
+the privileged player doing that the public-information player is not?
 
 <EvidenceLabel status="completed" evidence="task-record only" reads="oracle" />
 
@@ -23,7 +23,7 @@ trajectory looks like. No score produced by that arm is a policy result. See
 
 ## The intuition
 
-The natural question — "why do our policies die?" — is hard to answer by
+The natural question ("why do our policies die?") is hard to answer by
 staring at final scores, because the answer arrives dozens of moves after the
 mistake. The trick used here is to compare *windows* rather than games.
 
@@ -43,7 +43,7 @@ patterns such as adjacent 1s and triple 2s — and, for the searching arms, the
 search depth and work per move.
 
 The comparison then asks which of those quantities most separates the
-privileged arm from the honest ones. Whatever that is, is a candidate
+privileged arm from the public-information arms. Whatever that is, is a candidate
 description of "a game that sustains itself".
 
 ## How it works
@@ -71,7 +71,7 @@ quotes: roughly **2.4 numbered clears and 1.4 reveals per move** as the region
 associated with games that keep going. The
 [research status](/docs/research/status) carries them with an explicit warning
 attached — "treat these as diagnostic targets from limited runs, not proven
-universal thresholds" — and this page repeats the warning, because the run that
+universal thresholds", and this page repeats the warning, because the run that
 produced them survives only as a task record.
 
 Two later, independently recorded results speak to the same numbers and are
@@ -81,7 +81,7 @@ worth reading next to them:
   and 1.400 rather than measuring them: every five-move cycle puts five placed
   discs plus a seven-disc covered row onto a 49-cell board, so 12/5 and 7/5 are
   the break-even rates. It measures the depth-4 reference at 1.973 clears and
-  1.090 reveals per move over 64 paired games — a structural deficit of 18% and
+  1.090 reveals per move over 64 paired games: a structural deficit of 18% and
   22%.
 - [Finding 06](/docs/exploratory/finding-06-flow-ceiling) measures a
   clairvoyant planner at 2.3663 clears and 1.3832 reveals per move on 64 fresh
@@ -95,7 +95,7 @@ reaching it.
 
 <TechnicalDetails title="The technical record">
 
-**Status: completed — task-record only.** The
+**Status: completed; task-record only.** The
 [experiment index](/docs/research/experiment-index) records: "this analysis
 motivated the approximate 2.4-clear and 1.4-reveal sustainability targets."
 There is no ledger entry, protocol, artifact hash or retained per-window data;
@@ -128,5 +128,5 @@ Source: `main.ts`.
 - A privileged planner shows what a sustained game looks like. It does not show
   how to get there, and none of the legal policies measured since have.
 - The 2.4 / 1.4 pair has survived contact with two later analyses, one of which
-  derives it from the board's arithmetic — but the run on this page is a task
+  derives it from the board's arithmetic, but the run on this page is a task
   record and cannot be re-derived from anything retained here.

@@ -1,7 +1,7 @@
 ---
 title: Nudging a one-move search, from easy and hard starting boards
 family: ntuple-rl
-summary: A learned correction bolted onto a simple search, trained half on fresh games and half on difficult mid-game positions — it improved on the search slightly and stayed far below the reference.
+summary: A learned correction trains on fresh games and difficult mid-game positions. It improved the simple search slightly but stayed far below the reference.
 status: rejected
 evidence: task-record only
 reads: public
@@ -16,7 +16,7 @@ and half on difficult mid-game positions.
 The [experiment index](/docs/research/experiment-index) records this as
 rejected, task-record only: "it modestly improved D1 but remained far below
 sustainable flow and D4." There is no ledger section, no artifact hash, and no
-per-game data, so **no score from this experiment can be quoted** — none was
+per-game data, so **no score from this experiment can be quoted**: none was
 kept. What follows describes the design from the source and from the audit that
 catalogued it.
 </Callout>
@@ -36,7 +36,7 @@ there is a safe fallback by construction.
 
 **Do not only start from the beginning.** A policy trained solely from opening
 boards sees crowded, dangerous mid-game positions only after it has learned to
-survive long enough to reach them — which is exactly the skill it lacks. So half
+survive long enough to reach them, which is exactly the skill it lacks. So half
 of every training round starts from a **restart state**: a public position
 extracted from a long trajectory, replayed forward with a fresh, independent
 random future.
@@ -74,7 +74,7 @@ data". No result number exists to quote.
 The configuration facts above come from the source and from
 `docs/exploratory/audit-05-optimistic-curriculum.md`, which records the mixing
 rule as a fixed 50/50 split of initial and mature-restart episodes per
-iteration, in a **single arm** — the ratio was never ablated, so nothing is
+iteration, in a **single arm**: the ratio was never ablated, so nothing is
 known about whether the curriculum helped, hurt, or did nothing.
 
 From the source: training lane `0x3d670000...0x3d678000`, Stage-A screen
@@ -90,8 +90,8 @@ Source: `curriculum-option-ppo.cpp`.
 ## What this taught us, and what is still open
 
 **A safe-fallback residual is a good pattern, and it recurs.** Several later
-programs in the repository adopted the same structure — an exact search plus a
-zero-initialised learned correction — because it makes "did learning help?" a
+programs in the repository adopted the same structure: an exact search plus a
+zero-initialised learned correction because it makes "did learning help?" a
 well-posed question with a trivially available control. This experiment is an
 early instance.
 
@@ -99,7 +99,7 @@ early instance.
 training appears in at least four programs across this repository, always at a
 fixed ratio and always as a single arm. `docs/exploratory/audit-05-optimistic-curriculum.md`
 concludes that the *order* and *proportion* of oracle-derived and ordinary data
-were never ablated as independent factors — not once. So no page here, including
+were never ablated as independent factors, not once. So no page here, including
 this one, can say whether the curriculum was doing anything.
 
 **Still open, and cheap.** Because the residual reduces exactly to the base

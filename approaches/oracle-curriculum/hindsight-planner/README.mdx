@@ -1,7 +1,7 @@
 ---
 title: Hindsight planner
 family: oracle-curriculum
-summary: Imagine seven complete futures, play each one perfectly as if it were certain, and average — a legal policy that nevertheless cheats itself.
+summary: Imagine seven complete futures, play each as if it were certain, and average the results. The policy is legal but misuses uncertainty.
 status: rejected
 evidence: ledger-recorded
 reads: public
@@ -19,13 +19,13 @@ information**. Its seven futures are invented from a hash of the public board
 itself; the real game seed and the real future never enter it. It sits here
 because it fails for exactly the reason the
 [perfect-information oracle](/approaches/oracle-curriculum/perfect-information-oracle)
-cannot be copied — and because it produced the worst measured result in the
+cannot be copied, and because it produced the worst measured result in the
 repository, which makes it the most instructive failure in it.
 </Callout>
 
 ## Why it looks like a good idea
 
-Uncertainty is what makes this game hard. Averaging over it honestly, as
+Uncertainty is what makes this game hard. Averaging over it without optimism, as
 [fair expectimax](/approaches/fair-expectimax/reference) does, is expensive: the
 tree multiplies at every gray reveal and every new disc. The alternative that
 every planning textbook offers is **determinization**: replace the uncertainty
@@ -39,7 +39,7 @@ and it lets each individual plan look far ahead.
    gets the *same* seven invented futures, so the comparison between columns is
    paired.
 2. For each column and each invented future, run a deep search — depth 8 with a
-   beam of 64 — that treats that invented future as certain: the discs arrive in
+   beam of 64: that treats that invented future as certain: the discs arrive in
    the order the tape says, and the gray discs reveal the numbers the tape says.
 3. Summarise the seven values for each column with a blend of the mean and the
    lower quartile, so a column that is excellent in three futures and fatal in
@@ -50,7 +50,7 @@ and it lets each individual plan look far ahead.
 ## The flaw, in one sentence
 
 Inside each invented future, the planner is allowed to make *later* moves that
-depend on knowing that future — so the value it reports for a column is not "how
+depend on knowing that future, so the value it reports for a column is not "how
 good is this column", it is "how good is this column **if I am also allowed to
 respond to information I will not have**".
 
@@ -59,17 +59,17 @@ perfect-information oracle unbeatable and useless. Each individual plan is
 coherent; the plans are incompatible with one another, and averaging
 incompatible plans produces a systematically over-optimistic number. Worst of
 all, the bias is not uniform: it is largest exactly on cluttered boards where a
-favourable reveal is the only thing that saves you — the boards where
+favourable reveal is the only thing that saves you: the boards where
 over-confidence is fatal.
 
-## What happened, in plain English
+## What happened
 
 It lost half the game. On its fresh four-game screen, ordinary depth-3 search
 averaged about 107,000 points and 72.5 moves; the hindsight planner averaged
 about 51,500 points and 37.5 moves — less than half the score and roughly half
 the lifetime. Under the protocol the confirmation seeds were never opened. The
 ledger's diagnosis is explicit: "tape-specific later decisions make the per-tape
-root values incompatible and overoptimistic — the familiar strategy fusion
+root values incompatible and overoptimistic: the familiar strategy fusion
 failure of determinization."
 
 There is a striking follow-up elsewhere in the repository. A later study swept

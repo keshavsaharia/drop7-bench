@@ -22,7 +22,7 @@ corrupt numbers the rest of the repository was relying on.
 strength is made anywhere in this package.** It measures matrix throughput,
 training throughput, and numerical correctness. Every throughput number was
 taken on a **heavily contended machine** — other jobs held 20 to 50 of the 32
-logical CPUs throughout — and is reported as best-of-N, which bounds the effect
+logical CPUs throughout, and is reported as best-of-N, which bounds the effect
 but does not remove it. The figures are **lower bounds**. A brief quiet window
 suggested the GPU numbers are around 1.8 times pessimistic. Nothing here
 qualifies as a clean performance baseline, and the exploratory record says so
@@ -35,7 +35,7 @@ The package is one benchmark and correctness harness plus an environment script,
 and it runs four independent stages:
 
 1. **Probe.** Reports what is actually installed — interpreter, framework, GPU
-   runtime, device properties — so that a later result can be attributed to a
+   runtime, device properties, so that a later result can be attributed to a
    configuration.
 2. **Verify.** Checks that the GPU computes *correct* results, scored against a
    double-precision reference on the CPU rather than against single-precision
@@ -108,7 +108,7 @@ about the GPU at all.
 **Multithreaded single-precision matrix multiply on this CPU returns wrong
 answers.** Once the numerical library uses four or more threads, roughly 0.1% to
 1% of output elements come back wrong — by around 10, five orders of magnitude
-beyond legitimate rounding — and differently on every run for byte-identical
+beyond legitimate rounding, and differently on every run for byte-identical
 inputs. That makes it a data race, not a precision effect. Double precision
 never reproduced it; one and two threads never reproduced it; and a *different*
 maths library performing the same multiplication on the same CPU, in the same
@@ -121,19 +121,19 @@ same convolution over the same input, in evaluation mode, with every thread coun
 pinned to one, differ in about 6.25% of output elements. At whole-model scale the
 effect is larger, because normalisation mixes channels: repeated passes of a
 three-million-parameter network over an identical batch differ in **100%** of
-outputs. This silently invalidated a parity check — a comparison that reported a
+outputs. This silently invalidated a parity check: a comparison that reported a
 maximum difference of 1.1e-5 reported failure on every head twenty minutes later,
 and neither run was wrong about the code being tested. The *reference* had moved.
 
 <Callout title="Why this matters beyond the GPU work" tone="warn">
 Any measurement in this repository that compares something against a CPU-side
-neural reference — an export check, a distillation target, a held-out metric, a
+neural reference: an export check, a distillation target, a held-out metric, a
 teacher label — is measuring that comparison plus an unknown perturbation,
 unless the affected path was disabled or the work ran on the GPU. The rule the
 record settles on is: **prove your reference repeats before comparing anything
 to it.** More generally, the corruption was found only because a GPU check
 compared against a CPU reference and the *reference* was what failed. The
-natural reading — "the GPU disagrees with the CPU, so the GPU is wrong" — was
+natural reading ("the GPU disagrees with the CPU, so the GPU is wrong") was
 exactly backwards, and what resolved it was a third, higher-precision arm.
 Given how much of this repository's evidence is a candidate compared against a
 baseline, "the baseline is the broken one" is a failure mode worth keeping on
@@ -168,7 +168,7 @@ load 7.3 to 18.9: GPU 7,360 / 11,405 / 17,450 / 18,726 against CPU 5,892 / 5,039
 **Matrix throughput.** In the table taken at host load 29.8 to 34.6, bf16 peaked
 at 15.64 TFLOP/s and fp32 at 1.39 TFLOP/s. In the least-contended window of the
 whole session the same sweep reached **27.76 TFLOP/s bf16** and 2.60 TFLOP/s
-fp32, roughly 1.8 times higher — the clearest single illustration of what the
+fp32, roughly 1.8 times higher: the clearest single illustration of what the
 shared host costs these measurements. Two structural observations that are not
 contention artifacts: bf16 is 11 to 14 times faster than fp32 because this GPU
 has matrix cores for bf16 and not for fp32, and the fp32 path reaches only about
@@ -218,8 +218,8 @@ not edited, as it belongs to another work package.
 ## What this taught us, and what is still open
 
 The practical verdict is narrow and useful: **only the neural training step
-belongs on the GPU.** Game simulation stays on the CPU — nothing here suggests
-otherwise — and any training loop that intends to use the GPU should be written
+belongs on the GPU.** Game simulation stays on the CPU: nothing here suggests
+otherwise, and any training loop that intends to use the GPU should be written
 to push large batches in bf16, because that is where the hardware's advantage
 lives.
 

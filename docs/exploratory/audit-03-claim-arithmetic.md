@@ -762,7 +762,7 @@ eleven on n = 1. `docs/benchmarks.md` classifies 1–8 games as `PILOT` with "no
 strength claim". Single-game rows: history.md 568, 1465 (×4), 1688–1690 (×5),
 1886, 1949–1950, 2003, 2167–2168, 2255–2256, 2763–2766. Four-game rows: 226,
 296, 514, 554, 640, 658, 673, 687, 793, 962, 1697, 2176, 2768, 3335, 3707, 4425.
-The ledger is generally honest about this in prose (e.g. 1823–1825, 1830–1832,
+The ledger generally states this correctly in prose (e.g. 1823–1825, 1830–1832,
 922–923, 2263), but `experiment-index.md` and `status.md` frequently carry the
 resulting numbers forward without the caveat.
 

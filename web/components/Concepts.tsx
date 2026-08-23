@@ -113,7 +113,7 @@ export function RootAndChoices({ caption }: { caption?: string }) {
           {tree.columns.map((c, i) => (
             <g key={c.column} transform={`translate(${i * 108} 0)`}>
               <text x={0} y={-8} fontSize={10.5} fontFamily={FONT} fill={INK_3}>
-                column {c.column}
+                column {c.column + 1}
               </text>
               {c.legal && c.board ? (
                 <>
@@ -164,7 +164,7 @@ export function ChanceNode({
   if (!tree) return <Missing what="The look-ahead position" />;
   const node = tree.columns.find((c) => c.column === column);
   if (!node || !node.legal || !node.branches || !node.board) {
-    return <Missing what={`Column ${column}`} />;
+    return <Missing what={`Column ${column + 1}`} />;
   }
   const branches = node.branches;
   const t = 11;
@@ -177,9 +177,9 @@ export function ChanceNode({
   const total = branches.length * secondsPerBranch + 2.4;
   return (
     <figure className="engine-fig">
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Chance node after playing column ${column}`}>
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Chance node after playing column ${column + 1}`}>
         <text y={14} fontSize={13} fontFamily={FONT} fontWeight={700} fill={INK}>
-          After column {column} (+{fmt(node.points ?? 0)} now): which disc comes next?
+          After column {column + 1} (+{fmt(node.points ?? 0)} now): which disc comes next?
         </text>
         <text y={32} fontSize={11} fontFamily={FONT} fill={INK_2}>
           Seven possibilities, each equally likely. For each one, the best immediate reply and what it scores.
@@ -200,7 +200,7 @@ export function ChanceNode({
                 </g>
                 {b.best && <MiniBoard cells={b.best.board} y={20} s={t} />}
                 <text x={0} y={20 + 7 * t + 14} fontSize={10.5} fontFamily={FONT} fill={INK_2}>
-                  reply: column {b.best?.column ?? "—"}
+                  reply: column {b.best ? b.best.column + 1 : "—"}
                 </text>
                 <rect x={0} y={20 + 7 * t + 22} width={barW} height={8} rx={3} fill="#1f1f23" />
                 <rect x={0} y={20 + 7 * t + 22} width={(p / max) * barW} height={8} rx={3} fill={BLUE} />
@@ -228,7 +228,7 @@ export function ChanceNode({
         <g transform={`translate(0 ${7 * t + 150})`}>
           <path d={`M0,0 H${W - 8}`} stroke={GRID} />
           <text y={22} fontSize={12.5} fontFamily={FONT} fontWeight={700} fill={INK}>
-            Fair value of column {column} = {fmt(node.points ?? 0)} now + average of the seven best replies
+            Fair value of column {column + 1} = {fmt(node.points ?? 0)} now + average of the seven best replies
           </text>
           <text y={40} fontSize={12} fontFamily={FONT} fill={INK_2}>
             = {fmt(node.points ?? 0)} + ({values.map(fmt).join(" + ")}) ÷ 7 = {fmt(node.points ?? 0)} + {fmt(avg)} = <tspan fontWeight={700} fill={INK}>{fmt(node.fair ?? 0)}</tspan>
@@ -294,10 +294,10 @@ export function ChanceStyles({ caption }: { caption?: string }) {
                 const chosen = c.column === pick;
                 return (
                   <g key={c.column}>
-                    <title>{`${st.title}: column ${c.column} = ${fmt(v)}`}</title>
+                    <title>{`${st.title}: column ${c.column + 1} = ${fmt(v)}`}</title>
                     <rect x={x} y={56 + (barMaxH - h)} width={16} height={h} rx={3} fill={chosen ? ACCENT : BLUE} opacity={c.legal ? 1 : 0.2} />
                     <text x={x + 8} y={140} textAnchor="middle" fontSize={9.5} fontFamily={FONT} fill={chosen ? ACCENT : INK_3} fontWeight={chosen ? 700 : 400}>
-                      {c.column}
+                      {c.column + 1}
                     </text>
                     {chosen && (
                       <text x={x + 8} y={56 + (barMaxH - h) - 4} textAnchor="middle" fontSize={9.5} fontFamily={FONT} fontWeight={700} fill={INK}>
@@ -308,7 +308,7 @@ export function ChanceStyles({ caption }: { caption?: string }) {
                 );
               })}
               <text x={10} y={154} fontSize={9.5} fontFamily={FONT} fill={INK_2}>
-                picks column {pick}
+                picks column {pick + 1}
               </text>
             </g>
           );
@@ -328,7 +328,7 @@ export function ChanceStyles({ caption }: { caption?: string }) {
           <tbody>
             {tree.columns.map((c) => (
               <tr key={c.column}>
-                <td>{c.column}{c.legal ? "" : " (full)"}</td>
+                <td>{c.column + 1}{c.legal ? "" : " (full)"}</td>
                 {styles.map((st) => (
                   <td key={st.key}>{c.legal ? fmt(st.value(c)) : "—"}</td>
                 ))}
@@ -421,7 +421,7 @@ export function SiblingTrap({
                   {seen ? "labelled" : "no label"}
                 </text>
                 <text x={0} y={7 * t + 40} fontSize={10} fontFamily={FONT} fill={INK_3}>
-                  column {c.column}
+                  column {c.column + 1}
                 </text>
               </g>
             );

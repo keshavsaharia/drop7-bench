@@ -7,7 +7,7 @@ evidence: ledger-recorded
 reads: public
 ---
 
-A board is only "worth" something on average — the same position can die in ten
+A board is only "worth" something on average: the same position can die in ten
 moves or run for two hundred, depending on which discs arrive. Earlier value
 models learned from a single played future, which meant every label was mostly
 noise. This one re-simulates each position 32 times and learns the average.
@@ -68,7 +68,7 @@ signal, not the luck.
    phase-safety policy, and a position is kept every three moves. Positions are
    canonicalised (reflections folded together) and de-duplicated.
 2. **Strip the history.** Each kept position is rebuilt from the visible board,
-   the next disc and the [rise clock](/learn/glossary) alone — no score, level,
+   the next disc and the [rise clock](/learn/glossary) alone: no score, level,
    move index, game seed or history. The model can only see what a player sees.
 3. **Label it by simulation.** Each position is played forward 32 times, capped
    at 50 moves, by a fixed public depth-1 continuation policy. Only the luck
@@ -89,7 +89,7 @@ signal, not the luck.
 Steps 1–5 are a prediction problem; step 6 is where every model in this family
 has historically come apart. Note that the model still only ever ranks
 siblings it was not trained on — see
-[the sibling trap](/learn/concepts/ranking-siblings) — which is why the
+[the sibling trap](/learn/concepts/ranking-siblings), which is why the
 deployment rule is so heavily hedged.
 
 ## What happened
@@ -101,14 +101,14 @@ well calibrated. Every gate that had been declared before the run passed.
 
 **The play part is a small, hedged, positive signal.** In an eight-game
 confirmation the corrected policy survived longer on average than the policy it
-was correcting — 79.5 to 88.125 mean moves — while switching about 2.6 times a
+was correcting — 79.5 to 88.125 mean moves, while switching about 2.6 times a
 game. But the confidence bounds on that gain were negative, meaning eight games
 cannot rule out that it was luck; the experiment was never repeated; and the
 baseline it improved was *not* the strong depth-4 reference.
 
 **Both attempts to make it useful in a stronger setting failed.** A version
 that let the model veto a guided ensemble passed a four-game screen by a wide
-margin and then reversed on the eight-game confirmation — a textbook false
+margin and then reversed on the eight-game confirmation: a textbook false
 positive. A version bolted onto fair depth-4 search, allowed to act only at the
 one moment the search cannot see through the coming row rise, made zero
 switches in its first paired game and then exceeded its runtime budget, so it
@@ -148,7 +148,7 @@ Retained artifact: `artifacts/models/denoised-value/v1.bin`, 35,395 parameters,
 the verified 17,000-point Hardcore bonus. The exploratory audit in
 [`audit-03`](/docs/exploratory/audit-03-claim-arithmetic) flags this as
 internally contradictory (finding L1) and notes that **no point means were
-retained for the screen or the confirmation at all** — only move means — so the
+retained for the screen or the confirmation at all** — only move means, so the
 only defensible gameplay statement is the survival improvement quoted above.
 
 </TechnicalDetails>
@@ -163,7 +163,7 @@ predicted capped-50 lifetime advantage exceeds the model's own held-out MAE of
 
 Under historical 7,000-point Sequence scoring, the four-game `0x3e840000…003`
 screen looked strong: ensemble 126,146 points / 85.5 moves versus veto 184,649.25
-/ 121.25, deltas +58,503.25 and +35.75 — with 95% lower bounds already negative
+/ 121.25, deltas +58,503.25 and +35.75, with 95% lower bounds already negative
 at −27,421.531 and −14.210. Seven of 485 moves were vetoes (1.443%), or 8.537%
 of the 82 disagreements.
 
@@ -181,7 +181,7 @@ swept and the screen seeds were not reused.
 Source: `d4-phase5-value-veto.cpp`. Status **runtime-paused**, evidence
 **ledger-recorded**. Fair D4 completes first and remains the default; the model
 is routed only when the rise clock is exactly 5 and the tallest column is at
-least 4 high — the situation D4 cannot see through, because the covered row due
+least 4 high: the situation D4 cannot see through, because the covered row due
 in five drops would then push the board to height five or more.
 
 Only the first paired fitting seed `0x3de90000` was opened. Baseline and
@@ -194,7 +194,7 @@ against a fixed projection of 3,580.240 s for the full design, above the
 2,700-second limit, so the experiment paused before its heldout, screen and
 confirmation seeds were opened.
 
-This is pilot-only evidence — not a rejection and not a qualification. The
+This is pilot-only evidence, not a rejection and not a qualification. The
 [blind-spot audit](/docs/exploratory/audit-04-blind-spots) records it as the
 most confounded entry in the corpus: the best-predicting model in the repository
 was given a rule so tight that **zero information about the hypothesis was
@@ -223,6 +223,6 @@ audit rather than a closed question.
 ## Sources
 
 - `denoised-stochastic-value.cpp` — collection, labelling, fitting, gates.
-- `denoised-guided-veto.cpp` — the veto of the guided ensemble.
-- `d4-phase5-value-veto.cpp` — the phase-5 veto over fair D4.
+- `denoised-guided-veto.cpp`: the veto of the guided ensemble.
+- `d4-phase5-value-veto.cpp`: the phase-5 veto over fair D4.
 - Checkpoint: `artifacts/models/denoised-value/v1.bin`.

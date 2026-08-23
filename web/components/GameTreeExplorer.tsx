@@ -108,7 +108,7 @@ function ChoiceNode({ data }: NodeProps<Node<ChoiceNodeData, "choice">>) {
   return (
     <div className={`tree-node tree-node--choice${data.best ? " tree-node--best" : ""}${data.expanded ? " tree-node--expanded" : ""}`}>
       <Handle type="target" position={Position.Top} className="tree-handle" />
-      <div className="tree-node__title">column {data.column}</div>
+      <div className="tree-node__title">column {data.column + 1}</div>
       <div className="tree-node__big">{formatValue(data.value)}</div>
       <div className="tree-node__subtitle">expected value · {depthNote}</div>
       <div className="tree-node__meta">
@@ -166,7 +166,7 @@ function layout(tree: GameTree, expandedColumn: number | null, presentation: Pre
       id: `choice-${choice.column}`, type: "choice", position: { x, y: CHOICE_Y }, draggable: false, selectable: false,
       data: { column: choice.column, disc: root.nextDisc, value: choice.value, expectedScore: choice.expectedScore, best: tree.bestColumn === choice.column, expanded, mergedOutcomes: choice.mergedOutcomes, streamedOutcomes: choice.streamedOutcomes, unlisted: choice.unlisted, depthUsed: choice.depthUsed, leafDepth: tree.leafDepth },
     });
-    edges.push({ id: `e-root-${choice.column}`, source: "root", target: `choice-${choice.column}`, label: `drop the ${root.nextDisc} in column ${choice.column}`, animated: tree.bestColumn === choice.column, className: tree.bestColumn === choice.column ? "tree-edge tree-edge--best" : "tree-edge", labelBgPadding: [4, 2], labelBgBorderRadius: 4 });
+    edges.push({ id: `e-root-${choice.column}`, source: "root", target: `choice-${choice.column}`, label: `drop the ${root.nextDisc} in column ${choice.column + 1}`, animated: tree.bestColumn === choice.column, className: tree.bestColumn === choice.column ? "tree-edge tree-edge--best" : "tree-edge", labelBgPadding: [4, 2], labelBgBorderRadius: 4 });
     if (!expanded) return;
     const listed = choice.outcomes;
     const slots = listed.length + (choice.hiddenProbability > 0 ? 1 : 0);
@@ -294,7 +294,7 @@ export function GameTreeExplorer({ seed: initialSeed, moves: initialMoves, leafD
     setAnimating(true);
     const reduced = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     const realized = realizeTransition(tree.root, choice.column, outcome);
-    setNote(realized.matched ? `engine transition for column ${choice.column} (${realized.attempts} realisation${realized.attempts === 1 ? "" : "s"} tried)` : "the engine's random realisation differed from the listed outcome; showing the listed board");
+    setNote(realized.matched ? `engine transition for column ${choice.column + 1} (${realized.attempts} realisation${realized.attempts === 1 ? "" : "s"} tried)` : "the engine's random realisation differed from the listed outcome; showing the listed board");
     if (!reduced && realized.frames.length > 0) {
       setPresentation({ board: serializeBoard(tree.root.board) });
       if (await wait(PRE_DROP_HOLD_MS, controller.signal)) {
@@ -426,7 +426,7 @@ export function GameTreeExplorer({ seed: initialSeed, moves: initialMoves, leafD
         <span><b>MAX node</b> the position; the search picks the column with the highest expected value.</span>
         <span><b>chance branches</b> every exact outcome of a drop — the next disc, and what any cracked gray disc turns out to be — weighted by its probability.</span>
         <span><b>leaf</b> the opinion of the board scorer where the look-ahead stops. Click a column to expand it; click an outcome to play that transition and continue from it.</span>
-        <span className="tree-legend__muted">Columns are numbered 0–6 from the left. Values come from the browser solver and are a demonstration, never research evidence; seed {hexSeed(seed)} is the same game as <a href={`/play?seed=${hexSeed(seed)}`}>/play</a>.</span>
+        <span className="tree-legend__muted">Columns are numbered 1–7 from the left. Values come from the browser solver and are a demonstration, never research evidence; seed {hexSeed(seed)} is the same game as <a href={`/play?seed=${hexSeed(seed)}`}>/play</a>.</span>
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 ---
 title: Turning the reference search's constants into dials
 family: lifetime-objective
-summary: A copy of the reference search whose death penalty, look-ahead depth and number of chance samples can be set at run time, built to find out whether either dial makes the policy survive longer.
+summary: Makes death penalty, search depth, and chance samples configurable to test which settings improve survival.
 status: completed
 evidence: reproduced
 reads: public
@@ -14,7 +14,7 @@ assumed.
 
 <EvidenceLabel status="completed" evidence="reproduced" reads="public" />
 
-Two sweeps have been run through it. The first — the one the approach is named
+Two sweeps have been run through it. The first: the one the approach is named
 after — is a **valid negative**: the death penalty is at its stop and is not a
 lever. The second is a **replicated positive**: the number of chance samples was
 too small to represent the game's own randomness, and fixing it was worth about
@@ -40,7 +40,7 @@ The second dial is subtler. At a [chance node](/learn/concepts/chance-vs-choice)
 the search has to average over the next disc, which is equally likely to be any
 of seven values. The frozen reference averages over **five** representative
 samples. Five buckets cannot cover seven equally likely outcomes, so some disc
-values get no weight at all — the same ones, every time, at every node. That is
+values get no weight at all: the same ones, every time, at every node. That is
 not noise that cancels out; it is a fixed bias built into every estimate the
 search makes.
 
@@ -63,12 +63,12 @@ search makes.
    [shared harness](/approaches/lifetime-objective/common), including the
    survival-flow rates that the whole family watches.
 
-## What happened — the death penalty
+## What happened: the death penalty
 
 **Nothing at all, in the direction that mattered.** Making death fifty times
 more expensive produced byte-identical games: same scores, same lifetimes, 0
 wins, 64 ties, 0 losses. The search is already as risk-averse as the constant
-can make it. Moving the other way, towards recklessness, only cost — and it cost
+can make it. Moving the other way, towards recklessness, only cost, and it cost
 in an instructive shape: at a penalty of −100,000 the policy cleared slightly
 *more* discs per move and still died *sooner*. Throughput is not the objective;
 throughput sustained without dying is.
@@ -97,13 +97,13 @@ negative result. Six arms, 64 paired games each, seeds
 The identical-game result at magnitudes at or beyond 1,000,000 is exact and
 needs no statistics. The −300,000 and −100,000 deltas are single-cohort
 estimates. Only the terminal utility was varied; the leaf weights are frozen, and
-a jointly re-tuned leaf could in principle move the saturation point — which is
+a jointly re-tuned leaf could in principle move the saturation point, which is
 what the [leaf reweight](/approaches/lifetime-objective/leaf-reweight) work went
 on to test, using this same parameterised search as its base.
 
 </TechnicalDetails>
 
-## What happened — the number of chance samples
+## What happened: the number of chance samples
 
 **Averaging over seven disc values instead of five was worth about a third more
 score**, and it replicated on a second, previously unread set of games. On the
@@ -118,7 +118,7 @@ is better" result**. With the biased five-sample estimator, adding a fourth move
 of look-ahead bought nothing measurable. With the exact seven-sample estimator,
 the fourth move was worth about 86,000 points. Depth and estimator quality are
 complements. That offers a mechanism for one of the repository's most repeated
-conclusions — that deeper search is not automatically stronger — because every
+conclusions: that deeper search is not automatically stronger because every
 historical depth experiment sat on top of the same biased estimator.
 
 It is also not free: the exact estimator costs 3.82 times the work per move at
@@ -129,7 +129,7 @@ the frozen reference at an eighth of the work.
 The frozen search carries a work limit sized to sit just above five-sample
 depth-4 search. Seven samples need 3.7 times that. Left at the frozen limit, a
 seven-sample run silently hits the ceiling and falls back to a completed
-three-move search — so a naive comparison measures a shallower search and
+three-move search, so a naive comparison measures a shallower search and
 reports it as a chance-sampling result. Every arm here declares its limit
 explicitly.
 </Callout>

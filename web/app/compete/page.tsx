@@ -1,4 +1,5 @@
 import { CompetitionGame } from "@/components/CompetitionGame";
+import { GitHubSignInButton } from "@/components/GitHubSignInButton";
 import {
   COMPETITION_GAME,
   COMPETITION_ROUND,
@@ -17,14 +18,17 @@ export default function CompetePage() {
         <p className="mt-3 leading-relaxed text-zinc-400">
           You and every computer policy face the same visible discs and the same hidden
           values under gray discs. Play entirely in your browser, then optionally sign in
-          and submit only your column choices. The server replays those choices from the
-          immutable game artifact and computes the score independently.
+          and submit only your column choices. The server validates your score and puts you
+          on the same leaderboard as all the autonomous strategies.
         </p>
+        <div className="mt-4">
+          <GitHubSignInButton />
+        </div>
         <p className="mt-3 text-sm text-zinc-500">
-          Signing in is an explicit choice to contribute. A submitted run stores your OAuth
-          provider identity, public handle, game version, compact move sequence, client score,
-          server-verified score, and timestamps. Anonymous games never leave this browser.
-        </p>
+          You can submit as many runs as you want. When the game is over, you will see an explicit request to
+          contribute your moves and score. A submitted run stores minimal information (just your GitHub username).
+          Any open-source research data produced from your submission will only have your column choices, never any
+          identifying information.</p>
       </section>
 
       <CompetitionGame manifest={COMPETITION_GAME} round={COMPETITION_ROUND} />
@@ -42,7 +46,7 @@ export default function CompetePage() {
         />
         <InfoCard
           title="Three bits per move"
-          body="Your column sequence of 0-6 is packed into a bit stream (3 bits per move). These streams are completely anonymous, and will be publicly released at the end of the competition for anyone to use them in research."
+          body="You play columns 1–7. The submission stores them internally as 0–6 and packs them into a bit stream using three bits per move. These anonymous streams will be released after the competition for open research."
         />
         <InfoCard
           title="Server score wins"

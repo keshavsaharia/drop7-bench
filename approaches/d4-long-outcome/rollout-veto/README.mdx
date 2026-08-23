@@ -54,7 +54,7 @@ The veto design answers both at once: the long look never *chooses*, it can only
    own valuation of the position. Among alternatives that pass, the one with the
    largest confidence bound wins. Otherwise depth 4 plays.
 
-## What happened, in plain English
+## What happened
 
 **One astonishing game.** The single registered pilot lasted 250 moves and
 scored 404,047 where plain depth 4 lasted 105 moves and scored 159,616. It made
@@ -91,7 +91,7 @@ and reveals less per move than the search it was supposed to improve.
 
 <TechnicalDetails>
 
-**Original pilot** (runtime-paused — ledger-recorded). Seed `0x3ded0000`, one
+**Original pilot** (runtime-paused; ledger-recorded). Seed `0x3ded0000`, one
 game: stock depth 4 159,616 points / 105 moves, 1.97143 clears and 1.09524
 reveals per move; the veto 404,047 / 250, with 2.276 clears and 1.316 reveals per
 move. 12 switches out of 179 routed decisions (4.8% of 250 moves); 15
@@ -99,24 +99,24 @@ alternatives passed every gate. Runtime: 852.255 seconds for the pair against a
 2,700-second ceiling, projected to 15,340.599 seconds for the full protocol; the
 runner paused before `0x3ded0001`.
 
-**Exact compression** (runtime-paused — ledger-recorded). Replay asserted the
+**Exact compression** (runtime-paused; ledger-recorded). Replay asserted the
 original 404,047 points, 250 moves, 179 routes and 12 switches before writing.
 The depth-4 value prefilter skipped 120 of 1,242 action roots (9.66%); exact
 continuation reuse removed a further 26,303 transitions; depth-2 calls fell from
 192,983 to 152,884. Whole-game wall time moved 641.689 to 639.321 seconds — the
-rollout phase from 333.585 to 295.902 — which is not the order of magnitude the
+rollout phase from 333.585 to 295.902, which is not the order of magnitude the
 gate required.
 
-**Quality extension** (rejected — ledger-recorded). Four games: candidate mean
+**Quality extension** (rejected; ledger-recorded). Four games: candidate mean
 174,659.5 points / 113.75 moves against 107,007.75 / 72.5. Clears per move rose
 1.84483 to 2.05055, reveals 0.98966 to 1.12967, and all four leave-one-out
-subsets were positive — but only one of the three new pairs was a joint
+subsets were positive, but only one of the three new pairs was a joint
 score-and-move win, and lower-half score retention was 88.38% against a 90%
 requirement. Individual games: `0x3ded0001` 109,264/70 became 153,925/100;
 `0x3ded0002` was identical at 59,004/45 with zero switches; `0x3ded0003`
 100,147/70 became 81,662/60.
 
-**Teacher compression** (rejected — ledger-recorded). Replay-only over the 179
+**Teacher compression** (rejected; ledger-recorded). Replay-only over the 179
 exported routed states. Best configuration (depth 2 at rise phases 1 or 5,
 otherwise depth 1) reproduced 166 of 179 exact actions and **2 of 12** switches,
 against an eligibility floor of 8 of 12; the five other configurations recovered
@@ -135,7 +135,7 @@ untouched):
 Paired mean delta −46,510.5 points and −12.31 moves; one-sided 95% bootstrap
 lower bound −91,924.6; wins–ties–losses 9–4–19; sign test p = 0.0436 on the 28
 non-tied games; 0 censored games, 0 illegal moves. Of 12,314 alternatives
-scored, 103 passed all four conditions and 68 overrides were taken — an average
+scored, 103 passed all four conditions and 68 overrides were taken: an average
 of −21,887 points per override taken. Three games drew zero overrides and were
 *exactly identical* to the comparator, which doubles as a fallback check. The
 value-band correction that an earlier audit had asked for (7,000 to 17,000) was
@@ -164,7 +164,7 @@ files. Both statements are true and neither replaces the other.
 
 - **The estimator was measuring the wrong game.** A column selected because it
   looks good under 25 moves of depth-2 play is executed in a game that will be
-  played by depth 4. That mismatch — not merely noise — is the most concrete
+  played by depth 4. That mismatch, not merely noise — is the most concrete
   finding here, and it is why the accepted overrides made realized flow *worse*
   even though "must not clear fewer discs" was one of the four conditions.
 - **A one-game pilot cannot be informative in either direction** for a policy
@@ -172,7 +172,7 @@ files. Both statements are true and neither replaces the other.
 - **What is ruled out, exactly:** horizon 25, seven futures, danger height 4, a
   depth-2 continuation, all legal columns as challengers, at both value bands, on
   32 fresh paired games. **What is not:** the family. The retest names the
-  cheapest next test — not a longer horizon and not a wider band, but **more
+  cheapest next test, not a longer horizon and not a wider band, but **more
   imagined futures**, since the return test appears under-sampled by roughly two
   to seven times at seven.
 - The good engineering here survives the negative result: paired imagined futures

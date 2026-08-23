@@ -1,14 +1,14 @@
 ---
 title: Phase horizon
 family: heuristic-search
-summary: Judge a board by how it will look when the next row rises, not by how it looks now — a board one drop from a rise is in far more trouble than the same board five drops away.
+summary: Judge a board by how it will look when the next row rises. The same board is more dangerous one drop from a rise than five drops away.
 status: rejected
 evidence: task-record only
 reads: public
 ---
 
 Judge a board by how it will look when the next row rises, not by how it looks
-now — a board one drop from a rise is in far more trouble than the same board
+now: a board one drop from a rise is in far more trouble than the same board
 five drops away.
 
 <EvidenceLabel status="rejected" evidence="task-record only" reads="public" />
@@ -48,7 +48,7 @@ close.
    [sparse expectimax](/approaches/heuristic-search/sparse-expectimax) search.
 5. **Play the winning column.**
 
-## What happened, in plain English
+## What happened
 
 The frozen policy helped in some games and was retired because it missed the
 bar it had set for itself. Its own gate was a training-set mean of 400,000
@@ -57,9 +57,9 @@ were never opened.
 
 The lab deserves credit for how it failed. The weight sweep is deliberately
 tiny — each family of weights is halved or doubled around one fixed centre,
-nothing else — the selected weights are locked before calibration is allowed
+nothing else: the selected weights are locked before calibration is allowed
 to run, and the validation and final seed ranges are rejected by the program
-itself rather than by convention. That is what a small honest tuning run looks
+itself rather than by convention. That is what a small controlled tuning run looks
 like, and it is why "it did not reach 400,000" is a usable result instead of a
 mystery.
 
@@ -77,9 +77,9 @@ repository.** The gate value is not a guess, though: `REQUIRED_TRAINING_MEAN =
 
 Repository-verified from the source. `src/core/typescript/phase-horizon-evaluator.ts`
 defines `REQUIRED_CLEAR_RATE = 1 + BOARD_SIZE / MOVES_PER_LEVEL` and
-`REQUIRED_REVEAL_RATE = BOARD_SIZE / MOVES_PER_LEVEL` — the same 2.4 and 1.4
+`REQUIRED_REVEAL_RATE = BOARD_SIZE / MOVES_PER_LEVEL`: the same 2.4 and 1.4
 conservation arithmetic used by
-[gray throughput](/approaches/heuristic-search/gray-throughput) — an operating
+[gray throughput](/approaches/heuristic-search/gray-throughput): an operating
 band of two discs per column and three rows of height, and twelve weighted
 features from −900 (peak height risk) to +600 (quiet direct gain). The lab
 sweeps them on the `0x1d70…` training range with 2 pilot and 16 confirmation

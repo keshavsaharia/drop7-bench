@@ -1,15 +1,15 @@
 ---
-title: Entombed discs — the 3 that can never clear
+title: "Entombed discs: the 3 that can never clear"
 family: lifetime-objective
-summary: Check the owner's observation that the search lets a 3 or 4 land where it can never clear and then dies of it, by measuring on five million recorded positions how often such discs appear, how long before death, and whether the search's board scorer already knows.
+summary: Measures how often low numbered discs become impossible to clear, when death follows, and whether the evaluator notices.
 status: completed
 evidence: repository-verified
 reads: teacher
 ---
 
 Check an observation made while watching the depth-4 search play: it lets a 3
-or a 4 land above its "safe zone" — a column already taller than the disc's
-number — where it can never clear vertically, and a few rises later the game
+or a 4 land above its "safe zone": a column already taller than the disc's
+number, where it can never clear vertically, and a few rises later the game
 ends under it. The question is whether that disc is a cause the search cannot
 see, or a symptom of a board that is already lost.
 
@@ -45,7 +45,7 @@ a natural trigger for an "emergency mode".
    time ≥ 10 moves, and a held-out partial correlation ≤ −0.05 with an
    incremental R² ≥ 0.005. All three were required.
 
-## What happened, in plain English
+## What happened
 
 The observation is real, and the explanation is not the one hoped for. Three
 quarters of the depth-4 policy's deaths (579 of 768 complete games) end with an
@@ -85,5 +85,5 @@ numbers are in `runs/RUN-20260822T051517Z-eecf1098/analysis.json`.
 ## Sources
 
 - `leafdump.cpp` — frozen fast-leaf features for every corpus record
-- `analyze.py` — the entombed features, prevalence, lead time, occupancy
+- `analyze.py`: the entombed features, prevalence, lead time, occupancy
   matching and the whole-origin incremental fit

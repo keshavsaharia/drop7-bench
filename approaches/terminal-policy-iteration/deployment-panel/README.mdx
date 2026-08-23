@@ -1,14 +1,14 @@
 ---
 title: Deployment panel
 family: terminal-policy-iteration
-summary: A locked set of 477 positions with every legal column already labelled by long play-forwards — the repository's re-usable test bench for "can anything rank moves better than the reference?"
+summary: A locked set of 477 positions labels every legal column through long play-forwards, creating a reusable move-ranking test bench.
 status: rejected
 evidence: ledger-recorded
 reads: diagnostic
 ---
 
 A locked set of 477 positions in which every legal column has already been
-labelled by long play-forwards — so a new idea can be tested for a few CPU-minutes
+labelled by long play-forwards, so a new idea can be tested for a few CPU-minutes
 without opening a single new game.
 
 <EvidenceLabel status="rejected" evidence="ledger-recorded" reads="diagnostic" />
@@ -36,7 +36,7 @@ by checksum, marked development-only and already consumed, and the programs
 that read it are physically unable to start or replay a game: their only
 entry points begin at a stored public position.
 
-That makes it the cheapest honest test bench in the repository. Any proposed
+That makes it the cheapest valid test bench in the repository. Any proposed
 move-ranker can be asked the question that matters — *do you rank the columns
 the way the long outcomes do?* — before anyone spends compute on a game.
 
@@ -51,7 +51,7 @@ spent, so a new candidate tuned on it is tuning on used data.
 
 ## How a candidate is judged
 
-1. Rebuild each stored public position. Nothing else is passed in — no origin
+1. Rebuild each stored public position. Nothing else is passed in: no origin
    game, score, move number, history or scenario identity. Origin identity is
    used only by the coordinator, to split the 477 roots into eight
    whole-game folds so that a candidate cannot be scored on positions from a
@@ -62,10 +62,10 @@ spent, so a new candidate tuned on it is tuning on used data.
    pair of columns the right way round (pairwise), and how much outcome it
    gives up by not picking the best (regret).
 4. Compare all of that against the exact reference search on the same
-   positions, and require non-regression origin by origin — not merely on
+   positions, and require non-regression origin by origin, not merely on
    average.
 
-## What happened, in plain English
+## What happened
 
 The diagnostic worked, and both candidates lost to the reference.
 
@@ -85,7 +85,7 @@ mathematical penalty for every unit of advantage that peeking gave it, so that
 the advantage cancels out in expectation. It ranked siblings clearly worse than
 the reference: it picked the best column 28.93% of the time against the
 reference's 38.16%, and got pairs right 59.85% against 66.82%. It passed zero of
-eight origins, regressed in both halves of the data, and — the detail that
+eight origins, regressed in both halves of the data, and: the detail that
 matters most — agreed with itself only 22.6% of the time when its own planner
 scenarios were split in two. A ranker that unstable is not measuring the
 position; it is measuring its own random draws.
@@ -180,6 +180,6 @@ table in the [experiment index](/docs/research/experiment-index).
   already been read. The research roadmap says the same thing: the existing
   477-root panel is reusable diagnosis, not fresh model-selection evidence.
 - **Still open:** a successor-closed corpus collected fresh, with every legal
-  column labelled and successor states recorded under common futures — one of
+  column labelled and successor states recorded under common futures: one of
   the few directions the [research status](/docs/research/status) page still
   lists as defensible.

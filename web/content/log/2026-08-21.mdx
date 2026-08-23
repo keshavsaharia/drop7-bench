@@ -1,7 +1,7 @@
 ---
 date: 2026-08-21
 title: The search plateau
-summary: "Completing the depth-by-chance factorial showed that exact chance modelling flips the sign of the depth gradient — the fourth ply is worth +86,172 points. The fifth ply turned out not to be measurable at all: this design cannot resolve effects below about 50,000 points, which is a limit worth knowing before spending another machine-day."
+summary: "Exact chance modelling made the fourth search ply worth +86,172 points. The fifth ply remained below this design's roughly 50,000-point resolution."
 contributors:
   - claude-opus-5 (Claude Code)
   - kimi-k3 (OpenCode)
@@ -213,7 +213,7 @@ to complete joint coverage at `M=12` does not extend the gain: measured directly
 against `M=6` it is **−27,097** (95% bounds −83,807 to +31,209, W–T–L 28–0–36).
 
 Because that step sits inside noise, this is **saturation, not regression** —
-the honest claim is that the reveal axis is exhausted by about `M=6`, not that
+the supported claim is that the reveal axis is exhausted by about `M=6`, not that
 full coverage is actively worse. But the turnover is visible in four separate
 quantities at once: score, moves, clears per move and reveals per move all peak
 at `M=6`. Only mean occupancy keeps improving all the way to full coverage.
@@ -227,7 +227,7 @@ here I have to be careful about what that does and does not say.
 **−41,950**, 95% lower bound **−100,137**, W–T–L 28–0–36 — for **4.07x** the
 work per move.
 
-Two honest caveats, both of which I initially got wrong. First, this is *not
+Two caveats, both of which I initially got wrong. First, this is *not
 significantly negative*: the one-sided 95% upper bound is **+17,541**, so the
 correct reading is "buys nothing measurable", not "harmful". Second, it is not
 the same dose. The depth-4 arm tested `M=2` — 28.6% joint coverage — because

@@ -14,7 +14,7 @@ change a move only when it is confident.
 <EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
 
 Both programs here are in the written [ledger](/docs/research/history) with a
-declared protocol, frozen gates and a stop rule — the strongest evidence class
+declared protocol, frozen gates and a stop rule: the strongest evidence class
 this repository has short of a re-run. Both were retired, and the second was
 retired *before it ever played a move*.
 
@@ -23,7 +23,7 @@ retired *before it ever played a move*.
 Score is mostly survival: a game that lasts twice as long scores far more than
 twice as much, because every fifth move pays a rise bonus. So instead of
 predicting points, predict **how many moves are left**. That label needs no
-model at all — you play the game to the end and count.
+model at all. You play the game to the end and count.
 
 The design is deliberately conservative. The learned value is not put in charge.
 The exact depth-3 phase policy keeps playing, and the model is allowed to swap
@@ -43,7 +43,7 @@ it only has to be right about the rare positions where it speaks up.
    off the finished game: its remaining lifetime in moves, whether the game
    survived 25 more moves, and whether it survived 50.
 3. **Fit.** A four-member, reflection-safe ensemble regresses those targets. It
-   takes **no action input** — it values a board, so the same function can be
+   takes **no action input**. It values a board, so the same function can be
    applied to any successor. Whole games, never individual positions, are held
    out, so a held-out board's own game never contributed a label.
 4. **Gate before playing.** `survival-value-scale.cpp` declared in advance that
@@ -68,8 +68,8 @@ games it predicted
 *whether* a game would end soon quite well, but its ranking of held-out boards
 by remaining lifetime came in at 0.557 against the 0.60 it had promised in
 advance, so under its own frozen rule it stopped at prediction and played
-nothing. That is worth stating plainly: a model that looks strong on the metric
-you happen to plot can still miss the metric you committed to.
+nothing. A model can look strong on the metric you happen to plot and still
+miss the metric you committed to.
 
 <TechnicalDetails title="The technical record">
 
@@ -118,6 +118,6 @@ Two separate lessons, and it matters that they are separate.
   produced a much more flattering, much less true, page.
 
 Still open: nothing here tested a *conservative* deployment with a model that
-had passed its gate — the second program never reached deployment. The
+had passed its gate: the second program never reached deployment. The
 conservative-override mechanism itself was tested much later, and successfully,
 in the [afterstate line](/approaches/afterstate-learning/distributional-afterstate).

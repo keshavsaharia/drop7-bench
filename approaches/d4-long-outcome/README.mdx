@@ -1,11 +1,11 @@
 ---
 title: Depth-4 search and long outcomes
-summary: The reference search sees four of your own moves; these experiments judge a move by playing on for twenty-five, then try to keep only the moves that survive that longer look.
+summary: Judges moves over 25-step continuations, then tries to retain only choices that survive the longer view.
 ---
 
 The strongest dependable policy here looks four of your own moves ahead. These
 experiments ask what a move looks like when you keep playing for **twenty-five**
-— five complete rise cycles — and whether anything useful can be brought back
+— five complete rise cycles, and whether anything useful can be brought back
 from that far out.
 
 Everything in this family is a legal public-information policy or an offline
@@ -68,13 +68,13 @@ it; otherwise keep depth 4. That is the
 to play with, so train a model on those replays and use the model instead. That
 is the [long-outcome family](/approaches/d4-long-outcome/long-outcome), the
 [sibling network on the 200-move panel](/approaches/d4-long-outcome/h200-sibling-nnue),
-and — as a sanity check on whether the learning machinery works at all —
+and, as a sanity check on whether the learning machinery works at all —
 [compressing depth-4 search itself](/approaches/d4-long-outcome/d4-distillation).
 
 Every one of these keeps exact depth-4 search as the fallback, so a failure
 costs nothing but time.
 
-## What happened, in plain English
+## What happened
 
 The long look **does** contain information the shallow search cannot see. The
 learned models predict survival over a 100-move horizon strikingly well. But
@@ -83,7 +83,7 @@ long-outcome signal into a *ranking* of the seven available moves ranked them
 worse than a plain, much cheaper exact search — the
 [sibling trap](/learn/concepts/ranking-siblings) in its purest form.
 
-The direct version has a more dramatic history. One single game — one — scored
+The direct version has a more dramatic history. One single game (one) scored
 404,047 points and lasted 250 moves where depth 4 scored 159,616 in 105. That
 number was shelved for being far too slow rather than for being wrong, and it
 sat in the repository for a long time as the most tempting unexploited result in

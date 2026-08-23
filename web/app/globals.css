@@ -69,6 +69,58 @@ body {
   }
 }
 
+/* Compete-page GitHub OAuth button. The shine sweep is hover-only and
+   stops under prefers-reduced-motion, matching .play-cta. */
+.github-signin {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  border-radius: 0.5rem;
+  border: 1px solid #3f3f46;
+  background: #18181b;
+  color: #fafafa;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.7rem 1.05rem;
+  cursor: pointer;
+}
+.github-signin svg {
+  display: block;
+  flex-shrink: 0;
+}
+.github-signin::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.38) 50%,
+    transparent 65%
+  );
+  transform: translateX(-130%);
+  pointer-events: none;
+}
+.github-signin:hover {
+  border-color: #71717a;
+  background: #27272a;
+}
+.github-signin:hover::after {
+  animation: play-shimmer 0.7s ease-out;
+}
+.github-signin:focus-visible {
+  outline: 2px solid #a78bfa;
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .github-signin:hover::after {
+    animation: none;
+  }
+}
+
 /* Markdown/MDX prose styling (local, dependency-free alternative to the
    typography plugin, tuned for the dark research-console theme). */
 .prose-drop7 {

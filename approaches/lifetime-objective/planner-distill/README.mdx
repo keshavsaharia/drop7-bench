@@ -1,7 +1,7 @@
 ---
 title: Compressing a legal planner into a network
 family: lifetime-objective
-summary: Take the one expensive planner in this repository whose advantage is built only from information a real player can see, label every legal move at fifteen thousand positions with what it thinks, and try to teach a small network to do the same thing cheaply.
+summary: Labels every legal move with an expensive public-information planner, then trains a small network to imitate it.
 status: rejected
 evidence: development-tier exploratory finding
 reads: public
@@ -17,7 +17,7 @@ network to reproduce it cheaply.
 ## Why this teacher, after seventeen failures
 
 Seventeen learned models in this repository have failed, and an audit sorted
-them by cause. The largest group — six of seventeen — failed at **ranking the
+them by cause. The largest group (six of seventeen) failed at **ranking the
 moves that were not played**: the model learned the outcome of the move the data
 happened to contain, and deployment then asked it to choose among alternatives
 it had never seen labelled. That is the
@@ -35,7 +35,7 @@ hidden board, solves a short window exactly against each guess, and plays the
 best column on average. It never reads a hidden value or a future disc, and a
 mechanical gate proves it: replace every hidden number *and* the entire future,
 and it chooses the same column. **Its advantage over the reference search is
-therefore public by construction** — and it costs hundreds of exact window
+therefore public by construction**, and it costs hundreds of exact window
 solves per move, which is precisely the sort of expense a learned evaluator
 exists to amortise.
 
@@ -78,8 +78,8 @@ they disagree, the two columns they cannot tell apart are worth **0.0765 discs**
 apart, out of an average spread of **2.2643 discs** between the best and worst
 column at a position — about 8% of the range.
 
-**The label is sharp about value and blunt about which column wins.** Which
-means a training target and a grading rule built on "did the student pick the
+**The label is sharp about value and blunt about which column wins.** A
+training target and grading rule built on "did the student pick the
 same column?" are scoring the student on the least reliable part of what the
 teacher knows. Nothing in this repository had measured that before.
 
@@ -128,7 +128,7 @@ That is a real engineering result even though the gate failed.
 **And the student does carry signal the search does not already have.** Compared
 as a *policy* it loses badly, which was foreseeable: the reference search spends
 615,090 board evaluations per decision and the student spends one per column.
-Compared as what it was meant to be — an opinion mixed into that search — and
+Compared as what it was meant to be (an opinion mixed into that search) and
 with the mixing weight chosen on a separate validation split, it cuts the
 search's ranking regret by **13%** and improves pairwise ordering from 0.7961 to
 0.8117, with both improving on both splits. The top-1 improvement appears on the
@@ -144,7 +144,7 @@ trained, and is reproduced verbatim in the finding. There is no row in the
 [ledger](/docs/research/history).
 
 **Verdict as recorded:** run validity **valid**, scientific outcome **fail**,
-evidence tier **development**. Recorded as the eighteenth honest negative in this
+evidence tier **development**. Recorded as the eighteenth negative result in this
 repository.
 
 **Teacher configuration.** The legal planner at a five-move window with 256
@@ -166,7 +166,7 @@ ceiling only.
 | occupancy slope | +1.4798 | +1.4813 | −0.0015 | |
 
 Both arms are frozen search procedures playing identical futures, so this
-comparison involves no fitted model — but the seeds carry a **training** role and
+comparison involves no fitted model, but the seeds carry a **training** role and
 it is development-tier diagnostic evidence, not confirmation.
 
 **Corpus.** 15,833 positions from 160 on-policy teacher games; 108,462 labelled
@@ -216,7 +216,7 @@ least reliable part of the label; the blend probe is 1,445 positions from 16
 games; the trained model retains a 15% left-right preference because mirror
 augmentation was applied by chance rather than enforced; the scenario engine's
 randomness model is not the base engine's, so the scores above are not comparable
-with any ledger figure; and no timing is timing-grade — the machine carried load
+with any ledger figure; and no timing is timing-grade: the machine carried load
 averages of 44–54 with three other jobs running.
 
 </TechnicalDetails>
@@ -230,7 +230,7 @@ averages of 44–54 with three other jobs running.
   zero. Any future distillation should open with that run and only then spend
   training time.
 - **Stop targeting the teacher's chosen column.** The information is in the value
-  vector, not in the winner. Ranking regret — where half the teacher's own
+  vector, not in the winner. Ranking regret, where half the teacher's own
   compute scores 0.0073 and the student scores 0.1915 — is the better primary
   measure, and it is the one the blend probe improves.
 - **Compare a leaf as a leaf, not as a policy.** Pitting one model call against a

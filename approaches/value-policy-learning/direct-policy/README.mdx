@@ -1,7 +1,7 @@
 ---
 title: Direct public policy
 family: value-policy-learning
-summary: Skip the value model entirely — score each column with 25 weighted features and tune the weights against whole games.
+summary: Skip the value model. Score each column with 25 weighted features and tune the weights against whole games.
 status: rejected
 evidence: task-record only
 reads: public
@@ -15,7 +15,7 @@ complete games go well.
 <EvidenceLabel status="rejected" evidence="task-record only" reads="public" />
 
 It reads only what a player can see. Its recorded verdict is **task-record
-only** — no ledger section, no artifact, no per-game data — and, as noted
+only** (no ledger section, no artifact, no per-game data) and, as noted
 below, the recorded sentence does not describe the mechanism that is actually
 in the source file.
 
@@ -28,7 +28,7 @@ sidesteps both by never asking the question. It only ever asks: *when I play
 this way for a whole game, how does the game end?*
 
 Concretely, the policy scores a column by a weighted sum of features of what
-placing there would do — how many discs it clears, how many gray covers it
+placing there would do: how many discs it clears, how many gray covers it
 reveals, how deep the chain goes, how much dangerous height it adds near the
 top, whether it leaves a trench that a high disc could later fill, whether it
 puts a low-numbered cap over something that now cannot escape. Those features
@@ -48,7 +48,7 @@ get luckier discs.
 2. **Look one step into the fog, blindly.** Some features are computed over a
    couple of stratified sampled outcomes for the hidden reveal and the disc
    that follows. Those samples are drawn from the *policy's own* random
-   domains, seeded from the visible position — the real game's seed is never
+   domains, seeded from the visible position: the real game's seed is never
    passed to the chooser, so the policy cannot peek at what is actually coming.
 3. **Score a whole game, not a move.** The objective is deliberately mostly
    about survival: 55% how long the game lasted against the move cap, 25%
@@ -68,14 +68,14 @@ The [experiment index](/docs/research/experiment-index) records the verdict as
 **rejected, task-record only**, with the sentence: "learned-policy roll-ins
 drifted away from their teacher and did not clear the whole-game gate."
 
-Two things must be said honestly about that. First, **there is no retained
-number** — no mean score, no mean lifetime, no cohort size, no comparison
+Two qualifications matter. First, **there is no retained
+number**: no mean score, no mean lifetime, no cohort size, no comparison
 against a baseline. The
 [blind-spot audit](/docs/exploratory/audit-04-blind-spots) lists this source
 among the 30 whose rejection "cannot be re-derived". Second, the recorded
 sentence describes a teacher and roll-ins, and **the source file contains
 neither**: there is no imitation target, no expert, and no roll-in mechanism
-anywhere in it — the weights are searched directly against complete games. The
+anywhere in it: the weights are searched directly against complete games. The
 verdict may have been written about a different configuration, or about a
 sibling experiment; as it stands it cannot be checked against this code.
 
@@ -124,7 +124,7 @@ using it is recorded either way.
 
 Direct policy search is the one method here that cannot suffer from
 [the sibling trap](/learn/concepts/ranking-siblings), because it never learns a
-value for an unplayed move — it only ever measures whole games. What it buys
+value for an unplayed move. It only ever measures whole games. What it buys
 with that immunity is a brutally weak learning signal: one number per complete
 game, for a policy with 25 knobs, on 64 games per generation. The related
 evolutionary work elsewhere in the repository (see the

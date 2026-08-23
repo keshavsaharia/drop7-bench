@@ -1,7 +1,7 @@
 ---
 title: Evolving the leaf weights at the depth they are used
 family: lifetime-objective
-summary: Let an evolutionary optimiser adjust the eighteen numbers inside the search's board scorer by playing complete depth-4 games on a fresh block of seeds every generation, then test the frozen winner once on games it has never seen.
+summary: Evolves the reference evaluator on complete games, then tests the frozen winner once on unseen games.
 status: preregistered
 evidence: none
 reads: public
@@ -38,7 +38,7 @@ and moved the result to depth 4 unchanged
 other fitted one-move policies on a fixed set of games and lost on different
 games ([evolution](/approaches/heuristic-search/evolution)). Refitting the
 leaf toward a quantity the search already computes made things much worse
-([leaf reweight](/approaches/lifetime-objective/leaf-reweight)) — which is
+([leaf reweight](/approaches/lifetime-objective/leaf-reweight)), which is
 evidence the leaf's job is to price what the search *cannot* see, and a reason
 to let whole games, not a proxy, choose the weights.
 
@@ -48,7 +48,7 @@ the policy is deployed in. And every generation plays a block of seeds that no
 earlier generation saw, so the optimiser cannot memorise games; it can only move
 toward weights that are better on average.
 
-<GameTreeFigure seed={0x5eed1005} moves={16} caption="What the evolution is tuning: the numbers on the outcome boards. Change the weights and every leaf value moves, the averages move, and a different column can win — which is why the weights must be tested by whole games rather than by how sensible the numbers look." />
+<GameTreeFigure seed={0x5eed1005} moves={16} caption="What the evolution is tuning: the numbers on the outcome boards. Change the weights and every leaf value moves, the averages move, and a different column can win, which is why the weights must be tested by whole games rather than by how sensible the numbers look." />
 
 ## How it works, step by step
 
@@ -69,7 +69,7 @@ toward weights that are better on average.
    strategy with mirrored sampling in sign-normalised coordinates (the frozen
    vector is ±1 on every axis; one step of σ is a relative change). Generation
    *g* plays seeds `0xa5290000 + 32g` … `+31`. The candidate is the
-   distribution **mean** at the last generation — not the best sampled
+   distribution **mean** at the last generation, not the best sampled
    individual, whose fitness is inflated by having been selected on its own
    noise.
 5. **One held-out screen.** `compare.py` evaluates the frozen candidate against
@@ -87,8 +87,8 @@ about 0.29 CPU-seconds at depth 4 with five chance samples and about 1.03 with
 seven, and it reproduced the recorded seven-sample and five-sample reference
 cohorts seed for seed on the first sixteen games. The six CHECK gates passed
 with zero mismatches (2,500 and 4,285 leaf boards; 50 and 160 parity moves).
-The evolution then started on the five-sample configuration — the contract
-comparator — because at 3.7× less per game it affords roughly forty
+The evolution then started on the five-sample configuration: the contract
+comparator because at 3.7× less per game it affords roughly forty
 generations overnight instead of twelve, and the seven-sample transfer of the
 winner is a preregistered secondary measurement on the same held-out seeds.
 
@@ -108,7 +108,7 @@ winner is a preregistered secondary measurement on the same held-out seeds.
   above zero, lower-quartile non-regression, both halves positive, zero
   incomplete or illegal decisions. Failure records `valid` + `fail` for this
   exact configuration and adopts nothing.
-- Honest limit stated in advance: a 64-game paired cohort cannot see an effect
+- Limit stated in advance: a 64-game paired cohort cannot see an effect
   below roughly 50,000 points. A null here is a non-measurement for smaller
   effects, not evidence that the frozen weights are optimal.
 
@@ -116,12 +116,12 @@ winner is a preregistered secondary measurement on the same held-out seeds.
 
 ## Sources
 
-- `weighted-leaf.hpp`, `build.sh` — the weighted leaf and the generated search
+- `weighted-leaf.hpp`, `build.sh`: the weighted leaf and the generated search
 - `gate.cpp`, `evaluate.cpp` — CHECK gates and the population evaluator
-- `evolve.py`, `compare.py` — the optimiser and the paired held-out comparison
-- `screen.sh` — the once-only held-out screen, scripted before the candidate
+- `evolve.py`, `compare.py`: the optimiser and the paired held-out comparison
+- `screen.sh`: the once-only held-out screen, scripted before the candidate
   existed so the most safety-critical command is reviewed rather than typed
-- `decide.cpp` — a one-shot decision binary for the benchmark playground:
+- `decide.cpp`: a one-shot decision binary for the benchmark playground:
   `src/bench/native-policy.ts` bridges it into the leaderboard as
   `native-fair-d4-s7` (frozen leaf) so the research search itself, and later
   an evolved leaf, can play the scripted rounds. Scripted-round scores are a

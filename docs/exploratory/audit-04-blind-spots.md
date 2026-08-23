@@ -74,7 +74,7 @@ artifact of the scoring bug.**
 
 | Approach / source | Stated rejection reason | Δ₇ / Δmoves | Δ₁₇ (rescored) | Confound | What a clean retest needs |
 | --- | --- | --- | --- | --- | --- |
-| **D4 + 25-move exact-D2 rollout veto** `rollout-veto/d4-d2-rollout-veto.cpp` | Runtime gate: projected 15,341 s vs a 2,700 s ceiling | pilot **+244,431 / +145** (n=1) | **candidate 894,047 vs D4 359,616 on that game** | `C1`,`C2`(n=1),`C4` | See Section C.4. This is the single largest unexploited number in the repository. The source **cannot compile today** — it `#include`s `fair-only-depth4.cpp` (locked at 17,000) while asserting `kLevelBonus == 7'000` itself. Retest = port to a new 17k experiment, then measure runtime honestly. |
+| **D4 + 25-move exact-D2 rollout veto** `rollout-veto/d4-d2-rollout-veto.cpp` | Runtime gate: projected 15,341 s vs a 2,700 s ceiling | pilot **+244,431 / +145** (n=1) | **candidate 894,047 vs D4 359,616 on that game** | `C1`,`C2`(n=1),`C4` | See Section C.4. This is the single largest unexploited number in the repository. The source **cannot compile today** — it `#include`s `fair-only-depth4.cpp` (locked at 17,000) while asserting `kLevelBonus == 7'000` itself. Retest = port to a new 17k experiment, then measure wall time. |
 | **Quality extension** `rollout-veto/d4-d2-rollout-veto-quality-extension.cpp` | Quality gate failed: only 1 of 3 new pairs was a joint win; lower-half score retention 88.4% vs 90% required | mean **+67,652 / +41.25** (n=4) | **candidate 392,160 vs D4 242,008** | `C1`,`C2`,`C8` (a 90%-lower-half gate at n=4 is 1 game) | The gate failed by 1.6 percentage points of a lower-half statistic computed from **two** games. Not a defensible rejection of the mechanism. |
 | **Exact compression** `rollout-veto/d4-d2-rollout-veto-exact-compressed.cpp`, `-cache-free.cpp` | Parity held, savings immaterial (11.3% rollout-phase) | n/a | n/a | `C4` | **Clean.** Genuinely negative engineering result; correctly recorded. |
 | **Teacher compression menu** `rollout-veto/d2-rollout-teacher-compression.cpp` | Best hybrid recovered 2 of 12 beneficial switches (needed 8) | n/a | n/a | `C6` partially | Clean *for the menu tested*. But the ground truth being reproduced (12 switches from **one** game) is itself n=1, and the 12 switch labels were selected by a score-return criterion. |
@@ -404,7 +404,7 @@ One irony worth recording: `evolution.cpp`'s objective carries the comment
 dominate*" — and then computes `0.65·mean_score + 0.35·median_score`, with no
 survival term at all (lines 223–226).
 
-#### (e) The variance argument, stated honestly
+#### (e) The variance argument
 
 Score and lifetime are **0.88–0.9997 correlated per game** on 64-game cohorts of
 three weak policies, and switching the *reported* metric buys only 15–30%

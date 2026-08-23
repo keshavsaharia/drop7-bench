@@ -76,8 +76,8 @@ is `createMatrix(8, 8, null)` (`drop7.es6:339`) — an 8th buffer row `j = 0`
 exists precisely so the rise always succeeds and the overflow is *detected*
 afterwards, not *prevented*.
 
-Measured, repository engine, board with column 0 occupied in rows 1-6,
-`nextDisc = 5`, `movesRemaining = 1`, column 0:
+Measured in the repository engine, with internal column index `0` (displayed as
+column 1) occupied in rows 1-6, `nextDisc = 5`, and `movesRemaining = 1`:
 
 ```
 scoreDelta 0   levelAdvanced false   gameOver true   movesRemaining 0

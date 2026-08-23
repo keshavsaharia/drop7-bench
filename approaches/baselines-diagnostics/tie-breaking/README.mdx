@@ -1,14 +1,14 @@
 ---
 title: Tie-breaking
 family: baselines-diagnostics
-summary: When two columns are worth exactly the same, something has to choose — this measures how much that arbitrary choice is worth over a whole game.
+summary: When two columns are worth the same, their order chooses between them. This measures the effect over a whole game.
 status: support-only
 evidence: repository-verified
 reads: public
 ---
 
 Every policy in this repository ends up with two columns it likes exactly
-equally. The rule it uses to pick between them is arbitrary — and this program
+equally. The rule it uses to pick between them is arbitrary, and this program
 measures whether "arbitrary" is harmless.
 
 <EvidenceLabel status="support-only" evidence="repository-verified" reads="public" />
@@ -16,27 +16,27 @@ measures whether "arbitrary" is harmless.
 ## The intuition
 
 Here is a position that is symmetric down the middle. A 3 is coming, and
-columns 1 and 5 are mirror images of each other:
+columns 2 and 6 are mirror images of each other:
 
 <BoardCompare
   before="0000000000000000000000000000000000003000308888888"
   after="0000000000000000000000000000000000000000308988888"
   beforeLabel="a 3 is coming"
-  afterLabel="dropped in column 1"
+  afterLabel="dropped in column 2"
   highlightBefore={[36, 40]}
   highlightAfter={[43]}
-  caption="The engine's output for this position and this move: the 3 lands on the 3 already in column 1, the column run reaches three, both discs clear for 14 points, and the gray disc beneath them is hit once and cracks."
+  caption="The engine's output for this position and move: the 3 lands on the 3 already in column 2. The column run reaches three, both discs clear for 14 points, and the gray disc beneath them is hit once and cracks."
 />
 
-Dropping the same 3 into column 5 does the identical thing on the other side —
-the same two discs cleared, the same 14 points, the same single crack — and
-leaves the exact mirror image of the board above:
+Dropping the same 3 into column 6 does the same thing on the other side. The
+same two discs clear for 14 points and produce one crack. The move leaves the
+exact mirror image of the board above:
 
 <Board
   cells="0000000000000000000000000000000000003000008888898"
   highlight={[47]}
   size={200}
-  caption="Same position, same disc, column 5 instead of column 1. No evaluator that treats left and right alike can prefer one of these."
+  caption="Same position and disc, but column 6 instead of column 2. No evaluator that treats left and right alike can prefer one of these."
 />
 Real ties are rarer than mirror images, but near-ties are everywhere: two moves
 whose scores differ by less than the noise in the evaluation. Whichever column
@@ -50,8 +50,8 @@ partly measuring the order.
 1. Play complete games with a simple one-move-ahead policy: for each legal
    column, play the move a few times with different imagined reveals, average
    the immediate points plus a hand-written board score, and keep the best.
-2. The comparison is strict — a later column has to be *better*, not equal, to
-   displace an earlier one — so the order in which columns are visited decides
+2. The comparison is strict: a later column has to be *better*, not equal, to
+   displace an earlier one, so the order in which columns are visited decides
    every exact tie.
 3. Run the whole thing four times, changing only that order: left-to-right,
    centre-outwards, edges-first, and a paired order.
@@ -83,11 +83,12 @@ an edge case.
 
 <TechnicalDetails title="The technical record">
 
-**Status: support-only — repository-verified.** No ledger entry, no task
+**Status: support-only; repository-verified.** No ledger entry, no task
 record, no retained output.
 
 Defaults in `main.ts`: 64 games from seed `0x1d700500`, four imagined reveals
-per candidate column, a 1,000-move cap. Orders tested: `left` = 0…6,
+per candidate column, a 1,000-move cap. The source stores these orders as
+zero-based indices: `left` = 0…6,
 `center` = 3,2,4,1,5,0,6, `edge` = 0,6,1,5,2,4,3, `paired` = 0,1,6,5,2,3,4.
 Rule policies: `shortest`, `vertical`, `grouped`. The evaluator is
 `evaluateHeuristic(..., "combined")` from

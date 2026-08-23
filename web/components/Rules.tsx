@@ -766,7 +766,7 @@ export function PlayerView({ caption }: { caption?: string }) {
 
 export function LegalColumns({ caption }: { caption?: string }) {
   const s = 34;
-  // column 2 is full (top cell occupied); others have room
+  // Internal column index 2 (displayed as column 3) is full; others have room.
   const board = [
     "0050000",
     "0020000",
@@ -797,7 +797,7 @@ export function LegalColumns({ caption }: { caption?: string }) {
             Legal while the top cell is empty
           </text>
           {wrap(
-            "Column 2 is stacked to the top, so it cannot accept a disc. If every column is full, the game ends immediately. A full column also blocks the next rise: the board cannot shift up into an occupied top row.",
+            "Column 3 is stacked to the top, so it cannot accept a disc. If every column is full, the game ends immediately. A full column also blocks the next rise: the board cannot shift up into an occupied top row.",
             40,
           ).map((line, i) => (
             <text key={i} y={36 + i * 15} fontSize={11.5} fontFamily={FONT} fill={INK_2}>
