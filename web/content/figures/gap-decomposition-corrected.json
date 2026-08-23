@@ -1,0 +1,25 @@
+{
+  "title": "Share of the clairvoyant-minus-D4 clear-rate gap closed by fair planning — the finding-12 correction",
+  "kind": "bar",
+  "x": { "label": "gap component" },
+  "y": { "label": "share of the gap", "unit": "%" },
+  "notes": "finding-07 section 2 (eight master tapes, 0xa5230000-0xa5230007) against finding-12 section 2's corrected decomposition (all four arms on the same 32 fresh tapes, fully matched). The 'not closed' category is the H=7 residual in both documents; finding-07's H=5 residual (60.0% unattributed) is not plotted. A third finding-12 figure, 15.3% at H=5 against the 0.3798 fresh-tape gap denominator (section 2, 'what must be weakened'), uses a different denominator than its own matched-cohort table and is carried here in notes only, not charted: one denominator per series. finding-07 is not withdrawn — its method, information-boundary gate, arm-A result (the future disc tape is worth nothing) and qualitative conclusion stand; the correction halves the quantitative share. Evidence tier: exploratory, with the correction notice being the point of the figure.",
+  "series": [
+    {
+      "name": "finding-07 (eight tapes)",
+      "points": [
+        { "x": "closed, H=5 K=256", "y": 40.0, "label": "0.1213 of a 0.3029 gap", "sourceRecord": "docs/exploratory/finding-07-fair-planning-ceiling.md", "sourceField": "section 2 decomposition" },
+        { "x": "closed, H=7 K=256", "y": 58.8, "label": "0.1842 of a 0.3134 gap", "sourceRecord": "docs/exploratory/finding-07-fair-planning-ceiling.md", "sourceField": "section 2 decomposition table" },
+        { "x": "not closed (H=7)", "y": 41.2, "label": "0.1292 residual: hidden board plus PIMC suboptimality", "sourceRecord": "docs/exploratory/finding-07-fair-planning-ceiling.md", "sourceField": "section 2 decomposition table" }
+      ]
+    },
+    {
+      "name": "finding-12 corrected (32 fresh matched tapes)",
+      "points": [
+        { "x": "closed, H=5 K=256", "y": 22.2, "label": "+0.1027 of a 0.4633 gap", "sourceRecord": "docs/exploratory/finding-12-fair-planner-ceiling-extended.md", "sourceField": "section 2 corrected gap decomposition table" },
+        { "x": "closed, H=7 K=256", "y": 27.1, "label": "+0.1256 of a 0.4633 gap", "sourceRecord": "docs/exploratory/finding-12-fair-planner-ceiling-extended.md", "sourceField": "section 2 corrected gap decomposition table" },
+        { "x": "not closed (H=7)", "y": 72.9, "label": "0.3377 residual", "sourceRecord": "docs/exploratory/finding-12-fair-planner-ceiling-extended.md", "sourceField": "section 2 corrected gap decomposition table" }
+      ]
+    }
+  ]
+}

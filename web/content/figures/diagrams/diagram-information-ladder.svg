@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 545" width="100%" role="img" aria-labelledby="fig-diagram-information-ladder-title fig-diagram-information-ladder-desc" class="research-fig-svg" font-family="ui-sans-serif, system-ui, sans-serif">
+<title id="fig-diagram-information-ladder-title">The information ladder — what each privilege buys, in clears per move</title>
+<desc id="fig-diagram-information-ladder-desc">A four-rung ladder ordered by privilege, with rung height equal to measured numbered clears per move. Bottom rung: fair depth-4 expectimax, no sampling, public state only — 1.9865 on 128 fresh tapes (finding-12), with a dashed ghost rung at its inflated eight-tape reading 2.0467 (finding-06 section 2). Next: arm B, the legal fair planner with hidden board and future both sampled (H=7, K=256) — 2.0260 on 32 fresh tapes (finding-12 section 2), with a dashed ghost at the withdrawn eight-tape reading 2.2309 (finding-07 section 1) and a downward correction arrow. Next: arm A, future tape known but hidden board sampled (K=64) — 2.1361 on the eight master tapes (finding-07 section 2), never re-run fresh. Top: the clairvoyant rh-clears H=7, hidden board and future tape known — 2.3663 on 64 fresh tapes (finding-12 section 6). A dashed line at 2.400 = 12/5 marks the exact survival requirement (finding-01). Arrows between rungs carry the recorded shares: fair planning of this kind closes +0.1256 = 27.1% of the matched-cohort gap (corrected; finding-07 printed 58.8%, withdrawn), knowing the future tape is worth about 0% (2.1361 vs 2.1403 at K=64), and 72.9% is not closed — hidden board plus hindsight-optimization suboptimality, an upper bound. Rung heights mix cohorts (best available per rung); the shares come from the matched 32-fresh-tape cohort (D4 1.9004, arm B 2.0260, clairvoyant 2.3637). Sources: docs/exploratory/finding-06-flow-ceiling.md, finding-07-fair-planning-ceiling.md, finding-12-fair-planner-ceiling-extended.md, finding-01-score-is-survival.md.</desc>
+<style>
+.research-fig-svg text { fill: var(--fig-fg, #222); }
+.research-fig-svg .fig-title { font-size: 14px; font-weight: 600; }
+.research-fig-svg .fig-sub { font-size: 11px; fill: var(--fig-muted, #888); }
+.research-fig-svg .fig-tick { font-size: 11px; fill: var(--fig-muted, #888); }
+.research-fig-svg .fig-note { font-size: 10px; fill: var(--fig-muted, #888); }
+.research-fig-svg .fig-grid { stroke: var(--fig-grid, #d4d4d8); stroke-width: 1; }
+.research-fig-svg .fig-accent-text { fill: var(--fig-accent, #2563eb); }
+.research-fig-svg .fig-pt { cursor: pointer; outline: none; }
+.research-fig-svg .fig-pop { display: none; pointer-events: none; }
+.research-fig-svg .fig-pop rect { fill: var(--fig-pop-bg, #ffffff); stroke: var(--fig-pop-border, #d4d4d8); }
+.research-fig-svg .fig-pop text { fill: var(--fig-fg, #222); }
+.research-fig-svg .fig-pt:hover .fig-pop, .research-fig-svg .fig-pt:focus .fig-pop, .research-fig-svg .fig-pt:focus-within .fig-pop { display: block; }
+.research-fig-svg .fig-pt:hover .fig-marker, .research-fig-svg .fig-pt:focus .fig-marker { stroke: var(--fig-fg, #222); stroke-width: 2; }
+</style>
+<defs>
+<marker id="d5-arr" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" style="fill: var(--fig-muted, #888)"/></marker>
+</defs>
+<text class="fig-title" x="36" y="24">The information ladder — what each privilege buys, in clears per move</text>
+<text class="fig-sub" x="36" y="42">findings 06 → 07 → 12: separating planning from hidden information (with the fresh-tape correction)</text>
+<text class="fig-sub" x="180" y="92">numbered clears per move (whole game) — rung height</text>
+
+<line class="fig-grid" x1="180" y1="429.2" x2="730" y2="429.2"/><text class="fig-tick" x="172" y="433.2" text-anchor="end">1.9</text>
+<line class="fig-grid" x1="180" y1="367.5" x2="730" y2="367.5"/><text class="fig-tick" x="172" y="371.5" text-anchor="end">2.0</text>
+<line class="fig-grid" x1="180" y1="305.8" x2="730" y2="305.8"/><text class="fig-tick" x="172" y="309.8" text-anchor="end">2.1</text>
+<line class="fig-grid" x1="180" y1="244.2" x2="730" y2="244.2"/><text class="fig-tick" x="172" y="248.2" text-anchor="end">2.2</text>
+<line class="fig-grid" x1="180" y1="182.5" x2="730" y2="182.5"/><text class="fig-tick" x="172" y="186.5" text-anchor="end">2.3</text>
+<line class="fig-grid" x1="180" y1="120.8" x2="730" y2="120.8"/><text class="fig-tick" x="172" y="124.8" text-anchor="end">2.4</text>
+
+<line x1="180" y1="100" x2="180" y2="470" stroke="var(--fig-muted, #888)" stroke-width="1.5"/>
+<line x1="360" y1="100" x2="360" y2="470" stroke="var(--fig-muted, #888)" stroke-width="1.5"/>
+
+<line x1="180" y1="120.8" x2="730" y2="120.8" stroke="var(--fig-accent, #2563eb)" stroke-width="1.5" stroke-dasharray="7 4"/>
+<text class="fig-accent-text" x="726" y="112" text-anchor="end" font-size="11">survival requirement 2.400 = 12/5 (finding-01)</text>
+
+<rect x="180" y="138.6" width="180" height="6" style="fill: var(--fig-accent, #2563eb)"/>
+<rect x="180" y="222.1" width="180" height="6" fill="none" stroke="var(--fig-muted, #888)" stroke-width="1.2" stroke-dasharray="5 3"/>
+<rect x="180" y="280.6" width="180" height="6" style="fill: var(--fig-pop-bg, #fff)" stroke="var(--fig-muted, #888)" stroke-width="1.2" stroke-dasharray="5 3"/>
+<rect x="180" y="335.7" width="180" height="6" fill="none" stroke="var(--fig-muted, #888)" stroke-width="1.2" stroke-dasharray="5 3"/>
+<rect x="180" y="348.5" width="180" height="6" style="fill: var(--fig-fg, #222)"/>
+<rect x="180" y="372.8" width="180" height="6" style="fill: var(--fig-muted, #888)"/>
+
+<line x1="395" y1="228" x2="395" y2="345" stroke="var(--fig-muted, #888)" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#d5-arr)"/>
+<text class="fig-note" transform="translate(409 286) rotate(-90)" text-anchor="middle">fresh-tape correction (finding-12)</text>
+
+<text x="430" y="134" font-size="11" font-weight="600">clairvoyant rh-clears H=7 — hidden board + tape known</text>
+<text class="fig-note" x="430" y="148">2.3663 clears/move · 64 fresh tapes (finding-12 §6)</text>
+<text x="430" y="218" font-size="11">arm B — withdrawn eight-tape reading</text>
+<text class="fig-note" x="430" y="232">2.2309 (finding-07 §1) — cohort-inflated</text>
+<text x="430" y="276" font-size="11" font-weight="600">arm A — tape known, hidden board sampled (K=64)</text>
+<text class="fig-note" x="430" y="290">2.1361 · eight tapes (finding-07 §2), not re-run fresh</text>
+<text class="fig-note" x="430" y="330">ghost: fair D4 eight-tape 2.0467 (finding-06 §2)</text>
+<text x="430" y="344" font-size="11" font-weight="600">arm B — both sampled: a legal policy (H=7, K=256)</text>
+<text class="fig-note" x="430" y="358">2.0260 clears/move · 32 fresh tapes (finding-12 §2)</text>
+<text x="430" y="372" font-size="11" font-weight="600">fair depth 4 — no sampling, 4-ply expectimax</text>
+<text class="fig-note" x="430" y="386">1.9865 (128 fresh tapes); 1.9004 on the matched 32</text>
+
+<line x1="146" y1="145" x2="146" y2="348" stroke="var(--fig-muted, #888)" stroke-width="1.2" marker-start="url(#d5-arr)" marker-end="url(#d5-arr)"/>
+<line x1="158" y1="287" x2="158" y2="348" stroke="var(--fig-muted, #888)" stroke-width="1.2" marker-start="url(#d5-arr)" marker-end="url(#d5-arr)"/>
+<line x1="170" y1="355" x2="170" y2="372" stroke="var(--fig-muted, #888)" stroke-width="1.2" marker-start="url(#d5-arr)" marker-end="url(#d5-arr)"/>
+<text x="8" y="222" font-size="10">not closed: 72.9% —</text>
+<text x="8" y="234" font-size="10">hidden board + hindsight</text>
+<text x="8" y="246" font-size="10">(PIMC) suboptimality;</text>
+<text x="8" y="258" font-size="10">an upper bound</text>
+<text x="8" y="296" font-size="10">knowing the future tape:</text>
+<text x="8" y="308" font-size="10">≈0% of the gap</text>
+<text x="8" y="320" font-size="10">(2.1361 vs 2.1403 at K=64)</text>
+<text x="8" y="344" font-size="10">fair planning of this kind:</text>
+<text x="8" y="356" font-size="10">+0.1256 = 27.1% of the gap</text>
+<text x="8" y="368" font-size="10">(corrected; was 58.8%)</text>
+
+<rect x="36" y="495" width="728" height="34" rx="6" style="fill: var(--fig-pop-bg, #fff)" stroke="var(--fig-grid, #d4d4d8)"/>
+<text x="400" y="509" text-anchor="middle" font-size="12">rung height = measured clears per move; rungs are ordered by privilege — what the evaluator may see.</text>
+<text class="fig-note" x="400" y="523" text-anchor="middle">solid rungs: fresh-tape cohorts · dashed rungs: the eight master tapes finding-12 showed favour long games</text>
+
+<g class="fig-pt" tabindex="0"><title>Clairvoyant rung — both privileges</title><rect x="180" y="132" width="180" height="14" fill="transparent"/><circle class="fig-marker" cx="368" cy="141" r="6.5" style="fill: var(--fig-pop-bg, #fff)" stroke="var(--fig-muted, #888)"/><text x="368" y="144" text-anchor="middle" font-size="9" class="fig-sub">i</text><g class="fig-pop"><rect x="200" y="40" width="440" height="76" rx="4"/><text x="208" y="55" font-size="11" font-weight="600">rh-clears H=7: reads the hidden board AND the future tape; an exact</text><text x="208" y="70" font-size="11">7-move window solved every move. 2.3663 clears / 1.3832 reveals per move</text><text x="208" y="85" font-size="11">on 64 fresh tapes; 59 of 64 games censored alive at the cap</text><text x="208" y="100" font-size="11">(finding-12 §6). A ceiling and teacher, never a deployable policy.</text><text x="208" y="115" font-size="11">On the matched 32-tape cohort it measures 2.3637 (finding-12 §2).</text></g></g>
+
+<g class="fig-pt" tabindex="0"><title>Arm A — tape known, board sampled</title><rect x="180" y="277" width="180" height="14" fill="transparent"/><circle class="fig-marker" cx="368" cy="283" r="6.5" style="fill: var(--fig-pop-bg, #fff)" stroke="var(--fig-muted, #888)"/><text x="368" y="286" text-anchor="middle" font-size="9" class="fig-sub">i</text><g class="fig-pop"><rect x="200" y="190" width="440" height="76" rx="4"/><text x="208" y="205" font-size="11" font-weight="600">Arm A: the future disc tape is known, the hidden board is sampled (K=64).</text><text x="208" y="220" font-size="11">2.1361 clears/move on the eight master tapes (finding-07 §2). At matched</text><text x="208" y="235" font-size="11">K=64, arm B scored 2.1403 — the tape bought −0.004: knowing the future</text><text x="208" y="250" font-size="11">is worth nothing to this planner. Never re-run on fresh tapes, so this</text><text x="208" y="265" font-size="11">rung keeps its eight-tape dash.</text></g></g>
+
+<g class="fig-pt" tabindex="0"><title>Arm B ghost — the withdrawn reading</title><rect x="180" y="219" width="180" height="14" fill="transparent"/><circle class="fig-marker" cx="172" cy="225" r="6.5" style="fill: var(--fig-pop-bg, #fff)" stroke="var(--fig-muted, #888)"/><text x="172" y="228" text-anchor="middle" font-size="9" class="fig-sub">i</text><g class="fig-pop"><rect x="200" y="130" width="440" height="64" rx="4"/><text x="208" y="145" font-size="11" font-weight="600">Withdrawn reading: 2.2309 on the eight master tapes (finding-07 §1).</text><text x="208" y="160" font-size="11">finding-12 showed those tapes favour long games; the same configuration</text><text x="208" y="175" font-size="11">measures 2.0260 on 32 fresh tapes. The ghost rung keeps the correction</text><text x="208" y="190" font-size="11">visible — the arrow next to it is the fresh-tape correction.</text></g></g>
+
+<g class="fig-pt" tabindex="0"><title>Arm B — the legal planner</title><rect x="180" y="345" width="180" height="14" fill="transparent"/><circle class="fig-marker" cx="368" cy="351" r="6.5" style="fill: var(--fig-pop-bg, #fff)" stroke="var(--fig-muted, #888)"/><text x="368" y="354" text-anchor="middle" font-size="9" class="fig-sub">i</text><g class="fig-pop"><rect x="200" y="255" width="440" height="76" rx="4"/><text x="208" y="270" font-size="11" font-weight="600">Arm B: hidden board and future both sampled — a legal policy reading</text><text x="208" y="285" font-size="11">public state only. H=7, K=256: 2.0260 clears / 1.1256 reveals per move on</text><text x="208" y="300" font-size="11">32 fresh tapes (finding-12 §2). Every fair game still ended — 0 of 160</text><text x="208" y="315" font-size="11">fresh-tape fair games survived (finding-07 correction notice; finding-12).</text><text x="208" y="330" font-size="11">Legal by construction; expensive: 256 exact window solves per move.</text></g></g>
+
+<g class="fig-pt" tabindex="0"><title>Fair D4 ghost — the inflated baseline</title><rect x="180" y="332" width="180" height="14" fill="transparent"/><circle class="fig-marker" cx="172" cy="338" r="6.5" style="fill: var(--fig-pop-bg, #fff)" stroke="var(--fig-muted, #888)"/><text x="172" y="341" text-anchor="middle" font-size="9" class="fig-sub">i</text><g class="fig-pop"><rect x="200" y="240" width="440" height="64" rx="4"/><text x="208" y="255" font-size="11" font-weight="600">Ghost: fair D4's eight-tape reading, 2.0467 (finding-06 §2) — inflated;</text><text x="208" y="270" font-size="11">the same configuration measures 1.9865 on 128 fresh tapes (finding-12).</text><text x="208" y="285" font-size="11">The correction shrinks the baseline, which enlarges the true gap by 21%</text><text x="208" y="300" font-size="11">and halves the planning share of it.</text></g></g>
+
+<g class="fig-pt" tabindex="0"><title>Fair D4 — the reference</title><rect x="180" y="369" width="180" height="14" fill="transparent"/><circle class="fig-marker" cx="368" cy="375" r="6.5" style="fill: var(--fig-pop-bg, #fff)" stroke="var(--fig-muted, #888)"/><text x="368" y="378" text-anchor="middle" font-size="9" class="fig-sub">i</text><g class="fig-pop"><rect x="200" y="280" width="440" height="64" rx="4"/><text x="208" y="295" font-size="11" font-weight="600">Fair depth-4 expectimax: no sampling, public state only, the program's</text><text x="208" y="310" font-size="11">reference. 1.9865 clears/move on 128 fresh tapes; 1.9004 on the 32-tape</text><text x="208" y="325" font-size="11">matched subset used for the decomposition (finding-12 §2). Eight-tape</text><text x="208" y="340" font-size="11">reading 2.0467 (finding-06 §2), shown as the ghost rung above.</text></g></g>
+
+<g class="fig-pt" tabindex="0"><title>Fair planning closes 27.1% (corrected)</title><rect x="160" y="345" width="20" height="36" fill="transparent"/><circle class="fig-marker" cx="170" cy="392" r="6.5" style="fill: var(--fig-pop-bg, #fff)" stroke="var(--fig-muted, #888)"/><text x="170" y="395" text-anchor="middle" font-size="9" class="fig-sub">i</text><g class="fig-pop"><rect x="200" y="380" width="460" height="76" rx="4"/><text x="208" y="395" font-size="11" font-weight="600">Closed by fair planning at H=7, K=256: +0.1256 clears/move = 27.1% of the</text><text x="208" y="410" font-size="11">matched-cohort gap (finding-12 §2; matched arms on 32 fresh tapes: D4</text><text x="208" y="425" font-size="11">1.9004, arm B 2.0260, clairvoyant 2.3637). finding-07 printed 58.8% —</text><text x="208" y="440" font-size="11">withdrawn: D4's baseline was cohort-inflated, the clairvoyant ceiling not.</text><text x="208" y="455" font-size="11">At H=5 the corrected share is 22.2% (15.3% against the all-128 denominator).</text></g></g>
+
+<g class="fig-pt" tabindex="0"><title>Not closed — 72.9%, an upper bound</title><rect x="136" y="142" width="20" height="210" fill="transparent"/><circle class="fig-marker" cx="146" cy="220" r="6.5" style="fill: var(--fig-pop-bg, #fff)" stroke="var(--fig-muted, #888)"/><text x="146" y="223" text-anchor="middle" font-size="9" class="fig-sub">i</text><g class="fig-pop"><rect x="200" y="100" width="460" height="76" rx="4"/><text x="208" y="115" font-size="11" font-weight="600">Not closed: 0.3377 = 72.9% of the matched-cohort gap (finding-12 §2).</text><text x="208" y="130" font-size="11">An upper bound on hidden information; it also contains PIMC's structural</text><text x="208" y="145" font-size="11">blindness to acting in order to learn — valuing reveals is the named,</text><text x="208" y="160" font-size="11">actionable residual (finding-07 §2 and §6; the game demands 1.400</text><text x="208" y="175" font-size="11">covered reveals per move by the same conservation law).</text></g></g>
+
+<g class="fig-pt" tabindex="0"><title>Knowing the tape — about zero</title><rect x="150" y="284" width="16" height="68" fill="transparent"/><circle class="fig-marker" cx="158" cy="330" r="6.5" style="fill: var(--fig-pop-bg, #fff)" stroke="var(--fig-muted, #888)"/><text x="158" y="333" text-anchor="middle" font-size="9" class="fig-sub">i</text><g class="fig-pop"><rect x="200" y="180" width="460" height="64" rx="4"/><text x="208" y="195" font-size="11" font-weight="600">Knowing the future disc tape: ≈0% of the gap — arm A 2.1361 vs arm B</text><text x="208" y="210" font-size="11">2.1403 at K=64 on the eight tapes (finding-07 §2). A determinized planner</text><text x="208" y="225" font-size="11">is not monotone in information: fixing the tape removes sample diversity</text><text x="208" y="240" font-size="11">and sharpens strategy fusion (see diagram-strategy-fusion).</text></g></g>
+
+<g class="fig-pt" tabindex="0"><title>The survival requirement</title><rect x="180" y="114" width="550" height="12" fill="transparent"/><circle class="fig-marker" cx="190" cy="121" r="6.5" style="fill: var(--fig-pop-bg, #fff)" stroke="var(--fig-muted, #888)"/><text x="190" y="124" text-anchor="middle" font-size="9" class="fig-sub">i</text><g class="fig-pop"><rect x="200" y="30" width="460" height="64" rx="4"/><text x="208" y="45" font-size="11" font-weight="600">2.400 = 12/5 numbered clears per move — exact disc conservation</text><text x="208" y="60" font-size="11">(finding-01). Whole-game clairvoyant rates sit just under it because of</text><text x="208" y="75" font-size="11">the sparse opening; the steady-state second half reaches 2.4023</text><text x="208" y="90" font-size="11">(finding-06 §2.1).</text></g></g>
+</svg>

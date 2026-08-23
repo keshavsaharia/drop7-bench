@@ -1,0 +1,20 @@
+{
+  "title": "Failure-mode census of 17 learned-policy experiments (primary assignment)",
+  "kind": "bar",
+  "x": { "label": "failure class" },
+  "y": { "label": "experiments", "unit": "count" },
+  "notes": "Primary assignments of the 17 experiments classified in audit-05 section 4; secondary assignments are not plotted. Class (v) has zero members and was actively refuted twice (experiments 15 and 16: more data and capacity made ranking worse, and training initialized at exact fair D4 walked away from it). Classes (i) and (iii) dominate: information gaps in the oracle targets, and within-root discrimination even with complete sibling coverage. Zero of the seventeen failures is an optimization/basin failure — the class the owner's curriculum-ordering hypothesis targets. Evidence tier: audit of the historical ledger.",
+  "series": [
+    {
+      "name": "primary failure mode (count of 17)",
+      "points": [
+        { "x": "(i) info gap", "y": 3, "label": "representation / information gap: experiments 1, 2, 10", "sourceRecord": "docs/exploratory/audit-05-optimistic-curriculum.md", "sourceField": "section 4 Counts table" },
+        { "x": "(ii) distr. shift", "y": 1, "label": "distribution shift: experiment 6", "sourceRecord": "docs/exploratory/audit-05-optimistic-curriculum.md", "sourceField": "section 4 Counts table" },
+        { "x": "(iii) sibling coverage", "y": 6, "label": "sibling coverage / within-root discrimination: experiments 5, 9, 11, 13, 14, 17", "sourceRecord": "docs/exploratory/audit-05-optimistic-curriculum.md", "sourceField": "section 4 Counts table" },
+        { "x": "(iv) objective", "y": 3, "label": "objective mismatch: experiments 3, 7, 12", "sourceRecord": "docs/exploratory/audit-05-optimistic-curriculum.md", "sourceField": "section 4 Counts table" },
+        { "x": "(v) optimization", "y": 0, "label": "optimization / underfitting / bad basin: none; actively refuted by experiments 15 and 16", "sourceRecord": "docs/exploratory/audit-05-optimistic-curriculum.md", "sourceField": "section 4 Counts table" },
+        { "x": "(0) underpowered", "y": 2, "label": "underpowered or gate-stopped, mechanism untested: experiments 4, 8", "sourceRecord": "docs/exploratory/audit-05-optimistic-curriculum.md", "sourceField": "section 4 Counts table" }
+      ]
+    }
+  ]
+}

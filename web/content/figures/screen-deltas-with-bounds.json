@@ -1,0 +1,26 @@
+{
+  "title": "Every screen and confirmation paired delta with its recorded 95% bound",
+  "kind": "bar",
+  "x": { "label": "screen or confirmation (candidate minus reference)" },
+  "y": { "label": "paired mean score delta", "unit": "points" },
+  "notes": "Whole-game paired deltas against each experiment's reference arm, corrected 17,000-point Hardcore scoring. Bounds are one-sided 95% bootstrap lower bounds; upper bounds are drawn only where recorded (the three reveal-sampling contrasts, CMA-ES, both survival-instinct arms). finding-03, finding-14, both learned-leaf arms and A900 record no upper bound — the whisker is absent there, not zero. finding-05's confirmation lower bound is printed +47,457 in the finding and +47,446.8 in RS-20260821T205102Z-d89df4b5; the figure uses the record (+47,447). A900's rejection rests on flat flow statistics and opposite-sign halves, not the score delta, which sits inside its 30,957 detection floor (RS-20260823T131226Z-16564ed9). Cohorts differ per bar (n carried per point; the survival-instinct arms share 128 fresh seeds, A900 256 fresh seeds); this chart assembles separate experiments, it does not pool them. Evidence tier: development / public-development screens.",
+  "series": [
+    {
+      "name": "paired mean score delta vs reference",
+      "points": [
+        { "x": "f05 confirm d4s7-d4s5", "y": 101171, "lo": 47447, "n": 64, "label": "finding-05 confirmation, chance strata at depth 4; W-T-L 41-0-23", "sourceRecord": "RS-20260821T205102Z-d89df4b5", "sourceField": "metrics.pairedD4s7MinusD4s5" },
+        { "x": "f08 learned leaf s5", "y": 39105, "lo": 1138, "n": 64, "label": "learned leaf minus reference, 5 strata; W-T-L 37-0-27; significant", "sourceRecord": "docs/exploratory/finding-08-learned-leaf.md", "sourceField": "section 7 paired deltas table" },
+        { "x": "f08 learned leaf s7", "y": 17281, "lo": -55892, "n": 64, "label": "learned leaf minus reference, 7 strata; W-T-L 34-0-30; not significant", "sourceRecord": "docs/exploratory/finding-08-learned-leaf.md", "sourceField": "section 7 paired deltas table" },
+        { "x": "f16 d3 M6-M1", "y": 64116, "lo": 7475, "hi": 121776, "n": 64, "label": "reveal sampling at depth 3, M=6 minus M=1; W-T-L 36-0-28", "sourceRecord": "RS-20260821T192140Z-189fe392", "sourceField": "metrics.pairedD3M6MinusD3M1" },
+        { "x": "f16 d4 M2-M1", "y": -41950, "lo": -100137, "hi": 17541, "n": 64, "label": "reveal sampling at depth 4, M=2 minus M=1; W-T-L 28-0-36", "sourceRecord": "RS-20260821T192140Z-189fe392", "sourceField": "metrics.pairedD4M2MinusD4M1" },
+        { "x": "f16 d3 M12-M6", "y": -27097, "lo": -83807, "hi": 31209, "n": 64, "label": "full joint coverage minus M=6 at depth 3; W-T-L 28-0-36; saturation", "sourceRecord": "RS-20260821T192140Z-189fe392", "sourceField": "metrics.pairedD3M12MinusD3M6" },
+        { "x": "f03 rollout veto", "y": -46510.5, "lo": -91924.6, "n": 32, "label": "25-move rollout veto, 17,000-point port; W-T-L 9-4-19; rejected", "sourceRecord": "docs/exploratory/finding-03-rollout-veto-17k.md", "sourceField": "section 5.2 paired comparison" },
+        { "x": "f14 full leaf refit", "y": -237182, "lo": -290406, "n": 64, "label": "leaf reweighted fully toward the achievable-clear direction; W-T-L 7-0-57; rejected", "sourceRecord": "docs/exploratory/finding-14-leaf-reweight.md", "sourceField": "Summary / dose table (t2-fair-a1)" },
+        { "x": "CMA-ES leaf", "y": -30300, "lo": -70928, "hi": 9786, "n": 64, "label": "CMA-ES-tuned leaf screen, held out; W-T-L 28-0-36", "sourceRecord": "RS-20260822T120736Z-662b39ca", "sourceField": "metrics.heldOutD4S5.pairedScore" },
+        { "x": "survival STRICT", "y": -1970, "lo": -27738, "hi": 22313, "n": 128, "label": "survival-instinct root filter, strict rule; W-T-L 41-26-61; inconclusive by its coverage rule", "sourceRecord": "RS-20260822T233343Z-12becce9", "sourceField": "metrics.strict.pairedScore" },
+        { "x": "survival LITERAL", "y": -97064, "lo": -136887, "hi": -59500, "n": 128, "label": "survival-instinct root filter, literal rule; W-T-L 43-0-85; rejected", "sourceRecord": "RS-20260822T233343Z-12becce9", "sourceField": "metrics.literal.pairedScore" },
+        { "x": "A900 reveal constr.", "y": 3204, "lo": -26860, "n": 256, "label": "reveal-construction term at threshold 900; W-T-L 99-53-104; inside its 30,957 floor", "sourceRecord": "RS-20260823T131226Z-16564ed9", "sourceField": "metrics.A900_minus_frozen" }
+      ]
+    }
+  ]
+}

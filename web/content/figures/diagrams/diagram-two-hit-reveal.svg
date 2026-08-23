@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 540" width="100%" role="img" aria-labelledby="fig-diagram-two-hit-reveal-title fig-diagram-two-hit-reveal-desc" class="research-fig-svg" font-family="ui-sans-serif, system-ui, sans-serif">
+<title id="fig-diagram-two-hit-reveal-title">The two-hit reveal: two hits in one wave-scan reveal a solid gray</title>
+<desc id="fig-diagram-two-hit-reveal-desc">Mechanism diagram: the same-wave double hit behind the 2026-08-23 reveal-construction experiment. Board 1 (setup): a solid gray disc flanked on the bottom row by two numbered discs whose vertical runs are one short, with the completing discs being delivered by the ongoing cascade's gravity. Board 2 (actual): both neighbours pop in the same wave-scan, two hits land on the solid gray at once, and it reveals immediately. Board 3 (counterfactual): the hits arrive in different waves; the first only cracks the gray and the second never lands inside the search horizon. Engine rule per approaches/lifetime-objective/fast-engine/fast-engine.hpp resolveCascadeFast: poppers are marked first, then every covered cell counts its orthogonal neighbours in the popping set read from the pre-clear board; a solid gray needs 2 hits in one wave to reveal, a cracked gray needs 1. Caption: two hits, one wave = reveal; the leaf priced the marginals, not the joint event. Sources: web/content/log/2026-08-23.mdx, RS-20260823T131226Z-16564ed9, docs/agents/project-nature.md. Boards are 7x7, row 0 at top, columns 1-7 left to right.</desc>
+<style>
+.research-fig-svg text { fill: var(--fig-fg, #222); }
+.research-fig-svg .fig-title { font-size: 14px; font-weight: 600; }
+.research-fig-svg .fig-sub { font-size: 11px; fill: var(--fig-muted, #888); }
+.research-fig-svg .fig-note { font-size: 10px; fill: var(--fig-muted, #888); }
+.research-fig-svg .fig-tiny { font-size: 9px; fill: var(--fig-muted, #888); }
+.research-fig-svg .fig-grid { stroke: var(--fig-grid, #d4d4d8); stroke-width: 1; fill: none; }
+.research-fig-svg .fig-accent-text { fill: var(--fig-accent, #2563eb); }
+.research-fig-svg .fig-danger-text { fill: var(--fig-danger, #dc2626); }
+.research-fig-svg .fig-pt { cursor: pointer; outline: none; }
+.research-fig-svg .fig-pop { display: none; pointer-events: none; }
+.research-fig-svg .fig-pop rect { fill: var(--fig-pop-bg, #ffffff); stroke: var(--fig-pop-border, #d4d4d8); }
+.research-fig-svg .fig-pop text { fill: var(--fig-fg, #222); }
+.research-fig-svg .fig-pt:hover .fig-pop, .research-fig-svg .fig-pt:focus .fig-pop, .research-fig-svg .fig-pt:focus-within .fig-pop { display: block; }
+.research-fig-svg .fig-pt:hover .fig-marker, .research-fig-svg .fig-pt:focus .fig-marker { stroke: var(--fig-fg, #222); stroke-width: 2; }
+</style>
+<defs>
+<marker id="d2-arrF" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" style="fill: var(--fig-fg, #222)"/></marker>
+<marker id="d2-arrD" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" style="fill: var(--fig-danger, #dc2626)"/></marker>
+<marker id="d2-arrM" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" style="fill: var(--fig-muted, #888)"/></marker>
+<g id="d2grid">
+<path style="fill:none;stroke:var(--fig-grid,#d4d4d8);stroke-width:1" d="M0 0h140v140h-140z M20 0v140 M40 0v140 M60 0v140 M80 0v140 M100 0v140 M120 0v140 M0 20h140 M0 40h140 M0 60h140 M0 80h140 M0 100h140 M0 120h140"/>
+</g>
+</defs>
+<text class="fig-title" x="36" y="24">The two-hit reveal: two hits in one wave-scan reveal a solid gray</text>
+<text class="fig-sub" x="36" y="42">engine rule: a solid gray needs 2 hits in the same wave; a cracked gray needs 1 (resolveCascadeFast, fast-engine.hpp)</text>
+
+<!-- Board 1: setup -->
+<use href="#d2grid" x="60" y="180"/>
+<text class="fig-tiny" x="70" y="174" text-anchor="middle">1</text><text class="fig-tiny" x="90" y="174" text-anchor="middle">2</text><text class="fig-tiny" x="110" y="174" text-anchor="middle">3</text><text class="fig-tiny" x="130" y="174" text-anchor="middle">4</text><text class="fig-tiny" x="150" y="174" text-anchor="middle">5</text><text class="fig-tiny" x="170" y="174" text-anchor="middle">6</text><text class="fig-tiny" x="190" y="174" text-anchor="middle">7</text>
+<text class="fig-tiny" x="56" y="186" text-anchor="end">row 0</text>
+<circle cx="90" cy="310" r="8.5" style="fill: var(--fig-accent, #2563eb)"/><text x="90" y="313.5" text-anchor="middle" font-size="10" style="fill: #fff">5</text>
+<circle cx="110" cy="310" r="8.5" style="fill: var(--fig-accent, #2563eb)"/><text x="110" y="313.5" text-anchor="middle" font-size="10" style="fill: #fff">2</text>
+<circle cx="130" cy="310" r="8.5" style="fill: var(--fig-cover, #9ca3af)"/>
+<circle cx="150" cy="310" r="8.5" style="fill: var(--fig-accent, #2563eb)"/><text x="150" y="313.5" text-anchor="middle" font-size="10" style="fill: #fff">2</text>
+<circle cx="170" cy="310" r="8.5" style="fill: var(--fig-accent, #2563eb)"/><text x="170" y="313.5" text-anchor="middle" font-size="10" style="fill: #fff">5</text>
+<circle cx="110" cy="270" r="8.5" fill="none" stroke="var(--fig-muted, #888)" stroke-width="1" stroke-dasharray="3 2"/><text x="110" y="273.5" text-anchor="middle" font-size="10" class="fig-sub">2</text>
+<circle cx="150" cy="270" r="8.5" fill="none" stroke="var(--fig-muted, #888)" stroke-width="1" stroke-dasharray="3 2"/><text x="150" y="273.5" text-anchor="middle" font-size="10" class="fig-sub">2</text>
+<line x1="110" y1="279" x2="110" y2="291" stroke="var(--fig-muted, #888)" stroke-width="1" stroke-dasharray="3 2" marker-end="url(#d2-arrM)"/>
+<line x1="150" y1="279" x2="150" y2="291" stroke="var(--fig-muted, #888)" stroke-width="1" stroke-dasharray="3 2" marker-end="url(#d2-arrM)"/>
+<text class="fig-note" x="130" y="338" text-anchor="middle">setup — both neighbours one short;</text>
+<text class="fig-note" x="130" y="352" text-anchor="middle">a cascade delivers the completing discs</text>
+
+<!-- transition arrows -->
+<line x1="206" y1="226" x2="414" y2="134" stroke="var(--fig-fg, #222)" stroke-width="1.5" marker-end="url(#d2-arrF)"/>
+<text x="310" y="172" text-anchor="middle" font-size="11">same wave</text>
+<line x1="206" y1="274" x2="414" y2="366" stroke="var(--fig-fg, #222)" stroke-width="1.5" marker-end="url(#d2-arrF)"/>
+<text x="310" y="328" text-anchor="middle" font-size="11">separate waves (counterfactual)</text>
+
+<!-- Board 2: same wave, reveal -->
+<use href="#d2grid" x="420" y="60"/>
+<circle cx="450" cy="190" r="8.5" style="fill: var(--fig-accent, #2563eb)"/><text x="450" y="193.5" text-anchor="middle" font-size="10" style="fill: #fff">5</text>
+<circle cx="470" cy="190" r="8.5" style="fill: var(--fig-accent, #2563eb)"/><text x="470" y="193.5" text-anchor="middle" font-size="10" style="fill: #fff">2</text>
+<circle cx="470" cy="190" r="11.5" fill="none" stroke="var(--fig-accent, #2563eb)" stroke-width="2"/>
+<circle cx="510" cy="190" r="8.5" style="fill: var(--fig-accent, #2563eb)"/><text x="510" y="193.5" text-anchor="middle" font-size="10" style="fill: #fff">2</text>
+<circle cx="510" cy="190" r="11.5" fill="none" stroke="var(--fig-accent, #2563eb)" stroke-width="2"/>
+<circle cx="530" cy="190" r="8.5" style="fill: var(--fig-accent, #2563eb)"/><text x="530" y="193.5" text-anchor="middle" font-size="10" style="fill: #fff">5</text>
+<circle cx="470" cy="170" r="8.5" style="fill: var(--fig-accent, #2563eb)"/><text x="470" y="173.5" text-anchor="middle" font-size="10" style="fill: #fff">2</text>
+<circle cx="470" cy="170" r="11.5" fill="none" stroke="var(--fig-accent, #2563eb)" stroke-width="2"/>
+<circle cx="510" cy="170" r="8.5" style="fill: var(--fig-accent, #2563eb)"/><text x="510" y="173.5" text-anchor="middle" font-size="10" style="fill: #fff">2</text>
+<circle cx="510" cy="170" r="11.5" fill="none" stroke="var(--fig-accent, #2563eb)" stroke-width="2"/>
+<path d="M 471 181 Q 478 172 486 181" stroke="var(--fig-danger, #dc2626)" stroke-width="2" fill="none" marker-end="url(#d2-arrD)"/>
+<path d="M 509 181 Q 502 172 494 181" stroke="var(--fig-danger, #dc2626)" stroke-width="2" fill="none" marker-end="url(#d2-arrD)"/>
+<rect x="468" y="142" width="44" height="16" rx="4" style="fill: var(--fig-danger, #dc2626); opacity: 0.14" stroke="var(--fig-danger, #dc2626)" stroke-width="1"/>
+<text class="fig-danger-text" x="490" y="154" text-anchor="middle" font-size="10">2 hits</text>
+<circle cx="490" cy="190" r="8.5" style="fill: var(--fig-accent, #2563eb)"/><text x="490" y="193.5" text-anchor="middle" font-size="10" style="fill: #fff">4</text>
+<circle cx="490" cy="190" r="12" fill="none" stroke="var(--fig-accent, #2563eb)" stroke-width="1.5" stroke-dasharray="3 2"/>
+<text class="fig-note" x="490" y="216" text-anchor="middle">wave k: both neighbours pop in one scan —</text>
+<text class="fig-note" x="490" y="230" text-anchor="middle">2 hits ≥ 2 → the solid gray reveals at once</text>
+
+<!-- Board 3: counterfactual, only cracked -->
+<use href="#d2grid" x="420" y="300"/>
+<circle cx="450" cy="430" r="8.5" style="fill: var(--fig-accent, #2563eb)"/><text x="450" y="433.5" text-anchor="middle" font-size="10" style="fill: #fff">5</text>
+<circle cx="470" cy="430" r="8.5" fill="none" stroke="var(--fig-muted, #888)" stroke-width="1" stroke-dasharray="3 2"/>
+<path d="M 466 426 L 474 434 M 474 426 L 466 434" stroke="var(--fig-muted, #888)" stroke-width="1.2"/>
+<circle cx="490" cy="430" r="8.5" style="fill: var(--fig-cover, #9ca3af)"/>
+<path d="M 486 424 L 490 429 L 487.5 433 L 493 436" stroke="var(--fig-fg, #222)" stroke-width="1.2" fill="none"/>
+<circle cx="510" cy="430" r="8.5" style="fill: var(--fig-accent, #2563eb)"/><text x="510" y="433.5" text-anchor="middle" font-size="10" style="fill: #fff">2</text>
+<circle cx="530" cy="430" r="8.5" style="fill: var(--fig-accent, #2563eb)"/><text x="530" y="433.5" text-anchor="middle" font-size="10" style="fill: #fff">5</text>
+<circle cx="470" cy="410" r="8.5" fill="none" stroke="var(--fig-muted, #888)" stroke-width="1" stroke-dasharray="3 2"/>
+<path d="M 466 406 L 474 414 M 474 406 L 466 414" stroke="var(--fig-muted, #888)" stroke-width="1.2"/>
+<circle cx="510" cy="410" r="8.5" fill="none" stroke="var(--fig-muted, #888)" stroke-width="1" stroke-dasharray="3 2"/>
+<line x1="503" y1="417" x2="517" y2="403" stroke="var(--fig-muted, #888)" stroke-width="1.5"/>
+<path d="M 471 421 Q 478 412 486 421" stroke="var(--fig-danger, #dc2626)" stroke-width="2" fill="none" marker-end="url(#d2-arrD)"/>
+<rect x="468" y="382" width="44" height="16" rx="4" fill="none" stroke="var(--fig-muted, #888)" stroke-width="1"/>
+<text class="fig-sub" x="490" y="394" text-anchor="middle" font-size="10">1 hit</text>
+<text class="fig-note" x="490" y="456" text-anchor="middle">counterfactual — the hits arrive in different waves:</text>
+<text class="fig-note" x="490" y="470" text-anchor="middle">the first only cracks; the second never lands in-horizon</text>
+
+<!-- caption strip -->
+<rect x="36" y="496" width="688" height="34" rx="6" style="fill: var(--fig-pop-bg, #fff)" stroke="var(--fig-grid, #d4d4d8)"/>
+<text x="380" y="510" text-anchor="middle" font-size="12">two hits, one wave = reveal — the leaf priced the marginals, not the joint event.</text>
+<text class="fig-note" x="380" y="524" text-anchor="middle">solid gray: 2 hits in one wave-scan · cracked gray: 1 hit · hits counted from the pre-clear board (resolveCascadeFast, fast-engine.hpp)</text>
+
+<g class="fig-pt" tabindex="0"><title>Solid gray — the cover rule</title><rect x="120" y="300" width="20" height="20" fill="transparent"/><circle class="fig-marker" cx="204" cy="184" r="6.5" style="fill: var(--fig-pop-bg, #fff)" stroke="var(--fig-muted, #888)"/><text x="204" y="187" text-anchor="middle" font-size="9" class="fig-sub">i</text><g class="fig-pop"><rect x="36" y="60" width="370" height="76" rx="4"/><text x="44" y="75" font-size="11" font-weight="600">Solid gray (covered disc). Each wave, poppers are marked first; then</text><text x="44" y="90" font-size="11">every covered cell counts its orthogonal neighbours in the popping set,</text><text x="44" y="105" font-size="11">read from the pre-clear board. Solid needs 2 hits in one wave to reveal;</text><text x="44" y="120" font-size="11">a solid that takes 1 hit becomes cracked (needs 1 more, any later wave).</text><text x="44" y="135" font-size="11">source: fast-engine.hpp, resolveCascadeFast cover scan</text></g></g>
+
+<g class="fig-pt" tabindex="0"><title>Why the double hit is a cascade event</title><rect x="96" y="256" width="68" height="40" fill="transparent"/><circle class="fig-marker" cx="166" cy="262" r="6.5" style="fill: var(--fig-pop-bg, #fff)" stroke="var(--fig-muted, #888)"/><text x="166" y="265" text-anchor="middle" font-size="9" class="fig-sub">i</text><g class="fig-pop"><rect x="36" y="60" width="370" height="76" rx="4"/><text x="44" y="75" font-size="11" font-weight="600">A cascade is underway: an earlier wave's pops and gravity deliver the</text><text x="44" y="90" font-size="11">completing discs (ghosted). Wave-1 poppers are always runs through the</text><text x="44" y="105" font-size="11">dropped cell, so a same-wave double hit on a solid gray is a wave-≥2</text><text x="44" y="120" font-size="11">event: gravity must complete runs on both sides in one scan.</text><text x="44" y="135" font-size="11">derived from resolveCascadeFast: scan → poppers → cover hits → gravity</text></g></g>
+
+<g class="fig-pt" tabindex="0"><title>The joint event the leaf could not price</title><rect x="455" y="158" width="70" height="46" fill="transparent"/><circle class="fig-marker" cx="564" cy="64" r="6.5" style="fill: var(--fig-pop-bg, #fff)" stroke="var(--fig-muted, #888)"/><text x="564" y="67" text-anchor="middle" font-size="9" class="fig-sub">i</text><g class="fig-pop"><rect x="300" y="60" width="420" height="76" rx="4"/><text x="308" y="75" font-size="11" font-weight="600">Both neighbours pop in the same wave-scan, so two hits land on the solid</text><text x="308" y="90" font-size="11">gray at once. This joint event is what the aligned_double_hit leaf term</text><text x="308" y="105" font-size="11">tried to price: solid_exposure is a weighted sum of the two neighbours'</text><text x="308" y="120" font-size="11">marginal readiness and cannot express it.</text><text x="308" y="135" font-size="11">source: web/content/log/2026-08-23.mdx, Kimi K3 design direction</text></g></g>
+
+<g class="fig-pt" tabindex="0"><title>Reveal — and the cascade can continue</title><rect x="478" y="178" width="24" height="24" fill="transparent"/><circle class="fig-marker" cx="564" cy="88" r="6.5" style="fill: var(--fig-pop-bg, #fff)" stroke="var(--fig-muted, #888)"/><text x="564" y="91" text-anchor="middle" font-size="9" class="fig-sub">i</text><g class="fig-pop"><rect x="300" y="60" width="420" height="64" rx="4"/><text x="308" y="75" font-size="11" font-weight="600">2 hits ≥ 2 needed: the gray reveals immediately (drawn as the revealed 4),</text><text x="308" y="90" font-size="11">and the revealed number can itself pop in a later wave of the same cascade —</text><text x="308" y="105" font-size="11">the cheapest reveal in the game. Reveals apply after poppers are removed,</text><text x="308" y="120" font-size="11">before gravity, in row-major order (resolveCascadeFast).</text></g></g>
+
+<g class="fig-pt" tabindex="0"><title>Counterfactual — only cracked</title><rect x="478" y="418" width="24" height="24" fill="transparent"/><circle class="fig-marker" cx="564" cy="304" r="6.5" style="fill: var(--fig-pop-bg, #fff)" stroke="var(--fig-muted, #888)"/><text x="564" y="307" text-anchor="middle" font-size="9" class="fig-sub">i</text><g class="fig-pop"><rect x="300" y="300" width="420" height="76" rx="4"/><text x="308" y="315" font-size="11" font-weight="600">Counterfactual: the hits arrive in different waves. The first hit only</text><text x="308" y="330" font-size="11">cracks the gray; the second never lands inside the search horizon.</text><text x="308" y="345" font-size="11">Marginally each neighbour looked ready — the leaf sees the same board</text><text x="308" y="360" font-size="11">either way, which is why a weighted sum of marginals cannot rank this.</text><text x="308" y="375" font-size="11">source: web/content/log/2026-08-23.mdx</text></g></g>
+
+<g class="fig-pt" tabindex="0"><title>What the measurement showed</title><rect x="36" y="496" width="688" height="34" fill="transparent"/><circle class="fig-marker" cx="712" cy="504" r="6.5" style="fill: var(--fig-pop-bg, #fff)" stroke="var(--fig-muted, #888)"/><text x="712" y="507" text-anchor="middle" font-size="9" class="fig-sub">i</text><g class="fig-pop"><rect x="160" y="406" width="480" height="76" rx="4"/><text x="168" y="421" font-size="11" font-weight="600">Measured in play (RS-20260823T131226Z-16564ed9): the +900 dose changed</text><text x="168" y="436" font-size="11">2.08% of decisions and scored +3,204 over 256 fresh paired games (95% lower</text><text x="168" y="451" font-size="11">bound −26,860), with reveals flat at 1.152 vs 1.154 per move — the term</text><text x="168" y="466" font-size="11">re-ranks the search occasionally and buys no reveals. The gate reads fail;</text><text x="168" y="481" font-size="11">60.5% of live same-wave setups go uncollected within two moves.</text></g></g>
+</svg>

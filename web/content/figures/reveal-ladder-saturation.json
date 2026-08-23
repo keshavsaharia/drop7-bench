@@ -1,0 +1,25 @@
+{
+  "title": "Reveal-sample ladder: mean score against joint (disc, reveal) coverage — saturation at M about 6",
+  "kind": "line",
+  "x": { "label": "joint (disc, reveal) coverage", "unit": "%" },
+  "y": { "label": "mean score", "unit": "points" },
+  "notes": "Cohort 0xa51d1000-0xa51d103f, n=64 per arm, corrected 17,000-point Hardcore scoring, all from RS-20260821T192140Z-189fe392 (valid, fail/not-supported-as-tested for the compounding theory). Coverage values are metrics.jointCoverageByM (0.143 / 0.286 / 0.429 / 0.857 / 1.0) expressed in percent. The M=6 to M=12 step is -27,097 with interval (-83,807, +31,209), W-T-L 28-0-36: saturation, not regression (metrics.pairedD3M12MinusD3M6). Score, moves, numbered clears and covered reveals all peak at M=6; only mean occupancy improves monotonically to 100% coverage (finding-16). The depth-4 series tested only M=1 and M=2 (28.6% coverage); the wide depth-4 arm was never affordable. The d4 M=1 comparator mean (398,498) is quoted in the record's summary and recorded in finding-15 section 8.3. Evidence tier: public-development.",
+  "series": [
+    {
+      "name": "depth 3, N=7",
+      "points": [
+        { "x": 14.3, "y": 312327, "n": 64, "label": "M=1", "sourceRecord": "RS-20260821T192140Z-189fe392", "sourceField": "metrics.jointCoverageByM.M1 / metrics.ladderD3N7.M1" },
+        { "x": 42.9, "y": 337306, "n": 64, "label": "M=3", "sourceRecord": "RS-20260821T192140Z-189fe392", "sourceField": "metrics.jointCoverageByM.M3 / metrics.ladderD3N7.M3" },
+        { "x": 85.7, "y": 376442, "n": 64, "label": "M=6", "sourceRecord": "RS-20260821T192140Z-189fe392", "sourceField": "metrics.jointCoverageByM.M6 / metrics.ladderD3N7.M6" },
+        { "x": 100, "y": 349345, "n": 64, "label": "M=12 (full joint coverage)", "sourceRecord": "RS-20260821T192140Z-189fe392", "sourceField": "metrics.jointCoverageByM.M12 / metrics.ladderD3N7.M12" }
+      ]
+    },
+    {
+      "name": "depth 4, N=7",
+      "points": [
+        { "x": 14.3, "y": 398498, "n": 64, "label": "M=1 (fair D4 reference)", "sourceRecord": "RS-20260821T192140Z-189fe392", "sourceField": "summary comparator mean; finding-15 section 8.3" },
+        { "x": 28.6, "y": 356548, "n": 64, "label": "M=2", "sourceRecord": "RS-20260821T192140Z-189fe392", "sourceField": "metrics.jointCoverageByM.M2 / metrics.d4N7M2MeanScore" }
+      ]
+    }
+  ]
+}

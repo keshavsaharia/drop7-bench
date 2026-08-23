@@ -1,0 +1,60 @@
+{
+  "title": "Learned evaluators versus exact search: top-1, pairwise and regret on held-out roots",
+  "kind": "dot",
+  "x": { "label": "evaluator (evaluation panel after the dot)" },
+  "y": { "label": "metric value", "unit": "unitless" },
+  "notes": "Panels differ across points and are named per category: the afterstate models and the fair D4 / fair D1 comparators are gated on the H40 D1-continuation panel; the D4-value student on a D4-ordering panel; the planner-distill student and its comparator on the fair-planner H5K256 panel; martingale-dual B0 and its comparator on the locked 477-root H200 panel; exact D1 / exact D2 on the historical panel of RS-20260821T104500Z-77d21e90. Compare within a panel, not across. Fair D1 pairwise and regret on the afterstate panel are not recorded, and exact D1 / exact D2 are recorded top-1 only, so those series points are omitted. Full-train pairwise 0.658 is from the record's summary prose; its per-half values are not recorded. Per-point labels are omitted to keep the dot grid readable; every popover carries the value and source. All eight students sit below their panel's fair-D4 comparator column. Evidence tier: pilot (afterstate and D4-value line); see each source for its panel definition.",
+  "series": [
+    {
+      "name": "top-1 accuracy",
+      "points": [
+        { "x": "afterstate K=8 · H40", "y": 0.247, "sourceRecord": "RS-20260820T094500Z-5c1e9a04", "sourceField": "metrics.modelTop1Pooled" },
+        { "x": "afterstate K=64 · H40", "y": 0.3422, "sourceRecord": "RS-20260820T114500Z-2b7c9e31", "sourceField": "metrics.modelTop1Pooled" },
+        { "x": "afterstate K=256 · H40", "y": 0.4245, "sourceRecord": "RS-20260820T142500Z-8f4a2d17", "sourceField": "metrics.modelTop1Pooled" },
+        { "x": "afterstate full-train · H40", "y": 0.3611, "sourceRecord": "RS-20260821T094500Z-1a7e3c55", "sourceField": "metrics.diagnosticTop1VsIter3" },
+        { "x": "afterstate D2-teacher · H40", "y": 0.3365, "sourceRecord": "RS-20260821T134500Z-4b9d2f68", "sourceField": "metrics.rankingTop1Pooled" },
+        { "x": "D4-value student · D4 panel", "y": 0.3752, "sourceRecord": "RS-20260821T104500Z-77d21e90", "sourceField": "metrics.top1Pooled" },
+        { "x": "planner-distill · planner panel", "y": 0.4851, "sourceRecord": "docs/exploratory/finding-11-planner-distillation.md", "sourceField": "Summary table" },
+        { "x": "martingale-dual B0 · H200", "y": 0.289308, "sourceRecord": "docs/research/history.md", "sourceField": "Martingale-dual B0 ranking audit table (line 4526)" },
+        { "x": "fair D4 · H40", "y": 0.4986, "sourceRecord": "RS-20260820T142500Z-8f4a2d17", "sourceField": "metrics.d4Top1Pooled" },
+        { "x": "fair D1 · H40", "y": 0.3191, "sourceRecord": "RS-20260820T142500Z-8f4a2d17", "sourceField": "metrics.d1Top1Pooled" },
+        { "x": "exact D1 · historical panel", "y": 0.486, "sourceRecord": "RS-20260821T104500Z-77d21e90", "sourceField": "metrics.referenceD1Top1" },
+        { "x": "exact D2 · historical panel", "y": 0.568, "sourceRecord": "RS-20260821T104500Z-77d21e90", "sourceField": "metrics.referenceD2Top1" },
+        { "x": "fair D4 · planner panel", "y": 0.6111, "sourceRecord": "docs/exploratory/finding-11-planner-distillation.md", "sourceField": "Summary table" },
+        { "x": "fair D4 · H200", "y": 0.381551, "sourceRecord": "docs/research/history.md", "sourceField": "Martingale-dual B0 ranking audit table (line 4527)" }
+      ]
+    },
+    {
+      "name": "pairwise accuracy",
+      "points": [
+        { "x": "afterstate K=8 · H40", "y": 0.571, "sourceRecord": "RS-20260820T094500Z-5c1e9a04", "sourceField": "metrics.modelPairwisePooled" },
+        { "x": "afterstate K=64 · H40", "y": 0.6367, "sourceRecord": "RS-20260820T114500Z-2b7c9e31", "sourceField": "metrics.modelPairwisePooled" },
+        { "x": "afterstate K=256 · H40", "y": 0.6851, "sourceRecord": "RS-20260820T142500Z-8f4a2d17", "sourceField": "metrics.modelPairwisePooled" },
+        { "x": "afterstate full-train · H40", "y": 0.658, "sourceRecord": "RS-20260821T094500Z-1a7e3c55", "sourceField": "summary (pairwise 0.658 vs 0.685)" },
+        { "x": "afterstate D2-teacher · H40", "y": 0.631, "sourceRecord": "RS-20260821T134500Z-4b9d2f68", "sourceField": "metrics.rankingPairwisePooled" },
+        { "x": "D4-value student · D4 panel", "y": 0.6426, "sourceRecord": "RS-20260821T104500Z-77d21e90", "sourceField": "metrics.pairwisePooled" },
+        { "x": "planner-distill · planner panel", "y": 0.7364, "sourceRecord": "docs/exploratory/finding-11-planner-distillation.md", "sourceField": "Summary table" },
+        { "x": "martingale-dual B0 · H200", "y": 0.59846, "sourceRecord": "docs/research/history.md", "sourceField": "Martingale-dual B0 ranking audit table (line 4526)" },
+        { "x": "fair D4 · H40", "y": 0.7366, "sourceRecord": "RS-20260820T142500Z-8f4a2d17", "sourceField": "metrics.d4PairwisePooled" },
+        { "x": "fair D4 · planner panel", "y": 0.7961, "sourceRecord": "docs/exploratory/finding-11-planner-distillation.md", "sourceField": "Summary table" },
+        { "x": "fair D4 · H200", "y": 0.668191, "sourceRecord": "docs/research/history.md", "sourceField": "Martingale-dual B0 ranking audit table (line 4527)" }
+      ]
+    },
+    {
+      "name": "normalized regret",
+      "points": [
+        { "x": "afterstate K=8 · H40", "y": 0.413, "sourceRecord": "RS-20260820T094500Z-5c1e9a04", "sourceField": "metrics.modelRegretPooled" },
+        { "x": "afterstate K=64 · H40", "y": 0.3029, "sourceRecord": "RS-20260820T114500Z-2b7c9e31", "sourceField": "metrics.modelRegretPooled" },
+        { "x": "afterstate K=256 · H40", "y": 0.2408, "sourceRecord": "RS-20260820T142500Z-8f4a2d17", "sourceField": "metrics.modelRegretPooled" },
+        { "x": "afterstate full-train · H40", "y": 0.2807, "sourceRecord": "RS-20260821T094500Z-1a7e3c55", "sourceField": "metrics.diagnosticRegretVsIter3" },
+        { "x": "afterstate D2-teacher · H40", "y": 0.312, "sourceRecord": "RS-20260821T134500Z-4b9d2f68", "sourceField": "metrics.rankingRegretPooled" },
+        { "x": "D4-value student · D4 panel", "y": 0.2909, "sourceRecord": "RS-20260821T104500Z-77d21e90", "sourceField": "metrics.regretPooled" },
+        { "x": "planner-distill · planner panel", "y": 0.1915, "sourceRecord": "docs/exploratory/finding-11-planner-distillation.md", "sourceField": "Summary table" },
+        { "x": "martingale-dual B0 · H200", "y": 0.350157, "sourceRecord": "docs/research/history.md", "sourceField": "Martingale-dual B0 ranking audit table (line 4526)" },
+        { "x": "fair D4 · H40", "y": 0.1784, "sourceRecord": "RS-20260820T142500Z-8f4a2d17", "sourceField": "metrics.d4RegretPooled" },
+        { "x": "fair D4 · planner panel", "y": 0.1269, "sourceRecord": "docs/exploratory/finding-11-planner-distillation.md", "sourceField": "Summary table" },
+        { "x": "fair D4 · H200", "y": 0.276577, "sourceRecord": "docs/research/history.md", "sourceField": "Martingale-dual B0 ranking audit table (line 4527)" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "title": "Mean score by search depth and chance resolution (shared cohort)",
+  "kind": "line",
+  "x": { "label": "search depth", "unit": "plies" },
+  "y": { "label": "mean score", "unit": "points" },
+  "notes": "Cohort 0xa51d1000-0xa51d103f, corrected 17,000-point Hardcore scoring, 64 games per cell except the depth-5 seven-stratum arm, which was stopped by decision after the first 32 seeds (0xa51d1000-0xa51d101f) and is final. The stopped arm is drawn as its own dashed one-point series so the two sample sizes are never joined by a line (same convention as score-vs-depth). No per-mean confidence intervals are recorded anywhere for these arms; the bounds on the paired contrasts live in detection-floor-map. The d2s5 mean is the coordinator-supplied figure printed in finding-10's position-mode table and in the 2026-08-21 log ArmTable (the log path is not an accepted sourceRecord scheme, so the finding is cited). Evidence tier: development / public-development.",
+  "series": [
+    {
+      "name": "5 strata (approximate chance)",
+      "points": [
+        { "x": 2, "y": 249641, "n": 64, "label": "d2s5", "sourceRecord": "docs/exploratory/finding-10-suite-validation.md", "sourceField": "position-mode table, d2s5 row (also log 2026-08-21 ArmTable)" },
+        { "x": 3, "y": 305051, "n": 64, "label": "d3s5", "sourceRecord": "docs/exploratory/finding-05-chance-strata.md", "sourceField": "Cost table, depth 3 / 5 strata row" },
+        { "x": 4, "y": 297327, "n": 64, "label": "d4s5 (frozen reference)", "sourceRecord": "docs/exploratory/finding-15-depth5-exact-estimator.md", "sourceField": "8.3 cohort means table" },
+        { "x": 5, "y": 288704, "n": 64, "label": "d5s5", "sourceRecord": "docs/exploratory/finding-15-depth5-exact-estimator.md", "sourceField": "8.3 cohort means table" }
+      ]
+    },
+    {
+      "name": "7 strata (exact chance)",
+      "points": [
+        { "x": 2, "y": 265294, "n": 64, "label": "d2s7", "sourceRecord": "docs/exploratory/finding-05-chance-strata.md", "sourceField": "Cost table, depth 2 / 7 strata row" },
+        { "x": 3, "y": 312327, "n": 64, "label": "d3s7", "sourceRecord": "docs/exploratory/finding-15-depth5-exact-estimator.md", "sourceField": "8.3 cohort means table" },
+        { "x": 4, "y": 398498, "n": 64, "label": "d4s7", "sourceRecord": "docs/exploratory/finding-15-depth5-exact-estimator.md", "sourceField": "8.3 cohort means table" }
+      ]
+    },
+    {
+      "name": "7 strata, first 32 seeds (arm stopped, final)",
+      "dashed": true,
+      "points": [
+        { "x": 5, "y": 411874, "n": 32, "label": "d5s7: 32 of 64 planned games, stopped by decision, final", "sourceRecord": "RS-20260821T205102Z-d89df4b5", "sourceField": "metrics.d5s7MeanScore (411,873.65625)" }
+      ]
+    }
+  ]
+}

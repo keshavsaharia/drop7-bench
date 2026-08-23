@@ -1,0 +1,36 @@
+{
+  "title": "Mean score against logical work per move — the flat-topped budget frontier",
+  "kind": "line",
+  "x": { "label": "logical work per move", "unit": "work units" },
+  "y": { "label": "mean score", "unit": "points" },
+  "notes": "Cohort 0xa51d1000-0xa51d103f, corrected 17,000-point Hardcore scoring, n=64 per arm except the d5s7 point (32 of 64 planned games, stopped by decision, final), which is drawn as its own dashed one-point series so the two sample sizes are never joined by a line. Cache capacity differs across arms (60,000 entries for the recorded depth-4 comparators, 200,000 for the depth-5 arms, auto-sized 960,695 / 346,921 for the new reveal-sampling arms); capacity provably cannot change play but work per move is not comparable across capacities (finding-16 Limitations; RS-20260821T205102Z-d89df4b5 limitations). Equal-work pair: d3 M=6 (4,244,020; 376,442) vs d4 M=1 (4,956,614; 398,498) is statistically indistinguishable (paired -22,056 [-89,867, +46,009], RS-20260821T192140Z-189fe392 pairedD3M6MinusD4M1). The x axis is linear: the plan's log-scale recommendation is not expressible by the generator, and the d5s7 point dominates the range. Evidence tier: development / public-development.",
+  "series": [
+    {
+      "name": "exact chance (7 strata)",
+      "points": [
+        { "x": 4139, "y": 265294, "n": 64, "label": "d2 M=1", "sourceRecord": "docs/exploratory/finding-05-chance-strata.md", "sourceField": "Cost table, depth 2 / 7 strata row" },
+        { "x": 156834, "y": 312327, "n": 64, "label": "d3 M=1", "sourceRecord": "RS-20260821T192140Z-189fe392", "sourceField": "metrics.ladderWorkPerMoveD3N7.M1 / metrics.ladderD3N7.M1" },
+        { "x": 1045719, "y": 337306, "n": 64, "label": "d3 M=3", "sourceRecord": "RS-20260821T192140Z-189fe392", "sourceField": "metrics.ladderWorkPerMoveD3N7.M3 / metrics.ladderD3N7.M3" },
+        { "x": 4244020, "y": 376442, "n": 64, "label": "d3 M=6", "sourceRecord": "RS-20260821T192140Z-189fe392", "sourceField": "metrics.ladderWorkPerMoveD3N7.M6 / metrics.ladderD3N7.M6" },
+        { "x": 4956614, "y": 398498, "n": 64, "label": "d4 M=1 (fair D4 reference)", "sourceRecord": "docs/exploratory/finding-15-depth5-exact-estimator.md", "sourceField": "8.3 cohort means table" },
+        { "x": 13506434, "y": 349345, "n": 64, "label": "d3 M=12 (full joint coverage)", "sourceRecord": "RS-20260821T192140Z-189fe392", "sourceField": "metrics.ladderWorkPerMoveD3N7.M12 / metrics.ladderD3N7.M12" },
+        { "x": 20178327, "y": 356548, "n": 64, "label": "d4 M=2", "sourceRecord": "RS-20260821T192140Z-189fe392", "sourceField": "metrics.d4N7M2WorkPerMove / metrics.d4N7M2MeanScore" }
+      ]
+    },
+    {
+      "name": "approximate chance (5 strata)",
+      "points": [
+        { "x": 54429, "y": 305051, "n": 64, "label": "d3 M=1", "sourceRecord": "docs/exploratory/finding-05-chance-strata.md", "sourceField": "Cost table, depth 3 / 5 strata row" },
+        { "x": 1296034, "y": 297327, "n": 64, "label": "d4 M=1 (frozen reference)", "sourceRecord": "docs/exploratory/finding-05-chance-strata.md", "sourceField": "Cost table, depth 4 / 5 strata row" },
+        { "x": 30183227, "y": 288704, "n": 64, "label": "d5 M=1", "sourceRecord": "docs/exploratory/finding-15-depth5-exact-estimator.md", "sourceField": "8.3 cohort means table" }
+      ]
+    },
+    {
+      "name": "exact chance, d5 M=1 (n=32, stopped, final)",
+      "dashed": true,
+      "points": [
+        { "x": 176536117, "y": 411874, "n": 32, "label": "d5s7: 32 of 64 planned games, stopped by decision, final", "sourceRecord": "RS-20260821T205102Z-d89df4b5", "sourceField": "metrics.d5s7WorkPerMove / metrics.d5s7MeanScore" }
+      ]
+    }
+  ]
+}
