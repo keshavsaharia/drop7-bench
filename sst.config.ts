@@ -168,8 +168,8 @@ export default $config({
         "Append-only, server-side page-view events delivered by Amazon Data Firehose",
       tableType: "EXTERNAL_TABLE",
       parameters: {
+        // Glue owns reserved Iceberg parameters when openTableFormatInput creates the table.
         format: "parquet",
-        table_type: "ICEBERG",
       },
       openTableFormatInput: {
         icebergInput: {
