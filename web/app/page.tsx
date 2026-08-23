@@ -50,13 +50,12 @@ export default function OverviewPage() {
         <p className="mt-2 max-w-3xl text-zinc-400">
           <Link href="https://en.wikipedia.org/wiki/Drop7" target="_blank" className="text-sky-400 hover:text-sky-300">Drop7</Link> 
           {' '}is widely considered one of the great puzzle games of all time.
-          The goal of this research is to find an autonomous strategy for playing the game, 
-          whose average score exceeds one million points. 
+          The goal of this research is to find an autonomous strategy for playing the game as well as a human can.
         </p>
         <p className="mt-2 max-w-3xl text-zinc-400">
-          A decent human player can easily score many millions of points in a game through long-term strategic thinking. The strongest 
+          A decent human player can easily score multiple millions of points in this game with the right long-term strategic thinking. The strongest 
           research reference so far (<Link href="/approaches/fair-expectimax/reference" className="text-sky-400 hover:text-sky-300">fair depth-4 expectimax</Link>) 
-          averages about 309k points, so the problem is very much still open.
+          averages about 309k points, so the research problem is very much still open.
         </p>
       </section>
 

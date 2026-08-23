@@ -1,17 +1,16 @@
 # Research Status
 
-## Bottom line
+## August 2026
 
 The simulator and reference searches are mature enough to support reproducible
-research, but the strategy problem is unsolved. Corrected-score fair depth-4
-expectimax is the strongest dependable reference found so far. Its broader
-64-game ledger mean is about 308,296 points, far below the required
+research, but the strategy problem is unsolved. Corrected-score [fair depth-4
+expectimax](/approaches/fair-expectimax) is the strongest dependable reference found so far. 
+Its average score across 64 games is **308,296 points**, far below the goal of a
 one-million-point average.
 
 Exploratory work on 2026-08-20/21 reproduced that reference on fresh seeds and
-completed the depth-by-chance-resolution factorial that the roadmap had listed
-as priority 8. Two results from it are load-bearing for what to do next, and
-both are single-cohort *development* tier — they do not upgrade the ledger:
+completed the depth-by-chance-resolution factorial. Two results from it strongly
+suggest what to do next:
 
 - **The fourth ply is worth +86,172 points, but only with an exact chance
   model** (95% lower bound +26,605, 40-0-24 over 64 paired games). With an
@@ -36,26 +35,8 @@ both are single-cohort *development* tier — they do not upgrade the ledger:
   lower-variance estimator than complete games.**
 
 No candidate has qualified for the protected validation protocol. The frozen
-record marks both the protected and one-shot final cohorts as unopened.
-
-## Evidence snapshot
-
-| Finding | Evidence | Status |
-| --- | --- | --- |
-| TypeScript rules engine | 122 local tests | Reproduced in this checkout |
-| Native engine and n-tuple checks | Gradient and self-tests | Reproduced in this checkout |
-| Native/TypeScript trajectory agreement | Deterministic parity sweep | Reproduced; see reproducibility notes |
-| Fair D4 vs D3: 400,675.25/116.375 vs 235,071.25/71 over 8 games | Detailed ledger | Recorded, small confirmation cohort |
-| Fair D4: 308,295.578 points and 90.031 moves over 64 games | Detailed ledger; the 64 seeds, dispersion, censoring, and flow statistics required by `methodology.md` were not retained | Provisional reference mean pending a re-run under the benchmark contract |
-| Fair D4 reproduced: 321,992 points and 94.06 moves over 64 games | Fresh exploratory seeds `0xa51d0000`+, unmodified frozen source | Development tier; single cohort, consistent with the ledger figure |
-| Depth x chance-resolution factorial, depths 2-5 x 5/7 strata | 64 paired games per cell on `0xa51d1000`+, bit-exact accelerated engine | Development tier; the depth-5 cells are partial (32 and 16 games) |
-| Score is 94.29% row-rise bonus; r = 0.9995 with game length | 64-game decomposition with a per-game score identity check | Development tier; reframes the objective as survival |
-| One D4 game scored 1,246,684 | Task-record only | Anecdote; not an average or qualification |
-| Million-point candidate exists | Frozen validation protocol | No |
-| AFBR-40 afterstate idea | Task-record only | Proposal; no source, checkpoint, or result |
-
-The cleanup reproduced engine behavior and buildability, not the long and
-expensive training/evaluation runs in the historical ledger.
+record marks both the protected and one-shot final cohorts as unopened. See the
+[research status evidence](/docs/research/status/evidence) for details.
 
 ## How the research progressed
 
