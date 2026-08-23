@@ -791,3 +791,121 @@ select.tree-input {
     animation: none;
   }
 }
+
+/* Generated research figures (web/components/Figure.tsx, SVGs from
+   web/scripts/figures/). The SVG carries its own fallbacks; these variables
+   let the page theme override them. Popovers are plain SVG groups shown on
+   hover or keyboard focus, so they need no JavaScript. */
+.research-fig {
+  --fig-fg: #e4e4e7;
+  --fig-muted: #a1a1aa;
+  --fig-grid: #27272a;
+  --fig-pop-bg: #18181b;
+  --fig-pop-border: #3f3f46;
+  margin: 1.2rem 0;
+  border: 1px solid #27272a;
+  border-radius: 0.75rem;
+  background: #101014;
+  padding: 1rem;
+}
+.research-fig-svg-wrap svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  overflow: visible;
+}
+.research-fig .fig-pop {
+  display: none;
+}
+.research-fig .fig-pt:hover .fig-pop,
+.research-fig .fig-pt:focus .fig-pop,
+.research-fig .fig-pt:focus-within .fig-pop {
+  display: block;
+}
+.research-fig .fig-pt:focus-visible .fig-marker {
+  stroke: var(--fig-fg);
+  stroke-width: 2;
+}
+.research-fig figcaption {
+  margin-top: 0.6rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #a1a1aa;
+}
+.research-fig-missing {
+  border-style: dashed;
+  color: #a1a1aa;
+  font-size: 0.85rem;
+}
+.research-fig-missing p {
+  margin: 0;
+}
+.research-fig-data {
+  margin-top: 0.7rem;
+  font-size: 0.78rem;
+  color: #a1a1aa;
+}
+.research-fig-data summary {
+  cursor: pointer;
+  color: #a1a1aa;
+}
+.research-fig-notes {
+  margin: 0.5rem 0 0.6rem;
+  line-height: 1.5;
+}
+.research-fig-scroll {
+  overflow-x: auto;
+}
+.research-fig-data table {
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+}
+.research-fig-data th,
+.research-fig-data td {
+  border: 0;
+  border-bottom: 1px solid #27272a;
+  padding: 0.35rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+  white-space: nowrap;
+}
+.research-fig-data thead th {
+  background: none;
+  border-bottom-color: #3f3f46;
+  color: #a1a1aa;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.research-fig-data th.num,
+.research-fig-data td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.research-fig-data tbody tr:last-child td {
+  border-bottom: 0;
+}
+.research-fig-label,
+.research-fig-field {
+  color: #71717a;
+  white-space: normal;
+}
+.research-fig-source {
+  font-family: ui-monospace, monospace;
+  font-size: 0.72rem;
+  color: #7dd3fc;
+  text-decoration: none;
+  background: none;
+  padding: 0;
+}
+a.research-fig-source:hover {
+  text-decoration: underline;
+}
+.research-fig-spec {
+  margin: 0.6rem 0 0;
+  color: #71717a;
+}

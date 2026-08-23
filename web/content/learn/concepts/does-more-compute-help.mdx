@@ -46,6 +46,16 @@ explains the repository's most-repeated conclusion: "deeper is not automatically
 stronger." It also means the depth-5 question has never actually
 been asked cleanly.
 
+<Figure
+  name="score-vs-depth"
+  caption="Mean score by search depth on one 64-game development cohort, at five and at seven chance strata. The five-stratum line is flat from depth 3 to depth 5; the seven-stratum line climbs steeply to depth 4. The lone depth-5 seven-stratum point is a stopped arm on the first 32 seeds only and is drawn separately for that reason. Hover or tab to a point for its value, sample size and source record."
+/>
+
+<Figure
+  name="strata-5-vs-7"
+  caption="The same factorial as paired contrasts with one-sided 95% lower bounds. Both stratum contrasts clear zero; neither depth-5-minus-depth-4 contrast does, and each sits below the smallest effect its cohort could have detected. The depth-5 question was asked and came back as a non-measurement, which is a different thing from a null."
+/>
+
 It is now affordable to ask. The fast engine brought a depth-5, seven-sample
 64-game cohort down to roughly 19 CPU-hours, under an hour on this workstation,
 against an earlier projection of 75 hours. That does not predict the answer; it
@@ -92,6 +102,11 @@ On 64 previously unread paired games that was worth **+101,171 mean points
 (+34%) and +27.5 more moves per game**, winning 41 games, tying none and losing
 23, with a 95% lower bound of +47,457. The result was replicated on a second
 independent cohort.
+
+<Figure
+  name="moves-vs-depth"
+  caption="Mean moves survived for the same arms as the score figure. Survival, not scoring rate, is where the seven-stratum fourth ply pays: about 27 more moves per game at depth 4."
+/>
 
 That is the clearest "more compute helped" result in the repository, and note
 what it actually bought: not more search, but an **unbiased** one. The extra
@@ -151,6 +166,11 @@ estimator, and it "bounds the whole determinization family."
 Many learned evaluators were trained here: n-tuple networks, Monte Carlo value
 models, small neural networks, Q-learning and policy-gradient variants, phase
 models, fitted policies. Some predicted outcomes well. None displaced fair D4.
+
+<Figure
+  name="learned-leaf-arms"
+  caption="The one learned model that has helped so far was placed inside the fair D4 search, as a blend at its leaves, rather than in place of it. On 64 paired games the learned leaf beat the reference leaf at five strata (significant) but not measurably at seven, which refuted the preregistered prediction that it would help more once the chance estimate was exact. Finding-08, development tier; no result record was written for it."
+/>
 
 For most of them the diagnosed reason was not model size and not training
 length. It was the shape of the data: models were trained on the move that was

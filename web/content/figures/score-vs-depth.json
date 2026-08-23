@@ -1,0 +1,32 @@
+{
+  "title": "Mean score against search depth, fair expectimax, by chance-stratum count",
+  "kind": "line",
+  "x": { "label": "Search depth", "unit": "plies" },
+  "y": { "label": "Mean score", "unit": "points" },
+  "notes": "All arms play the same 64-seed development cohort 0xa51d1000-0xa51d103f under corrected 17,000-point Hardcore scoring, except the depth-5 seven-stratum arm, which was stopped by decision after the first 32 seeds (0xa51d1000-0xa51d101f) and is drawn as its own one-point series so the two sample sizes are never joined by a line. Depth 2 was run only at seven strata. No confidence band is drawn on means; the paired contrasts with their bounds are in the companion bar figure. Evidence tier: development / public-development. The historical eight-game D3/D4 cohorts used 7,000-point scoring and are not shown.",
+  "series": [
+    {
+      "name": "5 strata (biased next-disc estimate)",
+      "points": [
+        { "x": 3, "y": 305051, "n": 64, "label": "depth 3, 5 strata", "sourceRecord": "docs/exploratory/finding-05-chance-strata.md", "sourceField": "Cost table, mean score" },
+        { "x": 4, "y": 297327, "n": 64, "label": "depth 4, 5 strata (frozen reference)", "sourceRecord": "docs/exploratory/finding-05-chance-strata.md", "sourceField": "Confirmation cohort detail, mean score" },
+        { "x": 5, "y": 288704, "n": 64, "label": "depth 5, 5 strata", "sourceRecord": "RS-20260821T181917Z-9a34ba02", "sourceField": "metrics.d5s5MeanScore (288,703.67)" }
+      ]
+    },
+    {
+      "name": "7 strata (exact next-disc estimate)",
+      "points": [
+        { "x": 2, "y": 265294, "n": 64, "label": "depth 2, 7 strata", "sourceRecord": "docs/exploratory/finding-05-chance-strata.md", "sourceField": "Cost table, mean score" },
+        { "x": 3, "y": 312327, "n": 64, "label": "depth 3, 7 strata", "sourceRecord": "docs/exploratory/finding-05-chance-strata.md", "sourceField": "Cost table, mean score" },
+        { "x": 4, "y": 398498, "n": 64, "label": "depth 4, 7 strata", "sourceRecord": "RS-20260821T181917Z-9a34ba02", "sourceField": "metrics.d4s7ControlMeanScore (398,498.23)" }
+      ]
+    },
+    {
+      "name": "7 strata, first 32 seeds only (arm stopped)",
+      "dashed": true,
+      "points": [
+        { "x": 5, "y": 411874, "n": 32, "label": "depth 5, 7 strata (partial: 32 of 64 planned games)", "sourceRecord": "RS-20260821T205102Z-d89df4b5", "sourceField": "metrics.d5s7MeanScore (411,873.66)" }
+      ]
+    }
+  ]
+}

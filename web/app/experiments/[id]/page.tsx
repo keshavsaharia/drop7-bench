@@ -92,7 +92,7 @@ export default async function ExperimentPage({ params }: { params: Promise<{ id:
         )}
       </section>
 
-      <section>
+      <section id="results">
         <h2 className="text-lg font-bold text-zinc-100">What happened</h2>
         {results.length === 0 ? (
           <p className="mt-1 text-sm text-zinc-500">No result has been recorded for this experiment.</p>

@@ -1,0 +1,23 @@
+{
+  "title": "Paired contrasts in the depth x chance-resolution factorial (mean delta, one-sided 95% lower bound)",
+  "kind": "bar",
+  "x": { "label": "Paired contrast (same seeds, whole games)" },
+  "y": { "label": "Paired mean score delta", "unit": "points" },
+  "notes": "Whisker is the one-sided 95% whole-game bootstrap lower bound; the upper end of the whisker is the point estimate itself (no upper bound is drawn). A contrast is significant when its lower bound clears zero: both stratum contrasts (7 minus 5 strata) do; neither depth contrast (5 minus 4 plies) does, and each sits below its own detection floor (47,052 at n=64, 107,988 at n=32). Cohort 0xa51d1000-0xa51d103f; the n=32 contrasts cover its first 32 seeds. Evidence tier: public-development.",
+  "series": [
+    {
+      "name": "Chance resolution: 7 strata minus 5 strata",
+      "points": [
+        { "x": "at depth 4", "y": 101171, "lo": 47447, "n": 64, "label": "d4s7 - d4s5, W-T-L 41-0-23, 3.82x work", "sourceRecord": "RS-20260821T205102Z-d89df4b5", "sourceField": "metrics.pairedD4s7MinusD4s5 (101,170.8 / 47,446.8)" },
+        { "x": "at depth 5", "y": 123613, "lo": 32575, "n": 32, "label": "d5s7 - d5s5, W-T-L 19-0-13, 5.85x work", "sourceRecord": "RS-20260821T205102Z-d89df4b5", "sourceField": "metrics.pairedD5s7MinusD5s5 (123,612.7 / 32,575.2)" }
+      ]
+    },
+    {
+      "name": "Depth: 5 plies minus 4 plies",
+      "points": [
+        { "x": "at 5 strata", "y": -8624, "lo": -55134, "n": 64, "label": "d5s5 - d4s5, W-T-L 33-0-31, 23.29x work (below 47,052 floor)", "sourceRecord": "RS-20260821T205102Z-d89df4b5", "sourceField": "metrics.pairedD5s5MinusD4s5 (-8,623.7 / -55,133.7)" },
+        { "x": "at 7 strata", "y": 23367, "lo": -83046, "n": 32, "label": "d5s7 - d4s7, W-T-L 17-0-15, 35.62x work (below 107,988 floor)", "sourceRecord": "RS-20260821T205102Z-d89df4b5", "sourceField": "metrics.pairedD5s7MinusD4s7 (23,366.8 / -83,046.2)" }
+      ]
+    }
+  ]
+}

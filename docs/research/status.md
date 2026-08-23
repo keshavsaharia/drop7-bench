@@ -36,7 +36,7 @@ suggest what to do next:
 
 No candidate has qualified for the protected validation protocol. The frozen
 record marks both the protected and one-shot final cohorts as unopened. See the
-[research status evidence](/docs/research/status/evidence) for details.
+[research status evidence](status/evidence.md) for details.
 
 ## How the research progressed
 
