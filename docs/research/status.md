@@ -2,6 +2,16 @@
 
 ## August 2026
 
+```figure
+score-vs-depth
+caption: Mean score against search depth under the five-stratum and seven-stratum chance models. Hover or focus a point for its value, bounds, cohort size and source record.
+```
+
+```figure
+strata-5-vs-7
+caption: Paired contrasts from the same factorial: seven strata minus five strata, and the fifth ply minus the fourth, with one-sided 95% lower bounds. The source table under each figure names the record every point was copied from.
+```
+
 The simulator and reference searches are mature enough to support reproducible
 research, but the strategy problem is unsolved. Corrected-score [fair depth-4
 expectimax](/approaches/fair-expectimax) is the strongest dependable reference found so far. 

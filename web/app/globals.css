@@ -857,6 +857,33 @@ select.tree-input {
 .research-fig-scroll {
   overflow-x: auto;
 }
+/* A diagram's sibling <name>.source.md rendered under its "Source" disclosure
+   (web/components/Diagram.tsx). */
+.research-fig-source-md {
+  margin: 0.5rem 0 0.6rem;
+  line-height: 1.55;
+}
+.research-fig-source-md p,
+.research-fig-source-md ul,
+.research-fig-source-md ol {
+  margin: 0.4rem 0;
+}
+.research-fig-source-md ul,
+.research-fig-source-md ol {
+  padding-left: 1.2rem;
+}
+.research-fig-source-md code {
+  font-size: 0.75rem;
+}
+.research-fig-source-md table {
+  border-collapse: collapse;
+}
+.research-fig-source-md th,
+.research-fig-source-md td {
+  padding: 0.2rem 0.6rem 0.2rem 0;
+  border-bottom: 1px solid #27272a;
+  text-align: left;
+}
 .research-fig-data table {
   width: 100%;
   margin: 0;
