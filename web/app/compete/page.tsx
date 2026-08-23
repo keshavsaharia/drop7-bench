@@ -52,7 +52,7 @@ export default function CompetePage() {
         />
         <InfoCard
           title="Three bits per move"
-          body="You play columns 1–7. The submission stores them internally as 0–6 and packs them into a bit stream using three bits per move. These anonymous streams will be publicly released at the end of every competition, to hopefully advance the open research. Your github username and personal information will never be shared."
+          body="Since every turn involves making one of seven choices, your sequence of choices in a game can be packed into a bit stream using three bits per move. These anonymous streams will be publicly released at the end of every competition, to hopefully advance the open research. Submitter information will never be shared."
         />
         <InfoCard
           title="Server score wins"
