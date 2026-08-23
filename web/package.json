@@ -21,10 +21,12 @@
     "check:mdx": "node scripts/check-mdx.mjs ../approaches ./content",
     "check:figures": "node scripts/check-figures.mjs",
     "check": "npm run check:mdx && npm run check:figures",
-    "test": "node --experimental-strip-types --test lib/play/*.test.ts lib/competition/*.test.ts lib/*.test.ts"
+    "test": "node --experimental-strip-types --test lib/play/*.test.ts lib/competition/*.test.ts lib/analytics/*.test.ts lib/*.test.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-athena": "^3.1116.0",
     "@aws-sdk/client-dynamodb": "^3.1116.0",
+    "@aws-sdk/client-firehose": "^3.1116.0",
     "@aws-sdk/client-secrets-manager": "^3.1116.0",
     "@aws-sdk/lib-dynamodb": "^3.1116.0",
     "@xyflow/react": "^12.11.3",

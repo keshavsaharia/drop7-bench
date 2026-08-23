@@ -177,6 +177,77 @@ body:has(.source-workspace) > main {
   }
 }
 
+/* Admin analytics controls stay intentionally quiet so the data remains the
+   visual focus. The SQL surface uses a fixed-width face for scanability. */
+.analytics-panel {
+  border: 1px solid #27272a;
+  border-radius: 0.75rem;
+  background: rgba(24, 24, 27, 0.28);
+  padding: 1.25rem;
+}
+.analytics-control {
+  display: grid;
+  gap: 0.35rem;
+  color: #71717a;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.analytics-control select {
+  min-width: 9rem;
+  border: 1px solid #3f3f46;
+  border-radius: 0.5rem;
+  background: #18181b;
+  color: #e4e4e7;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: normal;
+  padding: 0.6rem 2rem 0.6rem 0.75rem;
+  text-transform: none;
+}
+.analytics-control select:focus-visible,
+.analytics-sql:focus-visible {
+  border-color: #38bdf8;
+  outline: 2px solid rgba(56, 189, 248, 0.35);
+  outline-offset: 1px;
+}
+.analytics-run-button {
+  border: 1px solid #047857;
+  border-radius: 0.5rem;
+  background: #065f46;
+  color: #ecfdf5;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.72rem 1rem;
+}
+.analytics-run-button:hover:not(:disabled) {
+  background: #047857;
+}
+.analytics-run-button:focus-visible {
+  outline: 2px solid #6ee7b7;
+  outline-offset: 2px;
+}
+.analytics-run-button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+.analytics-sql {
+  width: 100%;
+  resize: vertical;
+  border: 1px solid #3f3f46;
+  border-radius: 0.6rem;
+  background: #0c0c0f;
+  color: #d4d4d8;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  padding: 0.9rem 1rem;
+  tab-size: 2;
+}
+
 /* Markdown/MDX prose styling (local, dependency-free alternative to the
    typography plugin, tuned for the dark research-console theme). */
 .prose-drop7 {

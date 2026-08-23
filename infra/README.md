@@ -64,8 +64,10 @@ aws cloudformation describe-stacks \
   --output text
 ```
 
-In GitHub, create a repository **Actions variable** named `AWS_ROLE_ARN` with that value.
-No AWS access keys are stored in GitHub. The old
+In GitHub, create repository **Actions variables** named `AWS_ROLE_ARN` with that
+value and `ADMIN_GITHUB_USERNAME` with the GitHub login that should be allowed to
+open `/analytics`. The username comparison is case-insensitive, but use the canonical
+GitHub spelling for clarity. No AWS access keys are stored in GitHub. The old
 `CLOUDFRONT_DEV_DISTRIBUTION_ID` and `CLOUDFRONT_PROD_DISTRIBUTION_ID` variables are not
 needed because SST owns the distributions and invalidations.
 
@@ -193,8 +195,55 @@ same-named zone in another account.
 
 ## Analytics
 
-Server rendering provides CloudWatch request/error logs and Lambda/CloudFront operational
-metrics without adding browser telemetry. Product analytics are deliberately not collected
-yet: define the events, retention period, and IP/user-agent handling first. A first-party
-Route Handler backed by a linked DynamoDB table can then record only the approved event
-schema without sending visitor data to a third party.
+The site collects first-party page-view analytics. There is no analytics cookie, third-party
+analytics endpoint, or action tracking. Next.js `proxy.ts` records initial document requests
+and excludes prefetches, API calls, static assets, and the admin analytics route. A minimal
+first-party pathname hook reports client-side navigations that Next.js can otherwise serve
+entirely from its prefetch cache. In both cases, the server derives visitor fields from request
+headers and submits the compact JSON event directly to Amazon Data Firehose. Analytics
+delivery is best-effort: a Firehose or Secrets Manager failure is logged but never fails the
+page request.
+
+Each stage owns the complete analytics path:
+
+| SST stage | Firehose stream | Glue database | Iceberg table | Athena workgroup | S3 bucket |
+| --- | --- | --- | --- | --- | --- |
+| `production` | `drop7-production-page-views` | `drop7_production_analytics` | `page_views` | `drop7-production-analytics` | `drop7-prod-analytics` |
+| `dev` | `drop7-dev-page-views` | `drop7_dev_analytics` | `page_views` | `drop7-dev-analytics` | `drop7-dev-analytics` |
+
+Firehose uses direct PUT and an append-only Apache Iceberg destination. It buffers for 300
+seconds or 64 MiB, whichever happens first, and writes Iceberg v2 data files in Parquet
+format under `warehouse/page_views/`. Failed delivery records go under
+`firehose-errors/` and expire after 30 days. Athena query results go under
+`athena-results/` and expire after 7 days. The Iceberg event table is the durable source;
+rows are retained until an operator applies a documented table-retention policy.
+AWS Glue managed optimizers compact the five-minute files and run snapshot retention and
+orphan-file cleanup daily. They retain at least 10 snapshots and seven days of snapshot
+history; cleanup does not expire page-view rows that remain in the current table snapshot.
+
+The event schema records time, normalized page path, host, referrer hostname and channel,
+truncated user agent and accepted language, CloudFront country/region/city when present,
+coarse device/browser/OS families, bot classification, stage, and a pseudonymous visitor
+ID. It deliberately omits URL query strings, referrer paths and query strings, raw IP
+addresses, cookies, GitHub identity, and session identity. The visitor ID is an HMAC of the
+request address and user agent using the existing Auth.js secret; the source address is
+discarded before the event is sent.
+
+`/analytics` and `/api/analytics/query` both require a GitHub Auth.js session whose handle
+matches `ADMIN_GITHUB_USERNAME`. Other signed-in users receive a 404. The page offers
+aggregate time series and page, acquisition, referrer, country, device, and browser
+breakdowns, plus a read-only SQL workspace. Custom SQL accepts one `SELECT` or `WITH`
+statement, returns at most 500 rows, and runs in a dedicated Athena engine-v3 workgroup
+that enforces its result location and a 1 GiB per-query scan ceiling. The site Lambda role
+can read only the analytics Glue resources and S3 bucket, write only Athena results, run
+queries only in that workgroup, and put records only into the stage analytics stream.
+
+For a local UI build, only `ADMIN_GITHUB_USERNAME` is needed; Firehose collection is a
+no-op when `DROP7_ANALYTICS_FIREHOSE_STREAM` is absent. To exercise live analytics locally,
+set all four `DROP7_ANALYTICS_*` variables shown in `web/.env.example` and use AWS
+credentials that have the same Firehose/Athena/Glue/S3 permissions as the deployed site.
+
+After deployment, allow one five-minute delivery window, visit a few public routes, sign in
+as the configured admin, and open `/analytics`. Delivery failures appear in the Firehose
+CloudWatch log group `/aws/kinesisfirehose/drop7-<stage>-page-views`; query IDs and scanned
+bytes are shown directly below each dashboard or custom result.
