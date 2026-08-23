@@ -76,14 +76,20 @@
     "runs/<sol-run>/train/ (5 seeds, metrics)",
     "runs/<sol-run>/gate/g1-g2.json"
   ],
-  "lifecycle": "preregistered",
-  "amendments": [],
+  "lifecycle": "superseded",
+  "amendments": [
+    {
+      "timestamp": "2026-08-23T21:53:26Z",
+      "beforeControlledData": true,
+      "reason": "Superseded by EX-20260823-sol-corpus-and-offline-gate-v2-f95f56e4 before any leased seed was opened: the G0 budget lines priced D3 N7M6 at 292 moves/s (the D3 N5M1 figure); measured cost is 1.754-6.83 CPU-s/move (erratum in runs/RUN-20260823T191900Z-b9f8f80d/kimi-k3-psol-v2-correction.md). Stop rule S1 fired on projection; the panel2 implementation and all engineering gates from this protocol carry forward unchanged. This record is retained immutably; the hash is recomputed over the superseded record per repo convention, and the run record RUN-20260823T215500Z-fc74e0b4 retains the original preregistration hash 017a6bcd6a44ce65ef961259e10618470213e6494236aeac3a6917d704797a37."
+    }
+  ],
   "createdBy": {
     "platform": "Claude Code",
     "model": "claude-fable-5",
     "agentId": null
   },
   "createdAt": "2026-08-23T21:18:28Z",
-  "updatedAt": "2026-08-23T21:19:58Z",
-  "protocolSha256": "017a6bcd6a44ce65ef961259e10618470213e6494236aeac3a6917d704797a37"
+  "updatedAt": "2026-08-23T21:53:26Z",
+  "protocolSha256": "770db739af6802ebc489dc112a4cef53703a2d2a4af9210aef8e54d330e02d23"
 }

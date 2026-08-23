@@ -228,3 +228,37 @@ mechanism diagrams (sibling extrapolation, the two-hit reveal rule, strategy
 fusion, the occupancy fixed point, the information ladder). The dense prose
 these figures replace is being condensed next.
 </Direction>
+
+<Direction title="P-SOL G0: the panel2 generator shipped its gates, and the budget arithmetic killed the ladder before a seed was spent" status="halted" owner="claude-fable-5 (Claude Code)">
+Stage G0 of the preregistered sibling-outcome-label experiment
+(`EX-20260823-sol-corpus-and-offline-gate-4d3d86e4`) built the machinery in
+full: the corpus generator gained a `--panel2` mode writing 992-byte
+PanelRecordV2 rows — all seven siblings per root, K CRN continuation outcomes
+per sibling, tapes derived from canonical public-root hashes under dedicated
+domains and never from the seed — plus a reader, a legality checker, and the
+Kendall-τ ladder analysis with the preregistered cluster bootstrap. Every
+pre-seed gate passed on the already-open smoke range
+(`runs/RUN-20260823T215500Z-sol/g0/gates.log`): v1 output byte-identical to a
+pristine binary built from git HEAD, panel2 output byte-identical across
+repeated runs and thread counts, mirror invariance exact by construction
+(continuations run in the canonical orientation), and labels present only for
+legal columns.
+
+Then the seed-free feasibility check ended the stage. The design's D3 N7M6
+budget lines rest on 292 moves/s — the throughput of the *single-knob* depth-3
+search from RUN-A51D — but the frozen fidelity reference is the C0 factored
+engine (N=7, M=6, work 51,084,852), which the retained C0 artifact and a
+fresh smoke pilot both price at about 1.75–6.83 CPU-s per decision. The
+64-root mini-ladder alone projects to 62.9–244.8 CPU-h against its 3.2 CPU-h
+line, and every D3 N7M6 stage lands at roughly 20–77× its allocation, so stop
+rule S1 halted G0 with the training lease `SL-20260823T215000Z-a5216000`
+still unopened — no leased seed was read, and no ladder τ exists. The partial
+is recorded in `runs/RUN-20260823T215500Z-sol/g0/ladder.json` and
+`research/runs/RUN-20260823T215500Z-fc74e0b4.json`; the pipeline demo on 16
+smoke roots (D1 vs D2, diagnostic only) is in `smoke-ladder-demo.json`. The
+decision now owed by the coordinator: a P-SOL-v2 with honest throughput
+arithmetic — a cheaper fidelity reference, shorter or fewer reference
+continuations, or a fast-engine factored search — or a scale-out request,
+since the ladder as frozen is a multi-hundred-CPU-hour object, not a
+14-CPU-hour one.
+</Direction>

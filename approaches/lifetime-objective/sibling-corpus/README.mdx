@@ -177,3 +177,80 @@ comparison, and no bound of any kind.
   fresh training lease, would produce data worth the disk it costs. Nothing here
   answers that, and the later distillation result is a reason to be cautious
   rather than optimistic.
+
+## PanelRecordV2 (`--panel2`): sibling panels with CRN continuation outcomes
+
+Added 2026-08-23 for `EX-20260823-sol-corpus-and-offline-gate-4d3d86e4`
+(P-SOL-v1, stage G0). The v1 record layouts and code paths are untouched;
+with the flag absent the generator's state and panel output is byte-identical
+to the pre-change binary (gated against a pristine build from git HEAD in
+`runs/RUN-20260823T215500Z-sol/g0/gates.log`).
+
+<TechnicalDetails>
+
+**Record layout — 992 bytes per root, fixed stride.** A 96-byte header
+(version `0x0200`, sequential seed-order `recordId`, `originSeed` for split
+bookkeeping only, `moveIndex`, root next disc / moves-to-rise / legal mask,
+behaviour `chosenColumn`, fair-D4 `referenceColumn` computed only when
+`recordId % 16 == 0` else 255, `engineId` 0=D1 / 1=D2 / 2=D3 N7M6, `K`, `H`,
+`panelFlags` bit0 = reference computed bit1 = ε-root, the 49-cell root board,
+24 zero pad) followed by seven 128-byte sibling slots: resolved one-step
+afterstate (`afterBoard`, `afterNextDisc`, `afterMovesToRise`, `survived`,
+`legal`, clears/reveals/max-depth, `i32 afterScoreDelta` — same true-tape
+semantics as the v1 panel), then `u8 contLifetime[K]`, `u8 contDeathRise[K]`
+(0 = censored at H, else rise bin 1–12), then `u32 contClearsTotal`,
+`u32 contRevealsTotal`, zero pad to 128. Illegal columns keep their slot,
+fully zeroed.
+
+**Implementation completion, not a protocol change.** The design's
+per-sibling table left everything after `contDeathRise[K]` as pad. Per the
+work-package instruction, the layout was completed so each legal sibling
+carries every continuation summary the labels need: the KM hazard-vector
+inputs (per-rise survival counts over K) and the restricted-mean lifetime sum
+are derivable exactly from `contLifetime`/`contDeathRise` (censoring is type I
+at fixed H, so the KM restricted mean equals the mean capped lifetime), the
+censor count is `#{deathRise == 0}`, and the clears/reveals totals over the K
+continuations occupy 8 bytes of the former pad. Consequence: K ≤ 30
+(the design said "K ≤ 32 supported"; this experiment uses K = 6 and K = 16).
+
+**CRN continuation tapes never see the seed.** Continuations run in the
+*canonical* (mirror-normalized) orientation of the public root. The tape seed
+for continuation `j` is `mix32(FNV1a(canonical board, next disc,
+moves-to-rise) ^ 0x50534f4c ^ (j+1)·0x9e3779b9)`, and move ordinal `t` of a
+continuation reseeds its own Mulberry32 stream via
+`mix32(tapeSeed ^ 0x434f4e54 ^ (t+1)·0x85ebca6b)`, so cascade length cannot
+desynchronize siblings and alignment is by continuation move ordinal. The
+same tape serves all 7 siblings and every engine. Because the tape and the
+engines are pure functions of the canonical root, mirror invariance of the
+labels is exact (gate C), and regenerating a recordId reproduces
+byte-identical labels (gate B). This differs deliberately from the design
+text's `Hash(originSeed, moveIndex, j)`: the frozen lease record
+(`SL-20260823T215000Z-a5216000`) and the work-package instruction both fix
+tapes to *public root hashes with dedicated domains, never the seed*, which
+also makes the labels a pure function of the deployable information boundary.
+
+**Engines.** D1/D2 are the frozen parameterized fair search at depths 1/2
+(5 strata, work 3,200,000, cache 60,000); D3 N7M6 is the C0 arm exactly as
+retained in `runs/RUN-A525-reveal/d3-n7-m6.json` (depth 3, N=7, M=6, work
+51,084,852, cache 87,025). All three run through a faithful copy of
+`reveal-sampling/search.cpp`'s `FactoredSearch` (whose gate B proved the
+M=1 collapse is bit-identical to the single-knob search).
+
+**Lifetime semantics.** `contLifetime` counts moves survived from the root,
+the sibling placement being the first move: 0 if that placement is
+immediately terminal, H if alive at the horizon (then `contDeathRise` = 0,
+censored); otherwise `contDeathRise` = min(12, rises completed at death + 1).
+
+**Root sampling.** The grid is every `--panel-stride`-th move from
+`--panel2-start` (design: stride 4 from move 8); `--panel2-roots R` keeps R
+evenly spaced grid roots per game (`floor((i+0.5)·n/R)`; R = 1 keeps the
+median grid root — the disclosed G0 ladder rule producing one root per
+behaviour game), 0 keeps all. Output is written in seed order with
+deterministic recordIds for any thread count.
+
+**Readers and gates.** `approaches/lifetime-objective/p-sol/panel2_reader.py`
+(numpy reader + KM helpers), `check_panel2.py` (legality/layout gate),
+`ladder.py` (within-root Kendall τ between engines with cluster bootstrap by
+origin, seed `0xb0071eaf`).
+
+</TechnicalDetails>

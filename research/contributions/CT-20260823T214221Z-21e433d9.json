@@ -1,0 +1,45 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260823T214221Z-21e433d9",
+  "actor": {
+    "kind": "model",
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": null
+  },
+  "level": "L2",
+  "roles": [
+    {
+      "role": "software",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Stage G0 of P-SOL-v1 (EX-20260823-sol-corpus-and-offline-gate-4d3d86e4): implemented the --panel2 PanelRecordV2 mode of the sibling-corpus generator (992-byte records, CRN continuation tapes from canonical public-root hashes with dedicated domains, D1/D2/D3-N7M6 continuation engines via a faithful FactoredSearch copy, deterministic seed-order output), the panel2 reader / legality checker / Kendall-tau ladder analysis with cluster bootstrap, and the G0 gate suite (v1 byte-identity vs pristine HEAD, determinism across runs and thread counts, exact mirror invariance, legality). Ran the seed-free feasibility projection that triggered stop rule S1: the design's D3 N7M6 budget lines assume 292 moves/s but the C0 engine identity measures ~6.8 CPU-s per decision, so the mini-ladder and ladder were halted before any leased seed was opened.",
+  "theoryIds": [],
+  "experimentIds": [
+    "EX-20260823-sol-corpus-and-offline-gate-4d3d86e4"
+  ],
+  "runIds": [
+    "RUN-20260823T215500Z-fc74e0b4"
+  ],
+  "artifactPaths": [
+    "approaches/lifetime-objective/sibling-corpus/generate.cpp",
+    "approaches/lifetime-objective/p-sol/panel2_reader.py",
+    "approaches/lifetime-objective/p-sol/check_panel2.py",
+    "approaches/lifetime-objective/p-sol/ladder.py",
+    "runs/RUN-20260823T215500Z-sol/g0/gates.log",
+    "runs/RUN-20260823T215500Z-sol/g0/ladder.json"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "runs/RUN-20260823T215500Z-sol/g0/gates.log: gates A-E on smoke seeds 0xa51d8000+16 only",
+    "make research-validate"
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-23T21:42:21Z"
+}

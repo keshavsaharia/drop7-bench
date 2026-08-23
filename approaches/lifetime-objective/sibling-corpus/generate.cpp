@@ -30,6 +30,8 @@
 
 #include "../../../approaches/lifetime-objective/common/harness.hpp"
 
+#include <sys/resource.h>
+
 #include <cstdio>
 #include <cstring>
 #include <exception>
@@ -244,6 +246,22 @@ struct Options {
   std::string statesPath;
   std::string panelPath;
   std::string summaryPath;
+  // --- PanelRecordV2 mode (P-SOL-v1 section 3; EX-20260823-sol-corpus-...).
+  // Every field below is inert unless --panel2 or --panel2-mirror-check is
+  // given; the v1 output paths above are byte-identical with these defaults.
+  std::string panel2Prefix;            // enables panel2 mode; one file/engine
+  std::string contEngines = "d1";      // comma list of d1|d2|d3n7m6
+  int panel2K = 6;                     // continuations per sibling (1..30)
+  int panel2Horizon = 48;              // continuation horizon H in moves
+  int panel2Roots = 1;                 // roots kept per game (0 = all grid)
+  int panel2Start = 8;                 // first grid move index
+  int behaviourDiscSamples = 5;        // behaviour engine N (FactoredSearch)
+  int behaviourRevealSamples = 1;      // behaviour engine M
+  std::uint64_t behaviourMaxWork = 3'200'000;
+  std::size_t behaviourMaxCache = 60'000;
+  int mirrorCheck = 0;                 // >0: mirror-invariance gate, N roots
+  std::string leaseLabel = "unspecified";
+  std::string dataRole = "unspecified";
 };
 
 std::uint8_t legalMaskOf(const Board& board) {
@@ -377,6 +395,660 @@ GameOutput generateGame(std::uint32_t seed, const Options& options,
   return output;
 }
 
+// ===========================================================================
+// PanelRecordV2 (--panel2): sibling panels with K CRN continuation outcomes.
+//
+// Protocol: EX-20260823-sol-corpus-and-offline-gate-4d3d86e4 (P-SOL-v1,
+// runs/RUN-20260823T191900Z-b9f8f80d/kimi-k3-main-design.md section 3).
+// Everything in namespace panel2 is reachable only through --panel2 /
+// --panel2-mirror-check; the v1 record layouts and code paths above are
+// untouched.
+//
+// Layout (992 bytes per root, fixed stride; little-endian scalars):
+//   header, 96 B:
+//     u32 version = 0x0200; u32 recordId (sequential in seed order);
+//     u32 originSeed (split bookkeeping only, never a feature);
+//     u16 moveIndex; u8 rootNextDisc; u8 rootMovesToRise; u8 legalMask;
+//     u8 chosenColumn; u8 referenceColumn (fair-D4 argmax, computed only when
+//     recordId % 16 == 0, else 255); u8 engineId (0=D1, 1=D2, 2=D3 N7M6);
+//     u8 K; u8 H; u8 panelFlags (bit0 reference computed, bit1 epsilon-root);
+//     u8 rootBoard[49]; 24 B zero pad.
+//   per sibling, 128 B x 7 (illegal columns keep their slot, fully zeroed):
+//     u8 afterBoard[49]; u8 afterNextDisc; u8 afterMovesToRise; u8 survived;
+//     u8 legal; u8 afterClears; u8 afterReveals; u8 afterMaxDepth;
+//     i32 afterScoreDelta; u8 contLifetime[K]; u8 contDeathRise[K];
+//     u32 contClearsTotal; u32 contRevealsTotal; zero pad to 128.
+//   The two u32 continuation totals (summed numbered clears / cover reveals
+//   over all K continuations, sibling move included) are an implementation
+//   completion of the design's per-sibling table, which left the tail as pad;
+//   they are not a protocol change.  K <= 30 as a consequence.
+//
+// Continuation semantics:
+//   * One-step fields (afterBoard .. afterScoreDelta, survived) are resolved
+//     under the true environment tape via playHeadlessMove, exactly as the v1
+//     panel does (CRN across siblings is automatic there).
+//   * Continuations are computed in the CANONICAL orientation of the public
+//     root.  The CRN tape seed for continuation j is a pure function of the
+//     canonical public root (board, next disc, moves-to-rise) and j, under
+//     dedicated domain constants -- never of the origin seed.  Mirror
+//     invariance of the labels is therefore exact by construction, and a
+//     recordId regenerates byte-identical labels.
+//   * Tape T_{r,j} is shared by all 7 siblings of root r and by every
+//     continuation engine; alignment is by continuation move ordinal (each
+//     ordinal reseeds its own Mulberry32 stream, so cascade length cannot
+//     desynchronize siblings).
+//   * contLifetime = moves survived from the root, the sibling placement
+//     counting as the first move; 0 if that placement is immediately
+//     terminal; capped at H.  contDeathRise = 0 when alive at H (censored),
+//     else min(12, rises completed at death + 1).
+// ===========================================================================
+
+namespace panel2 {
+
+constexpr std::uint32_t kVersion = 0x0200;
+constexpr int kHeaderBytes = 96;
+constexpr int kSiblingBytes = 128;
+constexpr int kRecordBytes = kHeaderBytes + kBoardSize * kSiblingBytes;
+static_assert(kRecordBytes == 992, "PanelRecordV2 must stay 992 bytes");
+constexpr int kMaxK = 30;
+constexpr std::uint32_t kTapeDomain = 0x50534f4cu;  // "PSOL"
+constexpr std::uint32_t kMoveDomain = 0x434f4e54u;  // "CONT"
+
+struct EngineSpec {
+  std::uint8_t id = 0;  // 0=D1, 1=D2, 2=D3 N7M6
+  int depth = 1;
+  int discSamples = 5;
+  int revealSamples = 1;
+  std::uint64_t maximumWork = 3'200'000;
+  std::size_t maximumCacheEntries = 60'000;
+  std::string name;
+};
+
+// Continuation-engine identities are frozen to the configurations already on
+// record: D1/D2 are the parameterized fair search at the frozen bounds
+// (identical to FactoredSearch at N=5, M=1 -- gate B of the reveal-sampling
+// CHECK), and D3 N7M6 is the C0 arm exactly as retained in
+// runs/RUN-A525-reveal/d3-n7-m6.json (depth 3, N=7, M=6,
+// maximumWork 51,084,852, maximumCacheEntries 87,025).
+inline EngineSpec engineSpecByName(const std::string& name) {
+  if (name == "d1") return {0, 1, 5, 1, 3'200'000, 60'000, "d1"};
+  if (name == "d2") return {1, 2, 5, 1, 3'200'000, 60'000, "d2"};
+  if (name == "d3n7m6") return {2, 3, 7, 6, 51'084'852, 87'025, "d3n7m6"};
+  throw std::invalid_argument("unknown continuation engine " + name);
+}
+
+inline std::vector<EngineSpec> parseEngineList(const std::string& list) {
+  std::vector<EngineSpec> engines;
+  std::string current;
+  std::stringstream stream(list);
+  while (std::getline(stream, current, ',')) {
+    if (!current.empty()) engines.push_back(engineSpecByName(current));
+  }
+  if (engines.empty()) throw std::invalid_argument("--cont-engines is empty");
+  return engines;
+}
+
+// ---------------------------------------------------------------------------
+// Factored-chance fair search.  Faithful copy of
+// approaches/lifetime-objective/reveal-sampling/search.cpp
+// (drop7::lifetime::reveal::FactoredSearch, the C0 arms' engine), with the
+// global bound diagnostics removed; the search arithmetic, iterative
+// deepening, cache policy, and scenario indexing are line-identical.  At
+// M = 1 the scenario indexing collapses to the single-knob parameterized
+// search (proved by that program's gate B), so d1/d2 below are the frozen
+// fair search at depths 1 and 2.
+// ---------------------------------------------------------------------------
+
+struct FactoredParameters {
+  int depth = 4;
+  int discSamples = frozen::kChanceSamples;
+  int revealSamples = 1;
+  double terminalUtility = frozen::kTerminalUtility;
+  std::uint64_t maximumWork = 3'200'000;
+  std::size_t maximumCacheEntries = 60'000;
+};
+
+inline FactoredParameters parametersFor(const EngineSpec& spec) {
+  FactoredParameters parameters;
+  parameters.depth = spec.depth;
+  parameters.discSamples = spec.discSamples;
+  parameters.revealSamples = spec.revealSamples;
+  parameters.maximumWork = spec.maximumWork;
+  parameters.maximumCacheEntries = spec.maximumCacheEntries;
+  return parameters;
+}
+
+class FactoredSearch {
+ public:
+  explicit FactoredSearch(FactoredParameters parameters)
+      : parameters_(parameters) {}
+
+  int chooseAction(const State& source, std::uint64_t& work) {
+    if (source.game_over) return -1;
+    bool mirrored = false;
+    const State canonical = cfpi::detail::canonicalState(source, mirrored);
+    SearchContext context;
+    int action = -1;
+    for (int depth = 1; depth <= parameters_.depth; ++depth) {
+      try {
+        const int candidate = rootDecision(canonical, depth, context);
+        if (candidate < 0) break;
+        action = candidate;
+      } catch (const WorkLimitReached&) {
+        break;
+      }
+    }
+    if (action < 0) action = centerFirstMove(canonical.board);
+    work += context.work;
+    return mirrored && action >= 0 ? kBoardSize - 1 - action : action;
+  }
+
+ private:
+  void checkBudget(const SearchContext& context) const {
+    if (context.work >= parameters_.maximumWork) throw WorkLimitReached{};
+  }
+
+  void cacheValue(SearchContext& context, std::string key, double value) const {
+    const auto prior = context.cache.find(key);
+    if (prior != context.cache.end()) {
+      context.order.erase(prior->second.order);
+      context.cache.erase(prior);
+    }
+    while (context.cache.size() >= parameters_.maximumCacheEntries) {
+      const std::string& oldest = context.order.front();
+      context.cache.erase(oldest);
+      context.order.pop_front();
+    }
+    context.order.push_back(std::move(key));
+    const auto order = std::prev(context.order.end());
+    context.cache.emplace(*order, CacheEntry{value, order});
+  }
+
+  double evaluateAction(const State& state, int column, int depth,
+                        SearchContext& context) const {
+    const std::uint32_t stateSeed = cfpi::detail::scenarioSeedForState(
+        state, frozen::kPolicySeed, depth);
+    const int discSamples = parameters_.discSamples;
+    const int revealSamples = parameters_.revealSamples;
+    const int total = discSamples * revealSamples;
+    double value = 0.0;
+    for (int disc = 0; disc < discSamples; ++disc) {
+      for (int rev = 0; rev < revealSamples; ++rev) {
+        checkBudget(context);
+        const int scenario = rev * discSamples + disc;
+        cfpi::detail::StratifiedRandom random{stateSeed, scenario, total, 0};
+        MoveResult move;
+        const bool played =
+            cfpi::detail::playMoveSampled(state, column, random, move);
+        ++context.work;
+        if (!played) {
+          value += parameters_.terminalUtility;
+          continue;
+        }
+        const double scoreDelta = static_cast<double>(move.score_delta);
+        if (move.state.game_over) {
+          value += scoreDelta + parameters_.terminalUtility;
+          continue;
+        }
+        move.state.score = 0;
+        move.state.next_disc =
+            cfpi::detail::sampledNextDisc(stateSeed, disc, discSamples);
+        bool ignored = false;
+        const State next = cfpi::detail::canonicalState(move.state, ignored);
+        value += scoreDelta + bestFutureValue(next, depth - 1, context);
+      }
+    }
+    return value / static_cast<double>(total);
+  }
+
+  double bestFutureValue(const State& state, int depth,
+                         SearchContext& context) const {
+    checkBudget(context);
+    if (state.game_over) return parameters_.terminalUtility;
+    if (depth == 0) {
+      ++context.work;
+      return frozen::fairLeaf(state);
+    }
+    const std::string key = cfpi::detail::dynamicStateKey(state, depth);
+    const auto cached = context.cache.find(key);
+    if (cached != context.cache.end()) {
+      const double value = cached->second.value;
+      context.order.splice(context.order.end(), context.order,
+                           cached->second.order);
+      return value;
+    }
+    double best = -std::numeric_limits<double>::infinity();
+    for (const int column : cfpi::detail::kColumnOrder) {
+      if (!isLegal(state.board, column)) continue;
+      best = std::max(best, evaluateAction(state, column, depth, context));
+    }
+    if (!std::isfinite(best)) best = parameters_.terminalUtility;
+    cacheValue(context, key, best);
+    return best;
+  }
+
+  int rootDecision(const State& canonical, int depth,
+                   SearchContext& context) const {
+    int action = -1;
+    double bestValue = -std::numeric_limits<double>::infinity();
+    for (const int column : cfpi::detail::kColumnOrder) {
+      if (!isLegal(canonical.board, column)) continue;
+      const double value = evaluateAction(canonical, column, depth, context);
+      if (value > bestValue) {
+        bestValue = value;
+        action = column;
+      }
+    }
+    return action;
+  }
+
+  FactoredParameters parameters_;
+};
+
+// ---------------------------------------------------------------------------
+// CRN continuation tapes.  Seeds are pure functions of the canonical public
+// root and the continuation index, under dedicated domains; the origin seed
+// never enters (SL-20260823T215000Z-a5216000, rngAlgorithm note).
+// ---------------------------------------------------------------------------
+
+inline std::uint32_t publicRootHash(const State& canonicalRoot) {
+  std::uint32_t hash = 0x811c'9dc5u;
+  for (std::uint8_t cell : canonicalRoot.board) {
+    hash ^= static_cast<std::uint32_t>(cell + 1u);
+    hash *= 0x0100'0193u;
+  }
+  hash ^= static_cast<std::uint32_t>(canonicalRoot.next_disc);
+  hash *= 0x0100'0193u;
+  hash ^= static_cast<std::uint32_t>(canonicalRoot.moves_remaining);
+  hash *= 0x0100'0193u;
+  return hash;
+}
+
+inline std::uint32_t tapeSeedFor(std::uint32_t rootHash, int continuation) {
+  return mix32(rootHash ^ kTapeDomain ^
+               ((static_cast<std::uint32_t>(continuation) + 1u) *
+                0x9e37'79b9u));
+}
+
+inline std::uint32_t moveSeedFor(std::uint32_t tapeSeed, int ordinal) {
+  return mix32(tapeSeed ^ kMoveDomain ^
+               ((static_cast<std::uint32_t>(ordinal) + 1u) * 0x85eb'ca6bu));
+}
+
+struct ContinuationOutcome {
+  std::uint8_t lifetime = 0;   // moves survived, sibling move first, cap H
+  std::uint8_t deathRise = 0;  // 0 = censored at H; else rise bin 1..12
+  std::uint32_t clears = 0;    // numbered clears over the continuation
+  std::uint32_t reveals = 0;   // cover reveals over the continuation
+  std::uint64_t movesPlayed = 0;
+};
+
+inline ContinuationOutcome runContinuation(const State& canonicalRoot,
+                                           int canonicalColumn,
+                                           std::uint32_t tapeSeed, int horizon,
+                                           const EngineSpec& spec) {
+  FactoredSearch engine{parametersFor(spec)};
+  ContinuationOutcome outcome;
+  State state = canonicalRoot;
+  int column = canonicalColumn;
+  int survivedMoves = 0;
+  int rises = 0;
+  for (int ordinal = 0;; ++ordinal) {
+    Mulberry32 tape(moveSeedFor(tapeSeed, ordinal));
+    MoveResult move;
+    if (!cfpi::detail::playMoveSampled(state, column, tape, move)) break;
+    ++outcome.movesPlayed;
+    for (const Wave& wave : move.waves) {
+      outcome.clears += static_cast<std::uint32_t>(wave.cleared);
+      outcome.reveals += static_cast<std::uint32_t>(wave.revealed);
+    }
+    if (move.level_advanced) ++rises;
+    state = move.state;
+    if (state.game_over) break;
+    ++survivedMoves;
+    if (survivedMoves >= horizon) {
+      outcome.lifetime = static_cast<std::uint8_t>(horizon);
+      outcome.deathRise = 0;  // censored
+      return outcome;
+    }
+    std::uint64_t work = 0;
+    column = engine.chooseAction(state, work);
+    if (column < 0 || !isLegal(state.board, column)) {
+      column = centerFirstMove(state.board);
+    }
+    if (column < 0) break;
+  }
+  outcome.lifetime = static_cast<std::uint8_t>(std::min(survivedMoves, horizon));
+  outcome.deathRise = static_cast<std::uint8_t>(std::min(rises + 1, 12));
+  return outcome;
+}
+
+// ---------------------------------------------------------------------------
+// Behaviour game with root staging.  Mirrors generateGame (same epsilon
+// stream, same StateRecord labels) but plays through a FactoredSearch
+// behaviour engine and stages full pre-move roots on the panel grid
+// (moveIndex >= panel2Start, every panelStride-th move) for continuation
+// labelling.
+// ---------------------------------------------------------------------------
+
+struct RootStaging {
+  State rootState{};       // pre-move behaviour state, original orientation
+  State canonicalRoot{};   // canonical public root used for continuations
+  std::uint32_t rootHash = 0;
+  bool mirroredRoot = false;
+  std::uint8_t legalMask = 0;
+  std::uint8_t chosenColumn = 0;
+  std::uint8_t explored = 0;
+  std::uint16_t moveIndex = 0;
+  // One-step sibling resolution under the true environment tape (v1
+  // semantics); illegal siblings stay zeroed.
+  std::uint8_t afterBoard[kBoardSize][kCellCount] = {};
+  std::uint8_t afterNextDisc[kBoardSize] = {};
+  std::uint8_t afterMovesToRise[kBoardSize] = {};
+  std::uint8_t survived[kBoardSize] = {};
+  std::uint8_t afterClears[kBoardSize] = {};
+  std::uint8_t afterReveals[kBoardSize] = {};
+  std::uint8_t afterMaxDepth[kBoardSize] = {};
+  std::int32_t afterScoreDelta[kBoardSize] = {};
+};
+
+struct GameStaging {
+  std::vector<StateRecord> states;
+  std::vector<RootStaging> roots;
+  int moves = 0;
+  std::int64_t score = 0;
+  bool censored = false;
+  std::uint64_t clears = 0;
+  std::uint64_t reveals = 0;
+};
+
+inline State publicOnlyCanonicalRoot(const State& rootState, bool& mirrored) {
+  State canonical = cfpi::detail::canonicalState(rootState, mirrored);
+  // Continuation labels must be a pure function of the public root: the
+  // board, the next disc, and the moves until the next rise.  Score is
+  // already zeroed by canonicalState; level and move count are bookkeeping
+  // with no effect on dynamics, and are normalized so no privileged history
+  // can reach the tape or the engines.
+  canonical.score = 0;
+  canonical.level = 1;
+  canonical.moves_played = 0;
+  canonical.game_over = false;
+  return canonical;
+}
+
+inline GameStaging generateGamePanel2(std::uint32_t seed,
+                                      const Options& options,
+                                      FactoredSearch& behaviour) {
+  GameStaging output;
+  State state = initialHeadlessState(seed);
+  Mulberry32 explore(mix32(seed ^ 0x6f75'7421u) ^ frozen::kPolicySeed);
+  std::vector<int> riseIndexOfMove;
+
+  while (!state.game_over && state.moves_played < options.maximumMoves) {
+    const Board preBoard = state.board;
+    const std::uint8_t mask = legalMaskOf(preBoard);
+    if (mask == 0) break;
+
+    std::uint64_t work = 0;
+    int column = behaviour.chooseAction(state, work);
+    bool explored = false;
+    if (options.epsilon > 0.0 && explore.nextUnit() < options.epsilon) {
+      int legalCount = 0;
+      const auto legal = legalColumns(preBoard, legalCount);
+      if (legalCount > 0) {
+        const auto pick = static_cast<std::size_t>(
+            (static_cast<std::uint64_t>(explore.nextBits()) *
+             static_cast<std::uint64_t>(legalCount)) >> 32);
+        const int deviation = legal[pick];
+        if (deviation != column) {
+          column = deviation;
+          explored = true;
+        }
+      }
+    }
+    if (column < 0 || !isLegal(preBoard, column)) column = centerFirstMove(preBoard);
+    if (column < 0) break;
+
+    const bool onGrid =
+        state.moves_played >= options.panel2Start &&
+        (state.moves_played - options.panel2Start) % options.panelStride == 0;
+    if (onGrid) {
+      RootStaging root;
+      root.rootState = state;
+      root.legalMask = mask;
+      root.chosenColumn = static_cast<std::uint8_t>(column);
+      root.explored = explored ? 1 : 0;
+      root.moveIndex = static_cast<std::uint16_t>(state.moves_played);
+      root.canonicalRoot = publicOnlyCanonicalRoot(state, root.mirroredRoot);
+      root.rootHash = publicRootHash(root.canonicalRoot);
+      for (int sibling = 0; sibling < kBoardSize; ++sibling) {
+        if (!isLegal(preBoard, sibling)) continue;
+        State probe = state;
+        MoveResult move;
+        if (!playHeadlessMove(probe, seed, sibling, move)) continue;
+        std::memcpy(root.afterBoard[sibling], probe.board.data(), kCellCount);
+        root.afterNextDisc[sibling] = probe.next_disc;
+        root.afterMovesToRise[sibling] =
+            static_cast<std::uint8_t>(probe.moves_remaining);
+        root.survived[sibling] = probe.game_over ? 0 : 1;
+        int clears = 0, reveals = 0, maxDepth = 0;
+        for (const Wave& wave : move.waves) {
+          clears += wave.cleared;
+          reveals += wave.revealed;
+          maxDepth = std::max(maxDepth, wave.depth);
+        }
+        root.afterClears[sibling] =
+            static_cast<std::uint8_t>(std::min(clears, 255));
+        root.afterReveals[sibling] =
+            static_cast<std::uint8_t>(std::min(reveals, 255));
+        root.afterMaxDepth[sibling] =
+            static_cast<std::uint8_t>(std::min(maxDepth, 255));
+        root.afterScoreDelta[sibling] = static_cast<std::int32_t>(
+            std::min<std::int64_t>(move.score_delta,
+                                   std::numeric_limits<std::int32_t>::max()));
+      }
+      output.roots.push_back(std::move(root));
+    }
+
+    StateRecord record{};
+    std::memcpy(record.board, preBoard.data(), kCellCount);
+    record.nextDisc = state.next_disc;
+    record.movesRemaining = static_cast<std::uint8_t>(state.moves_remaining);
+    record.legalMask = mask;
+    record.chosenColumn = static_cast<std::uint8_t>(column);
+    record.behaviorDepth = static_cast<std::uint8_t>(options.depth);
+    record.explored = explored ? 1 : 0;
+    record.occupiedCells = static_cast<std::uint8_t>(occupiedCells(preBoard));
+    record.moveIndex = static_cast<std::uint16_t>(state.moves_played);
+    record.gameSeed = seed;
+
+    MoveResult move;
+    if (!playHeadlessMove(state, seed, column, move)) break;
+
+    int clears = 0, reveals = 0;
+    for (const Wave& wave : move.waves) {
+      clears += wave.cleared;
+      reveals += wave.revealed;
+    }
+    record.clearsThisMove = static_cast<std::uint8_t>(std::min(clears, 255));
+    record.revealsThisMove = static_cast<std::uint8_t>(std::min(reveals, 255));
+    output.clears += static_cast<std::uint64_t>(clears);
+    output.reveals += static_cast<std::uint64_t>(reveals);
+    output.states.push_back(record);
+    riseIndexOfMove.push_back(move.level_advanced ? 1 : 0);
+    output.moves += 1;
+  }
+
+  output.score = state.score;
+  output.censored = !state.game_over && output.moves >= options.maximumMoves;
+
+  int risesAfter = 0;
+  for (int index = output.moves - 1; index >= 0; --index) {
+    StateRecord& record = output.states[static_cast<std::size_t>(index)];
+    record.movesToDeath = static_cast<std::uint16_t>(output.moves - index);
+    record.risesToDeath = static_cast<std::uint16_t>(
+        risesAfter + riseIndexOfMove[static_cast<std::size_t>(index)]);
+    risesAfter = record.risesToDeath;
+    record.censoredGame = output.censored ? 1 : 0;
+  }
+
+  // Disclosed root-selection rule: keep panel2Roots roots per game, evenly
+  // spaced over the game's grid roots (index floor((i + 0.5) * n / R)); at
+  // R = 1 this is the median grid root.  0 keeps every grid root.
+  if (options.panel2Roots > 0 &&
+      output.roots.size() > static_cast<std::size_t>(options.panel2Roots)) {
+    const std::size_t n = output.roots.size();
+    const std::size_t r = static_cast<std::size_t>(options.panel2Roots);
+    std::vector<RootStaging> kept;
+    kept.reserve(r);
+    for (std::size_t i = 0; i < r; ++i) {
+      kept.push_back(std::move(output.roots[(2 * i + 1) * n / (2 * r)]));
+    }
+    output.roots = std::move(kept);
+  }
+  return output;
+}
+
+// ---------------------------------------------------------------------------
+// Serialization
+// ---------------------------------------------------------------------------
+
+template <typename Scalar>
+inline void putScalar(std::uint8_t* out, Scalar value) {
+  std::memcpy(out, &value, sizeof(Scalar));  // little-endian host assumed
+}
+
+inline void serializeRecord(std::uint8_t* out, const RootStaging& root,
+                            std::uint32_t recordId, std::uint32_t originSeed,
+                            const EngineSpec& spec, int k, int horizon,
+                            std::uint8_t referenceColumn,
+                            std::uint8_t panelFlags,
+                            const ContinuationOutcome* outcomes /* [7][K] */) {
+  std::memset(out, 0, kRecordBytes);
+  putScalar<std::uint32_t>(out + 0, kVersion);
+  putScalar<std::uint32_t>(out + 4, recordId);
+  putScalar<std::uint32_t>(out + 8, originSeed);
+  putScalar<std::uint16_t>(out + 12, root.moveIndex);
+  out[14] = root.rootState.next_disc;
+  out[15] = static_cast<std::uint8_t>(root.rootState.moves_remaining);
+  out[16] = root.legalMask;
+  out[17] = root.chosenColumn;
+  out[18] = referenceColumn;
+  out[19] = spec.id;
+  out[20] = static_cast<std::uint8_t>(k);
+  out[21] = static_cast<std::uint8_t>(horizon);
+  out[22] = panelFlags;
+  std::memcpy(out + 23, root.rootState.board.data(), kCellCount);
+  for (int sibling = 0; sibling < kBoardSize; ++sibling) {
+    std::uint8_t* slot = out + kHeaderBytes + sibling * kSiblingBytes;
+    const bool legal = (root.legalMask >> sibling) & 1u;
+    if (!legal) continue;  // illegal columns keep their slot, zeroed
+    std::memcpy(slot, root.afterBoard[sibling], kCellCount);
+    slot[49] = root.afterNextDisc[sibling];
+    slot[50] = root.afterMovesToRise[sibling];
+    slot[51] = root.survived[sibling];
+    slot[52] = 1;  // legal
+    slot[53] = root.afterClears[sibling];
+    slot[54] = root.afterReveals[sibling];
+    slot[55] = root.afterMaxDepth[sibling];
+    putScalar<std::int32_t>(slot + 56, root.afterScoreDelta[sibling]);
+    std::uint32_t clearsTotal = 0, revealsTotal = 0;
+    for (int j = 0; j < k; ++j) {
+      const ContinuationOutcome& outcome = outcomes[sibling * k + j];
+      slot[60 + j] = outcome.lifetime;
+      slot[60 + k + j] = outcome.deathRise;
+      clearsTotal += outcome.clears;
+      revealsTotal += outcome.reveals;
+    }
+    putScalar<std::uint32_t>(slot + 60 + 2 * k, clearsTotal);
+    putScalar<std::uint32_t>(slot + 64 + 2 * k, revealsTotal);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Continuation task pool, shared by the corpus writer and the mirror gate.
+// Outcomes are stored by (root, engine, sibling, continuation) index, so the
+// result is deterministic for any thread count.
+// ---------------------------------------------------------------------------
+
+struct ContinuationPlan {
+  const std::vector<const RootStaging*>* roots = nullptr;
+  const std::vector<EngineSpec>* engines = nullptr;
+  int k = 0;
+  int horizon = 0;
+  std::vector<ContinuationOutcome> outcomes;  // [root][engine][7][K]
+  std::vector<std::uint64_t> movesPerEngine;
+
+  std::size_t indexOf(std::size_t rootIndex, std::size_t engineIndex,
+                      int sibling, int continuation) const {
+    return ((rootIndex * engines->size() + engineIndex) * kBoardSize +
+            static_cast<std::size_t>(sibling)) * static_cast<std::size_t>(k) +
+           static_cast<std::size_t>(continuation);
+  }
+};
+
+inline void runContinuations(ContinuationPlan& plan, int threads) {
+  struct Task {
+    std::uint32_t rootIndex;
+    std::uint16_t engineIndex;
+    std::uint8_t sibling;
+    std::uint8_t continuation;
+  };
+  std::vector<Task> tasks;
+  for (std::size_t rootIndex = 0; rootIndex < plan.roots->size(); ++rootIndex) {
+    const RootStaging& root = *(*plan.roots)[rootIndex];
+    for (std::size_t engineIndex = 0; engineIndex < plan.engines->size();
+         ++engineIndex) {
+      for (int sibling = 0; sibling < kBoardSize; ++sibling) {
+        if (!((root.legalMask >> sibling) & 1u)) continue;
+        for (int j = 0; j < plan.k; ++j) {
+          tasks.push_back({static_cast<std::uint32_t>(rootIndex),
+                           static_cast<std::uint16_t>(engineIndex),
+                           static_cast<std::uint8_t>(sibling),
+                           static_cast<std::uint8_t>(j)});
+        }
+      }
+    }
+  }
+  plan.outcomes.assign(
+      plan.roots->size() * plan.engines->size() * kBoardSize *
+          static_cast<std::size_t>(plan.k),
+      ContinuationOutcome{});
+  std::vector<std::atomic<std::uint64_t>> engineMoves(plan.engines->size());
+  for (auto& counter : engineMoves) counter.store(0);
+
+  std::atomic<std::size_t> nextTask{0};
+  const int workerCount =
+      std::max(1, std::min<int>(threads, static_cast<int>(tasks.size())));
+  std::vector<std::thread> pool;
+  for (int worker = 0; worker < workerCount; ++worker) {
+    pool.emplace_back([&]() {
+      for (;;) {
+        const std::size_t taskIndex = nextTask.fetch_add(1);
+        if (taskIndex >= tasks.size()) return;
+        const Task& task = tasks[taskIndex];
+        const RootStaging& root = *(*plan.roots)[task.rootIndex];
+        const EngineSpec& spec = (*plan.engines)[task.engineIndex];
+        const int canonicalColumn =
+            root.mirroredRoot ? kBoardSize - 1 - task.sibling : task.sibling;
+        const std::uint32_t tapeSeed =
+            tapeSeedFor(root.rootHash, task.continuation);
+        const ContinuationOutcome outcome =
+            runContinuation(root.canonicalRoot, canonicalColumn, tapeSeed,
+                            plan.horizon, spec);
+        plan.outcomes[plan.indexOf(task.rootIndex, task.engineIndex,
+                                   task.sibling, task.continuation)] = outcome;
+        engineMoves[task.engineIndex].fetch_add(outcome.movesPlayed);
+      }
+    });
+  }
+  for (std::thread& thread : pool) thread.join();
+  plan.movesPerEngine.clear();
+  for (auto& counter : engineMoves) plan.movesPerEngine.push_back(counter.load());
+}
+
+}  // namespace panel2
+
 Options parseOptions(int argc, char** argv) {
   Options options;
   for (int index = 1; index < argc; index += 2) {
@@ -394,9 +1066,333 @@ Options parseOptions(int argc, char** argv) {
     else if (key == "--states") options.statesPath = value;
     else if (key == "--panel") options.panelPath = value;
     else if (key == "--summary") options.summaryPath = value;
+    else if (key == "--panel2") options.panel2Prefix = value;
+    else if (key == "--cont-engines") options.contEngines = value;
+    else if (key == "--panel2-k") options.panel2K = std::stoi(value);
+    else if (key == "--panel2-horizon") options.panel2Horizon = std::stoi(value);
+    else if (key == "--panel2-roots") options.panel2Roots = std::stoi(value);
+    else if (key == "--panel2-start") options.panel2Start = std::stoi(value);
+    else if (key == "--behaviour-disc-samples") options.behaviourDiscSamples = std::stoi(value);
+    else if (key == "--behaviour-reveal-samples") options.behaviourRevealSamples = std::stoi(value);
+    else if (key == "--behaviour-max-work") options.behaviourMaxWork = std::stoull(value);
+    else if (key == "--behaviour-max-cache") options.behaviourMaxCache = static_cast<std::size_t>(std::stoull(value));
+    else if (key == "--panel2-mirror-check") options.mirrorCheck = std::stoi(value);
+    else if (key == "--lease-label") options.leaseLabel = value;
+    else if (key == "--data-role") options.dataRole = value;
     else throw std::invalid_argument("unknown option " + key);
   }
   return options;
+}
+
+// ---------------------------------------------------------------------------
+// panel2 drivers (reachable only through --panel2 / --panel2-mirror-check).
+// ---------------------------------------------------------------------------
+
+double processCpuSeconds() {
+  struct rusage usage {};
+  if (getrusage(RUSAGE_SELF, &usage) != 0) return 0.0;
+  const auto seconds = [](const timeval& tv) {
+    return static_cast<double>(tv.tv_sec) +
+           static_cast<double>(tv.tv_usec) / 1e6;
+  };
+  return seconds(usage.ru_utime) + seconds(usage.ru_stime);
+}
+
+panel2::FactoredParameters behaviourParameters(const Options& options) {
+  panel2::FactoredParameters parameters;
+  parameters.depth = options.depth;
+  parameters.discSamples = options.behaviourDiscSamples;
+  parameters.revealSamples = options.behaviourRevealSamples;
+  parameters.terminalUtility = options.terminalUtility;
+  parameters.maximumWork = options.behaviourMaxWork;
+  parameters.maximumCacheEntries = options.behaviourMaxCache;
+  return parameters;
+}
+
+std::vector<panel2::GameStaging> playBehaviourGames(const Options& options) {
+  std::vector<panel2::GameStaging> games(
+      static_cast<std::size_t>(options.games));
+  std::atomic<int> nextIndex{0};
+  const int threads = std::max(1, std::min(options.threads, options.games));
+  std::vector<std::thread> pool;
+  for (int worker = 0; worker < threads; ++worker) {
+    pool.emplace_back([&]() {
+      panel2::FactoredSearch behaviour{behaviourParameters(options)};
+      for (;;) {
+        const int index = nextIndex.fetch_add(1);
+        if (index >= options.games) return;
+        const std::uint32_t seed =
+            options.seedStart + static_cast<std::uint32_t>(index);
+        games[static_cast<std::size_t>(index)] =
+            panel2::generateGamePanel2(seed, options, behaviour);
+      }
+    });
+  }
+  for (std::thread& thread : pool) thread.join();
+  return games;
+}
+
+int runMirrorCheck(const Options& options) {
+  const auto engines = panel2::parseEngineList(options.contEngines);
+  const auto games = playBehaviourGames(options);
+
+  // First N staged roots in seed order.
+  std::vector<const panel2::RootStaging*> roots;
+  std::vector<panel2::RootStaging> mirroredRoots;
+  for (const auto& game : games) {
+    for (const auto& root : game.roots) {
+      if (static_cast<int>(roots.size()) >= options.mirrorCheck) break;
+      roots.push_back(&root);
+    }
+  }
+  mirroredRoots.reserve(roots.size());
+  for (const panel2::RootStaging* original : roots) {
+    panel2::RootStaging mirrored;
+    mirrored.rootState = original->rootState;
+    mirrored.rootState.board =
+        cfpi::detail::mirrorBoard(original->rootState.board);
+    std::uint8_t mask = 0;
+    for (int column = 0; column < kBoardSize; ++column) {
+      if ((original->legalMask >> column) & 1u) {
+        mask |= static_cast<std::uint8_t>(1u << (kBoardSize - 1 - column));
+      }
+    }
+    mirrored.legalMask = mask;
+    mirrored.moveIndex = original->moveIndex;
+    mirrored.canonicalRoot =
+        panel2::publicOnlyCanonicalRoot(mirrored.rootState,
+                                        mirrored.mirroredRoot);
+    mirrored.rootHash = panel2::publicRootHash(mirrored.canonicalRoot);
+    mirroredRoots.push_back(mirrored);
+  }
+  std::vector<const panel2::RootStaging*> mirroredPointers;
+  for (const auto& root : mirroredRoots) mirroredPointers.push_back(&root);
+
+  panel2::ContinuationPlan originalPlan;
+  originalPlan.roots = &roots;
+  originalPlan.engines = &engines;
+  originalPlan.k = options.panel2K;
+  originalPlan.horizon = options.panel2Horizon;
+  panel2::runContinuations(originalPlan, options.threads);
+
+  panel2::ContinuationPlan mirroredPlan;
+  mirroredPlan.roots = &mirroredPointers;
+  mirroredPlan.engines = &engines;
+  mirroredPlan.k = options.panel2K;
+  mirroredPlan.horizon = options.panel2Horizon;
+  panel2::runContinuations(mirroredPlan, options.threads);
+
+  std::uint64_t comparisons = 0, mismatches = 0;
+  int maxLifetimeDiff = 0, maxDeathRiseDiff = 0;
+  for (std::size_t rootIndex = 0; rootIndex < roots.size(); ++rootIndex) {
+    for (std::size_t engineIndex = 0; engineIndex < engines.size();
+         ++engineIndex) {
+      for (int sibling = 0; sibling < kBoardSize; ++sibling) {
+        if (!((roots[rootIndex]->legalMask >> sibling) & 1u)) continue;
+        const int mirroredSibling = kBoardSize - 1 - sibling;
+        for (int j = 0; j < options.panel2K; ++j) {
+          const auto& a = originalPlan.outcomes[originalPlan.indexOf(
+              rootIndex, engineIndex, sibling, j)];
+          const auto& b = mirroredPlan.outcomes[mirroredPlan.indexOf(
+              rootIndex, engineIndex, mirroredSibling, j)];
+          ++comparisons;
+          const int lifetimeDiff =
+              std::abs(static_cast<int>(a.lifetime) - static_cast<int>(b.lifetime));
+          const int deathRiseDiff =
+              std::abs(static_cast<int>(a.deathRise) - static_cast<int>(b.deathRise));
+          maxLifetimeDiff = std::max(maxLifetimeDiff, lifetimeDiff);
+          maxDeathRiseDiff = std::max(maxDeathRiseDiff, deathRiseDiff);
+          if (lifetimeDiff != 0 || deathRiseDiff != 0 ||
+              a.clears != b.clears || a.reveals != b.reveals) {
+            ++mismatches;
+          }
+        }
+      }
+    }
+  }
+  std::cout << "{\"gate\": \"panel2-mirror-invariance\", \"roots\": "
+            << roots.size() << ", \"engines\": \"" << options.contEngines
+            << "\", \"k\": " << options.panel2K << ", \"horizon\": "
+            << options.panel2Horizon << ", \"comparisons\": " << comparisons
+            << ", \"mismatches\": " << mismatches
+            << ", \"maxLifetimeDiff\": " << maxLifetimeDiff
+            << ", \"maxDeathRiseDiff\": " << maxDeathRiseDiff
+            << ", \"pass\": " << (mismatches == 0 ? "true" : "false")
+            << "}\n";
+  return mismatches == 0 ? 0 : 1;
+}
+
+int runPanel2(const Options& options) {
+  const double cpuAtStart = processCpuSeconds();
+  const auto startedBehaviour = std::chrono::steady_clock::now();
+  const auto engines = panel2::parseEngineList(options.contEngines);
+  const auto games = playBehaviourGames(options);
+  const auto startedContinuations = std::chrono::steady_clock::now();
+
+  std::vector<const panel2::RootStaging*> roots;
+  std::vector<std::uint32_t> rootSeeds;
+  for (std::size_t gameIndex = 0; gameIndex < games.size(); ++gameIndex) {
+    for (const auto& root : games[gameIndex].roots) {
+      roots.push_back(&root);
+      rootSeeds.push_back(options.seedStart +
+                          static_cast<std::uint32_t>(gameIndex));
+    }
+  }
+
+  panel2::ContinuationPlan plan;
+  plan.roots = &roots;
+  plan.engines = &engines;
+  plan.k = options.panel2K;
+  plan.horizon = options.panel2Horizon;
+  panel2::runContinuations(plan, options.threads);
+  const auto startedReference = std::chrono::steady_clock::now();
+
+  // referenceColumn: fair-D4 argmax on every 16th record (recordId is the
+  // root's index in seed order, so this is deterministic for any thread
+  // count); 255 elsewhere.
+  std::vector<std::uint8_t> referenceColumn(roots.size(), 255);
+  {
+    std::vector<std::size_t> targets;
+    for (std::size_t rootIndex = 0; rootIndex < roots.size(); rootIndex += 16) {
+      targets.push_back(rootIndex);
+    }
+    std::atomic<std::size_t> nextTarget{0};
+    const int threads = std::max(
+        1, std::min<int>(options.threads, static_cast<int>(targets.size())));
+    std::vector<std::thread> pool;
+    for (int worker = 0; worker < threads; ++worker) {
+      pool.emplace_back([&]() {
+        for (;;) {
+          const std::size_t index = nextTarget.fetch_add(1);
+          if (index >= targets.size()) return;
+          const std::size_t rootIndex = targets[index];
+          referenceColumn[rootIndex] = static_cast<std::uint8_t>(
+              drop7::fair_only_depth4::chooseDepth4Action(
+                  roots[rootIndex]->rootState).action);
+        }
+      });
+    }
+    for (std::thread& thread : pool) thread.join();
+  }
+  const auto startedWrite = std::chrono::steady_clock::now();
+
+  // States file, seed order (deterministic for any thread count).
+  std::FILE* statesFile = std::fopen(options.statesPath.c_str(), "wb");
+  if (statesFile == nullptr) {
+    throw std::runtime_error("cannot open " + options.statesPath);
+  }
+  std::uint64_t totalStates = 0, totalMoves = 0;
+  std::uint64_t totalClears = 0, totalReveals = 0;
+  long long totalScore = 0;
+  int censoredGames = 0;
+  for (const auto& game : games) {
+    if (!game.states.empty()) {
+      std::fwrite(game.states.data(), sizeof(StateRecord), game.states.size(),
+                  statesFile);
+    }
+    totalStates += game.states.size();
+    totalMoves += static_cast<std::uint64_t>(game.moves);
+    totalClears += game.clears;
+    totalReveals += game.reveals;
+    totalScore += game.score;
+    if (game.censored) ++censoredGames;
+  }
+  std::fclose(statesFile);
+
+  // One panel2 file per continuation engine; identical roots, identical CRN
+  // tapes, engine-specific labels.
+  std::vector<std::string> panelPaths;
+  std::vector<std::uint8_t> buffer(panel2::kRecordBytes);
+  for (std::size_t engineIndex = 0; engineIndex < engines.size();
+       ++engineIndex) {
+    const std::string path =
+        options.panel2Prefix + "." + engines[engineIndex].name + ".panel2";
+    std::FILE* panelFile = std::fopen(path.c_str(), "wb");
+    if (panelFile == nullptr) throw std::runtime_error("cannot open " + path);
+    for (std::size_t rootIndex = 0; rootIndex < roots.size(); ++rootIndex) {
+      const panel2::RootStaging& root = *roots[rootIndex];
+      std::uint8_t panelFlags = 0;
+      if (referenceColumn[rootIndex] != 255) panelFlags |= 1u;
+      if (root.explored) panelFlags |= 2u;
+      const std::size_t base =
+          plan.indexOf(rootIndex, engineIndex, 0, 0);
+      panel2::serializeRecord(buffer.data(), root,
+                              static_cast<std::uint32_t>(rootIndex),
+                              rootSeeds[rootIndex], engines[engineIndex],
+                              options.panel2K, options.panel2Horizon,
+                              referenceColumn[rootIndex], panelFlags,
+                              plan.outcomes.data() + base);
+      std::fwrite(buffer.data(), 1, buffer.size(), panelFile);
+    }
+    std::fclose(panelFile);
+    panelPaths.push_back(path);
+  }
+
+  const auto finished = std::chrono::steady_clock::now();
+  const auto wallOf = [](auto from, auto to) {
+    return std::chrono::duration<double>(to - from).count();
+  };
+  std::ostringstream summary;
+  summary << std::setprecision(10) << "{\n"
+          << "  \"format\": \"drop7-panel2-summary-v1\",\n"
+          << "  \"seedLease\": \"" << options.leaseLabel << "\",\n"
+          << "  \"dataRole\": \"" << options.dataRole << "\",\n"
+          << "  \"seedStartHex\": \"0x" << std::hex << options.seedStart
+          << std::dec << "\",\n"
+          << "  \"games\": " << options.games << ",\n"
+          << "  \"behaviour\": {\"depth\": " << options.depth
+          << ", \"discSamples\": " << options.behaviourDiscSamples
+          << ", \"revealSamples\": " << options.behaviourRevealSamples
+          << ", \"maximumWork\": " << options.behaviourMaxWork
+          << ", \"epsilon\": " << options.epsilon << "},\n"
+          << "  \"contEngines\": \"" << options.contEngines << "\",\n"
+          << "  \"k\": " << options.panel2K << ",\n"
+          << "  \"horizon\": " << options.panel2Horizon << ",\n"
+          << "  \"panelStride\": " << options.panelStride << ",\n"
+          << "  \"panel2Start\": " << options.panel2Start << ",\n"
+          << "  \"panel2RootsPerGame\": " << options.panel2Roots << ",\n"
+          << "  \"panel2RecordBytes\": " << panel2::kRecordBytes << ",\n"
+          << "  \"panel2Records\": " << roots.size() << ",\n"
+          << "  \"stateRecords\": " << totalStates << ",\n"
+          << "  \"meanMoves\": "
+          << static_cast<double>(totalMoves) /
+                 static_cast<double>(std::max(1, options.games)) << ",\n"
+          << "  \"meanScore\": "
+          << static_cast<double>(totalScore) /
+                 static_cast<double>(std::max(1, options.games)) << ",\n"
+          << "  \"censoredGames\": " << censoredGames << ",\n"
+          << "  \"clearsPerMove\": "
+          << static_cast<double>(totalClears) /
+                 static_cast<double>(std::max<std::uint64_t>(1, totalMoves))
+          << ",\n"
+          << "  \"revealsPerMove\": "
+          << static_cast<double>(totalReveals) /
+                 static_cast<double>(std::max<std::uint64_t>(1, totalMoves))
+          << ",\n"
+          << "  \"continuationMovesPerEngine\": {";
+  for (std::size_t engineIndex = 0; engineIndex < engines.size();
+       ++engineIndex) {
+    summary << (engineIndex == 0 ? "" : ", ") << "\""
+            << engines[engineIndex].name << "\": "
+            << plan.movesPerEngine[engineIndex];
+  }
+  summary << "},\n"
+          << "  \"behaviourWallSeconds\": "
+          << wallOf(startedBehaviour, startedContinuations) << ",\n"
+          << "  \"continuationWallSeconds\": "
+          << wallOf(startedContinuations, startedReference) << ",\n"
+          << "  \"referenceWallSeconds\": "
+          << wallOf(startedReference, startedWrite) << ",\n"
+          << "  \"totalWallSeconds\": "
+          << wallOf(startedBehaviour, finished) << ",\n"
+          << "  \"cpuSeconds\": " << processCpuSeconds() - cpuAtStart << ",\n"
+          << "  \"threads\": " << options.threads << "\n}\n";
+  std::cout << summary.str();
+  if (!options.summaryPath.empty()) {
+    std::ofstream file(options.summaryPath);
+    file << summary.str();
+  }
+  return 0;
 }
 
 }  // namespace drop7::corpus
@@ -406,6 +1402,23 @@ int main(int argc, char** argv) {
   using namespace drop7::corpus;
   try {
     const Options options = parseOptions(argc, argv);
+    if (!options.panel2Prefix.empty() || options.mirrorCheck > 0) {
+      // PanelRecordV2 mode (P-SOL-v1).  The v1 body below is untouched.
+      if (options.panel2K < 1 || options.panel2K > panel2::kMaxK) {
+        throw std::invalid_argument("--panel2-k must be 1..30");
+      }
+      if (options.panel2Horizon < 1 || options.panel2Horizon > 255) {
+        throw std::invalid_argument("--panel2-horizon must be 1..255");
+      }
+      if (options.panelStride <= 0) {
+        throw std::invalid_argument("--panel-stride must be > 0 with --panel2");
+      }
+      if (options.mirrorCheck > 0) return runMirrorCheck(options);
+      if (options.statesPath.empty()) {
+        throw std::invalid_argument("--states is required");
+      }
+      return runPanel2(options);
+    }
     if (options.statesPath.empty()) throw std::invalid_argument("--states is required");
 
     std::FILE* statesFile = std::fopen(options.statesPath.c_str(), "wb");
