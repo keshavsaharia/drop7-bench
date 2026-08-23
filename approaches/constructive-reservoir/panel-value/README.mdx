@@ -1,14 +1,14 @@
 ---
 title: Panel value
 family: constructive-reservoir
-summary: Builds training data the expensive, honest way — every legal column at a position, each played out over the same imagined futures — then learns from it. Both models still ranked columns worse than the four-move search.
+summary: Builds complete training data by playing every legal column through the same imagined futures, then learns from it. Both models still ranked columns worse than the four-move search.
 status: rejected
 evidence: task-record only
 reads: public
 ---
 
 Two attempts to learn what a position is worth from data that, for once, covers
-*every* column a player could have chosen — not just the one that was actually
+*every* column a player could have chosen, not just the one that was actually
 played.
 
 <EvidenceLabel status="rejected" evidence="task-record only" reads="public" />
@@ -23,12 +23,12 @@ alternatives it has barely seen. Low prediction error, wrong choice.
 
 The obvious fix is expensive: at each position, play out **all** the legal
 columns, not just the chosen one, and label them all. That is what a "panel"
-means here — the complete set of siblings at one position, each carried forward
+means here: the complete set of siblings at one position, each carried forward
 over the *same* imagined futures so the comparison between them is fair.
 
 Two ways to learn from such a panel were tried:
 
-- **Panel-value** learns a value for a board — you evaluate the position each
+- **Panel-value** learns a value for a board. You evaluate the position each
   column leads to, and pick the best one.
 - **Direct sibling ranker** skips the intermediate step and learns to rank the
   columns within a position directly, from complete within-position panels,
@@ -42,8 +42,8 @@ states in general, when what is needed is a comparison inside one position.
 
 1. Play 1,024 complete games with two different behaviour policies — half with
    the one-move-ahead fair search, half with the
-   [constructive planner](/approaches/constructive-reservoir/constructive-spectrum)
-   — so the positions come from two different styles of play.
+   [constructive planner](/approaches/constructive-reservoir/constructive-spectrum),
+   so the positions come from two different styles of play.
 2. Take up to eight positions from each game, at fixed move numbers (5, 10, 15,
    20, 25, 30, 40, 50).
 3. At each position, for **every** legal column, continue the game 100 moves
@@ -67,15 +67,15 @@ one-move-ahead search but materially behind the four-move reference.
 
 There are **no retained numbers** for either. Both statuses exist only as task
 records, and [audit 04](/docs/exploratory/audit-04-blind-spots) §B.3 lists both
-sources among the thirty rejections that "cannot be re-derived" — no ledger
+sources among the thirty rejections that "cannot be re-derived": no ledger
 protocol, no artifact hash, no per-position data. This page therefore reports
 the verdicts as the index words them and quotes no accuracy figures, because
 none survive.
 
 That gap matters, because the *comparison* these runs made is the one the
 repository now thinks is central. When the same question was asked again later
-with machine-readable records — a distributional afterstate ranker trained on a
-successor-closed corpus — the numbers were retained, and the pattern looks
+with machine-readable records, a distributional afterstate ranker trained on a
+successor-closed corpus, the numbers were retained and the pattern looks
 similar: the model beat its one-move teacher (top-1 0.424 against 0.319) and
 still trailed the four-move reference (0.424 against 0.499, regret 0.241
 against 0.178). See the
@@ -83,7 +83,7 @@ against 0.178). See the
 
 <TechnicalDetails title="The technical record">
 
-**Status: rejected — task-record only, for both sources.** From the
+**Status: rejected; task-record only, for both sources.** From the
 [experiment index](/docs/research/experiment-index): panel-value NNUE — "the
 untouched holdout had weak top-action accuracy and worse regret, so gameplay
 stayed sealed"; direct sibling ranker — "it slightly beat D1 but remained
@@ -112,7 +112,7 @@ Sources: `panel-value-nnue.cpp`, `direct-sibling-ranker.cpp`.
   them before the vocabulary for them existed. Building the data was not
   sufficient.
 - Ranking directly, instead of ranking through a learned state value, was the
-  better of the two — but "better" here still means behind the four-move
+  better of the two, but "better" here still means behind the four-move
   reference.
 - Neither verdict can be re-derived from anything retained. Treat both as
   provisional in exactly the way the index instructs.

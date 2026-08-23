@@ -1,41 +1,40 @@
 ---
 title: Four ways a program can learn Drop7
-summary: N-tuple networks, neural evaluators, policy-gradient reinforcement learning and Monte Carlo tree search — what each one actually does, shown on a real board, and what happened when this repository tried it.
+summary: How n-tuple networks, neural evaluators, policy-gradient learning, and Monte Carlo tree search work, with real boards and retained results.
 order: 9
 ---
 
 The reference policy here does not learn anything. It looks four moves ahead,
 averages over the discs it cannot predict, and scores the boards it reaches with
-a hand-tuned formula — the idea is explained on
+a hand-tuned formula. The idea is explained on
 [choice, chance and looking ahead](/learn/concepts/chance-vs-choice). Over its
 64-game reference cohort it averaged about 308,000 points a game, against a
 target of one million.
 
-So most of the work in this repository has been an attempt to *learn* something
-better: either a better opinion about a board, or the column choice itself. Four
-families were tried. This page explains each one in plain English, shows the
-mechanism on a real position, and says honestly what happened — because all four
-have retained results, and none of them displaced the hand-tuned search.
+Most of the work in this repository tries to learn something better: either a
+better opinion about a board or the column choice itself. Four learning families
+have retained results, and none displaced the reference search. The sections
+below show each mechanism on a real position and summarize the evidence.
 
 ## 1. N-tuple networks
 
 The simplest learnable evaluator here does not look at the board as a whole. It
-looks at it through dozens of small windows — four cells in a row, four in a
-column, a two-by-two block — and asks, for each window, "what have I learned
+looks at it through dozens of small windows: four cells in a row, four in a
+column, or a two-by-two block. For each window it asks, "what have I learned
 about this exact little pattern?" Each window's four cell values are packed into
-a short code; the code, together with the rise clock and the next disc, picks one
-entry out of a large table of learned numbers; and the board's score is simply
-the sum of those numbers. Learning means nudging the entries that were active
+a short code. That code, together with the rise clock and the next disc, picks one
+entry from a large table of learned numbers. The board's score is the sum of
+those numbers. Learning means nudging the entries that were active
 when a game went well or badly. There is no matrix multiplication anywhere, which
 is why an n-tuple evaluator is fast enough to sit at the bottom of a search tree.
 
-<NTupleWindows caption="Three of the 92 windows the native implementation reads on every board. Windows that differ only by position share a table, so the model has far fewer parameters than a table of whole boards would — and it generalises, because a pattern learned in one corner is recognised in another. Layout as implemented in src/core/native/ntuple.hpp." />
+<NTupleWindows caption="Three of the 92 windows the native implementation reads on every board. Windows that differ only by position share a table, so the model has far fewer parameters than a table of whole boards would, and it generalises, because a pattern learned in one corner is recognised in another. Layout as implemented in src/core/native/ntuple.hpp." />
 
 **What happened here.** The most complete attempt trained for exactly 50 million
-transitions and was then opened on its mandatory burned 64-game gate, where the
-direct n-tuple policy averaged 181,733.422 points and 56.359 moves and the
-two-boundary rollout built on it fell further, to 113,643.969 points and 37.375
-moves — well below the reference search, and a decisive rejection of that family.
+transitions and was then opened on its mandatory burned 64-game gate. The direct
+n-tuple policy averaged 181,733.422 points and 56.359 moves. The two-boundary
+rollout fell further, to 113,643.969 points and 37.375 moves. That is well below
+the reference search and decisively rejects that configuration.
 The full record is on the [n-tuple and Q-learning family page](/approaches/ntuple-rl).
 
 ## 2. Value and policy neural networks
@@ -43,11 +42,11 @@ The full record is on the [n-tuple and Q-learning family page](/approaches/ntupl
 A neural network can represent things a sum of small patterns cannot: how the
 whole board's height profile interacts with where the covered discs sit, for
 instance. Two shapes were tried. A **value network** takes the public position
-and returns one number — how promising is this? — which can be dropped in as the
+and returns one number: how promising is this board? That number can become the
 search's leaf evaluator. A **policy network** skips the board score and outputs
 the choice directly.
 
-<ValueNetShape caption="A value network's inputs are yes/no questions about every cell, plus the next disc and the rise clock. NNUE — 'efficiently updatable neural network', an idea borrowed from computer chess — is the observation that a move changes only a handful of cells, so the first layer can be patched instead of recomputed. That matters when the evaluator runs at millions of leaves per decision." />
+<ValueNetShape caption="A value network's inputs are yes/no questions about every cell, plus the next disc and the rise clock. NNUE ('efficiently updatable neural network', an idea borrowed from computer chess) is the observation that a move changes only a handful of cells, so the first layer can be patched instead of recomputed. That matters when the evaluator runs at millions of leaves per decision." />
 
 **What happened here.** Repeatedly, the model predicted well and chose badly. The
 structured multi-head value network reached a death-within-25 AUC of 0.999 and a
@@ -71,9 +70,9 @@ good the position already was, so the *actor* is rewarded only for doing better
 than expected, and each update is clipped so a lucky batch cannot swing the
 policy wildly.
 
-<PolicyNetShape caption="A policy's output is a distribution over the seven columns. Nothing about this is specific to Drop7 — which is the appeal, and also the difficulty: the learning signal is one score at the end of a game that may last a hundred moves, and it has to be divided among all of them." />
+<PolicyNetShape caption="A policy's output is a distribution over the seven columns. Nothing about this is specific to Drop7, which is the appeal, and also the difficulty: the learning signal is one score at the end of a game that may last a hundred moves, and it has to be divided among all of them." />
 
-**What happened here.** These runs trained, and then calibrated below the bar. The
+**What happened here.** These runs trained but failed their calibration gates. The
 primal-dual actor-critic consumed 131,072 training games and, on its mandatory
 512-game final calibration, averaged 175,834 points and 55.006 moves; its
 terminal-risk upper bound was 0.10496 against a fixed 0.02 limit, so the
@@ -82,7 +81,7 @@ PyTorch pipeline never reached its policy-gradient step at all: the public
 behaviour clone meant to warm-start PPO agreed with its depth-2 teacher on only
 0.4718 of held-out decisions against a preregistered 0.55 gate, and on the fixed
 32-game development cohort it averaged 141,986.938 points and 45.125 moves
-against fair depth 2's 191,189.344 and 58.688 — so PPO did not run. The
+against fair depth 2's 191,189.344 and 58.688, so PPO did not run. The
 experiments live alongside the n-tuple work under
 [n-tuple and reinforcement learning](/approaches/ntuple-rl).
 
@@ -92,18 +91,18 @@ The fourth family changes the search rather than the evaluator. Instead of
 expanding every branch to a fixed depth, it runs many quick playouts from the
 current position: pick a promising column, play forward with a cheap policy, see
 how it went, and record the result back up the tree. Columns with good averages
-get tried more often, with a bonus that keeps under-explored columns in the mix,
-so the tree grows lopsided — deep where the game looks interesting, shallow
+get tried more often, with a bonus that keeps under-explored columns in the mix.
+The tree grows deep where the game looks interesting and stays shallow
 elsewhere. It is the algorithm behind the famous Go and chess programs, and it
 never needs to enumerate all 49 branches per move that a full-width search does.
 
 <MctsTreeGrowth caption="Each playout descends by picking the child with the best average plus an exploration bonus, plays forward with a quick policy, and reports back. In this repository's implementation the chance events are sampled from a solver-local stream and nodes are keyed by the complete visible position, so no branch can specialise to a future the player has not seen." />
 
-**What happened here.** The honest summary is that the budget was never the
+**What happened here.** The budget was never the
 problem. The observable-state version failed its held-out gate on top-1 accuracy
 (11 of 32 roots, 0.34375, against a 0.35 floor) even though it beat the exact
 depth-3 search on pairwise accuracy and regret on that panel. A much larger
-version — 65,536 playouts, horizon 64, a fair leaf — was then audited on 12
+version (65,536 playouts, horizon 64, a fair leaf) was then audited on 12
 disjoint held-out roots: its agreement with the depth-4 search's own move
 rankings rose from 66.67% to 91.67%, while its ability to rank the *25-move*
 outcome got worse. The audit's conclusion is the useful one: "the public D1
@@ -182,7 +181,7 @@ into the same wall. The status summary states it as a durable conclusion:
 **"State-value accuracy is not action-ranking accuracy. Training data must cover
 legal siblings or use an objective designed for relative action value."** A model
 trained on the moves a policy actually played is confident about boards that
-policy liked and guessing about the six it skipped — which is precisely the
+policy liked and guessing about the six it skipped, which is precisely the
 comparison it is asked to make at play time. That failure has its own page:
 [evaluating a board, and the sibling trap](/learn/concepts/ranking-siblings).
 
@@ -192,9 +191,8 @@ its own horizon, and a cheap continuation makes a confident but wrongly-aimed
 estimate.
 
 None of this says these methods cannot work on Drop7. It says the tested
-configurations did not, for reasons that were diagnosed rather than guessed —
-and the diagnoses point at the shape of the training data and the quality of the
-continuation, not at model size or search budget. That argument is followed
+configurations did not. The diagnoses point at the shape of the training data
+and the quality of the continuation, not at model size or search budget. That argument is followed
 through on
 [is more computation the answer?](/learn/concepts/does-more-compute-help).
 
@@ -202,8 +200,8 @@ through on
 Score in Drop7 is heavy-tailed, so a mean over a handful of games is fragile;
 several results above turn on panels of 12 to 64 games or roots, and every one of
 them says so. Some cited comparisons predate the scoring correction and are
-labelled historical 7,000-point Sequence-scored — they can be compared within
-themselves but never against the corrected Hardcore target. The rules for both
+labelled historical 7,000-point Sequence-scored. They can be compared within
+themselves, but never against the corrected Hardcore target. The rules for both
 are in the [methodology](/docs/methodology) and the
 [benchmark contract](/docs/benchmarks).
 </Callout>

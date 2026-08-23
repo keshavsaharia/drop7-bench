@@ -1,7 +1,7 @@
 ---
 title: Bringing back the old placement rewards
 family: fair-expectimax
-summary: An earlier one-move policy scored where a disc landed and what the drop achieved; this puts those rewards back inside the deeper search, then strips them down to the two that seemed most defensible.
+summary: Restores immediate move rewards inside deeper search, then tests a reduced two-term version.
 status: rejected
 evidence: ledger-recorded
 reads: public
@@ -11,7 +11,7 @@ Before the look-ahead search existed, a simpler one-move policy scored each
 drop directly: where the disc landed, how close it was to completing something,
 how many covered discs it exposed, how deep a chain it set off. Those terms were
 dropped when the search was built. These two experiments put them back — first
-all of them, then only the two that looked most defensible — and both made the
+all of them, then only the two that looked most defensible, and both made the
 policy worse.
 
 <EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
@@ -29,7 +29,7 @@ There are two different places a policy can express what it wants.
 
 The one-move policy needed both, because with no look-ahead the only way to say
 "prefer moves that expose covers" is to pay for exposing covers. When the search
-arrived, only the state terms were carried over — and that is a real gap in
+arrived, only the state terms were carried over, and that is a real gap in
 fidelity, worth testing rather than assuming.
 
 The argument for putting them back is that some of these are genuinely *new*
@@ -37,7 +37,7 @@ information: whether a drop cracked a cover, or whether it produced a second
 wave, is an outcome you cannot read off the resulting board. The argument
 against is double counting: the resulting board already shows how tall the
 column is and how good the structure looks, so paying separately for the
-landing geometry charges the same thing twice — and can outvote it.
+landing geometry charges the same thing twice, and can outvote it.
 
 ## How each one works, step by step
 
@@ -47,7 +47,7 @@ one-move policy: 300 points per revealed cover, 120 times the square of the
 continuation chain depth, and the original landing-height, column-content,
 build-distance, overshoot, neighbour-height, centre, one-away and imminent-rise
 terms. (3) Change nothing else. No coefficient is fitted or chosen from
-gameplay — they are the historical values, copied exactly.
+gameplay. They are the historical values, copied exactly.
 
 **Only the transition terms.** (1) Remove every placement prior. (2) Keep only
 the two signals that describe newly observed outcomes: 300 per revealed cover
@@ -56,7 +56,7 @@ for in writing **before** any gameplay: the placement terms duplicate geometry
 the leaf already sees, whereas cover damage and a multi-wave transition are new
 observations.
 
-## What happened, in plain English
+## What happened
 
 **All the terms together** were clearly harmful. On the eight fresh screening
 games the unchanged search averaged about 134,900 points and 89 moves; with the
@@ -89,7 +89,7 @@ does not tell a public search which preparations produce them reliably.*
 `transition-reward-horizon.cpp` (transition terms only).
 [Experiment index](/docs/research/experiment-index): **rejected —
 ledger-recorded**, "neither transfer survived its fresh screen." Both were run
-under the **historical 7,000-point Sequence scoring** — the first section says
+under the **historical 7,000-point Sequence scoring**: the first section says
 so explicitly; the second carries no label and is classified from the score
 identity by [audit 03](/docs/exploratory/audit-03-claim-arithmetic).
 
@@ -119,7 +119,7 @@ Artifact `/tmp/drop7-transition-reward-horizon.json`.
 
 **Verification.** Optimised and ASan/UBSan strict builds passed deterministic
 completion, reflection, metadata blindness, legal-action, fixed-seed and
-public-state checks, plus — for the second experiment — an explicit
+public-state checks, plus (for the second experiment) an explicit
 action-prior exclusion test.
 
 </TechnicalDetails>
@@ -133,14 +133,14 @@ gives that geometry two votes and lets it outvote everything the search learned
 by looking further ahead.
 
 The stripped-down follow-up is the more interesting failure, because its two
-surviving terms really are new information. It still failed — and its 24-game
+surviving terms really are new information. It still failed, and its 24-game
 training gain, which reversed on eight fresh games, is a compact demonstration
 of why this repository will not accept a fitting result as evidence.
 
 Still open: the same two signals have never been tried as *features of the
 leaf* rather than as payments per move, and the closely related question of
 paying per numbered clear or per reveal was tested separately, with the same
-shape of outcome — a strong fit followed by a held-out reversal
+shape of outcome: a strong fit followed by a held-out reversal
 ([transition rewards](/approaches/fair-expectimax/transition-rewards)).
 
 ## Sources

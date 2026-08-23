@@ -69,7 +69,7 @@ time on 30 threads.
 
 ---
 
-## 1. The machine, and an honest warning about every timing number here
+## 1. The machine and the limits of these timing numbers
 
 ```
 AMD RYZEN AI MAX+ 395 w/ Radeon 8060S, 16 cores / 32 threads, 64 MiB L3,
@@ -86,7 +86,7 @@ because fixing it would mean editing an existing file.
 held the one-minute load average between **14 and 57** throughout, on 32 logical
 CPUs. The load average is printed next to every measurement.
 
-Consequences, stated plainly:
+Consequences:
 
 - **Absolute nanosecond figures are inflated by roughly 3x at load 50 relative
   to load 15.** The same unoptimised depth-4 decision measured 3,076 ms at load
@@ -341,7 +341,7 @@ reported only from the low-load run.
 | O1 + engine | 1,012.50 | 1,596.04 | 1.58x | 1.07 |
 | **O1 + engine + leaf (all)** | **351.81** | 526.75 | 1.50x | **3.08** |
 
-Reading this table honestly:
+This table shows:
 
 - The leaf carries essentially the whole result: 2.61 of the 3.08.
 - The table on its own is 1.01x — indistinguishable from nothing, and inside the
@@ -408,7 +408,7 @@ LRU reproduces the `list<string>` LRU's eviction order.
 > the mirrored position); **0** reflection mismatches on 38 asymmetric boards
 > (`action == 6 - action` **and** identical work); 5 symmetric boards excluded.
 
-One honest note on the reflection property. On a **horizontally symmetric**
+One caveat applies to the reflection property. On a **horizontally symmetric**
 board the mirror *is* the board, so canonicalisation returns the same canonical
 state and the deterministic `kColumnOrder` tie-break returns the same column
 rather than its reflection; `action == 6 - action` then holds only for column 3.
@@ -488,7 +488,7 @@ Cache capacity 60,000 entries at five strata (the frozen value, worst case
 45,430, never binds) and 200,000 at depth-4 seven strata (worst case 122,598,
 never binds). Game counts differ per configuration because a depth-4
 seven-stratum game is ~4 s per move on this host; the move counts are the
-honest, reported unit.
+reported unit.
 
 Measured work per move agrees closely with
 [`finding-05`](finding-05-chance-strata.md)'s independent figures — 54,826 vs

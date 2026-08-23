@@ -683,7 +683,7 @@ export function MctsTreeGrowth({ caption }: { caption?: string }) {
                 </circle>
               </g>
               <text y={200} fontSize={10} fontFamily={FONT} fill={INK_3}>
-                {Math.round(share * 100)}% of playouts went to column {best}
+                {Math.round(share * 100)}% of playouts went to column {best + 1}
               </text>
             </g>
           );

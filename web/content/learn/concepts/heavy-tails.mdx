@@ -1,6 +1,6 @@
 ---
 title: Why one great game proves nothing
-summary: Drop7 scores are heavy-tailed, so a single million-point game can sit happily inside a policy whose average is three hundred thousand — and telling two policies apart takes paired games and a confidence bound, not a highlight reel.
+summary: A million-point game does not prove a million-point mean. Paired games and confidence bounds separate policy strength from luck.
 order: 7
 ---
 
@@ -8,7 +8,7 @@ The goal of this project is a policy whose **mean** score over many games is
 above one million points. That word does a lot of work. Somewhere in this
 repository is a record of a single depth-4 game that scored 1,246,684 points,
 and the research status page files it under *"Anecdote; not an average or
-qualification"*. This page is about why that filing is correct, and what it takes
+qualification"*. That distinction is correct, and it determines what it takes
 instead.
 
 ## Sixty-four games, one dot each
@@ -16,11 +16,11 @@ instead.
 Here is every game of a retained cohort: the repository's reference policy,
 fair depth-4 expectimax, over 64 complete games.
 
-<ScoreStrip caption="Each dot is one complete game. The data are the per-game rows recorded in runs/RUN-A51D-d4/d4-standard64.json and reported in docs/exploratory/finding-01-score-is-survival.md — an exploratory, development-tier cohort on seed lease SEEDLEASE-A51D, reproduced in this checkout on 2026-08-20, with no censored games. Hover a dot for its seed." />
+<ScoreStrip caption="Each dot is one complete game. The per-game rows come from runs/RUN-A51D-d4/d4-standard64.json and docs/exploratory/finding-01-score-is-survival.md. This exploratory development cohort used seed lease SEEDLEASE-A51D and had no censored games. It was reproduced in this checkout on 2026-08-20. Hover a dot for its seed." />
 
 The shape is the point. Most games cluster low. A long thin tail runs off to the
-right. And there, at the far end, sits a game worth 1,017,234 points — a genuine
-million-point game, played by a policy whose average over the same 64 games was
+right. At the far end sits a genuine million-point game worth 1,017,234 points.
+Yet the same policy averaged
 321,991.72 and whose median was 266,282.
 
 That single game is not a fluke to be explained away, and it is not evidence of
@@ -34,14 +34,14 @@ symmetric they are close. When a few games are enormous, the mean is dragged
 towards them and the median is not.
 
 In this cohort the mean is 321,991.72 and the median 266,282: the average game
-is not the typical game. The standard deviation — a rough measure of how spread
-out the games are — is about 187,502, which finding 01 notes is 58% of the mean
-itself. It draws the honest conclusion: with 64 games at that spread, **the mean
+is not the typical game. The standard deviation measures how widely the games
+are spread. Here it is about 187,502, which finding 01 notes is 58% of the mean
+itself. With 64 games at that spread, **the mean
 is known to roughly ±46,000 at one standard error**.
 
 Both numbers are useful and they answer different questions. The median answers
 *what happens in a typical game*. The mean answers *what happens on average over
-a long session* — and the mean is what the qualification standard is written
+a long session*, and the mean is what the qualification standard is written
 against, because the target is a mean. That choice makes the standard harder to
 meet reliably, not easier: a mean over a heavy-tailed variable is a jumpy
 quantity.
@@ -57,14 +57,14 @@ Every recorded figure for the reference policy, on one axis, with the target:
     { label: "fair D4, mean of 64 fresh-seed games", value: 321991.71875, display: "321,991.72", evidence: "development tier; finding 01, reproduced 2026-08-20" },
     { label: "median of those 64 fresh-seed games", value: 266282, display: "266,282", evidence: "recorded in the same run" },
     { label: "best single game in that cohort", value: 1017234, display: "1,017,234", evidence: "one game, 280 moves, seed 0xa51d0033", tone: "anecdote" },
-    { label: "one D4 game", value: 1246684, display: "1,246,684", evidence: "task-record only — an anecdote, not an average", tone: "anecdote" }
+    { label: "one D4 game", value: 1246684, display: "1,246,684", evidence: "task-record only; an anecdote, not an average", tone: "anecdote" }
   ]}
   caption="Grey bars are single games and are not comparable with the means above them. The 8-game and 64-game ledger figures are different cohorts of the same policy; the gap between 400,675.25 and 308,295.578 is what a small sample does to a heavy-tailed mean, not a change in the policy." />
 
 Look at the first two rows. The same reference policy measured 400,675.25 over
 eight games and 308,295.578 over 64. Nothing about the policy changed. Eight
 games is simply not enough to pin down the mean of a distribution with a tail
-this long — which is exactly why the repository's benchmark contract calls a
+this long, which is exactly why the repository's benchmark contract calls a
 1–8 game run a `PILOT`, whose entire permitted purpose is to *"find bugs and
 project runtime/memory"* with **no strength claim**
 ([benchmark contract](/docs/benchmarks)).
@@ -83,15 +83,15 @@ game, however large, is a step towards that; only the average is.
 ## Comparing two policies: pair the games
 
 If score is this noisy, how does anyone tell whether a change helped? The answer
-is not "run more games and compare averages" — or not only that. It is to make
+is not "run more games and compare averages", or not only that. It is to make
 the two policies **play the same games**.
 
 A cohort is a fixed, ordered list of seeds. Both the candidate and the reference
 play seed 1, then seed 2, and so on, and the comparison is done seed by seed:
 the candidate scored more on this game, less on that one. This is a **paired**
 comparison, and it removes the largest source of noise, which is that some games
-are simply luckier than others. The methodology document requires exactly that —
-*"per-game paired results against the reference"* — and asks for wins, ties and
+are simply luckier than others. The methodology requires exactly this:
+*"per-game paired results against the reference"*, and asks for wins, ties and
 losses, not just a difference of means
 ([methodology](/docs/methodology), [benchmarks](/docs/benchmarks)).
 
@@ -110,8 +110,8 @@ Suppose a candidate averages 1,050,000 over 256 games. Is its *true* long-run
 mean above one million, or did it get a lucky tail?
 
 The **bootstrap** answers that by resampling. Take the 256 recorded game scores.
-Draw 256 of them at random, with replacement — some games appear twice, some not
-at all — and compute the mean of that imaginary cohort. Do it thousands of
+Draw 256 of them at random with replacement. Some games appear twice and some
+not at all. Compute the mean of that imaginary cohort, then repeat thousands of
 times. You now have a spread of plausible means, built entirely out of the games
 you actually played. The 5th percentile of that spread is a **one-sided 95%
 lower bound**: a value the true mean is unlikely to be below.
@@ -119,8 +119,8 @@ lower bound**: a value the true mean is unlikely to be below.
 Two things make this the right tool here. It assumes nothing about the shape of
 the distribution, which matters when the shape is a long tail. And it resamples
 **whole games**, respecting the rule that a complete game is the independent
-unit of measurement — move-level or position-level statistics can diagnose a
-model, but they cannot supply a confidence interval for a policy.
+unit of measurement. Move-level or position-level statistics can diagnose a
+model, but cannot supply a confidence interval for a policy.
 
 The qualification ladder is built from these bounds:
 
@@ -170,8 +170,8 @@ as an exploratory, **development-tier** result reproduced in this checkout on
 2026-08-20. `runs/` is not committed, so on a checkout without it the figure
 degrades to a message rather than inventing data.
 
-**The ledger figures** — 400,675.25 over 8 games and 308,295.578 over 64 games,
-against depth-3's 235,071.25 over the same 8 — are the ledger-recorded entries
+**The ledger figures** are 400,675.25 over 8 games and 308,295.578 over 64 games,
+against depth-3's 235,071.25 over the same 8. These are the ledger-recorded entries
 in [`docs/research/status.md`](/docs/research/status), labelled there as a small
 confirmation cohort and a broader reference cohort respectively. They are
 different cohorts from the finding-01 run above and must not be pooled.
@@ -204,8 +204,8 @@ whole-game samples must all be published.
   308,295.578 over 64.
 - Pairing games and reporting wins, ties and losses removes far more noise than
   simply running more unpaired games.
-- The open question is not whether some game can reach a million — one already
-  has — but whether any policy can put the **average** there. Nothing in this
+- One game has already reached a million. The open question is whether any
+  policy can put the **average** there. Nothing in this
   repository is close; the reference policy would need roughly three times its
   current mean lifetime, as [score is survival](/learn/concepts/survival-vs-score)
   works out.

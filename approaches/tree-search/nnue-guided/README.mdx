@@ -1,7 +1,7 @@
 ---
 title: Learned-guidance search
 family: tree-search
-summary: Let a small learned board evaluator decide where a deeper search should spend its time — while keeping the exact search as a safety net.
+summary: Let a small learned board evaluator decide where a deeper search should spend its time, while keeping the exact search as a safety net.
 status: rejected
 evidence: ledger-recorded
 reads: public
@@ -18,7 +18,7 @@ A complete look-ahead spends the same effort on every column, including the
 ones a competent player would dismiss instantly. If something could tell the
 search which branches are worth expanding, the same budget would reach further
 ahead. That "something" here is a small learned evaluator of the public
-position — an [NNUE](/learn/glossary)-style network trained to reproduce a
+position: an [NNUE](/learn/glossary)-style network trained to reproduce a
 stronger search's judgements.
 
 The design is deliberately timid, and that is its most interesting feature.
@@ -50,19 +50,19 @@ The root-quadrature variant replaces step 2 with a wider treatment of chance:
 three first-reveal strata crossed with all seven possible next discs, followed
 by three joint interior strata.
 
-## What happened, in plain English
+## What happened
 
 Every version was worse than the plain depth-3 search it was trying to
 improve, and the ones that spent the most extra work were the worst.
 
 The safeguarded deeper search spent nearly its whole extra budget, actually
 completed a deeper iteration on about a fifth of moves, and changed the depth-3
-answer on fewer than one move in twenty — and still came out behind on score
+answer on fewer than one move in twenty, and still came out behind on score
 and on how long the games lasted. That combination is the finding: a rare
 learned override is not harmless, because the rare occasions on which a model
 disagrees with an exact search are exactly the occasions where its errors are
 largest. The wider chance coverage at the root failed the same way for a
-different reason — it spent about 239,000 work units per move against about
+different reason. It spent about 239,000 work units per move against about
 58,000 for plain depth 3 and still lost to it by a wide margin, showing that
 better sampling of chance does not repair an evaluator that is biased at the
 horizon.
@@ -103,7 +103,7 @@ only model-ranked promising actions while retaining the frozen exact fallback.
 
 **A caveat on "fresh" seeds.** The ledger describes the seed ranges for the
 deeper-search and quadrature screens as fresh.
-[Audit 03](/docs/exploratory/audit-03-claim-arithmetic) — an exploratory,
+[Audit 03](/docs/exploratory/audit-03-claim-arithmetic): an exploratory,
 read-only audit, not a re-measurement — finds those ranges fall inside the
 first 100,000-game n-tuple training block, at offsets 45,056 and 49,152, and
 places the selective-search screen and confirmation ranges at offset 36,864 of

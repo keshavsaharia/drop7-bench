@@ -11,8 +11,8 @@ identified as the binding quantity.
 
 Result: [`finding-10`](../../../docs/exploratory/finding-10-suite-validation.md).
 **Check 1 failed** (Spearman +0.633 against a 0.70 threshold). The structure
-probe was subsequently authorized by the coordinator — it does not consume the
-suite — and its result is Addendum A of the same document: the frozen leaf's
+probe was subsequently authorized by the coordinator. It does not consume the
+suite, and its result is Addendum A of the same document: the frozen leaf's
 feature basis is nearly sufficient and its **weights** are the problem
 (reweighting the 19 moves held-out R² from 0.396 to 0.734, against a 0.753
 ceiling over 53 candidate properties). Addendum B recommends **not** building a

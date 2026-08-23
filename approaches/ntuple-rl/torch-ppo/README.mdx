@@ -1,7 +1,7 @@
 ---
 title: A PyTorch policy network, cloned then trained by playing
 family: ntuple-rl
-summary: A small convolutional network taught to copy a two-move search and then improved by playing 16,384 games — it finished about 40% short of its own teacher.
+summary: A small convolutional network copies a two-move search, then improves through 16,384 games. It finished about 40% short of its teacher.
 status: rejected
 evidence: ledger-recorded
 reads: public
@@ -20,7 +20,7 @@ come out, one per column, which are turned into probabilities. Playing means
 taking the largest. Training means pushing probability toward the columns that
 led to more score over the rest of the game.
 
-<PolicyNetShape caption="A policy network's shape. The bar heights are illustrative — no retained record in this repository publishes a trained policy's per-column probabilities." />
+<PolicyNetShape caption="A policy network's shape. The bar heights are illustrative: no retained record in this repository publishes a trained policy's per-column probabilities." />
 
 The attraction is that this learns the decision directly, so it never has to
 build a value that generalises across positions it will not visit. The
@@ -28,7 +28,7 @@ difficulty is sample efficiency: policy-gradient methods need an enormous number
 of games, and Drop7 games are short until a policy is good. This experiment
 therefore did the same two-stage thing as the
 [native C++ attempt](/approaches/ntuple-rl/native-ppo) — copy a teacher first,
-then improve by playing — but with a much faster environment, a bigger network,
+then improve by playing, but with a much faster environment, a bigger network,
 and a stronger teacher.
 
 ## How it works, step by step
@@ -51,17 +51,17 @@ and a stronger teacher.
    imitation anchor and run 32 rounds of 512 complete games, updating the policy
    from its own experience.
 
-The network is deliberately small — 263,720 parameters — and averages each board
+The network is deliberately small — 263,720 parameters, and averages each board
 with its mirror image before masking illegal columns, so its choices are exactly
 symmetric.
 
-## What happened, in plain English
+## What happened
 
 **The clone missed its agreement gate, twice.** It matched the teacher on 47.2%
 of held-out decisions against a 55% requirement. A single permitted correction
-was allowed after diagnosing one concrete defect — a catastrophic losing move
+was allowed after diagnosing one concrete defect: a catastrophic losing move
 can dominate a position's range of values and flatten the soft targets among all
-the sensible columns — but retraining without soft targets made held-out
+the sensible columns, but retraining without soft targets made held-out
 agreement very slightly *worse* and the cross-entropy worse still. The small
 network had simply overfit. Policy-gradient training did not run.
 
@@ -73,7 +73,7 @@ read. A follow-up audit projected that a fresh process would fit; an empirical
 preflight disproved the projection and stopped again.
 
 **The third attempt completed, and was rejected on results.** Changing only the
-memory schedule — the same update, done in four chunks — brought peak memory
+memory schedule (the same update, done in four chunks) brought peak memory
 well within the limit. It ran all 32 rounds and 16,384 games, improved its own
 training-batch score from about 112,000 to about 137,000, and only then opened
 its single 64-game development cohort. There it averaged 142,678 points against
@@ -147,9 +147,9 @@ Sources: `torch-env.cpp`, `train.py`.
 
 ## What this taught us, and what is still open
 
-**Policy gradients worked — they were just far too weak.** This is the only
+**Policy gradients worked: they were just far too weak.** This is the only
 completed reinforcement-learning run in the family that improved a policy and
-then honestly measured it on unseen games. The improvement was about 9% over its
+then measured it on unseen games. The improvement was about 9% over its
 starting point, at a cost of 16,384 complete games, and left the policy at 59%
 of the two-move search it had been cloned from. That is the sample-efficiency
 problem stated as a number.
@@ -167,7 +167,7 @@ measurement, and the measurement won.
 
 **Still open.** Every stage of this line trained on the action a teacher or the
 policy itself chose. None trained on data covering every legal column — the
-[sibling trap](/learn/concepts/ranking-siblings) again — and none was given a
+[sibling trap](/learn/concepts/ranking-siblings) again, and none was given a
 compute budget of the kind that makes policy-gradient methods work in other
 games. The [scale-out proposal](/learn/concepts/scale-out-direction) is the
 repository's own statement of what that would require.

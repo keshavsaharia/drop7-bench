@@ -1,7 +1,7 @@
 ---
 title: Fair expectimax reference (D3/D4)
 family: fair-expectimax
-summary: The reference search itself — four moves of look-ahead, honest averaging over chance, and a hand-tuned board evaluator at the bottom.
+summary: The reference search looks four moves ahead, averages the sampled chance outcomes, and uses a hand-tuned board evaluator at the bottom.
 status: Completed
 evidence: ledger-recorded
 ---
@@ -48,7 +48,7 @@ choices** (take the best) and **chance events** (take the average):
 <GameTreeFigure seed={0x5eed1002} moves={10} leafDepth={1} caption="The same tree, live: the browser analogue of this search on a seeded game, with one further ply below each outcome. It is a playground demonstration of the mechanics, not the native reference whose cohort numbers this page quotes." />
 
 "Fair" means the chance nodes **average over what can actually happen** —
-every legal next disc, and the possible gray-disc reveals — instead of hoping
+every legal next disc, and the possible gray-disc reveals. Instead of hoping
 for the best reveal or fearing the worst. Depth 4 (D4) completes four full
 max/chance layers; the leaf is a hand-tuned public evaluator.
 
@@ -70,15 +70,15 @@ the tree grows by roughly an order of magnitude per ply.
 
 - Deeper is **not** automatically better: selective D5, full D5, and
   cycle-boundary variants all failed their gates (see the sibling approaches).
-- One D4 game scored 1,246,684 points — an anecdote, not an average. The
+- One D4 game scored 1,246,684 points: an anecdote, not an average. The
   million-point target requires the **mean** to exceed one million.
 - D4 is a strong tactical fallback and teacher, but its average is far below
   the target. Every serious candidate keeps an exact D4 fallback.
 
 ## Sources
 
-- `fair-only-horizon.cpp` — the fair-only depth-3 evaluator.
-- `fair-only-depth4.cpp` — the depth-4 reference build (`make native` produces
+- `fair-only-horizon.cpp`: the fair-only depth-3 evaluator.
+- `fair-only-depth4.cpp`: the depth-4 reference build (`make native` produces
   `build/fair-depth4`).
 - The TypeScript counterpart used by the benchmark registry is
   `evaluateMoves` in `src/core/typescript/solver.ts` with the combined leaf.

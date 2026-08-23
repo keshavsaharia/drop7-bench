@@ -8,14 +8,14 @@ reads: teacher
 ---
 
 Play thousands of games to the end, write down what each move was followed by,
-and train a network to predict that number for any board and column — then play
+and train a network to predict that number for any board and column. Then play
 the column the network likes best.
 
 <EvidenceLabel status="rejected" evidence="task-record only" reads="teacher" />
 
 The badge above describes the *training* pipeline, which is allowed to collect
 demonstration games from the repository's
-[perfect-information oracle](/approaches/oracle-curriculum) — a planner that
+[perfect-information oracle](/approaches/oracle-curriculum): a planner that
 reads the future disc and reveal streams. The frozen artifact that actually
 plays reads only the board, the visible next disc and the rise clock, which is
 the rule this repository requires of any policy: a
@@ -60,7 +60,7 @@ unmeasured ones, while deployment asks the network to compare all seven.
    and the best checkpoint by a separate selection lane is exported as a
    self-contained JSON artifact.
 5. **Play.** At each move the compiled artifact scores every legal column and
-   returns the highest — a one-ply greedy policy over learned action values,
+   returns the highest: a one-ply greedy policy over learned action values,
    with no look-ahead search around it.
 6. **Audit.** `benchmark.ts` replays the frozen artifact and the frozen
    [DQN](/learn/glossary) checkpoint over the same 64 games from a fixed audit
@@ -70,16 +70,16 @@ unmeasured ones, while deployment asks the network to compare all seven.
 ## What happened
 
 It lost to the learned policy that already existed. The repository's index
-records the audit in a single line — the Monte Carlo return artifact trailed the
-DQN — and does not retain a score, a cohort table, or a per-game artifact for it.
-So the honest reading is narrow: this configuration was retired, and there is no
+records the audit in a single line: the Monte Carlo return artifact trailed the
+DQN, and does not retain a score, a cohort table, or a per-game artifact for it.
+The supported conclusion is narrow: this configuration was retired, and there is no
 retained number on this page because the repository does not hold one.
 
 <TechnicalDetails title="The technical record">
 
 The [experiment index](/docs/research/experiment-index) row reads:
 *"Monte Carlo return … Learns action values from complete realized returns and
-benchmarks a frozen artifact. **Rejected — task-record only;** the independent
+benchmarks a frozen artifact. **Rejected; task-record only;** the independent
 audit trailed the existing DQN."*
 
 **Task-record only** is the repository's weakest evidence label: the referenced
@@ -94,7 +94,7 @@ separated (training `0x1d70…`, champion selection `0x1d70f…`, calibration
 `0x5d70…`), the trainer refuses to read the calibration lane at all unless its
 champion first clears a 300,000-point mean on the selection lane, and the
 encoder's own validator rejects any state carrying more than public
-information. That is discipline, not evidence of strength — the numbers those
+information. That is discipline, not evidence of strength: the numbers those
 lanes produced were not retained.
 
 Sources: `train.ts` (collection, oracle demonstrations, training, selection,
@@ -105,7 +105,7 @@ the shared encoder `src/core/typescript/mc-return-policy.ts`.
 
 ## What this taught us, and what is still open
 
-The played-action design is the whole lesson. Realized returns are an honest,
+The played-action design is the whole lesson. Realized returns are a valid,
 unbiased target, but they are only available for the move that was played, so
 the resulting values are strongest exactly where the policy already agreed with
 itself and weakest among the alternatives it must rank. That diagnosis is what

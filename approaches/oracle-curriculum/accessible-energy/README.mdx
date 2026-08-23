@@ -18,7 +18,7 @@ The privileged planner appears only in the *design history* of these features:
 the directions came from the split-half-stable list produced by the
 [topology audit](/approaches/oracle-curriculum/topology). The fitting
 continuations, the ranking, and the deployed policy read nothing but the public
-board — the source file says privileged oracle tapes "are unavailable to
+board: the source file says privileged oracle tapes "are unavailable to
 training roll-ins, ranking continuations, and the deployed policy". What this
 page describes is a legal policy built with a privileged hint about *where to
 look*.
@@ -35,9 +35,9 @@ nothing about the difference; a human player feels it immediately.
 The feature family tries to make that feeling explicit, in a few groups:
 
 - **stored unfired numbers** — high numbers still capable of firing;
-- **trigger readiness** — how close a run is to completing, directly or after a
+- **trigger readiness**: how close a run is to completing, directly or after a
   reveal;
-- **cover access** — whether covered gray discs can still be reached and cracked;
+- **cover access**, whether covered gray discs can still be reached and cracked;
 - **debt** — projected occupancy, dead low numbers, low caps and congested
   adjacent ones, which are the ways a board quietly becomes unplayable.
 
@@ -54,10 +54,10 @@ completely unchanged. Three independent chance-sampling salts produce three
 complete valuations of every legal column; an alternative is admitted only when
 a one-sided 95% paired lower bound *fails to establish* that it is worse than
 the search's own pick. Accessible energy then ranks only inside that admissible
-set — and if only one column is admissible, the exact search's action is
+set, and if only one column is admissible, the exact search's action is
 returned untouched. The design intent is a tie-break, not a policy.
 
-## What happened, in plain English
+## What happened
 
 **The prediction improved. The games got worse.** On held-out positions, adding
 the energy residual raised the accuracy of picking the best of the available
@@ -83,7 +83,7 @@ that were in fact worse were declared eligible.
 
 <TechnicalDetails>
 
-**Residual** (rejected — ledger-recorded). 601 held-out action successors:
+**Residual** (rejected; ledger-recorded). 601 held-out action successors:
 calibrated score-prediction R-squared 0.580 to 0.615; within-position top-action
 accuracy 22.9% to 31.3%; pairwise ranking 49.2% to 52.2%. Stored energy was the
 strongest feature group. Complete-game gate on fresh historical 7,000-point
@@ -91,7 +91,7 @@ Sequence-scored seeds `0x3e890000...07`: exact depth 3 averaged 112,318.5 points
 and 77.125 moves; the residual-guided search averaged 85,768 and 60.625, losing
 seven of eight pairs. Confirmation seeds were not read.
 
-**Root prior** (rejected — ledger-recorded). Screen on fresh `0x3e930000...07`:
+**Root prior** (rejected; ledger-recorded). Screen on fresh `0x3e930000...07`:
 exact depth 3 averaged 105,767.875 points / 73.125 moves; the root prior
 averaged 90,300.75 / 60.875 — paired losses of 15,467.125 points and 12.25
 moves. The confidence set switched **214 of 487 decisions (43.94%)**, admitted
@@ -103,7 +103,7 @@ threshold was **not** retuned on the failed screen.
 
 The ledger's own conclusion after the first failure: energy "may only be
 reconsidered as a conservative root tie-break among actions that repeated search
-samples cannot distinguish" — which is precisely what the second experiment
+samples cannot distinguish", which is precisely what the second experiment
 tested, and it failed on the calibration of that phrase.
 
 [`audit-05`](/docs/exploratory/audit-05-optimistic-curriculum) §4 classifies the

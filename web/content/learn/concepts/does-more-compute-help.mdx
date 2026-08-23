@@ -1,21 +1,21 @@
 ---
 title: Is more computation the answer?
-summary: An honest reading of the evidence on deeper search, more samples, bigger models, and large training runs — what has been measured, what has not, and under which conditions compute converts into strength.
+summary: What the evidence says about deeper search, more samples, bigger models, and large training runs, including where more compute improves play and where it does not.
 order: 3
 ---
 
 It is the most natural question in the project: the best policy averages about
 a third of the target, computers are fast, so *search deeper, sample more, train
-bigger*. This page goes through what the repository has actually measured for
-each of those, in plain language, with the technical record one click away.
+bigger*. The repository has measured each option, with mixed results. The
+technical record remains one click away.
 The short version: **it depends entirely on what the compute is spent on.**
 Spent on removing a measured bias in how the search handles luck, it was worth
 about a third more score and it unlocked a whole extra ply of look-ahead.
 Spent on more imagined futures for a planner with a broken objective, it made
 things measurably *worse*. Spent on bigger models trained on the wrong shape of
-data, it reproduces the same blind spot with more confidence. The most
-promising untested use — closing a learning loop that has already been half
-built here — is section 4.
+data, it reproduces the same blind spot with more confidence. Section 4 covers
+the most promising untested use: closing a learning loop that is already half
+built.
 
 ## 1. Deeper search
 
@@ -29,10 +29,10 @@ stop at the next row rise *"often spent much more work, sampled chance outcomes
 too noisily, or overrode good D4 actions on unstable estimates."*
 
 But a later, replicated measurement reframes that whole conclusion, and it is
-the most important thing on this page. **Depth was never being tested on its
-own.** Every historical depth experiment sat on top of a chance estimator that
-was quietly biased — see section 2 — and when that bias was removed, the fourth
-ply went from worth almost nothing to worth a great deal:
+the most important result here. **Depth was never being tested on its
+own.** Every historical depth experiment used a quietly biased chance estimator.
+Section 2 covers that bias. Once removed, the fourth ply went from worth almost
+nothing to worth a great deal:
 
 - with the old five-sample estimator, depth 4 beat depth 3 by about 7,700
   points, which the confidence interval could not distinguish from zero;
@@ -42,8 +42,8 @@ ply went from worth almost nothing to worth a great deal:
 In the finding's own words: *"With a biased chance estimator, the fourth ply
 buys nothing. With an exact one, it is worth 86,000 points."* Depth and the
 quality of the chance estimate are **complements, not independent dials**. That
-is a mechanism for the repository's most-repeated conclusion — "deeper is not
-automatically stronger" — and it means the depth-5 question has never actually
+explains the repository's most-repeated conclusion: "deeper is not automatically
+stronger." It also means the depth-5 question has never actually
 been asked cleanly.
 
 It is now affordable to ask. The fast engine brought a depth-5, seven-sample
@@ -60,7 +60,7 @@ means the experiment can be run and recorded rather than argued about.
   [finding-05](/docs/exploratory/finding-05-chance-strata) (evidence tier
   *development*, replicated across two independent cohorts, 64 paired games):
   depth 4 minus depth 3 is +7,723 points with five strata (95% lower bound
-  −42,743 — not significant) and **+86,172 with seven** (lower bound +26,468,
+  −42,743, not significant) and **+86,172 with seven** (lower bound +26,468,
   40–0–24 wins–ties–losses).
 - Depth-5 variants: [status](/docs/research/status) §3.
 - Depth-5 / seven-strata cost: measured work 55,765,609 per decision against a
@@ -76,7 +76,7 @@ means the experiment can be run and recorded rather than argued about.
 This is where the answer splits in two, depending on *what* the extra samples
 are being spent on.
 
-### When more samples fixed a real bias — and paid
+### When more samples fixed a real bias, and paid
 
 The reference search does not enumerate every possible next disc. It draws a
 fixed number of representative samples at each chance node: five, in the frozen
@@ -93,7 +93,7 @@ On 64 previously unread paired games that was worth **+101,171 mean points
 23, with a 95% lower bound of +47,457. The result was replicated on a second
 independent cohort.
 
-That is the clearest "more compute helped" result in the repository — and note
+That is the clearest "more compute helped" result in the repository, and note
 what it actually bought: not more search, but an **unbiased** one. The extra
 samples removed a defect rather than adding depth.
 
@@ -105,13 +105,13 @@ the move that does best on average. It is embarrassingly parallel: more worlds,
 more compute, done.
 
 The repository measured what happens as the number of worlds grows from 1 to
-1,024. Quality rose steadily up to 256 worlds — and then **fell**. At 1,024
+1,024. Quality rose steadily up to 256 worlds, and then **fell**. At 1,024
 worlds the planner survived about half as long and scored about half as much on
 the same games as it did at 256.
 
 That is not a bug; it is a known property of this kind of planner. Inside each
-imagined world the plan is made with the answer key — it knows how the hidden
-discs will turn out — so it systematically overvalues moves that only pay off
+imagined world, the plan knows the answer key. It knows how the hidden
+discs will turn out, so it systematically overvalues moves that only pay off
 if the covers happen to be right. With few worlds, sampling noise accidentally
 protects the planner from its own bias. With many worlds the noise vanishes and
 the planner converges, faithfully, on the wrong answer. *More compute bought a
@@ -127,7 +127,7 @@ Seven strata versus five, from
 replicated; the zero-weight measurement is
 [audit-02](/docs/exploratory/audit-02-fair-d4) H1): at depth 4, +101,171 points
 / +27.50 moves, 95% lower bound +47,457, 41–0–23. At depth 3 the same change is
-+7,276 points with a lower bound of −45,961 — not significant. The effect is an
++7,276 points with a lower bound of −45,961, not significant. The effect is an
 interaction with depth, not a main effect of sampling.
 
 Clairvoyant (hindsight-optimisation) planner, horizon 7, pooled numbered clears
@@ -140,8 +140,8 @@ per move on the original eight tapes, from
 
 Paired on the same six tapes, K = 1,024 vs K = 256: mean moves 100.33 vs
 182.00; mean score 347,348 vs 653,644; five of six tapes worse. The arm was
-stopped at 6 of 8 games. Note that this planner is an *oracle* — it reads hidden
-values — so its scores are not policy evidence; the lesson is about the
+stopped at 6 of 8 games. This planner is an *oracle* because it reads hidden
+values. Its scores are not policy evidence; the lesson is about the
 estimator, and it "bounds the whole determinization family."
 
 </details>
@@ -154,18 +154,18 @@ models, fitted policies. Some predicted outcomes well. None displaced fair D4.
 
 For most of them the diagnosed reason was not model size and not training
 length. It was the shape of the data: models were trained on the move that was
-played and then asked to rank moves that were never played — the
+played and then asked to rank moves that were never played. This is the
 [sibling trap](/learn/concepts/ranking-siblings). A bigger model trained on the
 same data learns the same blind spot with more confidence. The status summary is
 explicit that students *"usually lacked enough diverse successor data, failed
 held-out sibling ranking, or were too slow to improve complete games."*
 
-So the first honest answer to "would a giant training run fix it?" is: **not if
+The first answer to "would a giant training run fix it?" is **not if
 it trains on the same kind of data.** A thousand GPUs generating
 played-move-only labels produce the failure at scale.
 
 The most recent line is the exception that sharpens the point. The afterstate
-pilot *did* fix the data shape — and then ran into two different walls, label
+pilot *did* fix the data shape, and then ran into two different walls, label
 noise and undertraining, both of which are things compute buys down. Section 4
 is about that.
 
@@ -175,8 +175,8 @@ There is a way of spending compute that addresses the diagnosed problem
 directly:
 
 1. At every position the actors visit, run a fair search for **every legal
-   column**, under the same random futures, and record all seven values — the
-   successor-closed data the [sibling page](/learn/concepts/ranking-siblings)
+   column** under the same random futures, and record all seven values. This is
+   the successor-closed data the [sibling page](/learn/concepts/ranking-siblings)
    calls for.
 2. Train a public evaluator on those labels.
 3. Put the trained evaluator at the leaves of the search and repeat. Each
@@ -184,11 +184,11 @@ directly:
 
 **Steps 1 and 2 have been done here, at pilot scale, and they are the reason
 this section is not speculation.** The afterstate pilot built exactly that
-corpus — every legal sibling, chance scenarios shared across siblings — and
+corpus (every legal sibling, chance scenarios shared across siblings) and
 trained an evaluator on it. What it found is the most useful compute result in
 the repository: with eight imagined futures per label the labels were too noisy
-to learn a reliable ranking from, and raising that to 256 — a 32× increase in
-compute per label — fixed the stability problem outright. The bottleneck then
+to learn a reliable ranking from. Raising that to 256 increased compute per
+label by 32× and fixed the stability problem. The bottleneck then
 moved to the model itself, whose own result record names an undertrained
 checkpoint (11 of 20 planned epochs) and a weak teacher.
 
@@ -197,7 +197,7 @@ is also a warning: it is one pilot at one scale, and the model it produced
 still lost to fair D4 on ranking, and its most conservative deployment narrowly
 failed its gate.
 
-**Step 3 — closing the loop — has not been done.** No trained evaluator here
+**Step 3 (closing the loop) has not been done.** No trained evaluator here
 has been put back at the leaves of the search to generate the next round of
 labels. That is the step that makes compute compound rather than saturate: it
 is approximate policy iteration, the pattern behind the strongest game-playing
@@ -207,13 +207,13 @@ information boundary.
 Steps 1–3 together are now a registered theory with stated ways to prove it
 wrong. The next concept page,
 [what a large-scale run would look like](/learn/concepts/scale-out-direction),
-describes the software shape, the order of work, and the gates it would have to
-pass — starting with a small pilot on a single workstation.
+describes the software shape, the order of work, and the gates it must pass.
+The work starts with a small pilot on a single workstation.
 
-<Callout title="What this page is not claiming" tone="warn">
+<Callout title="Limits of the evidence" tone="warn">
 Nothing above says the loop in section 4 *will* reach a million-point mean.
 It says that it is the one use of large compute whose mechanism matches the
-diagnosed failure, which is the most that can honestly be said before a pilot
+diagnosed failure, which is the strongest claim the evidence supports before a pilot
 is run. Two further cautions: the pilot may show the evaluator ceiling is set by
 something else (the horizon of the search, the richness of the board features);
 and every claim will be judged by whole-game mean score on fresh paired cohorts,
@@ -225,7 +225,7 @@ never by a single spectacular game.
 For completeness: this workstation is a 16-core / 32-thread CPU with an
 integrated GPU that shares system memory. The GPU has been made to work for
 training and, for the small network sizes tried, runs 1.25–5× faster than the
-CPU depending on batch size — measured on a busy machine, so as lower bounds.
+CPU depending on batch size. These lower-bound measurements came from a busy machine.
 Exact game simulation and tree search remain CPU work; the hardware plan places
 a full GPU simulator as a research prototype that would have to prove itself
 move-for-move identical first. Everything in section 4 can be piloted here

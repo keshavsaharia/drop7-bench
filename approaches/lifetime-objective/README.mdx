@@ -10,7 +10,7 @@ That sounds like a slogan until you count the points. When this repository
 instrumented 64 games of its strongest policy and attributed every single point
 to its source, **94.3% of the score was the flat 17,000-point bonus for
 surviving another row rise**, 5.7% was chain reactions, and 0.0% was the
-70,000-point bonus for emptying the board — which never happened once. Final
+70,000-point bonus for emptying the board, which never happened once. Final
 score and moves survived correlated at **r = 0.9995**
 ([`finding-01`](/docs/exploratory/finding-01-score-is-survival), a development-tier
 exploratory finding; the same run is written up on the
@@ -44,20 +44,20 @@ sustains
 - **2.400 numbered clears per move** (12 ÷ 5), and
 - **1.400 gray discs revealed per move** (7 ÷ 5).
 
-The reference policy sustains **1.973 and 1.090** — a structural deficit of
+The reference policy sustains **1.973 and 1.090**: a structural deficit of
 about 18% and 22%. Its board fills up, and then it dies. That deficit, not a
 shortage of spectacular chain reactions, is what ends its games
 ([`finding-01`](/docs/exploratory/finding-01-score-is-survival)).
 
 ## What every approach in this family does
 
-1. **Take a policy** — the reference [depth-4 search](/learn/concepts/chance-vs-choice),
+1. **Take a policy**: the reference [depth-4 search](/learn/concepts/chance-vs-choice),
    a hand-written rule, a planner, or a candidate with something learned bolted
    into it.
 2. **Play whole games with it**, paired against a comparator on the same random
    seeds, so the two policies face identical luck.
 3. **Report three numbers besides the score**: numbered clears per move, gray
-   discs revealed per move, and the **occupancy slope** — how many of the 49
+   discs revealed per move, and the **occupancy slope**: how many of the 49
    cells the board gains per five-move cycle. The slope is just the
    conservation law integrated: a board drifts by `12 − 5 × clears-per-move`
    cells per cycle, so a positive slope is a policy that is losing, however
@@ -66,12 +66,12 @@ shortage of spectacular chain reactions, is what ends its games
    movement in the flow rates is treated here as unexplained rather than real.
 
 That last rule is what makes this family a family. Score in this game is heavy
-tailed — one lucky game can swamp 63 ordinary ones — while a flow rate is
+tailed: one lucky game can swamp 63 ordinary ones, while a flow rate is
 averaged over every move of every game and is far better determined. Several
 of the results below were decided on the flow rates when the score deltas could
 not be separated from zero.
 
-## What happened, in plain English
+## What happened
 
 Three things, and none of them is the one the family was hoping for.
 
@@ -91,7 +91,7 @@ those games ended.
 
 **Small, bounded corrections to the reference search worked better than
 replacing it.** The two positive results in this family are both of that
-shape — a better handling of the game's randomness
+shape: a better handling of the game's randomness
 ([reveal sampling](/approaches/lifetime-objective/reveal-sampling)) and a
 learned survival estimate mixed into the reference search's board-scoring
 function at half weight ([learned leaf](/approaches/lifetime-objective/learned-leaf)).
@@ -151,14 +151,14 @@ any of it. Read the numbers as "what to try next", not as confirmation.
 
 **Machinery the rest of the family runs on**
 
-- [**Scenario engine**](/approaches/lifetime-objective/scenario) — a rules
+- [**Scenario engine**](/approaches/lifetime-objective/scenario): a rules
   simulator in which every hidden number and every future disc is fixed in
   advance, which is what makes a clairvoyant optimum well posed at all.
-- [**Fast engine**](/approaches/lifetime-objective/fast-engine) — the same rules
+- [**Fast engine**](/approaches/lifetime-objective/fast-engine): the same rules
   about three times faster, proven to make byte-identical decisions.
-- [**Common**](/approaches/lifetime-objective/common) — the shared harness that
+- [**Common**](/approaches/lifetime-objective/common): the shared harness that
   runs a cohort, enforces seed leases and writes the result artifacts.
-- [**GPU**](/approaches/lifetime-objective/gpu) — the environment and benchmarks
+- [**GPU**](/approaches/lifetime-objective/gpu): the environment and benchmarks
   for the machine's integrated GPU, including two host defects that had to be
   worked around.
 
@@ -175,7 +175,7 @@ any of it. Read the numbers as "what to try next", not as confirmation.
   ([`finding-06`](/docs/exploratory/finding-06-flow-ceiling)).
 - **Still open:** nothing legal has been shown to hold flow balance. The
   measurements say the missing ingredient is reasoning about what is under the
-  gray discs, rather than averaging over guesses of it — and no candidate in
+  gray discs, rather than averaging over guesses of it, and no candidate in
   this family does that yet.
 
 For the wider picture see the [research status](/docs/research/status), and for

@@ -1,7 +1,7 @@
 ---
 title: Letting a long look-ahead overrule the search
 family: lifetime-objective
-summary: Before playing the move the reference search chose, play every column forward twenty-five moves under seven imagined futures with a cheap player, and overrule the search only when another column looks clearly better on all of them.
+summary: Plays every candidate 25 moves forward and overrides the reference only when one column is clearly better.
 status: rejected
 evidence: reproduced
 reads: public
@@ -13,7 +13,7 @@ long view disagrees strongly enough.
 
 <EvidenceLabel status="rejected" evidence="reproduced" reads="public" />
 
-It was tested on 32 paired games and **it lost** — not narrowly, and not only on
+It was tested on 32 paired games and **it lost**, not narrowly, and not only on
 score. It made the game's two survival flow rates *worse*, which is the one
 thing it could not afford to do.
 
@@ -25,7 +25,7 @@ here is a division of labour: keep the strong short-range search as the default,
 and add a second opinion that trades accuracy for reach.
 
 The second opinion works like this. Take each column you could legally play.
-Imagine seven possible futures — seven sequences of discs and hidden numbers.
+Imagine seven possible futures: seven sequences of discs and hidden numbers.
 Play each column forward for twenty-five moves in each future, using a fast
 two-move search to make the intervening decisions. Now you have seven paired
 comparisons for every column against the column the reference chose. If a
@@ -33,7 +33,7 @@ challenger wins consistently enough across all seven, take it; otherwise stay
 with the reference.
 
 The seven futures are shared across all the columns, and each future is seeded
-from the visible board alone — never from the game's seed — so the comparison is
+from the visible board alone — never from the game's seed, so the comparison is
 between columns rather than between lucky and unlucky imagined futures.
 
 ## How it works, step by step
@@ -62,7 +62,7 @@ between columns rather than between lucky and unlucky imagined futures.
    incumbent clears a confidence bound across the seven futures; and the
    reference search itself does not rate it worse than the incumbent by more
    than one row-rise bonus.
-7. **Output.** A column — the best passing challenger, or the reference's own
+7. **Output.** A column: the best passing challenger, or the reference's own
    column if none passes.
 
 ## What happened
@@ -134,7 +134,7 @@ rates not below the reference's.
 Mechanism counters: 2,763 decisions, 2,137 routed, 12,314 alternatives scored,
 103 passing all four conditions, **68 vetoes taken**. The binding condition is
 the confidence test on the paired return, which rejected **12,203 of 12,314
-alternatives (99.1%)** — because a single imagined future in which one column
+alternatives (99.1%)** because a single imagined future in which one column
 dies and another does not moves the difference by the whole million-point death
 penalty, so the spread across seven futures is enormous relative to the mean.
 A diagnostic on one probe game puts the number of futures the estimator would
@@ -150,7 +150,7 @@ measured, and did not rescue the mechanism.
 **Runtime, and why the original was shelved for the wrong reason.** The
 historical version was paused on a projected 15,341 seconds against a 2,700-second
 ceiling. Measured here, the long look-ahead adds about 1.92 times to total
-decision CPU and 1.61 times to arm wall time — a factor of two, not a factor of
+decision CPU and 1.61 times to arm wall time: a factor of two, not a factor of
 six. The runtime gate was never the real obstacle. **These timings were taken on
 a heavily contended machine** (other jobs held 20 to 70 of 32 logical CPUs
 throughout); the absolute seconds are upper bounds and are not benchmark-grade,
@@ -183,9 +183,9 @@ condition, on 32 fresh paired games.
 
 **Not ruled out:** the family. A valid negative rejects a configuration, not an
 idea. Two live alternatives survive it. The first is simply that seven imagined
-futures is too few to decide anything — the estimator is under-sampled by
+futures is too few to decide anything: the estimator is under-sampled by
 something like two to seven times, and cost grows linearly in the number of
-futures, so the cheapest honest next test is more futures over a shorter horizon,
+futures, so the cheapest valid next test is more futures over a shorter horizon,
 preregistered as a new configuration rather than as a repair of this one. The
 second is harder: even the vetoes that *were* accepted made realized flow worse,
 which under-sampling alone does not explain. A continuation player that is much

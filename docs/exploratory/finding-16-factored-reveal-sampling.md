@@ -86,7 +86,7 @@ Four things deserve to be read carefully.
 matters.** Two reveal samples raises joint (disc, reveal) coverage from 14.3% to
 28.6%. That is a *smaller* step than the one that first cleared noise at depth 3
 — six samples, 85.7% — and at depth 3 the intermediate 42.9% dose was itself not
-significant (+24,980 [−23,451]). So the honest claim is: **a doubling of reveal
+significant (+24,980 [−23,451]). The supported claim is: **a doubling of reveal
 samples on top of the fourth ply buys nothing measurable and costs 4.07× the
 work.** It is not "reveal sampling fails at depth 4"; the wide depth-4 arm that
 would test that was never affordable. What the arm does establish is that the

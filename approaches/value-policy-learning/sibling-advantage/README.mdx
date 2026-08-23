@@ -67,7 +67,7 @@ and its outcome, at the same position. There is no
    up to seven successor boards from one starting board.
 3. **Continue on aligned tapes.** Each successor is rolled forward on exactly
    the same public continuation tapes as its siblings — 24 of them, each running
-   up to 60 moves — so the difficulty of the *source* position cannot leak into
+   up to 60 moves, so the difficulty of the *source* position cannot leak into
    any one sibling's target.
 4. **Label relatively.** Each sibling's target is its return measured against
    its siblings at the same root, not against boards from elsewhere in the
@@ -99,10 +99,10 @@ Two rows in the [experiment index](/docs/research/experiment-index), both
 **task-record only**:
 
 - *"Sibling-advantage ranker … Learns relative returns for every legal sibling
-  under aligned continuation tapes. **Rejected — task-record only;** the learned
+  under aligned continuation tapes. **Rejected; task-record only;** the learned
   ordering did not beat exact search on unseen roots."*
 - *"Scaled sibling-advantage study … Increases data and capacity while retaining
-  grouped, whole-origin splits. **Rejected — task-record only;** more data still
+  grouped, whole-origin splits. **Rejected; task-record only;** more data still
   increased regret relative to exact search."*
 
 There is **no retained result** beyond those two sentences: no accuracy, no
@@ -120,7 +120,7 @@ is the repository's rule for archival sources.
 
 ## What this taught us, and what is still open
 
-This is the honest precursor of the repository's most recent line. The two
+This is the direct precursor of the repository's most recent line. The two
 ingredients that the later
 [distributional afterstate ranker](/approaches/afterstate-learning/distributional-afterstate)
 depends on — labelling every legal sibling, and aligning the chance events
@@ -136,6 +136,6 @@ could be certified against it, 64 was still not enough, and 256 was needed
 before the ordering held up when the scenarios were split in half (results
 `RS-20260820T094500Z-5c1e9a04`, `RS-20260820T114500Z-2b7c9e31` and
 `RS-20260820T142500Z-8f4a2d17`, machine-readable records). Nothing retained here
-reports a comparable diagnostic at 24 tapes — so "the learned ordering was
+reports a comparable diagnostic at 24 tapes, so "the learned ordering was
 wrong" and "the labels it was fitting were too noisy to learn" cannot be told
 apart from what this repository kept.

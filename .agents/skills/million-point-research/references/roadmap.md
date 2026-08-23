@@ -20,7 +20,7 @@ states well while ranking unplayed legal actions poorly. Prefer data and losses
 that compare every legal sibling under aligned chance scenarios.
 
 Treat stored chains, reservoirs, cover access, trigger reachability, phase, and
-release timing as hypotheses with ablations—not as human folklore that bypasses
+release timing as hypotheses with ablations, not as human folklore that bypasses
 evaluation.
 
 If no target-machine profile or authorized dataset manifest exists, begin with

@@ -436,7 +436,7 @@ These are recorded so they are not rediscovered. None is repaired here.
 2. **`approaches/lifetime-objective/afterstate-net/` has a contribution record
    but no result.** `CT-20260820T100249Z-b1ea4b1a` lists it as an artifact; no
    finding, result record, or explicit no-run status exists for it. Under
-   `AGENTS.md`'s definition of done this is unfinished, and the honest closure
+   `AGENTS.md`'s definition of done this is unfinished, and the appropriate closure
    may be a recorded no-run status rather than a run.
 3. **Contributor A's four undocumented leases** (above) should be added to
    `lease-map.md` or, better, given real `research/seeds/leases/` records.

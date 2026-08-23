@@ -96,7 +96,7 @@ and un-mirrors the result. `materialize` zeroes score, level and move counter,
 so score/level/absolute move index are structurally unreachable. Fixed worst-case
 bounds (`kWorstD2Work` = 2,485 per D2 call; 1,176 D2 calls and 1,225 synthetic
 transitions per routed decision at horizon 25) are asserted at runtime and the
-program throws rather than degrading. This is a well-built, honest program.
+program throws rather than degrading. This is a well-built, fail-fast program.
 
 ### 1.5 Runtime bound it was shelved on
 
@@ -271,7 +271,7 @@ run, but it was the right side of the decision.
 | synthetic transitions | 2,063,075 |
 
 The rollout adds **1.92×** to total decision CPU (7,633 → 14,662 s) and 1.61× to
-arm wall time. That is the honest cost of the mechanism: it is expensive, but it
+arm wall time. That is the measured cost of the mechanism: it is expensive, but it
 is roughly a factor of two, not the factor of six the original's 15,341 s-versus-
 2,700 s pause suggests. **The runtime gate was never the real obstacle.**
 

@@ -1,6 +1,6 @@
 ---
 title: What makes a board good?
-summary: The leaf evaluator, x-rayed — what a Drop7 search actually measures when it looks at a board, and why no measurement of the board as it stands is enough.
+summary: What a Drop7 search measures when it evaluates a board, and why the current board alone is never enough.
 order: 5
 ---
 
@@ -10,9 +10,9 @@ opinion is the **leaf evaluator**, and in the repository's reference policy it
 is a hand-written scoring function: a list of things you can count on a board,
 each multiplied by a number and added up.
 
-This page opens that function up. It is worth doing carefully, because the
-evaluator is where nearly all the work goes — in the reference search, 96.1% of
-the positions visited are leaves, and evaluating them accounts for 79.1% of the
+Opening that function shows where the work goes. In
+the reference search, 96.1% of visited positions are leaves, and evaluating them
+accounts for 79.1% of the
 attributed time of a single depth-4 decision
 ([finding 13](/docs/exploratory/finding-13-fast-engine), sections 2.1 and 2.3).
 Whatever the evaluator is blind to, the search is blind to.
@@ -25,8 +25,8 @@ term also has a one-line entry in the [glossary](/learn/glossary).
 
 <GameTreeFigure seed={0x5eed1003} moves={14} leafDepth={0} height={600} caption="Where the leaf does its job: the boards at the bottom of a one-move look-ahead. Each outcome shows the scorer's number for the board it leaves; the column's value is the probability-weighted average of points gained plus that number. Expand a column and compare what the scorer says about boards that look alike." />
 
-Here is a real position — a board the rules engine actually reached — with the
-*kinds* of thing an evaluator counts marked on it. Nothing here uses the
+Here is a real position reached by the rules engine. It marks the *kinds* of
+things an evaluator counts. Nothing here uses the
 evaluator itself: every annotation was recomputed by dropping discs into the
 engine and asking what happened.
 
@@ -36,8 +36,8 @@ Three things about that picture matter more than any individual number.
 
 **The board is mostly unreadable.** Most of the discs are gray: their numbers
 are hidden until a clear lands next to them, twice. A policy that lets covers
-pile up is playing blindfolded, and the covers arrive on a schedule — a fresh
-row of seven every five moves.
+pile up is playing blindfolded. A fresh row of seven covers arrives every five
+moves.
 
 **Height is not a single quantity.** A column of five is fine with five moves
 of room before the next rise and close to fatal with one. The evaluator
@@ -67,7 +67,7 @@ noticing that it never mentions points. The connection between "the board looks
 like this" and "the game will go well" is left entirely to the weights.
 
 <Callout title="One term was doing nothing at all" tone="warn">
-The roughness term — how uneven the column heights are — has a weight of
+The roughness term (how uneven the column heights are) has a weight of
 exactly zero in the frozen source. The board was measured and the result
 multiplied by nothing on every one of the search's hundreds of thousands of leaf
 evaluations. The fast engine removed it after checking that the removal changed
@@ -85,17 +85,17 @@ reachable triggers and covered discs evolve across rises"*
 ([research status](/docs/research/status)).
 
 That is easy to say and easy to demonstrate. These two boards agree on every
-summary quantity an evaluator of the kind above can compute — the same column
-heights, the same number of solid and cracked covers, the same three numbered
+summary quantity an evaluator of the kind above can compute. They have the same
+column heights, the same number of solid and cracked covers, the same three numbered
 discs, the same number of discs one drop from clearing, and the same response to
 an immediate rise. They differ only in *where* those discs sit.
 
-<BoardLookalikes caption="Both boards were reached by the engine in real games. Each was then replayed forward sixteen times with the same sixteen scripted disc tapes and the same toy policy — a demonstration, not a research measurement, since the policy is trivial and sixteen replays is a small sample. The point is not the size of the gap; it is that a gap exists at all between two boards a static score cannot tell apart." />
+<BoardLookalikes caption="Both boards were reached by the engine in real games. Each was replayed sixteen times with the same scripted disc tapes and toy policy. This is a demonstration, not a research measurement: the policy is trivial and the sample is small. The important result is that two boards a static score cannot distinguish can still diverge." />
 
 The evaluator can be refined, of course: count more shapes, count them more
 cleverly. But there is a limit built into the game. A depth-4 search sees at
-most one row rise, while the thing that ends a game — falling behind on clearing
-discs — accumulates over eight or more rise cycles. That argument is made
+most one row rise, while the clearing deficit that ends a game accumulates over
+eight or more rise cycles. That argument is made
 quantitatively in [score is survival](/learn/concepts/survival-vs-score), and it
 is the reason so much of this repository's history is attempts to *learn* a leaf
 evaluator that sees further than the search does.
@@ -124,15 +124,15 @@ in-leaf profile in
 §3.2: occupancy masks, heights, rise pressure and danger height; the per-cell
 sweep for direct potential, height load and covered/low-number height risk; the
 release inventory; adjacent ones; runs of twos; cover exposure. That document is
-an **engineering result** at `CHECK` tier — it makes no claim about strength,
-only that the fast implementation returns the identical bit pattern on 225,183
+an **engineering result** at `CHECK` tier. It makes no claim about strength,
+only that the fast implementation returns the same bit pattern on 225,183
 real leaf states.
 
 **Information boundary.** `fairLeaf` throws on a state outside the public
 domain, and the reference binary self-tests that a board and its mirror image
 evaluate identically and that hidden metadata does not change the result. The
-evaluator reads the visible board, the visible next disc and the moves remaining
-before the next rise — nothing else.
+evaluator reads the visible board, the visible next disc, and the moves remaining
+before the next rise. It reads nothing else.
 
 **Weights.** No retained record in this repository fits, tunes or validates
 these weights against an alternative set; the comment in `public-behavior.hpp`

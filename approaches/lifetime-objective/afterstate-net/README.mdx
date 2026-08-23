@@ -1,14 +1,14 @@
 ---
 title: A network that predicts how long you will live
 family: lifetime-objective
-summary: A planned neural evaluator that looks at a board and estimates how many more row rises the game will survive, so that a search can rank moves by survival rather than by immediate points.
+summary: Plans a neural evaluator that predicts remaining row rises so search can favor survival over immediate points.
 status: proposal
 evidence: none
 reads: public
 ---
 
 Instead of teaching a network to predict a score, teach it to predict how much
-longer the game lasts — and then let the search prefer the move whose resulting
+longer the game lasts, and then let the search prefer the move whose resulting
 board survives longest.
 
 <EvidenceLabel status="proposal" evidence="none" reads="public" />
@@ -20,7 +20,7 @@ There is no result record, no finding document, and no measurement of any kind.
 The only retained statement about its status is a line in its own contribution
 record: "the training pipeline is written and layout-validated but has not yet
 been trained or evaluated." A later reconciliation memo records the same thing
-and adds that under this repository's definition of done, the honest closure may
+and adds that under this repository's definition of done, the correct closure may
 be a recorded no-run status rather than a run. Everything below describes what
 the code does, from the code.
 </Callout>
@@ -43,12 +43,12 @@ label per game.
 
 Four outputs, from the board alone:
 
-1. **A hazard head** — the probability that the game survives one more rise, two
+1. **A hazard head**: the probability that the game survives one more rise, two
    more, and so on up to twelve. This is a calibrated, bounded, per-move quantity
    with an exact label from any completed game, and it is the thing a policy
    actually wants to know.
-2. **A lifetime head** — a scalar summary of the moves remaining.
-3. **Two flow heads** — how many numbered discs this move clears, and how many
+2. **A lifetime head**: a scalar summary of the moves remaining.
+3. **Two flow heads**: how many numbered discs this move clears, and how many
    gray discs it reveals. These are the two rates whose steady-state
    requirements (2.400 clears and 1.400 reveals per move) explain *why* a
    position dies, and they give the network a dense mechanistic signal rather
@@ -110,7 +110,7 @@ contribution record but no result, which under `AGENTS.md`'s definition of done
 is unfinished.
 
 The corpus files that would feed it are recorded as having the all-sibling panel
-disabled — panel stride 0, 0 panel records — in every summary of the four files
+disabled (panel stride 0, 0 panel records) in every summary of the four files
 that make up the training data, and the dataset reader contains no panel reader.
 
 The two design premises the code cites are themselves retained:

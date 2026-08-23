@@ -1,7 +1,7 @@
 ---
 title: Structured NNUE
 family: value-policy-learning
-summary: Give every one of the 49 cells its own learned description of the disc sitting in it, and predict how long the game has left — then find out that predicting well is not the same as choosing well.
+summary: Give every cell a learned description and predict the game's remaining lifetime. Good predictions still did not produce good choices.
 status: rejected
 evidence: ledger-recorded
 reads: public
@@ -21,7 +21,7 @@ and the second one is the reason the phrase
 
 ## The intuition
 
-Earlier value models compressed the board into hand-chosen summaries — how tall
+Earlier value models compressed the board into hand-chosen summaries: how tall
 the columns are, how many covered discs there are, how many clears are one disc
 away. Every such summary is a guess about what matters. An
 [NNUE](/learn/glossary)-shaped model makes fewer guesses: it gives each of the
@@ -31,13 +31,13 @@ from a 3 near the top.
 
 The model is also made exactly symmetric on purpose. Drop7 has no left or right
 preference, so the network is shown both mirror images of every training board
-and, at inference, its two orientations are averaged — a board and its mirror
+and, at inference, its two orientations are averaged: a board and its mirror
 receive exactly the same value, rather than approximately the same one.
 
 ## How it works
 
 1. **Collect.** Complete games are played by the exact depth-3, five-stratum
-   phase policy on one seed lane. Whole games — indices divisible by five — are
+   phase policy on one seed lane. Whole games (indices divisible by five) are
    held out before any fitting.
 2. **Encode.** Every cell/token pair, the visible next disc and the rise phase
    each activate their own embedding; 20 standardized phase metrics describing
@@ -68,9 +68,9 @@ prediction and never played.
 
 The second is the interesting failure. Labelling every sibling fixed the
 coverage problem, and the model became genuinely accurate about individual
-successor boards — a rank correlation of 0.839 and an average error under four
+successor boards: a rank correlation of 0.839 and an average error under four
 moves. But asked which column was best at a position — best according to the very
-labels it had been trained on — it named the right one 15.4% of the time; used
+labels it had been trained on. It named the right one 15.4% of the time; used
 as the leaf of a depth-3 search, 30.8%. Put on the board, it lost heavily. Strong global accuracy and poor within-root
 discrimination turned out to be entirely compatible.
 
@@ -119,13 +119,13 @@ corrected-score [fair D4 reference](/approaches/fair-expectimax/reference).
 This pair is where the repository stopped trusting prediction metrics as a proxy
 for playing strength. Every learned-evaluator gate written afterwards asks for
 *within-position ranking* — top-1 agreement, pairwise agreement, regret against
-a reference ordering at the same root — instead of, or in addition to, global
+a reference ordering at the same root. Instead of, or in addition to, global
 correlation.
 
 What it did not rule out: the architecture. Position-specific embeddings with
 exact reflection symmetry were never shown to be the problem; the labels and the
 objective were. The
 [distributional afterstate ranker](/approaches/afterstate-learning/distributional-afterstate)
-kept the "value a resolved position" idea and changed both — a within-root
+kept the "value a resolved position" idea and changed both: a within-root
 ranking loss instead of pure regression, and aligned chance scenarios shared
 across siblings instead of independent continuations per successor.

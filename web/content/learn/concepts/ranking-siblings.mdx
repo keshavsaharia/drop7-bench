@@ -1,6 +1,6 @@
 ---
 title: Evaluating a board, and the sibling trap
-summary: Why a model can predict how a game will go and still pick the wrong column — the single most important lesson in this repository's history.
+summary: Why a model can predict how a game will go and still pick the wrong column, the most important lesson in this repository's history.
 order: 2
 ---
 
@@ -9,15 +9,15 @@ opinion about each one: *how promising is this?* That opinion is the **leaf
 evaluator**, and almost every learning experiment in this repository is an
 attempt to replace the hand-written one with something learned from data.
 
-Most of those attempts failed in the same way. This page explains the failure
-in plain language, because it is the key to reading the research pages — and to
-judging any proposal to "just train a bigger model."
+Most of those attempts failed in the same way. Understanding that failure is
+the key to reading the research and judging any proposal to "just train a
+bigger model."
 
 ## The job is to rank, not to predict
 
 When a policy plays, it does not need to know *how many points* a board is
-worth. It needs to know which of up to seven **sibling** moves — the seven
-columns available right now — is best. A perfect ranking with wrong absolute
+worth. It needs to know which of up to seven **sibling** moves is best. The
+siblings are the columns available right now. A perfect ranking with wrong absolute
 numbers plays perfectly. A model with tiny average error that gets the *order*
 of two siblings wrong plays the wrong move.
 
@@ -30,13 +30,13 @@ happened: this board, this move, this outcome. Do that for thousands of games
 and you have a large dataset. But look at what it contains for any one
 position:
 
-<SiblingTrap played={5} caption="At this position the behaviour policy played column 5 and the game continued from there, so the outcome of column 5 is known. The other six boards — every one of them a move the policy could have made — were never played, so nothing in the data says how they would have turned out." />
+<SiblingTrap played={5} caption="At this position the behaviour policy played column 6 and continued from there, so the outcome of column 6 is known. The other six boards were legal moves too, but they were never played. The data does not show how they would have turned out." />
 
 The model trains on the boards that were played and gets very good at
 predicting their outcomes. Then it is deployed, shown seven siblings, and asked
 to rank them. Six of the seven are boards whose futures were never measured.
 Its answer for those is an **extrapolation** from boards that looked somewhat
-similar — and if the behaviour policy had a consistent style (they all do), the
+similar, and if the behaviour policy had a consistent style (they all do), the
 unplayed siblings are systematically the kinds of boards it never chose, so the
 model is systematically worst exactly where it is being asked to decide.
 
@@ -51,7 +51,7 @@ The repository's status summary names this directly:
 
 This is not a hypothetical. The latest completed work built a locked panel of
 477 real positions and evaluated **every** legal sibling at each one, so that a
-model's ranking could be checked against a reference. In plain terms: the best
+model's ranking could be checked against a reference. The best
 learned ranker at the time picked the same top move as fair D4 about 29% of the
 time, against D4's own 38% agreement with the gold standard, and ordered pairs
 of siblings correctly about 60% of the time against D4's 67%. It lost on both
@@ -73,45 +73,45 @@ regress. Neither justified a gameplay run.
 ## What would fix it
 
 The fix is conceptually simple and practically expensive: **label every
-sibling**. For each training position, evaluate all legal columns — under the
-same random futures, so the comparison between them is fair — and record all of
-them. A dataset built that way is called **successor-closed** here: every
+sibling**. For each training position, evaluate all legal columns under the
+same random futures, then record every value. A dataset built that way is called
+**successor-closed** here: every
 successor the model will be asked about at play time is present in training.
 
 That is precisely what the repository's registered afterstate theory proposes.
-In plain words it says: *train a single evaluator only on successor-closed
+The proposal is direct: *train a single evaluator only on successor-closed
 data, with every sibling labelled under aligned chance scenarios and a fixed
 continuation policy, and it will rank root moves at least as well as fair D4 on
 games it has never seen.*
 
 **It was built and tested, and as tested it did not work.** Four pilot
-experiments are on the record. The corpus pipeline did exactly what it promised
-— every legal sibling labelled, under chance scenarios shared across siblings —
-but the labels themselves turned out to be noisy: with a handful of imagined
+experiments are on the record. The corpus pipeline labelled every legal sibling
+under shared chance scenarios. The labels themselves turned out to be noisy:
+with a handful of imagined
 futures per sibling, re-running the same measurement on a different half of the
 scenarios produced a substantially different ranking. Raising the number of
 aligned futures to 256 fixed the stability problem, and the trained model still
 did not rank moves better than fair D4. A final, more conservative experiment
 let the model overrule the search only where the search's own top two moves were
-nearly tied; that came closer than anything before it — it improved on fair D4
-in both halves of the data — but the improvement in the second half was smaller
+nearly tied. That came closer than anything before it. It improved on fair D4
+in both halves of the data, but the improvement in the second half was smaller
 than the margin fixed in advance, so it is recorded as a **valid run with a
 failed gate**, not as a success.
 
 <TheorySummary id="TH-20260820-distributional-afterstate-ranker-7aba7fb3" />
 
-The honest reading is that the *data shape* was fixed and the problem moved:
+The *data shape* was fixed and the problem moved:
 what limits the model now is the quality of its labels and its own training,
 not the sibling gap. The result record itself names an undertrained checkpoint
 (11 of 20 planned epochs) and a weak teacher as the likely bottleneck. That is a
-different, more tractable complaint than the one this page opened with — and it
-is where the [more-computation question](/learn/concepts/does-more-compute-help)
+different, more tractable problem. It is where the
+[more-computation question](/learn/concepts/does-more-compute-help)
 picks up.
 
 <Callout title="Why this matters for any large-scale plan" tone="warn">
-Everything that makes sibling labelling expensive — a search at every position,
-for every column, under shared random scenarios — is exactly the kind of work
-that parallelises across a large cluster. Two lessons carry forward. First,
+Sibling labelling requires a search at every position, for every column, under
+shared random scenarios. That work parallelises across a large cluster. Two
+lessons carry forward. First,
 compute spent generating *played-move-only* data reproduces the failure at any
 scale; the data shape has to be right. Second, the pilot above shows that even
 with the right shape, the number of imagined futures per label is itself a

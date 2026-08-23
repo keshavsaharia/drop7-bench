@@ -1,7 +1,7 @@
 ---
 title: Scenario engine and exact solver
 family: lifetime-objective
-summary: A version of the game in which every future disc and every hidden number is decided in advance, so that a position has one exactly computable best line — the yardstick the repository had never had.
+summary: Fix every future disc and hidden number in advance so a position has one exactly computable best line.
 status: support-only
 evidence: repository-verified
 reads: oracle
@@ -14,7 +14,7 @@ an estimate.
 <EvidenceLabel status="support-only" evidence="repository-verified" reads="oracle" />
 
 Everything on this page reads hidden values. The solver is a **clairvoyant
-reference** — an [oracle](/learn/concepts/oracles-and-teachers), used to label
+reference**: an [oracle](/learn/concepts/oracles-and-teachers), used to label
 and to bound. It is not a policy and can
 never be one, and no score produced here is comparable to a score from an
 ordinary game.
@@ -39,7 +39,7 @@ of them.
 <Board
   cells="0000000000000000000000000000000000009000903300330"
   highlight={[36, 40]}
-  caption="The starting position, from the repository's TypeScript engine. Two cracked gray discs, one above column 1 and one above column 5, each resting on a pair of 3s."
+  caption="The starting position from the repository's TypeScript engine. Two cracked gray discs, one above column 2 and one above column 6, each rest on a pair of 3s."
 />
 
 <BoardCompare
@@ -62,14 +62,14 @@ the repository rested on a quantity the engine did not define.
 A **scenario** fixes everything the game would otherwise leave to chance:
 
 - the visible board and how many drops remain before the next rise;
-- the hidden number under every covered cell — a real hidden board, carried
+- the hidden number under every covered cell: a real hidden board, carried
   through gravity and row rises alongside the visible one;
 - the exact sequence of discs the player will be handed;
 - the hidden numbers of every future row that rises from below;
 - a horizon, the number of moves the scenario is scored over.
 
 With all of that fixed, the game stops being a gamble and becomes a
-deterministic single-player puzzle over a fixed number of moves — which means it
+deterministic single-player puzzle over a fixed number of moves, which means it
 has an exact best line, findable by exhaustive search. Each scenario carries a
 content hash of every field as its identity, so a suite of them is
 self-verifying, and a loader refuses any record whose contents do not match its
@@ -78,7 +78,7 @@ own name.
 The starting position, the hidden board, and the randomness are stored as
 separate fields on purpose, so the same position can be re-dealt with fresh
 discs and fresh hidden numbers. That is the operation a *fair* evaluation needs,
-and this work deliberately stops short of implementing it — see the caution at
+and this work deliberately stops short of implementing it. See the caution at
 the end of this page.
 
 ## How it was made trustworthy
@@ -100,7 +100,7 @@ the end of this page.
    is.
 3. **The solver is exact, not approximate.** Depth-first search over every legal
    move sequence to the horizon, maximising total points, with dying simply
-   ending the line and earning nothing further — so survival is priced by the
+   ending the line and earning nothing further, so survival is priced by the
    points it would have bought rather than by an invented penalty. A
    [transposition table](/learn/glossary) keyed on the full visible board, the
    full hidden board and the depth stores a value only when a position was
@@ -117,7 +117,7 @@ the end of this page.
 
 ## What it measured
 
-**A board clear is reachable — but only from boards that real play never
+**A board clear is reachable, but only from boards that real play never
 reaches.** This settles an open question the
 [score decomposition](/approaches/lifetime-objective/score-decomposition) had to
 leave open: emptying the board is worth 70,000 points, about 20 moves of
@@ -165,7 +165,7 @@ early. The 128-scenario suite solved 128 of 128 exactly at horizon 9.
 
 **A recorded negative on the solver's own machinery.** The transposition table
 is worth 7.6 times in nodes and 4.9 times in wall time. The admissible upper
-bound prunes **exactly zero nodes** at every horizon tested — the no-table node
+bound prunes **exactly zero nodes** at every horizon tested: the no-table node
 counts are identical to the node with and without it (52,198,097 either way).
 The bound that can be *proved* allows roughly 3.2 million points per move, while
 real optima are in the tens of thousands; a bound tight enough to prune would
@@ -210,11 +210,11 @@ search falls furthest short of the clairvoyant optimum. That selects for
 positions that require **knowing the future**, which a legal policy never does.
 Some of the gap is a real planning deficiency a better fair policy could
 recover; some of it is a coincidence between one deal and one hidden board, and
-selecting on it teaches a student to memorise luck. The honest statement about
+selecting on it teaches a student to memorise luck. The supported conclusion about
 the mean gap of 21,653 points over nine moves is that it is an **upper bound**
 on what better fair play could recover, with an unknown fraction unrecoverable.
 The one piece of evidence pointing at a genuine planning gap is that the
-privileged one-ply greedy — which sees everything the solver sees — matches the
+privileged one-ply greedy, which sees everything the solver sees — matches the
 best shallow policy in only 21 of 128 scenarios, so most of the gap is created
 by planning several moves ahead rather than by information alone.
 </Callout>

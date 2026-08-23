@@ -1,14 +1,14 @@
 ---
 title: Exact search
 family: heuristic-search
-summary: Three attempts to fix a search by giving it more — more independent chance estimates, more depth, more voters — and the discovery that none of them repairs a biased judgement of the board.
+summary: Three attempts add independent chance estimates, depth, and voters to a search. None repairs a biased board evaluation.
 status: rejected
 evidence: ledger-recorded
 reads: public
 ---
 
 Three attempts to fix a search by giving it more — more independent chance
-estimates, more depth, more voters — and the discovery that none of them
+estimates, more depth, more voters, and the discovery that none of them
 repairs a biased judgement of the board.
 
 <EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
@@ -17,7 +17,7 @@ repairs a biased judgement of the board.
 
 A search that looks ahead has two sources of error, and they need different
 cures. It can be **noisy** — its handful of sampled chance outcomes happen to
-flatter one column — or it can be **biased** — the evaluator at the bottom of
+flatter one column, or it can be **biased**: the evaluator at the bottom of
 the tree is simply wrong about which boards are good. Noise averages out with
 more samples; bias does not average out with anything.
 
@@ -31,7 +31,7 @@ evaluator alone:
 - **A fully completed fourth ply.** No shortlisting, no learned pruning: every
   legal action expanded at every depth, with the same chance sampler.
 - **A three-member policy ensemble.** Let three complete searches *vote*, and
-  when they split — no majority — keep the reference member's move rather than
+  when they split (no majority) keep the reference member's move rather than
   trusting a divided committee.
 
 ## How it works, step by step
@@ -48,7 +48,7 @@ evaluator alone:
    containing no robust direction, so the reference member's action is
    retained.
 
-## What happened, in plain English
+## What happened
 
 The first two were rejected, and together they make a single argument that
 shaped everything after them.
@@ -82,7 +82,7 @@ depth and different evaluators. That contrast is the point.
 
 <TechnicalDetails title="The technical record">
 
-**Independent root-quadrature ensemble — rejected, ledger-recorded.** Three
+**Independent root-quadrature ensemble: rejected, ledger-recorded.** Three
 members, each expanding every legal action through three plies with five
 stratified chance samples, differing only in a fixed public-state sampling
 salt; root-Q arrays averaged before selection. A four-game screen passed
@@ -93,7 +93,7 @@ games, at **157,047 work units per move versus 53,778**. Optimised `-Werror`
 and ASan/UBSan self-tests passed determinism, reflection, public-state
 isolation, legality, resource bounds, scoring and single-member action parity.
 
-**Fully completed depth 4 (older leaf) — rejected, ledger-recorded.** Every
+**Fully completed depth 4 (older leaf): rejected, ledger-recorded.** Every
 legal decision action expanded with the same five-stratum public chance
 sampler at depths 3 and 4, with compile-time worst-case bounds proving the
 search fits in 3,134,950 work units and 45,430 cached nodes, and a hard
@@ -111,7 +111,7 @@ measurements and the win records remain valid
 ([mode-specific scoring correction](/docs/research/history)). Four and eight
 games are small cohorts.
 
-**Three-member exact policy ensemble — completed, task-record only.** The
+**Three-member exact policy ensemble: completed, task-record only.** The
 [experiment index](/docs/research/experiment-index) records *"a small
 replicated gain was reported against its comparator, but it was not qualified
 against the strongest D3/D4 reference."* Task-record only means the comparison

@@ -24,7 +24,7 @@ are getting, how dangerous the position is with a rise approaching. Every
 feature carries a coefficient, and those coefficients were set by hand.
 
 Hand-set numbers are an obvious place to look for free strength. The method
-used here — a cross-entropy optimiser — is simple to describe: sample a
+used here (a cross-entropy optimiser) is simple to describe: sample a
 population of coefficient vectors, play games with each, keep the best few,
 move the sampling distribution towards them, repeat. The zero vector reproduces
 the existing policy exactly, so the optimiser starts from the known-good
@@ -39,7 +39,7 @@ games. The two runs on this page are a clean before-and-after picture of that.
 
 **The optimiser.** (1) Eight bounded coordinates scale groups of leaf features
 — direct trigger readiness, latent release, cover debt, altitude/danger/rise,
-low-number clog — and add two new transition rewards paid only after a sampled
+low-number clog, and add two new transition rewards paid only after a sampled
 move: one per revealed cover, one per additional wave. Five coordinates are
 log-bounded to a half-to-double range; the others are bounded absolutely.
 (2) Candidates are played on rotating three-game batches with common random
@@ -57,7 +57,7 @@ stock depth 4 exactly, down to the work count and cache hits on an independent
 fixture. This is an interaction test, not a rescue retune: nothing is
 re-optimised.
 
-## What happened, in plain English
+## What happened
 
 **At depth 3**, the frozen winner passed its held-out cohort convincingly — 32
 games, about 17% more score and 16% more survival, with both worst-quarter
@@ -150,10 +150,10 @@ depth-4 held-out regression is the durable part; the depth-3 screen failure is a
 scoring-mode artefact and should not be quoted as evidence on its own.
 
 Three things carry forward. First, a tuned evaluator that wins a small cohort by
-a few long games has told you almost nothing — the confidence bounds were
+a few long games has told you almost nothing: the confidence bounds were
 negative even when the means looked good. Second, coefficients fitted at one
 search depth do not automatically transfer to another; depth changes which
-errors the leaf is asked to absorb. Third, the honest way to run this is exactly
+errors the leaf is asked to absorb. Third, the sound way to run this is exactly
 how it was run: freeze the vector to a checkpoint before opening a fresh game,
 and report the fit and the fresh result side by side.
 

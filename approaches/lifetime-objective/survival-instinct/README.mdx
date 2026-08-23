@@ -1,14 +1,14 @@
 ---
 title: Survival instinct — never place a disc where it can't clear vertically
 family: lifetime-objective
-summary: Give the depth-4 search one human rule at the root — refuse to drop a 3 or higher above the row where it could still clear vertically — and measure on fresh paired games whether refusing extends life, and how often the rule has to override the search.
+summary: Adds one human rule to the depth-4 search by refusing risky drops above a disc's vertical safe zone, then tests whether the rule extends life.
 status: preregistered
 evidence: none
 reads: public
 ---
 
 Give the depth-4 search one human rule at the root — refuse to drop a 3 or
-higher above the row where it could still clear vertically — and measure on
+higher above the row where it could still clear vertically, and measure on
 fresh paired games whether refusing extends life, and how often the rule
 actually has to override the search's own choice.
 
@@ -19,7 +19,7 @@ actually has to override the search's own choice.
 The owner's observation, from watching play: the search lets a 3 or a 4 land
 as the fifth or sixth disc of a column, where it can never clear downward, and
 a few rises later the game ends under it. A human treats that placement as a
-danger — "it must be cracked horizontally now" — and simply does not make it
+danger — "it must be cracked horizontally now", and simply does not make it
 when there is a choice. The
 [entombed-disc analysis](/approaches/lifetime-objective/entombed-discs) showed
 the observation is real (three quarters of the search's deaths end with such a
@@ -28,7 +28,7 @@ board scorer already *values* those positions correctly. What it left open is
 the action: was the entombing move avoidable at acceptable cost?
 
 This experiment asks exactly that, in the smallest form an "emergency mode"
-can take — a trigger computed from the public board and a constraint that
+can take: a trigger computed from the public board and a constraint that
 overrides the search's preferred column.
 
 ## How it works, step by step
@@ -39,7 +39,7 @@ overrides the search's preferred column.
    The landing row run is also known before any chance event.
 2. **Two strengths of the rule.** *Strict* refuses a column only when the disc
    would be vertically dead *and* already entombed by its row (run longer than
-   *n*). *Literal* — the owner's wording — refuses every vertically dead
+   *n*). *Literal* (the owner's wording) refuses every vertically dead
    landing unless the disc clears on arrival. Values 1 and 2 are exempt; the
    scorer already prices them.
 3. **The same search chooses among what remains.** The filtered search is the
@@ -50,7 +50,7 @@ overrides the search's preferred column.
 4. **Coverage is measured, not assumed.** At every root where the rule refuses
    something, the unfiltered search is also run, so the artifact records how
    often the rule actually changed the decision.
-5. **One paired screen.** Three arms — unchanged, strict, literal — play the
+5. **One paired screen.** Three arms (unchanged, strict, literal) play the
    same 128 never-read seeds at depth 4 with five chance samples. The gate,
    fixed before the seeds are opened: strict beats unchanged with a positive
    95% lower bound, no lower-quartile regression, both halves positive, and an
@@ -81,6 +81,6 @@ queued behind the leaf-evolution screen so the two never share the machine.
 
 ## Sources
 
-- `filter.hpp` — the trigger (vertically dead landing; strict and literal rules)
+- `filter.hpp`: the trigger (vertically dead landing; strict and literal rules)
 - `build.sh` — generates `FilteredFastSearch` from `fast-search.hpp` with a diff guard
 - `gate.cpp`, `run.cpp` — CHECK gates and the three-arm paired cohort runner

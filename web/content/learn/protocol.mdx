@@ -20,8 +20,8 @@ A policy answers exactly one question, using exactly four inputs:
   column
 </div>
 
-Everything else — the seed, future discs, hidden gray-disc values, the score,
-the level, the move number — is privileged. Teachers may use privileged
+Everything else is privileged: the seed, future discs, hidden gray-disc values,
+the score, the level, and the move number. Teachers may use privileged
 information to *train* a policy, but the deployed policy must play without it.
 
 ## A wire session
@@ -44,8 +44,9 @@ this:
 ```
 
 The board travels as a 49-character string: `0` empty, `1`–`7` numbered, `8`
-solid gray, `9` cracked gray, row-major from the top. `bestmove` answers with
-a 0-indexed column.
+solid gray, `9` cracked gray, row-major from the top. `bestmove` uses the
+protocol's internal values `0`–`6`. A user interface displays those moves as
+columns 1–7.
 
 ## Try it against the registry
 
@@ -64,13 +65,13 @@ go
 
 ## Adding your own policy
 
-1. Implement `chooseColumn(state)` — see `src/bench/policies.ts` for the
+1. Implement `chooseColumn(state)`. See `src/bench/policies.ts` for the
    `BenchPolicy` interface and the existing registry entries.
 2. Keep it deterministic: the same public state must always produce the same
    column. Solver seeds derive from the policy id, never from game data.
 3. Register it, then run `npm run bench -- --policies your-policy`.
 4. If your policy reads level or move number, mark it
-   `publicInformation: false` — it will be badged "extended state" on the
+   `publicInformation: false`; it will be badged "extended state" on the
    leaderboard.
 
 The normative specification lives in

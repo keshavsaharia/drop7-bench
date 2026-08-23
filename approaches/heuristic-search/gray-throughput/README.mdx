@@ -1,7 +1,7 @@
 ---
 title: Gray throughput
 family: heuristic-search
-summary: Stop trying to score and start trying to keep up — clear numbered discs and open covered ones fast enough that the board never fills.
+summary: Clear numbered discs and open covered ones fast enough to keep the board from filling.
 status: rejected
 evidence: task-record only
 reads: public
@@ -29,7 +29,7 @@ be cleared at all:
 
 This policy is that arithmetic turned into an objective. It does not ask "how
 many points is this move worth"; it asks "does this move keep me at, or above,
-the replacement rate" — and it pays a **surplus** bonus for clearing or
+the replacement rate", and it pays a **surplus** bonus for clearing or
 revealing more than the requirement, not merely for clearing or revealing.
 
 ## How it works, step by step
@@ -51,11 +51,11 @@ The companion `tune.ts` fits the twenty weights with a cross-entropy method on
 complete games from a training seed range, then replays the frozen champion on
 a separate calibration range.
 
-## What happened, in plain English
+## What happened
 
 Pushing harder on gray discs made the board look better and did not make the
 policy live longer. The retained sentence is that stronger gray weights
-improved *exposure* — how much of the covered population was attackable — but
+improved *exposure* (how much of the covered population was attackable) but
 not the sustainable rate of cracks and reveals, and not the score.
 
 That is a more interesting failure than it first appears. It says the deficit
@@ -69,7 +69,7 @@ research contract excludes both from the deployable public interface, and the
 benchmark registry flags this policy accordingly
 (`publicInformation: false` in `src/bench/policies.ts`) so that it is shown
 separately on the [leaderboard](/leaderboard). Neither field can leak a hidden
-disc value or a future disc — they only vary the deterministic sampling — but
+disc value or a future disc (they only vary the deterministic sampling) but
 the flag is correct and the policy as written could not be submitted for
 qualification without changing that salt.
 </Callout>

@@ -22,7 +22,7 @@ both are single-cohort *development* tier — they do not upgrade the ledger:
   −8,624 over 64 paired games; at seven strata it is +23,367 over 32. Both are
   far inside their own detection floors (see below), and the seven-stratum
   estimate **changed sign** when the cohort grew from 16 games to 32. The
-  honest statement is that any depth-5 effect is smaller than a 64-game paired
+  supported statement is that any depth-5 effect is smaller than a 64-game paired
   cohort can resolve, not that it is zero. What can be said is economic: even
   the optimistic estimate is +23,367 for 35.6x the work per move.
 - **A 64-game paired cohort in this game cannot see an effect below roughly

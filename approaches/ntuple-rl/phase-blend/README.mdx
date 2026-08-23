@@ -18,7 +18,7 @@ Two evaluators were available at this point: a
 [learned n-tuple value](/approaches/ntuple-rl/native-suite) trained from half a
 million games, and a hand-written "phase horizon" heuristic that reasoned about
 the [rise clock](/learn/glossary) directly. They disagree about positions, and
-they disagree for different reasons — one from data, one from a human's model of
+they disagree for different reasons: one from data, one from a human's model of
 the game. The standard move is to add them: `value = heuristic + c × learned`,
 and tune the single number `c`.
 
@@ -38,9 +38,9 @@ set.
 5. Play the frozen policy on a separate fixed 64-game development probe, with a
    depth-2 [expectimax](/learn/glossary) and three chance samples.
 
-## What happened, in plain English
+## What happened
 
-The tuning games preferred pure learned value — the more of the learned
+The tuning games preferred pure learned value: the more of the learned
 evaluator in the mix, the better the tuning score, right up to using it alone.
 So the "blend" that won the tuning stage was not a blend at all.
 
@@ -65,7 +65,7 @@ Configuration: 8 training games, 24 scale-calibration games, 64 probe games,
 depth 2, three chance samples, 100,000 work units, 500-move cap.
 
 **Limitations.** The tuning cohort is very small, the probe range was already
-burned, and the ledger records only the four coefficient means — no per-game
+burned, and the ledger records only the four coefficient means: no per-game
 data, dispersion, or paired bounds. The ledger does not state which level bonus
 these figures use.
 

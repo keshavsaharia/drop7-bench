@@ -1,7 +1,7 @@
 ---
 title: Terminal policy iteration
 family: terminal-policy-iteration
-summary: The full-strength version — 255 shared imagined futures, 200 moves each, and a rule that only changes the reference's move when it is 99% sure of a gain in both score and lifetime.
+summary: The full-strength version uses 255 shared futures of 200 moves and changes the reference move only with 99% confidence in both score and lifetime gains.
 status: rejected
 evidence: task-record only
 reads: public
@@ -44,18 +44,18 @@ that is merely probably better.
 5. Replace the reference's action only when the paired one-sided 99% lower
    bounds are positive on *both* measures. Otherwise keep it.
 
-## What happened, in plain English
+## What happened
 
 It found something, and the something was not big enough.
 
 The retained verdict is that the gain was real but missed the frozen
 score-and-survival gate and the requirement that improvement hold up across
-whole origin games rather than in aggregate. That combination — a genuine
+whole origin games rather than in aggregate. That combination: a genuine
 effect that will not survive being split by game — is the single most common
 outcome in this repository, and it is what the whole-origin condition exists to
 detect: a mean can be lifted by one lucky origin while most origins get worse.
 
-The honest problem with this page is that there is nothing to quote. This
+There is nothing to quote. This
 result is **task-record only**: it comes from a research conversation and was
 never promoted into the written ledger, so there is no protocol, no artifact
 hash, no per-game data and no number.

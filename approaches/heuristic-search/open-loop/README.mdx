@@ -19,15 +19,15 @@ A look-ahead search branches: *if the next disc is a 3 I play here, if it is a
 6 I play there*. That is the right model of the game, and it is expensive —
 the tree multiplies by seven at every chance point.
 
-An open-loop planner refuses to branch. It writes down one plan — a fixed list
-of columns — and then asks how that single plan performs across a whole set of
+An open-loop planner refuses to branch. It writes down one plan: a fixed list
+of columns, and then asks how that single plan performs across a whole set of
 imagined disc streams. Because one plan must work for all of them, it cannot
 quietly assume it will know something it will not know. The cost is that it
 also cannot represent the value of *being able to react*, which is real: a
 good player's plan genuinely does change when a 1 arrives instead of a 7.
 
 Since the planner replans from scratch every move and only ever plays the
-first column of its plan, the reaction happens anyway — one move late.
+first column of its plan, the reaction happens anyway: one move late.
 
 ## How it works, step by step
 
@@ -47,7 +47,7 @@ first column of its plan, the reaction happens anyway — one move late.
 The leaf value can be the ordinary hand evaluator, the recursive-potential
 evaluator, or the tunneling residual; the lab compares all three.
 
-## What happened, in plain English
+## What happened
 
 There is no result here, and the index does not claim one. This lab is
 classified **support-only**: it exists so that other policies have something to
@@ -82,14 +82,14 @@ work bound.
 
 The planner's scenarios are generated from a solver-local seed and the
 observable state. It never receives the game seed, the hidden gray values, or
-the real future disc tape — the scenarios are the planner's own guesses, and
+the real future disc tape: the scenarios are the planner's own guesses, and
 they are wrong in exactly the way a player's guesses are wrong.
 
 </TechnicalDetails>
 
 ## What this taught us, and what is still open
 
-- **Support code is not a result, and labelling it honestly matters.** A
+- **Support code is not a result, and the label matters.** A
   comparator that has never been measured against the reference search cannot
   certify anything it wins against. That is why the tunneling comparison is
   described here as a comparison and not as evidence.

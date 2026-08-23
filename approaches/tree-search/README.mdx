@@ -13,7 +13,7 @@ The reference policy in this repository is
 turn it considers **all seven columns**, then all seven again after the game
 deals the next disc, and so on for four of the player's own moves. Nothing is
 skipped. That completeness is what makes it trustworthy, and it is also what
-makes it expensive — the number of positions at the bottom of the tree
+makes it expensive: the number of positions at the bottom of the tree
 multiplies by roughly forty-nine every time you look one move further ahead.
 
 <TreeGrowth caption="Why a complete look-ahead cannot simply be extended. Each extra move ahead multiplies the bottom of the tree by about forty-nine, before gray-disc reveals are counted at all. The reference stops at four." />
@@ -100,12 +100,12 @@ the moment the search actually crosses it, and by identifying tree nodes purely
 by the *visible* position that resulted. See [choice, chance, and looking ahead](/learn/concepts/chance-vs-choice)
 for how the reference handles the same problem.
 
-## What happened, in plain English
+## What happened
 
 Every member of this family that was tested was retired, and the one that was
 never tested is still sitting there unrun.
 
-The plain reading of the record is that the tree machinery worked and the
+The record shows that the tree machinery worked and the
 thing it was built on did not. Nodes stayed within their memory budgets, the
 searches were deterministic and passed their information-boundary self-tests,
 and one variant genuinely improved on the depth-3 comparator on two of the
@@ -117,19 +117,19 @@ turned the search into a much better imitator of the short-horizon reference,
 while making it a worse predictor of how a position would look twenty-five
 moves later. The audit's own conclusion was that the weak quick-playout policy
 and the small replayed pool of chance outcomes were optimizing the wrong
-future — so the next experiment should replace the continuation, not buy a
+future, so the next experiment should replace the continuation, not buy a
 bigger budget.
 
 <TechnicalDetails title="The technical record">
 
 | Approach | Status and evidence | Recorded outcome |
 | --- | --- | --- |
-| [Observable-state UCT](/approaches/tree-search/observable-mcts) | Rejected — ledger-recorded | Missed a frozen top-action gate by one root out of 32 |
-| [Confidence-gated override](/approaches/tree-search/observable-mcts) | Rejected — ledger-recorded | Held-out pairwise accuracy and regret both worsened |
-| [Scaled observable MCTS](/approaches/tree-search/observable-mcts) | Rejected — ledger-recorded | Larger search ranked 25-move outcomes worse |
-| [Learned-guidance search](/approaches/tree-search/nnue-guided) | Rejected — ledger-recorded | Screens were worse than the plain depth-3 comparator |
-| [TypeScript MCTS lab](/approaches/tree-search/mcts) | Rejected — task-record only | "Ordinary MCTS did not establish a whole-game improvement" |
-| [PUCT](/approaches/tree-search/puct) | Unknown — repository-verified | Complete lab, preregistered gates, never run |
+| [Observable-state UCT](/approaches/tree-search/observable-mcts) | Rejected; ledger-recorded | Missed a frozen top-action gate by one root out of 32 |
+| [Confidence-gated override](/approaches/tree-search/observable-mcts) | Rejected; ledger-recorded | Held-out pairwise accuracy and regret both worsened |
+| [Scaled observable MCTS](/approaches/tree-search/observable-mcts) | Rejected; ledger-recorded | Larger search ranked 25-move outcomes worse |
+| [Learned-guidance search](/approaches/tree-search/nnue-guided) | Rejected; ledger-recorded | Screens were worse than the plain depth-3 comparator |
+| [TypeScript MCTS lab](/approaches/tree-search/mcts) | Rejected; task-record only | "Ordinary MCTS did not establish a whole-game improvement" |
+| [PUCT](/approaches/tree-search/puct) | Unknown; repository-verified | Complete lab, preregistered gates, never run |
 
 Sources: the [experiment index](/docs/research/experiment-index) tree-search
 table and the ledger entries "Observable-state stochastic UCT", "Confidence-gated

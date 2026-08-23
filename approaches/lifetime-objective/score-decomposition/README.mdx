@@ -1,14 +1,14 @@
 ---
 title: Where the points actually come from
 family: lifetime-objective
-summary: An instrumented run of the strongest known policy that attributes every point to its source, and finds that in this game mode a score is almost entirely a measure of how long the game lasted.
+summary: Attributes every point to its source and shows that Hardcore score mostly measures survival time.
 status: completed
 evidence: reproduced
 reads: diagnostic
 ---
 
 Before trying to score more, this work simply asked where the points already
-come from — and the answer turned out to be that **a Drop7 Hardcore score is
+come from, and the answer turned out to be that **a Drop7 Hardcore score is
 survival time wearing a different unit**.
 
 <EvidenceLabel status="completed" evidence="reproduced" reads="diagnostic" />
@@ -37,7 +37,7 @@ not control. So the question "how do I score a million points?" collapses into
 
 1. **Input.** Nothing new. The program includes the frozen reference searches —
    the depth-3 and depth-4 [fair expectimax](/learn/concepts/chance-vs-choice)
-   policies — as a library and calls them unchanged.
+   policies, as a library and calls them unchanged.
 2. **Instrumentation.** A wrapper around the game loop tags every point earned
    as one of three sources: the flat bonus for surviving a row rise, the
    70,000-point bonus for emptying the board, and the points paid for each wave
@@ -55,7 +55,7 @@ not control. So the question "how do I score a million points?" collapses into
 ## What it found
 
 Over 64 fresh games of the reference policy, **score and lifetime were
-essentially the same variable** — the correlation between a game's final score
+essentially the same variable**: the correlation between a game's final score
 and the number of moves it lasted was 0.9995. Row-rise bonuses supplied 94.29%
 of all points; chains supplied 5.71%; emptying the board supplied nothing at
 all, because it never happened.
@@ -123,7 +123,7 @@ per move against moves r = 0.770; score against moves r = 0.9995.
 **Limitations as recorded.** 64 games on one exploratory lease, with a score
 standard deviation 58% of the mean, so the mean is known to roughly ±46,000 at
 one standard error. The flow-balance requirement is necessary for indefinite
-survival, not sufficient — a policy can meet it and still stack one column into
+survival, not sufficient: a policy can meet it and still stack one column into
 the ceiling. The zero-board-clear observation says nothing about whether a
 clear-seeking policy could change the economics; that question was later probed
 with a clairvoyant solver in the [scenario](/approaches/lifetime-objective/scenario)

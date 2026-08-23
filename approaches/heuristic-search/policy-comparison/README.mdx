@@ -34,22 +34,22 @@ Eight evaluators, behind one command-line flag:
 
 1. the five hand-evaluator profiles — `legacy`, `survival`, `potential`,
    `anti-clog`, and the default `combined`;
-2. `recursive` — the recursive-potential evaluator, which propagates
+2. `recursive`: the recursive-potential evaluator, which propagates
    "readiness to clear" outward from discs that can actually be triggered;
-3. `fertile` — an evaluator defined inside this lab that penalises covered
+3. `fertile`: an evaluator defined inside this lab that penalises covered
    discs by the square of their altitude with a 1.65 multiplier on the two
    edge columns, penalises high low-numbers, and adds a steep penalty above
    four rows;
-4. `learned` — a checkpoint from the learned-evaluator work, loaded from a
+4. `learned`: a checkpoint from the learned-evaluator work, loaded from a
    file.
 
 Each can be driven greedily, through sampled [rollouts](/learn/glossary), or
 through an open-loop beam, so the harness separates *which features* from *how
 much search*.
 
-## What happened, in plain English
+## What happened
 
-Nothing, in the sense that this file has no result of its own — and that is
+Nothing, in the sense that this file has no result of its own, and that is
 the correct outcome for a measuring instrument. The
 [experiment index](/docs/research/experiment-index) lists it as support-only
 with no recorded finding. The results it produced live on the pages of the

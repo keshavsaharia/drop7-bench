@@ -1,7 +1,7 @@
 ---
 title: Phase benchmark
 family: baselines-diagnostics
-summary: Plays complete games with the shared hand-written policy and reports not only its score but how it survived — clears, reveals, board height, search work and how many games were cut short.
+summary: Plays complete games with the shared hand-written policy and reports score, clears, reveals, board height, search work, and early stops.
 status: support-only
 evidence: repository-verified
 reads: public
@@ -23,16 +23,16 @@ about them.
 
 So this harness reports the score, and then the mechanism underneath it:
 
-- **mean moves** — how long the games lasted, which for this game is nearly the
+- **mean moves**: how long the games lasted, which for this game is nearly the
   same statement as the score;
-- **clears per move** and **reveals per move** — the flow rates the board has
+- **clears per move** and **reveals per move**: the flow rates the board has
   to sustain against the rise (see the
   [family page](/approaches/baselines-diagnostics) for why 2.4 and 1.4 are the
   numbers that matter);
-- **mean maximum height** — how close to the ceiling the policy was living;
+- **mean maximum height**: how close to the ceiling the policy was living;
 - **work per move** — search cost in the repository's own unit, so a strength
   change can be separated from a budget change;
-- **censored games** — how many were still alive at the move cap, whose score
+- **censored games**: how many were still alive at the move cap, whose score
   is therefore only a lower bound.
 
 Every one of those is public information about the trajectory. Nothing here
@@ -58,15 +58,15 @@ looks under a gray disc or forward in the tape.
 ## What happened
 
 **No retained result.** The [experiment index](/docs/research/experiment-index)
-records this source as support-only and repository-verified and states plainly
-that "no durable standalone result was located";
+records this source as support-only and repository-verified. It says that "no
+durable standalone result was located";
 [audit 04](/docs/exploratory/audit-04-blind-spots) §B.2 lists it among the
 sources whose question has no lane. This page describes the instrument from its
 code and quotes no scores for it.
 
 <TechnicalDetails title="The technical record">
 
-**Status: support-only — repository-verified.** No ledger entry and no task
+**Status: support-only; repository-verified.** No ledger entry and no task
 record was located, so no measurement is attributed to this source.
 
 Defaults: 8 games from seed `0x3d700100`, `--max-moves 1000`, `--depth 3`,

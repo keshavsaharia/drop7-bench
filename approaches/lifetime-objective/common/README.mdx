@@ -8,7 +8,7 @@ reads: diagnostic
 ---
 
 A single header that plays whole games, counts the same things every time, and
-writes the same file format — so that two experiments in this family can be
+writes the same file format, so that two experiments in this family can be
 compared without anyone having to ask whether they measured the same way.
 
 <EvidenceLabel status="support-only" evidence="repository-verified" reads="diagnostic" />
@@ -28,8 +28,8 @@ worker thread; the harness only runs it and watches.
    chain, a histogram of chain depths, mean board occupancy, and the mean height
    of the stack at each rise.
 4. **The same statistics.** Quantiles, and a one-sided lower confidence bound on
-   the mean computed by resampling **whole games** — the repository's required
-   statistical unit — with a fixed number of resamples and a fixed seed, so the
+   the mean computed by resampling **whole games**: the repository's required
+   statistical unit, with a fixed number of resamples and a fixed seed, so the
    bound is reproducible.
 
 ## The one thing it refuses to let through
@@ -63,7 +63,7 @@ and are not.
 
 Source: `approaches/lifetime-objective/common/harness.hpp`. It has no experiment
 of its own, no row in the [experiment index](/docs/research/experiment-index) and
-no entry in the [ledger](/docs/research/history) — it is support code, and there
+no entry in the [ledger](/docs/research/history). It is support code, and there
 is **no retained result** to report for it.
 
 It is named as a retained artifact in the contribution record

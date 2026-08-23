@@ -15,8 +15,8 @@ player would actually be able to see.
 ## The problem this was built to solve
 
 There is a cheap way to plan under uncertainty that does not work. Guess the
-whole future in advance — every disc the game will deal, every hidden gray
-number it will show — then plan perfectly inside that imagined future, and
+whole future in advance: every disc the game will deal, every hidden gray
+number it will show. Then plan perfectly inside that imagined future, and
 average the results over many guesses. Each individual plan looks brilliant,
 because each was made by a planner who already knew the answers. Averaging
 brilliant plans that could never have been made by the same player produces a
@@ -26,7 +26,7 @@ ledger calls this failure *strategy fusion*; the glossary entry is
 
 This approach removes the opportunity. A position in its tree is identified by
 the visible board, the visible next disc, the moves left until the next rise,
-whether the game is over, and how much search horizon remains — and by nothing
+whether the game is over, and how much search horizon remains, and by nothing
 else. No game seed, no future disc sequence, no hidden number is stored
 anywhere in a node or passed to any decision. A chance outcome is drawn only
 when the search actually crosses that event for the first time, and later
@@ -54,26 +54,26 @@ than three experiments: the first asked whether the idea ranks moves at all,
 the second asked whether it can be used safely as an override on top of a
 search that already works, and the third asked whether it was simply too small.
 
-## What happened, in plain English
+## What happened
 
 All three were retired, and the third is the one worth remembering.
 
 The plain search **almost** cleared its bar. On positions it had never seen, it
 ranked pairs of columns slightly better than the exact depth-3 comparator and
-had substantially lower regret — but its rate of picking the single best column
+had substantially lower regret, but its rate of picking the single best column
 was 11 correct out of 32, and the frozen gate required a rate that 11 out of 32
 just misses. Nothing was retuned and no further games were opened, which is the
 correct behaviour and also why there is no better number to report.
 
 The gated version, allowed to override a working depth-3 search only when it
 was confident, cut its disagreements from 34 positions to 12 and did improve
-its top-choice rate — but it got *worse* at ranking pairs and its regret rose.
+its top-choice rate, but it got *worse* at ranking pairs and its regret rose.
 A rule that switches rarely and is wrong when it switches is worse than no rule.
 
 The scaled version is the informative failure. It was given four times the
 simulations, twice the horizon, twice the chance pool, and a proper evaluator
 at the end of each playout. Against short-horizon reference values it improved
-enormously — it became an excellent imitator of the four-move reference. Against
+enormously. It became an excellent imitator of the four-move reference. Against
 what actually mattered, the outcome twenty-five moves later, it got worse than
 the small version it replaced. The audit's conclusion was blunt: the remaining
 failure is not search quantity, and this candidate should not receive a
@@ -104,7 +104,7 @@ aligned 80-move public fair-depth-1 continuations. The frozen thresholds were a
 Q margin of 3.2 and a visit-share margin of 0.8. Raw MCTS disagreed with fair
 depth 3 on 34 of 64 fitting roots and the gate reduced that to 12, but fitting
 regret was still worse than fair (29,783.74 versus 25,848.30). On the one
-allowed held-out set — 32 roots from 16 origin-disjoint games — the gate
+allowed held-out set (32 roots from 16 origin-disjoint games) the gate
 switched six actions: tie-aware top-1 rose from 0.28125 to 0.34375, pairwise
 accuracy fell from 0.58742 to 0.54755, and regret rose from 28,165.14 to
 32,443.13. Raw MCTS alone was weaker still at 0.21875, 0.51994 and 41,105.89.
@@ -135,7 +135,7 @@ same states, scaling raised top-1 from 66.67% to 91.67%, pairwise from 66.10%
 to 74.58%, and cut normalized regret from 0.03896 to 0.00356. The audit ran in
 550.296 seconds within a 47,710,856-byte fixed arena.
 
-**Limitations, stated plainly.** The held-out sets are 32 and 12 roots — small,
+**Limitations.** The held-out sets are 32 and 12 roots. Both are small,
 and the 12-root table separates predictors by a single root in places.
 `observable-mcts-lab.cpp` and `fair-mcts-confidence.cpp` carry a compile-time
 assertion pinning the historical 7,000-point Sequence level bonus, so their
@@ -153,7 +153,7 @@ observable MCTS (rejected before gameplay)" in the
 
 ## What this taught us, and what is still open
 
-- **The information boundary can be kept honestly inside a sampling search.**
+- **A sampling search can preserve the information boundary.**
   That is a real engineering result: nodes keyed only by the visible position,
   self-tests for determinism, reflection, metadata blindness and legality, and
   hard arena bounds that were never exhausted.
@@ -165,4 +165,4 @@ observable MCTS (rejected before gameplay)" in the
   with a small replayed chance pool, at any budget tested. What was *not* ruled
   out is Monte Carlo tree search in this game. The ledger's own recommendation
   is a separately frozen long-value or playout replacement, and unbiased
-  sampling of fresh chance events — not another budget increase.
+  sampling of fresh chance events, not another budget increase.

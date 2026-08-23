@@ -7,7 +7,7 @@ million-point game is a milestone, not proof that the goal is met.
 
 If any term here reads oddly out of context (cracking, exploding, oracle,
 clairvoyant, hooks), read `docs/agents/project-nature.md`: it is a glossary
-of this puzzle game's vocabulary and a plain statement of what the work is.
+of this puzzle game's vocabulary and a clear statement of what the work is.
 
 These rules are platform-neutral. Codex and OpenCode read this file directly.
 Claude Code reads it through `CLAUDE.md`.

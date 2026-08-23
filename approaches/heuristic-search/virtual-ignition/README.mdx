@@ -1,14 +1,14 @@
 ---
 title: Virtual ignition
 family: heuristic-search
-summary: Before choosing a column, imagine dropping a few imaginary discs onto the board to see which arrangements would go off like a firework — and prefer the boards that would.
+summary: Before choosing a column, imagine dropping a few imaginary discs onto the board to see which arrangements would go off like a firework, and prefer the boards that would.
 status: rejected
 evidence: task-record only
 reads: public
 ---
 
 Before choosing a column, imagine dropping a few imaginary discs onto the
-board to see which arrangements would go off like a firework — and prefer the
+board to see which arrangements would go off like a firework, and prefer the
 boards that would.
 
 <EvidenceLabel status="rejected" evidence="task-record only" reads="public" />
@@ -22,7 +22,7 @@ cascade, made without simulating one.
 
 Virtual ignition replaces the guess with the real thing. It takes the board,
 places up to a handful of *virtual* discs on it — discs that do not exist and
-are marked as such — and asks the actual rules engine what would happen. If a
+are marked as such, and asks the actual rules engine what would happen. If a
 board answers "a five-wave chain that opens four gray discs", it is a board
 with stored energy. If it answers "nothing", it is not, whatever the static
 count says.
@@ -48,14 +48,14 @@ total covered population would fall.
    [sparse expectimax](/approaches/heuristic-search/sparse-expectimax) search
    and play the winning column.
 
-## What happened, in plain English
+## What happened
 
 It was retired for cost. Simulating hypothetical cascades at every leaf of a
 three-move search is expensive, the gain it bought was small, and small gains
 do not justify large costs when the reference search is faster and stronger.
 
-The lab is built as a scale sweep — it plays the same games with the ignition
-residual switched off and at four increasing strengths — so the retirement is
+The lab is built as a scale sweep. It plays the same games with the ignition
+residual switched off and at four increasing strengths, so the retirement is
 a statement about the whole curve, not one setting.
 
 <TechnicalDetails title="The technical record">
@@ -78,7 +78,7 @@ virtual additions and defaults to seven reveal scenarios. The lab `main.ts` is
 pinned to depth 3 with five chance samples, three ignition scenarios, a
 1,000,000 work bound, and sweeps residual scales `0, 0.05, 0.1, 0.25, 0.5` over
 games from the `0x1d70…` training range. It reports mean and median score,
-moves, censored games, work per move and evaluator cache hit rate — the shape
+moves, censored games, work per move and evaluator cache hit rate: the shape
 of the missing result.
 
 The virtual discs and the reveal guesses are generated from a fixed public

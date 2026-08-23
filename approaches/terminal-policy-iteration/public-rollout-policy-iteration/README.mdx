@@ -1,7 +1,7 @@
 ---
 title: Public rollout policy iteration
 family: terminal-policy-iteration
-summary: The cheap version of the idea — fifteen shared imagined futures, fifty moves each, one improvement step over a simple search.
+summary: The cheap version uses fifteen shared futures of fifty moves for one improvement step over a simple search.
 status: rejected
 evidence: ledger-recorded
 reads: public
@@ -22,7 +22,7 @@ trusted policy play on, how does it go?* If the answer is reliable, the
 resulting player is at least as good as the one you started with. The word
 "reliable" is doing all the work.
 
-This program is that idea at its cheapest honest setting. The trusted policy is
+This program tests that idea at its cheapest valid setting. The trusted policy is
 a one-move-ahead fair search. The horizon is fifty moves — ten row rises, long
 enough for a bad structural decision to come due. Fifteen imagined futures are
 shared across all seven columns, so no column can win on luck alone: for every
@@ -32,7 +32,7 @@ chance event the fifteen scenarios cover all fifteen strata exactly once.
 
 1. Reduce the position to what a player can see: board, visible next disc,
    moves until the next rise, terminal flag. The imagined futures are seeded by
-   hashing *that* — so the tapes cannot smuggle in the game's real seed, score,
+   hashing *that*, so the tapes cannot smuggle in the game's real seed, score,
    level, move number or history.
 2. For each legal column, force it, then let a freshly completed full-width
    fair one-move-ahead search with five chance samples choose every subsequent
@@ -44,10 +44,10 @@ chance event the fifteen scenarios cover all fifteen strata exactly once.
    ties by a fixed centre-first column order.
 
 Paired confidence intervals against the reference's action are computed and
-exported, but deliberately do not influence the choice — they are audit output,
+exported, but deliberately do not influence the choice. They are audit output,
 not part of the policy.
 
-## What happened, in plain English
+## What happened
 
 It won on score in every single one of its four games, and was rejected anyway.
 
@@ -55,7 +55,7 @@ The gate had been frozen before the data was read, and it was demanding: at
 least a 1.20× improvement in both mean score and mean lifetime, no loss of
 reveal throughput, and at least three of the four games winning on score and
 survival together. What the run delivered was about 1.07× on score and 1.03× on
-moves, two joint wins rather than three, and — the detail worth pausing on — it
+moves, two joint wins rather than three, and (the detail worth pausing on) it
 uncovered *fewer* hidden discs per move than the simple policy it was trying to
 improve, 0.695 against 0.862.
 

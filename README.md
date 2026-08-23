@@ -17,10 +17,10 @@ Gray discs hide numbers and need two neighboring hits to open. After every five
 moves, a new covered row rises from the bottom. The game ends when no column
 can accept another disc.
 
-The basic choice is easy to state—pick one of seven columns—but a move can
-change what happens many row rises later. It also has to cope with numbers that
-have not been revealed yet. That combination makes the strategy problem much
-harder than it first appears.
+The basic choice is easy to state: pick one of seven columns. A move can change
+what happens many row rises later, and it must account for numbers that have not
+been revealed yet. That combination makes the strategy problem much harder than
+it first appears.
 
 ## What the research is allowed to know
 
@@ -34,7 +34,7 @@ A deployable policy may use only:
 It may not use the random seed, future discs, future gray-disc reveals, the
 score, the level, the absolute move number, or hidden game history. Some
 experiments deliberately use future information as teachers, but those are
-training tools—not legal playing policies.
+training tools, not legal playing policies.
 
 ## Current answer
 
@@ -62,7 +62,7 @@ evidence of a million-point average.
 See [research status](docs/research/status.md) for the evidence trail and
 [methodology](docs/methodology.md) for the evaluation rules.
 
-## Strategy families in plain language
+## Strategy families
 
 - **Heuristics:** score visible board features such as height, holes, exposed
   numbers, and immediate chains. They are fast, but a hand-written score can
@@ -100,7 +100,7 @@ Independent claims are checked with the separate
 [`audit-drop7-experiment` skill](.agents/skills/audit-drop7-experiment/SKILL.md)
 so verification is not mixed with candidate repair.
 
-Start a session from the repository root and ask for the goal in plain language.
+Start a session from the repository root and describe the goal in your own words.
 The agent's first safe checks are:
 
 ```sh

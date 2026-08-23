@@ -5,8 +5,8 @@ order: 2
 ---
 
 The leaderboard answers one question fairly: **given identical luck, which
-policy scores more?** Ordinary seeded play cannot promise that — a policy that
-opens more gray discs would consume more random numbers and quietly receive a
+policy scores more?** Ordinary seeded play cannot promise that. A policy that
+opens more gray discs consumes more random numbers and quietly receives a
 different disc sequence. The scripted-round format removes that problem by
 deciding every random outcome before the game starts.
 
@@ -42,8 +42,8 @@ is a small JSON document with two tapes:
     </div>
     <p className="mt-2 text-xs text-zinc-400">
       <code>latentRows[r][c]</code> is the hidden value that the covered disc in
-      column c of rise r will reveal — fixed before the game, carried with the
-      disc through gravity and rises.
+      column c of rise r will reveal. It is fixed before the game and stays with
+      the disc through gravity and rises.
     </p>
   </div>
 </div>
@@ -57,7 +57,7 @@ it happens to be revealed.
   before="00000000000000000000000000000000000000008888888"
   after="00000000000000000000000000000000000000008988888"
   beforeLabel="Gauntlet 01, opening row"
-  afterLabel="One hit cracks it — value still hidden"
+  afterLabel="One hit cracks it; value still hidden"
   caption="Every covered cell in the opening row already has its value written down in latentRows[0]. Revealing it can only ever produce that value."
 />
 
@@ -67,10 +67,10 @@ Each policy × round pairing produces a complete game record: final score,
 moves survived, censor flag at the 2,000-move cap, numbered clears and covered
 reveals per move, maximum chain depth, illegal choices (a legal fallback is
 played and the lapse is counted), wall time, and a SHA-256 trajectory
-checksum. The full move-by-move frames power the replay viewer — click any
-score on the leaderboard to watch the game.
+checksum. The full move-by-move frames power the replay viewer. Click any score
+on the leaderboard to watch the game.
 
-## Honest limits
+## Limits
 
 <Callout title="Playground evidence, not tier evidence" tone="warn">
 Scripted rounds are a public playground. They are not drawn from the research

@@ -1,7 +1,7 @@
 ---
 title: Board topology
 family: oracle-curriculum
-summary: Stop copying the teacher's moves and ask a narrower question — can a player recognise, from the shape of the board alone, the positions a future-reading planner keeps itself in?
+summary: Ask whether a player can recognise, from board shape alone, the positions a future-reading planner creates.
 status: rejected
 evidence: ledger-recorded
 reads: teacher
@@ -14,7 +14,7 @@ see the future, or from an ordinary search?
 <EvidenceLabel status="rejected" evidence="ledger-recorded" reads="teacher" />
 
 If that question has a good answer, then something about a sustainable board is
-visible on screen, and a legal policy could be nudged toward it — without ever
+visible on screen, and a legal policy could be nudged toward it, without ever
 being asked to reproduce a choice that depended on invisible information.
 
 ## Why this is a better question than "what would the teacher play?"
@@ -26,14 +26,14 @@ with its high numbers stacked where they can never fire and its covers buried
 under four rows, the other with triggers reachable and covers exposed. That
 difference is entirely visible. So the experiment matches the two policies'
 positions on everything superficial — rise phase, exact occupancy, exact maximum
-height, and where in the game they occurred — and then asks a small network to
+height, and where in the game they occurred, and then asks a small network to
 tell them apart from the 49 cells alone.
 
 ## Three programs, three stages
 
 1. **The audit** plays the privileged planner and an ordinary public search on
    the same seeds and pairs their positions on the matching keys above. It then
-   looks for feature directions that separate the two, and — this is the part
+   looks for feature directions that separate the two, and: this is the part
    that makes it an audit rather than a fishing trip — requires each direction
    to appear independently in *both* halves of the seed set before it counts.
 2. **The residual** turns the surviving question into a learned model: a compact
@@ -43,18 +43,18 @@ tell them apart from the 49 cells alone.
 3. **The extension** verifies the frozen model byte for byte, replays the
    original held-out games and requires the original numbers to reproduce
    exactly, then collects a larger, untouched set of positions to test the same
-   prediction at more than twice the sample size — and only then lets it play.
+   prediction at more than twice the sample size, and only then lets it play.
 
 Nothing privileged enters the model's input. It receives a reflection-canonical
 49-cell board and nothing else: no seed, no tape, no next disc, no phase, no
 score, no move index, and none of the matching keys used to balance the
 examples.
 
-## What happened, in plain English
+## What happened
 
 **The signal is real.** The audit found a set of board properties that are
 stable across independent halves of the data: sustainable boards reward
-reachable triggers — direct and latent — triggers that survive a rise, stored
+reachable triggers (direct and latent) triggers that survive a rise, stored
 high numbers that can still fire, and cracked covers that are close to being
 revealed; they penalise solid cover count and cover altitude, projected
 occupancy debt, dead low numbers, low caps and adjacent ones. Two plausible
@@ -73,7 +73,7 @@ on 204 fresh pairs. An eight-game screen looked like a win — until you notice
 each policy won four of the eight games and both confidence bounds were
 negative. The sixteen-game confirmation rejected it: about 42,000 points and 24
 moves worse per game. The failure mode is worth stating precisely, because the
-mean hides it — the candidate did not lose a little everywhere; it destroyed a
+mean hides it: the candidate did not lose a little everywhere; it destroyed a
 few very long baseline games, turning a 285-move game into a 90-move one and a
 200-move game into a 55-move one, while occasionally making large gains
 elsewhere.
@@ -86,7 +86,7 @@ points and hit the 200-move cap in all 16 games, winning every pair; public
 depth 3 averaged 90,273 points and 63.625 moves. Clears and reveals per move:
 2.354 / 1.386 against 1.792 / 0.960.
 
-**Residual** (rejected — ledger-recorded; underpowered gate failure): 738
+**Residual** (rejected; ledger-recorded; underpowered gate failure): 738
 matched training examples (369 pairs); board-only sparse network, 490 one-hot
 inputs with exactly 49 active, 8 accumulators, 3,937 parameters, 240 fixed Adam
 epochs. Held-out 170 examples / 85 pairs against a preregistered floor of 200
@@ -94,7 +94,7 @@ examples / 100 pairs. Area under curve 0.68097, exact-stratum ranking 0.67059,
 pair accuracy positive in both whole-seed halves (0.70270 and 0.64583). Screen
 and confirmation seeds were not read. Model fingerprint `0x0af6ed6f88895cfe`.
 
-**Extension** (rejected — ledger-recorded; prediction replicated, policy
+**Extension** (rejected; ledger-recorded; prediction replicated, policy
 regressed): replay reproduced the original 85 pairs and every metric exactly.
 Extension cohort 204 pairs / 408 examples: area under curve 0.63829, matched
 pair accuracy 0.64216, halves 0.64103 / 0.64368. Pooled 289 pairs / 578

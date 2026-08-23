@@ -445,7 +445,7 @@ games in 256; the seven-stratum arms ran at `--max-work 16000000` and their
 4,956,614 work per move confirms a completed depth 4; and tuning used a disjoint
 leased cohort.
 
-**Stated plainly, as the preregistration required:** the hypothesis that
+**Conclusion required by the preregistration:** the hypothesis that
 chance-node bias caps what leaf-injected foresight can contribute **is wrong**.
 It caps extra lookahead — `finding-05` measured that, and this document
 reproduces the underlying arm exactly — but a learned leaf is not extra

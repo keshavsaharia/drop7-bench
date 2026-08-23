@@ -1,14 +1,14 @@
 ---
 title: Risk sensitive
 family: heuristic-search
-summary: Judge a column by how bad its worst futures are, not only by how good its average future is — because one collapse ends the game and there is no next game to average it against.
+summary: Ranks columns partly by their worst imagined futures. Every tested risk setting trails the baseline.
 status: rejected
 evidence: task-record only
 reads: public
 ---
 
 Judge a column by how bad its worst futures are, not only by how good its
-average future is — because one collapse ends the game and there is no next
+average future is because one collapse ends the game and there is no next
 game to average it against.
 
 <EvidenceLabel status="rejected" evidence="task-record only" reads="public" />
@@ -43,7 +43,7 @@ disasters; anything in between trades mean for safety.
 The planner takes a solver-local seed only. It refuses the game seed, and no
 future disc or reveal tape can reach action selection.
 
-## What happened, in plain English
+## What happened
 
 Every setting of the risk dial was retired. The best mild-risk configuration —
 the one that only leans slightly toward caution — still finished behind the
@@ -82,7 +82,7 @@ mechanism to the reference search with a preregistered root utility of
 `0.75 × mean + 0.25 × CVaR25` over seven scenarios per action. It is
 **rejected, ledger-recorded**. On its eight-game screen the unchanged
 depth-3 fair search averaged 176,819.75 points and 114.125 moves; the risk
-version averaged 87,112 points and 61.5 moves — a paired difference of
+version averaged 87,112 points and 61.5 moves: a paired difference of
 −89,707.75 points and −52.625 moves, losing seven of eight games on both
 measures. Clear and reveal throughput fell from 2.043/1.141 to 1.730/0.945 per
 move and mean maximum chain fell from 7.875 to 5.125. It switched away from
@@ -109,9 +109,9 @@ small screen.
 - **Mean-protecting and tail-protecting came apart in the wrong direction.**
   The recorded root-CVaR screen lost mean score, survival *and* flow. A
   risk-averse policy that dies sooner is not being cautious about the right
-  thing — with a short horizon, "avoid the worst sampled outcome" is a
+  thing, with a short horizon, "avoid the worst sampled outcome" is a
   statement about sampling noise as much as about danger.
 - **What is still open.** Distributional gates are still in the recommended
-  decision standard for a future candidate — but as a *check* applied after a
+  decision standard for a future candidate, but as a *check* applied after a
   challenger already ranks moves well, not as the thing that makes it rank
   moves well.

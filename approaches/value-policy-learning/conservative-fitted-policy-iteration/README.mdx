@@ -8,8 +8,8 @@ reads: public
 ---
 
 Most learned evaluators predict one number: how good is this board. This one
-predicts a *distribution* — the odds of surviving another 10 moves, 30 moves,
-100 moves — and then refuses to deviate from a known-safe fallback move unless
+predicts a *distribution*: the odds of surviving another 10 moves, 30 moves,
+100 moves, and then refuses to deviate from a known-safe fallback move unless
 the improvement clears a confidence bound. The idea was to make the usual
 failure mode impossible by construction: if the model is unsure, it does not
 get to act.
@@ -34,7 +34,7 @@ Four independently initialised copies are trained, and their disagreement is
 used as a measure of ignorance: where the four ensemble members disagree, the
 model is out of its depth and the safe move stands.
 
-The safe move is the exact depth-3, five-stratum phase-safety policy — a fixed
+The safe move is the exact depth-3, five-stratum phase-safety policy: a fixed
 search, not a learned thing. The learned part is only ever allowed to *override*
 it, never to play on its own.
 
@@ -44,12 +44,12 @@ it, never to play on its own.
    phase-safety policy, and states are collected along the way.
 2. **Expand every legal move at each collected state.** Each state enumerates
    all seven columns under seven common, exactly stratified outcomes for the
-   gray-disc reveal and the following disc — the same seven futures for every
+   gray-disc reveal and the following disc: the same seven futures for every
    column, so the comparison between siblings is like-for-like.
 3. **Fit a distribution, not a mean.** Four bootstrap ensemble members fit the
    101-bucket lifetime distribution. Auxiliary heads predict survival past the
    next rise, five-move clear and reveal throughput, and top-row risk.
-4. **Keep the shaping honest.** The extra shaping reward is defined as the
+4. **Keep the shaping fixed.** The extra shaping reward is defined as the
    difference of a potential function between consecutive states, so it
    telescopes and cannot change what a complete game is ultimately worth; the
    lifetime target itself is left unshaped.
@@ -58,7 +58,7 @@ it, never to play on its own.
    homework.
 6. **Deviate only under confidence.** An alternative column is played only when
    its four-member *lower* confidence margin over the fallback action stays
-   positive after an additional "epistemic floor" — a fixed number of moves of
+   positive after an additional "epistemic floor": a fixed number of moves of
    predicted advantage that the model must clear before it is believed.
 
 That last floor is the tunable knob, and the pilot's result is entirely a story
@@ -66,20 +66,20 @@ about it.
 
 ## What happened
 
-With the floor set low — a five-move advantage required — the model switched
+With the floor set low (a five-move advantage required) the model switched
 often and played worse than the fallback it was correcting: a recorded 224,621
 points against 257,423 on the same paired games, with a confidence bound so
 wide it spans the whole effect. (Those are the only two numbers the ledger kept
 for that comparison; no move counts were recorded with them, and a later audit
 could not recover which scoring mode they were in. See the technical record.)
 
-With the floor set high — ten moves — the model never found an alternative it
+With the floor set high (ten moves) the model never found an alternative it
 believed in, made zero switches, and reproduced the fallback policy exactly.
 
 That is the whole finding: between "acts and hurts" and "never acts", the pilot
 found no setting that acts and helps. It stopped there, having used a tiny
 fraction of its training budget, and never reached the 64-game qualification
-gate. A negative result on the exact configuration tested — not a proof that
+gate. A negative result on the exact configuration tested, not a proof that
 distributional, confidence-gated improvement cannot work.
 
 <TechnicalDetails title="The technical record">
@@ -122,14 +122,14 @@ The design anticipated the family's central problem and tried to engineer
 around it: rather than trusting a learned ranking, trust it only where an
 ensemble agrees. The pilot showed that this converts the problem rather than
 solving it. Confidence gating has exactly two failure modes — believe too much
-and lose, believe too little and change nothing — and finding the window
+and lose, believe too little and change nothing, and finding the window
 between them is itself an empirical search that this run never got to conduct.
 
 Worth noting for anyone resuming it: the collection step here already labels
 *every* legal sibling under shared random outcomes, which is the data shape the
 [sibling-trap page](/learn/concepts/ranking-siblings) argues is necessary. What
 it lacked was scale — 14,164 modeled transitions is a pilot, not a training
-run — and a cohort large enough for a four-game paired comparison to mean
+run, and a cohort large enough for a four-game paired comparison to mean
 anything.
 
 The "act only when confident" pattern reappears throughout the repository
@@ -139,6 +139,6 @@ tight enough to be safe is usually tight enough to be inert.
 
 ## Sources
 
-- `cfpi.cpp` — the standalone falsification lab, including its self-test and
+- `cfpi.cpp`: the standalone falsification lab, including its self-test and
   pilot mode. The fallback policy it never abandons lives in
   `src/core/native/public-behavior.hpp`.

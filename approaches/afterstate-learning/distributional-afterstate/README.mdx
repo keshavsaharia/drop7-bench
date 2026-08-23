@@ -1,13 +1,13 @@
 ---
 title: Distributional afterstate ranker
 family: afterstate-learning
-summary: Build training data in which every column the player could have chosen is played out under the same imagined futures, train one network to judge the resulting positions, and test whether it can rank columns as well as the reference search.
+summary: Measures every legal column under aligned futures and trains one network to rank the resulting positions.
 status: rejected
 evidence: machine-readable records
 reads: public
 ---
 
-One network, one input — the position a move leaves behind — trained on data
+One network, one input (the position a move leaves behind) trained on data
 where nothing was left unmeasured, and then graded against the strongest search
 this repository has.
 
@@ -37,12 +37,12 @@ candidate as `public-policy`.
 ## The intuition
 
 Take one position. The player has up to seven legal columns. Drop into each of
-them in turn and let the cascade finish — seven resolved boards, the
+them in turn and let the cascade finish: seven resolved boards, the
 *afterstates*. Now give every one of those seven the same treatment: play 40
 more moves with a fixed simple policy, under a future you have pinned down in
 advance, and record the score. Repeat with a different pinned-down future, and
 again, and again. Average, and you have an opinion about which of the seven
-columns was better — an opinion in which luck has been held constant, because
+columns was better: an opinion in which luck has been held constant, because
 all seven lived through the same futures.
 
 <svg viewBox="0 0 660 208" className="my-4 w-full max-w-2xl rounded-xl border border-zinc-800 bg-zinc-900/40" role="img" aria-label="One root, every legal column, the same pinned futures, one distribution of outcomes per column">
@@ -84,7 +84,7 @@ all seven lived through the same futures.
 
 Two design choices in that picture are the whole point.
 
-**The label is a spread, not an average.** Drop7 scores are wildly uneven — the
+**The label is a spread, not an average.** Drop7 scores are wildly uneven: the
 same position can produce a short game or an enormous one. Predicting only the
 mean throws that away. The network predicts 16 quantiles of the outcome
 distribution instead, so it can distinguish "reliably decent" from "usually poor
@@ -107,7 +107,7 @@ optimised absolute calibration and were then asked for relative order.
    a held-out position's own game never contributes anything to training.
 2. **Expand and pin.** For each position, each legal column is played out to its
    resolved afterstate. For each scenario index, one random stream is derived
-   from the canonical public position alone — never from the seed — and shared by
+   from the canonical public position alone — never from the seed, and shared by
    every column at that position.
 3. **Label.** From each afterstate, a fixed public phase-greedy depth-1 policy
    plays up to 40 further moves inside that stream. The recorded label is the
@@ -122,7 +122,7 @@ optimised absolute calibration and were then asked for relative order.
 6. **Grade.** `label-d4.cpp` computes the exact
    [fair depth-4](/approaches/fair-expectimax/reference) ordering of the same
    held-out positions. Both the model and depth-4 are then scored against the
-   same target — the ordering implied by the averaged 40-move outcomes — on
+   same target (the ordering implied by the averaged 40-move outcomes) on
    three measures: how often the first choice is right, how often a pair of
    columns is ordered correctly, and *normalized regret*, meaning how much of the
    available gap between the best and worst column the chooser gives away, where
@@ -142,9 +142,9 @@ are too noisy to be stable, the verdict is "inconclusive", not "the theory is
 wrong". Three of the four falsification criteria are about ranking quality; the
 fourth is about whether the corpus can be built successor-closed at all.
 
-## What happened, in plain English
+## What happened
 
-**First: the labels were noise.** The machinery worked perfectly — 11,379
+**First: the labels were noise.** The machinery worked perfectly: 11,379
 positions, 616,048 sibling labels, complete coverage, every mechanics and
 information-boundary check passing before a single label was looked at. But with
 only eight pinned futures per column, the "best column" the labels pointed to
@@ -157,7 +157,7 @@ trustworthy answer to grade anyone against, so nobody was graded.
 
 **Second: still noise, but less.** Sixty-four futures per column lifted agreement
 to 0.446 — closer, still under the line, still inconclusive. The model's
-uncertainty estimates did become honest at this point, and training ran out of
+uncertainty estimates were calibrated at this point, and training ran out of
 its two-hour budget at epoch 15 of 20 with the ranking loss still improving.
 
 **Third: a real answer, and it was no.** With 256 futures per column the target
@@ -172,8 +172,8 @@ inside search."*
 
 **Fourth: the narrow question.** So the last experiment asked the companion
 question instead. Leave depth-4 in charge. Look only at positions where
-depth-4's own top two columns are almost tied — where its estimate is least able
-to separate them anyway — and let the model swap to the second column, but only
+depth-4's own top two columns are almost tied, where its estimate is least able
+to separate them anyway, and let the model swap to the second column, but only
 when the model's advantage survives a resampling test at 95% confidence.
 
 That override fired often (on 37% of the eligible positions, so it is not a rule
@@ -186,7 +186,7 @@ It also failed its gate. The rule fixed in advance required the improvement to
 be at least 0.01 in **each** half separately; one half delivered 0.0351 and the
 other 0.0075. Under the frozen rule, that is a fail.
 
-<Callout title="Why &quot;valid run, outcome fail&quot; is the honest reading — and so is &quot;positive signal&quot;" tone="info">
+<Callout title="Why &quot;valid run, outcome fail&quot; and &quot;positive signal&quot; both fit the record" tone="info">
 All three statements are true at once, and none of them cancels the others.
 
 **Valid run** means the experiment actually did what it promised: the corpus was
@@ -199,7 +199,7 @@ a finished scientific contribution; an invalid run tells you nothing either way.
 existed* was not met. The obvious temptation is to point out that the pooled
 improvement passes, or that a 0.0075 miss is small. Both are true. Neither
 matters, because a threshold you are allowed to reinterpret after seeing the
-data is not a threshold — it is how false positives get published. The
+data is not a threshold. It is how false positives get published. The
 experiment's own failure action closes the door explicitly: no further override
 variants of this same checkpoint without new evidence.
 
@@ -207,7 +207,7 @@ variants of this same checkpoint without new evidence.
 about the *mechanism*. The recorded limitations name the likely bottleneck
 without hedging: the network was stopped at 11 of 20 epochs by its GPU time
 budget with its ranking loss still falling, and it was trained against a weak
-depth-1 continuation teacher. A retry is allowed — with a better-trained or
+depth-1 continuation teacher. A retry is allowed, with a better-trained or
 better-taught model, under the same unchanged rule.
 </Callout>
 
@@ -225,7 +225,7 @@ better-taught model, under the same unchanged rule.
 
 <ResultSummary id="RS-20260820T184500Z-63c0a8e2" />
 
-<TechnicalDetails title="The technical record — every number, with its source">
+<TechnicalDetails title="The technical record: every number, with its source">
 
 All figures below are read from the machine-readable result records under
 `research/results/`. They are **pilot** tier: offline ranking comparisons on
@@ -233,7 +233,7 @@ public-development data, with no complete games played by either side. All four
 runs drew only on seed lease `SL-20260820T083000Z-5da70000`, and every held-out
 block was read exactly once.
 
-**Iteration 1 — 8 scenarios** (`RS-20260820T094500Z-5c1e9a04`, valid run,
+**Iteration 1: 8 scenarios** (`RS-20260820T094500Z-5c1e9a04`, valid run,
 inconclusive). 11,379 roots, 616,048 sibling labels, action completeness 1.0;
 2,470 held-out roots. Split-half Spearman **0.2457** against the frozen 0.50
 floor. Within-action scenario standard deviation **20,922** points against a
@@ -243,14 +243,14 @@ regret **0.413 vs 0.337**) and depth-4 beat depth-1 (**0.330 vs 0.254**), which
 matches the historical ordering of those searches. Quantile interval coverage
 0.631, outside its band.
 
-**Iteration 2 — 64 scenarios** (`RS-20260820T114500Z-2b7c9e31`, valid run,
+**Iteration 2: 64 scenarios** (`RS-20260820T114500Z-2b7c9e31`, valid run,
 inconclusive). Split-half Spearman **0.4462** on 2,750 fresh held-out roots.
 Coverage **0.8069**, inside the band. Model vs depth-4: top-1 **0.3422 vs
 0.4331**, pairwise **0.6367 vs 0.6972**, regret **0.3029 vs 0.2315**; model vs
 its own depth-1 teacher, top-1 **0.3422 vs 0.2985**. Training stopped at epoch
 **15 of 20** on the GPU budget.
 
-**Iteration 3 — 256 scenarios** (`RS-20260820T142500Z-8f4a2d17`, valid run,
+**Iteration 3: 256 scenarios** (`RS-20260820T142500Z-8f4a2d17`, valid run,
 **fail**; theory assessed *not supported as tested*). 24,270,592 rows over
 14,009 roots, completeness 1.0; 2,523 held-out roots of which **411** are
 "decisive" (best-to-worst spread above 20,000 points, a threshold fixed on
@@ -273,7 +273,7 @@ Stability **0.8144**, coverage **0.8606**, two gate runs byte-identical. Six of
 seven gate criteria passed; the one that failed was the primary one.
 
 **Recorded limitations that apply to every number above.** The target is the
-40-move outcome under a phase-greedy depth-1 continuation — a weak, fixed public
+40-move outcome under a phase-greedy depth-1 continuation: a weak, fixed public
 teacher, and the *same label family the model was trained on*; depth-4 is scored
 against that same target, but an offline ranking comparison cannot measure real
 gameplay interaction, which only a SCREEN tier could. Roots are harvested from
@@ -294,7 +294,7 @@ learning*.
 **The label has to be checked before the model is.** This is the transferable
 lesson, and it was nearly missed. Two full pilots produced complete corpora,
 trained models and a full sheet of comparison numbers in which the model looked
-worse than depth-4 — and all of those numbers were meaningless, because the
+worse than depth-4, and all of those numbers were meaningless, because the
 thing they were compared against was noise. Only the preregistered stability
 floor prevented two false negatives from entering the record as real ones. Any
 future experiment that grades a policy against simulated outcomes should measure

@@ -225,7 +225,7 @@ commits to a specific line instead of choosing a move that is good on average.
 The safe reading is that **the future disc tape is not the source of the
 clairvoyant planner's advantage; the board under the covers is.**
 
-**What is *not* attributable, stated plainly.** The 41.2% residual is an upper
+**What is *not* attributable.** The 41.2% residual is an upper
 bound on the value of hidden information, not a measurement of it. It contains
 two things this experiment cannot separate:
 
@@ -237,7 +237,7 @@ two things this experiment cannot separate:
    move, that is likely a material part of the residual.
 
 Since the fair planner had not saturated at H = 7, item 2 is known to be
-non-zero and the honest statement is **"at least 59% planning, at most 41%
+non-zero. The supported statement is **"at least 59% planning, at most 41%
 information, and the planning share can only go up with better fair methods."**
 
 ## 3. The occupancy trend — no fair planner found a fixed point
@@ -357,7 +357,7 @@ is bounded above by 41%.**
   out.
 
 So finding-06's ceiling is not obviously out of reach for a legal policy, but it
-was not reached here, and the honest position is that the fair-planner frontier
+was not reached here, and the evidence leaves the fair-planner frontier
 is **still moving** and its limit is unmeasured.
 
 ### What this changes for the research program

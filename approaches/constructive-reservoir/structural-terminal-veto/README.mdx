@@ -1,14 +1,14 @@
 ---
 title: Structural terminal veto
 family: constructive-reservoir
-summary: Keeps the four-move search in charge but lets its second-choice column take over when a long simulation says the first choice dies sooner — tested twice over, on two independent sets of imagined futures. It still finished behind the plain search.
+summary: Keeps the four-move search in charge unless a long simulation favors its second choice. Two independent tests still finished behind the unchanged search.
 status: rejected
 evidence: task-record only
 reads: public
 ---
 
 A safety-first way to use the family's structural planner: never let it choose
-a move, only let it *object* to one — and only when two independent panels of
+a move, only let it *object* to one, and only when two independent panels of
 imagined futures agree.
 
 <EvidenceLabel status="rejected" evidence="task-record only" reads="public" />
@@ -39,7 +39,7 @@ collected in the next few moves.
 2. Take only its top two columns. If there is only one legal column, or the
    search is decisive, nothing else happens.
 3. Force each of the two columns, then continue with the frozen constructive
-   continuation — the inner rollout policy, deliberately *not* its
+   continuation: the inner rollout policy, deliberately *not* its
    depth-shielded outer form — over a 200-move horizon.
 4. Do that on two independent panels of 127 event-stratified public chance
    streams each.
@@ -52,7 +52,7 @@ the program reproduces exact four-move play.
 ## What happened
 
 **Rejected.** The recorded verdict is that the aggregate fitting result trailed
-plain four-move search and could not reach its gate — so no screen was opened.
+plain four-move search and could not reach its gate, so no screen was opened.
 
 There are **no retained numbers.** The status exists only as a task record;
 [audit 04](/docs/exploratory/audit-04-blind-spots) §B.3 lists this source among
@@ -64,7 +64,7 @@ scores.
 The wider pattern it belongs to *is* well recorded. The
 [strategy landscape](/docs/strategies) collects the whole family of
 conservative overrides — long-outcome vetoes, denoised-value vetoes, root
-tail-risk objectives, regenerative panels — and concludes that the gates
+tail-risk objectives, regenerative panels, and concludes that the gates
 themselves work mechanically, while the challengers behind them were "too rare,
 poorly calibrated, or unstable across whole games". Its verdict is worth
 reading before designing another one: *confidence gates are a safety mechanism,
@@ -72,7 +72,7 @@ not a source of new strategic information.*
 
 <TechnicalDetails title="The technical record">
 
-**Status: rejected — task-record only.** From the
+**Status: rejected; task-record only.** From the
 [experiment index](/docs/research/experiment-index): "the aggregate fitting
 result trailed plain D4 and could not reach its gate." No entry in the
 [experiment history](/docs/research/history).

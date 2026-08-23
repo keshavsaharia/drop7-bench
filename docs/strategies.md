@@ -1,11 +1,10 @@
 # Drop7 strategy catalog
 
-This guide explains the strategy ideas represented in this repository, the
-evidence for each one, and the most useful directions that remain open. It
-starts with a plain-language overview and then uses more precise research
-language.
+This guide explains the strategy ideas in this repository, the evidence for
+each one, and the most useful open directions. It begins with the game itself,
+then introduces research terms as they become useful.
 
-## The problem in plain language
+## The problem
 
 In Drop7, you choose one of seven columns for the next numbered disc. A 3, for
 example, breaks when it sits in an unbroken horizontal or vertical group of
@@ -221,7 +220,7 @@ shift problem, not merely a need for a larger network.
 
 **Conclusion.** A learned leaf remains plausible, but a new attempt should
 begin with a data-coverage proof, whole-origin splits, calibrated uncertainty,
-and exact fallback parity—not with additional model capacity.
+and exact fallback parity, not with additional model capacity.
 
 ### Policy-gradient and actor-critic methods
 
@@ -483,7 +482,7 @@ different rise/scoring rules, so the method and score are not evidence for a
 public stochastic Hardcore policy. Its block-search idea is still relevant to
 bounded cycle planning if future knowledge is replaced by fair chance models.
 
-### Experienced-player strategy — anecdotal
+### Experienced-player strategy: anecdotal
 
 The [Drop7 strategy notes by an experienced
 player](https://blog.adamatomic.com/post/46685122887/drop7-strats) recommend

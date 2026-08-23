@@ -14,7 +14,7 @@ because the discs a move clears are not a function of the state after it.
 `docs/exploratory/audit-05-optimistic-curriculum.md` classifies seventeen failed
 learned models here. The largest primary class is **sibling coverage /
 within-root discrimination (6 of 17)**, and the oracle-distillation failures are
-**representation / information gap (3 of 17)** — the teacher's advantage was
+**representation / information gap (3 of 17)**: the teacher's advantage was
 largely a function of the realised tape, which no public student can represent.
 
 `docs/exploratory/finding-07-fair-planning-ceiling.md` supplies a teacher with
@@ -68,7 +68,7 @@ The offline gate failed, so no gameplay cohort was opened and
 `runs/RUN-A526-DISTILL-46d93fb7956e/run-stage5.sh` is retained unrun.
 
 The result that matters is upstream of the student. On **160 paired master
-tapes** the teacher — the legal fair planner at `H = 5, K = 256` — beats fair
+tapes** the teacher (the legal fair planner at `H = 5, K = 256`) beats fair
 depth 4 by +16,777 points (95% lower bound **−19,143**) and +5.18 moves (lower
 bound **−4.56**), with an occupancy slope of **+1.4798 against +1.4813**.
 `finding-07`'s eight-tape cohort put that gap at +0.1213 clears per move; on 160
@@ -76,7 +76,7 @@ tapes it is +0.0405. **A distillation can only transfer what the teacher has.**
 
 Secondary, and useful: the teacher agrees with its own argmax only **0.8318** of
 the time when its 256 completions are split in half, while the columns it cannot
-separate are worth 0.0765 discs apart out of a 2.26-disc spread — so a top-1
+separate are worth 0.0765 discs apart out of a 2.26-disc spread, so a top-1
 target is a poor summary of what this teacher knows, and `normalised regret` is
 the better primary metric. Nothing in this repository had measured that.
 

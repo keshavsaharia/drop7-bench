@@ -1,9 +1,8 @@
 # Drop7 Policy Protocol (D7P)
 
-D7P is the standard interface between a Drop7 policy and a benchmark harness —
-the analogue of UCI for chess engines. It exists so that any strategy, in any
-language, can be benched against the same scripted rounds and reported the
-same way.
+D7P is the standard interface between a Drop7 policy and a benchmark harness,
+similar to UCI for chess engines. It lets any strategy, in any language, run
+against the same scripted rounds and report results the same way.
 
 D7P has two equivalent layers:
 
@@ -47,8 +46,9 @@ interface BenchPolicy {
 }
 ```
 
-`chooseColumn` returns a 0-indexed column. Returning `null` or an illegal
-column is recorded as an illegal decision and the harness plays the first
+`chooseColumn` returns an internal column index from `0` to `6`. Interfaces for
+players display the same columns as 1–7. Returning `null` or an illegal column
+is recorded as an illegal decision and the harness plays the first
 legal column as a fallback. Policies must be deterministic: same public state,
 same column. Solver seeds, when needed, are derived from the policy id and are
 never game seeds.
@@ -96,7 +96,8 @@ commands; the policy answers. All tokens are space-separated.
 <- bestmove 4
 ```
 
-`bestmove` carries the 0-indexed column, or `none` when no column is legal.
+`bestmove` carries the internal column index from `0` to `6`, or `none` when no
+column is legal. User-facing tools add one when they display it.
 The policy may emit `info ...` lines at any time; harnesses must ignore lines
 they do not understand. `quit` ends the session.
 
@@ -113,8 +114,8 @@ node --experimental-strip-types src/bench/d7p-server.ts --policy expectimax-d2
 Benchmark randomness is predetermined by the `drop7-scripted-round-v1` format
 (`src/bench/rounds.ts`):
 
-- `discs[m]` — the visible disc at move `m`, indexed by absolute move number;
-- `latentRows[r][c]` — the hidden value of the covered disc in column `c` of
+- `discs[m]`: the visible disc at move `m`, indexed by absolute move number;
+- `latentRows[r][c]`: the hidden value of the covered disc in column `c` of
   covered-row generation `r` (generation 0 is the opening bottom row).
 
 The engine's latent-board mode (`PlayMoveOptions.latent` in

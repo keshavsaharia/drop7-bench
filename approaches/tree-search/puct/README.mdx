@@ -1,7 +1,7 @@
 ---
 title: PUCT
 family: tree-search
-summary: A tree search that starts from a hunch about which columns are worth trying — complete, and never run.
+summary: A complete but unrun tree search that starts from a prior about which columns are worth trying.
 status: unknown
 evidence: repository-verified
 reads: public
@@ -14,7 +14,7 @@ and is allowed to overrule the existing policy only when it is very sure.
 
 <Callout title="No retained result" tone="warn">
 This lab is complete, compiles, carries its own preregistered seed lanes and
-frozen acceptance rules — and there is no record anywhere in this repository
+frozen acceptance rules, and there is no record anywhere in this repository
 that it was ever run. The [experiment index](/docs/research/experiment-index)
 gives it the status **Unknown**: "the source exists, but neither the ledger nor
 the task record establishes a trustworthy outcome." Everything on this page is
@@ -40,7 +40,7 @@ distribution over columns by a softmax with a fixed temperature.
 
 The second idea in this lab is caution. The search is not the player. The
 player is the existing phase policy, and the tree is only allowed to change its
-mind when the tree is emphatic — the challenger column must have been visited
+mind when the tree is emphatic: the challenger column must have been visited
 at least a minimum number of times, must hold a large share of all visits, and
 must lead by more than a fixed margin in value. Four such rules of increasing
 strictness are laid out side by side so a run would show how the outcome
@@ -66,15 +66,15 @@ Simulation, gray-disc reveal and next-disc randomness each draw from a separate
 domain of the solver's own random stream, so the search's imagined futures
 cannot line up with the game's real ones.
 
-## What happened, in plain English
+## What happened
 
-Nothing happened. That is the honest state of this approach: a finished
+Nothing happened. The approach has a finished
 experiment with no result.
 
 It is not an oversight so much as a queue. The research roadmap places PUCT
 last in a sequence — first get a model that ranks moves safely, then let it
-override the reference conservatively, then batch and widen — and states the
-rule plainly: "Do not begin with learned action pruning. Every legal root
+override the reference conservatively, then batch and widen. It sets one firm
+rule: "Do not begin with learned action pruning. Every legal root
 action remains eligible until the model has independently demonstrated safe
 sibling ranking." A search that concentrates its budget by prior is exactly the
 kind of thing that rule is holding back until the ranking problem is solved.
@@ -95,7 +95,7 @@ There is no result record, no ledger entry and no artifact. What exists:
 - Preregistered lanes in the source: an eight-game screen and an eight-game
   confirmation, on separate training seed ranges.
 - One frozen search configuration — 256 simulations, horizon 8, exploration
-  constant 1.25, at most 4,096 nodes — and four override gate profiles
+  constant 1.25, at most 4,096 nodes, and four override gate profiles
   combining a 0.65 or 0.80 visit share with a 0.10 or 0.25 value margin at a
   minimum of 32 challenger visits.
 - Separate random domains for simulations, reveals and next discs; a

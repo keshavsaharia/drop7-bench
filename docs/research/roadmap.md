@@ -211,7 +211,7 @@ roughly 47,000 to 108,000 points. Every significant result in this factorial is
 above its floor; every null result is below it and is therefore a
 non-measurement. Giving the observed depth-5 estimate a bound would take about
 684 paired games — about 13 wall-days at that arm's measured throughput of
-1,647 s per game on 14 threads (honest range 8-18 days, since the two chunks
+1,647 s per game on 14 threads (estimated range 8-18 days, since the two chunks
 differed 2.3x under other agents' load), and finishing the planned 64 would not
 have come close.
 

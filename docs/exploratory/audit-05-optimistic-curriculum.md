@@ -233,7 +233,7 @@ Classification scheme as requested:
 | (v) optimization / underfitting / bad basin | **0** | — (and **actively refuted twice**, by 15 and 16) |
 | (0) underpowered or gate-stopped, mechanism untested | **2** | 4, 8 |
 
-### What this means for the owner's hypothesis — stated plainly
+### What this means for the owner's hypothesis
 
 Curriculum ordering is an intervention on class **(v)**. It changes which basin
 the optimizer lands in. It cannot create sibling labels that were never
@@ -260,7 +260,7 @@ that at a single root, the legal siblings' true long-horizon values are close
 together relative to the noise in any affordable label, and no amount of
 reordering the same examples changes that gap-to-noise ratio.
 
-Two honest qualifications in the owner's favour:
+Two qualifications favour the original hypothesis:
 
 - Class (i) failures 1, 2, and 10 are all *oracle-target* failures, and §6
   argues they share a single removable cause — optimism in the **label**. Fixing
@@ -354,7 +354,7 @@ of the realised tape — with a genuine but non-actionable type-(a) residue.** T
 type-(a) residue is real and shows up as *state* quality (AUC 0.93+), not as
 *action* preference (top-1 0.218, root-prior loss).
 
-Which is exactly the split the owner needs to know about:
+That is exactly the split the owner needs to know about:
 
 - Optimism in the **label** (regress what happened on a lucky tape) is a type-(b)
   target. It is not a function of the public state, so a public network cannot fit
@@ -413,7 +413,7 @@ allocator must first import every historical range per `benchmarks.md:47-50`):
 - pool **O**: states from oracle (depth 4 / beam 128) roll-ins, sampled from move
   50 onward as `oracle-curriculum.cpp:28` already does;
 - pool **F**: fair-D4 states matched to each O state on rise phase, occupancy,
-  and max height (this matching is what made the manifold discriminator honest).
+  and max height (this matching made the manifold discriminator valid).
 
 Report four numbers plus split halves:
 
@@ -578,7 +578,7 @@ contributes. This document is an audit and registers none of those.
 
 ---
 
-## 7. Honest assessment
+## 7. Assessment
 
 **Is H-order, as literally stated, likely to work? No — perhaps 10%.**
 

@@ -1,7 +1,7 @@
 ---
 title: Expert iteration from the depth-4 search
 family: ntuple-rl
-summary: Start from the strongest known search, learn from its games, play with what you learned, and repeat — eight rounds later the learned policy was still less than half as good as the search it started from.
+summary: Learn from the strongest search, play with the result, and repeat. After eight rounds, the learned policy was still less than half as good as its teacher.
 status: rejected
 evidence: ledger-recorded
 reads: public
@@ -26,7 +26,7 @@ from the rest of the family.
 
 First, it learns *several* things at once rather than a single value: how long
 the game will last, how well the board regenerates across row rises, and how
-much flow — clears and reveals per move — it sustains. The repository's own
+much flow (clears and reveals per move) it sustains. The repository's own
 diagnostics had repeatedly pointed at flow rather than points as the quantity
 that separates long games from short ones, so the student was asked to predict
 it directly.
@@ -49,7 +49,7 @@ data useful instead of stale.
    intermediate gameplay evaluation is permitted, so the run cannot quietly
    pick its luckiest round.
 
-## What happened, in plain English
+## What happened
 
 The learned policy never came close to the search it was learning from, and it
 did not improve monotonically either.
@@ -110,7 +110,7 @@ Source: `regenerative-expert-iteration.cpp`.
 
 **This experiment names the family's central failure precisely.** The ledger's
 own diagnosis: targets were observed for the action that was played, while
-deployment maximised predictions over unplayed siblings — so even regenerating
+deployment maximised predictions over unplayed siblings, so even regenerating
 fresh on-policy games every round did not remove the extrapolation error. If you
 read one sentence from this family, read that one. It is the
 [sibling trap](/learn/concepts/ranking-siblings) stated by the experiment that

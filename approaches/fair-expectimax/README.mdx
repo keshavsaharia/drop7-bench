@@ -1,10 +1,10 @@
 ---
 title: Fair expectimax
-summary: Look a few moves ahead, take the best column on your own turns, and average honestly over every disc the game might deal — no hoping, no fearing.
+summary: Look a few moves ahead, take the best column on your own turns, and average over every sampled disc the game might deal.
 ---
 
 Look a few moves ahead, take the best column on your own turns, and average
-honestly over every disc the game might deal — no hoping, no fearing. That is
+over every sampled disc the game might deal, without hoping or fearing. That is
 the whole family. The strongest policy this repository has is one of these
 searches, and every other idea in the project is measured against it.
 
@@ -19,7 +19,7 @@ The alternative is to enumerate: for each column, imagine every disc that
 could come next, work out the best reply to each, and average. That average is
 what the search compares. Averaging is not the only attitude available — you
 could assume the disc you want (optimistic), the disc you fear (pessimistic),
-or ignore the future (greedy) — and on a real position those four attitudes
+or ignore the future (greedy), and on a real position those four attitudes
 pick different columns:
 
 <ChanceStyles caption="One real position, valued four ways by the repository's rules engine. Greedy and pessimistic take the 53-point chain; the optimist gambles on a one-in-seven disc; the fair player banks 7 points and keeps the chain structure standing. Full walkthrough on the chance-and-choice concept page." />
@@ -41,7 +41,7 @@ read the concept page first; the pages here link rather than re-explain.
    not the hidden gray numbers, not the score or the move number.
 2. **Try every legal column** at the root. No pruning, no shortlist.
 3. **At each chance point, take a fixed handful of representative outcomes**
-   instead of enumerating everything — five of them in the frozen reference.
+   instead of enumerating everything: five of them in the frozen reference.
    These are the [strata](/learn/glossary).
 4. **Repeat for four of the player's own moves**, alternating choice and
    chance, and stop.
@@ -62,7 +62,7 @@ The four-move search (depth 4) beat the three-move search (depth 3) on the
 recorded comparison, and nothing since has displaced it. On the eight paired
 games of its confirmation cohort, replayed under corrected Hardcore scoring, it
 averaged about 400,675 points to depth 3's 235,071 and won seven of the eight
-games. That is the strongest dependable public-information result here — and it
+games. That is the strongest dependable public-information result here, and it
 is roughly 40% of the score the project is aiming for.
 
 <div className="my-4 grid gap-3 sm:grid-cols-3">
@@ -87,7 +87,7 @@ reference point, not a measured cohort.
 
 - **Reference sources.** `approaches/fair-expectimax/reference/fair-only-horizon.cpp`
   (full-width depth 3, five strata) and `fair-only-depth4.cpp` (the same leaf,
-  four completed plies). Both **completed — ledger-recorded** in the
+  four completed plies). Both **completed; ledger-recorded** in the
   [experiment index](/docs/research/experiment-index).
 - **Depth-4 confirmation, corrected 17,000-point Hardcore scoring** (ledger,
   "Corrected Hardcore scoring replay"): eight-game confirmation, D3 235,071.25
@@ -99,7 +99,7 @@ reference point, not a measured cohort.
   30,441,472 bytes.
 - **Original 7,000-point figures.** The same trajectories were first recorded
   under the historical Sequence scoring (D3 102,571.25, D4 176,925.25). The
-  replay changed no decision — identical move counts — so those sections are
+  replay changed no decision — identical move counts, so those sections are
   archival, not separate evidence.
 - **Broad reference cohort.** 308,295.578 points and 90.031 moves over 64 games,
   recorded once in the ledger inside the regenerative expert-iteration
@@ -158,6 +158,6 @@ bad combination; one long game can carry a mean.
 **What is still open.** A properly powered corrected-scoring re-test of exact
 seven-sample chance coverage; whether covered-disc reveals, not the next disc,
 are now the binding sampling bias; and whether depth 5 pays once the estimator
-is exact — an in-progress exploratory arm reports it is currently far behind on
+is exact: an in-progress exploratory arm reports it is currently far behind on
 a partial, admittedly biased sample
 ([finding 15](/docs/exploratory/finding-15-depth5-exact-estimator)).

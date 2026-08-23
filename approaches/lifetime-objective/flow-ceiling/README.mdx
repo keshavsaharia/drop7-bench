@@ -1,7 +1,7 @@
 ---
 title: Is the required clearing rate reachable at all?
 family: lifetime-objective
-summary: Let a planner cheat — read the hidden numbers and plan against a future it already knows — to find out whether any way of playing can remove discs as fast as the game adds them.
+summary: Lets a privileged planner test whether any policy can remove discs as fast as the game adds them.
 status: completed
 evidence: development-tier exploratory findings
 reads: oracle
@@ -17,7 +17,7 @@ can remove discs as fast as the game adds them.
 The planner measured here reads the hidden value under every gray disc and the
 whole future sequence of discs. It is an **oracle**: a measuring instrument and
 a possible source of training labels, never something that could play the game
-for real. Its numbers are a *ceiling* — they say what the game permits, not what
+for real. Its numbers are a *ceiling*. They say what the game permits, not what
 a legal player achieved. This page also measures a **legal** planner with the
 same design and the cheating removed; every number below says which one it is.
 </Callout>
@@ -71,7 +71,7 @@ board and whether anything can sit on it.
    [scenario engine](/approaches/lifetime-objective/scenario) rather than the
    base one.
 2. **Plan exactly over a short window.** At every move, cut a window of `H`
-   moves out of that fixed future, solve it exactly — every legal move, every
+   moves out of that fixed future, solve it exactly: every legal move, every
    consequence, no [leaf evaluator](/learn/glossary) and no guessing — play the
    first move of the best line, and re-solve from the new position. Windows of
    5, 7 and 9 moves were used; 9 is the largest that solves exactly in seconds.
@@ -101,11 +101,11 @@ this is a control problem with a solution, not an arithmetic impossibility.
 
 **And the equilibrium is self-correcting.** Conditioning on how full the board
 was before each move, the clairvoyant clear-seeker extracts 2.16 clears per move
-at 15–19 occupied cells, 2.97 at 20–24 and 4.21 at 25–29 — so below about 20
+at 15–19 occupied cells, 2.97 at 20–24 and 4.21 at 25–29, so below about 20
 cells it clears less than 2.400 and the board fills, above it clears more and
 the board empties. The reference policy has no such fixed point: its rate peaks
 at 2.59 near 27 cells and then *falls* — 2.26, 1.58, 1.40, 1.00 as the board
-crowds — which is a death spiral, and explains why its lifetimes are so
+crowds, which is a death spiral, and explains why its lifetimes are so
 unevenly distributed.
 
 **Chain building is real, and it is not the lever.** Given the same futures and
@@ -132,14 +132,14 @@ than the fully legal arm. But the shortfall against the clairvoyant planner
 grows sharply with how much is hidden: **+0.05 clears per move on boards with
 10–14 discs, +3.54 on boards with 30–34**, where about twenty covered cells are
 unknown. More guessing closes the sparse end and does essentially nothing at the
-crowded end — which is exactly the regime a policy running a flow deficit gets
+crowded end, which is exactly the regime a policy running a flow deficit gets
 pushed into.
 
 **More guessing eventually makes it worse.** The obvious lever — raise the number
 of guessed futures — turns over. Going from 256 guesses to 1,024 was worse on
 five of six paired futures and cut mean lifetime from 182 to 100 moves. That is
 the expected behaviour of this kind of planner: inside every guess it plans as
-if the guess were true — [strategy fusion](/learn/glossary) — so more compute
+if the guess were true — [strategy fusion](/learn/glossary), so more compute
 buys a more faithful optimisation of a biased objective. There is no setting of this dial at which the planner
 approaches 2.400.
 
@@ -147,7 +147,7 @@ approaches 2.400.
 The first study reported the legal planner at **2.2309 clears per move**, closing
 **58.8%** of the gap. Both figures were measured on eight futures that turned out
 to favour long games: the reference policy scores 117.75 mean moves on those
-eight and **93.56** on 128 fresh ones — a 26% inflation, confirmed by two
+eight and **93.56** on 128 fresh ones: a 26% inflation, confirmed by two
 independent measurements of the same policy at 94.06 and 93.78 moves. The
 clairvoyant planner, which was hitting the move cap either way, was **not**
 affected (2.3601 → 2.3663). So the ceiling stands and the legal planner's share
@@ -235,7 +235,7 @@ the machine carried load averages of 36–60 throughout.
 - **The residual has a shape.** It is concentrated on crowded boards, where the
   hidden state is largest, and it is not something a better [leaf](/learn/glossary)
   can absorb. Whatever comes next has to *reason about* what is under the covers
-  instead of averaging over guesses of it — a belief-state search, or an explicit
+  instead of averaging over guesses of it: a belief-state search, or an explicit
   reason to open a cover in order to learn from it. Nothing in this repository
   does that yet.
 - **One tempting repair is already ruled out.** "Make the reference search keep

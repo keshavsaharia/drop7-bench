@@ -366,7 +366,7 @@ its board and dies; no arm was censored at the move cap.
 | d4, N=5, M=1 *(frozen)* | 1,296,034 | 1.000× | 297,327 | 0.23 | finding-05 |
 | d4, N=7, M=1 | 4,956,614 | 3.824× | 398,498 | 0.080 | finding-05 |
 
-**Stated plainly: yes, this buys strength with compute — at very nearly the same
+**This buys strength with compute at very nearly the same
 exchange rate as the fourth ply, and no better.** M = 1 → 6 at depth 3 costs
 27.1× the logical work per move for +64,116 points. Score per unit work falls
 monotonically with M, as it does with depth. Under

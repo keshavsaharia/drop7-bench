@@ -1,9 +1,9 @@
 ---
 title: The data factory, and the switch that was left off
 family: lifetime-objective
-summary: Replays a great many games and writes down every position they passed through, labelled with how many moves that game still had left — the training data other approaches in this family learn from.
+summary: Replays many games and labels every visited position with its remaining lifetime, producing training data for the rest of the family.
 status: support-only
-evidence: none — no retained result of its own
+evidence: "none: no retained result of its own"
 reads: teacher
 ---
 
@@ -12,7 +12,7 @@ each one labelled with how many moves that game still had left. This approach
 produces no result of its own; it is the data other approaches in this family
 learn from.
 
-<EvidenceLabel status="support-only" evidence="none — no retained result" reads="teacher" />
+<EvidenceLabel status="support-only" evidence="none: no retained result" reads="teacher" />
 
 <Callout title="Why this counts as a teacher, not a policy" tone="info">
 The label attached to each position — *how many moves this game still had left* —
@@ -29,7 +29,7 @@ The obvious training target is score. Score in this game mode is a poor target:
 it is dominated by a flat 17,000-point bonus, it is heavy-tailed, and there is
 exactly **one label per game**. Remaining lifetime is the same quantity with the
 noise taken out — final score and moves survived correlate at r = 0.9995
-([`finding-01`](/docs/exploratory/finding-01-score-is-survival)) — and it gives
+([`finding-01`](/docs/exploratory/finding-01-score-is-survival)), and it gives
 **one label per move** instead of one per game.
 
 ## The intuition: seven answers per position, and only one of them written down
@@ -42,7 +42,7 @@ next disc is a <Disc n={4} />. Two of the seven possibilities:
   after="0000000000000000000000000000005500060988889988888"
   beforeLabel="the position"
   afterLabel="drop into the second column"
-  caption="A three-wave chain worth 155 points. The board ends the move with two fewer discs on it than it started, even after adding one — this is the kind of move that keeps a game alive."
+  caption="A three-wave chain worth 155 points. The board ends the move with two fewer discs on it than it started, even after adding one: this is the kind of move that keeps a game alive."
 />
 
 <BoardCompare
@@ -69,7 +69,7 @@ it is on the record.
    move, a fixed-width record: the public board before the move, the visible next
    disc, how many drops remain before the next rise, which columns were legal,
    which one was played, how many discs cleared and how many gray discs were
-   revealed — and the labels, which are how many moves and how many rises that
+   revealed, and the labels, which are how many moves and how many rises that
    game still had ahead of it.
 2. **Mix the behaviour rather than branching at each position.** The generator
    was run four times with searches of one, two, three and four moves of
@@ -111,14 +111,14 @@ model trained on this data contains no panel reader at all. So the capability wa
 deliberately built and the corpus that was consumed holds **one row per played
 move, not one row per legal column**. Coverage of alternatives comes instead from
 behaviour mixing: a column that one arm avoids appears in the data as a column
-another arm played, in a different game — which is not the same thing as having
+another arm played, in a different game, which is not the same thing as having
 the alternatives at the *same* position.
 
 **A lease collision was caught and the data destroyed rather than filtered.** The
 first corpus run was sized in games and its end address was not checked against
 the allocation table, so it overlapped the scenario-minting range by 4,096 seeds.
 Both ranges are development data, so no protected seed was touched and no
-qualification claim is affected — but positions minted for a benchmark could have
+qualification claim is affected, but positions minted for a benchmark could have
 appeared in the training data for a model later graded on that benchmark. The
 contaminated corpus, 1,029,206 records, was **destroyed rather than filtered**,
 and regenerating it from a clean range cost 103 seconds
@@ -168,7 +168,7 @@ comparison, and no bound of any kind.
   one gives it the alternatives at a position it will actually be asked about.
   The [planner distillation](/approaches/lifetime-objective/planner-distill) work
   later built a corpus that does have full sibling coverage — 108,462 labelled
-  columns with zero gaps — and found that closing this gap, on its own, was not
+  columns with zero gaps, and found that closing this gap, on its own, was not
   enough to beat the reference search.
 - **Sizing a seed range in games rather than addresses is a real hazard**, and
   the recorded process change — print the arithmetic and check it against the

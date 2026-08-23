@@ -1,7 +1,7 @@
 ---
 title: Seven chance samples instead of five
 family: fair-expectimax
-summary: The next disc has seven equally likely values, but the reference search only samples five of them — this asks what happens if it samples all seven.
+summary: The next disc has seven equally likely values, but the reference samples only five. This tests all seven.
 status: rejected
 evidence: ledger-recorded
 reads: public
@@ -27,7 +27,7 @@ protocol, so the question is open, not settled in either direction.
 
 When the game deals the next disc, it picks uniformly from
 <Disc n={1} /> <Disc n={2} /> <Disc n={3} /> <Disc n={4} /> <Disc n={5} />
-<Disc n={6} /> <Disc n={7} /> — seven outcomes, each one chance in seven. The
+<Disc n={6} /> <Disc n={7} />: seven outcomes, each one chance in seven. The
 search cannot afford to expand all seven at every node of a four-move tree, so
 it draws a fixed handful of representative outcomes instead — the
 [strata](/learn/glossary). The frozen reference draws five.
@@ -36,7 +36,7 @@ Five samples cannot represent seven equally likely things. Some disc values get
 drawn twice, and some do not get drawn at all. An independent audit of the
 reference search measured exactly how often: across the sampled nodes, five
 strata produced five distinct disc values on 62.65% of nodes, four on 33.86%,
-and three on 3.49% — a mean of 4.59, so **on average 2.41 of the seven possible
+and three on 3.49%: a mean of 4.59, so **on average 2.41 of the seven possible
 next discs are given probability zero at every node**, while the ones that were
 drawn are inflated from one-in-seven to one-in-five or two-in-five
 ([audit 02](/docs/exploratory/audit-02-fair-d4), H1).
@@ -70,11 +70,11 @@ enumeration with the true one-in-seven weights.
    tree.
 5. The output, as always, is one column.
 
-## What happened, in plain English
+## What happened
 
 On the eight games used to fit it, the seven-sample search scored almost
 exactly the same as the five-sample reference — about 164 points less on
-average — while surviving 2.25 moves longer. It won three of the eight games.
+average, while surviving 2.25 moves longer. It won three of the eight games.
 The rule the experiment had committed to in advance required both the score
 average and the survival average to improve, so a tiny score loss was enough to
 stop it, and the later cohorts were never opened. It also cost 3.79 times as
@@ -86,7 +86,7 @@ Two things about that outcome are worth knowing before quoting it.
 **First, the scoring mode.** Those eight games were scored under the historical
 7,000-point rule, not the corrected 17,000-point Hardcore rule this project
 uses. Because the level award is added *after* the search has chosen, rescoring
-does not change a single decision — the same games can be rescored exactly. Done
+does not change a single decision: the same games can be rescored exactly. Done
 that way, the −164-point gap becomes **+4,336 points**, and the experiment's
 own lower-tail numbers had already improved. On the corrected scoring, the gate
 this candidate failed would have passed
@@ -106,10 +106,10 @@ That finding also offers a mechanism for why the original run might have looked
 flat. The reference search's frozen work ceiling of 3,200,000 units was sized
 to sit just above five-sample depth 4. A seven-sample search left at that
 ceiling silently runs out of budget and returns a completed **depth-3** answer
-instead — so a careless comparison measures three moves with seven samples
+instead, so a careless comparison measures three moves with seven samples
 against four moves with five samples and reports it as a chance-sampling
 result. The recorded run declared a 12,000,000-unit ceiling, so it was not
-making that mistake; but the pattern it reported — a small score loss with a
+making that mistake; but the pattern it reported: a small score loss with a
 *move gain* — is also the signature of a shallower search, which is why the
 exploratory work flags the rejection as unsafe rather than wrong.
 
@@ -120,7 +120,7 @@ ledger's own numbers plus a separate experiment on different seeds.
 
 **Source.** `approaches/fair-expectimax/chance-strata/fair-depth4-s7.cpp`.
 Status in the [experiment index](/docs/research/experiment-index):
-**rejected — ledger-recorded**, "score-neutral to worse, reduced flow, and cost
+**rejected: ledger-recorded**, "score-neutral to worse, reduced flow, and cost
 about 3.8 times more work."
 
 **Fitting cohort** (ledger, "Fair full-width D4 with seven chance samples",
@@ -136,7 +136,7 @@ the score identity, which is what makes the rescoring argument possible.
 Paired change −163.625 points and +2.25 moves; three of eight score and move
 pairs won; paired 95% lower bound on score −38,398. No game censored at 1,000
 moves. Work: 3,140,461,451 units total, 4,838,924 per move, against 806,741,660
-and 1,278,513 for the reference — a 3.79× increase.
+and 1,278,513 for the reference: a 3.79× increase.
 
 **Heldout.** The preregistered held-out cohort had already started when the
 fitting failure was computed and was stopped at a completed-game boundary. Four
@@ -189,7 +189,7 @@ What is still genuinely unknown:
   distribution. Nothing here is that.
 - Whether the *reveal* distribution is now the binding bias. Seven samples make
   the next disc exact, but a gray-disc reveal can expose a variable number of
-  cells, so its expectation is still approximated. Fourteen samples — two per
+  cells, so its expectation is still approximated. Fourteen samples: two per
   disc value — would separate "exactness" from "more samples", at roughly 7.8×
   the work of seven.
 - What the right way to spend the extra computation is. Seven samples at depth 3
@@ -198,6 +198,6 @@ What is still genuinely unknown:
 
 ## Sources
 
-- `approaches/fair-expectimax/chance-strata/fair-depth4-s7.cpp` — the candidate;
+- `approaches/fair-expectimax/chance-strata/fair-depth4-s7.cpp`: the candidate;
   the sample count and the completion-independent resource caps are its only
   differences from the reference.

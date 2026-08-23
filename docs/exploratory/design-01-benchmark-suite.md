@@ -64,7 +64,7 @@ This is a genuine semantic change, and it is being handled as one:
   to base-engine runs and will never be reported as if they were.
 
 As a side effect this closes an audit finding: without latent values there is no
-true hidden board, which is what blocks honest oracle and teacher experiments.
+true hidden board, which blocks reproducible oracle and teacher experiments.
 
 ## Two modes, and only one of them can prove improvement
 

@@ -1,7 +1,7 @@
 ---
 title: Double-DQN and continuation
 family: value-policy-learning
-summary: The textbook reinforcement-learning method — learn a score for each column from experience, reward staying alive, and add a short look-ahead on top.
+summary: Use textbook reinforcement learning to score each column from experience, reward survival, and add a short look-ahead.
 status: completed
 evidence: task-record only
 reads: public
@@ -73,7 +73,7 @@ this family.
 The record says two things, both without numbers.
 
 The frozen network plus six-move continuations **improved on the frozen network
-playing directly**, over 64 games — and remained far below the research target.
+playing directly**, over 64 games, and remained far below the research target.
 That is the entire retained content of the "completed" verdict: a direction,
 not a magnitude.
 
@@ -154,14 +154,14 @@ code is present and self-contained, but there is no baseline number to
 reproduce, no checkpoint retained, and no cohort to compare against. If the
 approach is revisited, the interesting question is no longer "does DQN work
 here" but whether an off-policy learner can be trained on
-[successor-closed](/learn/glossary) data — every legal sibling labelled — rather
+[successor-closed](/learn/glossary) data (every legal sibling labelled) rather
 than on the single move its own exploration happened to take. That is
 [the sibling trap](/learn/concepts/ranking-siblings), and a replay buffer is
 one of its purest examples.
 
 ## Sources
 
-- `train.ts` — the Double-DQN laboratory, features, reward, paired validation.
+- `train.ts`: the Double-DQN laboratory, features, reward, paired validation.
 - `continuation-benchmark.ts` — six-move continuations and sparse-search modes
   over a frozen checkpoint.
 - `train-v2.ts` — five-step credit, prioritized trajectory replay, optional

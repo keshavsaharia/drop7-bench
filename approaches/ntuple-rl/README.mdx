@@ -1,6 +1,6 @@
 ---
 title: N-tuple networks and learning from play
-summary: Instead of hand-writing what makes a Drop7 board good, learn it — from small patches of cells, and from millions of games the program plays against itself.
+summary: Learn what makes a Drop7 board good from small cell patterns and millions of self-play games.
 ---
 
 Instead of hand-writing what makes a Drop7 board good, learn it — from small
@@ -54,7 +54,7 @@ the advantage of one column over another.
 2. **Evaluate.** Look up all 92 windows (plus, in some variants, extra features
    for board height, disc counts, and rise phase) and add the weights.
 3. **Choose a column.** Simulate dropping the visible disc in each legal column,
-   evaluate the resulting board — its [afterstate](/learn/glossary) — and take
+   evaluate the resulting board — its [afterstate](/learn/glossary), and take
    the best. Some variants put a shallow
    [expectimax search](/learn/concepts/chance-vs-choice) on top and use the
    network only at the [leaves](/learn/concepts/evaluating-a-board).
@@ -64,12 +64,13 @@ the advantage of one column over another.
 5. **Freeze and test.** Freeze the weights, then play a fixed cohort of complete
    games against a reference policy on the same seeds.
 
-## What happened, in plain English
+## What happened
 
 The first version worked well enough to be interesting and was never beaten by
 anything that came after it. Adding a two-move look-ahead on top of the learned
 values lifted it from about 182,000 to about 232,000 points per game on a fixed
-64-game development probe — a real improvement, honestly measured. But by the
+64-game development probe. The improvement was real and measured on paired
+games. But by the
 time the hand-tuned depth-4 search was properly measured, that search was
 scoring around 308,000 on its own 64-game reference cohort, and the learned
 policies were not close.
@@ -146,8 +147,8 @@ a policy no better than one trained far less.
 **The bottleneck was which moves the data covered.** Almost every program here
 learned from the move it actually played, then, at play time, was asked to rank
 up to seven columns it had never been scored on. That is the
-[sibling trap](/learn/concepts/ranking-siblings), and the expert-iteration run
-states it most plainly: even regenerating fresh on-policy games every round did
+[sibling trap](/learn/concepts/ranking-siblings). The expert-iteration run
+showed that even regenerating fresh on-policy games every round did
 not remove it, because the targets still described only the played action.
 
 **Search on top of a weak value can hurt.** The two-rise rollout over the

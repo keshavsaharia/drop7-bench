@@ -248,7 +248,7 @@ they are listed here rather than edited into that document.
 | "The best legal planner sustains **2.2309 clears and 1.2782 reveals per move**" | **cohort-inflated.** That is an eight-tape figure at H = 7. On fresh tapes the same configuration measures **2.0260 clears and 1.1256 reveals per move** on 32 fresh tapes, and the H = 5 configuration falls from 2.1680 to 2.0445. |
 | "**Fair planning closes 58.8%** of the clairvoyant-minus-D4 gap" (40.0% at H = 5) | **withdrawn as stated.** The numerator and the denominator were both wrong: D4's baseline was inflated and the clairvoyant ceiling was not, so the true gap is 21% larger. At H = 5 on fresh tapes the share closed is 0.0580 / 0.3798 = **15.3%**, not 40.0%. At H = 7 on the matched fresh cohort it is **27.1%**, not 58.8%. |
 | "best mean lifetime **200.88 moves** against the clairvoyant's 366.25" | **cohort-inflated on the fair side only.** The clairvoyant figure is robust (386.48 on fresh tapes); the fair figure is not. |
-| "at least 59% planning, at most 41% information" | **withdrawn.** With the corrected gap and the corrected fair-planner rate, the fair planner accounts for a *much smaller* share of the gap than finding-07 reported, and the honest statement is now the opposite of that document's headline: on a representative cohort, **most of the clairvoyant advantage is not recovered by fair planning of this kind.** Whether the unrecovered part is information or a better fair planner's headroom remains unresolved, and §5 argues it is mostly information. |
+| "at least 59% planning, at most 41% information" | **withdrawn.** With the corrected gap and the corrected fair-planner rate, the fair planner accounts for a *much smaller* share of the gap than finding-07 reported. On a representative cohort, **most of the clairvoyant advantage is not recovered by fair planning of this kind.** Whether the unrecovered part is information or a better fair planner's headroom remains unresolved, and §5 argues it is mostly information. |
 | "Every fair game ended… every fair arm's board filled monotonically" | **stands, and is reinforced.** 0 of 128 and 0 of 32 fresh-tape fair games reached the cap. |
 
 `finding-06`'s clairvoyant results are **not** affected; see §6.
@@ -334,7 +334,7 @@ state, or an explicit information term — not spending more on the current one.
 ## 4. Is H = 9 reachable?
 
 **H = 9 was not reached, and this document does not report an H = 9 fair
-number.** That is the honest outcome the coordinator asked for in preference to
+number.** That is the recorded outcome the coordinator asked for in preference to
 a misleading one.
 
 The cost arithmetic: a fair decision costs `K` window solves. Measured
@@ -581,7 +581,7 @@ resolves cleanly — the two axes are not the same operation.
 | effect of more samples | monotone improvement | interior optimum, then degradation |
 
 **The distinguishing property is whether the inner evaluation conditions on the
-sample.** finding-09's `M` refines an honest expectation: the base engine draws a
+sample.** finding-09's `M` refines an unbiased expectation: the base engine draws a
 covered disc's number at the moment of reveal (audit-01 M2), so there is no
 hidden truth to be clairvoyant about, and adding samples strictly reduces
 estimator variance with no bias to sharpen. This document's `K` refines a

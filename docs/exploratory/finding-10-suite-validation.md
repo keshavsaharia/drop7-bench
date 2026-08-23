@@ -174,7 +174,7 @@ while their whole-game means span 148,857 points, 60% of theirs.
 ### The Spearman numbers
 
 `p` is a one-sided permutation p-value against the null of no association;
-`n` is 9 or 6, so the permutation distribution is the honest null and no
+`n` is 9 or 6, so the permutation distribution is the appropriate null and no
 large-sample approximation is used.
 
 | metric | S9 (all nine, cross-cohort) | p | S6 (six fair arms, shared cohort) | p |
@@ -223,7 +223,7 @@ above have the wrong sign, and the largest whole-game gap in the set
 (`d4s7` over `d2s7`, +133,204 points, a 50% improvement) registers as
 **minus four points**.
 
-That is the honest description of the instrument: a family detector, not a
+The instrument is a family detector, not a
 strength meter.
 
 ### The mechanism, from the exact score identity
@@ -974,7 +974,7 @@ metric only carries survival information once the horizon is long enough for the
 17,000-point rise term to vary, and "long enough for lifetime differences to
 show" is a large fraction of the lifetime itself.
 
-### B.3 The non-cost reasons, weighed honestly
+### B.3 The non-cost reasons
 
 The instruction asked whether reusability, a sealed half, low variance on small
 effects, or measuring things whole games cannot might justify it at parity cost.
@@ -1039,7 +1039,7 @@ exist, opening no new seed.
 ### B.5 If you build it anyway
 
 Should a coordinator overrule this, the configuration below is what a v2 check 1
-must preregister, and this is its honest price. It is included so the decision is
+must preregister, and this is its cost. It is included so the decision is
 made against a number rather than an impression.
 
 - H = 25 or longer; K >= 5; 128 positions;
@@ -1083,7 +1083,7 @@ target directly.
    noise term.
 3. **Nine policies is a small n for a Spearman.** S9 = 0.70 was chosen in advance
    as the threshold precisely because n = 9 admits no finer statement. The p
-   values are exact permutation p values, so they are honest, but they cannot
+   values are exact permutation p values, but they cannot
    distinguish "the suite is uninformative" from "the suite is weakly
    informative" — only the S6 = −0.26 with four wrong signs does that.
 4. **The nine-policy comparison is cross-cohort.** Six arms share

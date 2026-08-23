@@ -1,7 +1,7 @@
 ---
 title: Native parity
 family: baselines-diagnostics
-summary: Play the same games in both copies of the rules — the readable TypeScript one and the fast C++ one — and require the two write-ups to match character for character.
+summary: Play the same games in the readable TypeScript engine and the fast C++ engine, then require their records to match exactly.
 status: completed
 evidence: reproduced
 reads: diagnostic
@@ -23,7 +23,7 @@ affordable in native code.
 Two implementations mean two chances to be wrong. If the fast engine dropped a
 chain wave one move earlier, or awarded the rise bonus in a different order,
 every score produced by the C++ experiments would mean something slightly
-different from every score produced by the TypeScript ones — and the difference
+different from every score produced by the TypeScript ones, and the difference
 would be invisible, because nobody compares a mean of 308,296 against a mean of
 307,900 and concludes "our rules disagree."
 
@@ -32,7 +32,7 @@ would be invisible, because nobody compares a mean of 308,296 against a mean of
 1. Pick a seed. The seed fixes the sequence of discs the game will deal, in
    both engines, through the same arithmetic.
 2. Play a complete game in each engine, choosing columns from a **shared
-   random stream** rather than from a policy — so both engines make exactly the
+   random stream** rather than from a policy, so both engines make exactly the
    same moves, and any difference in the result is a difference in the rules,
    not in the player.
 3. After every move, each engine writes one record: the points that move
@@ -61,7 +61,7 @@ everything the engines can do.
 
 <TechnicalDetails title="The technical record">
 
-**Status: completed — reproduced in this checkout.** 256 seeds, 6,852
+**Status: completed; reproduced in this checkout.** 256 seeds, 6,852
 transitions, `PARITY {"seeds":256,"moves":6852,"exact":true}`. Seed range
 `0x2d700000 + 0..255`, which is a determinism range rather than a research
 cohort. Sources: [reproducibility guide](/docs/reproducibility) §"Current
@@ -95,7 +95,7 @@ a strong policy actually visits.
 
 The same audit records two further limits. Agreement is not fidelity: it lists
 three divergences (§H1–H3) between this engine and the reference implementation
-the repository cites — the level bonus is forfeited on the terminating rise
+the repository cites: the level bonus is forfeited on the terminating rise
 where the reference pays it, the board-clear bonus is tested before the rise so
 a fifth-drop clear is overpaid by 70,000, and the opening position is a solid
 gray row rather than the reference's 11–21 numbered discs. Its scientific
@@ -118,5 +118,5 @@ Source: `main.ts`.
   variant of Drop7.
 - The most valuable extension is cheap and has not been done: drive the parity
   sweep with a *strong* policy instead of random play, so the comparison
-  reaches board clears, long chains, and the censoring path — the exact
+  reaches board clears, long chains, and the censoring path: the exact
   branches a million-point candidate would live in.

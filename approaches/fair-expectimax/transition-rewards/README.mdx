@@ -1,7 +1,7 @@
 ---
 title: Paying the search for clears and reveals
 family: fair-expectimax
-summary: Give the search a bonus every time a move clears a numbered disc or exposes a hidden one, on the theory that a policy that keeps the board flowing survives longer.
+summary: Rewards clears and reveals inside search to test whether faster board flow improves survival.
 status: rejected
 evidence: ledger-recorded
 reads: public
@@ -18,7 +18,7 @@ test reversed it.
 The label above is the group's outcome, not a single record. Of the four
 experiments here, two were **rejected** on held-out games (ledger-recorded), one
 was **runtime-paused** and kept as a diagnostic (ledger-recorded), and the cheap
-survey that started the line is **completed — task-record only**, with no
+survey that started the line is **completed; task-record only**, with no
 numbers retained anywhere in the repository.
 
 ## The intuition
@@ -38,7 +38,7 @@ that keep the board turning over.
 
 The reason this is not obviously right is that the reward is a **proxy**, and
 the search is very good at maximising proxies. Clearing discs is valuable
-because of the position it leaves behind — and the position it leaves behind is
+because of the position it leaves behind, and the position it leaves behind is
 already what the evaluator scores. Paying separately for the act of clearing
 means a move that clears wastefully can outrank a move that prepares something
 larger.
@@ -66,19 +66,19 @@ larger.
    per clear and +600 per reveal), where the transition reward counts every
    wave's exact reveal count, including cascades after a row rise.
 
-## What happened, in plain English
+## What happened
 
 **The rise-cycle schedule was harmful on its own** and diluted the clear reward
 when combined with it. On the four games that finished, the schedule-only policy
 scored 93,785 and survived 65.5 moves against the unchanged search's 143,300 and
-88.75 — the worst arm in the experiment. That run also **ran out of its time
+88.75: the worst arm in the experiment. That run also **ran out of its time
 budget** before its last two games completed, so it is recorded as a
 resource-capped diagnostic, not a result: no held-out, screen or confirmation
 cohort exists for it.
 
 **The clear reward looked, briefly, like the best idea in the family.** On those
 same four games, +600 per numbered clear scored 244,187 and survived 156.25
-moves against 143,300 and 88.75 — a triple win in every leave-one-out fold, an
+moves against 143,300 and 88.75: a triple win in every leave-one-out fold, an
 improvement of about 100,000 points. That justified one fixed follow-up.
 
 **The follow-up reversed it completely.** On eight untouched games the unchanged
@@ -98,7 +98,7 @@ not have been trusted: the first fitting game had been run and inspected as a
 separate diagnostic before being included in the fitting average, and **60.8% of
 the balanced arm's fitting score comes from that one pre-observed game**. On the
 three fitting games opened afterwards, the balanced arm averaged 79,688 points
-against the unchanged search's 99,959 — the selection reverses without the
+against the unchanged search's 99,959: the selection reverses without the
 pre-observed game, which exactly predicts the held-out failure
 ([audit 03](/docs/exploratory/audit-03-claim-arithmetic), H1).
 
@@ -107,15 +107,15 @@ pre-observed game, which exactly predicts the held-out failure
 All four are under `approaches/fair-expectimax/transition-rewards/`. Statuses
 from the [experiment index](/docs/research/experiment-index).
 
-**`d2-reward-probe.cpp`** — **completed — task-record only diagnostic**; "it
+**`d2-reward-probe.cpp`: completed, task-record-only diagnostic.** "It
 generated hypotheses but cannot qualify a policy." Twelve-arm menu, depth 2, 256
 games by default from `0x3d98_0000`, 1,000-move cap, training range
 `0x3d00_0000`–`0x3e00_0000` enforced in the source. **No numbers from this probe
 are recorded in the ledger**; treat any figure attributed to it as provisional
 until one is.
 
-**`fair-phase-energy-release.cpp`** — **runtime-paused — ledger-recorded**;
-"useful diagnostics were retained after the resource cap." Ledger "Fair-D4
+**`fair-phase-energy-release.cpp`: runtime-paused, ledger-recorded.**
+"Useful diagnostics were retained after the resource cap." Ledger "Fair-D4
 phase-energy release pilot". Zero coefficients reproduce the reference exactly
 (action, root values, nodes, work, cache). Four policies completed all four
 `0x3de50000...003` games:
@@ -134,7 +134,7 @@ Clear-only beat the reference on score, moves and clear throughput in all four
 leave-one-out folds but is **not a formal fitting winner**, because a
 preregistered menu member is missing.
 
-**`fair-clear-reward-confirmation.cpp`** — **rejected — ledger-recorded**; "the
+**`fair-clear-reward-confirmation.cpp`: rejected, ledger-recorded.** "The
 held-out cohort reversed the fitting gain." Selection (four `0x3de50000...003`
 games): +600 per clear improved score by 100,887, moves by 67.5, clear
 throughput by 0.18274, a triple win in every fold. Frozen gate, eight
@@ -152,7 +152,7 @@ bytes, 377.96 seconds. Neither `0x3eb30000...007` nor `0x3eb40000...00f` was
 read. Artifact SHA-256
 `995c6664e068f330eba009f4aa36b1afcffd8afb8a53e07ecaa64ef2f91bdf96`.
 
-**`fair-reveal-reward.cpp`** — **rejected — ledger-recorded**; "the held-out
+**`fair-reveal-reward.cpp`: rejected, ledger-recorded.** "The held-out
 comparison failed." Fitting, four seeds `0x3def0000...003`:
 
 | Arm | Mean score | Mean moves | Clears / move | Reveals / move | Score Q25 | Move Q25 |
@@ -207,11 +207,11 @@ confirmations here exist precisely because someone insisted on running them.
 
 **Selection hygiene is fragile in ways that are easy to miss.** The reveal
 reward's fit was dominated by a game that had already been observed before it
-was counted. The run disclosed the pre-observation honestly; nobody re-evaluated
+was counted. The run disclosed the pre-observation; nobody re-evaluated
 the gate without it until an audit did, and the answer changed.
 
 Still open: whether the aggressive arm of the rise-cycle schedule experiment
-would have changed its picture — it was never finished — and whether clear and
+would have changed its picture. It was never finished, and whether clear and
 reveal counts belong in the evaluator as **features of the resulting board**
 rather than as payments per move. The depth-2 survey that started all of this
 has no retained numbers at all, so its landscape would have to be re-measured
@@ -227,6 +227,6 @@ before being used again.
   terminal utility, deepening and cache limits matching the reference.
 - `fair-clear-reward-confirmation.cpp` — fixed-candidate confirmation of the
   isolated +600 numbered-clear reward, with no phase term and no remaining menu.
-- `fair-reveal-reward.cpp` — an access-to-covered-number reward with
+- `fair-reveal-reward.cpp`: an access-to-covered-number reward with
   coefficients fixed before evaluation, reading neither of the clear-reward seed
   ranges.

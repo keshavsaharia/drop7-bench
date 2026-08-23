@@ -1,14 +1,14 @@
 ---
 title: Evolved public policy
 family: heuristic-search
-summary: Give the weight search a bigger, phase-aware evaluator and let it optimise complete games directly — no imitation, no proxy label, just play and keep what survives.
+summary: Give the weight search a larger phase-aware evaluator and optimise complete games directly, without imitation or proxy labels.
 status: rejected
 evidence: ledger-recorded
 reads: public
 ---
 
 Give the weight search a bigger, phase-aware evaluator and let it optimise
-complete games directly — no imitation, no proxy label, just play and keep
+complete games directly: no imitation, no proxy label, just play and keep
 what survives.
 
 <EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
@@ -43,20 +43,20 @@ with the reference search.
    structurally excludes score, level, moves played, game seed, history, and
    any future disc or reveal.
 2. **For each legal column, average seven exactly stratified public
-   successors** — the immediate outcomes a player could imagine.
+   successors**: the immediate outcomes a player could imagine.
 3. **Describe each successor with 33 normalised features**: direct and latent
    potential, cover exposure and altitude, low-number clogs, quiet-build and
    rise readiness, height risk, and the clears, reveals, waves and score the
    transition produced.
 4. **Score with the weight block for the current rise phase** — 33 weights ×
-   5 phases = 165 numbers — and play the best column.
+   5 phases = 165 numbers, and play the best column.
 5. **Evolve the 165 numbers** with a diagonal cross-entropy method over
    generations of complete games on common random seeds, then replay the frozen
    champion on a generation-disjoint tournament.
 
-## What happened, in plain English
+## What happened
 
-It improved, clearly and reproducibly — and the improvement was in the wrong
+It improved, clearly and reproducibly, and the improvement was in the wrong
 place.
 
 On its 128-game tournament the evolved policy scored **15.7% more than the
@@ -69,7 +69,7 @@ improvement can have.
 
 Wrapping the evolved evaluator in a search made the numbers larger and the
 picture no better. The best configuration reached 272,605 points on eight
-games — but those were eight games the policy had already been fitted on, so
+games, but those were eight games the policy had already been fitted on, so
 the ledger records the whole search comparison as a mechanism ablation and not
 as evidence. Deeper variants were unstable and one to two orders of magnitude
 slower, and even the best of them stayed below the reference search's recorded
@@ -81,7 +81,7 @@ seeds.
 
 <TechnicalDetails title="The technical record">
 
-**Phase-conditioned public heuristic evolution — rejected before probe,
+**Phase-conditioned public heuristic evolution: rejected before probe,
 ledger-recorded.** Full entry in the
 [experiment history](/docs/research/history). Corrected 17,000-point Hardcore
 scoring throughout.
@@ -138,7 +138,7 @@ over its 64-game reference cohort.
   generalise into the thing that matters.
 - **Watch the lower quartile, not the mean.** An unchanged lower-quartile
   survival next to a 13.8% mean gain is the clearest single illustration in
-  the repository of why mean-only reporting hides damage — and why the
+  the repository of why mean-only reporting hides damage, and why the
   benchmark contract requires lower-tail outcomes and censoring counts.
 - **Search cannot rescue an evaluator, and reused games cannot measure it.**
   The ablation table is a useful catalogue of how expensive each search

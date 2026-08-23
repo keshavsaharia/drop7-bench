@@ -1,14 +1,14 @@
 ---
 title: Rollout
 family: heuristic-search
-summary: Instead of judging a column by how the board looks afterwards, play the game on from there — twenty-five more moves, several imagined disc streams — and judge it by how that went.
+summary: Judge a column by playing twenty-five more moves under several imagined disc streams instead of scoring only the resulting board.
 status: rejected
 evidence: task-record only
 reads: public
 ---
 
 Instead of judging a column by how the board looks afterwards, play the game
-on from there — twenty-five more moves, several imagined disc streams — and
+on from there (twenty-five more moves, several imagined disc streams) and
 judge it by how that went.
 
 <EvidenceLabel status="rejected" evidence="task-record only" reads="public" />
@@ -28,7 +28,7 @@ consequences of a decision *through* the events that actually kill policies in
 this game.
 
 The idea has the best single anecdote in the repository behind it, and also
-the clearest demonstration of why an anecdote is not a result — see below.
+the clearest demonstration of why an anecdote is not a result. See below.
 
 ## How it works, step by step
 
@@ -45,11 +45,11 @@ the clearest demonstration of why an anecdote is not a result — see below.
 
 A second program in this directory does the same thing more expensively and
 for a different purpose: it beam-searches each root column across fourteen
-fixed synthetic tapes and votes across them, to produce *labels* — a stronger
+fixed synthetic tapes and votes across them, to produce *labels*: a stronger
 opinion about which column is best — for training and distillation work rather
 than for playing.
 
-## What happened, in plain English
+## What happened
 
 The playing version was retired. With a weak continuation policy driving the
 rehearsals, the rehearsals inherit that policy's mistakes: you are not seeing
@@ -59,7 +59,7 @@ times over, and preferring the columns that suit it.
 The labelling version was kept, with an explicit warning attached: it is a
 useful teacher and benchmark, and it is not a policy anyone may deploy. It
 costs far too much per decision, and every one of its plans is made inside a
-future it has been told in advance — which is the classic way to make a plan
+future it has been told in advance, which is the classic way to make a plan
 look better than any real player could achieve.
 
 The strongest version of this idea lives in a different family, and it is
@@ -70,7 +70,7 @@ in the repository.
 
 **This directory.** The [experiment index](/docs/research/experiment-index)
 records the planner as **rejected, task-record only** — *"the tested 25-move
-control reproduced the weak continuation policy's mistakes"* — and the teacher
+control reproduced the weak continuation policy's mistakes"*, and the teacher
 as **completed, task-record only** — *"useful as a teacher/benchmark, not a
 deployable policy."* Task-record only means both outcomes are reported in a
 research conversation and neither was promoted into the
@@ -83,7 +83,7 @@ bound, CVaR25 or a blend, one to seven continuation samples, and a scaled
 phase-style leaf for surviving branches. `teacher.cpp` defaults to a 25-move
 horizon, 14 tapes and a beam of 8 per root action, with optional cross-tape
 voting; its tapes are keyed on a hash of the canonical *observable* state —
-board, next disc, rise clock — so it reads no hidden value and no real future
+board, next disc, rise clock, so it reads no hidden value and no real future
 disc, but it does plan inside a future it has fixed in advance.
 
 **The properly recorded version of this idea, in the
@@ -91,7 +91,7 @@ disc, but it does plan inside a future it has fixed in advance.
 seven-scenario continuation driven by a completed depth-2 search, used to veto
 the reference search's move, produced a single pilot game of **404,047 points
 in 250 moves against 159,616 in 105** for the reference. That is
-**ledger-recorded and labelled signal only** — one game, and far outside its
+**ledger-recorded and labelled signal only**: one game, and far outside its
 runtime limit. It was rescored to the corrected 17,000-point Hardcore award as
 **894,047 against 359,616** in
 [audit 04](/docs/exploratory/audit-04-blind-spots), which called it the single
@@ -109,7 +109,7 @@ diagnoses why the veto almost never fired: its confidence test required the
 mean advantage to exceed 0.92 standard deviations over seven scenarios, and
 99.1% of the 12,314 candidate alternatives failed that one condition.
 
-So the honest summary of the family is: one spectacular game, and a properly
+The family produced one spectacular game and a properly
 powered retest that went the other way.
 
 </TechnicalDetails>
@@ -128,7 +128,7 @@ powered retest that went the other way.
 - **What is still open** is affordability. The strategy catalog's second open
   direction is to make multi-cycle sibling comparison cheap by design — a
   cheaper verified continuation, batched transitions, admissible early
-  elimination — while keeping the one positive pilot out of parameter
+  elimination, while keeping the one positive pilot out of parameter
   selection. Multi-cycle comparison remains one of the more informative
   directions in the repository; this implementation of it is not the way to
   get there.

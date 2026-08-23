@@ -1,7 +1,7 @@
 ---
 title: Viability controller
 family: constructive-reservoir
-summary: Replaces "score every column" with "decide what kind of move this is" — charge, dig, release, repair or emergency — and then picks the best move of that kind. It scored well below the one-move-ahead reference.
+summary: Classifies each move as charge, dig, release, repair, or emergency, then picks the best move of that kind. It scored well below the one-move-ahead reference.
 status: rejected
 evidence: ledger-recorded
 reads: public
@@ -17,16 +17,16 @@ facts about the position rather than a tuned number.
 
 Human players do not evaluate seven columns on a numeric scale. They decide
 what the position calls for — "I need to open some grays", "I need to dump this
-stack before the rise" — and then look for the move that does it. This
+stack before the rise", and then look for the move that does it. This
 approach makes that literal:
 
-- **charge** — the board is comfortable; add to the stored structure;
+- **charge**: the board is comfortable; add to the stored structure;
 - **dig** — there are covered discs that can be attacked; attack them;
-- **release** — the board is filling, or a big clear is available right now;
+- **release**: the board is filling, or a big clear is available right now;
   spend the structure;
-- **repair** — a specific clog is forming, such as a low number capping a
+- **repair**: a specific clog is forming, such as a low number capping a
   column; fix it;
-- **emergency** — the board is nearly dead; survive.
+- **emergency**: the board is nearly dead; survive.
 
 The appeal is that it removes the thing that goes wrong everywhere else in this
 repository: a fitted number that is slightly miscalibrated and therefore ranks
@@ -36,7 +36,7 @@ two columns in the wrong order. There is no fitted leaf here at all.
 
 1. Build an **exact certificate** for the position: for all 7 × 7 combinations
    of "which disc arrives" and "which column it lands in", work out
-   conservatively what would happen — how many discs clear, how many gray discs
+   conservatively what would happen: how many discs clear, how many gray discs
    are damaged or revealed, how many chain waves follow, and whether the column
    is productive at all.
 2. Pick the mode from thresholds that come from the game's mechanics rather
@@ -50,7 +50,7 @@ two columns in the wrong order. There is no fitted leaf here at all.
 3. Apply a survival shield that removes actions which the certificate cannot
    show to be survivable.
 4. Rank whatever is left **lexicographically** on eighteen ordered fields —
-   first criterion first, ties broken by the second, and so on — rather than by
+   first criterion first, ties broken by the second, and so on, rather than by
    a weighted sum.
 
 Everything read is public: the visible board, the next disc, the rise clock and
@@ -60,7 +60,7 @@ the terminal flag. There is no gameplay history and no fitted scalar.
 
 It was clearly worse than the simple comparator. On its 32-game Stage A the
 controller averaged **132,537.1 points and 43.3 moves** against fair D1's
-**172,697.6 and 54.0**, and its flow fell as well — 1.511 clears and 0.729
+**172,697.6 and 54.0**, and its flow fell as well: 1.511 clears and 0.729
 reveals per move against 1.741 and 0.936. Score, survival and flow all
 regressed, so it went no further.
 
@@ -71,7 +71,7 @@ finding a move that digs.
 
 <TechnicalDetails title="The technical record">
 
-**Status: rejected — ledger-recorded.**
+**Status: rejected; ledger-recorded.**
 [Experiment history](/docs/research/history) §"Explicit reservoir and
 constructive-cycle policies (rejected)": 32-game Stage A, 132,537.094 points /
 43.281 moves versus fair D1 172,697.625 / 53.969; clear and reveal flow
@@ -82,7 +82,7 @@ rows 4409–4410. Source and artifact SHA-256 values are retained in the ledger.
 Frozen configuration, from the source: Stage A seeds
 `0x3d65c000`–`0x3d65c01f` (32 games), 1,000-move cap, seven successor samples,
 policy seed `VRC1`, 30-minute wall limit, 256 MiB RSS limit, eighteen ranking
-fields. Its admission gate — never reached — required 700,000 mean points, 200
+fields. Its admission gate (never reached) required 700,000 mean points, 200
 mean moves, 2.20 clears and 1.20 reveals per move, a 120-move lower-quartile
 lifetime and 24 joint wins.
 

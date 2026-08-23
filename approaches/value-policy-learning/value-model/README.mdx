@@ -1,7 +1,7 @@
 ---
 title: General value model
 family: value-policy-learning
-summary: A workbench, not a single idea — one trainer that can fit a board model from four different kinds of teacher, on strictly separated seed lanes, so the teachers can be compared rather than argued about.
+summary: A shared trainer fits board models from four kinds of teacher on separate seed lanes, making the teachers directly comparable.
 status: rejected
 evidence: task-record only
 reads: teacher
@@ -19,7 +19,7 @@ teachers is the [perfect-information oracle](/approaches/oracle-curriculum),
 which reads the future disc and reveal streams and is therefore never a legal
 player. What comes out of the trainer is a model over the public board, the
 visible next disc and the rise clock, and it is only that frozen student — not
-its teacher — that any strength claim could ever be about.
+its teacher: that any strength claim could ever be about.
 
 ## The intuition
 
@@ -46,7 +46,7 @@ them is not confounded by four different implementations.
 
 1. **Fixed seed lanes.** Three ranges are hard-coded and never moved:
    training (`0x1d70…`), calibration (`0x5d70…`) and validation (`0x7d70…`).
-   The source comment states the reason plainly — the ranges stay fixed so that
+   The source comment gives the reason: the ranges stay fixed so that
    checkpoints trained at different times remain directly comparable.
 2. **Generate.** Games are played on the training lane by the selected teacher.
    Every kind of randomness the trainer touches — reveals, exploration, shuffles,
@@ -64,7 +64,7 @@ them is not confounded by four different implementations.
 The one recorded outcome is a warning about where a learned evaluator helps: an
 early learned leaf improved a *one-ply* policy and made the *stronger* rollout
 policy worse. In other words, the model was adding something the weak policy
-lacked and subtracting something the strong policy already had — so measuring it
+lacked and subtracting something the strong policy already had, so measuring it
 against a weak baseline would have produced a positive result and a wrong
 conclusion.
 
@@ -108,4 +108,4 @@ against a convenient weaker policy.
 What is still open here is most of the workbench. Three of the four teachers
 have no retained result at all, and the trainer is intact, deterministic and
 lane-disciplined. Reviving it would mean registering a theory and a frozen gate
-first — not rerunning it to see what happens.
+first, not rerunning it to see what happens.

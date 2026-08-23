@@ -1,7 +1,7 @@
 ---
 title: Phase distillation
 family: value-policy-learning
-summary: Watch a slow but reliable search play, and train a fast network to make the same choices — once by copying the column it picked, once by copying the numbers behind the pick.
+summary: Train a fast network to copy a slow but reliable search, using both its chosen column and the values behind that choice.
 status: rejected
 evidence: task-record only
 reads: public
@@ -22,7 +22,7 @@ in the repository.
 A search that looks three of the player's own moves ahead and averages five
 representative chance outcomes at every dealt disc has to evaluate a very large
 number of boards for one decision. If its decisions are a *function* of the
-visible position — and they are, since it reads nothing else — then in principle
+visible position, and they are, since it reads nothing else. Then in principle
 a network can learn that function and reproduce the decisions at a fraction of
 the cost. Cheap decisions are not a footnote here: everything the research would
 like to do (longer horizons, more chance samples, more games) is bounded by how
@@ -34,7 +34,7 @@ Two ways to copy a teacher, and this directory tries both.
   classifier over the seven columns. Simple, and it throws away everything the
   teacher knew about the six columns it rejected.
 - **Copy the numbers.** Ask the teacher for the value it assigned each column
-  and regress those values. Richer, and it keeps the near-misses — the positions
+  and regress those values. Richer, and it keeps the near-misses: the positions
   where two columns were nearly equal are exactly the ones a classifier learns
   nothing useful from.
 
@@ -81,14 +81,14 @@ is recorded, the measurement is not.
 <TechnicalDetails title="The technical record">
 
 Two rows in the [experiment index](/docs/research/experiment-index), both
-labelled **task-record only** — the referenced research conversation reports the
+labelled **task-record only**: the referenced research conversation reports the
 outcome but it was never promoted into [the ledger](/docs/research/history):
 
 - *"Policy distillation … Clones the exact phase D3/s5 action policy from public
-  board tokens. **Rejected — task-record only;** held-out top-action agreement
+  board tokens. **Rejected; task-record only;** held-out top-action agreement
   and whole-game play were poor."*
 - *"Q distillation … Regresses scalar teacher Q from phase features and common
-  one-ply successor summaries. **Rejected — task-record only;** training fit did
+  one-ply successor summaries. **Rejected; task-record only;** training fit did
   not translate to a viable standalone policy."*
 
 A search of the ledger for either source file returns nothing, so **no retained
@@ -109,11 +109,11 @@ The recurring shape of every cloning attempt in this repository is a large gap
 between agreement on the teacher's own positions and agreement on positions the
 student generated for itself. Once the student plays a slightly different move,
 it drifts into boards the teacher never visited, and its imitation quality there
-is unmeasured — the same coverage problem as the
+is unmeasured: the same coverage problem as the
 [sibling trap](/learn/concepts/ranking-siblings), arriving through a different
 door.
 
 What this does not rule out: distillation as an *engineering* step. If a policy
 ever qualifies, compressing it is a separate, well-defined problem with its own
-gate — and one that would be judged on decision agreement and speed, not on
+gate, and one that would be judged on decision agreement and speed, not on
 whether the student invents strength its teacher never had.

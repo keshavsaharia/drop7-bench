@@ -19,7 +19,7 @@ that did best. It finished behind the fast policy it was built on.
 A look-ahead search needs an opinion about the boards at the bottom of its tree,
 and that opinion is hand-written and imperfect. A
 [rollout](/learn/glossary) sidesteps it: instead of evaluating a position,
-finish the game from it — or at least play a long stretch — with some quick
+finish the game from it, or at least play a long stretch, with some quick
 policy, and use the actual outcome.
 
 This is *policy improvement* in its most literal form. If you have a fast
@@ -35,8 +35,8 @@ good as the fast one. Two practical things break that guarantee:
    structure your first move created, the rollout will report that squandering
    as the move's value.
 
-The experiment controls the first problem carefully — every column is evaluated
-on the *same* seven imagined futures, so the comparison is paired — and it ran
+The experiment controls the first problem carefully: every column is evaluated
+on the *same* seven imagined futures, so the comparison is paired, and it ran
 straight into the second.
 
 ## How it works, step by step
@@ -58,18 +58,18 @@ The frozen fitting grid crossed the three horizons with two settings of a
 tail-weighting term on the fair evaluator (off, or 0.25), on 12 complete games,
 using plain mean returns.
 
-## What happened, in plain English
+## What happened
 
 The rollout policy lost to the very policy it used as its continuation. The fair
 one-move policy averaged 72,526 points and 53.75 moves; the best rollout
-configuration — a sixteen-move horizon with no tail weighting — averaged 64,305
+configuration (a sixteen-move horizon with no tail weighting) averaged 64,305
 points and 45.5 moves. It lost **all twelve** leave-one-out score comparisons
 and all twelve clear-throughput comparisons. It cleared 1.51 numbered discs per
 move against the fair policy's 1.69.
 
 That is unusually clean for a negative result. The sixteen-move horizon was also
 selected in eleven of twelve leave-one-out fits, so the loss is not an accident
-of picking the wrong grid point — the whole grid was weak. The candidate missed
+of picking the wrong grid point: the whole grid was weak. The candidate missed
 both frozen thresholds (250,000 points, and 1.05 times the clear rate), so the
 one-shot held-out range was never opened.
 
@@ -142,14 +142,14 @@ Still open, and explicitly not rejected by this run: rollouts with a stronger
 continuation policy; rollouts whose returns feed a learned value model rather
 than a direct ranking; and rollouts used as a **veto** on a small set of
 near-tied root moves rather than as the ranking itself. That last shape did
-produce one promising pilot elsewhere in the repository — a costly 25-move
+produce one promising pilot elsewhere in the repository: a costly 25-move
 rollout allowed to veto the four-move search passed its quality gates and was
 then stopped for missing its runtime limit by a wide margin (**runtime-paused —
 ledger-recorded**, see the [experiment index](/docs/research/experiment-index)).
 
 ## Sources
 
-- `fair-d1-rollout-improvement.cpp` — a deliberately small, public-information
+- `fair-d1-rollout-improvement.cpp`: a deliberately small, public-information
   rollout pilot; every legal root action is evaluated on the same seven
   deterministic stratified scenario tapes, and every later action is chosen by
   the fair one-move policy without access to the tape.

@@ -113,7 +113,7 @@ export function TreeExplorer({ data }: { data: TreeData }) {
                 style={{ ...btn(column === c.column), opacity: c.legal ? 1 : 0.35 }}
                 aria-pressed={column === c.column}
               >
-                <span style={{ color: "#a1a1aa" }}>col {c.column}</span>
+                <span style={{ color: "#a1a1aa" }}>col {c.column + 1}</span>
                 {c.legal && c.board ? <Board cells={c.board} s={8} /> : <span>full</span>}
                 {c.legal && (
                   <span style={{ fontWeight: 700, color: "#fafafa" }}>+{fmt(c.points ?? 0)} now</span>
@@ -123,7 +123,7 @@ export function TreeExplorer({ data }: { data: TreeData }) {
           </div>
           {node && node.legal && (
             <div style={{ marginTop: 10, fontSize: 12, color: "#a1a1aa" }}>
-              Column {node.column} scores <strong style={{ color: "#fafafa" }}>+{fmt(node.points ?? 0)}</strong> immediately.
+              Column {node.column + 1} scores <strong style={{ color: "#fafafa" }}>+{fmt(node.points ?? 0)}</strong> immediately.
               Looking one move further and averaging over the next disc, its fair value is{" "}
               <strong style={{ color: "#fafafa" }}>{fmt(node.fair ?? 0)}</strong>
               {" "}(optimistic {fmt(node.optimistic ?? 0)}, pessimistic {fmt(node.pessimistic ?? 0)}).
@@ -166,7 +166,7 @@ export function TreeExplorer({ data }: { data: TreeData }) {
               .sort((a, b) => b.points - a.points)
               .map((r, i) => (
                 <div key={r.column} style={{ border: `1px solid ${i === 0 ? "#199e70" : "#27272a"}`, borderRadius: 8, padding: 6, background: "#18181b", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, fontSize: 12 }}>
-                  <span style={{ color: "#a1a1aa" }}>col {r.column}</span>
+                  <span style={{ color: "#a1a1aa" }}>col {r.column + 1}</span>
                   <Board cells={r.board} s={8} />
                   <span style={{ fontWeight: 700, color: i === 0 ? "#34d399" : "#fafafa" }}>+{fmt(r.points)}</span>
                   <span style={{ color: "#71717a" }}>{r.waves === 0 ? "no clear" : `${r.waves} wave${r.waves === 1 ? "" : "s"}`}</span>

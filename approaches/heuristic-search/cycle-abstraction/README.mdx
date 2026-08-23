@@ -1,7 +1,7 @@
 ---
 title: Cycle abstraction
 family: heuristic-search
-summary: Stop choosing a column and start choosing a plan — pick one of five intentions for the whole five-drop cycle, and let a model predict which intention this board should adopt.
+summary: Choose one of five plans for the whole five-drop cycle, then let a model decide which plan fits the board.
 status: rejected
 evidence: task-record only
 reads: public
@@ -27,7 +27,7 @@ are held for a whole cycle:
 - **build** — arrange numbers so that a future trigger fires a chain;
 - **tunnel** — dig at the covered discs and open them;
 - **safety** — keep the board low and survive the coming rise;
-- **balanced** — a mixture.
+- **balanced**: a mixture.
 
 Each option is a different weighting of the same measurements, so "choosing an
 option" means choosing which of five ready-made evaluators drives the next
@@ -53,7 +53,7 @@ alone, can you tell which of the five intentions this board should adopt?**
    and actual option ordering must reach 0.6.
 5. **If it passed**, a policy could pick its intention at each cycle boundary.
 
-## What happened, in plain English
+## What happened
 
 Half of it worked, and it was the half that does not matter.
 
@@ -64,7 +64,7 @@ whole point was to choose an intention, the lab was retired.
 
 This is the repository's central failure pattern arriving in a new costume.
 Being accurate about a position's value is not the same as being accurate
-about the ordering of the choices available at it — the difference the
+about the ordering of the choices available at it: the difference the
 [sibling ranking](/learn/concepts/ranking-siblings) page is about. Here the
 "siblings" are not columns but plans, and the result is the same.
 
@@ -87,7 +87,7 @@ scaled score signal, labels produced by holding an option for five drops and
 continuing under `balanced` to the horizon on paired synthetic tapes, and
 per-option logistic and linear models fitted with ridge regularization on the
 `0x3d70…` training range. Tapes are keyed on a hash of the observable state —
-board, next disc, rise clock, level — so no hidden value and no real future
+board, next disc, rise clock, level, so no hidden value and no real future
 disc is read.
 
 </TechnicalDetails>
@@ -99,9 +99,9 @@ disc is read.
   and it was still too hard from these features.
 - **The idea keeps reappearing because it is probably right.** Planning across
   a complete rise cycle is one of the few things that has repeatedly shown
-  signal in this repository — the constructive complete-cycle planner beat a
+  signal in this repository: the constructive complete-cycle planner beat a
   one-ply policy substantially, and a 12-move constructive horizon beat a
-  seven-move one — while never being stable enough to displace the reference
+  seven-move one, while never being stable enough to displace the reference
   search. The strategy catalog's standing recommendation is to test long-cycle
   features as bounded corrections to the reference search rather than letting
   them control a whole game.

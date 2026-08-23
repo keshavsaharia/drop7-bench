@@ -1,6 +1,6 @@
 ---
 title: Baselines and diagnostics
-summary: The measuring instruments — simple reference players, cross-checks between the two rules engines, and per-move counters that say what a policy is actually doing.
+summary: Simple reference players, engine cross-checks, and per-move counters provide the measuring instruments for policy research.
 status: support-only
 evidence: repository-verified
 reads: diagnostic
@@ -24,7 +24,7 @@ game by game against a fixed comparator and paired by seed, because Drop7
 scores vary enormously from one game to the next.
 
 **A cross-check compares two implementations of the same rules.** The rules
-exist twice here — once in TypeScript, once in C++ — because the C++ version is
+exist twice here, once in TypeScript and once in C++. The C++ version is
 fast enough to play millions of games and the TypeScript version is the one
 that is easy to read and test. If they ever disagreed, every recorded score
 would be ambiguous. So the same games are replayed through both and the
@@ -39,11 +39,11 @@ move.
 <BoardCompare
   before="0000000000000000000000000000000000000330008899888"
   after="0000000000000000000000000000000000000000008845988"
-  beforeLabel="a 3 is about to fall into column 4"
+  beforeLabel="a 3 is about to fall into column 5"
   afterLabel="one move later"
   highlightBefore={[37, 38]}
   highlightAfter={[44, 45, 46]}
-  caption="What a flow counter counts, on one engine-verified move. Three 3s in a row clear; the two already-cracked gray discs beneath them are hit again and show their numbers (4 and 5); the gray to their right is hit for the first time and cracks. The move scores 21 points — which is why flow, not score, is the useful description of it."
+  caption="What a flow counter counts, on one engine-verified move. Three 3s in a row clear; the two already-cracked gray discs beneath them are hit again and show their numbers (4 and 5); the gray to their right is hit for the first time and cracks. The move scores 21 points, which is why flow, not score, is the useful description of it."
 />
 
 Every board on these pages is the rules engine's own output for the position
@@ -59,7 +59,7 @@ removes at least 12/5 = **2.400 numbered discs per move** and opens at least
 exist, and it is recorded in
 [finding 01](/docs/exploratory/finding-01-score-is-survival) together with the
 measurement that the depth-4 reference sustains 1.973 clears and 1.090 reveals
-per move — an 18% and 22% structural deficit — over 64 paired games at the
+per move (an 18% and 22% structural deficit) over 64 paired games at the
 exploratory development tier.
 
 Score follows from that. In those same 64 games, 94.3% of all points came from
@@ -80,13 +80,13 @@ the page says so and labels the evidence.
 
 | Instrument | What it produces | Status and evidence |
 | --- | --- | --- |
-| [Native parity](/approaches/baselines-diagnostics/native-parity) | Byte-for-byte comparison of native and TypeScript traces | **Completed — reproduced;** 256 seeds and 6,852 transitions matched in this checkout |
-| [Heuristic benchmark](/approaches/baselines-diagnostics/heuristic-benchmark) | Paired complete-game comparisons among named TypeScript profiles | **Support-only — repository-verified** |
-| [Phase benchmark](/approaches/baselines-diagnostics/phase-benchmark) | Score, survival, flow, height, work, censoring for the shared phase policy | **Support-only — repository-verified;** no durable standalone result was located |
-| [D4 flow audit](/approaches/baselines-diagnostics/d4-flow) | Per-move geometry, flow and root-value traces for the depth-4 reference | **Support-only — repository-verified** |
-| [Trajectory throughput](/approaches/baselines-diagnostics/trajectory-throughput) | Matched windows from public policies and a privileged ceiling | **Completed — task-record only;** motivated the ~2.4-clear / ~1.4-reveal targets |
-| [Tie-breaking](/approaches/baselines-diagnostics/tie-breaking) | Sensitivity to the fixed legal-column ordering | **Support-only — repository-verified** |
-| [Cover-throughput probe](/approaches/baselines-diagnostics/throughput-probe) | Five crack/reveal weight profiles over 256 historical games | **Rejected — task-record only;** the strongest profile was nearly flat |
+| [Native parity](/approaches/baselines-diagnostics/native-parity) | Byte-for-byte comparison of native and TypeScript traces | **Completed; reproduced;** 256 seeds and 6,852 transitions matched in this checkout |
+| [Heuristic benchmark](/approaches/baselines-diagnostics/heuristic-benchmark) | Paired complete-game comparisons among named TypeScript profiles | **Support-only; repository-verified** |
+| [Phase benchmark](/approaches/baselines-diagnostics/phase-benchmark) | Score, survival, flow, height, work, censoring for the shared phase policy | **Support-only; repository-verified;** no durable standalone result was located |
+| [D4 flow audit](/approaches/baselines-diagnostics/d4-flow) | Per-move geometry, flow and root-value traces for the depth-4 reference | **Support-only; repository-verified** |
+| [Trajectory throughput](/approaches/baselines-diagnostics/trajectory-throughput) | Matched windows from public policies and a privileged ceiling | **Completed; task-record only;** motivated the ~2.4-clear / ~1.4-reveal targets |
+| [Tie-breaking](/approaches/baselines-diagnostics/tie-breaking) | Sensitivity to the fixed legal-column ordering | **Support-only; repository-verified** |
+| [Cover-throughput probe](/approaches/baselines-diagnostics/throughput-probe) | Five crack/reveal weight profiles over 256 historical games | **Rejected; task-record only;** the strongest profile was nearly flat |
 
 Sources: [experiment index](/docs/research/experiment-index) §"Baselines and
 diagnostics"; [reproducibility guide](/docs/reproducibility);
@@ -112,5 +112,5 @@ these seven sources as "support-only — real questions with no lane".
   9, so the board-clear and censoring code paths have **zero** cross-engine
   coverage.
 - Five of these instruments have no retained output at all. They can be run
-  again — they are cheap — but nothing in this repository records what they
+  again. They are cheap, but nothing in this repository records what they
   said.

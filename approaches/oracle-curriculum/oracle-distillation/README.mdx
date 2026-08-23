@@ -55,13 +55,13 @@ that a mirrored position cannot be treated as a different one.
    within 10% of the search's value range. Eight fresh games screen it;
    sixteen more confirm it.
 
-## What happened, in plain English
+## What happened
 
 The network learned the training data well and could not reproduce it on games
 it had not seen. On held-out positions it picked the teacher's column about
 **22% of the time**, against the 30% the protocol required in advance, and its
 cross-entropy was far worse than the gate allowed. Crucially, it was just as bad
-on the ordinary-search positions as on the teacher's own positions — so this is
+on the ordinary-search positions as on the teacher's own positions, so this is
 not a case of the student being shown unfamiliar boards. The information needed
 to reproduce the teacher's choice is simply not on the screen.
 
@@ -103,8 +103,8 @@ direction* of the confirmation is what the rejection rests on.
 
 [`audit-05`](/docs/exploratory/audit-05-optimistic-curriculum) §4 classifies
 this as failure 1 of 17, primary mode "representation / information gap", and
-notes that distribution shift was *controlled* here — the ledger's own words are
-that "oracle and behavior holdouts were similarly weak" — and that fitting was
+notes that distribution shift was *controlled* here: the ledger's own words are
+that "oracle and behavior holdouts were similarly weak", and that fitting was
 excellent, so it is not an optimisation failure either.
 
 Records: [experiment index](/docs/research/experiment-index) "Oracle and
@@ -124,7 +124,7 @@ oracle distillation". Source: `oracle-distill.cpp`.
   the public board.
 - **What it does not rule out.** It rejects imitating the *choices* of a
   future-reading teacher. It says nothing about teachers whose advantage is
-  itself public — a distinct line of work pursued later under
+  itself public: a distinct line of work pursued later under
   [planner distillation](/approaches/lifetime-objective/planner-distill) — nor about learning
   something other than the teacher's action, which is what the
   [topology](/approaches/oracle-curriculum/topology) experiments tried next.

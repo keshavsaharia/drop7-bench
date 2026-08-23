@@ -1,7 +1,7 @@
 ---
 title: One dial was controlling two different pieces of luck
 family: lifetime-objective
-summary: The reference search drew "which disc comes next" and "what the hidden discs turn out to be" from the same counter, so it never imagined the two happening in different combinations; giving them separate draws is worth about as much as a whole extra move of look-ahead.
+summary: Separates next-disc and hidden-value samples inside search. The change is worth about one extra move of look-ahead.
 status: completed
 evidence: development-tier exploratory finding
 reads: public
@@ -17,7 +17,7 @@ whole extra move of look-ahead.
 ## The intuition: one move, two futures
 
 When a move causes a clear next to a gray disc, the gray disc's hidden number is
-revealed — and what that number turns out to be can change everything about the
+revealed, and what that number turns out to be can change everything about the
 move. Below is one real position from the rules engine. The next disc is a
 <Disc n={5} />, and it goes into the second column from the left.
 
@@ -37,7 +37,7 @@ move. Below is one real position from the rules engine. The next disc is a
   afterLabel="if the hidden disc is a 4"
   highlightBefore={[29, 36]}
   highlightAfter={[36]}
-  caption="Same board, same drop. The 4 pops and the gray disc reveals — but as a 4, which sits in a run of three and does nothing. One wave, 7 points. Both outcomes are the engine's; the only difference is a number no player can see."
+  caption="Same board, same drop. The 4 pops and the gray disc reveals, but as a 4, which sits in a run of three and does nothing. One wave, 7 points. Both outcomes are the engine's; the only difference is a number no player can see."
 />
 
 A search cannot know which of those it will get, so it has to imagine several
@@ -48,8 +48,8 @@ it imagines is the search's **chance samples** (the repository calls them
 seven).
 
 Here is the defect this approach found. Every chance node has *two* independent
-pieces of luck — the number revealed under the gray disc, and which disc the
-game deals next — and the reference search indexed both with the same counter.
+pieces of luck: the number revealed under the gray disc, and which disc the
+game deals next, and the reference search indexed both with the same counter.
 Sample 1 always paired a particular reveal with a particular next disc; sample 2
 always paired the next pair; and so on. With seven samples the search saw seven
 of the 49 possible combinations, and the seven it saw were perfectly correlated.
@@ -64,8 +64,8 @@ correctly.**
    spaced through the unit interval so that each disc branch still sees a
    properly spread reveal sample.
 2. **Prove it is the same policy when `M = 1`.** At one reveal sample the two
-   loops collapse to exactly the old one — the same draws in the same order with
-   the same divisor — so the existing arms become special cases rather than
+   loops collapse to exactly the old one: the same draws in the same order with
+   the same divisor, so the existing arms become special cases rather than
    things that merely resemble them.
 3. **Count what the samples actually cover.** A separate script re-implements
    the engine's own quadrature in Python and measures, over 20,000 synthetic
@@ -86,7 +86,7 @@ correctly.**
 **The fix pays, and it pays in proportion to how much of the chance node it
 covers.** Holding the disc side exact at seven samples and the look-ahead at
 three moves, raising the reveal samples from one to three to six raised the mean
-score from 312,327 to 337,306 to 376,442 — and the fraction of the
+score from 312,327 to 337,306 to 376,442, and the fraction of the
 disc-and-reveal combinations receiving any weight went 14.3% → 42.9% → 85.7% in
 lockstep. Score, lifetime, clears per move, reveals per move and (downward)
 board occupancy all ordered correctly across the three settings.
@@ -101,8 +101,8 @@ one pairwise test.
 **The headline is against the reference policy.** A three-move search with six
 reveal samples beats the frozen four-move reference by **+79,115 points (95%
 lower bound +30,242)**, and is **statistically indistinguishable** from the
-strongest previously measured arm — the four-move search with seven chance
-samples — while doing 86% of its work. So the earlier conclusion that "depth
+strongest previously measured arm: the four-move search with seven chance
+samples, while doing 86% of its work. So the earlier conclusion that "depth
 needs an exact chance estimator" is only half of a symmetric statement: at a
 fixed budget, a fourth move of look-ahead and a decorrelated chance estimate buy
 roughly the same thing, and the chance estimate is slightly cheaper.
@@ -111,7 +111,7 @@ roughly the same thing, and the chance estimate is slightly cheaper.
 sample to six, numbered clears rose by 0.0598 per move and gray-disc reveals by
 0.0422, with mean occupancy falling from 23.88 to 23.49 of 49 cells. The
 six-sample three-move arm reaches **exactly** the four-move reference's reveal
-rate of 1.1423 and comes within 0.002 of its clear rate — a shallower search
+rate of 1.1423 and comes within 0.002 of its clear rate: a shallower search
 reproducing a deeper search's flow profile.
 
 **It is bought with compute, at about the same exchange rate as depth.** Going
@@ -163,7 +163,7 @@ as a tie. The two intermediate steps, (7,1)→(7,3) at +24,980 and (7,3)→(7,6)
 +39,136, do not clear zero.
 
 **Coverage** (20,000 synthetic chance nodes): at seven samples every *individual*
-marginal is already exact — seven strata over seven equally likely values. The
+marginal is already exact: seven strata over seven equally likely values. The
 residual error is in the joint. Reveal samples raise the (disc, reveal) joint
 coverage 14.3% → 42.9% → 85.7% → 100% at M = 3, 6, 12, but the reveal-by-reveal
 joint only 14.3% → 26.2%, because all reveals inside one scenario still share
@@ -182,7 +182,7 @@ decision at 77% of its bound.
 
 **Recorded rather than omitted:** a depth-4 arm with two reveal samples was
 launched on the shared cohort and **killed by the runtime after about an hour
-with no games written** — a partial run, not a censored result, and it appears
+with no games written**: a partial run, not a censored result, and it appears
 in no table. It was authorised by a matched pilot rather than guessed. It is the
 highest-value open arm, because it is the only way to learn whether the two axes
 compound rather than substitute. A three-move arm with twelve reveal samples,
