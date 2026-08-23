@@ -7,22 +7,24 @@ order: 1
 Drop7 is a solo puzzle on a 7 by 7 grid. Each turn gives you a numbered disc to
 drop in an available column. Gravity pulls it down. It explodes when its number
 matches the length of its row or column, and falling pieces can start a chain
-reaction.
+reaction. Explosions give you points, and the goal is to maximize your total score 
+before the board overflows. 
 
-The goal is to score before the board overflows. Every five turns, a new row of
-gray hidden discs pushes the board upward. Explosions beside a gray disc crack
-it and reveal its number. Long survival creates more chances to score.
+Every five turns, a new row of gray *hidden discs* pushes the board upward, and
+you get a large survival bonus. The rules over how hidden discs get cracked and
+revealed is explained in depth in this guide, or you can play with the game below.
 
 <Drop7Intro />
 
 ## The board and the pieces
 
-Each cell is empty, numbered, solid gray, or cracked gray.
+Each cell is either empty, numbered, a solid *hidden disc*, or a *cracked disc*.
 
 <DiscLegend />
 
-The player sees the board, the next numbered disc, and the rise clock. A legal
-computer policy receives the same information.
+On every turn, the player sees the board, the next numbered disc, and the number of remaining
+drops until a new row of hidden discs appears. This is the information that goes into any "legal"
+autonomous playing strategy.
 
 <PlayerView caption="The visible board, the next disc, and the rise clock are public. What is under a gray disc is unknowable until it is opened, and nobody knows which discs are coming after the next one." />
 
@@ -57,6 +59,10 @@ including the disc itself. It explodes if either run length exactly equals its n
   caption="The 3 sits beside a 5 and a 6, making a run of three occupied cells. The 3 clears because its own number matches that run; the 5 and 6 stay."
 />
 
+Each animation steps through a single turn, where a column is chosen to drop
+a particular *incoming disc*, and the result plays out. Below each animation, the steps
+of a multi-stage explosion are also laid out as a filmstrip.
+
 <RulesScenario
   id="row-clear"
   notes={[
@@ -66,15 +72,8 @@ including the disc itself. It explodes if either run length exactly equals its n
     "The 3 is removed. Every numbered disc is judged independently, even when several share the same run.",
     "The board settles. Nothing was above the cleared disc, so nothing falls.",
   ]}
-  caption="A horizontal clear. The neighboring numbers can be anything stable; only the disc whose own number matches the run explodes."
+  caption="Only the disc whose own number matches the run length explodes."
 />
-
-<Callout title="How to read the animations" tone="info">
-Each animation steps through a single move of the game: the user chooses a column to drop
-a particular incoming disc, and then the result plays out. Below each animation, each step
-of a multi-stage explosion might also be laid out as a filmstrip. The panels on the right
-show the score earned from the move.
-</Callout>
 
 The same rule reads downwards. A column-run counts the occupied cells stacked
 directly above and below the disc:
@@ -109,11 +108,9 @@ The match has to be **exact**. A run that is too long does nothing:
   caption="Too long is as good as too short. The surrounding values do not need to match one another; each disc compares its own number with its row-run and column-run."
 />
 
-<Callout title="A subtle but important point" tone="warn">
-Gray discs are occupied cells. They **count toward the length of a run** even
+Note that gray discs count toward the length of a run, even
 though they have no visible number to compare. A 3 beside a 5, a 6, and a gray
 disc is in a run of four, not three.
-</Callout>
 
 <RunCounter
   row="0356800"
@@ -131,18 +128,17 @@ disc is in a run of four, not three.
   caption="A gray disc has no visible number, but it still counts as an occupied cell when every numbered disc measures its run."
 />
 
-## Gray discs: cracking and revealing
+## Cracking and revealing gray discs
 
 A solid gray disc <Disc solid /> hides a number from 1 to 7. It opens in two
-steps. Whenever a disc **directly next to it** (above, below, left, or right,
-never diagonally) clears, the gray disc takes one **hit**:
+steps. Whenever a disc directly next to it explodes (above, below, left, or right,
+not diagonally), then the gray disc takes one **hit**:
 
-- the **first** hit turns a solid disc into a cracked disc <Disc cracked />;
-- the **second** hit reveals the number underneath, which becomes an ordinary
+- the first hit turns a solid disc into a cracked disc <Disc cracked />;
+- the second hit reveals the number underneath, which is an ordinary
   numbered disc from then on.
 
-Hits are counted per wave, on the board *as it was just before the wave's discs
-were removed*. A cracked disc therefore needs one more hit; a solid disc hit by
+Hits are counted per wave of explosions, so a solid disc hit by
 two clearing neighbours in the same wave opens immediately.
 
 <RulesScenario
@@ -197,22 +193,7 @@ The same counting works when the two hits are not on opposite sides:
   caption="Two hits in the same wave open a solid disc at once. Hits are judged on the board before the clear, so a disc that is about to be removed still counts as a neighbour."
 />
 
-A gray disc hides one number from 1 to 7, drawn uniformly. Nothing you do
-changes the odds. You only control *when* and *whether* it is exposed.
-
-<Callout title="One place where this simulator differs from the original game" tone="warn">
-In the original Drop7 the hidden number is decided when the gray disc is
-created, and stays with that disc. **This project's engine draws it at the
-moment of reveal instead**, in row-major order. To a player, the two methods are
-indistinguishable. The number you see is uniformly chosen from 1 to 7 and is
-unknowable in advance. For researching optimal strategy, it means there can be a
-persistent "answer key" underneath the board that is turned on with an optional
-**latent mode**. This is exactly what all the scripted benchmark rounds and 
-the hidden-board research tools do. 
-
-In latent mode, the values are written down in advance, so every legal policy 
-that opens the same disc finds the same number.
-</Callout>
+A gray disc's number is always chosen uniformly at random from 1 to 7.
 
 ## Gravity and chain reactions
 
@@ -309,11 +290,11 @@ room:
   caption="A blocked rise. A single full column ends the game even when six other columns have plenty of space, which is why height is the thing every strategy here watches most closely."
 />
 
-Nothing else ends a game: there is no timer, no move limit in the rules
-themselves (the research benchmarks cap games at 2,000 moves and mark those as
-censored), and no way to lose points.
+Nothing else ends a game: there are no timers, no move limits, and no way to lose points.
 
-## The whole rulebook in one table
+## Vocabulary
+
+Here is a table of the key terms and concepts used throughout this research project.
 
 | Rule | Precisely |
 | --- | --- |
@@ -321,25 +302,16 @@ censored), and no way to lose points.
 | A turn | You are shown the next disc; you choose a column whose top cell is empty; the disc falls to the lowest empty cell in that column. |
 | Clearing | A numbered disc clears when the contiguous run of occupied cells through it, along its row **or** its column, has length **exactly** equal to its number. Gray discs count as occupied. |
 | Waves | All matching discs clear simultaneously; gravity then pulls everything above them down; if new matches exist, the next wave clears them; repeat until nothing matches. |
-| Gray discs | A hit is an orthogonally adjacent disc clearing in the current wave, judged on the pre-clear board. Solid + 1 hit = cracked. Cracked + 1 hit = revealed. Solid + 2 hits in one wave = revealed. The revealed number is uniform on 1–7; this engine draws it at reveal time unless latent mode fixes it in advance. |
+| Gray discs | Might be a *hidden gray disc* or a *cracked gray disc*. An orthogonally adjacent disc clearing in the current wave, judged on the pre-clear board, gives the disc a *hit*. Solid + 1 hit = cracked. Cracked + 1 hit = revealed. Solid + 2 hits in one wave = revealed. The revealed number is uniform on 1-7, and this engine draws it at reveal time unless *latent mode* fixes it in advance. |
 | Wave score | `floor(7 × d^2.5)` points per disc cleared in wave `d`: 7, 39, 109, 224, 391, 617, 907, 1,267, … |
-| Rise | After every fifth drop (and after that move's cascade), the board moves up one row and a row of seven solid gray discs appears at the bottom; **+17,000**. A cascade caused by the new row continues the move's wave count. |
+| Rise | After every fifth drop (and after that move's cascade), the board moves up one row and a row of seven solid gray discs appears at the bottom. This gives a **+17,000** survival bonus. A cascade caused by the new row might continue the move's wave count. |
 | Board clear | A move that ends with an empty board earns **+70,000**. |
 | Game over | The board must rise but some column's top cell is occupied; or no column can accept a disc. |
-| Information | The player and any legal policy see only the board, the next disc, and the rise clock. Hidden gray values and future discs are unknown. |
+| Information | The player and any legal policy see only the board, the next disc, and the rise clock. Hidden gray values and future discs are unknown to the player and any *legal policy*. |
 
 ## Why the strategy is hard
 
-A move is never just its immediate clear. It changes which gray discs get hit,
-which numbers fall together, how tall each column is when the next rise comes,
-and which hidden numbers will surface later. Good play keeps numbers flowing.
-It clears and reveals steadily so the board never stacks up, while
-building the shapes that turn a single drop into a deep, high-scoring chain.
-
-<Callout title="The public information boundary" tone="info">
-A legal policy may use only the visible board, the visible next disc, the
-drops until the next rise, and whether the game is over. Never the seed,
-future discs, hidden gray-disc values, the score, or the level. Every approach
-in this repository is held to that rule, and the question they all try to
-answer is the same one a player faces: which column should receive this disc?
-</Callout>
+A common pattern that human players naturally do in this game, that every computer
+policy so far has not been able to perform, involves the long-term strategic thinking to 
+build up large chain reactions. If you review the computer games, you will see they tend
+to play very efficiently but currently lose because of avoidable mistakes.

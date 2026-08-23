@@ -49,7 +49,7 @@ export default function OverviewPage() {
         </h1>
         <p className="mt-2 max-w-3xl text-zinc-400">
           <Link href="https://en.wikipedia.org/wiki/Drop7" target="_blank" className="text-sky-400 hover:text-sky-300">Drop7</Link> 
-          is widely considered one of the great puzzle games of all time.
+          {' '}is widely considered one of the great puzzle games of all time.
           The goal of this research is to find an autonomous strategy for playing the game, 
           whose average score exceeds one million points. 
         </p>
