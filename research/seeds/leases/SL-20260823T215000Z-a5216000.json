@@ -17,6 +17,7 @@
   "runIds": [],
   "notes": [
     "Sub-ranges per P-SOL-v1 section 4: G0 ladder 0xa5216000-0xa52160ff (256), main corpus 0xa5217000-0xa52177ff (2,048), gate set 0xa5219000-0xa52191ff (512); interleaved gaps stay clean. Inside the SEEDLEASE-A52 reserve 0xa5216000-0xa522ffff, which docs/exploratory/lease-map.md lists as unallocated.",
-    "Training role; gate-set origins become development-read on use and never train."
+    "Training role; gate-set origins become development-read on use and never train.",
+    "2026-08-23 G0 (RUN-20260823T215500Z-fc74e0b4): never opened. Stop rule S1 halted stage G0 before the first leased seed was read: the design's D3 N7M6 budget lines assume 292 moves/s, but the C0 engine identity (runs/RUN-A525-reveal/d3-n7-m6.json) and a fresh smoke-seed pilot measure ~6.8 CPU-s per decision, projecting every D3 N7M6 stage far beyond 1.3x its line (runs/RUN-20260823T215500Z-sol/g0/ladder.json). The range remains clean and reserved pending coordinator decision (P-SOL-v2 or scale-out)."
   ]
 }

@@ -10,7 +10,8 @@
     "F2: offline gate G1 fails (student top-1 vs exact-D4 argmax < 0.52, or < incumbent LeafNet + 0.01) while the G2 decomposition shows target quality adequate (label-argmax top-1 vs D4 >= 0.60): sibling-complete data did not fix discrimination.",
     "F3: G2 shows label-argmax top-1 vs D4 < 0.60: the outcome-label family itself does not track decision quality; falsifies the label mechanism regardless of fit.",
     "F4: gameplay co-primary fails: paired 256-game d4s7 lower bound <= 0 (successor screen experiment).",
-    "A negative rejects only the tested configuration {continuation in D1/D2, H=48, K=16, 572k student, ranking+regression mix}; D3-continuation labels at corpus scale remain open via the scale-out path."
+    "A negative rejects only the tested configuration {continuation in D1/D2, H=48, K=16, 572k student, ranking+regression mix}; D3-continuation labels at corpus scale remain open via the scale-out path.",
+    "Status 2026-08-23: F1 is triggered in its v2 form - no affordable continuation engine could be certified (the fast M=1 proxy failed the D3 N7M6 guardrail: mean tau 0.370, top-1 4/6) - so the core claims M1/M2 remain untested rather than refuted; the theory is blocked pending the fast-engine M=6 port (E-FAST-M6) or a scale-out lease for native-M6 labels."
   ],
   "informationClass": "public-policy",
   "lifecycle": "proposed",
@@ -24,7 +25,8 @@
     "runs/RUN-20260823T191900Z-b9f8f80d/kimi-k3-main-design.md",
     "research/results/RS-20260823T194142Z-946e3cd1.json",
     "research/results/RS-20260823T194200Z-42b113db.json",
-    "docs/exploratory/finding-08-learned-leaf.md"
+    "docs/exploratory/finding-08-learned-leaf.md",
+    "research/results/RS-20260823T225753Z-0fbd48c3.json"
   ],
   "createdBy": {
     "platform": "unknown",
@@ -32,5 +34,5 @@
     "agentId": null
   },
   "createdAt": "2026-08-23T21:18:28Z",
-  "updatedAt": "2026-08-23T21:19:29Z"
+  "updatedAt": "2026-08-23T22:57:53Z"
 }

@@ -76,14 +76,20 @@
     "runs/RUN-20260823T215500Z-sol/corpus/ (pilot + main)",
     "runs/RUN-20260823T215500Z-sol/train/ and gate/"
   ],
-  "lifecycle": "preregistered",
-  "protocolSha256": "cdf85bc4b3ca7925d0805524aa609e7717906c5d21e68d47aa4dba2e6c4813f6",
-  "amendments": [],
+  "lifecycle": "completed",
+  "protocolSha256": "2635b0477b90cb559455576e7744417d872283529909202f1a69805e15b28509",
+  "amendments": [
+    {
+      "timestamp": "2026-08-23T22:57:53Z",
+      "beforeControlledData": false,
+      "reason": "Closed out after G0: rung 1 S1-halted on measured fast-d3s7 cost (54.6 ms/move vs the 4 ms planning figure), rung 2 guardrail killed the M1 proxy (mean tau 0.370, top-1 4/6). failureAction applies; no leased seed was opened; lifecycle completed and hash recomputed per repo convention. The run record retains the preregistration hash cdf85bc4b3ca7925d0805524aa609e7717906c5d21e68d47aa4dba2e6c4813f6."
+    }
+  ],
   "createdBy": {
     "platform": "Claude Code",
     "model": "claude-fable-5",
     "agentId": null
   },
   "createdAt": "2026-08-23T21:52:46Z",
-  "updatedAt": "2026-08-23T21:53:26Z"
+  "updatedAt": "2026-08-23T22:57:53Z"
 }

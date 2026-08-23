@@ -29,8 +29,11 @@
 #include "fair-only-depth4-noentry.cpp"
 
 #include "../../../approaches/lifetime-objective/common/harness.hpp"
+#include "../fast-engine/fast-search.hpp"
 
 #include <sys/resource.h>
+
+#include <memory>
 
 #include <cstdio>
 #include <cstring>
@@ -262,6 +265,14 @@ struct Options {
   int mirrorCheck = 0;                 // >0: mirror-invariance gate, N roots
   std::string leaseLabel = "unspecified";
   std::string dataRole = "unspecified";
+  // --- G0 ladder modes (EX-...-v2).  Inert unless one of these is given.
+  int makeSyntheticRoots = 0;   // >0: write N seed-free synthetic roots
+  std::string rootsOut;         // output path for a roots file
+  std::string replaySpec;       // "seedHex:move:move,..." C0 replay harvest
+  std::string ladderRoots;      // roots file to run the continuation plan on
+  int ladderLimit = 0;          // 0 = all roots in the file
+  int crnParity = 0;            // >0: H=1 tape-parity gate over N roots
+  int fastParity = 0;           // >0: fast-vs-native decision parity gate
 };
 
 std::uint8_t legalMaskOf(const Board& board) {
@@ -470,10 +481,22 @@ struct EngineSpec {
 // CHECK), and D3 N7M6 is the C0 arm exactly as retained in
 // runs/RUN-A525-reveal/d3-n7-m6.json (depth 3, N=7, M=6,
 // maximumWork 51,084,852, maximumCacheEntries 87,025).
+// worstCaseWork(3,7)+1 with b = 7 columns x 7 strata = 49 (the run.cpp
+// iterative-deepening bound formula; at (4,7) it reproduces the recorded
+// 11,892,399): the fast-d3s7 search always completes depth 3.
+constexpr std::uint64_t kFastD3S7MaxWork = 242'698;
+
 inline EngineSpec engineSpecByName(const std::string& name) {
   if (name == "d1") return {0, 1, 5, 1, 3'200'000, 60'000, "d1"};
   if (name == "d2") return {1, 2, 5, 1, 3'200'000, 60'000, "d2"};
   if (name == "d3n7m6") return {2, 3, 7, 6, 51'084'852, 87'025, "d3n7m6"};
+  // EX-20260823-sol-corpus-and-offline-gate-v2: the fast memo-free engine
+  // (finding-13, proven action/work-identical to the parameterized fair
+  // search) at depth 3, seven disc strata, M = 1.
+  if (name == "fastd3s7") return {3, 3, 7, 1, kFastD3S7MaxWork, 60'000, "fastd3s7"};
+  // The native single-knob d3 s7 M1 search at the same bounds, for the
+  // fast-vs-native parity gate only (never a corpus engine).
+  if (name == "d3s7native") return {4, 3, 7, 1, kFastD3S7MaxWork, 60'000, "d3s7native"};
   throw std::invalid_argument("unknown continuation engine " + name);
 }
 
@@ -683,11 +706,39 @@ struct ContinuationOutcome {
   std::uint64_t movesPlayed = 0;
 };
 
+// Continuation mover: FactoredSearch for the native engines, fast::FastSearch
+// for engineId 3.  Both expose chooseAction(state, work&); the environment
+// stepping below is engine-independent (CRN tape playMoveSampled), so engines
+// differ only in the columns they choose from move 2 onward.
+class ContinuationMover {
+ public:
+  explicit ContinuationMover(const EngineSpec& spec) {
+    if (spec.id == 3) {
+      fast::FastSearchParameters parameters;
+      parameters.depth = spec.depth;
+      parameters.chance_samples = spec.discSamples;
+      parameters.maximum_work = spec.maximumWork;
+      parameters.maximum_cache_entries = spec.maximumCacheEntries;
+      fast_ = std::make_unique<fast::FastSearch>(parameters);
+    } else {
+      factored_ = std::make_unique<FactoredSearch>(parametersFor(spec));
+    }
+  }
+  int chooseAction(const State& state, std::uint64_t& work) {
+    return fast_ ? fast_->chooseAction(state, work)
+                 : factored_->chooseAction(state, work);
+  }
+
+ private:
+  std::unique_ptr<FactoredSearch> factored_;
+  std::unique_ptr<fast::FastSearch> fast_;
+};
+
 inline ContinuationOutcome runContinuation(const State& canonicalRoot,
                                            int canonicalColumn,
                                            std::uint32_t tapeSeed, int horizon,
                                            const EngineSpec& spec) {
-  FactoredSearch engine{parametersFor(spec)};
+  ContinuationMover engine{spec};
   ContinuationOutcome outcome;
   State state = canonicalRoot;
   int column = canonicalColumn;
@@ -1049,6 +1100,426 @@ inline void runContinuations(ContinuationPlan& plan, int threads) {
 
 }  // namespace panel2
 
+// ===========================================================================
+// G0 ladder harness (EX-20260823-sol-corpus-and-offline-gate-v2).
+//
+// Everything in namespace ladder is reachable only through the --make-*,
+// --ladder-roots, --fast-parity and --crn-parity options; the v1 and panel2
+// code paths above are untouched.
+//
+// Root pools are stored as JSON lines:
+//   {"tag": 17, "kind": "synthetic", "moveIndex": 42,
+//    "board": "<49 digits 0-9>", "nextDisc": 4, "movesRemaining": 5}
+//
+// Synthetic pool rule (disclosed): for pool index i, the generation tape is
+// tapeSeed = mix32(kPoolTapeDomain ^ (i+1)*0x9e3779b9); the game starts from
+// the empty board with next_disc drawn from Mulberry32(mix32(tapeSeed ^
+// kPoolDiscDomain)) and moves_remaining 5, is played forward by the
+// fast-d3s7 reference with environment randomness
+// Mulberry32(mix32(tapeSeed ^ kPoolMoveDomain ^ (ordinal+1)*0x85ebca6b))
+// per move, and the root is the pre-move state at move
+// 8 + mix32(tapeSeed ^ kPoolDepthDomain) % 53 (8..60).  If the game dies
+// first, the last pre-move state with >= 2 legal columns and >= 8 moves
+// played is kept; if none exists the index is skipped and counted.  No
+// engine seed is consumed anywhere on this path.
+// ===========================================================================
+
+double processCpuSeconds();
+
+namespace ladder {
+
+constexpr std::uint32_t kPoolTapeDomain = 0x524f'4f54u;   // "ROOT"
+constexpr std::uint32_t kPoolMoveDomain = 0x504f'4f4cu;   // "POOL"
+constexpr std::uint32_t kPoolDiscDomain = 0x4449'5343u;   // "DISC"
+constexpr std::uint32_t kPoolDepthDomain = 0x4445'5054u;  // "DEPT"
+
+struct PoolRoot {
+  std::uint32_t tag = 0;
+  std::string kind;
+  std::uint16_t moveIndex = 0;
+  State state{};
+};
+
+inline int popcount8(std::uint8_t mask) {
+  int bits = 0;
+  for (int i = 0; i < 8; ++i) bits += (mask >> i) & 1;
+  return bits;
+}
+
+inline void writeRoots(const std::string& path,
+                       const std::vector<PoolRoot>& roots) {
+  std::ofstream file(path);
+  if (!file) throw std::runtime_error("cannot open " + path);
+  for (const PoolRoot& root : roots) {
+    file << "{\"tag\": " << root.tag << ", \"kind\": \"" << root.kind
+         << "\", \"moveIndex\": " << root.moveIndex << ", \"board\": \"";
+    for (std::uint8_t cell : root.state.board)
+      file << static_cast<char>('0' + cell);
+    file << "\", \"nextDisc\": " << static_cast<int>(root.state.next_disc)
+         << ", \"movesRemaining\": " << root.state.moves_remaining << "}\n";
+  }
+}
+
+inline std::string jsonField(const std::string& line, const std::string& key) {
+  const std::string needle = "\"" + key + "\": ";
+  const std::size_t at = line.find(needle);
+  if (at == std::string::npos)
+    throw std::runtime_error("roots file missing field " + key);
+  std::size_t start = at + needle.size();
+  bool quoted = line[start] == '"';
+  if (quoted) ++start;
+  std::size_t end = start;
+  while (end < line.size() &&
+         (quoted ? line[end] != '"'
+                 : (line[end] != ',' && line[end] != '}')))
+    ++end;
+  return line.substr(start, end - start);
+}
+
+inline std::vector<PoolRoot> readRoots(const std::string& path, int limit) {
+  std::ifstream file(path);
+  if (!file) throw std::runtime_error("cannot open " + path);
+  std::vector<PoolRoot> roots;
+  std::string line;
+  while (std::getline(file, line)) {
+    if (line.empty()) continue;
+    PoolRoot root;
+    root.tag = static_cast<std::uint32_t>(std::stoul(jsonField(line, "tag")));
+    root.kind = jsonField(line, "kind");
+    root.moveIndex =
+        static_cast<std::uint16_t>(std::stoul(jsonField(line, "moveIndex")));
+    const std::string board = jsonField(line, "board");
+    if (board.size() != static_cast<std::size_t>(kCellCount))
+      throw std::runtime_error("bad board length in roots file");
+    for (int cell = 0; cell < kCellCount; ++cell) {
+      root.state.board[static_cast<std::size_t>(cell)] =
+          static_cast<std::uint8_t>(board[static_cast<std::size_t>(cell)] - '0');
+    }
+    root.state.next_disc =
+        static_cast<std::uint8_t>(std::stoi(jsonField(line, "nextDisc")));
+    root.state.moves_remaining = std::stoi(jsonField(line, "movesRemaining"));
+    roots.push_back(std::move(root));
+    if (limit > 0 && static_cast<int>(roots.size()) >= limit) break;
+  }
+  return roots;
+}
+
+// Play one synthetic pool game; returns true and fills the root when a state
+// with >= 2 legal columns at >= 8 moves played exists on the trajectory.
+inline bool makeSyntheticRoot(std::uint32_t index, PoolRoot& out) {
+  const std::uint32_t tapeSeed =
+      mix32(kPoolTapeDomain ^ ((index + 1u) * 0x9e37'79b9u));
+  const int targetDepth =
+      8 + static_cast<int>(mix32(tapeSeed ^ kPoolDepthDomain) % 53u);
+  State state{};
+  {
+    Mulberry32 disc(mix32(tapeSeed ^ kPoolDiscDomain));
+    state.next_disc = disc.nextDisc();
+  }
+  panel2::ContinuationMover mover{panel2::engineSpecByName("fastd3s7")};
+  State lastGood{};
+  bool haveGood = false;
+  for (int ordinal = 0; ordinal <= targetDepth; ++ordinal) {
+    if (state.game_over) break;
+    const std::uint8_t mask = legalMaskOf(state.board);
+    if (mask == 0) break;
+    if (popcount8(mask) >= 2 && state.moves_played >= 8) {
+      lastGood = state;
+      haveGood = true;
+      if (state.moves_played == targetDepth) break;
+    }
+    std::uint64_t work = 0;
+    int column = mover.chooseAction(state, work);
+    if (column < 0 || !isLegal(state.board, column))
+      column = centerFirstMove(state.board);
+    if (column < 0) break;
+    Mulberry32 tape(mix32(tapeSeed ^ kPoolMoveDomain ^
+                          ((static_cast<std::uint32_t>(ordinal) + 1u) *
+                           0x85eb'ca6bu)));
+    MoveResult move;
+    if (!cfpi::detail::playMoveSampled(state, column, tape, move)) break;
+    state = move.state;
+  }
+  if (!haveGood) return false;
+  out.tag = index;
+  out.kind = "synthetic";
+  out.moveIndex = static_cast<std::uint16_t>(lastGood.moves_played);
+  lastGood.score = 0;
+  out.state = lastGood;
+  return true;
+}
+
+inline int runMakeSyntheticRoots(const Options& options) {
+  const int wanted = options.makeSyntheticRoots;
+  const std::uint32_t budget = static_cast<std::uint32_t>(wanted) * 2u;
+  std::vector<PoolRoot> candidates(budget);
+  std::vector<std::uint8_t> valid(budget, 0);
+  std::atomic<std::uint32_t> nextIndex{0};
+  const int threads = std::max(1, options.threads);
+  std::vector<std::thread> pool;
+  for (int worker = 0; worker < threads; ++worker) {
+    pool.emplace_back([&]() {
+      for (;;) {
+        const std::uint32_t index = nextIndex.fetch_add(1);
+        if (index >= budget) return;
+        valid[index] = makeSyntheticRoot(index, candidates[index]) ? 1 : 0;
+      }
+    });
+  }
+  for (std::thread& thread : pool) thread.join();
+  std::vector<PoolRoot> roots;
+  int skipped = 0;
+  for (std::uint32_t index = 0;
+       index < budget && static_cast<int>(roots.size()) < wanted; ++index) {
+    if (valid[index]) roots.push_back(candidates[index]);
+    else ++skipped;
+  }
+  if (static_cast<int>(roots.size()) < wanted)
+    throw std::runtime_error("synthetic pool exhausted its 2x index budget");
+  writeRoots(options.rootsOut, roots);
+  std::cout << "{\"mode\": \"make-synthetic-roots\", \"roots\": "
+            << roots.size() << ", \"skippedIndices\": " << skipped
+            << ", \"out\": \"" << options.rootsOut << "\"}\n";
+  return 0;
+}
+
+// Replay retained C0 games (already-read cohort; data status unchanged) with
+// the exact C0 engine to harvest realistic roots.  --replay-spec is
+// "seedHex:move:move[,...]"; every game is replayed to its end and the final
+// (moves, score) printed so the caller can assert identity with the retained
+// artifact.
+inline int runReplayRoots(const Options& options) {
+  struct Item {
+    std::uint32_t seed;
+    std::vector<int> captures;
+  };
+  std::vector<Item> items;
+  {
+    std::stringstream stream(options.replaySpec);
+    std::string part;
+    while (std::getline(stream, part, ',')) {
+      if (part.empty()) continue;
+      std::stringstream inner(part);
+      std::string token;
+      Item item{};
+      int field = 0;
+      while (std::getline(inner, token, ':')) {
+        if (field == 0)
+          item.seed = static_cast<std::uint32_t>(std::stoul(token, nullptr, 0));
+        else
+          item.captures.push_back(std::stoi(token));
+        ++field;
+      }
+      items.push_back(std::move(item));
+    }
+  }
+  std::vector<std::vector<PoolRoot>> captured(items.size());
+  std::vector<std::string> finals(items.size());
+  std::atomic<std::size_t> nextItem{0};
+  const int threads =
+      std::max(1, std::min<int>(options.threads, static_cast<int>(items.size())));
+  std::vector<std::thread> pool;
+  for (int worker = 0; worker < threads; ++worker) {
+    pool.emplace_back([&]() {
+      for (;;) {
+        const std::size_t itemIndex = nextItem.fetch_add(1);
+        if (itemIndex >= items.size()) return;
+        const Item& item = items[itemIndex];
+        panel2::ContinuationMover mover{panel2::engineSpecByName("d3n7m6")};
+        State state = initialHeadlessState(item.seed);
+        while (!state.game_over && state.moves_played < options.maximumMoves) {
+          if (legalMaskOf(state.board) == 0) break;
+          for (const int capture : item.captures) {
+            if (state.moves_played == capture) {
+              PoolRoot root;
+              root.tag = item.seed;
+              root.kind = "c0";
+              root.moveIndex = static_cast<std::uint16_t>(capture);
+              root.state = state;
+              root.state.score = 0;
+              captured[itemIndex].push_back(std::move(root));
+            }
+          }
+          std::uint64_t work = 0;
+          int column = mover.chooseAction(state, work);
+          if (column < 0 || !isLegal(state.board, column))
+            column = centerFirstMove(state.board);
+          if (column < 0) break;
+          MoveResult move;
+          if (!playHeadlessMove(state, item.seed, column, move)) break;
+        }
+        std::ostringstream summary;
+        summary << "{\"seedHex\": \"0x" << std::hex << item.seed << std::dec
+                << "\", \"moves\": " << state.moves_played
+                << ", \"score\": " << state.score << "}";
+        finals[itemIndex] = summary.str();
+      }
+    });
+  }
+  for (std::thread& thread : pool) thread.join();
+  std::vector<PoolRoot> roots;
+  for (const auto& perItem : captured)
+    for (const PoolRoot& root : perItem) roots.push_back(root);
+  writeRoots(options.rootsOut, roots);
+  std::cout << "{\"mode\": \"replay-roots\", \"roots\": " << roots.size()
+            << ", \"finals\": [";
+  for (std::size_t index = 0; index < finals.size(); ++index)
+    std::cout << (index == 0 ? "" : ", ") << finals[index];
+  std::cout << "], \"out\": \"" << options.rootsOut << "\"}\n";
+  return 0;
+}
+
+inline panel2::RootStaging stagingFor(const PoolRoot& root) {
+  panel2::RootStaging staging;
+  staging.rootState = root.state;
+  staging.legalMask = legalMaskOf(root.state.board);
+  staging.chosenColumn = 255;
+  staging.moveIndex = root.moveIndex;
+  staging.canonicalRoot =
+      panel2::publicOnlyCanonicalRoot(staging.rootState, staging.mirroredRoot);
+  staging.rootHash = panel2::publicRootHash(staging.canonicalRoot);
+  return staging;
+}
+
+// Run the continuation plan over a roots file and write one panel2 file per
+// engine (ladder.py consumes them).  With --crn-parity N > 0 this instead
+// runs every engine at horizon 1 over the first N roots: no engine decision
+// is ever taken before the horizon, so the outcome arrays must be
+// byte-identical across engines -- the CRN tape-parity gate.
+inline int runLadder(const Options& options) {
+  const auto engines = panel2::parseEngineList(options.contEngines);
+  const auto poolRoots = readRoots(options.ladderRoots, options.ladderLimit);
+  std::vector<panel2::RootStaging> staged;
+  staged.reserve(poolRoots.size());
+  for (const PoolRoot& root : poolRoots) staged.push_back(stagingFor(root));
+  std::vector<const panel2::RootStaging*> roots;
+  for (const auto& staging : staged) roots.push_back(&staging);
+
+  const bool parityMode = options.crnParity > 0;
+  if (parityMode && static_cast<int>(roots.size()) > options.crnParity)
+    roots.resize(static_cast<std::size_t>(options.crnParity));
+
+  panel2::ContinuationPlan plan;
+  plan.roots = &roots;
+  plan.engines = &engines;
+  plan.k = options.panel2K;
+  plan.horizon = parityMode ? 1 : options.panel2Horizon;
+  const auto started = std::chrono::steady_clock::now();
+  const double cpuAtStart = processCpuSeconds();
+  panel2::runContinuations(plan, options.threads);
+  const double wall =
+      std::chrono::duration<double>(std::chrono::steady_clock::now() - started)
+          .count();
+  const double cpu = processCpuSeconds() - cpuAtStart;
+
+  if (parityMode) {
+    std::uint64_t comparisons = 0, mismatches = 0;
+    for (std::size_t rootIndex = 0; rootIndex < roots.size(); ++rootIndex) {
+      for (int sibling = 0; sibling < kBoardSize; ++sibling) {
+        if (!((roots[rootIndex]->legalMask >> sibling) & 1u)) continue;
+        for (int j = 0; j < plan.k; ++j) {
+          const auto& reference = plan.outcomes[plan.indexOf(rootIndex, 0, sibling, j)];
+          for (std::size_t engineIndex = 1; engineIndex < engines.size();
+               ++engineIndex) {
+            const auto& other =
+                plan.outcomes[plan.indexOf(rootIndex, engineIndex, sibling, j)];
+            ++comparisons;
+            if (reference.lifetime != other.lifetime ||
+                reference.deathRise != other.deathRise ||
+                reference.clears != other.clears ||
+                reference.reveals != other.reveals)
+              ++mismatches;
+          }
+        }
+      }
+    }
+    std::cout << "{\"gate\": \"panel2-crn-tape-parity\", \"roots\": "
+              << roots.size() << ", \"engines\": \"" << options.contEngines
+              << "\", \"k\": " << plan.k << ", \"comparisons\": " << comparisons
+              << ", \"mismatches\": " << mismatches
+              << ", \"pass\": " << (mismatches == 0 ? "true" : "false")
+              << "}\n";
+    return mismatches == 0 ? 0 : 1;
+  }
+
+  std::vector<std::uint8_t> buffer(panel2::kRecordBytes);
+  for (std::size_t engineIndex = 0; engineIndex < engines.size();
+       ++engineIndex) {
+    const std::string path = options.panel2Prefix + "." +
+                             engines[engineIndex].name + ".panel2";
+    std::FILE* file = std::fopen(path.c_str(), "wb");
+    if (file == nullptr) throw std::runtime_error("cannot open " + path);
+    for (std::size_t rootIndex = 0; rootIndex < roots.size(); ++rootIndex) {
+      const std::size_t base = plan.indexOf(rootIndex, engineIndex, 0, 0);
+      panel2::serializeRecord(buffer.data(), *roots[rootIndex],
+                              static_cast<std::uint32_t>(rootIndex),
+                              poolRoots[rootIndex].tag, engines[engineIndex],
+                              plan.k, plan.horizon, 255, 0,
+                              plan.outcomes.data() + base);
+      std::fwrite(buffer.data(), 1, buffer.size(), file);
+    }
+    std::fclose(file);
+  }
+  std::cout << std::setprecision(10)
+            << "{\"mode\": \"ladder\", \"roots\": " << roots.size()
+            << ", \"engines\": \"" << options.contEngines
+            << "\", \"k\": " << plan.k << ", \"horizon\": " << plan.horizon
+            << ", \"movesPerEngine\": {";
+  for (std::size_t engineIndex = 0; engineIndex < engines.size();
+       ++engineIndex) {
+    std::cout << (engineIndex == 0 ? "" : ", ") << "\""
+              << engines[engineIndex].name
+              << "\": " << plan.movesPerEngine[engineIndex];
+  }
+  std::cout << "}, \"wallSeconds\": " << wall << ", \"cpuSeconds\": " << cpu
+            << ", \"threads\": " << options.threads << "}\n";
+  return 0;
+}
+
+// Fast-vs-native parity gate: identical decisions from fast::FastSearch and
+// the native single-knob d3 s7 M1 search on live probe games (smoke seeds
+// only).  Work counts are compared and reported; the gate criterion is
+// decision identity.
+inline int runFastParityGate(const Options& options) {
+  panel2::ContinuationMover nativeMover{panel2::engineSpecByName("d3s7native")};
+  panel2::ContinuationMover fastMover{panel2::engineSpecByName("fastd3s7")};
+  std::uint64_t decisions = 0, actionMismatches = 0, workMismatches = 0;
+  std::uint64_t nativeWorkTotal = 0, fastWorkTotal = 0;
+  for (std::uint32_t seed = options.seedStart;
+       decisions < static_cast<std::uint64_t>(options.fastParity); ++seed) {
+    State state = initialHeadlessState(seed);
+    while (!state.game_over &&
+           decisions < static_cast<std::uint64_t>(options.fastParity)) {
+      if (legalMaskOf(state.board) == 0) break;
+      std::uint64_t nativeWork = 0, fastWork = 0;
+      const int nativeAction = nativeMover.chooseAction(state, nativeWork);
+      const int fastAction = fastMover.chooseAction(state, fastWork);
+      ++decisions;
+      nativeWorkTotal += nativeWork;
+      fastWorkTotal += fastWork;
+      if (nativeAction != fastAction) ++actionMismatches;
+      if (nativeWork != fastWork) ++workMismatches;
+      int column = nativeAction;
+      if (column < 0 || !isLegal(state.board, column))
+        column = centerFirstMove(state.board);
+      if (column < 0) break;
+      MoveResult move;
+      if (!playHeadlessMove(state, seed, column, move)) break;
+    }
+  }
+  std::cout << "{\"gate\": \"fast-d3s7-vs-native-parity\", \"decisions\": "
+            << decisions << ", \"actionMismatches\": " << actionMismatches
+            << ", \"workMismatches\": " << workMismatches
+            << ", \"nativeWorkTotal\": " << nativeWorkTotal
+            << ", \"fastWorkTotal\": " << fastWorkTotal
+            << ", \"seedStartHex\": \"0x" << std::hex << options.seedStart
+            << std::dec << "\", \"pass\": "
+            << (actionMismatches == 0 ? "true" : "false") << "}\n";
+  return actionMismatches == 0 ? 0 : 1;
+}
+
+}  // namespace ladder
+
 Options parseOptions(int argc, char** argv) {
   Options options;
   for (int index = 1; index < argc; index += 2) {
@@ -1079,6 +1550,13 @@ Options parseOptions(int argc, char** argv) {
     else if (key == "--panel2-mirror-check") options.mirrorCheck = std::stoi(value);
     else if (key == "--lease-label") options.leaseLabel = value;
     else if (key == "--data-role") options.dataRole = value;
+    else if (key == "--make-synthetic-roots") options.makeSyntheticRoots = std::stoi(value);
+    else if (key == "--roots-out") options.rootsOut = value;
+    else if (key == "--replay-spec") options.replaySpec = value;
+    else if (key == "--ladder-roots") options.ladderRoots = value;
+    else if (key == "--ladder-limit") options.ladderLimit = std::stoi(value);
+    else if (key == "--crn-parity") options.crnParity = std::stoi(value);
+    else if (key == "--fast-parity") options.fastParity = std::stoi(value);
     else throw std::invalid_argument("unknown option " + key);
   }
   return options;
@@ -1402,6 +1880,23 @@ int main(int argc, char** argv) {
   using namespace drop7::corpus;
   try {
     const Options options = parseOptions(argc, argv);
+    // G0 ladder modes (EX-20260823-sol-corpus-and-offline-gate-v2).
+    if (options.makeSyntheticRoots > 0) {
+      if (options.rootsOut.empty()) throw std::invalid_argument("--roots-out is required");
+      return ladder::runMakeSyntheticRoots(options);
+    }
+    if (!options.replaySpec.empty()) {
+      if (options.rootsOut.empty()) throw std::invalid_argument("--roots-out is required");
+      return ladder::runReplayRoots(options);
+    }
+    if (options.fastParity > 0) return ladder::runFastParityGate(options);
+    if (!options.ladderRoots.empty()) {
+      if (options.panel2K < 1 || options.panel2K > panel2::kMaxK)
+        throw std::invalid_argument("--panel2-k must be 1..30");
+      if (options.crnParity == 0 && options.panel2Prefix.empty())
+        throw std::invalid_argument("--panel2 prefix is required for ladder output");
+      return ladder::runLadder(options);
+    }
     if (!options.panel2Prefix.empty() || options.mirrorCheck > 0) {
       // PanelRecordV2 mode (P-SOL-v1).  The v1 body below is untouched.
       if (options.panel2K < 1 || options.panel2K > panel2::kMaxK) {

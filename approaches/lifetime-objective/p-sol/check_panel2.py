@@ -3,7 +3,7 @@
 # artifacts.  Exit 0 iff every check passes.
 #
 # Checks per record:
-#   * version 0x0200, K and H match the file-level values, engineId in {0,1,2}
+#   * version 0x0200, K and H match the file-level values, engineId in {0,1,2,3}
 #   * recordId is the record's index (seed-order sequential)
 #   * legalMask agrees with the root board's top row (column c legal iff
 #     board[0][c] is empty)
@@ -33,7 +33,7 @@ def check(path):
 
     idx = np.arange(f.count, dtype=np.uint32)
     require(np.all(f.record_id == idx), "recordId sequential in file order")
-    require(np.all((f.engine_id >= 0) & (f.engine_id <= 2)), "engineId in 0..2")
+    require(np.all((f.engine_id >= 0) & (f.engine_id <= 3)), "engineId in 0..3")
     require(np.all(f.horizon == f.horizon[0]) if f.count else True, "uniform H")
     require(np.all(f.header_pad == 0), "header pad zero")
     require(np.all(f.sibling_pad == 0), "sibling pad zero")
@@ -64,12 +64,21 @@ def check(path):
     require(np.all(sib_raw[illegal] == 0), "illegal sibling slots fully zero")
 
     rows, cols = np.nonzero(mask_bits)
+    # Ladder-mode records (EX-...-v2) carry no behaviour move and no D4
+    # reference pass: both columns are the 255 sentinel there.  Behaviour
+    # panels keep the strict checks.
+    chosen_present = f.chosen_column != 255
     require(
-        np.all(mask_bits[np.arange(f.count), f.chosen_column]),
-        "chosenColumn legal",
+        np.all(mask_bits[np.arange(f.count), np.where(chosen_present, f.chosen_column, 0)][chosen_present])
+        if chosen_present.any() else True,
+        "chosenColumn legal when present",
     )
     ref_computed = f.reference_column != 255
-    require(np.all(ref_computed == (f.record_id % 16 == 0)), "reference on recordId%16==0")
+    require(
+        np.all(ref_computed == (f.record_id % 16 == 0))
+        if chosen_present.all() else True,
+        "reference on recordId%16==0 (behaviour panels only)",
+    )
     ref_idx = np.where(ref_computed, f.reference_column, 0)
     require(
         np.all(mask_bits[np.arange(f.count), ref_idx][ref_computed])

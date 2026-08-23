@@ -54,6 +54,21 @@ def kendall_tau_b(a, b):
     return (concordant - discordant) / denom
 
 
+def top1_agreement(mean_ref, mean_cand, legal_idx):
+    """1.0 iff the candidate's best column is among the reference's max set.
+
+    Ties in the reference count as agreement when the candidate's argmax is
+    inside the tied max set (disclosed in the ladder JSON); the strict
+    first-argmax variant is reported alongside.
+    """
+    ref = mean_ref[legal_idx]
+    cand = mean_cand[legal_idx]
+    ref_max = ref.max()
+    in_set = 1.0 if ref[np.argmax(cand)] == ref_max else 0.0
+    strict = 1.0 if np.argmax(ref) == np.argmax(cand) else 0.0
+    return in_set, strict
+
+
 def per_root_taus(file_a, file_b):
     if file_a.count != file_b.count:
         raise ValueError("panel2 files have different record counts")
@@ -64,6 +79,7 @@ def per_root_taus(file_a, file_b):
     mean_a = file_a.km_restricted_mean()
     mean_b = file_b.km_restricted_mean()
     taus, origins = [], []
+    agrees, stricts = [], []
     skipped = 0
     for r in range(file_a.count):
         legal = np.nonzero(file_a.legal[r] == 1)[0]
@@ -79,8 +95,14 @@ def per_root_taus(file_a, file_b):
             skipped += 1
             continue
         taus.append(tau)
+        # file_a is the reference engine of the pair (first named on the
+        # command line); file_b is the candidate.
+        agree, strict = top1_agreement(mean_a[r], mean_b[r], legal)
+        agrees.append(agree)
+        stricts.append(strict)
         origins.append(int(file_a.origin_seed[r]))
-    return np.asarray(taus), np.asarray(origins), skipped
+    return (np.asarray(taus), np.asarray(agrees), np.asarray(stricts),
+            np.asarray(origins), skipped)
 
 
 def cluster_bootstrap(taus, origins, resamples=BOOTSTRAP_RESAMPLES,
@@ -106,6 +128,7 @@ def cluster_bootstrap(taus, origins, resamples=BOOTSTRAP_RESAMPLES,
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", default="")
+    parser.add_argument("--per-root", action="store_true")
     parser.add_argument("files", nargs="+", help="name=path per engine")
     args = parser.parse_args()
 
@@ -126,14 +149,26 @@ def main():
             "engineId": int(f.engine_id[0]) if f.count else None,
         }
     for a, b in itertools.combinations(engines, 2):
-        taus, origins, skipped = per_root_taus(engines[a], engines[b])
+        taus, agrees, stricts, origins, skipped = per_root_taus(
+            engines[a], engines[b])
         entry = {
+            "referenceEngine": a,
+            "candidateEngine": b,
             "roots": int(len(taus)),
             "skippedRoots": int(skipped),
             "meanTau": float(taus.mean()) if len(taus) else None,
             "medianTau": float(np.median(taus)) if len(taus) else None,
+            "minTau": float(taus.min()) if len(taus) else None,
             "bootstrap": cluster_bootstrap(taus, origins) if len(taus) else None,
+            "top1Agreement": float(agrees.mean()) if len(agrees) else None,
+            "top1AgreementStrict": float(stricts.mean()) if len(stricts) else None,
+            "top1Bootstrap": cluster_bootstrap(agrees, origins) if len(agrees) else None,
         }
+        if args.per_root:
+            entry["perRoot"] = [
+                {"origin": int(o), "tau": float(t), "top1": float(g)}
+                for o, t, g in zip(origins, taus, agrees)
+            ]
         result["pairs"][f"{a}-vs-{b}"] = entry
     text = json.dumps(result, indent=2)
     print(text)

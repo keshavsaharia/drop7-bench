@@ -1,0 +1,84 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260823T225753Z-0fbd48c3",
+  "theoryIds": [
+    "TH-20260823-sibling-outcome-labels-fix-leaf-0c3d480d"
+  ],
+  "experimentId": "EX-20260823-sol-corpus-and-offline-gate-v2-f95f56e4",
+  "runIds": [
+    "RUN-20260823T224351Z-6ad4e09e"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "fail",
+  "assessment": "not-supported-as-tested",
+  "evidenceTier": "pilot",
+  "summary": "P-SOL-2 stage G0 fails per the frozen failureAction, with no leased seed opened. Re-gates 7/7 pass, including fast-vs-native d3s7 parity (240 decisions, 0 action/work mismatches). Rung 1 S1-halted on measured cost: fast-d3s7 continuations run at 54.6 ms/move, ~13x the design's 4 ms estimate, projecting 47.9 CPU-h against the 6.76 ceiling; no tau was computed and the 1,200-root seed-free pool is retained. Rung 2 executed within envelope and the guardrail KILLED the proxy: on 6 CRN-matched C0 roots (exact replay verified), fast-d3s7 vs native D3 N7M6 within-root KM-lifetime orderings agree at mean tau 0.370 (LB95 0.283, min 0.053), top-1 4/6 - both kill conditions trigger, worst at late-game roots. Scientific consequence: the M=6 reveal quadrature genuinely changes within-root orderings, so an M=1 continuation corpus cannot carry D3 N7M6 label semantics; the fast-engine M=6 port (E-FAST-M6) is the required reopening route for any cheap-continuation label programme. Total ~7.5 CPU-h of the 35 cap; training lease still reserved and unopened.",
+  "metrics": {
+    "regates": "7/7 pass; fast-vs-native parity 240 decisions 0 mismatches, work 38,179,907 both sides",
+    "rung1": {
+      "halted": "S1 on projection",
+      "ratesMsPerMove": {
+        "d1": 0.074,
+        "d2": 1.99,
+        "fastD3s7": 54.6
+      },
+      "projectionCpuH": 47.9,
+      "ceilingCpuH": 6.76
+    },
+    "rung2": {
+      "roots": 6,
+      "K": 4,
+      "H": 40,
+      "meanTau": 0.37,
+      "tauLB95": 0.283,
+      "medianTau": 0.304,
+      "minTau": 0.053,
+      "top1Agreement": "4/6",
+      "kill": [
+        "mean tau < 0.5",
+        "top-1 <= 4/6"
+      ],
+      "nativeSecondsPerMove": 3.4,
+      "cpuHours": 4.6
+    },
+    "totalCpuHours": 7.5
+  },
+  "gateChecks": [
+    {
+      "criterion": "Re-gates: v1 byte-identity, fast-vs-native d3s7 decision parity, CRN tape parity, mirror invariance, thread/run determinism, legality",
+      "passed": true,
+      "observed": "7/7 pass; parity 240 decisions, 0 action/work mismatches (work 38,179,907 both sides); CRN 2,016 comparisons 0 mismatches"
+    },
+    {
+      "criterion": "Rung 1: at least one of D1/D2 with tau LB95 >= 0.75 and top-1 LB95 >= 0.80 vs fast-d3s7 on 1,200 roots",
+      "passed": false,
+      "observed": "not run: S1 halt - measured fast-d3s7 54.6 ms/move (design assumed 4), projection 47.9 CPU-h vs 6.76 ceiling; root pool retained"
+    },
+    {
+      "criterion": "Rung 2 guardrail: top-1 > 4/6 AND mean tau >= 0.5 AND no root tau < 0 (fast-d3s7 vs native D3 N7M6, 6 CRN-matched C0 roots)",
+      "passed": false,
+      "observed": "mean tau 0.370 (LB95 0.283, median 0.304, min 0.053), top-1 4/6 - kill conditions 'mean tau < 0.5' and 'top-1 <= 4/6' both trigger; native 3.40 s/move realised"
+    }
+  ],
+  "perGameArtifact": {
+    "path": "runs/RUN-20260823T215500Z-sol/g0v2/rung2.json",
+    "sha256": "35b1bac76ccdf4f94aa90454f6f64db2b79b97e3cb5b034ba59b1416d2bf68d5",
+    "recordCount": 6
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260820T080056Z-376ada90.json"
+  ],
+  "artifactManifestRef": null,
+  "limitations": [
+    "Rung 2 is a 6-root guardrail: it detects gross misalignment (kill power ~0.89 at true agreement 0.5) and its kill here is decisive for the proxy, but the tau point estimates carry wide intervals.",
+    "Rung 1's powered comparison never ran, so D1/D2 fidelity to fast-d3s7 is unmeasured.",
+    "The 20-minute wall overage over the subagent's 2.5 h cap was spent in the single-threaded determinism gate and is disclosed."
+  ],
+  "contributionIds": [
+    "CT-20260823T224410Z-869dd2f6",
+    "CT-20260823T215412Z-e59c1b8c",
+    "CT-20260823T205825Z-40e17d96"
+  ],
+  "recordedAt": "2026-08-23T22:57:53Z"
+}

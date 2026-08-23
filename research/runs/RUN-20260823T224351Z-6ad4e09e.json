@@ -1,0 +1,52 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260823T224351Z-6ad4e09e",
+  "experimentId": "EX-20260823-sol-corpus-and-offline-gate-v2-f95f56e4",
+  "lifecycle": "completed",
+  "runValidity": "partial",
+  "startedAt": "2026-08-23T21:55:00Z",
+  "endedAt": "2026-08-23T22:43:51Z",
+  "protocolSha256": "cdf85bc4b3ca7925d0805524aa609e7717906c5d21e68d47aa4dba2e6c4813f6",
+  "machineProfileRef": "research/system-profiles/MACH-20260820T080056Z-376ada90.json",
+  "sourceState": {
+    "gitCommit": "5ab5ebdd80f2221249a225239612ff4e950d4e41",
+    "dirty": true,
+    "diffSha256": "05a30429750cc5f111d4752b82029ff5ee5a7c8bcb8ef751bbc9fdcb54a50e85",
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "stage G0v2 re-gates: runs/RUN-20260823T215500Z-sol/g0v2/run-gates.sh <scratch> (gates A/SR/FN/CRN/M/T/L; smoke seeds 0xa51d8000+16 and seed-free synthetic roots only; log: g0v2/gates.log)",
+    "stage G0v2 rung 1: runs/RUN-20260823T215500Z-sol/g0v2/run-rungs.sh pool|probe1 then S1 HALT (projection 47.9 CPU-h vs 6.76 ceiling; measured rates in g0v2/decision.json; the 1,200-root seed-free pool and probe artifacts retained; no rung-1 tau computed)",
+    "stage G0v2 rung 2: runs/RUN-20260823T215500Z-sol/g0v2/run-rungs.sh roots2|probe2|rung2 (replay of 3 retained C0 games verified against the artifact finals byte-for-value; 6 roots, K=4 H=40, fastd3s7 vs native d3n7m6; GUARDRAIL KILL: mean tau 0.370, top-1 4/6; g0v2/rung2.json, decision.json)"
+  ],
+  "seedLeaseRefs": [
+    "SL-20260823T215000Z-a5216000"
+  ],
+  "resourceLimits": {
+    "wallSeconds": 12600,
+    "cpuThreads": 26,
+    "maxHostBytes": 34359738368,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": 8100,
+    "cpuSeconds": 27154,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "CPU seconds summed from the stage summaries (gates.log, probe1/probe2/rung2-run.json, roots2 replay rusage); wall from stage timestamps; peak RSS not sampled (panel2/ladder working sets are tens of MB). Partial: rung 1 S1-halted on the corrected cost model before any tau was computed (fast-d3s7 continuation rate measured 51-55 ms/move vs the design's 4 ms); rung 2 executed within its envelope and its preregistered guardrail KILLED the M1 proxy (mean within-root Kendall tau 0.370 vs native D3 N7M6, top-1 agreement 4/6, kill thresholds 0.5 and 4/6). All seven engineering re-gates passed, including fast-vs-native action AND work identity on 240 live decisions. No leased seed was opened; the lease stays reserved. G0 records FAIL per the frozen failureAction; E-FAST-M6 is the named reopening route and is now shown to be required, not optional."
+  },
+  "exitCode": 0,
+  "stopReason": "S1 (rung 1) + rung-2 guardrail kill; see resourceObserved.measurementNotes and runs/RUN-20260823T215500Z-sol/g0v2/decision.json",
+  "artifactRefs": [
+    "runs/RUN-20260823T215500Z-sol/g0/gates.log",
+    "runs/RUN-20260823T215500Z-sol/g0/ladder.json",
+    "runs/RUN-20260823T215500Z-sol/g0/timing-pilot-d3n7m6.json",
+    "runs/RUN-20260823T215500Z-sol/g0/smoke-ladder-demo.json",
+    "runs/RUN-20260823T215500Z-sol/g0/run-gates.sh",
+    "runs/RUN-20260823T215500Z-sol/g0/project-budget.py"
+  ],
+  "contributionIds": [
+    "CT-20260823T214221Z-21e433d9"
+  ]
+}
