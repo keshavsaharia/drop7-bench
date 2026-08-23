@@ -1,0 +1,135 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 540" width="100%" role="img" aria-labelledby="fig-diagram-work-budget-title fig-diagram-work-budget-desc" class="research-fig-svg" font-family="ui-sans-serif, system-ui, sans-serif">
+<title id="fig-diagram-work-budget-title">The work budget: what one search decision counts, and where the cap stops it</title>
+<desc id="fig-diagram-work-budget-desc">Parameter diagram: what 'work' counts in the fair expectimax search. Panel 1 (tree): one decision node expands all 7 columns at full width; each column leads to a chance node over the N sampled next-disc strata (N = 5 or 7 of the seven possible discs); the tree repeats per ply down to the frontier leaves, with branching about 7 columns times N strata per ply (worst case 49^d at seven strata). Panel 2 (census, finding-13 section 2.1): one depth-4 five-strata decision expands 796,058 nodes, of which 764,899 (96.1%) are fairLeaf leaf calls and 31,159 (3.9%) are interior nodes; logical work is 1,560,979 because iterative deepening re-expands plies 1 through 4. At seven strata a depth-4 decision evaluates 2,271,280 leaves (finding-08 section 2). Panel 3 (work cap): the search deepens iteratively - work per completed depth at five strata is 70, 2,221, 60,800, 1,383,207 (finding-13 section 4B) - and when the declared --max-work budget is exhausted mid-ply the decision falls back to the deepest completed ply. A 3,200,000 cap sized for five strata silently degrades a seven-stratum depth-4 search to depth 3 (finding-05, via finding-13 section 8); the seven-stratum arms of finding-08 ran at 16,000,000 and verified completion by work per move 4,956,614. Caption: leaf cost multiplies everything - the LeafNet NNUE at 1.33 us per state times 2,271,280 leaves is about 3 s per depth-4 seven-strata decision, while the exported CNN teacher at 4,122 us per state would be about 2.6 hours per decision and is gated but never played (finding-08 sections 2-3 and 11). Sources: docs/exploratory/finding-13-fast-engine.md, docs/exploratory/finding-08-learned-leaf.md, docs/exploratory/finding-05-chance-strata.md.</desc>
+<style>
+.research-fig-svg text { fill: var(--fig-fg, #222); }
+.research-fig-svg .fig-title { font-size: 14px; font-weight: 600; }
+.research-fig-svg .fig-sub { font-size: 11px; fill: var(--fig-muted, #888); }
+.research-fig-svg .fig-note { font-size: 10px; fill: var(--fig-muted, #888); }
+.research-fig-svg .fig-tiny { font-size: 9px; fill: var(--fig-muted, #888); }
+.research-fig-svg .fig-grid { stroke: var(--fig-grid, #d4d4d8); stroke-width: 1; fill: none; }
+.research-fig-svg .fig-accent-text { fill: var(--fig-accent, #2563eb); }
+.research-fig-svg .fig-danger-text { fill: var(--fig-danger, #dc2626); }
+.research-fig-svg .fig-pt { cursor: pointer; outline: none; }
+.research-fig-svg .fig-pop { display: none; pointer-events: none; }
+.research-fig-svg .fig-pop rect { fill: var(--fig-pop-bg, #ffffff); stroke: var(--fig-pop-border, #d4d4d8); }
+.research-fig-svg .fig-pop text { fill: var(--fig-fg, #222); }
+.research-fig-svg .fig-pt:hover .fig-pop, .research-fig-svg .fig-pt:focus .fig-pop, .research-fig-svg .fig-pt:focus-within .fig-pop { display: block; }
+.research-fig-svg .fig-pt:hover .fig-marker, .research-fig-svg .fig-pt:focus .fig-marker { stroke: var(--fig-fg, #222); stroke-width: 2; }
+</style>
+<defs>
+<marker id="wb-arrF" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" style="fill: var(--fig-fg, #222)"/></marker>
+<marker id="wb-arrD" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" style="fill: var(--fig-danger, #dc2626)"/></marker>
+<marker id="wb-arrM" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" style="fill: var(--fig-muted, #888)"/></marker>
+</defs>
+<text class="fig-title" x="36" y="24">The work budget: what one search decision counts, and where the cap stops it</text>
+<text class="fig-sub" x="36" y="42">one unit of work = one node expansion, counted identically in every arm of every comparison (finding-13 §4B)</text>
+
+<!-- Panel 1: the tree -->
+<text x="36" y="64" font-size="11" font-weight="600">one decision = one tree of nodes</text>
+<rect x="85" y="74" width="130" height="22" rx="4" style="fill: var(--fig-pop-bg, #fff)" stroke="var(--fig-fg, #222)" stroke-width="1"/>
+<text x="150" y="89" text-anchor="middle" font-size="10">decision: pick a column</text>
+<line x1="150" y1="96" x2="73" y2="116" stroke="var(--fig-fg, #222)" stroke-width="1" marker-end="url(#wb-arrF)"/>
+<line x1="150" y1="96" x2="153" y2="116" stroke="var(--fig-fg, #222)" stroke-width="1" marker-end="url(#wb-arrF)"/>
+<line x1="150" y1="96" x2="233" y2="116" stroke="var(--fig-fg, #222)" stroke-width="1" marker-end="url(#wb-arrF)"/>
+<circle cx="73" cy="126" r="8" fill="none" stroke="var(--fig-fg, #222)" stroke-width="1"/><text x="73" y="129.5" text-anchor="middle" font-size="8">c1</text>
+<circle cx="153" cy="126" r="8" fill="none" stroke="var(--fig-fg, #222)" stroke-width="1"/><text x="153" y="129.5" text-anchor="middle" font-size="8">c2</text>
+<circle cx="233" cy="126" r="8" fill="none" stroke="var(--fig-fg, #222)" stroke-width="1"/><text x="233" y="129.5" text-anchor="middle" font-size="8">c7</text>
+<text x="113" y="130" text-anchor="middle" font-size="11" class="fig-sub">…</text>
+<text x="193" y="130" text-anchor="middle" font-size="11" class="fig-sub">…</text>
+<text x="150" y="152" text-anchor="middle" font-size="9" class="fig-note">all 7 columns, full width — no pruning</text>
+<line x1="153" y1="134" x2="150" y2="172" stroke="var(--fig-fg, #222)" stroke-width="1" marker-end="url(#wb-arrF)"/>
+<circle cx="150" cy="186" r="11.5" style="fill: var(--fig-pop-bg, #fff)" stroke="var(--fig-fg, #222)" stroke-width="1"/>
+<text x="150" y="190.5" text-anchor="middle" font-size="11">?</text>
+<text x="170" y="190" font-size="10">chance: the next disc</text>
+<line x1="150" y1="197" x2="60" y2="214" stroke="var(--fig-muted, #888)" stroke-width="1" marker-end="url(#wb-arrM)"/>
+<line x1="150" y1="197" x2="150" y2="214" stroke="var(--fig-muted, #888)" stroke-width="1" marker-end="url(#wb-arrM)"/>
+<line x1="150" y1="197" x2="240" y2="214" stroke="var(--fig-muted, #888)" stroke-width="1" marker-end="url(#wb-arrM)"/>
+<circle cx="60" cy="224" r="8.5" style="fill: var(--fig-accent, #2563eb)"/><text x="60" y="227.5" text-anchor="middle" font-size="9" style="fill:#fff">1</text>
+<circle cx="90" cy="224" r="8.5" style="fill: var(--fig-accent, #2563eb)"/><text x="90" y="227.5" text-anchor="middle" font-size="9" style="fill:#fff">2</text>
+<circle cx="120" cy="224" r="8.5" style="fill: var(--fig-accent, #2563eb)"/><text x="120" y="227.5" text-anchor="middle" font-size="9" style="fill:#fff">3</text>
+<circle cx="150" cy="224" r="8.5" style="fill: var(--fig-accent, #2563eb)"/><text x="150" y="227.5" text-anchor="middle" font-size="9" style="fill:#fff">4</text>
+<circle cx="180" cy="224" r="8.5" style="fill: var(--fig-accent, #2563eb)"/><text x="180" y="227.5" text-anchor="middle" font-size="9" style="fill:#fff">5</text>
+<circle cx="210" cy="224" r="8.5" style="fill: var(--fig-accent, #2563eb)"/><text x="210" y="227.5" text-anchor="middle" font-size="9" style="fill:#fff">6</text>
+<circle cx="240" cy="224" r="8.5" style="fill: var(--fig-accent, #2563eb)"/><text x="240" y="227.5" text-anchor="middle" font-size="9" style="fill:#fff">7</text>
+<text x="150" y="250" text-anchor="middle" font-size="9" class="fig-note">the chance node samples N = 5 or 7 of the seven discs</text>
+<line x1="150" y1="256" x2="150" y2="272" stroke="var(--fig-muted, #888)" stroke-width="1" stroke-dasharray="3 2" marker-end="url(#wb-arrM)"/>
+<text x="160" y="268" font-size="9" class="fig-note">× every ply, d = 1…4</text>
+<rect x="55" y="278" width="10" height="10" style="fill: var(--fig-accent, #2563eb); opacity: 0.85"/>
+<rect x="80" y="278" width="10" height="10" style="fill: var(--fig-accent, #2563eb); opacity: 0.85"/>
+<rect x="105" y="278" width="10" height="10" style="fill: var(--fig-accent, #2563eb); opacity: 0.85"/>
+<rect x="130" y="278" width="10" height="10" style="fill: var(--fig-accent, #2563eb); opacity: 0.85"/>
+<rect x="155" y="278" width="10" height="10" style="fill: var(--fig-accent, #2563eb); opacity: 0.85"/>
+<rect x="180" y="278" width="10" height="10" style="fill: var(--fig-accent, #2563eb); opacity: 0.85"/>
+<rect x="205" y="278" width="10" height="10" style="fill: var(--fig-accent, #2563eb); opacity: 0.85"/>
+<rect x="230" y="278" width="10" height="10" style="fill: var(--fig-accent, #2563eb); opacity: 0.85"/>
+<rect x="255" y="278" width="10" height="10" style="fill: var(--fig-accent, #2563eb); opacity: 0.85"/>
+<text x="150" y="304" text-anchor="middle" font-size="9" class="fig-note">frontier leaves — 96.1% of every decision's nodes</text>
+<text x="150" y="320" text-anchor="middle" font-size="9" class="fig-note">branching 7 × N per ply; worst case 49^d at s7</text>
+
+<!-- Panel 2: census of one d4 s5 decision -->
+<text x="340" y="76" font-size="11" font-weight="600">census: one depth-4, five-strata decision (finding-13 §2.1)</text>
+<rect x="340" y="90" width="359" height="22" style="fill: var(--fig-accent, #2563eb)"/>
+<rect x="699" y="90" width="15" height="22" style="fill: var(--fig-muted, #888)"/>
+<rect x="340" y="90" width="374" height="22" fill="none" stroke="var(--fig-grid, #d4d4d8)"/>
+<text x="519" y="105" text-anchor="middle" font-size="11" style="fill:#fff">leaves 96.1%</text>
+<text x="706" y="126" text-anchor="middle" font-size="9" class="fig-note">interior 3.9%</text>
+<rect x="340" y="124" width="8" height="8" style="fill: var(--fig-accent, #2563eb)"/>
+<text x="354" y="132" font-size="10">fairLeaf leaf calls — 764,899 (96.1% of nodes)</text>
+<rect x="340" y="140" width="8" height="8" style="fill: var(--fig-muted, #888)"/>
+<text x="354" y="148" font-size="10">interior nodes — 31,159 (3.9%); applied moves 796,081</text>
+<text x="340" y="166" class="fig-note">nodes 796,058 · logical work 1,560,979 — iterative deepening re-expands plies d1–d4</text>
+<text x="340" y="182" class="fig-note">at seven strata: 2,271,280 leaves per decision (finding-08 §2); the last ply is always ≈96%</text>
+
+<!-- Panel 3: the work cap -->
+<text x="340" y="212" font-size="11" font-weight="600">the work cap: iterative deepening, five strata (finding-13 §4B)</text>
+<text x="344" y="240" font-size="10">d1</text>
+<rect x="368" y="230" width="44" height="13" style="fill: var(--fig-accent, #2563eb); opacity: 0.8"/>
+<text x="418" y="240" font-size="9" class="fig-note">70</text>
+<text x="344" y="266" font-size="10">d2</text>
+<rect x="368" y="256" width="122" height="13" style="fill: var(--fig-accent, #2563eb); opacity: 0.8"/>
+<text x="496" y="266" font-size="9" class="fig-note">2,221</text>
+<text x="344" y="292" font-size="10">d3</text>
+<rect x="368" y="282" width="197" height="13" style="fill: var(--fig-accent, #2563eb); opacity: 0.8"/>
+<text x="571" y="292" font-size="9" class="fig-note">60,800</text>
+<text x="344" y="318" font-size="10">d4</text>
+<rect x="368" y="308" width="267" height="13" style="fill: var(--fig-accent, #2563eb); opacity: 0.8"/>
+<text x="630" y="318" text-anchor="end" font-size="9" style="fill:#fff">1,383,207</text>
+<rect x="368" y="308" width="296" height="13" fill="none" stroke="var(--fig-danger, #dc2626)" stroke-width="1" stroke-dasharray="4 2"/>
+<text x="668" y="300" font-size="9" class="fig-danger-text">s7: 4.96M</text>
+<line x1="654" y1="222" x2="654" y2="330" stroke="var(--fig-danger, #dc2626)" stroke-width="1.5" stroke-dasharray="5 3"/>
+<text x="654" y="218" text-anchor="middle" font-size="9" class="fig-danger-text">cap 3.2M (s5)</text>
+<path d="M 654 314 C 630 332 600 300 572 293" stroke="var(--fig-danger, #dc2626)" stroke-width="1.2" fill="none" marker-end="url(#wb-arrD)"/>
+<text x="340" y="348" class="fig-tiny">bar length: log10 of work per completed depth</text>
+<text x="340" y="364" class="fig-note">cap hit mid-ply → fall back to the deepest completed ply (finding-13 §8.2)</text>
+<text x="340" y="379" class="fig-note">a 3.2M cap sized for five strata silently degrades d4 s7 to depth 3 (finding-05)</text>
+<text x="340" y="393" class="fig-note">s7 arms run --max-work 16000000; completion checked via work/move (finding-08 §7)</text>
+
+<!-- Panel 4: leaf cost x leaf count -->
+<text x="36" y="356" font-size="11" font-weight="600">leaf cost × leaf count = decision cost</text>
+<rect x="46" y="368" width="74" height="13" style="fill: var(--fig-accent, #2563eb)"/>
+<text x="126" y="378" font-size="9">LeafNet 1.33 µs → ≈ 3.0 s per d4 s7 decision</text>
+<rect x="46" y="390" width="249" height="13" style="fill: var(--fig-danger, #dc2626)"/>
+<text x="52" y="400" font-size="9" style="fill:#fff">CNN 4,122 µs → ≈ 9,362 s ≈ 2.6 h</text>
+<text x="46" y="420" class="fig-note">× 2,271,280 leaves per decision (finding-08 §2)</text>
+<text x="46" y="434" class="fig-note">a leaf evaluator has roughly one microsecond (finding-08 §3)</text>
+<text x="46" y="448" class="fig-tiny">bar length: log10 seconds per decision</text>
+<text x="46" y="464" class="fig-note">fairLeaf: 970 → 279 ns fast (3.5×), still 58% of the time (finding-13)</text>
+
+<!-- caption strip -->
+<rect x="36" y="496" width="688" height="34" rx="6" style="fill: var(--fig-pop-bg, #fff)" stroke="var(--fig-grid, #d4d4d8)"/>
+<text x="380" y="510" text-anchor="middle" font-size="12">work counts every node; the cap stops the deepening; the leaf (96.1% of nodes) multiplies everything.</text>
+<text class="fig-note" x="380" y="524" text-anchor="middle">1.33 µs NNUE × 2.27M leaves ≈ 3 s per d4 s7 decision · 4,122 µs CNN ≈ 2.6 h — exported and gated, never played (finding-08)</text>
+
+<g class="fig-pt" tabindex="0"><title>What one unit of work is</title><rect x="55" y="70" width="210" height="85" fill="transparent"/><circle class="fig-marker" cx="268" cy="76" r="6.5" style="fill: var(--fig-pop-bg, #fff)" stroke="var(--fig-muted, #888)"/><text x="268" y="79" text-anchor="middle" font-size="9" class="fig-sub">i</text><g class="fig-pop"><rect x="36" y="60" width="440" height="76" rx="4"/><text x="44" y="75" font-size="11" font-weight="600">Work is the fixed-cost currency every comparison is denominated in:</text><text x="44" y="90" font-size="11">one unit per node expansion, counted identically in both arms. One d4</text><text x="44" y="105" font-size="11">s5 decision expands 796,058 nodes but counts 1,560,979 work — iterative</text><text x="44" y="120" font-size="11">deepening re-expands plies 1–4, and the shallow passes are cheap.</text><text x="44" y="135" font-size="11">Same column with less work = a different algorithm (finding-13 §4B).</text></g></g>
+
+<g class="fig-pt" tabindex="0"><title>N strata per chance node</title><rect x="52" y="210" width="200" height="28" fill="transparent"/><circle class="fig-marker" cx="268" cy="216" r="6.5" style="fill: var(--fig-pop-bg, #fff)" stroke="var(--fig-muted, #888)"/><text x="268" y="219" text-anchor="middle" font-size="9" class="fig-sub">i</text><g class="fig-pop"><rect x="36" y="60" width="460" height="76" rx="4"/><text x="44" y="75" font-size="11" font-weight="600">Each column's chance node samples N of the 7 possible next discs</text><text x="44" y="90" font-size="11">(N = 5, or N = 7 for the exact uniform). Branching per ply is</text><text x="44" y="105" font-size="11">7 columns × N strata — worst case 49^d nodes at seven strata:</text><text x="44" y="120" font-size="11">582,727,796 at d5 s7. Measured work is 10.4× lower (55.8M): the</text><text x="44" y="135" font-size="11">deeper the tree, the more of it is transpositions (finding-13 §6).</text></g></g>
+
+<g class="fig-pt" tabindex="0"><title>Why the leaf dominates</title><rect x="338" y="88" width="378" height="26" fill="transparent"/><circle class="fig-marker" cx="724" cy="94" r="6.5" style="fill: var(--fig-pop-bg, #fff)" stroke="var(--fig-muted, #888)"/><text x="724" y="97" text-anchor="middle" font-size="9" class="fig-sub">i</text><g class="fig-pop"><rect x="280" y="120" width="460" height="90" rx="4"/><text x="288" y="135" font-size="11" font-weight="600">The last ply is always ≈96% of the nodes, so the leaf fraction does</text><text x="288" y="150" font-size="11">not fall as the tree grows (finding-13 §5). fairLeaf was 79.1% of</text><text x="288" y="165" font-size="11">attributed decision time; after a 3.5× leaf speedup it is still 58%,</text><text x="288" y="180" font-size="11">and Amdahl's bound with an infinitely fast leaf is ≈5× (§2.3). The</text><text x="288" y="195" font-size="11">transposition table — 5.8× faster per op — touches 3.9% of nodes,</text><text x="288" y="208" font-size="11">which is 0.6% of a decision: the profile, not the brief, picks the lead.</text></g></g>
+
+<g class="fig-pt" tabindex="0"><title>Work-cap semantics</title><rect x="600" y="222" width="110" height="110" fill="transparent"/><circle class="fig-marker" cx="722" cy="226" r="6.5" style="fill: var(--fig-pop-bg, #fff)" stroke="var(--fig-muted, #888)"/><text x="722" y="229" text-anchor="middle" font-size="9" class="fig-sub">i</text><g class="fig-pop"><rect x="280" y="336" width="460" height="90" rx="4"/><text x="288" y="351" font-size="11" font-weight="600">--max-work is a declared budget over counted work. Exhausted mid-ply,</text><text x="288" y="366" font-size="11">the decision falls back to the deepest completed ply — consistent, not</text><text x="288" y="381" font-size="11">partial (finding-13 §8.2). A 3.2M cap sized for five strata silently</text><text x="288" y="396" font-size="11">degraded d4 s7 to depth 3 and produced a wrong conclusion (finding-05);</text><text x="288" y="411" font-size="11">finding-08's s7 arms run 16M and verify completion by work/move</text><text x="288" y="424" font-size="11">= 4,956,614. The dashed bar: s7's d4 requirement crosses the s5 cap.</text></g></g>
+
+<g class="fig-pt" tabindex="0"><title>The leaf-cost frontier</title><rect x="40" y="362" width="270" height="48" fill="transparent"/><circle class="fig-marker" cx="316" cy="368" r="6.5" style="fill: var(--fig-pop-bg, #fff)" stroke="var(--fig-muted, #888)"/><text x="316" y="371" text-anchor="middle" font-size="9" class="fig-sub">i</text><g class="fig-pop"><rect x="36" y="240" width="470" height="90" rx="4"/><text x="44" y="255" font-size="11" font-weight="600">finding-08 §2 measured the leaves per depth-4 decision: 615,090 at</text><text x="44" y="270" font-size="11">five strata, 2,271,280 at seven. Multiply by leaf cost: LeafNet</text><text x="44" y="285" font-size="11">(572,367 params, 1.33 µs/state) ≈ 3.0 s per d4 s7 decision; the</text><text x="44" y="300" font-size="11">3,006,543-param CNN teacher at 4,122 µs/state ≈ 9,362 s ≈ 2.6 h —</text><text x="44" y="315" font-size="11">exported and parity-gated, but it never played a move (§11). That is</text><text x="44" y="328" font-size="11">why the deployed student is NNUE-shaped: the budget is ≈1 µs.</text></g></g>
+
+<g class="fig-pt" tabindex="0"><title>Sources and caveats</title><rect x="36" y="496" width="688" height="34" fill="transparent"/><circle class="fig-marker" cx="712" cy="504" r="6.5" style="fill: var(--fig-pop-bg, #fff)" stroke="var(--fig-muted, #888)"/><text x="712" y="507" text-anchor="middle" font-size="9" class="fig-sub">i</text><g class="fig-pop"><rect x="160" y="406" width="480" height="76" rx="4"/><text x="168" y="421" font-size="11" font-weight="600">Census, caps, worst case: finding-13 §2.1, §4B, §6, §8. Leaves per</text><text x="168" y="436" font-size="11">decision and LeafNet/CNN costs: finding-08 §2–3. Silent degradation:</text><text x="168" y="451" font-size="11">finding-05, via finding-13 §8. Timing ratios are same-process interleaved</text><text x="168" y="466" font-size="11">A/B on a contended host; absolute ns inflate ≈3× at load 50 (§1), and</text><text x="168" y="481" font-size="11">the 3 s / 2.6 h figures are the cited counts × the cited per-state costs.</text></g></g>
+</svg>

@@ -1,0 +1,27 @@
+{
+  "title": "The scenario suite ranks fair policies backwards at H=9 and correctly at H=25 — same positions, same tapes",
+  "kind": "dot",
+  "x": { "label": "horizon and position set (arm counts in the popovers)" },
+  "y": { "label": "Spearman correlation with whole-game means", "unit": "Spearman" },
+  "notes": "finding-10, position mode, K=4 tapes, common random numbers; evidence tier development/pilot. The first category is the PREREGISTERED primary: S9 = +0.6333 over nine policies against the frozen 0.70 pass threshold (p = 0.038) and S6 = -0.2571 over the six fair arms (p = 0.717) — check 1 FAILS; the H=9 run completed 95 of 128 positions under its preregistered 90-minute stop (an unbiased subsample), so the figure plan's '(128 positions)' label for -0.257 was wrong and is corrected here to the record. The second category restricts the SAME 95 positions and tape streams to the seven policies that also ran at H=25 (the two depth-4 arms were omitted at H=25 for cost, so the fair block there is the four cheaper arms): -0.6000 fair / +0.7143 all. The third category is the horizon repair on those same 95 positions: +0.8000 fair / +0.9643 all. The fourth is the full 128-position H=25 arm: +1.0000 / +1.0000 (p = 0.042 for the four fair arms; a monotone n=4 set is a weaker statement than it looks, and whole-game means are not monotone in depth once d4s5 is included). Everything at H=25 is post hoc — designed after the H=9 failure was read; only the direction of the effect was predicted. The +1.000 on 128 positions and +0.800 on the matched 95 differ because d2s7 and d3s5 land 4 points apart on the subset and swap rank (finding-10 section 5 caution 2).",
+  "series": [
+    {
+      "name": "fair block",
+      "points": [
+        { "x": "H=9 · 95 pos · full grid", "y": -0.2571, "label": "S6, six fair arms, 95 positions x 4 tapes; p = 0.717; preregistered primary — ranks the fair arms slightly backwards", "sourceRecord": "docs/exploratory/finding-10-suite-validation.md", "sourceField": "section 2 Spearman table" },
+        { "x": "H=9 · 95 pos · H25 subset", "y": -0.6, "label": "four fair arms (depth-4 arms omitted), same 95 positions and tapes as the H=25 arm", "sourceRecord": "docs/exploratory/finding-10-suite-validation.md", "sourceField": "section 5 controlled horizon table" },
+        { "x": "H=25 · 95 pos · same subset", "y": 0.8, "label": "four fair arms, same 95 positions and tape streams; the repair: -0.600 to +0.800 by changing only the horizon", "sourceRecord": "docs/exploratory/finding-10-suite-validation.md", "sourceField": "section 5 controlled horizon table" },
+        { "x": "H=25 · 128 pos", "y": 1.0, "label": "four fair arms, all 128 positions; p = 0.042; post hoc", "sourceRecord": "docs/exploratory/finding-10-suite-validation.md", "sourceField": "section 5 H=25 Spearman table" }
+      ]
+    },
+    {
+      "name": "all policies",
+      "points": [
+        { "x": "H=9 · 95 pos · full grid", "y": 0.6333, "label": "S9, nine policies (six fair + three weak baselines, cross-cohort); p = 0.038; below the preregistered 0.70 gate", "sourceRecord": "docs/exploratory/finding-10-suite-validation.md", "sourceField": "section 2 Spearman table" },
+        { "x": "H=9 · 95 pos · H25 subset", "y": 0.7143, "label": "seven policies (four fair + three weak), same 95 positions", "sourceRecord": "docs/exploratory/finding-10-suite-validation.md", "sourceField": "section 5 controlled horizon table" },
+        { "x": "H=25 · 95 pos · same subset", "y": 0.9643, "label": "seven policies, same 95 positions; p = 0.0015", "sourceRecord": "docs/exploratory/finding-10-suite-validation.md", "sourceField": "section 5 controlled horizon table" },
+        { "x": "H=25 · 128 pos", "y": 1.0, "label": "seven policies, all 128 positions; p = 0.0002; consistent on both split halves and both position origins", "sourceRecord": "docs/exploratory/finding-10-suite-validation.md", "sourceField": "section 5 H=25 Spearman table" }
+      ]
+    }
+  ]
+}

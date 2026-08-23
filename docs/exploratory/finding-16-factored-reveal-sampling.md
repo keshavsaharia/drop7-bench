@@ -35,6 +35,13 @@ joint outcomes and those seven were perfectly correlated. Factoring the chance
 node into `--disc-samples N` × `--reveal-samples M` and raising `M` from one to
 six at depth 3 was worth **+64,116 points [95% lower bound +7,475]**.
 
+What the `M` parameter actually does inside a look-ahead, drawn:
+
+```diagram
+diagram-reveal-sampling
+caption: A covered gray disc has no value until the engine reveals it, so a search whose imagined cascade cracks one must guess the draw — M is how many guesses it averages, and averaging more can change which column looks best.
+```
+
 It closed with two named open arms and one explicit question:
 
 > **Still open:** whether the two axes *compound* when used together. The arm

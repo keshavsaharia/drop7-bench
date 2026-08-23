@@ -26,7 +26,7 @@ const PAD = { top: 44, right: 24, bottom: 84, left: 84 };
 const CHAR = 0.6; // heuristic text width, em per character
 const TITLE_CHARS = Math.floor((W - PAD.left - PAD.right) / (14 * CHAR));
 const PALETTE = ["#3987e5", "#f59e0b", "#22c55e", "#e879f9", "#f87171", "#a3e635"];
-const SOURCE_ID = /^(RS|RUN|EX|TH)-[A-Za-z0-9-]+$|^docs\/.+\.md$/;
+const SOURCE_ID = /^(RS|RUN|EX|TH)-[A-Za-z0-9-]+$|^docs\/.+\.md$|^web\/content\/log\/\d{4}-\d{2}-\d{2}\.mdx$/;
 
 export function loadSpec(path) {
   const spec = JSON.parse(readFileSync(path, "utf8"));

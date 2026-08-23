@@ -1,0 +1,20 @@
+{
+  "title": "NNUE capacity saturation — training loss falls monotonically with width while held-out Pearson falls",
+  "kind": "line",
+  "x": { "label": "parameter count", "unit": "parameters" },
+  "y": { "label": "held-out lifetime Pearson", "unit": "Pearson r" },
+  "notes": "RS-20260822T024228Z-94090db1: a 13-run offline capacity/training sweep of the NNUE-shaped survival leaf on runs/RUN-A51D-corpus/all.states, all runs on the same whole-origin test split (486,819 held-out examples); evidence tier mechanics-only, gate verdict supported-as-tested. The width series charted here is copied verbatim from the record's summary (tag: parameters, Pearson, final train loss): h32-m32-e10 286,447 / 0.855 / 0.5238; h64-m32-e10 (baseline) 572,367 / 0.8546 / 0.511; h128-m32-e10 1,144,207 / 0.8543 / 0.5006; h256-m32-e10 2,287,887 / 0.8515 / 0.4857; h256-m64-e20 2,296,591 / 0.8446 / 0.4596; h512-m64-e20 4,592,143 / 0.8378 / 0.4197 — training loss falls while held-out accuracy falls: larger students overfit this corpus. The two h256 points differ in mid-width and epochs, not width alone. Seed-to-seed spread is 0.0023 over three seeds; the best configuration (h64-m64-e10, 0.8568) beats the baseline by +0.0022 <= max(0.005, 2 x spread), so capacity is saturated near 0.855-0.857 on this feature space and corpus. The record itself notes finding-08 recorded 0.8564 for the h64 baseline architecture on an earlier torch build — the 0.8546 charted here is this record's own measurement. Teacher CNN anchor, NOT charted (different architecture): 0.8646 at 3,006,543 parameters (finding-08 section 3). The x axis is linear; the plan's log-scale suggestion is not expressible by the generator.",
+  "series": [
+    {
+      "name": "held-out lifetime Pearson (NNUE width sweep)",
+      "points": [
+        { "x": 286447, "y": 0.855, "label": "h32-m32-e10-lr3e3-s0; final train loss 0.5238", "sourceRecord": "RS-20260822T024228Z-94090db1", "sourceField": "summary width series; metrics.runs[]" },
+        { "x": 572367, "y": 0.8546, "label": "h64-m32-e10-lr3e3-s0 (baseline); train loss 0.511; finding-08 recorded 0.8564 on an earlier torch build", "sourceRecord": "RS-20260822T024228Z-94090db1", "sourceField": "summary width series; metrics.runs[]" },
+        { "x": 1144207, "y": 0.8543, "label": "h128-m32-e10-lr3e3-s0; train loss 0.5006", "sourceRecord": "RS-20260822T024228Z-94090db1", "sourceField": "summary width series; metrics.runs[]" },
+        { "x": 2287887, "y": 0.8515, "label": "h256-m32-e10-lr3e3-s0; train loss 0.4857", "sourceRecord": "RS-20260822T024228Z-94090db1", "sourceField": "summary width series; metrics.runs[]" },
+        { "x": 2296591, "y": 0.8446, "label": "h256-m64-e20-lr3e3-s0; train loss 0.4596; mid-width and epochs also changed", "sourceRecord": "RS-20260822T024228Z-94090db1", "sourceField": "summary width series; metrics.runs[]" },
+        { "x": 4592143, "y": 0.8378, "label": "h512-m64-e20-lr3e3-s0; train loss 0.4197 — lowest loss, worst held-out", "sourceRecord": "RS-20260822T024228Z-94090db1", "sourceField": "summary width series; metrics.runs[]" }
+      ]
+    }
+  ]
+}

@@ -199,13 +199,31 @@ Training took 10 epochs at 3.4 s per epoch on the gfx1151 GPU. The student
 contains no convolution, so its PyTorch reference repeats bit-for-bit with no
 flags at all (§1.3).
 
+A subsequent thirteen-run offline sweep
+([`RS-20260822T024228Z-94090db1`](../../research/results/RS-20260822T024228Z-94090db1.json),
+mechanics-only tier) asked whether a wider student of the same shape closes the
+0.008 gap to the teacher, and the answer is no — held-out accuracy *falls* as
+width grows even as training loss keeps improving:
+
+```figure
+nnue-capacity-saturation
+caption: Held-out lifetime Pearson against parameter count for the NNUE-shaped student on a log axis. More capacity fits the training set better and generalizes worse; the deployed width is already at the flat top.
+```
+
 ## 4. The leaf, and why this leaf value
 
     leafValue = (1 - w) * frozen::fairLeaf(state) + w * scale * learnedValue(state)
 
 `w = 0` short-circuits to `frozen::fairLeaf` **before the model is touched**, so
 the reference arms are the frozen search bit-for-bit and cost exactly what the
-reference costs. CHECK gate: `--parity --seed-start 0xa5240100 --parity-games 2
+reference costs.
+
+The whole arrangement, drawn once:
+
+```diagram
+diagram-leaf-blend
+caption: At every frontier leaf of the search, the position's value is a weighted mix of the nineteen hand-tuned structural terms and the learned model's remaining-lifetime estimate scaled into points — w slides between the two, with w = 0 exactly the frozen policy.
+``` CHECK gate: `--parity --seed-start 0xa5240100 --parity-games 2
 --parity-moves 25` → **50 moves compared, 0 mismatches**. Everything else in the
 search — depth, chance stratification, canonicalisation, cache keying, column
 order, work accounting, terminal utility — is the unmodified frozen code
@@ -415,6 +433,13 @@ the resource-performance frontier, not as a strength number alone.
 | d4 s5, learned | 660,481 | **660,481** | 0.215 | 2.575 (**1.94x**) | 170.7 (0.46x) | 336,432 |
 | d4 s7, reference | 2,423,502 | 0 | 0.378 | 4.538 | 83.0 | 398,498 |
 | d4 s7, learned | 2,496,922 | **2,496,922** | 0.798 | 9.570 (**2.11x**) | 37.4 (0.45x) | 415,779 |
+
+The frontier itself, as the two lines the table describes:
+
+```figure
+leaf-cost-frontier
+caption: Mean score against CPU seconds per decision for the frozen and learned leaves at both chance resolutions. The learned leaf's curve sits above the reference's, but moving right along the reference curve — buying the exact chance estimator — buys more score per second than switching leaves.
+```
 
 The learned leaf calls the model at **every** leaf — 660,481 and 2,496,922
 inferences per decision — and roughly doubles the cost of a decision. Read as a

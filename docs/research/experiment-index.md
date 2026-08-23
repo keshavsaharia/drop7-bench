@@ -262,6 +262,21 @@ public-information policies.
 | Top-two near-tie override gate: [override-gate.py](../../approaches/afterstate-learning/distributional-afterstate/override-gate.py) | Lets the frozen K=256 model swap fair D4's action only at near-tied top-two roots (Q gap <= 500) and only when the model's paired 256-scenario advantage has a positive 95% bootstrap lower bound. | **Rejected — machine-readable records;** the frozen gate failed narrowly: eligible-root regret improved in both fresh half-folds (+0.0351, +0.0075) but half2 missed the frozen +0.01 margin; decisive eligible roots improved +0.0426; override fired on 37% of eligible roots; stability (0.814) and calibration (0.861) passed. First preregistered held-out test where a learned model's intervention improved on fair D4 at all; the checkpoint's ranking quality is the bottleneck. See [result](../../research/results/RS-20260820T184500Z-63c0a8e2.json) and [experiment](../../research/experiments/EX-20260820-d4-toptwo-override-gate-0bdb39a1.json). |
 | Overnight follow-ups (full training, D2 teacher, D4-value stage 1): [d4q.py](../../approaches/afterstate-learning/distributional-afterstate/d4q.py), [label-d4q.cpp](../../approaches/afterstate-learning/distributional-afterstate/label-d4q.cpp) | Three preregistered tests of whether the ranking deficit is fixable: (A) full training (22 epochs, 2x row-updates), (B) a stronger fair-D2 continuation teacher, (C) successor-closed exact D4 search-value distillation (the registered self-play loop's stage 1). | **All rejected — machine-readable records.** A: full training OVERFIT (held-out top-1 fell 0.424 to 0.361 on the same roots) and the frozen override gate failed (half2 gain -0.0297). B: the D2-teacher model ranked at exact-D1's level (top-1 0.337 vs D4's 0.502; confounded by a D2-train/D1-eval target mismatch, disclosed) and its override failed. C: the successor-closed D4-value student agreed with D4 at top-1 0.375 (threshold 0.60), WORSE than exact D1's 0.486 - the compact model cannot represent the 4-ply search-value function, blocking the self-play loop's stage-1 prerequisite at this model scale. Results: [A](../../research/results/RS-20260821T094500Z-1a7e3c55.json), [B](../../research/results/RS-20260821T134500Z-4b9d2f68.json), [C](../../research/results/RS-20260821T104500Z-77d21e90.json). |
 
+Two figures carry the numbers those three rows turn on. The label-noise
+dose-response that licensed the K=256 verdict:
+
+```figure
+label-stability-by-k
+caption: Split-half label stability against the number of aligned chance scenarios per label, on a log axis. K=8 and K=64 sit below the frozen 0.5 stability floor — their pilots were inconclusive by rule — and K=256 crosses it, which is what made its negative result a valid one.
+```
+
+And how narrowly each override gate missed the frozen margin:
+
+```figure
+override-gate-halves
+caption: Eligible-root regret gain over fair D4 for each override gate, by held-out half-fold, against the frozen requirement that both half-folds clear +0.01. The first gate passed one half and missed the other by a quarter of the margin; no gate passed both.
+```
+
 ## Search-budget factorials (exploratory, 2026-08-21)
 
 | Approach and sources | Purpose | Status and evidence |

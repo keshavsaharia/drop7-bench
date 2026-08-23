@@ -4,6 +4,7 @@ import { Board, BoardCompare, Callout, Disc, Stat } from "./Board";
 import { Drop7Board } from "./Drop7Board";
 import { Drop7Game } from "./Drop7Game";
 import { Drop7Intro } from "./Drop7Intro";
+import { Diagram } from "./Diagram";
 import { Figure } from "./Figure";
 import { GameTreeFigure } from "./GameTree";
 import * as Engine from "./Engine";
@@ -16,7 +17,7 @@ import { ArmTable, DeadEnd, Direction, Finding, LogQuote, Timeline } from "./Res
 import { RepoDocAnchor } from "./RepoDocAnchor";
 import remarkGfm from "remark-gfm";
 
-const components = { Board, BoardCompare, Callout, Disc, Drop7Board, Drop7Game, Drop7Intro, Figure, GameTreeFigure, Stat, ...Engine, ...Rules, ...Concepts, ...ConceptsB, ...ConceptsC, EvidenceLabel, ExperimentSummary, ResultSummary, TechnicalDetails, TheorySummary, ArmTable, DeadEnd, Direction, Finding, LogQuote, Timeline };
+const components = { Board, BoardCompare, Callout, Diagram, Disc, Drop7Board, Drop7Game, Drop7Intro, Figure, GameTreeFigure, Stat, ...Engine, ...Rules, ...Concepts, ...ConceptsB, ...ConceptsC, EvidenceLabel, ExperimentSummary, ResultSummary, TechnicalDetails, TheorySummary, ArmTable, DeadEnd, Direction, Finding, LogQuote, Timeline };
 
 /** Renders an MDX document (already stripped of frontmatter) with the Drop7 visual components available. */
 export function Mdx({ source, fromPath }: { source: string; fromPath?: string }) {

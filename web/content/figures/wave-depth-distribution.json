@@ -1,0 +1,69 @@
+{
+  "title": "Wave-depth distribution — deep cascades are real for the points-maximizer and nearly absent from survival play",
+  "kind": "bar",
+  "x": { "label": "cascade wave depth band" },
+  "y": { "label": "share of all waves", "unit": "%" },
+  "notes": "finding-06 section 4 wave-depth table, copied verbatim; share of all waves at each depth per policy. Cohorts: fair D4 (this run), rh-clears H9 and rh-points H9 are 8-game cohorts on the eight master tapes (400-move cap); rh-clears cap-1000 is 6 games on six fresh futures at a 1,000-move cap; the H9 exact optimum column is the 2,249 waves of the 128 suite-h9-v1 optimal lines, a window sample rather than whole games. Waves observed per policy: 1,374 / 5,018 / 9,501 / 2,179 / 2,249 (carried per point). CAVEAT on the bands: 'depth >=15' is a subset of 'depth >=11', not a partition — both rows are charted exactly as recorded. The rh-points tail (21.53% at depth >=11, 7.76% at >=15, deepest 22) is the chain-construction regime that earns 1.75x the points per move and still loses on the mean (1,123,130 vs 1,544,461) because it cuts lifetime by 58%; the survival policies' profiles are near-identical (0.22-0.72% past depth 10). finding-01's independent base-engine measurement (44.0% at depth 1, deepest-ever 11 over 8,444 waves in 64 fair-D4 games) is a different cohort and engine — noted here, not charted. The eight-tape cohort is now known to favour long games (finding-12); this is a descriptive share table, not a lifetime figure. Evidence tier: development/pilot.",
+  "series": [
+    {
+      "name": "fair D4 (this run)",
+      "points": [
+        { "x": "depth 1", "y": 42.36, "label": "1,374 waves observed", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" },
+        { "x": "depth 2", "y": 24.38, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" },
+        { "x": "depth 3", "y": 15.87, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" },
+        { "x": "depth 4", "y": 8.59, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" },
+        { "x": "depth 5–10", "y": 8.66, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" },
+        { "x": "depth ≥11", "y": 0.22, "label": "deepest wave 12", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" },
+        { "x": "depth ≥15", "y": 0.0, "label": "subset of the >=11 band", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" }
+      ]
+    },
+    {
+      "name": "rh-clears H9",
+      "points": [
+        { "x": "depth 1", "y": 36.09, "label": "5,018 waves", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" },
+        { "x": "depth 2", "y": 21.32, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" },
+        { "x": "depth 3", "y": 14.63, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" },
+        { "x": "depth 4", "y": 9.92, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" },
+        { "x": "depth 5–10", "y": 17.32, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" },
+        { "x": "depth ≥11", "y": 0.72, "label": "deepest 14", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" },
+        { "x": "depth ≥15", "y": 0.0, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" }
+      ]
+    },
+    {
+      "name": "rh-clears H9 cap-1000",
+      "points": [
+        { "x": "depth 1", "y": 36.5, "label": "9,501 waves; six fresh futures, 1,000-move cap", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" },
+        { "x": "depth 2", "y": 21.49, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" },
+        { "x": "depth 3", "y": 14.64, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" },
+        { "x": "depth 4", "y": 10.2, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" },
+        { "x": "depth 5–10", "y": 16.5, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" },
+        { "x": "depth ≥11", "y": 0.67, "label": "deepest 19", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" },
+        { "x": "depth ≥15", "y": 0.06, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" }
+      ]
+    },
+    {
+      "name": "rh-points H9",
+      "points": [
+        { "x": "depth 1", "y": 24.78, "label": "2,179 waves", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" },
+        { "x": "depth 2", "y": 13.17, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" },
+        { "x": "depth 3", "y": 8.08, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" },
+        { "x": "depth 4", "y": 6.1, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" },
+        { "x": "depth 5–10", "y": 26.34, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" },
+        { "x": "depth ≥11", "y": 21.53, "label": "deepest 22 — the chain-seeking tail", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" },
+        { "x": "depth ≥15", "y": 7.76, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" }
+      ]
+    },
+    {
+      "name": "H9 exact optimum (windows)",
+      "points": [
+        { "x": "depth 1", "y": 24.68, "label": "2,249 waves in the 128 suite-h9-v1 optimal lines", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" },
+        { "x": "depth 2", "y": 13.38, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" },
+        { "x": "depth 3", "y": 9.96, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" },
+        { "x": "depth 4", "y": 8.05, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" },
+        { "x": "depth 5–10", "y": 31.58, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" },
+        { "x": "depth ≥11", "y": 12.36, "label": "deepest 20", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" },
+        { "x": "depth ≥15", "y": 2.67, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 wave-depth table" }
+      ]
+    }
+  ]
+}

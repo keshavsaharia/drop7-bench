@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Figure } from "@/components/Figure";
 import { ContributorChips, OutcomeCounts, TagChips } from "@/components/ResearchLog";
 import { formatLogDate, listLogEntries } from "@/lib/log";
 
@@ -42,6 +43,15 @@ export default function LogIndexPage() {
           <code className="text-xs">web/content/log/</code>.
         </p>
       </div>
+
+      {entries.length > 0 && (
+        <div className="max-w-3xl">
+          <Figure
+            name="evidence-timeline"
+            caption="What each logged day produced, counted from the outcome tallies in the entries' own frontmatter. Negative results outnumbering positive ones is the honest picture of the program, and recording them is the log's job."
+          />
+        </div>
+      )}
 
       {entries.length === 0 ? (
         <div className="rounded-xl border border-zinc-800 bg-zinc-950/40 p-6 text-sm text-zinc-500">

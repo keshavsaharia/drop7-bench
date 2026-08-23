@@ -48,6 +48,13 @@ cap, common seeds across arms.
 | −300,000 | 321,652 | 93.98 | 266,282 | 1.973 | −340 | 1–62–1 | −1,039 |
 | −100,000 | 320,161 | 92.92 | 264,942 | 1.987 | −1,831 | 4–29–31 | −4,563 |
 
+The flat segment is the finding, and it is easiest to see drawn:
+
+```figure
+terminal-utility-saturation
+caption: Mean score against the terminal utility on a log-magnitude axis. The four identical points across a fiftyfold parameter range are byte-identical games — the search is already at its risk-averse limit — and only softening the penalty changes anything, for the worse.
+```
+
 ## Interpretation
 
 **The constant is saturated.** Every value at or beyond −1,000,000 produces

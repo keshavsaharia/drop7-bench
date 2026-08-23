@@ -74,6 +74,14 @@ The runner asserts this identity on every game; it held for 64/64.
 | Chain waves | 5.71% |
 | Board clears | 0.00% |
 
+The same decomposition next to the policies later measured in
+[`finding-06`](finding-06-flow-ceiling.md) §4 puts this cohort in context:
+
+```figure
+score-composition
+caption: Where each policy's points come from. Every survival-oriented policy earns roughly nine-tenths of its score from the flat row-rise bonus; the one planner that escapes that split — the clairvoyant score-maximizer — pays for its chains with its lifetime.
+```
+
 Chain-wave points are small by construction: a wave awards 7 points per disc at
 depth 1, 39 at depth 2, 109 at depth 3, 224 at depth 4, 391 at depth 5. A
 five-deep, seven-disc wave — a spectacular play — is worth 2,737 points, or

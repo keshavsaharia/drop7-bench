@@ -425,7 +425,16 @@ difference being the horizon:
 | **H = 25** | 95 | 73,448 | 73,764 | 73,760 | 74,426 | **+0.964** | **+0.800** |
 
 **Changing only the horizon moves the fair-block Spearman from −0.600 to +0.800.**
-On the full 128-position H = 25 arm both statistics reach +1.000. And unlike
+On the full 128-position H = 25 arm both statistics reach +1.000.
+
+The sign flip, drawn with the summary table's H = 9 numbers beside it:
+
+```figure
+suite-spearman-by-horizon
+caption: Spearman correlation between suite scores and whole-game means, at horizon 9 and horizon 25. The all-policies series was always positive — the suite could tell families apart — but the fair-block series flips from negative to strongly positive when the horizon lets the row-rise term vary. Position counts differ per point and are carried on the labels.
+```
+
+And unlike
 H = 9 the H = 25 result is stable across every slice:
 
 | slice | positions | S over seven | S over the four fair arms |

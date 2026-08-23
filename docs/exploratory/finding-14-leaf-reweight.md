@@ -348,6 +348,14 @@ direction toward the fitted one:
 | *steady-state requirement* | | | | ∞ | *2.400* | *1.400* | |
 | *clairvoyant planner, `finding-07`* | | | | | *2.3601* | *1.3785* | *~18* |
 
+The score column of that table against the rotation itself is the whole result
+in one curve:
+
+```figure
+leaf-reweight-monotone
+caption: Mean score against how far the leaf's weight vector has been rotated toward the fitted achievable-clear direction. The loss is monotone across all six arms: every degree of rotation toward the direction that predicts clears makes the policy worse at sustaining them.
+```
+
 **Score, lifetime, numbered clears per move, covered reveals per move and mean
 occupancy are monotone in how far the leaf has been rotated toward the fitted
 direction — six arms, five columns, one exception.** The exception is
