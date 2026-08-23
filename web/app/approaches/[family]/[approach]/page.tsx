@@ -5,7 +5,8 @@ import matter from "gray-matter";
 import { Mdx } from "@/components/Mdx";
 import { Markdown } from "@/components/Markdown";
 import { Badge } from "@/components/Badge";
-import { approachDocPath, approachOperationalNotes, listApproaches, listFamilies } from "@/lib/repo";
+import { approachDocPath, approachOperationalNotes, listApproaches, listFamilies, REPO_ROOT } from "@/lib/repo";
+import { relative as relativePath } from "node:path";
 
 export const dynamic = "force-dynamic";
 
@@ -44,7 +45,12 @@ export default async function ApproachPage({
           <ul className="mt-2 space-y-1 text-sm text-zinc-400">
             {entry.sourceFiles.map((file) => (
               <li key={file}>
-                <code className="text-xs">{file}</code>
+                <Link
+                  href={`/approaches/${family}/${approach}/${file}`}
+                  className="font-mono text-xs text-sky-400 hover:text-sky-300"
+                >
+                  {file}
+                </Link>
               </li>
             ))}
           </ul>
@@ -92,7 +98,11 @@ export default async function ApproachPage({
         )}
       </div>
 
-      {isMdx ? <Mdx source={parsed!.content} /> : <Markdown source={raw} />}
+      {isMdx ? (
+        <Mdx source={parsed!.content} fromPath={relativePath(REPO_ROOT, docPath).replaceAll("\\", "/")} />
+      ) : (
+        <Markdown source={raw} fromPath={relativePath(REPO_ROOT, docPath).replaceAll("\\", "/")} />
+      )}
 
       {operationalNotes && (
         <section className="rounded-xl border border-zinc-800 bg-zinc-950/40 p-4 text-sm text-zinc-400">
@@ -107,8 +117,13 @@ export default async function ApproachPage({
         <h2 className="text-sm font-semibold text-zinc-200">Source files</h2>
         <ul className="mt-2 flex flex-wrap gap-2 text-sm text-zinc-400">
           {entry.sourceFiles.map((file) => (
-            <li key={file} className="rounded bg-zinc-900 px-2 py-0.5">
-              <code className="text-xs">{file}</code>
+            <li key={file}>
+              <Link
+                href={`/approaches/${family}/${approach}/${file}`}
+                className="block rounded bg-zinc-900 px-2 py-0.5 font-mono text-xs hover:bg-sky-950 hover:text-sky-300"
+              >
+                {file}
+              </Link>
             </li>
           ))}
         </ul>

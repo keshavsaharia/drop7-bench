@@ -49,13 +49,13 @@ export default function OverviewPage() {
         </h1>
         <p className="mt-2 max-w-3xl text-zinc-400">
           <Link href="https://en.wikipedia.org/wiki/Drop7" target="_blank" className="text-sky-400 hover:text-sky-300">Drop7</Link> 
-          is widely considered one of the great puzzle games of all time.
+          {' '}is widely considered one of the great puzzle games of all time.
           The goal of this research is to find an autonomous strategy for playing the game, 
           whose average score exceeds one million points. 
         </p>
         <p className="mt-2 max-w-3xl text-zinc-400">
           A decent human player can easily score many millions of points in a game through long-term strategic thinking. The strongest 
-          research reference so far (<Link href="/approaches/expectimax" target="_blank" className="text-sky-400 hover:text-sky-300">fair depth-4 expectimax</Link>) 
+          research reference so far (<Link href="/approaches/fair-expectimax/reference" className="text-sky-400 hover:text-sky-300">fair depth-4 expectimax</Link>) 
           averages about 309k points, so the problem is very much still open.
         </p>
       </section>
@@ -72,9 +72,7 @@ export default function OverviewPage() {
             How Drop7 works
           </h2>
           <p className="mt-1 text-sm text-zinc-400">
-            A guide to the mechanics behind one of the greatest puzzle games of all time. Learn the rules,
-            <Link href="/play">play the game for a while</Link>, and see for yourself why this is 
-            such a captivating research prize.
+            A guide to the mechanics behind one of the greatest puzzle games of all time. Learn the rules, play the game for a while, and see for yourself why this is such a captivating research prize.
           </p>
           <span className="mt-3 inline-block text-sm text-sky-400 group-hover:text-sky-300">
             Click to read how Drop7 works →
@@ -168,7 +166,7 @@ export default function OverviewPage() {
 
       {status && (
         <section>
-          <Markdown source={status} />
+          <Markdown source={status} fromPath="docs/research/status.md" />
         </section>
       )}
     </div>

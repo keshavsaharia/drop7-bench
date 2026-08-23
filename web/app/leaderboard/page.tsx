@@ -100,7 +100,11 @@ export default async function LeaderboardPage({
         </p>
         <p className="mt-1 text-xs text-zinc-600">
           Playground evidence only — scripted rounds are not a research tier and
-          support no qualification claim (see docs/benchmarks.md).
+          support no qualification claim (see the{" "}
+          <Link href="/docs/benchmarks" className="text-zinc-500 underline underline-offset-2 hover:text-zinc-300">
+            benchmark contract
+          </Link>
+          ).
         </p>
       </section>
 

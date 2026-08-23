@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { CompetitionGame } from "@/components/CompetitionGame";
 import { GitHubSignInButton } from "@/components/GitHubSignInButton";
 import {
@@ -26,9 +27,11 @@ export default function CompetePage() {
         </div>
         <p className="mt-3 text-sm text-zinc-500">
           You can submit as many runs as you want. When the game is over, you will see an explicit request to
-          contribute your moves and score. A submitted run stores minimal information (just your GitHub username).
-          Any open-source research data produced from your submission will only have your column choices, never any
-          identifying information.</p>
+          contribute your moves and score. A submission links your GitHub username and numeric account ID to the
+          validated game record; research datasets derived from the move stream omit those identifiers. See the{" "}
+          <Link href="/privacy" className="text-violet-300 hover:text-violet-200">privacy policy</Link> and{" "}
+          <Link href="/terms" className="text-violet-300 hover:text-violet-200">terms</Link>.
+        </p>
       </section>
 
       <CompetitionGame manifest={COMPETITION_GAME} round={COMPETITION_ROUND} />

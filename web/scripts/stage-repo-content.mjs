@@ -42,7 +42,7 @@ const competitionArtifacts = competitionCatalog.games.map((entry) => {
 rmSync(stagedRoot, { recursive: true, force: true });
 mkdirSync(stagedRoot, { recursive: true });
 
-for (const directory of ["approaches", "docs", "research"]) {
+for (const directory of ["approaches", "docs", "research", "src"]) {
   cpSync(join(repoRoot, directory), join(stagedRoot, directory), {
     recursive: true,
   });

@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync, existsSync, statSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { basename, extname, join, resolve, sep } from "node:path";
 import matter from "gray-matter";
 
 /** Absolute path to the checkout, or its build-staged copy in a Lambda bundle. */
@@ -21,6 +21,207 @@ export function readRepoFile(relativePath: string): string | null {
   const path = join(REPO_ROOT, relativePath);
   if (!existsSync(path)) return null;
   return readFileSync(path, "utf8");
+}
+
+/* ---- Repository source browser ---- */
+
+const SOURCE_ROOTS = new Set(["src", "approaches"]);
+const MAX_SOURCE_BYTES = 2 * 1024 * 1024;
+
+const SOURCE_LANGUAGES: Record<string, string> = {
+  ".bash": "bash",
+  ".c": "c",
+  ".cc": "cpp",
+  ".cpp": "cpp",
+  ".css": "css",
+  ".csv": "csv",
+  ".cxx": "cpp",
+  ".go": "go",
+  ".h": "cpp",
+  ".hh": "cpp",
+  ".hpp": "cpp",
+  ".html": "html",
+  ".java": "java",
+  ".js": "javascript",
+  ".json": "json",
+  ".jsonl": "json",
+  ".jsx": "jsx",
+  ".kt": "kotlin",
+  ".md": "markdown",
+  ".mdx": "mdx",
+  ".mjs": "javascript",
+  ".py": "python",
+  ".rs": "rust",
+  ".scss": "scss",
+  ".sh": "bash",
+  ".sql": "sql",
+  ".swift": "swift",
+  ".toml": "toml",
+  ".ts": "typescript",
+  ".tsx": "tsx",
+  ".txt": "text",
+  ".xml": "xml",
+  ".yaml": "yaml",
+  ".yml": "yaml",
+  ".zsh": "bash",
+};
+
+const SPECIAL_SOURCE_LANGUAGES: Record<string, string> = {
+  Dockerfile: "dockerfile",
+  Makefile: "makefile",
+};
+
+export interface RepoSourceTreeNode {
+  name: string;
+  path: string;
+  href: string;
+  children?: RepoSourceTreeNode[];
+}
+
+export interface RepoSourceFile {
+  kind: "file";
+  name: string;
+  path: string;
+  href: string;
+  language: string;
+  source: string;
+  bytes: number;
+  lines: number;
+}
+
+export interface RepoSourceDirectory {
+  kind: "directory";
+  name: string;
+  path: string;
+  href: string;
+  children: RepoSourceTreeNode[];
+}
+
+export type RepoSourceEntry = RepoSourceFile | RepoSourceDirectory;
+
+export function sourceLanguage(path: string): string | null {
+  return SPECIAL_SOURCE_LANGUAGES[basename(path)] ?? SOURCE_LANGUAGES[extname(path).toLowerCase()] ?? null;
+}
+
+export function sourceLanguageLabel(language: string): string {
+  const labels: Record<string, string> = {
+    bash: "Shell",
+    c: "C",
+    cpp: "C++",
+    css: "CSS",
+    dockerfile: "Dockerfile",
+    go: "Go",
+    html: "HTML",
+    java: "Java",
+    javascript: "JavaScript",
+    json: "JSON",
+    jsx: "JSX",
+    kotlin: "Kotlin",
+    makefile: "Makefile",
+    markdown: "Markdown",
+    mdx: "MDX",
+    python: "Python",
+    rust: "Rust",
+    scss: "SCSS",
+    sql: "SQL",
+    swift: "Swift",
+    text: "Plain text",
+    toml: "TOML",
+    tsx: "TSX",
+    typescript: "TypeScript",
+    xml: "XML",
+    yaml: "YAML",
+  };
+  return labels[language] ?? language;
+}
+
+function sourceHref(path: string): string {
+  return `/${path.split("/").map(encodeURIComponent).join("/")}`;
+}
+
+function sourceAbsolutePath(repoPath: string): string | null {
+  if (!repoPath || repoPath.includes("\\") || repoPath.startsWith("/")) return null;
+  const parts = repoPath.split("/");
+  if (!SOURCE_ROOTS.has(parts[0]) || parts.some((part) => !part || part === "." || part === "..")) {
+    return null;
+  }
+  const absolute = resolve(REPO_ROOT, ...parts);
+  if (!absolute.startsWith(`${REPO_ROOT}${sep}`)) return null;
+  return absolute;
+}
+
+function sourceTreeNode(repoPath: string): RepoSourceTreeNode | null {
+  const absolute = sourceAbsolutePath(repoPath);
+  if (!absolute || !existsSync(absolute)) return null;
+  const stats = statSync(absolute);
+  if (stats.isFile()) {
+    if (!sourceLanguage(repoPath) || stats.size > MAX_SOURCE_BYTES) return null;
+    return {
+      name: basename(repoPath),
+      path: repoPath,
+      href: sourceHref(repoPath),
+    };
+  }
+  if (!stats.isDirectory()) return null;
+
+  const children = readdirSync(absolute, { withFileTypes: true })
+    .filter((entry) => !entry.name.startsWith(".") && !entry.isSymbolicLink())
+    .map((entry) => sourceTreeNode(`${repoPath}/${entry.name}`))
+    .filter((entry): entry is RepoSourceTreeNode => entry !== null)
+    .sort((a, b) => {
+      const aDirectory = a.children !== undefined;
+      const bDirectory = b.children !== undefined;
+      if (aDirectory !== bDirectory) return aDirectory ? -1 : 1;
+      return a.name.localeCompare(b.name);
+    });
+
+  if (children.length === 0) return null;
+  return {
+    name: basename(repoPath),
+    path: repoPath,
+    href: sourceHref(repoPath),
+    children,
+  };
+}
+
+/** Build a serializable, source-only tree rooted at `src/` or one approach. */
+export function getRepoSourceTree(repoPath: string): RepoSourceTreeNode | null {
+  return sourceTreeNode(repoPath);
+}
+
+/** Read one viewable source file or list one source directory from the checkout. */
+export function getRepoSource(repoPath: string): RepoSourceEntry | null {
+  const absolute = sourceAbsolutePath(repoPath);
+  if (!absolute || !existsSync(absolute)) return null;
+  const stats = statSync(absolute);
+  const href = sourceHref(repoPath);
+
+  if (stats.isDirectory()) {
+    const tree = sourceTreeNode(repoPath);
+    if (!tree?.children) return null;
+    return {
+      kind: "directory",
+      name: basename(repoPath),
+      path: repoPath,
+      href,
+      children: tree.children,
+    };
+  }
+
+  const language = sourceLanguage(repoPath);
+  if (!stats.isFile() || !language || stats.size > MAX_SOURCE_BYTES) return null;
+  const source = readFileSync(absolute, "utf8");
+  const lines = source.length === 0 ? 0 : source.split("\n").length - (source.endsWith("\n") ? 1 : 0);
+  return {
+    kind: "file",
+    name: basename(repoPath),
+    path: repoPath,
+    href,
+    language,
+    source,
+    bytes: Buffer.byteLength(source, "utf8"),
+    lines,
+  };
 }
 
 export function listJsonRecords<T>(subdir: string): (T & { $id: string })[] {

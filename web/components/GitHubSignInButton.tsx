@@ -1,4 +1,4 @@
-import { signIn } from "@/auth";
+import { auth, signIn, signOut } from "@/auth";
 
 function GitHubMark() {
   return (
@@ -8,7 +8,31 @@ function GitHubMark() {
   );
 }
 
-export function GitHubSignInButton() {
+export async function GitHubSignInButton() {
+  const session = await auth();
+  const username = session?.user?.handle || session?.user?.name;
+
+  if (session?.user) {
+    return (
+      <div className="github-auth-status">
+        <div className="github-signin github-signin-status" role="status">
+          <GitHubMark />
+          Signed in as {username || "GitHub user"}
+        </div>
+        <form
+          action={async () => {
+            "use server";
+            await signOut({ redirectTo: "/compete" });
+          }}
+        >
+          <button type="submit" className="github-signout">
+            Sign out
+          </button>
+        </form>
+      </div>
+    );
+  }
+
   return (
     <form
       action={async () => {

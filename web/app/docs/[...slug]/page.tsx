@@ -14,11 +14,13 @@ export default async function RepoDocPage({
   params: Promise<{ slug: string[] }>;
 }) {
   const { slug } = await params;
-  const relative = `${slug.join("/")}.md`;
+  const parts = [...slug];
+  const last = parts.at(-1);
+  if (last) parts[parts.length - 1] = last.replace(/\.mdx?$/i, "");
+  const relative = `${parts.join("/")}.md`;
   const path = normalize(join(DOCS_DIR, relative));
   if (!path.startsWith(DOCS_DIR) || !existsSync(path)) notFound();
   const source = readFileSync(path, "utf8");
-  const title = source.match(/^#\s+(.+)$/m)?.[1] ?? slug.join("/");
 
   return (
     <div className="space-y-6">
@@ -27,11 +29,10 @@ export default async function RepoDocPage({
           ← Docs
         </Link>
         <div className="mt-1 flex flex-wrap items-baseline justify-between gap-2">
-          <h1 className="text-2xl font-black text-zinc-50">{title}</h1>
           <span className="text-xs text-zinc-600">docs/{relative}</span>
         </div>
       </div>
-      <Markdown source={source} />
+      <Markdown source={source} fromPath={`docs/${relative}`} />
       <div className="mt-6 rounded-xl border border-sky-900/60 bg-sky-950/20 p-4 text-sm text-zinc-300">
         These documents are written for researchers. For the same ideas in plain
         language, with animations, start at{" "}

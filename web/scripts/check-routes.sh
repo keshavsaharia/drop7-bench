@@ -5,7 +5,7 @@
 set -u
 BASE="${1:-http://localhost:3000}"
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-routes=( / /compete /approaches /theories /experiments /learn /learn/concepts /leaderboard /docs/research/status /docs/methodology /docs/benchmarks /docs/strategies /docs/research/experiment-index )
+routes=( / /play /compete /leaderboard /research /approaches /theories /experiments /log /learn /learn/concepts /src /docs /privacy /terms /docs/research/status /docs/methodology /docs/benchmarks /docs/strategies /docs/research/experiment-index )
 for f in "$ROOT"/approaches/*/; do fam=$(basename "$f"); routes+=("/approaches/$fam"); for a in "$f"*/; do [ -d "$a" ] && routes+=("/approaches/$fam/$(basename "$a")"); done; done
 for t in "$ROOT"/research/theories/TH-*.json; do routes+=("/theories/$(basename "$t" .json)"); done
 for e in "$ROOT"/research/experiments/EX-*.json; do routes+=("/experiments/$(basename "$e" .json)"); done

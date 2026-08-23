@@ -4,16 +4,17 @@ summary: How the leaderboard guarantees that every policy faces the exact same d
 order: 2
 ---
 
-The leaderboard answers one question fairly: **given identical luck, which
-policy scores more?** Ordinary seeded play cannot promise that. A policy that
+The [leaderboard](/leaderboard) seeks to fairly answer the question: **given identical luck, which
+policy scores more?** 
+
+Ordinary randomly seeded play cannot promise that. A policy that
 opens more gray discs consumes more random numbers and quietly receives a
 different disc sequence. The scripted-round format removes that problem by
 deciding every random outcome before the game starts.
 
 ## Two predetermined tapes
 
-Each round (the well-known **Gauntlet 01–08** suite ships with the repository)
-is a small JSON document with two tapes:
+Each round is a small JSON document with two tapes:
 
 <div className="my-4 grid gap-3 md:grid-cols-2">
   <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
@@ -48,8 +49,7 @@ is a small JSON document with two tapes:
   </div>
 </div>
 
-Because rises always happen after moves 5, 10, 15, … for every policy, the
-r-th latent row is consumed by the r-th rise no matter what the policies do.
+Because rises always happen after every 5th move, latent row `r` is consumed by the `r`th rise no matter what the policies do.
 A gray disc's value is therefore a property of the **disc**, not of the moment
 it happens to be revealed.
 
@@ -63,21 +63,20 @@ it happens to be revealed.
 
 ## What a run records
 
-Each policy × round pairing produces a complete game record: final score,
+Each policy and round pairing produces a complete game record with a final score,
 moves survived, censor flag at the 2,000-move cap, numbered clears and covered
 reveals per move, maximum chain depth, illegal choices (a legal fallback is
 played and the lapse is counted), wall time, and a SHA-256 trajectory
-checksum. The full move-by-move frames power the replay viewer. Click any score
-on the leaderboard to watch the game.
+checksum. The full move-by-move frames power the [replay viewer](/leaderboard/gray-throughput/gauntlet-01). 
+You can click any score from the leaderboard to watch the game.
 
 ## Limits
 
 <Callout title="Playground evidence, not tier evidence" tone="warn">
 Scripted rounds are a public playground. They are not drawn from the research
-seed lifecycle, so a leaderboard result is never SCREEN, STANDARD, QUALIFY,
-PROTECTED, or FINAL evidence and supports no million-point qualification
-claim. The research benchmark contract in docs/benchmarks.md governs those
-tiers.
+seed lifecycle, so a leaderboard result is never considered as strong evidence,
+and supports no million-point qualification claim. The research benchmark 
+contract in [docs/benchmarks.md](/docs/benchmarks) governs those tiers.
 </Callout>
 
 Policies are also compared at **fixed algorithmic work** (bounded search
