@@ -59,7 +59,7 @@ export default function ResearchPage() {
     {
       href: "/log",
       title: "Log",
-      text: "A dated, plain-English account of what was tried each day — including the things that did not work.",
+      text: "A dated account of what was tried each day — including the things that did not work.",
       hint: latestLog
         ? `latest: ${latestLog.date}`
         : "none in this checkout",

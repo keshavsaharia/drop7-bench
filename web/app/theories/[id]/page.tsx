@@ -37,7 +37,7 @@ export default async function TheoryPage({ params }: { params: Promise<{ id: str
         <Mdx source={overlay.content} />
       ) : (
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4 text-sm text-zinc-400">
-          No plain-English explanation has been written for this theory yet. Add{" "}
+          No explanation has been written for this theory yet. Add{" "}
           <code className="text-xs">web/content/research/{theory.theoryId}.mdx</code> and it will appear here.
           The registered record is shown below.
         </div>

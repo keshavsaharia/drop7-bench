@@ -31,7 +31,7 @@ column looks best:
    best. The six-draw average prices the reveal rather than the draw, and the
    ordering can change. This is measured, not hypothetical — see below.
 
-## Load-bearing facts
+## Facts used in the diagram
 
 - Engine rule (`approaches/lifetime-objective/fast-engine/fast-engine.hpp`,
   `resolveCascadeFast`, statement order per the reference

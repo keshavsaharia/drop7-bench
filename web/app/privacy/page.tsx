@@ -18,7 +18,7 @@ export default function PrivacyPage() {
       <p className="text-sm text-zinc-500">Effective August 23, 2026</p>
 
       <div className="my-6 rounded-xl border border-emerald-900/70 bg-emerald-950/20 p-5">
-        <p className="!m-0 font-semibold text-emerald-200">The short version</p>
+        <p className="!m-0 font-semibold text-emerald-200">Summary</p>
         <p className="!mb-0 text-zinc-300">
           Ordinary visits are measured on the server with first-party page-view analytics.
           There are no third-party analytics scripts, advertising pixels, cross-site trackers,

@@ -12,7 +12,7 @@ The same-wave double hit behind the 2026-08-23 reveal-construction term
 `EX-20260823-reveal-construction-screen-v2-63d73b6a`), and why a weighted sum of
 marginal readiness cannot express it.
 
-## The engine rule (load-bearing facts)
+## The engine rule
 
 From `approaches/lifetime-objective/fast-engine/fast-engine.hpp`,
 `resolveCascadeFast` (statement order copied verbatim from the reference

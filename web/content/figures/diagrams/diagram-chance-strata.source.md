@@ -31,7 +31,7 @@ uniform is what unlocks depth:
    and estimator quality are complements, not independent knobs — a deeper ply
    propagates whatever the chance estimator gives it, bias or signal.
 
-## Load-bearing facts
+## Facts used in the diagram
 
 From `docs/exploratory/finding-05-chance-strata.md`:
 

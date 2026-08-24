@@ -18,15 +18,15 @@ scratch. It is written for readers who have followed the
 [sibling trap](/learn/concepts/ranking-siblings), and
 [more-compute](/learn/concepts/does-more-compute-help) pages.
 
-## The loop, in one paragraph
+## The loop
 
 Thousands of games run at once. At every position, instead of playing the move
 a policy likes, the system runs a fair search for **every legal column** under
 the same imagined futures and writes down all of the values. It then plays one
-of them, usually the best and sometimes a deliberate alternative, so the data
-covers moves a strong player would not make). A learner on the GPUs trains a
+of them (usually the best and sometimes a deliberate alternative), so the data
+covers moves a strong player would not make. A learner on the GPUs trains a
 small board evaluator on that ever-growing, every-sibling dataset. When the
-learner produces a better evaluator, it is frozen, tested against fair D4 on
+learner produces a better evaluator, it is frozen and tested against fair D4 on
 fixed games. If it passes, it becomes the leaf of the search that generates the
 next round of data. Repeat until improvement stops.
 
@@ -89,13 +89,12 @@ information, which disqualifies a student regardless of score.
   through this loop; how far it goes is what the experiment measures.
 - That the GPU will simulate games. Exact simulation stays on the CPU until a
   GPU version passes the same differential gates and beats the CPU end to end.
-- That any number below is evidence. There are none; that is the point
-  of writing the direction down before the data exists.
+- That any number below is evidence. There are none. The direction is written
+  down before the data exists.
 
 <Callout title="For contributors with compute" tone="success">
 If you can bring GPUs or a cluster, start by running stages 0–3 on a single
-machine. The repository's
-scale-out skill walks through, and to read the
+machine. The repository's scale-out skill walks through those stages. Read the
 [methodology](/docs/methodology) and [benchmark contract](/docs/benchmarks) so
 that what you produce counts as evidence. The open-source repository is at
 [github.com/keshavsaharia/drop7-bench](https://github.com/keshavsaharia/drop7-bench).

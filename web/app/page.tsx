@@ -138,7 +138,7 @@ export default async function OverviewPage() {
         <ol className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {[
             { href: "/learn/rules", step: "1", title: "Learn the game", text: "Learn the rules, and play the game right here in your browser." },
-            { href: "/learn/concepts", step: "2", title: "Learn the ideas", text: "Chance, look-ahead, evaluating a board, the sibling trap, and most importantly, what compute can and cannot buy." },
+            { href: "/learn/concepts", step: "2", title: "Learn the ideas", text: "Chance, look-ahead, evaluating a board, the sibling trap, and what compute can and cannot buy." },
             { href: "/approaches", step: "3", title: "See what was tried", text: "Twelve strategy families have been developed so far, and each has a hierarchy of records into specific approaches that were attempted." },
             { href: "/theories", step: "4", title: "See what is open", text: "Browse the theories and contribute your own, to guide the large-scale direction of the research." },
           ].map((item) => (

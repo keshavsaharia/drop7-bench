@@ -25,7 +25,7 @@ million-point *average* requires games that go on for hundreds of moves.
 So the objective was replaced with a survival curve: reward a policy for the
 fraction of its games that reach 75 moves, then 100, then 150, 225 and 300,
 with rapidly increasing weight for the later milestones. Two details in the
-frozen design are worth noting, because both are aimed at the same failure:
+frozen design target the same failure:
 
 - a milestone's **first** hit in a batch earns only 35% of its rate, with the
   remaining 65% unlocked by repeated hits, so one lucky game cannot carry a

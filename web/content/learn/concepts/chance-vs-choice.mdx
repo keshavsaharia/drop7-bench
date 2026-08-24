@@ -55,7 +55,7 @@ columns**:
 
 <ChanceStyles caption="The same seven columns valued four ways. Greedy and pessimistic both take the 53-point chain for different reasons: one ignores the future, while the other distrusts it. The optimist plays column 4 and hopes for a 3 next, a one-in-seven chance worth 155 points. The fair player chooses column 1. Columns 1, 2, and 3 are identical here, so the leftmost tied column wins." />
 
-This is not a toy distinction. Across the research ledger, the repository's
+Across the research ledger, the repository's
 status summary lists *"fair chance handling matters"* as its first durable
 conclusion: optimistic, worst-case, and tiny reused reveal samples
 **ranked moves incorrectly** in measured games. The optimist chases jackpots
@@ -111,8 +111,8 @@ following the same path.
 
 ## What "fair D4" means
 
-Put the pieces together and you have the repository's reference policy, **fair
-D4**: a depth-4 search that takes the best column at every choice node, averages
+The repository's reference policy, **fair
+D4**, is a depth-4 search that takes the best column at every choice node, averages
 over chance at every chance node (no optimism, no pessimism), samples five or
 seven strata per chance node, and scores leaves with a hand-tuned evaluator.
 "Fair" also means it uses only what a real player can see. It never reads hidden

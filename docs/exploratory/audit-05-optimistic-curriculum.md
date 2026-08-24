@@ -204,7 +204,7 @@ Classification scheme as requested:
 
 | # | Experiment | Primary | Secondary | Decisive evidence |
 | --: | --- | --- | --- | --- |
-| 1 | Oracle distillation (`oracle-distill.cpp`) | **(i)** | (iii) | Train CE 0.480 → **held-out CE 3.282, top-1 0.218**. Crucially, `(ii)` was *controlled*: fair-D3 roll-in states were labelled with oracle actions (`:308-311`) and *"oracle and behavior holdouts were similarly weak"* (history.md:607-609). Fitting was excellent, so **not (v)** |
+| 1 | Oracle distillation (`oracle-distill.cpp`) | **(i)** | (iii) | Train CE 0.480 → **held-out CE 3.282, top-1 0.218**. `(ii)` was *controlled*: fair-D3 roll-in states were labelled with oracle actions (`:308-311`) and *"oracle and behavior holdouts were similarly weak"* (history.md:607-609). Fitting was excellent, so **not (v)** |
 | 2 | Oracle DAgger (`oracle-dagger/main.ts`) | **(i)** | (ii) | DAgger exists precisely to fix (ii); it still failed. Index: "the student drifted and **oracle choices were not recoverable from public state**" (experiment-index.md:200) |
 | 3 | Hindsight planner (`hindsight-planner.cpp`) | **(iv)** | (i) | 51,500.5 vs D3 107,076. Ledger names the mechanism: **strategy fusion** — per-tape root values are "incompatible and overoptimistic" (history.md:797-799). This is *exactly* the owner's "best possible outcome" generator, made public and fair, and it is the single worst result in the corpus |
 | 4 | Oracle topology residual | **(0) underpowered** | — | 170 held-out examples vs a 200 gate; AUC 0.681 was favourable. Not a mechanism failure (history.md:1372-1379) |
@@ -654,7 +654,7 @@ half of that split independently:
    reported despite the code to compute it having been written, run, and
    self-tested. Whatever it returns, it is a durable result. If `τ < 0.25`, the
    optimistic-teacher program ends here on solid evidence and the owner has saved
-   a CPU-day and, more importantly, a wrong conclusion.
+   a CPU-day and a wrong conclusion.
 2. **Only then run E1**, and run it as designed: optimism in states, fairness in
    labels, hazard targets, all legal siblings, whole-origin folds, ≥5 seeds per
    arm, A3-shuffled as the null. Its most likely outcome is that ordering does

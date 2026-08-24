@@ -60,7 +60,7 @@ that a mirrored position cannot be treated as a different one.
 The network learned the training data well and could not reproduce it on games
 it had not seen. On held-out positions it picked the teacher's column about
 **22% of the time**, against the 30% the protocol required in advance, and its
-cross-entropy was far worse than the gate allowed. Crucially, it was just as bad
+cross-entropy was far worse than the gate allowed. It was just as bad
 on the ordinary-search positions as on the teacher's own positions, so this is
 not a case of the student being shown unfamiliar boards. The information needed
 to reproduce the teacher's choice is simply not on the screen.

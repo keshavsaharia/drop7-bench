@@ -201,9 +201,9 @@ survival-flavoured experiments whose numbers Section C needs.
 
 `floor(7·d^2.5)` for d = 1…8: **7, 39, 109, 224, 391, 617, 907, 1267** per disc.
 
-The terminal rule is load-bearing and is *not* stated in `methodology.md`:
-because the failed rise pays nothing, a game of exactly `M` moves that dies at a
-rise earns `M/5 − 1` level bonuses, not `floor(M/5)`.
+The terminal rule is *not* stated in `methodology.md`. Because the failed rise
+pays nothing, a game of exactly `M` moves that dies at a rise earns `M/5 − 1`
+level bonuses, not `floor(M/5)`.
 
 ### C.2 An exact paired-rescoring identity
 
