@@ -61,6 +61,14 @@ It is now affordable to ask. The fast engine brought a depth-5, seven-sample
 against an earlier projection of 75 hours. That does not predict the answer; it
 means the experiment can be run and recorded rather than argued about.
 
+What "affordable" is measured in deserves a picture of its own, because every
+depth and sampling choice on this page is ultimately a work budget being spent:
+
+<Diagram
+  name="diagram-work-budget"
+  caption="One decision is one tree, almost all of its nodes are the leaf evaluations at the frontier, and every added ply or sample multiplies that count — which is why the search carries an explicit work cap and why leaf cost multiplies everything."
+/>
+
 <details>
 <summary>The technical record</summary>
 
@@ -96,6 +104,11 @@ average **2.41 of the 7 disc values receive zero weight at every chance node**,
 and because the sampling is deterministic the error never averages out. The
 search was not mis-estimating the future randomly; it was systematically blind
 to part of it.
+
+<Diagram
+  name="diagram-chance-strata"
+  caption="The next disc is dealt uniformly from seven values, so a five-sample chance node must leave at least two of them with zero weight every time — the search is not noisy about the future, it is systematically blind to part of it — while seven samples make the average exact."
+/>
 
 Raising the sample count to seven makes the next-disc expectation **exact**.
 On 64 previously unread paired games that was worth **+101,171 mean points
