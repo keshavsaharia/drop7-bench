@@ -12,7 +12,7 @@
 // sub-block 0xa5277000-0xa5277fff of the already-opened SEEDLEASE-A52-FAST
 // development lease.
 
-use drop7_rs::board::Board;
+use drop7_rs::board::{Board, BOARD_SIZE, MOVES_PER_LEVEL};
 use drop7_rs::engine::{center_first_move, play_headless_move, MinimalWaveSink, State};
 use drop7_rs::search::{
     work_bound_for, DepthTable, FairLeaf, Leaf, NoTable, Searcher, SearchParams,
@@ -52,16 +52,65 @@ fn load_average() -> f64 {
         .unwrap_or(-1.0)
 }
 
-fn parse_state(tokens: &[&str]) -> State {
-    State {
-        board: Board::from_serialized(tokens[0]).expect("board parses"),
-        next_disc: tokens[1].parse().unwrap(),
-        score: 0,
-        level: tokens[3].parse().unwrap(),
-        moves_remaining: tokens[2].parse().unwrap(),
-        moves_played: 0,
-        game_over: tokens[4] == "1",
+/// Parses one `s <board49> <next> <mr> <level> <over>` record.  Returns None
+/// on a truncated record or an out-of-range field: a benchmark must never
+/// time a state the emitter never produced.
+fn parse_state(tokens: &[&str]) -> Option<State> {
+    let [board, next, moves_remaining, level, over] = tokens else {
+        return None;
+    };
+    let board = Board::from_serialized(board)?;
+    let next_disc: u8 = next.parse().ok()?;
+    let moves_remaining: i32 = moves_remaining.parse().ok()?;
+    let level: i32 = level.parse().ok()?;
+    if !(1..=BOARD_SIZE as u8).contains(&next_disc)
+        || !(0..=MOVES_PER_LEVEL).contains(&moves_remaining)
+        || level < 1
+        || (*over != "0" && *over != "1")
+    {
+        return None;
     }
+    Some(State {
+        board,
+        next_disc,
+        score: 0,
+        level,
+        moves_remaining,
+        moves_played: 0,
+        game_over: *over == "1",
+    })
+}
+
+/// Reads every `s ` record from `path`.  Exits rather than returning on a
+/// missing file, a malformed record, or an empty corpus -- an empty corpus
+/// would otherwise divide a timing by zero and report an infinite ns/leaf
+/// while exiting successfully.
+fn read_roots(path: &str) -> Vec<State> {
+    let text = match fs::read_to_string(path) {
+        Ok(text) => text,
+        Err(error) => {
+            eprintln!("cannot read roots file {path}: {error}");
+            std::process::exit(2);
+        }
+    };
+    let mut roots = Vec::new();
+    for (index, line) in text.lines().enumerate() {
+        let Some(rest) = line.strip_prefix("s ") else {
+            continue;
+        };
+        match parse_state(&rest.split_whitespace().collect::<Vec<_>>()) {
+            Some(state) => roots.push(state),
+            None => {
+                eprintln!("{path}:{}: malformed root record", index + 1);
+                std::process::exit(2);
+            }
+        }
+    }
+    if roots.is_empty() {
+        eprintln!("no roots in {path}");
+        std::process::exit(2);
+    }
+    roots
 }
 
 /// Play one center-policy game; returns (moves, score, waves).
@@ -342,25 +391,11 @@ fn main() {
         "moves" => bench_moves(games, threads, max_moves),
         "scaling" => bench_scaling(games, max_threads, max_moves),
         "micro" => {
-            let text = fs::read_to_string(&roots_path).expect("read roots");
-            let roots: Vec<State> = text
-                .lines()
-                .filter_map(|line| line.strip_prefix("s "))
-                .map(|rest| parse_state(&rest.split_whitespace().collect::<Vec<_>>()))
-                .collect();
+            let roots = read_roots(&roots_path);
             bench_micro(&roots, repeats);
         }
         "search" => {
-            let text = fs::read_to_string(&roots_path).expect("read roots");
-            let roots: Vec<State> = text
-                .lines()
-                .filter_map(|line| line.strip_prefix("s "))
-                .map(|rest| parse_state(&rest.split_whitespace().collect::<Vec<_>>()))
-                .collect();
-            if roots.is_empty() {
-                eprintln!("no roots in {roots_path}");
-                std::process::exit(2);
-            }
+            let roots = read_roots(&roots_path);
             // Memoization arms: "none" (NoTable) or "gate<K>" (DepthTable
             // caching nodes at depth >= K).  Both compute identical values;
             // only node counts and per-node cost differ.
