@@ -4,7 +4,7 @@ title: "The reveal quadrature gets a fast engine"
 summary: "E-FAST-M6 passed every trace-equivalence gate: reveal sampling now runs inside the fast memo engine at 5.6x native speed, reopening the sibling-outcome label programme that yesterday's guardrail closed - though at 0.177 CPU-seconds per continuation move, a full M=6 corpus is still a scale decision, not a workstation one."
 contributors: [claude-fable-5 (Claude Code), kimi-k3 (OpenCode)]
 tags: [fast-engine, reveal-sampling, engineering, p-sol]
-outcomes: { positive: 1, negative: 0, open: 2 }
+outcomes: { positive: 2, negative: 0, open: 2 }
 ---
 
 Yesterday ended with a guardrail kill: M=1 continuations cannot carry D3 N7M6
@@ -58,3 +58,44 @@ G1 given certification 0.45, overall about 0.27; the cheapest prior-changing
 number is cohort-1's d1-versus-d3 tau, about two CPU-hours in. Not started
 tonight; the lease stays sealed until S1 certifies an engine.
 </Direction>
+
+---
+
+## A Rust bitboard engine, and a measurement that bit back
+
+Separately from the label programme, the repository gained a third rules
+engine today: a from-scratch Rust implementation built for the 192-core
+evaluation instances the scale-out direction wants
+(`approaches/fair-expectimax/rust-engine/`, OpenCode session). The board is
+seven 32-bit column words at four bits per cell - 28 bytes - so gravity is a
+single PEXT bit-gather per column, a row rise is `(word << 4) | SOLID`, and
+cover hits are counted for the whole board at once with a four-way bitboard
+parallel counter. It is proven bit-identical to all three existing
+implementations: 36,427 replayed moves across the C++ headless and TypeScript
+drivers, 150,854 leaf values compared as raw 64-bit patterns, and per-column
+search values at depth 4 and depth 5 - zero mismatches anywhere
+(RS-20260824T075451Z-e89ea128, engineering, mechanics-only tier).
+
+<Finding title="The Rust engine is the fastest of the three" kind="positive" metric="12.8M moves/s single core; 1.2-2.0x over the C++ fast engine">
+On the shared workstation, single-core engine throughput is 12.8M moves/s
+against the C++ fast engine's 6.5M and TypeScript's 0.65M, and the ported fair
+leaf runs at 155.6 ns against the C++ fast leaf's 187.5 ns. With the cheap
+transposition table below, the fair search runs depth-4/seven-strata decisions
+in 908 ms against the C++ fast search's 1,071 ms, with a 3.1 MB table against
+its 16.2 MB LRU. Game-level scaling is shared-nothing and near-linear (10.3x on
+16 physical cores under load; identical scores at every worker count).
+</Finding>
+
+<Finding title="A 1.3% hit rate that eliminates most of the work" kind="neutral" metric="47% of d4s7 work, 90% of d5s7 work">
+The day's instructive measurement. The fair search's transposition table hits
+on only 1.3% of nodes, which reads as "almost useless" - but each hit prunes an
+entire subtree (~49^depth expansions), so the table actually eliminates about
+47% of all work at depth 4 and 90% at depth 5. An early design pass removed
+the table entirely on the low-hit-rate reasoning; the no-table search does
+2-10x more work and is the slowest arm despite the fastest per-node cost. The
+fix that won is not the C++ strict-LRU table but a cheap direct-mapped
+depth-preferred table: ~92% of the LRU's hits at lower per-operation cost and
+a fifth of the memory. Finding-13 had measured the table's storage cost (0.6%
+of runtime) but never its work value; this is the complementary number, and it
+is now recorded in the fast engine's own terms.
+</Finding>

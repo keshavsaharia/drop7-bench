@@ -1,0 +1,52 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260824T052018Z-b88c3e22",
+  "experimentId": "EX-20260824-rust-engine-parity-throughput-4036a91f",
+  "lifecycle": "completed",
+  "runValidity": "valid",
+  "startedAt": "2026-08-24T05:20:18Z",
+  "endedAt": "2026-08-24T07:56:00Z",
+  "protocolSha256": "e49a42e09ce44aa6082645a29b570c9cddba473a04bfc194a62e8c1c626c9f7a",
+  "machineProfileRef": "research/system-profiles/MACH-20260824T072426Z-fa409222.json",
+  "sourceState": {
+    "gitCommit": "a4b49a5221d42a686a76c9f5d7d6455200e2ed4f",
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "approaches/fair-expectimax/rust-engine/build.sh",
+    "build/rust-engine/trace --policy center --games 512  (and --policy d3fast --games 256)",
+    "node --experimental-strip-types approaches/fair-expectimax/rust-engine/ts/trace.ts trace --games 256",
+    "build/rust-engine/leaf-trace --mode leaves --games 6 --limit 150000  (and --mode visited)",
+    "build/rust-engine/search-trace --mode values|metrics --depth 4|5 --strata 7",
+    "target/release/gate_trajectory / gate_leaf / gate_search over the emitted traces",
+    "approaches/fair-expectimax/rust-engine/bench_all.sh runs/RUN-20260824T052018Z-b88c3e22/rust-engine <roots> 3"
+  ],
+  "seedLeaseRefs": [],
+  "resourceLimits": {
+    "wallSeconds": 14400,
+    "cpuThreads": 32,
+    "maxHostBytes": 34359738368,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": 9400,
+    "cpuSeconds": null,
+    "peakHostBytes": 201326592,
+    "peakGpuBytes": null,
+    "measurementNotes": "CHECK-tier equivalence gates plus timing. All seeds come from sub-blocks 0xa5276000-0xa5276fff (gates) and 0xa5277000-0xa5277fff (benchmark) of the already-opened SEEDLEASE-A52-FAST development lease; zero new seeds opened. Timing measured on a shared workstation (load average 1.1-1.7); best-of-N reported. The largest working set is the Rust 4M-entry direct-mapped table arm at 201 MB peak RSS. The d5s7 C++ values emitter ran 4m07s for 10 roots; the Rust gate reproduced its values in 3m00s."
+  },
+  "exitCode": 0,
+  "stopReason": null,
+  "artifactRefs": [
+    "runs/RUN-20260824T052018Z-b88c3e22/rust-engine/gates.log",
+    "runs/RUN-20260824T052018Z-b88c3e22/rust-engine/bench.log",
+    "runs/RUN-20260824T052018Z-b88c3e22/rust-engine/benchmark.json",
+    "runs/RUN-20260824T052018Z-b88c3e22/rust-engine/machine-profile.json"
+  ],
+  "contributionIds": [
+    "CT-20260824T075654Z-e374d688"
+  ]
+}
