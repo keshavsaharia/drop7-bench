@@ -1,0 +1,33 @@
+{
+  "$schema": "../schemas/theory-v1.schema.json",
+  "format": "drop7-theory-v1",
+  "theoryId": "TH-20260824-m6-depth-second-order-for-ordering-7de1e79e",
+  "title": "With reveal quadrature fixed at M=6, search depth is second-order for within-root sibling ordering (P-SOL-3)",
+  "claim": "With the reveal quadrature fixed at M=6, continuation-search depth is second-order for WITHIN-ROOT sibling ordering: fast d1-M6 or d2-M6 KM-lifetime orderings agree with fast d3-N7M6 at mean within-root Kendall tau LB95 >= 0.75 and top-1 agreement LB95 >= 0.80 at the corpus operating point (K=8, H=40, CRN continuations shared across siblings and engines), and labels from the certified cheap engine train the 572k NNUE leaf to the P-SOL G1/G2 gates (student top-1 vs exact D4 >= 0.55 and >= incumbent + 0.03; label-argmax vs D4 >= 0.60; fit >= 0.7x the split-half label ceiling).",
+  "mechanism": "Design: Kimi K3, runs/RUN-20260823T191900Z-b9f8f80d/kimi-k3-psol3-design.md (P-SOL-3). The v2 guardrail showed the REVEAL axis is first-order for sibling ordering (fast-M1 vs native D3 N7M6 mean tau 0.370, top-1 4/6, RS-20260823T225753Z-0fbd48c3) while E-FAST-M6 made M=6 affordable at shallow depth (RS-20260824T010000Z-8f3e9b4f; measured 0.177 CPU-s/move at d3 N7M6 continuation duty; d1/d2-M6 estimated ~2/~54 ms/move, measured first in T0). If depth is second-order once M=6 is fixed, a d1-M6 corpus prices at ~17.8 CPU-h for 14,336 whole-origin roots x 7 siblings x K8 x H40 - affordable - while the d3-M6 equivalent is ~180 roots. Falsification (a) both cheap engines miss the ladder thresholds: the shallow-depth label claim is dead; (b) certified-engine corpus fails G2 target-quality: the ladder reference is an inadequate D4 proxy; (c) G2 passes and G1 fails: the bottleneck is the student or training, not the labels.",
+  "falsificationCriteria": [
+    "Ladder (R=64, two cohorts 16 then 48, early stop): both d1-M6 and d2-M6 below mean tau LB95 0.75 or top-1 LB95 0.80 vs fast d3-N7M6 refutes the depth-second-order claim at K8 H40.",
+    "G2 label-argmax vs exact D4 < 0.60 on the 4,096-root gate set refutes the certified engine as a label source.",
+    "G1 fail with G2 pass narrows the failure to student/training and leaves the label claim standing.",
+    "S0: if T0 re-pricing leaves fewer than 6,000 affordable corpus roots, the experiment records no-run rather than running underpowered."
+  ],
+  "informationClass": "public-policy",
+  "lifecycle": "proposed",
+  "assessment": "untested",
+  "evidenceTier": "proposal",
+  "dependencies": [
+    "TH-20260823-sibling-outcome-labels-fix-leaf-0c3d480d"
+  ],
+  "evidenceRefs": [
+    "runs/RUN-20260823T191900Z-b9f8f80d/kimi-k3-psol3-design.md",
+    "research/results/RS-20260823T225753Z-0fbd48c3.json",
+    "research/results/RS-20260824T010000Z-8f3e9b4f.json"
+  ],
+  "createdBy": {
+    "platform": "unknown",
+    "model": "unknown",
+    "agentId": null
+  },
+  "createdAt": "2026-08-24T01:22:09Z",
+  "updatedAt": "2026-08-24T01:23:00Z"
+}

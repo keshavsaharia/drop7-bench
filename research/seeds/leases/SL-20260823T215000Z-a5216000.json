@@ -2,7 +2,7 @@
   "$schema": "../schemas/seed-lease-v1.schema.json",
   "format": "drop7-seed-lease-v1",
   "seedLeaseId": "SL-20260823T215000Z-a5216000",
-  "experimentId": "EX-20260823-sol-corpus-and-offline-gate-4d3d86e4",
+  "experimentId": "EX-20260824-psol3-m6-ladder-corpus-gate-2d0167ad",
   "rngAlgorithm": "mulberry32 with mix32 domain separation (src/core/native/engine.hpp); continuation CRN streams derived from public root hashes with dedicated domains (P-SOL-v1 section 3), never from the seed",
   "domain": "environment",
   "role": "training",
@@ -13,11 +13,12 @@
   "reservedAt": "2026-08-23T21:19:29Z",
   "openedAt": null,
   "closedAt": null,
-  "protocolSha256": "017a6bcd6a44ce65ef961259e10618470213e6494236aeac3a6917d704797a37",
+  "protocolSha256": "b132397899ef701b7335e3095c70855d538013036772217793d96f4a43d7e11b",
   "runIds": [],
   "notes": [
     "Sub-ranges per P-SOL-v1 section 4: G0 ladder 0xa5216000-0xa52160ff (256), main corpus 0xa5217000-0xa52177ff (2,048), gate set 0xa5219000-0xa52191ff (512); interleaved gaps stay clean. Inside the SEEDLEASE-A52 reserve 0xa5216000-0xa522ffff, which docs/exploratory/lease-map.md lists as unallocated.",
     "Training role; gate-set origins become development-read on use and never train.",
-    "2026-08-23 G0 (RUN-20260823T215500Z-fc74e0b4): never opened. Stop rule S1 halted stage G0 before the first leased seed was read: the design's D3 N7M6 budget lines assume 292 moves/s, but the C0 engine identity (runs/RUN-A525-reveal/d3-n7-m6.json) and a fresh smoke-seed pilot measure ~6.8 CPU-s per decision, projecting every D3 N7M6 stage far beyond 1.3x its line (runs/RUN-20260823T215500Z-sol/g0/ladder.json). The range remains clean and reserved pending coordinator decision (P-SOL-v2 or scale-out)."
+    "2026-08-23 G0 (RUN-20260823T215500Z-fc74e0b4): never opened. Stop rule S1 halted stage G0 before the first leased seed was read: the design's D3 N7M6 budget lines assume 292 moves/s, but the C0 engine identity (runs/RUN-A525-reveal/d3-n7-m6.json) and a fresh smoke-seed pilot measure ~6.8 CPU-s per decision, projecting every D3 N7M6 stage far beyond 1.3x its line (runs/RUN-20260823T215500Z-sol/g0/ladder.json). The range remains clean and reserved pending coordinator decision (P-SOL-v2 or scale-out).",
+    "2026-08-24: consumer re-pointed to the P-SOL-3 successor EX-20260824-psol3-m6-ladder-corpus-gate-2d0167ad (prior consumers P-SOL-1/-2 superseded/completed without opening any seed). Still reserved; the ladder sub-range 0xa5216000-0xa52160ff is no longer needed (P-SOL-3's ladder is seed-free) and stays clean unless the T0 re-pricing reassigns it."
   ]
 }

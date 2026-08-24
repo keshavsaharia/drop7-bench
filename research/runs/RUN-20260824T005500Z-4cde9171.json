@@ -1,0 +1,57 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260824T005500Z-4cde9171",
+  "experimentId": "EX-20260823-fast-m6-reveal-sampling-port-be23e203",
+  "lifecycle": "completed",
+  "runValidity": "valid",
+  "startedAt": "2026-08-23T23:26:44Z",
+  "endedAt": "2026-08-24T00:55:10Z",
+  "protocolSha256": "e9c31fbc7ddf9d8a363fabab557d991eba38b0fb3121f6b882146a2d7c70d5fd",
+  "machineProfileRef": "research/system-profiles/MACH-20260820T080056Z-376ada90.json",
+  "sourceState": {
+    "gitCommit": "699e39a8a04ea3944613bf3ccb2ac0d9d8cc8562",
+    "dirty": true,
+    "diffSha256": "9ed637101bf12415569d22cdaa1fd858aa66c91455639416bf80f8fd01fddadc",
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "stage E (grid): runs/RUN-20260823T215500Z-sol/fastm6/run-gates.sh -> build/fast-reveal-sampling/gate --mode grid --threads 26 --games 21 --max-moves 25 (12 points d3/d4 x N5/N7 x M1/M2/M6, probe seeds 0xa5278000+, 525 decisions each)",
+    "stages R/M1/D/C/T1/T2: runs/RUN-20260823T215500Z-sol/fastm6/run-gates-resume.sh (--mode replay/m1/subset x4/cont; npm test; make test; researchctl doctor) after an external kill of the harness task hosting run-gates.sh between stages E and R (disclosed in gates.log; stage E artifacts retained unchanged)",
+    "stage D iteration 2: runs/RUN-20260823T215500Z-sol/fastm6/run-gate-d2.sh after the disclosed gate-harness fix (mirror check now excludes mirror-symmetric boards per finding-13 4C; engine source unchanged, sha256 bba2b71b6b1e5fef776105a08d8d7cb6bf922f352baf70af139bc9fd1c0dc4de)"
+  ],
+  "seedLeaseRefs": [],
+  "resourceLimits": {
+    "wallSeconds": 14400,
+    "cpuThreads": 26,
+    "maxHostBytes": 17179869184,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": 5306,
+    "cpuSeconds": 94000,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "Stage E process CPU was instrumented at 85,752 s (grid.json); the resumed stages (~8,300 s) are derived from the measured per-move rates in replay.json/cont.json and the subset/m1 decision counts, so the 94,000 total is measured-plus-derived. Wall 5,306 s from stage E start (2026-08-23T23:26:44Z) to the final D2 pass, including the ~5-minute external-kill gap - within the 14,400 s cap. Peak RSS not sampled; the largest working set is the d4-n7-m2 point (native cache 960,695 string-keyed entries per game thread). Probe seeds 0xa5278000-0xa5278274 and smoke seeds 0xa51d8000-0xa51d800b only, plus the three already-read retained C0 games; no leased seed opened."
+  },
+  "exitCode": 0,
+  "stopReason": "All preregistered gates completed and passed. Two disclosed interruptions/iterations: (1) the background task hosting run-gates.sh was killed externally after stage E passed and the run resumed at stage R with stage E artifacts unchanged; (2) stage D iteration 1 failed on a gate-harness artifact (mirror comparison on mirror-symmetric boards, which map to themselves) and passed on iteration 2 after the harness adopted finding-13 4C's symmetric-board exclusion - the engine source was byte-identical across both iterations.",
+  "artifactRefs": [
+    "runs/RUN-20260823T215500Z-sol/fastm6/gates.log",
+    "runs/RUN-20260823T215500Z-sol/fastm6/equivalence.json",
+    "runs/RUN-20260823T215500Z-sol/fastm6/timing.json",
+    "runs/RUN-20260823T215500Z-sol/fastm6/grid.json",
+    "runs/RUN-20260823T215500Z-sol/fastm6/replay.json",
+    "runs/RUN-20260823T215500Z-sol/fastm6/m1.json",
+    "runs/RUN-20260823T215500Z-sol/fastm6/subset-a.json",
+    "runs/RUN-20260823T215500Z-sol/fastm6/cont.json",
+    "runs/RUN-20260823T215500Z-sol/fastm6/doctor.json",
+    "runs/RUN-20260823T215500Z-sol/fastm6/run-gates.sh",
+    "runs/RUN-20260823T215500Z-sol/fastm6/run-gates-resume.sh",
+    "runs/RUN-20260823T215500Z-sol/fastm6/run-gate-d2.sh",
+    "runs/RUN-20260823T215500Z-sol/fastm6/assemble.py"
+  ],
+  "contributionIds": [
+    "CT-20260824T005543Z-e3c8bfea"
+  ]
+}
