@@ -879,12 +879,14 @@ select.tree-input {
   background: #101014;
   padding: 1rem;
 }
+.research-fig-svg-wrap {
+  overflow: hidden;
+}
 .research-fig-svg-wrap svg {
   display: block;
   width: 100%;
   height: auto;
   max-width: 100%;
-  overflow: visible;
 }
 .research-fig .fig-pop {
   display: none;
@@ -990,7 +992,12 @@ select.tree-input {
 .research-fig-label,
 .research-fig-field {
   color: #71717a;
-  white-space: normal;
+  display: inline-block;
+  max-width: 22rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
 }
 .research-fig-source {
   font-family: ui-monospace, monospace;

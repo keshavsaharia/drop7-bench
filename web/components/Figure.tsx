@@ -153,7 +153,12 @@ export function Figure({ name, caption }: { name: string; caption?: string }) {
                         <td>{s.name}</td>
                         <td>
                           {String(p.x)}
-                          {p.label && <span className="research-fig-label"> {p.label}</span>}
+                          {p.label && (
+                            <span className="research-fig-label" title={p.label}>
+                              {" "}
+                              {p.label}
+                            </span>
+                          )}
                         </td>
                         <td className="num">{formatValue(p.y, spec.y?.unit)}</td>
                         <td className="num">
@@ -174,7 +179,12 @@ export function Figure({ name, caption }: { name: string; caption?: string }) {
                           ) : (
                             <SourceRef source={p.sourceRecord} />
                           )}
-                          {p.sourceField && <span className="research-fig-field"> {p.sourceField}</span>}
+                          {p.sourceField && (
+                            <span className="research-fig-field" title={p.sourceField}>
+                              {" "}
+                              {p.sourceField}
+                            </span>
+                          )}
                         </td>
                       </tr>
                     );

@@ -12,9 +12,10 @@
  * deterministic: no dates, no random ids.
  *
  * Kinds:
- *   line  numeric x; one polyline per series; optional lo/hi whiskers
- *   bar   categorical x; one bar per point around a zero line; lo/hi whiskers
- *   dot   categorical x; one marker per point, series side by side; lo/hi whiskers
+ *   line    numeric x; one polyline per series; optional lo/hi whiskers
+ *   bar     categorical x; one bar per point around a zero line; lo/hi whiskers
+ *   dot     categorical x; one marker per point, series side by side; lo/hi whiskers
+ *   forest  categorical rows, numeric x; one marker per point with horizontal whiskers
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
@@ -22,6 +23,8 @@ import { basename, dirname, join } from "node:path";
 const W = 720;
 let H = 400; // grows when the legend needs more than one row
 const LEGEND_ROW = 16;
+const FOREST_ROW = 40;
+const FOREST_LEFT = 156; // fixed gutter; labels that do not fit are truncated
 const PAD = { top: 44, right: 24, bottom: 84, left: 84 };
 const CHAR = 0.6; // heuristic text width, em per character
 const TITLE_CHARS = Math.floor((W - PAD.left - PAD.right) / (14 * CHAR));
@@ -39,7 +42,7 @@ function validate(spec, path) {
     throw new Error(`${path}: ${msg}`);
   };
   if (!spec.title) fail("missing title");
-  if (!["line", "bar", "dot"].includes(spec.kind)) fail(`unknown kind ${spec.kind}`);
+  if (!["line", "bar", "dot", "forest"].includes(spec.kind)) fail(`unknown kind ${spec.kind}`);
   if (!Array.isArray(spec.series) || spec.series.length === 0) fail("series[] is empty");
   for (const s of spec.series) {
     if (!s.name) fail("every series needs a name");
@@ -91,6 +94,24 @@ function axisLabel(axis) {
   return axis.unit ? `${axis.label} (${axis.unit})` : axis.label;
 }
 
+/** Truncate to `max` characters, appending an ellipsis when the source is longer. */
+function ellipsis(text, max) {
+  const s = String(text);
+  if (s.length <= max) return { display: s, truncated: false };
+  return { display: `${s.slice(0, Math.max(1, max - 1))}…`, truncated: true };
+}
+
+/**
+ * SVG text that fits `maxChars`. When truncated, the full string lives in a
+ * native <title> and the existing hover popover — nothing is drawn past the slot.
+ */
+function truncatedText(className, { x, y, anchor = "start", extra = "" }, full, maxChars) {
+  const { display, truncated } = ellipsis(full, maxChars);
+  const text = `<text class="${className}" x="${x}" y="${y}" text-anchor="${anchor}"${extra}>${esc(display)}</text>`;
+  if (!truncated) return text;
+  return `<g class="fig-pt" tabindex="0"><title>${esc(full)}</title>${text}${popover([full], x, y)}</g>`;
+}
+
 /** Greedy word wrap to at most `max` characters per line. */
 function wrap(text, max) {
   const lines = [];
@@ -111,7 +132,7 @@ const POP_CHARS = 64;
 function popLines(spec, series, p) {
   const yUnit = spec.y?.unit;
   const heading = spec.kind === "line" ? `${series.name}, ${spec.x?.label ?? "x"} ${p.x}` : `${series.name} — ${p.x}`;
-  const lines = [heading];
+  const lines = [...wrap(heading, POP_CHARS)];
   if (p.label) lines.push(...wrap(p.label, POP_CHARS));
   lines.push(`${spec.y?.label ?? "value"}: ${spec.kind === "bar" ? signed(p.y, yUnit) : fmt(p.y, yUnit)}`);
   if (p.lo !== undefined && p.hi !== undefined) lines.push(`bounds: ${fmt(p.lo, yUnit)} to ${fmt(p.hi, yUnit)}`);
@@ -127,7 +148,7 @@ function popover(lines, cx, cy) {
   const fs = 11;
   const lh = 15;
   const padX = 8;
-  const width = Math.max(...lines.map((l) => l.length)) * fs * CHAR + padX * 2;
+  const width = Math.min(W - 8, Math.max(...lines.map((l) => l.length)) * fs * CHAR + padX * 2);
   const height = lines.length * lh + 8;
   let x = cx + 10;
   let y = cy - height - 8;
@@ -148,6 +169,10 @@ function pointGroup(spec, series, p, cx, cy, marker) {
 
 function whisker(x, yLo, yHi, color) {
   return `<g class="fig-whisker" stroke="${color}"><line x1="${x}" y1="${yLo}" x2="${x}" y2="${yHi}"/><line x1="${x - 4}" y1="${yLo}" x2="${x + 4}" y2="${yLo}"/><line x1="${x - 4}" y1="${yHi}" x2="${x + 4}" y2="${yHi}"/></g>`;
+}
+
+function hWhisker(xLo, xHi, y, color) {
+  return `<g class="fig-whisker" stroke="${color}"><line x1="${xLo}" y1="${y}" x2="${xHi}" y2="${y}"/><line x1="${xLo}" y1="${y - 4}" x2="${xLo}" y2="${y + 4}"/><line x1="${xHi}" y1="${y - 4}" x2="${xHi}" y2="${y + 4}"/></g>`;
 }
 
 /* ---------------------------------------------------------------- layout */
@@ -312,13 +337,86 @@ function renderCategorical(spec) {
   return frame(spec, yTicks, yScale, xAxis) + body + legend(spec);
 }
 
+/** Left gutter is fixed; labels that do not fit are truncated with an ellipsis. */
+function forestLeft() {
+  return FOREST_LEFT;
+}
+
+function forestHeight(spec) {
+  return PAD.top + 16 + categories(spec).length * FOREST_ROW + 56 + legendRows(spec).length * LEGEND_ROW;
+}
+
+/**
+ * Horizontal forest plot: each category is a row, the recorded metric runs
+ * left-to-right, whiskers are horizontal. Row names and the title are clipped
+ * to their slot with an ellipsis; the full string is on hover. Long point
+ * labels stay in the popover — they are not drawn on the plot.
+ */
+function renderForest(spec, slug = "figure") {
+  const cats = categories(spec);
+  const left = forestLeft();
+  const right = W - PAD.right - 28;
+  const xTicks = yRange(spec, true);
+  const plotTop = PAD.top + 8;
+  const plotBottom = plotTop + cats.length * FOREST_ROW;
+  const xScale = (v) => left + ((v - xTicks.lo) / (xTicks.hi - xTicks.lo)) * (right - left);
+  const rowY = (i) => plotTop + FOREST_ROW * (i + 0.5);
+  const labelChars = Math.max(8, Math.floor((left - 16) / (11 * CHAR)));
+  const titleClip = `fig-${slug}-title`;
+  const labelClip = `fig-${slug}-ylabels`;
+  const defs = `<defs><clipPath id="${titleClip}"><rect x="${PAD.left}" y="6" width="${W - PAD.left - PAD.right}" height="24"/></clipPath><clipPath id="${labelClip}"><rect x="4" y="${plotTop - 14}" width="${left - 12}" height="${round2(cats.length * FOREST_ROW + 20)}"/></clipPath></defs>`;
+
+  const title = truncatedText("fig-title", { x: PAD.left, y: 24, extra: ` clip-path="url(#${titleClip})"` }, spec.title, TITLE_CHARS);
+  const grid = xTicks.values
+    .map((v) => {
+      const x = round2(xScale(v));
+      return `<line class="fig-grid" x1="${x}" y1="${plotTop}" x2="${x}" y2="${plotBottom}"/><text class="fig-tick" x="${x}" y="${plotBottom + 16}" text-anchor="middle">${esc(fmt(v))}</text>`;
+    })
+    .join("");
+  const zero =
+    xTicks.lo < 0 && xTicks.hi > 0
+      ? `<line class="fig-zero" x1="${round2(xScale(0))}" y1="${plotTop}" x2="${round2(xScale(0))}" y2="${plotBottom}"/>`
+      : "";
+  const rows = cats
+    .map((c, i) => {
+      const y = round2(rowY(i));
+      const label = truncatedText("fig-tick", { x: left - 8, y: y + 4, anchor: "end", extra: ` clip-path="url(#${labelClip})"` }, c, labelChars);
+      return `<line class="fig-grid" x1="${left}" y1="${y}" x2="${right}" y2="${y}"/>${label}`;
+    })
+    .join("");
+  const xAxis = `<text class="fig-axis" x="${round2((left + right) / 2)}" y="${plotBottom + 40}" text-anchor="middle">${esc(axisLabel(spec.y))}</text>`;
+
+  let body = "";
+  spec.series.forEach((s, si) => {
+    const color = PALETTE[si % PALETTE.length];
+    for (const p of s.points) {
+      const ci = cats.indexOf(p.x);
+      const present = spec.series.filter((t) => t.points.some((q) => q.x === p.x));
+      const offset = (present.indexOf(s) - (present.length - 1) / 2) * 10;
+      const cy = round2(rowY(ci) + offset);
+      const cx = round2(xScale(p.y));
+      let marker = "";
+      if (p.lo !== undefined || p.hi !== undefined) {
+        marker += hWhisker(round2(xScale(p.lo ?? p.y)), round2(xScale(p.hi ?? p.y)), cy, color);
+      }
+      if (s.dashed) {
+        marker += `<rect class="fig-marker" x="${cx - 5}" y="${cy - 5}" width="10" height="10" transform="rotate(45 ${cx} ${cy})" fill="none" stroke="${color}" stroke-width="1.5"/>`;
+      } else {
+        marker += `<circle class="fig-marker" cx="${cx}" cy="${cy}" r="5" fill="${color}"/>`;
+      }
+      body += pointGroup(spec, s, p, cx, cy, marker);
+    }
+  });
+  return `${defs}${title}${grid}${zero}${rows}${xAxis}${body}${legend(spec)}`;
+}
+
 /* ---------------------------------------------------------------- entry */
 
 export function renderSpec(spec, slug = "figure") {
-  const extraTitle = (titleLines(spec.title).length - 1) * 18;
+  const extraTitle = spec.kind === "forest" ? 0 : (titleLines(spec.title).length - 1) * 18;
   PAD.top = 44 + extraTitle;
-  H = 400 + extraTitle + (legendRows(spec).length - 1) * LEGEND_ROW;
-  const inner = spec.kind === "line" ? renderLine(spec) : renderCategorical(spec);
+  H = spec.kind === "forest" ? forestHeight(spec) : 400 + extraTitle + (legendRows(spec).length - 1) * LEGEND_ROW;
+  const inner = spec.kind === "line" ? renderLine(spec) : spec.kind === "forest" ? renderForest(spec, slug) : renderCategorical(spec);
   const sources = [...new Set(spec.series.flatMap((s) => s.points.map((p) => p.sourceRecord)))];
   const desc = [`${spec.title}.`, spec.notes ?? "", `Sources: ${sources.join(", ")}.`].filter(Boolean).join(" ");
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-labelledby="fig-${slug}-title fig-${slug}-desc" class="research-fig-svg" font-family="ui-sans-serif, system-ui, sans-serif">

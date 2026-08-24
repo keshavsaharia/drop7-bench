@@ -63,11 +63,11 @@ scoring rule, evidence tier and any partial or stopped arm.
 }
 ```
 
-Point fields: `x` (number for `line`, string category for `bar` and `dot`),
-`y`, optional `lo` / `hi` (drawn as whiskers; a lone `lo` is labelled as a
-one-sided 95% lower bound in the popover), optional `n` (games), optional
-`label` (shown in the popover; for `dot` also drawn next to the marker, useful
-for W-T-L), `sourceRecord` (required), `sourceField` (optional).
+Point fields: `x` (number for `line`, string category for `bar`, `dot` and
+`forest`), `y`, optional `lo` / `hi` (drawn as whiskers; a lone `lo` is
+labelled as a one-sided 95% lower bound in the popover), optional `n` (games),
+optional `label` (shown in the popover; for `dot` also drawn next to the
+marker, useful for W-T-L), `sourceRecord` (required), `sourceField` (optional).
 
 Kinds:
 
@@ -76,6 +76,11 @@ Kinds:
   bounds. Use for candidate-minus-comparator contrasts.
 - `dot` — per-arm comparisons on categorical x; series sit side by side
   within each category.
+- `forest` — the same categorical points as `dot`, laid out as rows with the
+  metric on the horizontal axis. Use when category names or point labels are
+  too long to share a vertical x-axis. Row names and the title are truncated
+  with an ellipsis; the full string is on hover. Long `label` text stays in
+  the popover.
 
 ## What the SVG contains
 

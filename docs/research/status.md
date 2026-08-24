@@ -2,12 +2,9 @@
 
 ## August 2026
 
-**Where the program stands.** Drop7 is a one-player puzzle game, and this
-program's goal is a policy that plays it from public information alone with a
-*mean* score above one million points in corrected five-move Hardcore mode. The
-best dependable policy found so far is [fair depth-4
+The best dependable policy found so far is [fair depth-4
 expectimax](/approaches/fair-expectimax) — a four-move look-ahead that treats
-the game's luck honestly — and even with its best chance model its measured
+the game's luck honestly. Even with its best chance model, its measured
 means sit under half of that target. This page shows where the gap is, what has
 been measured, and which directions the evidence has closed.
 
@@ -185,7 +182,7 @@ The closures themselves, one dot per direction, each drawn against the detection
 
 ```figure
 closed-directions-map
-caption: Every closed direction whose headline is a points number, with its recorded bound and, where the record states one, its detection floor. A dot inside its floor is a non-measurement, not a rejection. The non-score closures are quoted verbatim in the figure's notes.
+caption: Every closed direction whose headline is a points number, one row each, with its recorded bound and, where the record states one, its detection floor. A dot whose magnitude sits inside its floor is a non-measurement, not a rejection. Hover a marker for the recorded note; the non-score closures are quoted verbatim in the figure's notes.
 ```
 
 | Direction | Result | Reopens if |

@@ -87,25 +87,22 @@ export default async function LeaderboardPage({
       {competition}
       <section>
         <h1 className="text-2xl font-black text-zinc-50">
-          Scripted-round leaderboard
+          Computer policy leaderboard
         </h1>
         <p className="mt-2 max-w-3xl text-sm text-zinc-400">
-          Every policy plays the exact same predetermined rounds: the visible
+          Every autonomous policy plays the exact same predetermined rounds. The visible
           disc sequence is fixed by move number, and every gray disc hides a
           fixed value that takes its place when revealed. Two policies therefore
-          face identical randomness, move for move. Generated{" "}
-          {new Date(data.generatedAt).toLocaleString()}.{" "}
+          face identical randomness on every move.{" "}
           <Link href="/learn/benchmarking" className="text-sky-400 hover:text-sky-300">
             How the benchmark works →
           </Link>
         </p>
         <p className="mt-1 text-xs text-zinc-600">
-          Playground evidence only — scripted rounds are not a research tier and
-          support no qualification claim (see the{" "}
+          Playground evidence only. These competitions do not support qualification claims as per the{" "}
           <Link href="/docs/benchmarks" className="text-zinc-500 underline underline-offset-2 hover:text-zinc-300">
-            benchmark contract
-          </Link>
-          ).
+            benchmark guidelines
+          </Link>.
         </p>
       </section>
 

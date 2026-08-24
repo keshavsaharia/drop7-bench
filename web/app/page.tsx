@@ -82,12 +82,11 @@ export default async function OverviewPage() {
           What is the best strategy in a game with chance?
         </h1>
         <p className="mt-2 max-w-3xl text-zinc-400">
-          <Link href="https://en.wikipedia.org/wiki/Drop7" target="_blank" className="text-sky-400 hover:text-sky-300">Drop7</Link> 
-          {' '}is widely considered one of the great puzzle games of all time.
+          Drop7 is widely considered one of the great puzzle games of all time<sup><Link href="https://en.wikipedia.org/wiki/Drop7" target="_blank" className="text-sky-400 hover:text-sky-300">1</Link></sup>.
           The goal of this research is to find an autonomous strategy for playing the game as well as a human can.
         </p>
         <p className="mt-2 max-w-3xl text-zinc-400">
-          A decent human player can easily score multiple millions of points in this game with the right long-term strategic thinking. The strongest 
+          An experienced human player can score millions of points in this game with the right long-term strategic thinking. The strongest 
           research reference so far (<Link href="/approaches/fair-expectimax/reference" className="text-sky-400 hover:text-sky-300">fair depth-4 expectimax</Link>) 
           averages about 309k points, so the research problem is very much still open.
         </p>
@@ -99,16 +98,16 @@ export default async function OverviewPage() {
           className="group rounded-xl border border-sky-900/70 bg-sky-950/30 p-5 hover:border-sky-700"
         >
           <div className="text-xs font-semibold uppercase tracking-wide text-sky-300">
-            Learn
+            Gameplay Guide
           </div>
           <h2 className="mt-1 text-lg font-bold text-zinc-50 group-hover:text-white">
             How Drop7 works
           </h2>
           <p className="mt-1 text-sm text-zinc-400">
-            A guide to the mechanics behind one of the greatest puzzle games of all time. Learn the rules, play the game for a while, and see for yourself why this is such a captivating research prize.
+            Learn the rules and play the game right here in your browser, and see for yourself why this is such a captivating research prize.
           </p>
           <span className="mt-3 inline-block text-sm text-sky-400 group-hover:text-sky-300">
-            Click to read how Drop7 works →
+            Learn how to play Drop7 →
           </span>
         </Link>
         <a
@@ -124,7 +123,7 @@ export default async function OverviewPage() {
             keshavsaharia/drop7-bench
           </h2>
           <p className="mt-1 text-sm text-zinc-400">
-            All of the game engines, approaches, research records, scripted-round benchmarks, and this website are all open-source, and automatically rebuild from GitHub Actions.
+            All of the game engines, research approaches, scripted-round benchmarks, and this website are all open-source.
           </p>
           <span className="mt-3 inline-block text-sm text-zinc-300 group-hover:text-zinc-100">
             github.com/keshavsaharia/drop7-bench →
@@ -132,9 +131,9 @@ export default async function OverviewPage() {
         </a>
       </section>
 
-      <section className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5">
+      <section>
         <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">
-          How to get involved in the research
+          How to start researching
         </h2>
         <ol className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {[
@@ -172,6 +171,15 @@ export default async function OverviewPage() {
           value="1,000,000+"
           hint="frozen qualification bar"
         />
+      </section>
+
+      <section>
+        <h2 className="text-2xl font-black text-zinc-50">
+          Compete with the computer strategies
+        </h2>
+        <p className="mt-2 max-w-3xl text-zinc-400">
+          There are monthly competitions where you can compete with the computer strategies and get yourself onto the same leaderboard. 
+        </p>
       </section>
 
       <section className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5">
