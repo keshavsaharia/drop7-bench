@@ -34,7 +34,7 @@ sha256sum "${REFERENCE}/fair-only-depth4.cpp" \
           "${REVEAL}/search.cpp" \
           "${FAST}/fast-engine.hpp" "${FAST}/fast-leaf.hpp" "${FAST}/fast-search.hpp" \
           "${MEMO}/memo-leaf.hpp" \
-          "${HERE}/fast-factored-search.hpp" "${HERE}/gate.cpp" \
+          "${HERE}/fast-factored-search.hpp" "${HERE}/gate.cpp" "${HERE}/psol3.cpp" \
           "${ROOT}/approaches/lifetime-objective/common/harness.hpp" \
           "${ROOT}/src/core/native/public-behavior.hpp" \
           "${ROOT}/src/core/native/engine.hpp" > "${OUT}/sources.sha256"
@@ -82,4 +82,6 @@ FLAGS=(-O3 -std=c++20 -pthread -Wall -Wextra -Werror -ffp-contract=off
 echo "compiling gate..."
 "${CXX}" "${FLAGS[@]}" -o "${OUT}/gate" "${HERE}/gate.cpp"
 
-echo "built ${OUT}/gate with ${CXX}"
+echo "compiling psol3..."
+"${CXX}" "${FLAGS[@]}" -o "${OUT}/psol3" "${HERE}/psol3.cpp"
+echo "built ${OUT}/gate and ${OUT}/psol3 with ${CXX}"
