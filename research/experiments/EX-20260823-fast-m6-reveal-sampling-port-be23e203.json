@@ -1,0 +1,80 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260823-fast-m6-reveal-sampling-port-be23e203",
+  "theoryIds": [
+    "TH-20260823-sibling-outcome-labels-fix-leaf-0c3d480d"
+  ],
+  "title": "E-FAST-M6: port M=6 reveal sampling into the fast memo engine, trace-equivalent to the native factored search",
+  "classification": "engineering",
+  "hypothesis": "Engineering port, no new science: implement factored reveal sampling (M>1, matching the native FactoredSearch semantics used by the C0 arms: N disc strata x M reveal samples, work accounting, cache behaviour) inside the fast memo engine family (approaches/lifetime-objective fast-search/fast-engine/fast-leaf, proven bit-identical to the reference at M=1 in finding-13/audit-06 and re-verified at d3s7 by RS-20260823T225753Z-0fbd48c3's re-gates: 240 decisions, 0 mismatches). The port is accepted only if it is trace-equivalent to the native factored search: identical chosen columns, identical work counts, identical completed depths and cache statistics semantics, across the full equivalence gate below. Expected speedup ~10-40x per move at d3 N7M6 (native measured 1.754-6.83 CPU-s/move; fast M=1 d3s7 measured 54.6 ms/move in continuation duty, ~4 ms/move in play duty); the realised figure is measured and reported with the machine profile. Per docs/benchmarks.md, any deviation in actions, random events, or work semantics reclassifies the port as a new algorithmic candidate and it is then not accepted under this record.",
+  "candidate": {
+    "name": "fast-engine factored reveal sampling",
+    "entryPoint": null,
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "native FactoredSearch (C0 configuration)",
+    "entryPoint": "approaches/lifetime-objective/reveal-sampling/search.cpp",
+    "manifestRef": null
+  },
+  "informationBoundary": "seed-free",
+  "benchmarkTier": "CHECK",
+  "data": {
+    "role": "no-gameplay",
+    "seedLeaseRefs": [],
+    "datasetRefs": [],
+    "wholeOriginSplit": false,
+    "reuseDisclosure": "Zero leased seeds. Equivalence gates run on already-open probe/smoke seeds (0xa5278000-0xa52784ff, 0xa51d8000-0xa51d800f) and on the retained C0 per-game artifacts (already-read data); the timing figure uses the same probes. No cohort's data status changes."
+  },
+  "metrics": {
+    "primary": "trace equivalence vs the native factored search: chosen column, work, completed depth on every probe decision",
+    "secondary": [
+      "decisions compared per configuration grid point",
+      "realised CPU-s/move fast vs native at d3 N7M6 (play duty and continuation duty)",
+      "thread determinism and mirror invariance",
+      "memo on/off bit-identity",
+      "configuration grid covered: depth 3 and 4; N in 5,7; M in 1,2,6"
+    ],
+    "statisticalUnit": "not-applicable",
+    "uncertaintyMethod": "exact comparison; zero mismatches required"
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "Equivalence: >= 500 live decisions per grid point over the configuration grid (d3/d4 x N5/N7 x M1/M2/M6) on probe seeds and on >= 3 full replayed C0 games, with 0 column mismatches, 0 work-count mismatches and 0 completed-depth mismatches vs the native factored search.",
+      "M=1 regression: the port at M=1 remains bit-identical to the existing fast search (no regression of finding-13/audit-06 guarantees).",
+      "Determinism: byte-identical outputs across two runs and across thread counts; mirror invariance of decisions.",
+      "npm test and make test pass; default random-reveal behaviour byte-identical (latent-mode contract untouched)."
+    ],
+    "failureAction": "Record valid + fail as an engineering result; the native search remains the only M>1 implementation; P-SOL stays blocked and the scale-out route becomes the only reopening path for cheap-continuation labels.",
+    "passAction": "Record valid + pass (engineering, CHECK tier) with the measured speedup and machine profile; register the P-SOL-3 successor (rung-2 upgrade to fast-M6 with R2=48 and the corpus re-baselined to fast-M6) as a new protocol version before any leased seed is opened."
+  },
+  "resources": {
+    "wallSeconds": 14400,
+    "cpuThreads": 26,
+    "maxHostBytes": 17179869184,
+    "maxGpuBytes": null,
+    "gpuDevices": []
+  },
+  "stopConditions": [
+    "Stop on any equivalence mismatch that survives a bug-fix iteration on the SAME probe set; probe seeds are diagnostic and reusable for engineering equivalence, disclosed.",
+    "Stop at 4 h wall for the gate runs; implementation time is not capped by this record.",
+    "No leased seed may be opened under this record."
+  ],
+  "expectedArtifacts": [
+    "runs/RUN-20260823T215500Z-sol/fastm6/gates.log",
+    "runs/RUN-20260823T215500Z-sol/fastm6/equivalence.json (per grid point: decisions, mismatches, timings)",
+    "runs/RUN-20260823T215500Z-sol/fastm6/timing.json with machine profile reference"
+  ],
+  "lifecycle": "completed",
+  "protocolSha256": "60f3a42c7ecbd223c1b4627b8a7cc7d6b125cd9329420c3060e1184f84c49347",
+  "amendments": [],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": null
+  },
+  "createdAt": "2026-08-23T23:07:39Z",
+  "updatedAt": "2026-08-24T01:02:00Z"
+}
