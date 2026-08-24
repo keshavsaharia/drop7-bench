@@ -358,9 +358,9 @@ out-of-bounds access exists. `make ... CXX=clang++` is required; using
   scored. On that arithmetic a 1,000,000-point mean needs roughly 59 level
   advances, i.e. about 294 surviving moves per game against the 26.8 observed
   for uniform-random play. Measured under uniform-random play only; a strong
-  policy shifts the mix toward chain points, but the observation makes the
-  17,000 constant and the H1/H2 rise-boundary edge cases load-bearing for the
-  entire program rather than incidental.
+  policy shifts the mix toward chain points, but the observation makes later
+  scoring claims rest on the 17,000 constant and the H1/H2 rise-boundary edge
+  cases rather than treating them as incidental.
 - **Working tree state.** `git status` at audit time showed one untracked
   directory, `approaches/lifetime-objective/`, belonging to another
   contributor. It was not read, modified, or included in any hash above.

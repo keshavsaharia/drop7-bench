@@ -34,8 +34,7 @@ export default async function RepoDocPage({
       </div>
       <Markdown source={source} fromPath={`docs/${relative}`} />
       <div className="mt-6 rounded-xl border border-sky-900/60 bg-sky-950/20 p-4 text-sm text-zinc-300">
-        These documents are written for researchers. For the same ideas in plain
-        language, with animations, start at{" "}
+        For a walkthrough with board animations, start at{" "}
         <Link href="/learn/rules" className="text-sky-400 hover:text-sky-300">
           how the game works
         </Link>{" "}

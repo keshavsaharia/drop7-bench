@@ -18,7 +18,7 @@ attributed time of a single depth-4 decision
 Whatever the evaluator is blind to, the search is blind to.
 
 If the words *leaf*, *depth* or *expectimax* are new, start with
-[choice, chance, and looking ahead](/learn/concepts/chance-vs-choice); every
+[choice, chance, and looking ahead](/learn/concepts/chance-vs-choice). Every
 term also has a one-line entry in the [glossary](/learn/glossary).
 
 ## What there is to look at
@@ -62,8 +62,8 @@ fast reimplementation deleted
 Read as a sentence, the function says: *a good board is short, open, mostly
 readable, full of discs that are one drop from clearing, with more clears
 waiting behind those, and free of low numbers stranded in places they can never
-escape.* That is a reasonable description of good Drop7 play, and it is worth
-noticing that it never mentions points. The connection between "the board looks
+escape.* That is a reasonable description of good Drop7 play, and it never
+mentions points. The connection between "the board looks
 like this" and "the game will go well" is left entirely to the weights.
 
 <Callout title="One term was doing nothing at all" tone="warn">
@@ -72,27 +72,27 @@ exactly zero in the frozen source. The board was measured and the result
 multiplied by nothing on every one of the search's hundreds of thousands of leaf
 evaluations. The fast engine removed it after checking that the removal changed
 no evaluation on 225,183 real leaf states
-([finding 13](/docs/exploratory/finding-13-fast-engine) §3, lead L7). It is a
-useful reminder that a hand-tuned evaluator accumulates history.
+([finding 13](/docs/exploratory/finding-13-fast-engine) §3, lead L7). A
+hand-tuned evaluator accumulates history.
 </Callout>
 
 ## Why a good-looking board is not enough
 
-Here is the uncomfortable part. The repository's status summary lists, among its
-most useful conclusions, that **static board potential is insufficient**:
+The repository's status summary lists that **static board potential is
+insufficient**:
 *"Similar-looking boards can have very different futures depending on how
 reachable triggers and covered discs evolve across rises"*
 ([research status](/docs/research/status)).
 
-That is easy to say and easy to demonstrate. These two boards agree on every
+These two boards agree on every
 summary quantity an evaluator of the kind above can compute. They have the same
 column heights, the same number of solid and cracked covers, the same three numbered
 discs, the same number of discs one drop from clearing, and the same response to
 an immediate rise. They differ only in *where* those discs sit.
 
-<BoardLookalikes caption="Both boards were reached by the engine in real games. Each was replayed sixteen times with the same scripted disc tapes and toy policy. This is a demonstration, not a research measurement: the policy is trivial and the sample is small. The important result is that two boards a static score cannot distinguish can still diverge." />
+<BoardLookalikes caption="Both boards were reached by the engine in real games. Each was replayed sixteen times with the same scripted disc tapes and toy policy. This is a demonstration, not a research measurement: the policy is trivial and the sample is small. Two boards a static score cannot distinguish can still diverge." />
 
-The evaluator can be refined, of course: count more shapes, count them more
+The evaluator can be refined: count more shapes, count them more
 cleverly. But there is a limit built into the game. A depth-4 search sees at
 most one row rise, while the clearing deficit that ends a game accumulates over
 eight or more rise cycles. That argument is made
@@ -100,8 +100,8 @@ quantitatively in [score is survival](/learn/concepts/survival-vs-score), and it
 is the reason so much of this repository's history is attempts to *learn* a leaf
 evaluator that sees further than the search does.
 
-Those attempts have mostly failed, and they failed in a specific and
-instructive way: a model can predict how a game will go from the boards it was
+Those attempts have mostly failed, and they failed in a specific way: a model
+can predict how a game will go from the boards it was
 trained on, and still rank the seven columns available right now in the wrong
 order. That failure has its own page:
 [evaluating a board, and the sibling trap](/learn/concepts/ranking-siblings).

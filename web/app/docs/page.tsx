@@ -18,9 +18,9 @@ export default function DocsIndexPage() {
         </Link>
         <h1 className="mt-1 text-2xl font-black text-zinc-50">Docs</h1>
         <p className="mt-1 max-w-3xl text-sm text-zinc-400">
-          These documents are written for researchers and live in{" "}
-          <code className="text-xs">docs/</code>. For the same ideas in plain
-          language, with animations, start at{" "}
+          These documents live in{" "}
+          <code className="text-xs">docs/</code>. For a walkthrough with board
+          animations, start at{" "}
           <Link href="/learn/rules" className="text-sky-400 hover:text-sky-300">
             how the game works
           </Link>{" "}

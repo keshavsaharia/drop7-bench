@@ -4,18 +4,15 @@ summary: What the evidence says about deeper search, more samples, bigger models
 order: 3
 ---
 
-It is the most natural question in the project: the best policy averages about
-a third of the target, computers are fast, so *search deeper, sample more, train
-bigger*. The repository has measured each option, with mixed results. The
-technical record remains one click away.
-The short version: **it depends entirely on what the compute is spent on.**
-Spent on removing a measured bias in how the search handles luck, it was worth
-about a third more score and it unlocked a whole extra ply of look-ahead.
+The best policy averages about a third of the target, and computers are fast,
+so the question is *search deeper, sample more, train bigger*. The repository
+has measured each option. **It depends entirely on what the compute is spent
+on.** Spent on removing a measured bias in how the search handles luck, it was
+worth about a third more score and it unlocked a whole extra ply of look-ahead.
 Spent on more imagined futures for a planner with a broken objective, it made
 things measurably *worse*. Spent on bigger models trained on the wrong shape of
 data, it reproduces the same blind spot with more confidence. Section 4 covers
-the most promising untested use: closing a learning loop that is already half
-built.
+the untested use: closing a learning loop that is already half built.
 
 ## 1. Deeper search
 
@@ -28,9 +25,8 @@ status summary records that selective depth 5, full depth 5, and variants that
 stop at the next row rise *"often spent much more work, sampled chance outcomes
 too noisily, or overrode good D4 actions on unstable estimates."*
 
-But a later, replicated measurement reframes that whole conclusion, and it is
-the most important result here. **Depth was never being tested on its
-own.** Every historical depth experiment used a quietly biased chance estimator.
+A later, replicated measurement reframes that conclusion. **Depth was never
+being tested on its own.** Every historical depth experiment used a quietly biased chance estimator.
 Section 2 covers that bias. Once removed, the fourth ply went from worth almost
 nothing to worth a great deal:
 
@@ -61,8 +57,7 @@ It is now affordable to ask. The fast engine brought a depth-5, seven-sample
 against an earlier projection of 75 hours. That does not predict the answer; it
 means the experiment can be run and recorded rather than argued about.
 
-What "affordable" is measured in deserves a picture of its own, because every
-depth and sampling choice on this page is ultimately a work budget being spent:
+Every depth and sampling choice on this page is a work budget:
 
 <Diagram
   name="diagram-work-budget"
@@ -121,8 +116,8 @@ independent cohort.
   caption="Mean moves survived for the same arms as the score figure. Survival, not scoring rate, is where the seven-stratum fourth ply pays: about 27 more moves per game at depth 4."
 />
 
-That is the clearest "more compute helped" result in the repository, and note
-what it actually bought: not more search, but an **unbiased** one. The extra
+That is the clearest "more compute helped" result in the repository, and what
+it actually bought was not more search, but an **unbiased** one. The extra
 samples removed a defect rather than adding depth.
 
 ### When more samples made things worse
@@ -197,7 +192,7 @@ The first answer to "would a giant training run fix it?" is **not if
 it trains on the same kind of data.** A thousand GPUs generating
 played-move-only labels produce the failure at scale.
 
-The most recent line is the exception that sharpens the point. The afterstate
+The afterstate
 pilot *did* fix the data shape, and then ran into two different walls, label
 noise and undertraining, both of which are things compute buys down. Section 4
 is about that.
@@ -215,11 +210,10 @@ directly:
 3. Put the trained evaluator at the leaves of the search and repeat. Each
    round's labels come from a stronger searcher than the last.
 
-**Steps 1 and 2 have been done here, at pilot scale, and they are the reason
-this section is not speculation.** The afterstate pilot built exactly that
-corpus (every legal sibling, chance scenarios shared across siblings) and
-trained an evaluator on it. What it found is the most useful compute result in
-the repository: with eight imagined futures per label the labels were too noisy
+**Steps 1 and 2 have been done here, at pilot scale.** The afterstate pilot
+built exactly that corpus (every legal sibling, chance scenarios shared across
+siblings) and trained an evaluator on it. With eight imagined futures per
+label the labels were too noisy
 to learn a reliable ranking from. Raising that to 256 increased compute per
 label by 32× and fixed the stability problem. The bottleneck then
 moved to the model itself, whose own result record names an undertrained
@@ -255,7 +249,7 @@ never by a single spectacular game.
 
 ## 5. The hardware that exists today
 
-For completeness: this workstation is a 16-core / 32-thread CPU with an
+This workstation is a 16-core / 32-thread CPU with an
 integrated GPU that shares system memory. The GPU has been made to work for
 training and, for the small network sizes tried, runs 1.25–5× faster than the
 CPU depending on batch size. These lower-bound measurements came from a busy machine.

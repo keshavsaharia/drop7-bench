@@ -1,6 +1,6 @@
 ---
 title: Evaluating a board, and the sibling trap
-summary: Why a model can predict how a game will go and still pick the wrong column, the most important lesson in this repository's history.
+summary: Why a model can predict how a game will go and still pick the wrong column.
 order: 2
 ---
 
@@ -9,9 +9,8 @@ opinion about each one: *how promising is this?* That opinion is the **leaf
 evaluator**, and almost every learning experiment in this repository is an
 attempt to replace the hand-written one with something learned from data.
 
-Most of those attempts failed in the same way. Understanding that failure is
-the key to reading the research and judging any proposal to "just train a
-bigger model."
+Most of those attempts failed in the same way. Any proposal to "just train a
+bigger model" has to answer that failure.
 
 ## The job is to rank, not to predict
 
@@ -20,8 +19,6 @@ worth. It needs to know which of up to seven **sibling** moves is best. The
 siblings are the columns available right now. A perfect ranking with wrong absolute
 numbers plays perfectly. A model with tiny average error that gets the *order*
 of two siblings wrong plays the wrong move.
-
-That distinction sounds academic until you look at how training data is made.
 
 ## How the data was collected, and what it missed
 
@@ -49,7 +46,7 @@ The repository's status summary names this directly:
 
 ## Measured, not supposed
 
-This is not a hypothetical. The latest completed work built a locked panel of
+The latest completed work built a locked panel of
 477 real positions and evaluated **every** legal sibling at each one, so that a
 model's ranking could be checked against a reference. The best
 learned ranker at the time picked the same top move as fair D4 about 29% of the
@@ -108,7 +105,7 @@ different, more tractable problem. It is where the
 [more-computation question](/learn/concepts/does-more-compute-help)
 picks up.
 
-<Callout title="Why this matters for any large-scale plan" tone="warn">
+<Callout title="Played-move-only data fails at any scale" tone="warn">
 Sibling labelling requires a search at every position, for every column, under
 shared random scenarios. That work parallelises across a large cluster. Two
 lessons carry forward. First,

@@ -1039,7 +1039,7 @@ exist, opening no new seed.
 
 | artifact | disposition |
 | --- | --- |
-| `suite-h9-v1.jsonl` (128 positions, exact optima, PVs, difficulty labels) | **Keep, reclassified as a diagnostic corpus.** It is already load-bearing: `flow-run --cross-check` validates against it and `finding-06` §1 replays its principal variations. Its policy-comparison columns (`fairDepth1/2/4`, `bestShallow`, `gap`) should carry a pointer to §2 of this document |
+| `suite-h9-v1.jsonl` (128 positions, exact optima, PVs, difficulty labels) | **Keep, reclassified as a diagnostic corpus.** `flow-run --cross-check` already validates against it and `finding-06` §1 replays its principal variations. Its policy-comparison columns (`fairDepth1/2/4`, `bestShallow`, `gap`) should carry a pointer to §2 of this document |
 | `sparse-probe-h9-v1.jsonl` | **Keep unchanged.** It answers a question whole games cannot, and `finding-06` §5 already uses it correctly |
 | `data/suite-h9-v1-split-v1.json` | **Keep.** It cost nothing, it is content-hashed, and any future corpus — including the structure probe's train/held-out split — should follow the same rule. Retarget it as the split for diagnostic reuse rather than for tuning a ranked candidate |
 | `posmode.{hpp,cpp}` (position mode) | **Keep the instrument, retire the claim.** It is the repository's only fair multi-tape evaluator and the only thing that can measure a public policy's behaviour at a controlled occupancy. It should not be used to rank candidates |

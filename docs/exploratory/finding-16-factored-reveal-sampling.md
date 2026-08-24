@@ -103,7 +103,7 @@ depth 3 in the direction of the effect if not its significance.
 
 **2. The delta is negative but not significantly negative.** The same estimator
 puts the one-sided 95% *upper* bound at **+17,541**. Read it as "buys nothing
-measurable", not as "harms". That ceiling is the load-bearing number: had the
+measurable", not as "harms". Had the
 two axes compounded even at a quarter of the +64,116 the same knob is worth at
 depth 3, 64 paired games would have had to show it. The sign is also stable
 across both cohort halves — **−11,082** on seeds `0xa51d1000`–`0xa51d101f` and

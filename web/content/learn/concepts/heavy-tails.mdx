@@ -5,7 +5,7 @@ order: 7
 ---
 
 The goal of this project is a policy whose **mean** score over many games is
-above one million points. That word does a lot of work. Somewhere in this
+above one million points. Somewhere in this
 repository is a record of a single depth-4 game that scored 1,246,684 points,
 and the research status page files it under *"Anecdote; not an average or
 qualification"*. That distinction is correct, and it determines what it takes
@@ -21,7 +21,7 @@ fair depth-4 expectimax, over 64 complete games.
 The shape is the point. Most games cluster low. A long thin tail runs off to the
 right. At the far end sits a genuine million-point game worth 1,017,234 points.
 Yet the same policy averaged
-321,991.72 and whose median was 266,282.
+321,991.72, and its median was 266,282.
 
 That single game is not a fluke to be explained away, and it is not evidence of
 a million-point policy either. **It is what a heavy tail looks like.**
@@ -63,14 +63,14 @@ Every recorded figure for the reference policy, on one axis, with the target:
 
 Look at the first two rows. The same reference policy measured 400,675.25 over
 eight games and 308,295.578 over 64. Nothing about the policy changed. Eight
-games is simply not enough to pin down the mean of a distribution with a tail
+games is not enough to pin down the mean of a distribution with a tail
 this long, which is exactly why the repository's benchmark contract calls a
 1–8 game run a `PILOT`, whose entire permitted purpose is to *"find bugs and
 project runtime/memory"* with **no strength claim**
 ([benchmark contract](/docs/benchmarks)).
 
 Now look at the last two rows. A single million-point game is above the target
-line. It says nothing whatsoever about the mean, because you can always find the
+line. It says nothing about the mean, because you can always find the
 best game in a sample, and the best game of a heavy-tailed sample is always
 impressive.
 
@@ -135,7 +135,7 @@ The qualification ladder is built from these bounds:
 candidate has qualified and that neither the protected nor the final seeds have
 been opened.*
 
-Note the gap between the first two rows: the development gate demands 1,050,000,
+The gap between the first two rows: the development gate demands 1,050,000,
 not 1,000,000. That margin exists because a mean measured on data you were
 allowed to look at is optimistic, and a heavy tail makes it more optimistic
 still.
@@ -150,8 +150,8 @@ still.
 - **Ask whether it was paired.** An unpaired comparison of two policies on
   different seeds is mostly measuring luck.
 - **Ask what the label says.** This repository marks every figure
-  `task-record only`, `ledger-recorded`, `repository-verified` or `reproduced`,
-  and those words are not decoration. The 1,246,684-point game is
+  `task-record only`, `ledger-recorded`, `repository-verified` or `reproduced`.
+  The 1,246,684-point game is
   `task-record only`: it survives as a note in a conversation record, with no
   run artifact behind it.
 

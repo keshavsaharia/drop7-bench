@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export const metadata = {
   title: "Research log · Drop7 Research",
   description:
-    "A dated, plain-English account of what was tried each day in the Drop7 million-point research program, including the things that did not work.",
+    "A dated account of what was tried each day in the Drop7 million-point research program, including the things that did not work.",
 };
 
 export default function LogIndexPage() {
@@ -48,7 +48,7 @@ export default function LogIndexPage() {
         <div className="max-w-3xl">
           <Figure
             name="evidence-timeline"
-            caption="What each logged day produced, counted from the outcome tallies in the entries' own frontmatter. Negative results outnumbering positive ones is the honest picture of the program, and recording them is the log's job."
+            caption="What each logged day produced, counted from the outcome tallies in the entries' own frontmatter. Negative results outnumber positive ones; recording them is the log's job."
           />
         </div>
       )}
