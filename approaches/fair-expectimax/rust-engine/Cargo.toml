@@ -1,0 +1,18 @@
+[package]
+name = "drop7-rs"
+version = "0.1.0"
+edition = "2021"
+description = "Semantics-preserving bit-packed Drop7 engine and fair expectimax search (CHECK tier, engineering result)"
+license = "MIT"
+
+# Std-only on purpose: the crate builds hermetically with no network fetch.
+[dependencies]
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "unwind"
+
+[profile.bench]
+inherits = "release"

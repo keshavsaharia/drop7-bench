@@ -1,0 +1,111 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260824T075451Z-e89ea128",
+  "theoryIds": [
+    "TH-20260824-rust-bitboard-engine-f68fcbfd"
+  ],
+  "experimentId": "EX-20260824-rust-engine-parity-throughput-4036a91f",
+  "runIds": [
+    "RUN-20260824T052018Z-b88c3e22"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "pass",
+  "assessment": "supported-as-tested",
+  "evidenceTier": "mechanics-only",
+  "summary": "The Rust bitboard engine is trace-equivalent to the frozen C++ reference, the proven C++ fast engine, and the TypeScript engine on every observable, and is the fastest of the three. Board representation is seven u32 column words at 4 bits per cell (28 bytes): gravity is a single PEXT bit-gather per column, a row rise is (word << 4) | SOLID, and cover hits are counted board-wide with a 4-way bitboard parallel counter. All parity gates pass with zero mismatches: 3 trajectory arms (512 center + 256 search-policy games vs C++ playHeadlessMove; 256 games vs the TypeScript seededRandom driver) totalling 36,427 moves and 40,286 waves; 150,854 leaf states bit-identical as uint64 patterns; 105 d4s7 and 10 d5s7 roots with bit-identical per-column values and identical actions; the values gate re-run with the transposition table enabled proves cache-independence. Measured on the shared AMD Ryzen AI MAX+ 395 workstation (best-of-N, load 1.1-1.7): single-core engine throughput 12.8M moves/s vs C++ fast 6.5M (1.97x) and TypeScript 0.65M (19.8x); leaf 155.6 ns vs C++ fast 187.5 ns (1.20x); fair search at d4s7 908 ms/decision vs C++ fast 1,071 ms (1.18x) with a 3.1 MB direct-mapped table vs the C++ 16.2 MB LRU; d5s7 7,047 ms at 1M entries vs 7,817 ms (1.11x). Game-level scaling is shared-nothing and near-linear (10.3x on 16 physical cores on the shared machine; 14.1x in a clean run), with identical results at every worker count. A key recorded finding: the transposition table's 1.3% node hit rate is misleading \u2014 each hit prunes a whole subtree, so the table eliminates ~47% of work at d4s7 and ~90% at d5s7, and a cheap direct-mapped depth-preferred table captures nearly all of the strict-LRU table's payoff at a fifth of the memory. No strength claim; no new seeds opened.",
+  "metrics": {
+    "engineMovesPerSecond": {
+      "typescript": 649471,
+      "cppReference": 6799180,
+      "cppFast": 6511760,
+      "rust": 12838933
+    },
+    "leafNsPerEval": {
+      "cppFast": 187.5,
+      "rust": 155.6
+    },
+    "searchD4S7MsPerDecision": {
+      "cppBaseline": 3247.8,
+      "cppFast": 1071.5,
+      "rustNoTable": 1633.4,
+      "rustDepthGated64k": 907.6
+    },
+    "searchD5S7MsPerDecision": {
+      "cppBaseline": 23992.6,
+      "cppFast": 7817.3,
+      "rustNoTable": 63325.4,
+      "rustDepthGated256k": 7787.9,
+      "rustDepthGated1M": 7047.1,
+      "rustDepthGated4M": 6748.4
+    },
+    "transpositionWorkReduction": {
+      "nodeHitRateD4S7": 0.013,
+      "nodeHitRateD5S7": 0.0136,
+      "workEliminatedD4S7": "11.9M -> 6.3M (47%)",
+      "workEliminatedD5S7": "582.7M -> 59.5M (90%)"
+    },
+    "scalingMovesPerSecond16Threads": {
+      "rust": 129483860,
+      "cppFast": 82364000
+    },
+    "memoryBytes": {
+      "rustSearcher": 2496,
+      "rustBoard": 28,
+      "rustTable64k": 3145728,
+      "cppFastTable": 16194304
+    }
+  },
+  "gateChecks": [
+    {
+      "criterion": "Trajectory parity vs C++ reference and TypeScript engine across center, search-policy, and TS-driver arms",
+      "passed": true,
+      "observed": "3 arms, 36,427 moves, 40,286 waves, 0 mismatches on board, next disc, score, score delta, wave list, level, moves remaining, terminal/clear/advance flags"
+    },
+    {
+      "criterion": "Leaf bit-exactness vs C++ fastFairLeaf as uint64 bit patterns",
+      "passed": true,
+      "observed": "150,854 states, 0 mismatches"
+    },
+    {
+      "criterion": "Search value/action parity at fixed depth/strata",
+      "passed": true,
+      "observed": "105 d4s7 roots (no-table and depth-gated arms) + 10 d5s7 roots, per-column f64 bit patterns and chosen actions identical, 0 mismatches"
+    },
+    {
+      "criterion": "Cache independence of the transposition table",
+      "passed": true,
+      "observed": "values gate re-run with the direct-mapped table enabled: 105 roots, 0 mismatches"
+    },
+    {
+      "criterion": "Worker-count independence and determinism",
+      "passed": true,
+      "observed": "identical move counts, wave counts and mean scores at 1/2/4/8/16/32 game-level workers; each game computed by exactly one worker"
+    },
+    {
+      "criterion": "npm test and make test pass; no existing file modified",
+      "passed": true,
+      "observed": "npm test 137/137 pass; make research-validate OK; all Rust/C++/TS additions live under approaches/fair-expectimax/rust-engine/ and build/rust-engine/"
+    }
+  ],
+  "perGameArtifact": {
+    "path": "runs/RUN-20260824T052018Z-b88c3e22/rust-engine/benchmark.json",
+    "sha256": "c515a91f6c4da23e263bfba88dc730a9ab27c70545fa1582f57173b4490659e5",
+    "recordCount": null
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260824T072426Z-fa409222.json"
+  ],
+  "artifactManifestRef": null,
+  "limitations": [
+    "CHECK-tier engineering result: proves equivalence and measures speed/memory, but makes no policy-strength claim and advances no benchmark tier.",
+    "Timing measured on a shared workstation (load average 1.1-1.7); ratios between back-to-back arms are the trustworthy quantity, absolute nanoseconds are not.",
+    "The d5s7 arms ran 3 decisions each (1 repeat) because a single d5s7 decision costs 7-63 s; the d4s7 arms ran 21 decisions, best of 3.",
+    "The direct-mapped table's hit rate at d5s7 (748k-825k hits/decision) trails the C++ strict-LRU table (911k); a set-associative table is the recorded reopening direction.",
+    "No GPU, latent-mode, or native-scenario variant: scripted-round and scenario duties stay with the existing engines."
+  ],
+  "recordedAt": "2026-08-24T07:56:54Z",
+  "contributionIds": [
+    "CT-20260824T075654Z-e374d688"
+  ]
+}

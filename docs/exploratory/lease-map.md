@@ -37,7 +37,7 @@ constants anywhere in the repository are `0xa511e9b3`, `0xa54ff53a` and
 | `SEEDLEASE-A52-REVEAL` | `0xa5250000`–`0xa5257fff` | 32,768 | development, tuning | reveal-vs-next-disc sampling split | opened |
 | `SEEDLEASE-A52-SUITE` | `0xa5258000`–`0xa525bfff` | 16,384 | development, diagnostic | scenario-suite validation, position mode | opened |
 | `SEEDLEASE-A52-DISTILL` | `0xa5260000`–`0xa526ffff` | 65,536 | **training** | fair-planner distillation corpus | opened |
-| `SEEDLEASE-A52-FAST` | `0xa5270000`–`0xa5277fff` | 32,768 | development, equivalence gates | semantics-preserving engine optimisation | opened |
+| `SEEDLEASE-A52-FAST` | `0xa5270000`–`0xa5277fff` | 32,768 | development, equivalence gates | semantics-preserving engine optimisation; C++ fast engine used `0xa5270000`–`0xa5275fff`, Rust bitboard engine used `0xa5276000`–`0xa5277fff` (gates `…6000`–`…6fff`, benchmark `…7000`–`…7fff`) | opened |
 | `SEEDLEASE-A52` reserve | `0xa5216000`–`0xa522ffff` and `0xa5278000`–`0xa52fffff` | — | unallocated | — | reserved |
 | `SL-…-5da70000` | `0x5da70000`–`0x5da70fff` | 4,096 | public-development | a concurrent agent's afterstate track | **state disputed — under review** |
 | `SL-20260822T020000Z-a5290000` | `0xa5290000`–`0xa529ffff` | 65,536 | **training** | leaf-evolution CMA-ES fitness blocks, 32 seeds per generation from `0xa5290000` (at most 40 generations authorised: `0xa5290000`–`0xa52904ff`) | opened |

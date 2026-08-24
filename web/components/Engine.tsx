@@ -1165,3 +1165,117 @@ export function Num({ v }: { v: number }) {
   return <span style={{ fontVariantNumeric: "tabular-nums" }}>{fmt(v)}</span>;
 }
 
+/* =========================================================================
+ * 11. Nibble-packed column + PEXT gravity (rust-engine).
+ * ========================================================================= */
+
+/**
+ * One packed column word and gravity as a bit gather.  Seven nibbles hold the
+ * seven cells of a column; the least-significant nibble is the bottom row, so
+ * compacting the non-zero nibbles toward the bottom IS gravity.  Drawn
+ * left-to-right as the word is read: the top row's nibble on the left, the
+ * bottom row's nibble on the right, discs falling rightward.
+ */
+export function PackedColumn({
+  before,
+  after,
+  caption,
+}: {
+  /** Seven nibble values, top row first; 0 = empty. */
+  before: number[];
+  /** Seven nibble values after gravity, top row first. */
+  after: number[];
+  caption?: string;
+}) {
+  const cellW = 46;
+  const gap = 4;
+  const rowH = 34;
+  const W = 8 * (cellW + gap) + 8;
+  const H = 2 * rowH + 74;
+  const glyph = (v: number) => (v === 0 ? "" : v === 8 ? "●" : v === 9 ? "◐" : String(v));
+
+  const row = (
+    values: number[],
+    y: number,
+    label: string,
+  ) => (
+    <g>
+      <text x={0} y={y - 8} fontSize={11} fontFamily={FONT} fill={INK_3}>
+        {label}
+      </text>
+      {/* the unused top nibble, bits 28-31 */}
+      <rect
+        x={4}
+        y={y}
+        width={cellW}
+        height={rowH}
+        rx={5}
+        fill="#1f1f23"
+        stroke={GRID}
+        strokeDasharray="3 3"
+      />
+      {values.map((v, i) => {
+        // values[0] is the top row = nibble 6; drawn just right of the unused nibble.
+        const x = 4 + (i + 1) * (cellW + gap);
+        return (
+          <g key={i}>
+            <rect
+              x={x}
+              y={y}
+              width={cellW}
+              height={rowH}
+              rx={5}
+              fill={v === 0 ? "#18181b" : "#24304a"}
+              stroke={v === 0 ? GRID : SERIES[0]}
+              strokeWidth={v === 0 ? 1 : 1.5}
+            />
+            <text
+              x={x + cellW / 2}
+              y={y + rowH / 2}
+              textAnchor="middle"
+              dominantBaseline="central"
+              fontSize={14}
+              fontFamily={FONT}
+              fontWeight={700}
+              fill={v === 0 ? INK_3 : INK}
+            >
+              {glyph(v)}
+            </text>
+            <text
+              x={x + cellW / 2}
+              y={y + rowH + 12}
+              textAnchor="middle"
+              fontSize={9}
+              fontFamily={FONT}
+              fill={INK_3}
+            >
+              r{6 - i}
+            </text>
+          </g>
+        );
+      })}
+    </g>
+  );
+
+  const arrowY = rowH + 34;
+  return (
+    <figure className="engine-fig">
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Gravity as a PEXT bit gather">
+        {row(before, 20, "one u32 column word (4 bits per cell)")}
+        <text
+          x={W / 2}
+          y={arrowY + 8}
+          textAnchor="middle"
+          fontSize={11.5}
+          fontFamily={FONT}
+          fill={ACCENT}
+        >
+          {"↓  gravity = pext(word, expanded-nonzero-mask)  — discs gather toward the bottom row"}
+        </text>
+        {row(after, arrowY + 22, "after: bottom-packed, order preserved")}
+      </svg>
+      {caption && <figcaption>{caption}</figcaption>}
+    </figure>
+  );
+}
+

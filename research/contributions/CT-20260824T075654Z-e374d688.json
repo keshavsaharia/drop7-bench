@@ -1,0 +1,63 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260824T075654Z-e374d688",
+  "actor": {
+    "kind": "model",
+    "platform": "OpenCode",
+    "model": "moonshotai/Kimi-K3",
+    "agentId": "opencode-rust-engine"
+  },
+  "level": "L3",
+  "roles": [
+    {
+      "role": "software",
+      "degree": "lead"
+    },
+    {
+      "role": "methodology",
+      "degree": "supporting"
+    },
+    {
+      "role": "writing",
+      "degree": "lead"
+    }
+  ],
+  "summary": "Designed, implemented, and verified the Rust bitboard Drop7 engine and fair expectimax search: a 28-byte column-major nibble-packed board (gravity as a single PEXT bit-gather, row rise as (word << 4) | SOLID, board-wide cover-hit counting with a 4-way bitboard parallel counter), a statically dispatched pluggable leaf, and a measured-driven cheap direct-mapped depth-preferred transposition table. Proven bit-identical to the frozen C++ reference, the C++ fast engine, and the TypeScript engine across three trajectory drivers, 150,854 leaf bit-patterns, and d4s7/d5s7 per-column search values. Benchmarked against the TypeScript, C++ reference, and C++ fast engines with game-level thread scaling to 32 workers.",
+  "theoryIds": [
+    "TH-20260824-rust-bitboard-engine-f68fcbfd"
+  ],
+  "experimentIds": [
+    "EX-20260824-rust-engine-parity-throughput-4036a91f"
+  ],
+  "runIds": [
+    "RUN-20260824T052018Z-b88c3e22"
+  ],
+  "artifactPaths": [
+    "approaches/fair-expectimax/rust-engine/",
+    "runs/RUN-20260824T052018Z-b88c3e22/rust-engine/gates.log",
+    "runs/RUN-20260824T052018Z-b88c3e22/rust-engine/bench.log",
+    "runs/RUN-20260824T052018Z-b88c3e22/rust-engine/benchmark.json",
+    "web/components/Engine.tsx"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "cargo test: 14/14 unit tests pass (board packing, gravity, rise, mirror, scan, RNG, wave scores).",
+    "Trajectory gates: 0 mismatches over 512 center-policy + 256 search-policy games vs C++ playHeadlessMove and 256 games vs the TypeScript seededRandom driver (36,427 moves, 40,286 waves total).",
+    "Leaf gate: 150,854 real states bit-identical to C++ fastFairLeaf as uint64 patterns.",
+    "Search gates: 105 d4s7 roots (no-table and depth-gated arms) and 10 d5s7 roots with bit-identical per-column values and identical actions; values gate re-run with the table enabled proves cache-independence.",
+    "Search metrics gate: identical chosen action and completed depth to the C++ FastSearch on 105 d4s7 roots.",
+    "npm test 137/137 pass; make research-validate OK; web next build compiles and the approach page renders (HTTP 200).",
+    "make research-doctor machine profile captured to runs/RUN-20260824T052018Z-b88c3e22/rust-engine/machine-profile.json."
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed.",
+    "The runtime exposes the exact model identifier moonshotai/Kimi-K3 (baseten/moonshotai/Kimi-K3); reported as given.",
+    "Timing figures were measured on a shared workstation (load average 1.1-1.7); ratios between back-to-back arms are the trustworthy quantity.",
+    "The transposition-table design was revised during the work: an initial full strict-LRU port was removed at the owner's direction, and the shipped cheap direct-mapped table was then driven by the measured work-reduction data (1.3% node hit rate but 47%/90% work elimination at d4s7/d5s7).",
+    "No commit SHA: the work is uncommitted in the working tree at record time."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-24T07:56:54Z"
+}
