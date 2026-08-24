@@ -262,7 +262,7 @@ overstatement finding-07 was written to retract.
 >   **r = 0.9995**. The engine's score identity
 >   `score = 17,000·rises + 70,000·boardClears + Σ popperCount·floor(7·depth^2.5)`
 >   was asserted on every game and held 64/64. A five-deep seven-disc wave — a
->   spectacular play — is worth 2,737 points, or 0.8 of one row rise. This is a
+>   spectacular play — is worth 2,737 points, or 0.16 of one row rise. This is a
 >   single 64-game development cohort under this repository's simulator
 >   semantics; it does not by itself establish that chain-seeking play cannot
 >   change the economics.

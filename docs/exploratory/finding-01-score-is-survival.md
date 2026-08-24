@@ -85,7 +85,7 @@ caption: Where each policy's points come from. Every survival-oriented policy ea
 Chain-wave points are small by construction: a wave awards 7 points per disc at
 depth 1, 39 at depth 2, 109 at depth 3, 224 at depth 4, 391 at depth 5. A
 five-deep, seven-disc wave — a spectacular play — is worth 2,737 points, or
-**0.8 of one row rise**. The 70,000-point board clear is worth 20.6 moves of
+**0.16 of one row rise**. The 70,000-point board clear is worth 20.6 moves of
 survival but was never once achieved in 64 games of the strongest known policy.
 
 ## Flow balance predicts lifetime
