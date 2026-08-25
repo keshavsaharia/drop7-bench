@@ -17,7 +17,12 @@ import {
 import { playScriptedGame } from "./runner.ts";
 import { validateScriptedRound } from "./rounds.ts";
 import { parsePosition, stateFromPosition } from "./d7p-server.ts";
-import { NATIVE_DECIDE_BINARY, nativeBinaryAvailable } from "./native-policy.ts";
+import {
+  NATIVE_DECIDE_BINARY,
+  RUST_DECIDE_BINARY,
+  nativeBinaryAvailable,
+  nativeDecide,
+} from "./native-policy.ts";
 
 const BENCH_DIR = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(BENCH_DIR, "..", "..");
@@ -167,5 +172,29 @@ test(
       "native policy answered with a column",
     );
     assert.equal(policy.publicInformation, true);
+  },
+);
+
+test(
+  "the Rust decision binary, when built, answers a public position deterministically",
+  { skip: !nativeBinaryAvailable(RUST_DECIDE_BINARY) && `${RUST_DECIDE_BINARY} is not built` },
+  () => {
+    const state: GameState = stateFromPosition(
+      parsePosition(["startpos", "next", "4", "rise", "5"]),
+    );
+    // Depth 2 keeps the suite fast; the registered policy's depth-7
+    // configuration is the same binary and code path with a larger budget.
+    const decide = (s: GameState) =>
+      nativeDecide(s, { binary: RUST_DECIDE_BINARY, depth: 2, chanceSamples: 7 });
+    const first = decide(state);
+    const second = decide(state);
+    assert.equal(first, second, "same public state, same column");
+    assert.ok(
+      first !== null && first >= 0 && first < BOARD_SIZE,
+      "rust policy answered with a column",
+    );
+    const policy = getPolicy("rust-fair-d7-s7");
+    assert.equal(policy.publicInformation, true);
+    assert.equal(policy.family, "fair-expectimax");
   },
 );
