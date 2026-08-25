@@ -1,0 +1,23 @@
+{
+  "title": "Learned leaf (LeafNet, w = 0.50) against the frozen reference leaf at depth 4: the 2x2",
+  "kind": "dot",
+  "x": { "label": "Chance strata at depth 4" },
+  "y": { "label": "Mean score", "unit": "points" },
+  "notes": "64 paired whole games per arm on cohort 0xa51d1000-0xa51d103f, corrected scoring, 2,000-move cap. Marker labels are paired wins-ties-losses of the learned leaf against the reference on the same seeds. The learned-minus-reference paired delta is +39,105 at five strata (one-sided 95% lower bound +1,138, significant) and +17,281 at seven strata (lower bound -55,892, not significant); the difference-in-differences is -21,824 (lower bound -105,254), which refuted the preregistered prediction that the learned leaf would help more with the exact estimator. Evidence tier: development (finding-08; no result record was written for this finding).",
+  "series": [
+    {
+      "name": "Reference leaf (frozen fair D4)",
+      "points": [
+        { "x": "5 strata", "y": 297327, "n": 64, "sourceRecord": "docs/exploratory/finding-08-learned-leaf.md", "sourceField": "Section 7 table, d4 s5 reference leaf, mean" },
+        { "x": "7 strata", "y": 398498, "n": 64, "sourceRecord": "docs/exploratory/finding-08-learned-leaf.md", "sourceField": "Section 7 table, d4 s7 reference leaf, mean" }
+      ]
+    },
+    {
+      "name": "Learned leaf (LeafNet lifetime, w = 0.50)",
+      "points": [
+        { "x": "5 strata", "y": 336432, "n": 64, "label": "W-T-L 37-0-27 vs reference", "sourceRecord": "docs/exploratory/finding-08-learned-leaf.md", "sourceField": "Section 7 table, d4 s5 learned leaf, mean; paired delta +39,105 (lower bound +1,138)" },
+        { "x": "7 strata", "y": 415779, "n": 64, "label": "W-T-L 34-0-30 vs reference", "sourceRecord": "docs/exploratory/finding-08-learned-leaf.md", "sourceField": "Section 7 table, d4 s7 learned leaf, mean; paired delta +17,281 (lower bound -55,892)" }
+      ]
+    }
+  ]
+}

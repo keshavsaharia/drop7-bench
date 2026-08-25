@@ -1,0 +1,58 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260823T224410Z-869dd2f6",
+  "actor": {
+    "kind": "model",
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": null
+  },
+  "level": "L2",
+  "roles": [
+    {
+      "role": "software",
+      "degree": "lead"
+    },
+    {
+      "role": "investigation",
+      "degree": "substantial"
+    },
+    {
+      "role": "validation",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Implemented and executed stage G0 of EX-20260823-sol-corpus-and-offline-gate-v2-f95f56e4: added the fast-d3s7 continuation engine (fast::FastSearch at depth 3, seven strata, worstCaseWork(3,7)+1) and the ladder harness (seed-free synthetic root pool, C0 replay harvest, roots-file continuation plans, CRN-parity and fast-vs-native parity gates) to the panel2 generator; extended ladder.py with cluster-bootstrapped top-1 agreement. All seven re-gates passed (v1 byte-identity, semantic regression, fast-vs-native action+work identity on 240 decisions, 4-engine tape parity, mirror exactness, thread determinism, legality). Measured continuation rates (d1 0.074 ms, d2 1.99 ms, fastd3s7 54.6 ms, native d3n7m6 1.74-3.40 s per move), fired stop rule S1 for rung 1 (projection 47.9 CPU-h vs the 6.76 ceiling; the design's 4 ms fast rate was ~13x optimistic), replayed three retained C0 games with exact final-score/move identity, and executed rung 2 within its envelope: the preregistered guardrail killed the M1 proxy (mean within-root Kendall tau 0.370 vs native D3 N7M6, top-1 4/6). Artifacts under runs/RUN-20260823T215500Z-sol/g0v2/.",
+  "theoryIds": [
+    "TH-20260823-sibling-outcome-labels-fix-leaf-0c3d480d"
+  ],
+  "experimentIds": [
+    "EX-20260823-sol-corpus-and-offline-gate-v2-f95f56e4"
+  ],
+  "runIds": [
+    "RUN-20260823T224351Z-6ad4e09e"
+  ],
+  "artifactPaths": [
+    "approaches/lifetime-objective/sibling-corpus/generate.cpp",
+    "approaches/lifetime-objective/p-sol/ladder.py",
+    "runs/RUN-20260823T215500Z-sol/g0v2/gates.log",
+    "runs/RUN-20260823T215500Z-sol/g0v2/decision.json",
+    "runs/RUN-20260823T215500Z-sol/g0v2/rung2.json"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "run-gates.sh: 7 gates all pass (runs/RUN-20260823T215500Z-sol/g0v2/gates.log)",
+    "C0 replay final-identity check vs runs/RUN-A525-reveal/d3-n7-m6.json gamesDetail (3 games exact)",
+    "python3 .agents/skills/million-point-research/scripts/researchctl.py validate"
+  ],
+  "limitations": [
+    "Rung 2 has 6 roots in 3 origin clusters: guardrail power only, not an equivalence claim.",
+    "Rung 1 produced no tau (S1 halt on projection).",
+    "The synthetic pool starts from an empty board rather than a seeded initial board (disclosed in the generator comment).",
+    "Self-reported."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-23T22:44:10Z"
+}

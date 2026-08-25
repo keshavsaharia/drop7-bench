@@ -230,6 +230,11 @@ the comparison is fully matched:
 | **closed by fair planning at H = 7, K = 256** | **+0.1256** | **27.1%** |
 | **not closed** | **0.3377** | **72.9%** |
 
+```figure
+gap-decomposition-corrected
+caption: The correction, quantified: the share of the clairvoyant-minus-D4 gap closed by fair planning, eight-tape reading against the matched fresh-tape reading. The halved bars are why the supersession notice matters.
+```
+
 `finding-07` reported 40.0% and 58.8% for these same two configurations. **The
 corrected figures are roughly half: 22.2% and 27.1%.** The direction of that
 document's headline — "at least 59% planning, at most 41% information" — is

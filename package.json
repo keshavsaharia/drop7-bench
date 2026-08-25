@@ -8,6 +8,7 @@
     "node": ">=22.6"
   },
   "scripts": {
+    "dev": "npm --prefix web run dev",
     "test": "node --experimental-strip-types --test src/core/typescript/*.test.ts src/bench/*.test.ts",
     "benchmark": "node --experimental-strip-types approaches/baselines-diagnostics/heuristic-benchmark/main.ts",
     "parity": "node --experimental-strip-types approaches/baselines-diagnostics/native-parity/main.ts --native build/native-suite --seed-start 762314752 --seed-count 256",

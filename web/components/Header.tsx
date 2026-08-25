@@ -4,13 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { DiscFace } from "@/components/discs";
+import { ShimmerButton } from "@/components/ShimmerButton";
 
 const NAV = [
   { href: "/compete", label: "Compete" },
   { href: "/leaderboard", label: "Leaderboard" },
   { href: "/research", label: "Research" },
   { href: "/learn", label: "Learn" },
-  { href: "/src", label: "Source" },
 ];
 
 function GitHubMark() {
@@ -94,12 +94,9 @@ export function Header() {
             <GitHubMark />
             GitHub
           </a>
-          <Link href="/play" className="play-cta">
-            <span className="play-cta-disc" aria-hidden="true">
-              <DiscFace cell={7} />
-            </span>
+          <ShimmerButton href="/play" icon={<DiscFace cell={7} />}>
             Play
-          </Link>
+          </ShimmerButton>
         </div>
         <button
           type="button"
@@ -137,12 +134,14 @@ export function Header() {
             <GitHubMark />
             GitHub
           </a>
-          <Link href="/play" className="play-cta mt-2 self-start" onClick={() => setOpenAtPathname(null)}>
-            <span className="play-cta-disc" aria-hidden="true">
-              <DiscFace cell={7} />
-            </span>
+          <ShimmerButton
+            href="/play"
+            icon={<DiscFace cell={7} />}
+            className="mt-2 self-start"
+            onClick={() => setOpenAtPathname(null)}
+          >
             Play
-          </Link>
+          </ShimmerButton>
         </div>
       </nav>
     </header>

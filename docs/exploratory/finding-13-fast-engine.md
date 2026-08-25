@@ -38,6 +38,14 @@ b6dcde5f…3090   src/core/native/engine.hpp
 | `fairLeaf` return value | identical **bit pattern**, 225,183 real leaf states |
 | **Whole-game outcomes on a real 64-game cohort** | **identical**, 704 field comparisons, 0 mismatches ([`finding-14`](finding-15-depth5-exact-estimator.md) §1) |
 
+The speedups as a chart, with the separately-recorded indicative leaf-memo
+timings kept visually apart:
+
+```figure
+engine-speedup
+caption: Measured speedup over the unoptimised reference per configuration, all value-identical. The answer is about 3x everywhere, not the hoped-for 5-10x, and the leaf-memo bars carry their record's indicative-only flag.
+```
+
 **The measured speedup is about 3x, not the 5–10x the brief hoped for, and the
 reason is structural rather than a failure of effort.** 96.1 % of the search's
 nodes are leaves; after the leaf is made 3.5–3.8x faster it is still 58 % of the

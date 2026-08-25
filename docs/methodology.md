@@ -42,6 +42,11 @@ Privileged planners may inspect future randomness to generate labels. Such an
 experiment is an oracle or teacher experiment until a separate public student
 is frozen and evaluated without those inputs.
 
+```diagram
+diagram-information-ladder
+caption: The information classes as a ladder, from the legal public policy up to the clairvoyant planner, with the measured clears-per-move rate at each rung and the recorded shares of the gap between them.
+```
+
 ## Chance nodes and fair comparison
 
 Drop7 is stochastic, so a search must evaluate player choices and chance

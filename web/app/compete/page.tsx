@@ -12,7 +12,7 @@ export default function CompetePage() {
   return (
     <div className="space-y-8">
       <section className="max-w-3xl">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-400">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-400">
           Human strategy lab
         </p>
         <h1 className="mt-2 text-3xl font-black text-zinc-50">Compete on the global game</h1>
@@ -25,16 +25,19 @@ export default function CompetePage() {
         <div className="mt-4">
           <GitHubSignInButton />
         </div>
+      </section>
+
+      <CompetitionGame manifest={COMPETITION_GAME} round={COMPETITION_ROUND} />
+
+      <section className="max-w-3xl">
         <p className="mt-3 text-sm text-zinc-500">
           You can submit as many runs as you want. When the game is over, you will see an explicit request to
           contribute your moves and score. A submission links your GitHub username and numeric account ID to the
           validated game record; research datasets derived from the move stream omit those identifiers. See the{" "}
-          <Link href="/privacy" className="text-violet-300 hover:text-violet-200">privacy policy</Link> and{" "}
-          <Link href="/terms" className="text-violet-300 hover:text-violet-200">terms</Link>.
+          <Link href="/privacy" className="text-sky-400 hover:text-sky-300">privacy policy</Link> and{" "}
+          <Link href="/terms" className="text-sky-400 hover:text-sky-300">terms</Link>.
         </p>
       </section>
-
-      <CompetitionGame manifest={COMPETITION_GAME} round={COMPETITION_ROUND} />
 
       <section className="grid gap-4 text-sm md:grid-cols-3">
         <InfoCard
@@ -49,7 +52,7 @@ export default function CompetePage() {
         />
         <InfoCard
           title="Three bits per move"
-          body="You play columns 1–7. The submission stores them internally as 0–6 and packs them into a bit stream using three bits per move. These anonymous streams will be released after the competition for open research."
+          body="Since every turn involves making one of seven choices, your sequence of choices in a game can be packed into a bit stream using three bits per move. These anonymous streams will be publicly released at the end of every competition, to hopefully advance the open research. Submitter information will never be shared."
         />
         <InfoCard
           title="Server score wins"

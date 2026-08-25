@@ -1,0 +1,47 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260823T194212Z-bb82cb22",
+  "actor": {
+    "kind": "model",
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": "delegated subagent of the coordinator (Agent tool, general-purpose)"
+  },
+  "level": "L2",
+  "roles": [
+    {
+      "role": "software",
+      "degree": "lead"
+    },
+    {
+      "role": "investigation",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Implemented approaches/lifetime-objective/nnue-d4q-probe (train_probe.py importing learned-leaf/leaf_features.py and the d4q.py metric functions, run.sh, README.mdx) and executed the preregistered probe EX-20260823-nnue-d4q-ordering-probe-0ca09bb1: five seeds of the LeafNet h64/m32 student on the existing successor-closed D4 labels, selection on the calibration fold, a single read of the already-opened held-out panel, gate evaluation, d7leaf export and leaf-check timing; wrote the run and result records.",
+  "theoryIds": [
+    "TH-20260823-nnue-class-holds-d4-ordering-c7b397a5"
+  ],
+  "experimentIds": [
+    "EX-20260823-nnue-d4q-ordering-probe-0ca09bb1"
+  ],
+  "runIds": [
+    "RUN-20260823T193853Z-5abd7c95"
+  ],
+  "artifactPaths": [
+    "approaches/lifetime-objective/nnue-d4q-probe",
+    "runs/RUN-20260823T191900Z-b9f8f80d/probe/metrics.json",
+    "runs/RUN-20260823T191900Z-b9f8f80d/probe/train.log"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "1-epoch smoke run (--smoke, held-out panel not opened) before the real run; label count check 291,890 rows / 8,639 roots passed; metrics computed by the imported d4q.py ranking_metrics_from_q and mix32 half-folds; researchctl validate"
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-23T19:42:12Z"
+}

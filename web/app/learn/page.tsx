@@ -94,9 +94,9 @@ export default function LearnPage() {
           </Link>
         </div>
         <p className="mt-1 text-sm text-zinc-400">
-          Repository documents written for researchers. They live in{" "}
-          <code className="text-xs">docs/</code> and are the authority for
-          status, method, and historical record.
+          The documents in{" "}
+          <code className="text-xs">docs/</code> are the authority for status,
+          method, and historical record.
         </p>
         <div className="mt-3 grid gap-4 sm:grid-cols-2">
           {RESEARCH_DOCS.map((doc) => (

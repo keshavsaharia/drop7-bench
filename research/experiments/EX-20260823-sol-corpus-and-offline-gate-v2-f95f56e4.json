@@ -1,0 +1,95 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260823-sol-corpus-and-offline-gate-v2-f95f56e4",
+  "theoryIds": [
+    "TH-20260823-sibling-outcome-labels-fix-leaf-0c3d480d"
+  ],
+  "title": "P-SOL-2: corrected two-rung G0 fidelity ladder (fast-d3s7 proxy + native D3 N7M6 guardrail), fast-engine corpus continuations, and the G1/G2 offline gates",
+  "classification": "algorithmic",
+  "hypothesis": "Successor to EX-20260823-sol-corpus-and-offline-gate-4d3d86e4, whose G0 budget arithmetic was wrong by 20-77x for every native D3 N7M6 stage (S1 halted before any leased seed was read; erratum and corrected design: runs/RUN-20260823T191900Z-b9f8f80d/kimi-k3-psol-v2-correction.md, Kimi K3). All engineering from v1 is retained: the panel2 generator, byte-identity/CRN/mirror/legality gates (all passed at HEAD 49b4631), the training recipe, the G1/G2 offline gate and the incumbent comparison. Changes, per the v2 correction: (G0 rung 1, powered) D1 and D2 continuation engines are certified against a fast-engine depth-3 seven-stratum M=1 reference (fast-d3s7, ~0.004 CPU-s/move) on 1,200 seed-free synthetic roots, 7 siblings x K=8 x H=50, CRN-paired tapes; proceed per candidate iff mean per-root Kendall-tau LB95 >= 0.75 AND top-1 agreement LB95 >= 0.80. (G0 rung 2, guardrail) fast-d3s7 is spot-checked against native D3 N7M6 on 6 roots harvested from retained C0 traces (already-read data), 7 x K=4 x H=40 (equivalent-cost alternative K=6 H=26), CRN-matched; kill iff top-1 agreement <= 4/6 OR mean tau < 0.5 OR any root tau < 0; this is a guardrail, not an equivalence claim, and every downstream conclusion is worded 'M1-continuation evaluation; M6 transfer assumed and guardrailed'. (Corpus) main-corpus continuations switch from D3 N7M6 to fast-d3s7; a 500-root fast-d3s7 pilot (2.5 CPU-h) precedes the full corpus; behaviour mix, seed arithmetic (0xa5217000-0xa52177ff), training and G1/G2 are unchanged from v1. Budget to the offline gate: rung 1 5.2 CPU-h + rung 2 12.8 (priced at 6.83 s/move) + regates 0.5 + pilot 2.5 + preregistered reserve 14.0 = 35.0 CPU-h cap; reserve uses only (i) rung-2 extension to 12 roots if realised rate <= 2.5 s/move, (ii) rung-1 top-up if a CI straddles a threshold, (iii) returned.",
+  "candidate": {
+    "name": "panel2-km-label-nnue-leaf-fastd3s7",
+    "entryPoint": "approaches/lifetime-objective/sibling-corpus/generate.cpp",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "incumbent played-action LeafNet (finding-08) and exact D1/D2/D4 orderings",
+    "entryPoint": "approaches/lifetime-objective/learned-leaf/train_leaf.py",
+    "manifestRef": null
+  },
+  "informationBoundary": "public-policy",
+  "benchmarkTier": "CHECK",
+  "data": {
+    "role": "no-gameplay",
+    "seedLeaseRefs": [
+      "SL-20260823T215000Z-a5216000"
+    ],
+    "datasetRefs": [],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "G0 consumes zero leased seeds: rung-1 and pilot roots come from a seed-free synthetic pool, rung-2 roots from retained already-read C0 artifacts (runs/RUN-A525-reveal, data status unchanged). The training lease SL-20260823T215000Z-a5216000 (still reserved, never opened under v1) is opened only for the main corpus and gate set after G0 passes, with the same sub-ranges as v1."
+  },
+  "metrics": {
+    "primary": "G1: student top-1 vs exact-D4 argmax on the 4,096-root gate set (clustered by origin), against 0.55 absolute and incumbent+0.03 (paired McNemar 95% LB > 0)",
+    "secondary": [
+      "G0: per-engine within-root Kendall-tau vs D3 N7M6 with cluster-bootstrap CIs",
+      "G2 target quality: label-argmax top-1 vs exact D4 (>= 0.60 required to call the target right)",
+      "G2 fit quality: student-vs-label within-root tau against 0.7x the split-half label ceiling",
+      "G2 coverage slice: tau by behaviour source (d3 vs d2/eps roots)",
+      "incumbent LeafNet row for every metric; exact D1 (0.486) and D2 (0.568) anchors",
+      "init-seed spread over 5 seeds",
+      "corpus counts, censoring rate at H=48, per-stage CPU-hours"
+    ],
+    "statisticalUnit": "root",
+    "uncertaintyMethod": "cluster bootstrap over origin games (10,000 resamples, seed 0xb0071eaf) for tau and gaps; paired McNemar for the incumbent comparison"
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "Re-gates for the fast-d3s7 configuration: byte-exact agreement with the native single-knob d3 s7 M1 search on probe decisions, CRN tape parity, mirror invariance, seed-free tapes only.",
+      "G0 rung 1: at least one of D1/D2 with mean per-root Kendall-tau LB95 >= 0.75 AND top-1 agreement LB95 >= 0.80 vs fast-d3s7 (cluster bootstrap, 10,000 resamples, seed 0xb0071eaf).",
+      "G0 rung 2 guardrail not triggered: top-1 agreement > 4/6 AND mean tau >= 0.5 AND no root tau < 0 (fast-d3s7 vs native D3 N7M6, 6 roots).",
+      "G1 (unchanged from v1): student top-1 vs exact-D4 argmax >= 0.55 AND >= incumbent LeafNet + 0.03 (paired McNemar LB > 0); marginal band [0.52,0.55) proceeds to a d4s5-only screen."
+    ],
+    "failureAction": "Rung-1 total failure or guardrail kill: record valid + fail; the cheap-continuation label mechanism is rejected for this configuration; the fast-M6 engineering port (E-FAST-M6) is the named reopening route. G1 fail: as v1, routed by the G2 decomposition.",
+    "passAction": "As v1: register the successor gameplay experiment (P-SOL-v1 section 8, including the D3 N7M6 arm) before any gameplay seed is opened. If the fast-M6 port passes its equivalence gates before rung 2 executes, the preregistered contingency upgrades rung 2 to fast-M6 with R2=48 inside the same envelope."
+  },
+  "resources": {
+    "wallSeconds": 18000,
+    "cpuThreads": 26,
+    "maxHostBytes": 34359738368,
+    "maxGpuBytes": 17179869184,
+    "gpuDevices": [
+      "gfx1151"
+    ]
+  },
+  "stopConditions": [
+    "S1 (re-armed on the corrected cost model): any stage projecting over its envelope halts before consuming roots or seeds; partial recorded.",
+    "Rung-1 kill: both candidates fail -> stop before the corpus.",
+    "Rung-2 guardrail kill -> stop before the corpus.",
+    "Corpus overrun fallback as v1.",
+    "Reserve spends only on its three preregistered uses."
+  ],
+  "expectedArtifacts": [
+    "runs/RUN-20260823T191900Z-b9f8f80d/kimi-k3-psol-v2-correction.md (corrected design, Kimi K3)",
+    "runs/RUN-20260823T215500Z-sol/g0v2/ (regates, rung1.json, rung2.json, decision)",
+    "runs/RUN-20260823T215500Z-sol/corpus/ (pilot + main)",
+    "runs/RUN-20260823T215500Z-sol/train/ and gate/"
+  ],
+  "lifecycle": "completed",
+  "protocolSha256": "2635b0477b90cb559455576e7744417d872283529909202f1a69805e15b28509",
+  "amendments": [
+    {
+      "timestamp": "2026-08-23T22:57:53Z",
+      "beforeControlledData": false,
+      "reason": "Closed out after G0: rung 1 S1-halted on measured fast-d3s7 cost (54.6 ms/move vs the 4 ms planning figure), rung 2 guardrail killed the M1 proxy (mean tau 0.370, top-1 4/6). failureAction applies; no leased seed was opened; lifecycle completed and hash recomputed per repo convention. The run record retains the preregistration hash cdf85bc4b3ca7925d0805524aa609e7717906c5d21e68d47aa4dba2e6c4813f6."
+    }
+  ],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": null
+  },
+  "createdAt": "2026-08-23T21:52:46Z",
+  "updatedAt": "2026-08-23T22:57:53Z"
+}

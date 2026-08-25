@@ -1,0 +1,25 @@
+{
+  "title": "The d5s7-minus-d4s7 paired reading as the cohort grew — wrong twice, then unmeasurable",
+  "kind": "line",
+  "x": { "label": "paired games completed", "unit": "n" },
+  "y": { "label": "paired mean score delta", "unit": "points" },
+  "notes": "The three recorded readings of the depth-5-minus-depth-4 seven-stratum contrast on cohort 0xa51d1000-0xa51d103f (corrected 17,000-point Hardcore scoring). n=8 is completion-order biased against d5s7 (finding-15 section 2.2 warns of exactly this) and carries no bootstrap bound — the source states none is quoted at n=8 because it would not be meaningful. n=16 was reported as a wash and withdrawn in finding-15 section 10 as a non-measurement reported as a null. n=32 is final: the arm was stopped by decision at the chunk boundary and will not be resumed; +23,367 is equally unsupported (22% of its floor), so the correct statement is that the contrast was never measured. Whiskers are one-sided 95% bootstrap lower bounds where recorded. The detection floor (1.645 x sd / sqrt(n)) at n=8 is not recorded anywhere, so the floor series starts at n=16. Resolving the observed +23,367 would need about 684 paired games (RS-20260821T205102Z-d89df4b5). Evidence tier: public-development.",
+  "series": [
+    {
+      "name": "paired mean delta (d5s7 - d4s7)",
+      "points": [
+        { "x": 8, "y": -268611, "n": 8, "label": "interim, completion-order biased; W-T-L 1-0-7; no bound quoted", "sourceRecord": "docs/exploratory/finding-15-depth5-exact-estimator.md", "sourceField": "section 2.2 interim table" },
+        { "x": 16, "y": -1581, "lo": -173154, "n": 16, "label": "first chunk; W-T-L 7-0-9; withdrawn as a non-measurement", "sourceRecord": "docs/exploratory/finding-15-depth5-exact-estimator.md", "sourceField": "section 8.3 paired table" },
+        { "x": 32, "y": 23367, "lo": -83046, "n": 32, "label": "final (stopped); W-T-L 17-0-15; sign flip from n=16; 22% of floor", "sourceRecord": "RS-20260821T205102Z-d89df4b5", "sourceField": "metrics.pairedD5s7MinusD4s7" }
+      ]
+    },
+    {
+      "name": "detection floor 1.645*sd/sqrt(n)",
+      "dashed": true,
+      "points": [
+        { "x": 16, "y": 177421, "n": 16, "label": "floor at n=16 (paired sd 431,420)", "sourceRecord": "docs/exploratory/finding-15-depth5-exact-estimator.md", "sourceField": "section 10.2" },
+        { "x": 32, "y": 107988, "n": 32, "label": "floor at n=32 (paired sd 371,351)", "sourceRecord": "RS-20260821T205102Z-d89df4b5", "sourceField": "metrics.powerTable[5].detectionFloor" }
+      ]
+    }
+  ]
+}

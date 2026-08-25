@@ -1,0 +1,36 @@
+{
+  "title": "Logged outcomes per day, 2026-08-20 to 2026-08-23 — the negative-results column is the honest picture",
+  "kind": "dot",
+  "x": { "label": "calendar day (UTC-local)" },
+  "y": { "label": "logged outcomes", "unit": "count" },
+  "notes": "Counts are the outcome tallies recorded in each day's log frontmatter (web/content/log/2026-08-2*.mdx, the 'outcomes' block), copied verbatim: 2026-08-20 positive 2 / negative 5 / open 3; 2026-08-21 positive 2 / negative 7 / open 6; 2026-08-22 positive 2 / negative 2 / open 1; 2026-08-23 positive 1 / negative 5 / open 2. The figure plan (written mid-day on 2026-08-23) carried 0 / 2 / 1 for 2026-08-23; the finalized log frontmatter reads 1 / 5 / 2 and is charted — plan-vs-record drift resolved in the record's favour. Milestones behind these counts (verbatim anchors): the 400,675-point eight-game D4 confirmation (docs/strategies.md, Current reference table); the 398,498 d4s7 64-game confirmation mean (finding-05); the 386,545 frozen-arm mean over 256 fresh games (RS-20260823T131226Z-16564ed9, metrics.frozenArmFreshBaseline). Kind is dot rather than the plan's line because the generator requires numeric x for line charts and the task specifies string date categories.",
+  "series": [
+    {
+      "name": "positive",
+      "points": [
+        { "x": "2026-08-20", "y": 2, "label": "log frontmatter outcomes.positive", "sourceRecord": "web/content/log/2026-08-20.mdx", "sourceField": "frontmatter outcomes.positive" },
+        { "x": "2026-08-21", "y": 2, "label": "log frontmatter outcomes.positive", "sourceRecord": "web/content/log/2026-08-21.mdx", "sourceField": "frontmatter outcomes.positive" },
+        { "x": "2026-08-22", "y": 2, "label": "log frontmatter outcomes.positive", "sourceRecord": "web/content/log/2026-08-22.mdx", "sourceField": "frontmatter outcomes.positive" },
+        { "x": "2026-08-23", "y": 1, "label": "log frontmatter outcomes.positive", "sourceRecord": "web/content/log/2026-08-23.mdx", "sourceField": "frontmatter outcomes.positive" }
+      ]
+    },
+    {
+      "name": "negative",
+      "points": [
+        { "x": "2026-08-20", "y": 5, "label": "log frontmatter outcomes.negative", "sourceRecord": "web/content/log/2026-08-20.mdx", "sourceField": "frontmatter outcomes.negative" },
+        { "x": "2026-08-21", "y": 7, "label": "log frontmatter outcomes.negative", "sourceRecord": "web/content/log/2026-08-21.mdx", "sourceField": "frontmatter outcomes.negative" },
+        { "x": "2026-08-22", "y": 2, "label": "log frontmatter outcomes.negative", "sourceRecord": "web/content/log/2026-08-22.mdx", "sourceField": "frontmatter outcomes.negative" },
+        { "x": "2026-08-23", "y": 5, "label": "log frontmatter outcomes.negative", "sourceRecord": "web/content/log/2026-08-23.mdx", "sourceField": "frontmatter outcomes.negative" }
+      ]
+    },
+    {
+      "name": "open",
+      "points": [
+        { "x": "2026-08-20", "y": 3, "label": "log frontmatter outcomes.open", "sourceRecord": "web/content/log/2026-08-20.mdx", "sourceField": "frontmatter outcomes.open" },
+        { "x": "2026-08-21", "y": 6, "label": "log frontmatter outcomes.open", "sourceRecord": "web/content/log/2026-08-21.mdx", "sourceField": "frontmatter outcomes.open" },
+        { "x": "2026-08-22", "y": 1, "label": "log frontmatter outcomes.open", "sourceRecord": "web/content/log/2026-08-22.mdx", "sourceField": "frontmatter outcomes.open" },
+        { "x": "2026-08-23", "y": 2, "label": "log frontmatter outcomes.open", "sourceRecord": "web/content/log/2026-08-23.mdx", "sourceField": "frontmatter outcomes.open" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260824T005543Z-e3c8bfea",
+  "actor": {
+    "kind": "model",
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": null
+  },
+  "level": "L2",
+  "roles": [
+    {
+      "role": "investigation",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Implemented and gated E-FAST-M6 (EX-20260823-fast-m6-reveal-sampling-port-be23e203): ported the native factored reveal-sampling chance node (N disc strata x M reveal samples, scenario s = r*N + d over T = N*M, disc-major enumeration) into the fast memo engine as drop7::fastr::FastFactoredSearch, with the M=1 path kept verbatim behind an M==1 branch and the one-entry leaf memo retained under M>1 (board-memcmp keying cannot alias across reveal samples; memo sits below the work increment). Built the equivalence gate against the genuine native source (machine-checked no-entry copy, thread_local diagnostics only) and executed the frozen gates: 6,300 grid decisions over d3/d4 x N5/N7 x M1/M2/M6 with 0 column/work/completed-depth mismatches; 3 retained C0 games replayed by the fast engine to byte-for-value final identity (335 decisions, 0 mismatches); 2,100-decision M=1 bit-identity regression; thread/run determinism, memo-on/off identity and mirror invariance (one disclosed harness iteration: symmetric-board mirror exclusion per finding-13 4C); 8 CRN continuations byte-identical. Realised speedup 4.4-5.9x (play duty 5.56x, continuation duty 5.60x at d3 N7M6), below the 10-40x hoped for in the hypothesis and reported as measured.",
+  "theoryIds": [
+    "TH-20260823-sibling-outcome-labels-fix-leaf-0c3d480d"
+  ],
+  "experimentIds": [
+    "EX-20260823-fast-m6-reveal-sampling-port-be23e203"
+  ],
+  "runIds": [
+    "RUN-20260824T005500Z-4cde9171"
+  ],
+  "artifactPaths": [
+    "approaches/lifetime-objective/fast-reveal-sampling/fast-factored-search.hpp",
+    "approaches/lifetime-objective/fast-reveal-sampling/gate.cpp",
+    "approaches/lifetime-objective/fast-reveal-sampling/build.sh",
+    "runs/RUN-20260823T215500Z-sol/fastm6/gates.log",
+    "runs/RUN-20260823T215500Z-sol/fastm6/equivalence.json",
+    "runs/RUN-20260823T215500Z-sol/fastm6/timing.json"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "runs/RUN-20260823T215500Z-sol/fastm6/run-gates.sh + run-gates-resume.sh + run-gate-d2.sh: all preregistered gates pass (gates.log)",
+    "npm test and make test (parity 256 seeds / 6,852 moves exact)",
+    "python3 .agents/skills/million-point-research/scripts/researchctl.py validate"
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-24T00:55:43Z"
+}

@@ -636,7 +636,7 @@ independence: 1-thread and 12-thread runs produce identical per-game records.
 Both arms passed `--max-work` explicitly, taken from the binary's own
 `--work-bound` (the frozen arithmetic with `b = 7·N·M`). Leaving a bound sized
 for a smaller branching factor does not error — it silently completes a
-shallower depth — so this is load-bearing.
+shallower depth — so later claims rest on using the correctly sized bound.
 
 | arm | b = 7·N·M | worst-case work | `--max-work` used | worst-case cache entries | cache used |
 | --- | ---: | ---: | ---: | ---: | ---: |

@@ -1,0 +1,83 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260824-rust-engine-parity-throughput-4036a91f",
+  "theoryIds": [
+    "TH-20260824-rust-bitboard-engine-f68fcbfd"
+  ],
+  "title": "Rust bitboard engine: parity gates and throughput benchmark vs TypeScript and C++ engines",
+  "classification": "engineering",
+  "hypothesis": "Engineering port, no new science: a column-major nibble-packed Rust reimplementation of the Drop7 engine (7 x u32, 4 bits per cell; gravity as PEXT compaction; whole-board cover-hit counting with a bitboard adder) plus a packed-key transposition-table expectimax search is trace-equivalent to the frozen C++ reference (src/core/native/engine.hpp), the proven C++ fast engine (approaches/lifetime-objective/fast-engine, finding-13/audit-06), and the TypeScript engine (src/core/typescript/engine.ts): identical boards, scores, wave lists, reveal streams, leaf value bit patterns, per-column search values and chosen actions at fixed depth/strata. Expected speedup: at least the C++ fast engine's decisions/second at identical fixed work, with bounded per-searcher memory and near-linear game-level thread scaling; the realised figures are measured and reported with the machine profile. Per docs/benchmarks.md, any deviation in actions, random events, or work semantics reclassifies the port as a new algorithmic candidate and it is then not accepted under this record.",
+  "candidate": {
+    "name": "rust-engine (drop7-rs cargo crate, std-only)",
+    "entryPoint": "approaches/fair-expectimax/rust-engine/src/lib.rs",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "C++ fast engine + frozen native reference + TypeScript engine",
+    "entryPoint": "approaches/lifetime-objective/fast-engine/fast-search.hpp",
+    "manifestRef": null
+  },
+  "informationBoundary": "not-applicable",
+  "benchmarkTier": "CHECK",
+  "data": {
+    "role": "no-gameplay",
+    "seedLeaseRefs": [],
+    "datasetRefs": [],
+    "wholeOriginSplit": false,
+    "reuseDisclosure": "Zero new leased seeds. Trajectory and search gates read sub-blocks of the already-opened SEEDLEASE-A52-FAST development block 0xa5270000-0xa5277fff (docs/exploratory/lease-map.md, opened for semantics-preserving engine optimisation): Rust uses 0xa5276000-0xa5276fff (gates) and 0xa5277000-0xa5277fff (timing), disjoint from the C++ sub-blocks at 0xa5270000-0xa5275fff. CHECK probes may also read the already-open 0xa5278000-0xa52784ff probe block. No cohort's data status changes; no strength claim is made."
+  },
+  "metrics": {
+    "primary": "trace equivalence vs the C++ reference and fast engine: board, score, next disc, wave list, reveal stream on every move; leaf value uint64 bit patterns; per-column search values and chosen actions at fixed depth/strata",
+    "secondary": [
+      "moves and waves compared per gate configuration",
+      "decisions/second and games/second at d4s7 and d5s7 fixed work, Rust vs C++ fast vs C++ reference vs TypeScript",
+      "peak resident memory per searcher and per process",
+      "game-level thread scaling from 1 to 32 workers on the 16-core/32-thread host",
+      "worker-count independence of chosen actions in complete-depth mode",
+      "horizontal-reflection behavior"
+    ],
+    "statisticalUnit": "not-applicable",
+    "uncertaintyMethod": "exact comparison; zero mismatches required; timing ratios from interleaved repeated best-of measurement on one machine profile"
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "Trajectory gate: >= 4096 complete games per policy arm (center policy and a searching policy) replayed move-by-move through the Rust engine and the C++ reference/fast engine with 0 mismatches on board, next disc, score, score delta, wave list, level, moves remaining, terminal flag.",
+      "Leaf gate: >= 100,000 real leaf states with uint64-bit-identical leaf values vs the C++ fast leaf.",
+      "Search gate: >= 500 real root decisions at d4s7 and a d5s7 probe set with per-column double values bit-identical to the C++ fast search and identical chosen actions; identical completed depths at fixed work bounds.",
+      "Determinism: byte-identical chosen actions across worker counts (1 vs 32) in complete-depth mode and across repeated runs; reflection gate mirrors the C++ behavior.",
+      "TypeScript cross-check: >= 1000 games replayed through the TS engine and the Rust engine from the same Mulberry32 draw stream with identical boards and scores.",
+      "npm test and make test pass; no existing file is modified."
+    ],
+    "failureAction": "Record valid + fail as an engineering result; the C++ fast engine remains the fastest proven-equivalent implementation.",
+    "passAction": "Record valid + pass (engineering, CHECK tier) with measured throughput, memory and scaling figures and the machine profile; publish the comparative writeup as the approach page; no strength claim and no later cohort is opened by this record."
+  },
+  "resources": {
+    "wallSeconds": 14400,
+    "cpuThreads": 32,
+    "maxHostBytes": 34359738368,
+    "maxGpuBytes": null,
+    "gpuDevices": []
+  },
+  "stopConditions": [
+    "Stop on any equivalence mismatch that survives a bug-fix iteration on the SAME probe set; probe seeds are diagnostic and reusable for engineering equivalence, disclosed.",
+    "Stop at 4 h wall for the gate and benchmark runs; implementation time is not capped by this record.",
+    "No new leased seed may be opened under this record."
+  ],
+  "expectedArtifacts": [
+    "approaches/fair-expectimax/rust-engine/ (cargo crate, gates, bench, README.mdx)",
+    "runs/<run-id>/rust-engine/gates.log",
+    "runs/<run-id>/rust-engine/benchmark.json (per engine: decisions/second, games/second, memory, scaling; machine profile reference)"
+  ],
+  "lifecycle": "completed",
+  "protocolSha256": "e49a42e09ce44aa6082645a29b570c9cddba473a04bfc194a62e8c1c626c9f7a",
+  "amendments": [],
+  "createdBy": {
+    "platform": "OpenCode",
+    "model": "moonshotai/Kimi-K3",
+    "agentId": "opencode-rust-engine"
+  },
+  "createdAt": "2026-08-24T05:11:27Z",
+  "updatedAt": "2026-08-24T07:56:06Z"
+}

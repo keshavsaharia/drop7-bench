@@ -1,0 +1,20 @@
+{
+  "title": "Rotating the search leaf toward the achievable-clear direction — one exact tie, then monotone loss",
+  "kind": "line",
+  "x": { "label": "cosine of the leaf's weight vector to the fitted achievable-clear direction", "unit": "cosine" },
+  "y": { "label": "mean score", "unit": "points" },
+  "notes": "Six arms, 64 paired whole games each on the shared evaluation cohort 0xa51d1000-0xa51d103f (reusable development data, never tuned on), depth 4, seven chance strata, corrected 17,000-point Hardcore scoring (finding-14 section 5). The popover labels carry the recorded paired delta against the frozen leaf with its one-sided 95% bootstrap lower bound (20,000 resamples, Mulberry32 domain 0xb0075eed); per-mean confidence intervals are not recorded anywhere, so no whiskers are drawn. Score is NOT strictly monotone: the smallest dose (t1-rough-560, cosine +0.181) is an exact tie at +627 (95% bound -73,325, 31-0-33) — the document's own statement is 'five metrics, six arms, one direction' with this arm the named exception; every step past it degrades monotonically to the full refit's -237,182. Along the same axis clears per move fall 2.0571 to 1.6019 (against the 2.400 conservation requirement of finding-01) and mean occupancy rises 23.15 to 28.34 cells. Negative result, evidence tier development; rejects the exact tested configurations, not a refit against remaining lifetime. Queued but never run (recorded no-run, not charted): t1-numbered and t1-solidexp-1250 at depth 4.",
+  "series": [
+    {
+      "name": "mean score, 64 paired games per arm",
+      "points": [
+        { "x": 0.176, "y": 398498, "n": 64, "label": "frozen comparator (cosine to itself's fitted direction +0.176); 2.0571 clears/move, 23.15 cells", "sourceRecord": "docs/exploratory/finding-14-leaf-reweight.md", "sourceField": "section 5 dose-response table" },
+        { "x": 0.181, "y": 399125, "n": 64, "label": "t1-rough-560; paired delta +627, 95% LB -73,325, W-T-L 31-0-33: an exact tie, the one exception", "sourceRecord": "docs/exploratory/finding-14-leaf-reweight.md", "sourceField": "section 5 dose-response and paired-delta tables" },
+        { "x": 0.231, "y": 330779, "n": 64, "label": "t1-exposures; paired delta -67,719, 95% LB -133,082, 29-0-35", "sourceRecord": "docs/exploratory/finding-14-leaf-reweight.md", "sourceField": "section 5 dose-response and paired-delta tables" },
+        { "x": 0.255, "y": 323284, "n": 64, "label": "t1-combined; paired delta -75,214, 95% LB -139,902, 25-0-39", "sourceRecord": "docs/exploratory/finding-14-leaf-reweight.md", "sourceField": "section 5 dose-response and paired-delta tables" },
+        { "x": 0.767, "y": 291391, "n": 64, "label": "t2-fair-a05 (halfway to the refit); paired delta -107,107, 95% LB -169,589, 22-0-42", "sourceRecord": "docs/exploratory/finding-14-leaf-reweight.md", "sourceField": "section 5 dose-response and paired-delta tables" },
+        { "x": 1.0, "y": 161316, "n": 64, "label": "t2-fair-a1 (the full fair-play refit); paired delta -237,182, 95% LB -290,406, 7-0-57", "sourceRecord": "docs/exploratory/finding-14-leaf-reweight.md", "sourceField": "section 5 dose-response and paired-delta tables" }
+      ]
+    }
+  ]
+}

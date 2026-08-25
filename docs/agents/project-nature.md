@@ -27,6 +27,13 @@ network, user, account, device, or external system involved at any point. The
 | **D4 / expectimax / NNUE / n-tuple / PPO** | Standard game-tree search and value-function learning techniques. |
 | **million-point** | The score target: a mean score above 1,000,000 points per game. |
 
+The crack / hit / reveal rows are the least obvious rule, so here it is drawn:
+
+```diagram
+diagram-two-hit-reveal
+caption: The two-hit reveal rule: a solid gray disc reveals in a single cascade wave only when two adjacent clears strike it in that same wave; hits otherwise accumulate only through the cracked state.
+```
+
 ## What the work consists of
 
 - Writing and optimizing a simulator of the puzzle's rules (TypeScript, C++,

@@ -1,0 +1,39 @@
+{
+  "title": "Score composition by policy — the row-rise bonus is the score; only the points-maximizing clairvoyant escapes it",
+  "kind": "bar",
+  "x": { "label": "policy (engine and cohort in the popover)" },
+  "y": { "label": "share of all points", "unit": "%" },
+  "notes": "Shares of total points from the 17,000-point row-rise bonus, chain waves, and the 70,000-point board clear, copied verbatim from finding-01's Score decomposition table (64 fair-D4 games, base engine, seeds 0xa51d0000-0xa51d003f) and finding-06 section 4 (8-game master-tape cohorts in the latent scenario engine, 400-move cap). The two engines are not bit-comparable (audit-01 M2); the finding-01 row and the finding-06 rows are separate cohorts and are placed side by side, never pooled. Board clears are 0.00% in every row — zero board clears in 19,610 measured moves on realistic boards (finding-06 section 5). finding-01 pairs its 94.29% with r(score, moves) = 0.9995 over 64 games: score is survival. The rh-points row is the World-A test: 51.56% of its points from chain waves at 1.75x the points per move — and it still loses 1,123,130 to 1,544,461 on the mean because it cuts lifetime by 58%. Recorded rows of the same finding-06 table NOT charted (the plan's selection of five): rh-clears H5 89.99/10.01/0.00, rh-clears H7 87.27/12.73/0.00, rh-clears H9 cap-1000 87.97/12.03/0.00, and the H9 window optimum 53.77/46.23/0.00. The eight-tape cohort is now known to favour long games (finding-12); these are composition shares rather than lifetimes, but the cohort caveat stands. Evidence tier: development/pilot.",
+  "series": [
+    {
+      "name": "row-rise bonus",
+      "points": [
+        { "x": "fair D4 · finding-01", "y": 94.29, "n": 64, "label": "base engine, 64 games; 3,423 points/move; r(score, moves) = 0.9995", "sourceRecord": "docs/exploratory/finding-01-score-is-survival.md", "sourceField": "Score decomposition table" },
+        { "x": "lowest column", "y": 98.47, "n": 8, "label": "scenario engine, 8 master tapes; 2,932 points/move", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 score-composition table" },
+        { "x": "fair D4 · finding-06", "y": 93.81, "n": 8, "label": "scenario engine, 8 master tapes; 3,482 points/move", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 score-composition table" },
+        { "x": "rh-clears H9", "y": 87.23, "n": 8, "label": "clairvoyant clear-seeker; 3,891 points/move; 7/8 alive at the 400-move cap", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 score-composition table" },
+        { "x": "rh-points H9", "y": 48.44, "n": 8, "label": "clairvoyant score-seeker; 6,807 points/move but 165.00 mean moves — loses on the mean", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 score-composition table" }
+      ]
+    },
+    {
+      "name": "chain waves",
+      "points": [
+        { "x": "fair D4 · finding-01", "y": 5.71, "n": 64, "label": "a five-deep seven-disc wave is worth 2,737 points — 0.16 of one row rise", "sourceRecord": "docs/exploratory/finding-01-score-is-survival.md", "sourceField": "Score decomposition table" },
+        { "x": "lowest column", "y": 1.53, "n": 8, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 score-composition table" },
+        { "x": "fair D4 · finding-06", "y": 6.19, "n": 8, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 score-composition table" },
+        { "x": "rh-clears H9", "y": 12.77, "n": 8, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 score-composition table" },
+        { "x": "rh-points H9", "y": 51.56, "n": 8, "label": "the only policy whose points come mostly from chains — and it dies at 165 moves", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 score-composition table" }
+      ]
+    },
+    {
+      "name": "board clears",
+      "points": [
+        { "x": "fair D4 · finding-01", "y": 0.0, "n": 64, "label": "no board clears in 64 games", "sourceRecord": "docs/exploratory/finding-01-score-is-survival.md", "sourceField": "Score decomposition table" },
+        { "x": "lowest column", "y": 0.0, "n": 8, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 score-composition table" },
+        { "x": "fair D4 · finding-06", "y": 0.0, "n": 8, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 score-composition table" },
+        { "x": "rh-clears H9", "y": 0.0, "n": 8, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 score-composition table" },
+        { "x": "rh-points H9", "y": 0.0, "n": 8, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 4 score-composition table" }
+      ]
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ShimmerButton } from "@/components/ShimmerButton";
 import {
   loadCompetitionLeaderboard,
   type CompetitionLeaderboardEntry,
@@ -86,25 +87,22 @@ export default async function LeaderboardPage({
       {competition}
       <section>
         <h1 className="text-2xl font-black text-zinc-50">
-          Scripted-round leaderboard
+          Computer policy leaderboard
         </h1>
         <p className="mt-2 max-w-3xl text-sm text-zinc-400">
-          Every policy plays the exact same predetermined rounds: the visible
+          Every autonomous policy plays the exact same predetermined rounds. The visible
           disc sequence is fixed by move number, and every gray disc hides a
           fixed value that takes its place when revealed. Two policies therefore
-          face identical randomness, move for move. Generated{" "}
-          {new Date(data.generatedAt).toLocaleString()}.{" "}
+          face identical randomness on every move.{" "}
           <Link href="/learn/benchmarking" className="text-sky-400 hover:text-sky-300">
             How the benchmark works →
           </Link>
         </p>
         <p className="mt-1 text-xs text-zinc-600">
-          Playground evidence only — scripted rounds are not a research tier and
-          support no qualification claim (see the{" "}
+          Playground evidence only. These competitions do not support qualification claims as per the{" "}
           <Link href="/docs/benchmarks" className="text-zinc-500 underline underline-offset-2 hover:text-zinc-300">
-            benchmark contract
-          </Link>
-          ).
+            benchmark guidelines
+          </Link>.
         </p>
       </section>
 
@@ -340,7 +338,7 @@ function CompetitionLeaderboard({
   return (
     <section className="space-y-4">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-400">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-400">
           {selectedGame.manifest.name} · {selectedGame.manifest.gameVersion}
         </p>
         <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
@@ -352,18 +350,17 @@ function CompetitionLeaderboard({
               harness. This is a reproducible playground, not research-tier evidence.
             </p>
           </div>
-          <Link
+          <ShimmerButton
             href={
               selectedGame.gameKey === COMPETITION_GAME_KEY
                 ? "/compete"
                 : "/leaderboard"
             }
-            className="rounded-md border border-violet-500/60 px-3 py-2 text-sm font-semibold text-violet-300 hover:bg-violet-500/10"
           >
             {selectedGame.gameKey === COMPETITION_GAME_KEY
               ? "Play this game →"
               : "Current competition →"}
-          </Link>
+          </ShimmerButton>
         </div>
       </div>
 
@@ -397,7 +394,7 @@ function CompetitionLeaderboard({
             className={
               "rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide " +
               (filter === option
-                ? "border-violet-400 bg-violet-500/15 text-violet-200"
+                ? "border-sky-400 bg-sky-500/15 text-sky-200"
                 : "border-zinc-700 text-zinc-500 hover:border-zinc-500 hover:text-zinc-300")
             }
           >
@@ -440,7 +437,7 @@ function CompetitionLeaderboard({
                     className={
                       "rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide " +
                       (entry.kind === "human"
-                        ? "bg-violet-950 text-violet-300"
+                        ? "bg-blue-950 text-blue-300"
                         : "bg-sky-950 text-sky-300")
                     }
                   >

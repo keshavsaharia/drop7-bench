@@ -1,0 +1,116 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260823T194142Z-946e3cd1",
+  "theoryIds": [
+    "TH-20260823-nnue-class-holds-d4-ordering-c7b397a5"
+  ],
+  "experimentId": "EX-20260823-nnue-d4q-ordering-probe-0ca09bb1",
+  "runIds": [
+    "RUN-20260823T193853Z-5abd7c95"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "fail",
+  "assessment": "not-supported-as-tested",
+  "evidenceTier": "pilot",
+  "summary": "The leaf-affordable NNUE-class student does not reproduce fair D4's within-root ordering from the existing successor-closed labels. Five initialisation seeds of the LeafNet h64/m32 student (571,905 parameters; features from learned-leaf/leaf_features.py) were trained for 30 epochs on the 6,551 training roots of runs/RUN-20260821T085042Z-c5cf0e71/d4q-labels with the preregistered listwise + gap-weighted pairwise + 0.1 MSE loss; the seed with the best calibration-fold top-1 (0xA52E02, 0.3281) was then read once on the 3,030-root held-out panel of that experiment. Held-out top-1 was 0.296 / 0.3011 in the two origin-seed half-folds (gate >= 0.60), pairwise 0.6266 / 0.6259 (>= 0.78), normalised regret 0.3354 / 0.3379 (<= 0.13): every criterion fails in both half-folds. The other four seeds lie between 0.2987 and 0.3135 pooled top-1, all below the 3.4M-parameter afterstate CNN of RS-20260821T104500Z-77d21e90 (0.375) and below exact D1 (0.486). The student is leaf-affordable as claimed (1.27 us per state through the existing d7leaf export and leaf-check), but at this size it holds less of D4's ordering than the CNN did. Per the preregistered failure action: no leaf-affordable NNUE-class student of this size reproduces D4's ordering from these labels; the self-play loop TH-20260821-...-299ed02f stays blocked in its leaf form and its redesign is routed to the larger-student question. Diagnostic tier: the held-out panel had already been read once by the d4q experiment, so this is a diagnostic read on existing data, not new evidence about fresh roots.",
+  "metrics": {
+    "labelRows": 291890,
+    "labelRoots": 8639,
+    "trainRoots": 6551,
+    "validationRoots": 2088,
+    "heldoutRoots": 3030,
+    "modelParameters": 571905,
+    "seedsRun": 5,
+    "selectedSeed": "0xA52E02",
+    "selectedValidationTop1": 0.3281,
+    "top1Pooled": 0.2987,
+    "top1Half1": 0.296,
+    "top1Half2": 0.3011,
+    "top2Pooled": 0.5099,
+    "pairwisePooled": 0.6262,
+    "pairwiseHalf1": 0.6266,
+    "pairwiseHalf2": 0.6259,
+    "regretPooled": 0.3367,
+    "regretHalf1": 0.3354,
+    "regretHalf2": 0.3379,
+    "heldoutTop1AllSeeds": {
+      "0xA52E01": 0.3026,
+      "0xA52E02": 0.2987,
+      "0xA52E03": 0.3069,
+      "0xA52E04": 0.3132,
+      "0xA52E05": 0.3135
+    },
+    "validationTop1FinalAllSeeds": {
+      "0xA52E01": 0.3051,
+      "0xA52E02": 0.3281,
+      "0xA52E03": 0.3089,
+      "0xA52E04": 0.3127,
+      "0xA52E05": 0.3027
+    },
+    "validationTop1BestEpochAllSeeds": {
+      "0xA52E01": 0.3554,
+      "0xA52E02": 0.3549,
+      "0xA52E03": 0.352,
+      "0xA52E04": 0.3525,
+      "0xA52E05": 0.3592
+    },
+    "heldoutTop1SpreadAcrossSeeds": [
+      0.2987,
+      0.3135
+    ],
+    "inferenceMicrosecondsPerState": 1.27212,
+    "trainWallSeconds": 166.08,
+    "comparatorAfterstateCnnTop1Pooled": 0.3752,
+    "referenceD1Top1": 0.486,
+    "referenceD2Top1": 0.568
+  },
+  "gateChecks": [
+    {
+      "criterion": "Label file is the preregistered artifact: 291,890 rows / 8,639 roots",
+      "passed": true,
+      "observed": "291890 rows, 8639 roots (train 6,551, calibration 2,088)"
+    },
+    {
+      "criterion": "No non-finite loss in any seed; all five seeds completed 30 epochs within 5,400 wall-seconds",
+      "passed": true,
+      "observed": "5 of 5 seeds valid; 166.08 wall-seconds total"
+    },
+    {
+      "criterion": "Selected seed (best validation top-1, 0xA52E02) held-out top1 >= 0.6 in each half-fold",
+      "passed": false,
+      "observed": "half1 0.2960, half2 0.3011"
+    },
+    {
+      "criterion": "Selected seed (best validation top-1, 0xA52E02) held-out pairwise >= 0.78 in each half-fold",
+      "passed": false,
+      "observed": "half1 0.6266, half2 0.6259"
+    },
+    {
+      "criterion": "Selected seed (best validation top-1, 0xA52E02) held-out regret <= 0.13 in each half-fold",
+      "passed": false,
+      "observed": "half1 0.3354, half2 0.3379"
+    }
+  ],
+  "perGameArtifact": {
+    "path": "runs/RUN-20260823T191900Z-b9f8f80d/probe/metrics.json",
+    "sha256": "ae86d823f2574890ed52d5a78bca926c86dd58b6cd942fe002a0a878c252fa2e",
+    "recordCount": 1
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260820T080056Z-376ada90.json"
+  ],
+  "artifactManifestRef": null,
+  "limitations": [
+    "Diagnostic-tier read: the 3,030-root held-out panel (d4q-labels-gate) was already opened once by EX-20260821-afterstate-d4q-stage1; no fresh roots were labelled. The result schema has no diagnostic tier, so it is recorded at the lowest tier (pilot); it is not development-tier evidence.",
+    "The preregistration names only the d4q-labels file, which carries folds train and calibration but no held-out fold; the held-out panel and its origin-seed half-folds were taken from the same run's d4q-labels-gate/d4q-labels.tsv and corpus-gate/roots.tsv, exactly as d4q.py consumed them, which is the reading the protocol's 'train/validation/held-out origins are reused unchanged' clause intends.",
+    "Epoch count was fixed at 30 by the protocol and the final-epoch model was used. Calibration-fold top-1 peaked at 0.352-0.359 between epochs 5 and 10 for every seed and then declined as the training listwise loss kept falling (overfitting); even the best epoch is far below the 0.60 gate, so early stopping would not change the verdict, but the reported held-out numbers are for the overfitted final epoch.",
+    "Loss coefficients not fixed by the hypothesis text were set to 1.0 for the pairwise term (d4-q-clone used 0.35) and the prediction-side softmax temperature was 1 in standardised value units; only the listed configuration is rejected.",
+    "CPU training with 8 torch threads; the EmbeddingBag backward is not bit-deterministic across thread counts, so a re-run reproduces the numbers only approximately.",
+    "Inference cost is from leaf-check on the RUN-A51D-corpus mix-d3 states on a shared host; informational only."
+  ],
+  "contributionIds": [
+    "CT-20260823T194212Z-bb82cb22"
+  ],
+  "recordedAt": "2026-08-23T19:41:42Z"
+}

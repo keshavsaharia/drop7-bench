@@ -1,0 +1,38 @@
+{
+  "$schema": "../schemas/theory-v1.schema.json",
+  "format": "drop7-theory-v1",
+  "theoryId": "TH-20260823-sibling-outcome-labels-fix-leaf-0c3d480d",
+  "title": "Complete-sibling long-horizon outcome labels fix the learned leaf's within-root discrimination (P-SOL)",
+  "claim": "A leaf-cost student (the existing 572k-parameter finding-08 NNUE, architecture unchanged) trained on ALL legal siblings per root, with labels that are long-horizon outcome distributions (per-rise hazard vector plus censored restricted-mean lifetime, Kaplan-Meier over K CRN-paired continuations under a fixed cheap public continuation policy) and a within-root pairwise ranking loss on the deployed scalar (KM expected lifetime), achieves within-root discrimination that played-action outcome training cannot provide (coverage) and exact-search-value distillation cannot provide (objective): offline, top-1 agreement with exact D4's argmax >= 0.55 and >= the played-action incumbent + 0.03; deployed as the existing blended leaf, it improves the paired 256-game d4s7 mean with a positive one-sided 95% lower bound without giving back the incumbent's d4s5 gain.",
+  "mechanism": "Design: Kimi K3, runs/RUN-20260823T191900Z-b9f8f80d/kimi-k3-main-design.md (P-SOL-v1), grounded in tonight's three results. M1 coverage: one row per played move gives no within-root gradient; complete panels supply 21 ordered pairs per root. M2 objective: exact D4 values encode search depth a 1.33us leaf cannot represent (RS-20260823T194142Z-946e3cd1: top-1 0.296/0.301 at 572k, 0.375 at 3.4M, vs exact D1 0.486); outcome distributions under a fixed cheap continuation are properties of the afterstate and leaf-representable. M3 label economics: under within-root CRN pairing, sibling outcome differences are driven by afterstate structure, so a cheap continuation engine (D1/D2) can preserve the ranking of D3 N7M6 (the C0-validated strong cheap policy, RS-20260823T194200Z-42b113db) - measured by the G0 fidelity ladder before any corpus spend, never assumed. Single-factor discipline: model, features, head weights and deploy path held identical to finding-08; only sibling-complete data, the K-sample CRN estimator and the ranking term change.",
+  "falsificationCriteria": [
+    "F1: no cheap continuation engine achieves within-root label Kendall-tau vs D3 N7M6 with 95% LB >= 0.85 on the G0 ladder (label-fidelity failure; stop at ~14 CPU-h).",
+    "F2: offline gate G1 fails (student top-1 vs exact-D4 argmax < 0.52, or < incumbent LeafNet + 0.01) while the G2 decomposition shows target quality adequate (label-argmax top-1 vs D4 >= 0.60): sibling-complete data did not fix discrimination.",
+    "F3: G2 shows label-argmax top-1 vs D4 < 0.60: the outcome-label family itself does not track decision quality; falsifies the label mechanism regardless of fit.",
+    "F4: gameplay co-primary fails: paired 256-game d4s7 lower bound <= 0 (successor screen experiment).",
+    "A negative rejects only the tested configuration {continuation in D1/D2, H=48, K=16, 572k student, ranking+regression mix}; D3-continuation labels at corpus scale remain open via the scale-out path.",
+    "Status 2026-08-23: F1 is triggered in its v2 form - no affordable continuation engine could be certified (the fast M=1 proxy failed the D3 N7M6 guardrail: mean tau 0.370, top-1 4/6) - so the core claims M1/M2 remain untested rather than refuted; the theory is blocked pending the fast-engine M=6 port (E-FAST-M6) or a scale-out lease for native-M6 labels."
+  ],
+  "informationClass": "public-policy",
+  "lifecycle": "proposed",
+  "assessment": "untested",
+  "evidenceTier": "proposal",
+  "dependencies": [
+    "TH-20260823-nnue-class-holds-d4-ordering-c7b397a5",
+    "TH-20260823-d3-reveal-quadrature-beats-d4s5-paired-4ee1d5fe"
+  ],
+  "evidenceRefs": [
+    "runs/RUN-20260823T191900Z-b9f8f80d/kimi-k3-main-design.md",
+    "research/results/RS-20260823T194142Z-946e3cd1.json",
+    "research/results/RS-20260823T194200Z-42b113db.json",
+    "docs/exploratory/finding-08-learned-leaf.md",
+    "research/results/RS-20260823T225753Z-0fbd48c3.json"
+  ],
+  "createdBy": {
+    "platform": "unknown",
+    "model": "unknown",
+    "agentId": null
+  },
+  "createdAt": "2026-08-23T21:18:28Z",
+  "updatedAt": "2026-08-23T22:57:53Z"
+}

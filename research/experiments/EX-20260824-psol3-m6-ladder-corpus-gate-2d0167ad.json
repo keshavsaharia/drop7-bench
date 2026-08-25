@@ -1,0 +1,89 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260824-psol3-m6-ladder-corpus-gate-2d0167ad",
+  "theoryIds": [
+    "TH-20260824-m6-depth-second-order-for-ordering-7de1e79e"
+  ],
+  "title": "P-SOL-3: T0 timing, all-M=6 fidelity ladder, uniform certified-cheap-engine M=6 corpus, and the G1/G2 offline gates",
+  "classification": "algorithmic",
+  "hypothesis": "Full protocol: runs/RUN-20260823T191900Z-b9f8f80d/kimi-k3-psol3-design.md (P-SOL-3, Kimi K3), frozen as written; this record fixes its decision structure. Stages: (T0, ~1 CPU-h, seed-free) measure continuation-duty rates for fast d1-M6, d2-M6, d3-N7M6 on 20 seed-free roots x 7 x K8 x H40 under an exclusive resource lease; re-price every stage; S0 halt with a no-run record if fewer than 6,000 corpus roots fit 18 CPU-h at the measured d1-M6 rate; if d3-M6 exceeds 1.5x 0.177 s/move the ladder drops R 64->48 with an amended power note before any ladder root is drawn. (S1 ladder) certify fast d1-M6 and d2-M6 against fast d3-N7M6 (no native arm - parity is exact per E-FAST-M6; no M<6 arm - M=1 is dead per the v2 guardrail) at the corpus operating point K8 H40 with CRN shared across siblings and engines; R=64 in cohorts 16 then 48, reusing the retained v2 1,200-root seed-free pool iff its manifest shows no M=1-conditioned selection (else regenerate ~0.2 CPU-h); certification = mean within-root Kendall tau LB95 >= 0.75 AND top-1 LB95 >= 0.80 (root bootstrap, 10,000 resamples, seed 0xb0071eaf); early stop drops an arm with tau LB95 < 0.5 after cohort 1. (Corpus) uniform labels from the cheapest certified engine on 2,048 whole origin games (lease sub-range 0xa5217000-0xa52177ff) x 7 harvested roots = 14,336 roots x 7 siblings x K8 x H40 (~17.8 CPU-h at the 2 ms/move d1-M6 estimate, re-priced at T0; ~1 GB disk, full continuations not retained); fallback if only d2 certifies: uniform d2-M6, K4 H32, ~1,300 roots, explicitly a pilot. (Training) as P-SOL v2 with two changes: SE-weighted pairs w_ij=|mu_i-mu_j|/sqrt(se_i^2+se_j^2) clipped to [0,2], and near-tie oversampling x2 for roots with label top-two gap <= 500 points capped at 50% of total loss weight; labels are KM restricted mean lifetime at H=40 with censor rates recorded. (Gate) G1/G2 unchanged from v2 on the 512-game / 4,096-root gate set (lease sub-range 0xa5219000-0xa52191ff) with exact D4 sibling values - the comparator is independent of the corpus engine.",
+  "candidate": {
+    "name": "psol3-m6-cheap-engine-corpus-nnue",
+    "entryPoint": "approaches/lifetime-objective/fast-reveal-sampling/fast-factored-search.hpp",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "incumbent played-action LeafNet and exact D1/D2/D4 orderings",
+    "entryPoint": "approaches/lifetime-objective/learned-leaf/train_leaf.py",
+    "manifestRef": null
+  },
+  "informationBoundary": "public-policy",
+  "benchmarkTier": "CHECK",
+  "data": {
+    "role": "no-gameplay",
+    "seedLeaseRefs": [
+      "SL-20260823T215000Z-a5216000"
+    ],
+    "datasetRefs": [],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "T0 and the ladder consume zero leased seeds (seed-free roots; the retained v2 rung-1 pool is reused only if manifest-clean). The training lease SL-20260823T215000Z-a5216000, still reserved and never opened, is opened only for the corpus (0xa5217000-0xa52177ff) and gate set (0xa5219000-0xa52191ff) after S1 certifies an engine; gate-set origins become development-read on use and never train."
+  },
+  "metrics": {
+    "primary": "G1: student top-1 vs exact-D4 argmax on the 4,096-root gate set, against 0.55 absolute and incumbent+0.03 (paired McNemar LB > 0)",
+    "secondary": [
+      "T0 measured ms/move per engine with SD; re-priced budget table",
+      "S1 per-engine mean within-root Kendall tau and top-1 agreement with bootstrap CIs, per cohort",
+      "G2 target quality (label-argmax vs D4), fit quality vs 0.7x split-half ceiling, coverage slice",
+      "censor rate at H=40 (preregistered check: median within-root rate > 35% raises H to 48 and re-prices x0.83; below 6,000 roots halts)",
+      "near-tie rate (preregistered check: outside [20%,60%] rescales oversampling to fixed effective weight, no re-labeling)",
+      "init-seed spread over 5 seeds; per-stage CPU-h vs the budget table"
+    ],
+    "statisticalUnit": "root",
+    "uncertaintyMethod": "root/origin cluster bootstrap (10,000 resamples, seed 0xb0071eaf); paired McNemar for the incumbent comparison"
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "T0/S0: at least 6,000 corpus roots affordable within 18 CPU-h at measured rates.",
+      "S1: at least one of d1-M6/d2-M6 certified (tau LB95 >= 0.75 AND top-1 LB95 >= 0.80 vs fast d3-N7M6).",
+      "G1: student top-1 >= 0.55 AND >= incumbent + 0.03 (McNemar LB > 0); marginal band [0.52,0.55) proceeds to a d4s5-only screen as in v1/v2.",
+      "G2 reported in every outcome; label-argmax >= 0.60 required to call the target right."
+    ],
+    "failureAction": "S0: no-run record. S1 double failure: valid negative refuting depth-second-order at K8 H40; the d3-M6 small-corpus and scale-out routes are named, not run. G1 fail: routed by G2 exactly as v2 (target wrong vs fit wrong vs coverage wrong).",
+    "passAction": "Register the gameplay successor (P-SOL-v1 section 8 unchanged: blend tuning on reusable-development cohorts, 256-game paired screens at d4s5/d4s7 with rarity and futility stops, plus the D3 N7M6 deployment arm) before any gameplay seed is opened."
+  },
+  "resources": {
+    "wallSeconds": 21600,
+    "cpuThreads": 26,
+    "maxHostBytes": 34359738368,
+    "maxGpuBytes": 17179869184,
+    "gpuDevices": [
+      "gfx1151 (training only)"
+    ]
+  },
+  "stopConditions": [
+    "S0 as above.",
+    "S1 early stop: drop an arm at tau LB95 < 0.5 after cohort 1; both dropped halts the experiment.",
+    "Censor and near-tie preregistered checks as in metrics.",
+    "Any stage exceeding 150% of its re-priced budget halts for coordinator review before the 2.3 CPU-h reserve is spent; the reserve never buys extra roots and never repeats a failed gate.",
+    "Budget to the offline gate: 35.0 CPU-h cap per the design's table (T0 1.0, S1 2.4 + <=7.0, corpus roots 1.0, labels 17.8, training 2.0, gate 1.5, reserve 2.3)."
+  ],
+  "expectedArtifacts": [
+    "runs/RUN-20260823T191900Z-b9f8f80d/kimi-k3-psol3-design.md",
+    "runs/<psol3-run>/t0/timing.json",
+    "runs/<psol3-run>/ladder/{cohort1,cohort2}.json and certification.json",
+    "runs/<psol3-run>/corpus/ summary",
+    "runs/<psol3-run>/gate/g1-g2.json"
+  ],
+  "lifecycle": "preregistered",
+  "protocolSha256": "b132397899ef701b7335e3095c70855d538013036772217793d96f4a43d7e11b",
+  "amendments": [],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": null
+  },
+  "createdAt": "2026-08-24T01:22:09Z",
+  "updatedAt": "2026-08-24T01:23:00Z"
+}

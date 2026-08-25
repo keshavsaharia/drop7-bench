@@ -1,0 +1,34 @@
+{
+  "$schema": "../schemas/theory-v1.schema.json",
+  "format": "drop7-theory-v1",
+  "theoryId": "TH-20260823-hpool-optimistic-states-fair-labels-bb707bc9",
+  "title": "Oracle-visited public states carry transferable fair value (stage D0): the fair-relabelled lifetime of oracle-visited states exceeds that of matched fair-D4 states by a transferable fraction tau >= 0.25",
+  "claim": "Public board states visited by the perfect-information oracle after move 50 have a higher expected remaining lifetime under FAIR, public-randomness continuation than fair-D4-visited states matched on rise phase, occupancy and maximum height. Defining R_fair(O) and R_fair(F) as the mean remaining moves over K independent public futures under a fixed public continuation policy, and R_tape(O), R_real(F) as the realised remaining moves on the states' own trajectories, the transferable fraction tau = (R_fair(O) - R_fair(F)) / (R_tape(O) - R_real(F)) is at least 0.25, with the same sign in both split halves of the O pool, and the oracle's column at oracle-visited roots is fair-top-1 under common public futures at least as often as fair D4's column is.",
+  "mechanism": "docs/exploratory/audit-05-optimistic-curriculum.md sections 4-7 classify every oracle-target failure as class (i) information gap and argue the removable cause is optimism in the LABEL (a function of the realised tape). The salvageable core, H-pool, is optimism in the STATE DISTRIBUTION with fair labels: oracle-visited states are publicly distinguishable (manifold classifier held-out AUC 0.925/0.915) and survival-type targets are the only targets this corpus ever fitted well. The crux number - the fair-relabelled value of an oracle-visited state - was computed by approaches/oracle-curriculum/state-curriculum/oracle-curriculum.cpp (7 public-derived H25 restarts per state, domain-separated streams, privilege terminated at the PublicState constructor) but never reported. This theory is a measurement, not a model: if tau is small, the oracle reaches its long lifetimes by knowing the tape, not by standing on better boards, and no student can inherit that by training on those boards. Design: runs/RUN-20260823T191900Z-b9f8f80d/kimi-k3-open-items.md (K4-B, Kimi K3).",
+  "falsificationCriteria": [
+    "tau < 0.25 on the pooled O set (K >= 32 public futures per state, fixed public D1 continuation, horizon 25, as in the curriculum code) refuses H-pool.",
+    "Split halves of the O pool (by origin game) disagree in the sign of R_fair(O) - R_fair(F).",
+    "At oracle-visited roots the oracle's column is fair-top-1 under common public futures less often than fair D4's column.",
+    "Any one refusal ends the optimistic-teacher program; no follow-on student is trained. A pass licenses exactly one follow-on (pool comparison A1 fair / A2 optimistic / A3 mixed with fair labels), registered separately."
+  ],
+  "informationClass": "diagnostic",
+  "lifecycle": "assessed",
+  "assessment": "not-supported-as-tested",
+  "evidenceTier": "pilot",
+  "dependencies": [],
+  "evidenceRefs": [
+    "docs/exploratory/audit-05-optimistic-curriculum.md",
+    "approaches/oracle-curriculum/state-curriculum/oracle-curriculum.cpp",
+    "approaches/oracle-curriculum/topology/oracle-topology-audit.cpp",
+    "runs/RUN-20260823T191900Z-b9f8f80d/kimi-k3-open-items.md",
+    "research/results/RS-20260823T205143Z-ead14c9d.json",
+    "runs/RUN-20260823T191900Z-b9f8f80d/d0/d0-result.json"
+  ],
+  "createdBy": {
+    "platform": "unknown",
+    "model": "unknown",
+    "agentId": null
+  },
+  "createdAt": "2026-08-23T19:29:58Z",
+  "updatedAt": "2026-08-23T20:55:00Z"
+}

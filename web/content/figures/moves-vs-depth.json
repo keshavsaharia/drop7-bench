@@ -1,0 +1,32 @@
+{
+  "title": "Mean moves survived against search depth, fair expectimax, by chance-stratum count",
+  "kind": "line",
+  "x": { "label": "Search depth", "unit": "plies" },
+  "y": { "label": "Mean moves", "unit": "moves" },
+  "notes": "Companion to score-vs-depth: same arms, same cohort 0xa51d1000-0xa51d103f (64 games), same partial depth-5 seven-stratum arm on the first 32 seeds drawn separately. Depth 2 was run only at seven strata.",
+  "series": [
+    {
+      "name": "5 strata (biased next-disc estimate)",
+      "points": [
+        { "x": 3, "y": 89.84, "n": 64, "label": "depth 3, 5 strata", "sourceRecord": "docs/exploratory/finding-05-chance-strata.md", "sourceField": "Cost table, mean moves" },
+        { "x": 4, "y": 87.16, "n": 64, "label": "depth 4, 5 strata (frozen reference)", "sourceRecord": "docs/exploratory/finding-05-chance-strata.md", "sourceField": "Confirmation cohort detail, mean moves" },
+        { "x": 5, "y": 84.69, "n": 64, "label": "depth 5, 5 strata", "sourceRecord": "RS-20260821T181917Z-9a34ba02", "sourceField": "metrics.d5s5MeanMoves (84.6875)" }
+      ]
+    },
+    {
+      "name": "7 strata (exact next-disc estimate)",
+      "points": [
+        { "x": 2, "y": 79.48, "n": 64, "label": "depth 2, 7 strata", "sourceRecord": "docs/exploratory/finding-05-chance-strata.md", "sourceField": "Cost table, mean moves" },
+        { "x": 3, "y": 92.27, "n": 64, "label": "depth 3, 7 strata", "sourceRecord": "docs/exploratory/finding-05-chance-strata.md", "sourceField": "Cost table, mean moves" },
+        { "x": 4, "y": 114.66, "n": 64, "label": "depth 4, 7 strata", "sourceRecord": "RS-20260821T181917Z-9a34ba02", "sourceField": "metrics.d4s7ControlMeanMoves (114.65625)" }
+      ]
+    },
+    {
+      "name": "7 strata, first 32 seeds only (arm stopped)",
+      "dashed": true,
+      "points": [
+        { "x": 5, "y": 117.97, "n": 32, "label": "depth 5, 7 strata (partial: 32 of 64 planned games)", "sourceRecord": "RS-20260821T205102Z-d89df4b5", "sourceField": "metrics.d5s7MeanMoves (117.96875)" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,136 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260823T110000Z-baecb816",
+  "theoryIds": [
+    "TH-20260823-reveal-construction-leaf-e8f7c78d"
+  ],
+  "experimentId": "EX-20260823-reveal-construction-screen-371fd638",
+  "runIds": [
+    "RUN-20260823T091530Z-cbe65468"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "fail",
+  "assessment": "not-supported-as-tested",
+  "evidenceTier": "mechanics-only",
+  "summary": "Seed-free corpus gate for the reveal-construction leaf terms, read once on the depth-4 non-explored subset of runs/RUN-A51D-corpus/all.states (62,831 rows, 768 games, whole-origin split, base held-out R^2 0.6483): the gating term aligned_double_hit FAILS the preregistered four-part gate. Held-out partial correlation with log1p remaining lifetime beyond the 18 leaf features, occupancy and rise clock is -0.0443 (threshold >= +0.05) and incremental R^2 +0.00047 (>= 0.005); prevalence 19.75% and the uncollected-setup rate 60.47% (56.51% excluding ambiguous-empty outcomes; 6,969 setups) pass. chain_to_crack_cracked (partial r -0.0325, R^2 +0.00026, prevalence 28.92%) and chain_to_crack_solid (partial r -0.0385, prevalence 1.77%, uncollected 62.85%) also fail; entombed_high on depth 4 alone reads partial r -0.0595, incremental R^2 +0.00125. Per the protocol the 256-game screen was NOT run and no leased seed was read. All CHECK gates passed at the final term source (0 bit, parity, mirror, determinism, metadata mismatches at d4s5 and d4s7; runs/RUN-20260823T091530Z-cbe65468/gates.log). The value-criterion part of the gate rejects these terms as lifetime predictors; the action-level statistic says the depth-4 (s5, epsilon 0.03) behaviour policy leaves 60% of live same-wave double-hit setups uncollected within two moves.",
+  "metrics": {
+    "corpus": {
+      "records": 5257181,
+      "depth4Rows": 62831,
+      "depth4Games": 768,
+      "depth4Train": 50003,
+      "depth4Test": 5528,
+      "baseHeldOutR2": 0.6483227567169099
+    },
+    "aligned_double_hit": {
+      "partialR": -0.04431528341342647,
+      "incrementalR2": 0.0004739902438248844,
+      "prevalenceDepth4": 0.1974662189046808,
+      "uncollectedRate": 0.6046578493387004,
+      "uncollectedRateExcludingAmbiguous": 0.5650798671516685,
+      "setups": 6969,
+      "revealedWithin2": 2750
+    },
+    "chain_to_crack_cracked": {
+      "partialR": -0.032508299327459945,
+      "incrementalR2": 0.0002557745039944992,
+      "prevalenceDepth4": 0.2892043736372173
+    },
+    "chain_to_crack_solid": {
+      "partialR": -0.03854274456563797,
+      "incrementalR2": 0.000147987439786057,
+      "prevalenceDepth4": 0.017682354251882033,
+      "uncollectedRate": 0.628482972136223,
+      "uncollectedRateExcludingAmbiguous": 0.5774647887323944,
+      "setups": 324,
+      "revealedWithin2": 120
+    },
+    "entombed_high": {
+      "partialR": -0.05954909188139391,
+      "incrementalR2": 0.0012532223468892933,
+      "prevalenceDepth4": 0.16776750330250992
+    },
+    "aligned_double_hit_gated": {
+      "partialR": -0.050408588135396296,
+      "incrementalR2": 0.0007397000534576925,
+      "prevalenceDepth4": 0.16977288281262434
+    },
+    "chain_to_crack_cracked_gated": {
+      "partialR": -0.02768934136602995,
+      "incrementalR2": 0.00027830439370624127,
+      "prevalenceDepth4": 0.23830593178526524
+    },
+    "chain_to_crack_solid_gated": {
+      "partialR": -0.006405359242813929,
+      "incrementalR2": 2.2834541207217285e-05,
+      "prevalenceDepth4": 0.015088093457051456
+    },
+    "checkGates": {
+      "leafBitMismatches": 0,
+      "parityMismatches": 0,
+      "mirrorMismatches": 0,
+      "determinismMismatches": 0,
+      "metadataBlindnessMismatches": 0,
+      "liveDivergence": {
+        "A_d4s5": "2/600",
+        "B_d4s5": "5/645",
+        "A_d4s7": "7/370",
+        "B_d4s7": "6/310"
+      }
+    }
+  },
+  "gateChecks": [
+    {
+      "criterion": "aligned_double_hit held-out partial r >= +0.05",
+      "passed": false,
+      "observed": "-0.0443"
+    },
+    {
+      "criterion": "aligned_double_hit incremental held-out R^2 >= 0.005",
+      "passed": false,
+      "observed": "0.00047"
+    },
+    {
+      "criterion": "aligned_double_hit prevalence >= 5% of depth-4 positions",
+      "passed": true,
+      "observed": "19.75%"
+    },
+    {
+      "criterion": "aligned_double_hit uncollected-setup rate >= 30%",
+      "passed": true,
+      "observed": "60.47% (excluding ambiguous 56.51%)"
+    },
+    {
+      "criterion": "CHECK gates (bit parity, search parity, mirror, determinism, metadata blindness, memo identity) at d4s5 and d4s7",
+      "passed": true,
+      "observed": "0 mismatches in every gate; runs/RUN-20260823T091530Z-cbe65468/gates.log"
+    },
+    {
+      "criterion": "Screen gate (A minus frozen lower bounds, Q25, halves, coverage)",
+      "passed": null,
+      "observed": "not evaluated: the screen was not run because the corpus gate failed"
+    }
+  ],
+  "perGameArtifact": {
+    "path": "runs/RUN-20260823T091530Z-cbe65468/corpus-gate.json",
+    "sha256": "9e53b556470d20244eeca0b14624c7d218d26a429d03872c7c6caa5707fe852f",
+    "recordCount": 62831
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260820T080056Z-376ada90.json"
+  ],
+  "artifactManifestRef": null,
+  "limitations": [
+    "Mechanics-only tier: no gameplay was run; this rejects the terms as held-out predictors of remaining lifetime beyond the frozen leaf on depth-4 corpus positions, not as action-changing leaf terms in play.",
+    "The corpus behaviour policy is the reference depth-4 search at FIVE strata with epsilon 0.03 exploration, not the seven-stratum memo configuration the screen would have run; the uncollected-setup rate is therefore inflated by epsilon moves and by s5's coarser chance model (Kimi K3 review, written before the result was read: runs/RUN-20260823T091530Z-cbe65468/kimi-k3-prereg-review.md section 3).",
+    "The same review argued, blind to the result, that a partial-correlation kill criterion is a value criterion and can reject a term whose purpose is to re-rank sibling actions at the horizon boundary; the preregistered gate is nonetheless applied as written. Any successor that drops the value criterion must disclose that this gate was read first.",
+    "The uncollected-setup rate counts a reveal of a different gray as not collecting this setup; a high rate can mean the search had better lines.",
+    "The formal freeze command ran after the corpus gate was read; the thresholds were fixed by file content 9.5 minutes before the read (experiment amendment).",
+    "The implementer's support-disjoint rule R2 (skip adjacent-side pairs whose completion paths share a cell) excludes configurations where one dropped disc completes both runs in the same wave; the term as frozen is narrower than the design's prose."
+  ],
+  "contributionIds": [
+    "CT-20260823T094848Z-7492d61e"
+  ],
+  "recordedAt": "2026-08-23T10:55:14Z"
+}

@@ -1,0 +1,24 @@
+{
+  "$schema": "../schemas/theory-v1.schema.json",
+  "format": "drop7-theory-v1",
+  "theoryId": "TH-20260824-rust-bitboard-engine-f68fcbfd",
+  "title": "A nibble-packed column-major Rust engine reproduces fair expectimax bit-for-bit faster than the C++ fast engine",
+  "claim": "A 28-byte column-major board (7 x u32, 4 bits per cell) makes gravity, disc placement and legality constant-time bit operations (PEXT compaction on Zen 5, portable nibble loop elsewhere); combined with a packed-key open-addressed transposition table and per-thread searchers, the fair expectimax search runs bit-identical to the frozen C++ reference at higher throughput and lower memory, scaling near-linearly to all available cores.",
+  "mechanism": "Column nibble packing turns gravity into PEXT(word, expanded-nonzero-mask); occupancy/numbered/covered bitboards are derived with SWAR nibble tests and PDEP scatters; popper detection uses the proven 128-entry run-length table on row/column masks; cover hits are counted for the whole board at once with a 4-way bitboard adder; the leaf, chance stratification, canonicalisation, column order and accumulation order are copied character-for-character from the proven C++ fast engine.",
+  "falsificationCriteria": [
+    "Any mismatch in the trajectory gate (Rust vs C++ reference playHeadlessMove over leased seeds), the leaf gate (uint64 bit patterns of leaf values), or the search gate (per-column values and chosen actions at fixed depth/strata); or end-to-end throughput at identical work not exceeding the C++ fast engine; or worker-count dependence of chosen actions in complete-depth mode."
+  ],
+  "informationClass": "engineering",
+  "lifecycle": "draft",
+  "assessment": "untested",
+  "evidenceTier": "proposal",
+  "dependencies": [],
+  "evidenceRefs": [],
+  "createdBy": {
+    "platform": "OpenCode",
+    "model": "moonshotai/Kimi-K3",
+    "agentId": "opencode-rust-engine"
+  },
+  "createdAt": "2026-08-24T05:11:23Z",
+  "updatedAt": "2026-08-24T05:11:23Z"
+}

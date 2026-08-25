@@ -1,0 +1,99 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260823-d3n7m6-vs-d4s5-paired-reanalysis-ea66f4ec",
+  "theoryIds": [
+    "TH-20260823-d3-reveal-quadrature-beats-d4s5-paired-4ee1d5fe"
+  ],
+  "title": "C0: paired D3 N7M6 minus D4 s5 contrast from retained per-game records",
+  "classification": "diagnostic",
+  "hypothesis": "On the retained drop7-lifetime-cohort-v1 per-game records for D3 N7M6 (runs/RUN-A525-reveal/d3-n7-m6.json) and D4 s5 (runs/RUN-A51D-s7confirm/fresh-s5.json), both covering seeds 0xa51d1000-0xa51d103f, the paired score delta has a one-sided 95% bootstrap lower bound and a Student-t lower bound both above zero.",
+  "candidate": {
+    "name": "D3 N7M6: factored-chance-fair-search, depth 3, discSamples 7, revealSamples 6, terminalUtility -1000000, maximumWork 51084852, 2000-move cap, corrected 17,000-point Hardcore scoring (finding-16 arm, RUN-20260821T035407Z-00483c6c)",
+    "entryPoint": "runs/RUN-20260823T191900Z-b9f8f80d/c0/c0_compare.py",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "D4 s5: parameterized-fair-search, depth 4, chanceSamples 5 (N5 M1), terminalUtility -1000000, maximumWork 3200000, 2000-move cap, corrected 17,000-point Hardcore scoring (finding-05 fresh-s5 arm, runs/RUN-A51D-s7confirm/fresh-s5.json; byte-identical games to runs/RUN-A52-LEAF/eval/s5-w000.json)",
+    "entryPoint": "approaches/fair-expectimax/reference/fair-only-depth4.cpp",
+    "manifestRef": "research/benchmarks/baselines-v1.json"
+  },
+  "informationBoundary": "seed-free",
+  "benchmarkTier": "CHECK",
+  "data": {
+    "role": "previously-evaluated-development",
+    "seedLeaseRefs": [],
+    "datasetRefs": [
+      "runs/RUN-A525-reveal/d3-n7-m6.json (sha256 36aa1d0f0ec29b0ec70bd540e7d06758e37147a521f6891c0fde930943aa83fc)",
+      "runs/RUN-A51D-s7confirm/fresh-s5.json (sha256 d6c1dbd403dbf5b477f1b0905b4aa440e443c2dfba8eef29085b7f5bee024d9a)",
+      "runs/RUN-A51D-s7confirm/fresh-s7.json (sha256 0c95442620a78ef5a928a4b8cdab9f57b3bdb8a3d7df5fcd1a6d818785bd4209; secondary D4 s7 contrast only)"
+    ],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "Reanalysis only: no game is played, no seed is opened, no lease is consumed. Both arms were played under SEEDLEASE-A51D on the already-read shared development cohort 0xa51d1000-0xa51d103f (exploratory-development-diagnostic). The arm MEANS (376,442 and 297,327) and their difference (+79,115) were published in finding-16 and finding-05 and were known to the author before this gate was written, as was the finding-16 contrast D3 N7M6 minus D4 N7 M1 (-22,056). What was never computed or printed is the paired per-game D3 N7M6 minus D4 s5 delta and its bounds. This is therefore a bound computation on already-read data whose sign is already known; it is diagnostic tier only and its pass cannot be promoted above public-development on this cohort. The bootstrap seed, resample count and analysis code are pinned in expectedArtifacts before the wrapper is run."
+  },
+  "metrics": {
+    "primary": "paired mean whole-game score delta, D3 N7M6 minus D4 s5, 64 games, seeds 0xa51d1000-0xa51d103f",
+    "secondary": [
+      "paired mean moves delta",
+      "first-half / second-half deltas in seed order (seeds 0xa51d1000-0xa51d101f and 0xa51d1020-0xa51d103f)",
+      "Q25 delta (marginal), median, min, max per arm",
+      "W-T-L",
+      "detection floor 1.645*sd/sqrt(64)",
+      "paired numbered clears and cover reveals deltas",
+      "work-per-move ratio",
+      "the same contrast D3 N7M6 minus D4 s7 (fresh-s7.json), reported as a diagnostic, not gated"
+    ],
+    "statisticalUnit": "whole-game",
+    "uncertaintyMethod": "one-sided 95% percentile bootstrap over whole games (20,000 resamples, numpy PCG64 seed 0xB0071EAF, via the paired() function of approaches/lifetime-objective/chain-reveal-leaf/compare.py imported unchanged by the c0_compare.py wrapper) and Student-t one-sided 95% lower bound; detection floor reported"
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "Both arms are drop7-lifetime-cohort-v1 artifacts covering exactly the same 64 seeds 0xa51d1000-0xa51d103f in order, 0 censored games, 2000-move cap, terminalUtility -1000000, seedLease SEEDLEASE-A51D.",
+      "D3 N7M6 minus D4 s5 paired score delta: percentile bootstrap 95% lower bound > 0 AND Student-t 95% lower bound > 0."
+    ],
+    "failureAction": "Record valid + fail; the theory is not-supported-as-tested at public-development tier; the +79,115 difference of means may not be quoted as a head start in the K2 program without the bound attached; open no cohort.",
+    "passAction": "Record valid + pass at public-development tier on already-read data; no tier above CHECK/diagnostic is claimed because the point estimate preceded the gate; any promotion requires a fresh-development cohort under a new protocol."
+  },
+  "resources": {
+    "wallSeconds": 60,
+    "cpuThreads": 1,
+    "maxHostBytes": 1073741824,
+    "maxGpuBytes": null,
+    "gpuDevices": []
+  },
+  "stopConditions": [
+    "Stop on any rules, information-boundary, legality, determinism, or parity failure.",
+    "Stop and record nothing beyond c0.md if the seed lists of the two arms differ or either artifact is not drop7-lifetime-cohort-v1."
+  ],
+  "expectedArtifacts": [
+    "runs/RUN-20260823T191900Z-b9f8f80d/c0/inputs-manifest.json (sha256 of every file read)",
+    "runs/RUN-20260823T191900Z-b9f8f80d/c0/compare-d3n7m6-vs-d4s5.json",
+    "runs/RUN-20260823T191900Z-b9f8f80d/c0/compare-d3n7m6-vs-d4s7.json",
+    "runs/RUN-20260823T191900Z-b9f8f80d/c0/c0.md",
+    "sha256 runs/RUN-20260823T191900Z-b9f8f80d/c0/c0_compare.py f25581560c2ffe1e5dcab10d2fdeab06dc97c1e879cbf18a447bdb3d5b5636e5",
+    "sha256 approaches/lifetime-objective/chain-reveal-leaf/compare.py 2994995e12687a512173758a9ff11a43797ef20378c0ecdde1fedbd3be23bb18",
+    "sha256 approaches/lifetime-objective/leaf-evolution/compare.py d40d28b4cd78c40b6cb22b289203d633e44c3d8a98a2b70e65a1623d7b8a670b"
+  ],
+  "lifecycle": "completed",
+  "protocolSha256": "ac93c0b6fa6681ace3a030d0f9ef58428c942557c8904368fa7896aa0d987793",
+  "amendments": [
+    {
+      "timestamp": "2026-08-23T19:38:45Z",
+      "beforeControlledData": true,
+      "reason": "c0_compare.py as pinned (sha256 f25581560c2ffe1e5dcab10d2fdeab06dc97c1e879cbf18a447bdb3d5b5636e5) failed to import at all: chain-reveal-leaf/compare.py performs `import compare as le` for the leaf-evolution resampler, so importing it under the module name `compare` resolved that statement to the half-initialised module. The wrapper now loads compare.py via importlib under the distinct module name chain_reveal_leaf_compare; no statistic, seed, or resample count changed. Amended sha256 b26715431715a3f848f227357c163dbc2a9bde73874cc8b835cdafbb94e94ac0. No compare output existed before this amendment (both earlier invocations died at import, see c0.md)."
+    },
+    {
+      "timestamp": "2026-08-23T19:38:51Z",
+      "beforeControlledData": false,
+      "reason": "lifecycle advanced preregistered -> completed after the wrapper ran and the run and result records were written; protocol content otherwise unchanged. protocolSha256 recomputed over the amended, completed record (repository practice: the run record retains the pre-data freeze hash b276634a2195f78e89c999e5f8b79b3e1fa18d58d3634d6fcea127b4e3de935e)."
+    }
+  ],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": "delegated subagent (Agent tool, general-purpose)"
+  },
+  "createdAt": "2026-08-23T19:36:54Z",
+  "updatedAt": "2026-08-23T19:45:00Z"
+}

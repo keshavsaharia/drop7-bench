@@ -1,0 +1,55 @@
+{
+  "title": "Numbered clears per move by occupancy band — the attracting equilibrium versus the death spiral",
+  "kind": "line",
+  "x": { "label": "occupied cells before the move (band midpoint)", "unit": "cells of 49" },
+  "y": { "label": "numbered clears per move", "unit": "clears/move" },
+  "notes": "From finding-06 section 3's occupancy-conditional table. Bands are 0-9, 10-14, 15-19, 20-24, 25-29, 30-34, 35-39, 40-44, 45-49 occupied cells; x positions are band midpoints chosen for drawing (the bands are the recorded unit). Bands are not matched samples across policies; each point carries its recorded move count n, and sparse cells should not be over-read. rh-clears cap-1000 bands above 34 cells and the rh-points 45-49 band are em-dashes in the source table (not recorded) — those points are omitted. The flat series is the exact disc-conservation requirement 2.400 = 12/5 (finding-01); the generator has no reference-line primitive, so it is drawn as a two-point polyline. rh-clears is a clairvoyant (privileged) diagnostic, not a legal policy. Evidence tier: exploratory mechanism study.",
+  "series": [
+    {
+      "name": "rh-clears H=9, cap 1000 (clairvoyant)",
+      "points": [
+        { "x": 4.5, "y": 1.08, "n": 274, "label": "band 0-9", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 3 occupancy-conditional table" },
+        { "x": 12, "y": 1.48, "n": 1296, "label": "band 10-14", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 3 occupancy-conditional table" },
+        { "x": 17, "y": 2.16, "n": 2279, "label": "band 15-19", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 3 occupancy-conditional table" },
+        { "x": 22, "y": 2.97, "n": 1568, "label": "band 20-24", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 3 occupancy-conditional table" },
+        { "x": 27, "y": 4.21, "n": 533, "label": "band 25-29", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 3 occupancy-conditional table" },
+        { "x": 32, "y": 5.7, "n": 50, "label": "band 30-34", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 3 occupancy-conditional table" }
+      ]
+    },
+    {
+      "name": "fair depth 4",
+      "points": [
+        { "x": 4.5, "y": 0.87, "n": 38, "label": "band 0-9", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 3 occupancy-conditional table" },
+        { "x": 12, "y": 1.38, "n": 63, "label": "band 10-14", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 3 occupancy-conditional table" },
+        { "x": 17, "y": 1.91, "n": 173, "label": "band 15-19", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 3 occupancy-conditional table" },
+        { "x": 22, "y": 2.1, "n": 266, "label": "band 20-24", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 3 occupancy-conditional table" },
+        { "x": 27, "y": 2.59, "n": 239, "label": "band 25-29", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 3 occupancy-conditional table" },
+        { "x": 32, "y": 2.26, "n": 78, "label": "band 30-34", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 3 occupancy-conditional table" },
+        { "x": 37, "y": 1.58, "n": 45, "label": "band 35-39", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 3 occupancy-conditional table" },
+        { "x": 42, "y": 1.4, "n": 30, "label": "band 40-44", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 3 occupancy-conditional table" },
+        { "x": 47, "y": 1.0, "n": 10, "label": "band 45-49", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 3 occupancy-conditional table" }
+      ]
+    },
+    {
+      "name": "rh-points H=9 (clairvoyant)",
+      "points": [
+        { "x": 4.5, "y": 0.27, "n": 33, "label": "band 0-9", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 3 occupancy-conditional table" },
+        { "x": 12, "y": 0.6, "n": 73, "label": "band 10-14", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 3 occupancy-conditional table" },
+        { "x": 17, "y": 0.66, "n": 205, "label": "band 15-19", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 3 occupancy-conditional table" },
+        { "x": 22, "y": 0.97, "n": 288, "label": "band 20-24", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 3 occupancy-conditional table" },
+        { "x": 27, "y": 1.99, "n": 314, "label": "band 25-29", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 3 occupancy-conditional table" },
+        { "x": 32, "y": 4.66, "n": 258, "label": "band 30-34", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 3 occupancy-conditional table" },
+        { "x": 37, "y": 4.2, "n": 123, "label": "band 35-39", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 3 occupancy-conditional table" },
+        { "x": 42, "y": 3.58, "n": 26, "label": "band 40-44", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 3 occupancy-conditional table" }
+      ]
+    },
+    {
+      "name": "survival requirement 2.400 = 12/5",
+      "dashed": true,
+      "points": [
+        { "x": 4.5, "y": 2.4, "label": "exact disc-conservation rate", "sourceRecord": "docs/exploratory/finding-01-score-is-survival.md", "sourceField": "steady-state requirement (12/5)" },
+        { "x": 47, "y": 2.4, "label": "exact disc-conservation rate", "sourceRecord": "docs/exploratory/finding-01-score-is-survival.md", "sourceField": "steady-state requirement (12/5)" }
+      ]
+    }
+  ]
+}

@@ -60,7 +60,7 @@ Training ran exactly as planned and the result failed everything.
 
 On the mandatory 512-game calibration, the greedy policy averaged 175,834 points
 and 55.0 moves — respectable against random play, far below the depth-4
-reference. More importantly, all four of the drift constraints it was supposed
+reference. All four of the drift constraints it was supposed
 to satisfy came out on the wrong side of zero with confidence, and its
 terminal-risk bound was 0.10496 against a fixed limit of 0.02. The board was
 filling faster than it was clearing, and the policy's own critics said so.
@@ -94,8 +94,8 @@ conservative maximum) and 333,348,864 bytes peak resident, inside fixed
 `docs/exploratory/audit-03-claim-arithmetic.md` classifies the calibration row
 as corrected 17,000-point scoring; the ledger section does not state the mode.
 
-**A discrepancy worth noting.** `docs/strategies.md` summarises this run as
-"about 176,000 points and 54 moves". The ledger records 55.006 moves.
+One wording discrepancy remains: `docs/strategies.md` summarises this run as
+"about 176,000 points and 54 moves", while the ledger records 55.006 moves.
 
 Source: `primal-dual-actor-critic.cpp`.
 

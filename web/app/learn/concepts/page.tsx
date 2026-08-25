@@ -13,9 +13,9 @@ export default function ConceptsIndexPage() {
         </Link>
         <h1 className="mt-1 text-2xl font-black text-zinc-50">Concepts</h1>
         <p className="mt-1 max-w-3xl text-sm text-zinc-400">
-          The ideas behind every strategy in this repository, explained in plain
-          language with animations computed by the rules engine. Read these in
-          order and the research pages will make sense.
+          The ideas behind every strategy in this repository, shown with
+          animations computed by the rules engine. Read these in order and the
+          research pages will make sense.
         </p>
       </div>
       <ol className="grid gap-4 sm:grid-cols-2">

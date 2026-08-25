@@ -547,6 +547,11 @@ By chunk, the paired mean is **−1,581** on seeds `0xa51d1000`–`0xa51d100f` a
 **+48,315** on `0xa51d1010`–`0xa51d101f`. Adding sixteen games moved the point
 estimate by 25,000 points and reversed its sign and its median.
 
+```figure
+depth5-reading-history
+caption: The three recorded readings of the d5s7 minus d4s7 contrast as the cohort grew, against the detection floor at each size. The estimate crossed zero twice while staying far inside the floor: the contrast was never measured.
+```
+
 ### 10.2 So §8's reading is withdrawn too — for a different reason
 
 §8 replaced "depth 5 reverses" with "depth 5 is a wash — depth 3 → 4 → 5 does

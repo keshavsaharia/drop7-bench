@@ -425,7 +425,16 @@ difference being the horizon:
 | **H = 25** | 95 | 73,448 | 73,764 | 73,760 | 74,426 | **+0.964** | **+0.800** |
 
 **Changing only the horizon moves the fair-block Spearman from −0.600 to +0.800.**
-On the full 128-position H = 25 arm both statistics reach +1.000. And unlike
+On the full 128-position H = 25 arm both statistics reach +1.000.
+
+The sign flip, drawn with the summary table's H = 9 numbers beside it:
+
+```figure
+suite-spearman-by-horizon
+caption: Spearman correlation between suite scores and whole-game means, at horizon 9 and horizon 25. The all-policies series was always positive — the suite could tell families apart — but the fair-block series flips from negative to strongly positive when the horizon lets the row-rise term vary. Position counts differ per point and are carried on the labels.
+```
+
+And unlike
 H = 9 the H = 25 result is stable across every slice:
 
 | slice | positions | S over seven | S over the four fair arms |
@@ -1030,7 +1039,7 @@ exist, opening no new seed.
 
 | artifact | disposition |
 | --- | --- |
-| `suite-h9-v1.jsonl` (128 positions, exact optima, PVs, difficulty labels) | **Keep, reclassified as a diagnostic corpus.** It is already load-bearing: `flow-run --cross-check` validates against it and `finding-06` §1 replays its principal variations. Its policy-comparison columns (`fairDepth1/2/4`, `bestShallow`, `gap`) should carry a pointer to §2 of this document |
+| `suite-h9-v1.jsonl` (128 positions, exact optima, PVs, difficulty labels) | **Keep, reclassified as a diagnostic corpus.** `flow-run --cross-check` already validates against it and `finding-06` §1 replays its principal variations. Its policy-comparison columns (`fairDepth1/2/4`, `bestShallow`, `gap`) should carry a pointer to §2 of this document |
 | `sparse-probe-h9-v1.jsonl` | **Keep unchanged.** It answers a question whole games cannot, and `finding-06` §5 already uses it correctly |
 | `data/suite-h9-v1-split-v1.json` | **Keep.** It cost nothing, it is content-hashed, and any future corpus — including the structure probe's train/held-out split — should follow the same rule. Retarget it as the split for diagnostic reuse rather than for tuning a ranked candidate |
 | `posmode.{hpp,cpp}` (position mode) | **Keep the instrument, retire the claim.** It is the repository's only fair multi-tape evaluator and the only thing that can measure a public policy's behaviour at a controlled occupancy. It should not be used to rank candidates |

@@ -1,0 +1,63 @@
+---
+title: The fast engine learns reveal sampling
+family: lifetime-objective
+summary: Ports the native factored chance node (N disc strata x M reveal samples) into the fast memo engine, trace-equivalent to the C0 search at a fraction of the cost.
+status: completed
+evidence: repository-verified
+reads: public
+---
+
+The C0-positive D3 N7M6 policy lived only in the native factored search, at
+seconds per move; the fast engine could only play M = 1. This port teaches the
+fast memo engine the factored chance node so the exact same decisions cost
+milliseconds instead.
+
+<EvidenceLabel status="completed" evidence="repository-verified" reads="public" />
+
+<Callout title="An engineering result, not a strength result" tone="info">
+Nothing about play changes. The port is accepted only as trace-equivalent to
+the native factored search: the same chosen column, the same logical work
+count and the same completed depth on every compared decision, across the
+whole d3/d4 x N5/N7 x M1/M2/M6 grid, plus full replays of retained C0 games
+that reproduce the recorded final scores exactly. Any deviation would have
+reclassified this as a new algorithmic candidate
+(EX-20260823-fast-m6-reveal-sampling-port-be23e203).
+</Callout>
+
+## The traversal order being preserved
+
+At every action node the search tries the legal columns in the frozen order
+3, 2, 4, 1, 5, 0, 6. Each move is then scored under a factored chance node:
+the outer loop runs the N next-disc strata, the inner loop the M reveal
+samples, and iteration (d, r) is scenario s = r*N + d of T = N*M. The cascade
+reveal values come from the stratified stream indexed by (state seed, s, T)
+with events consumed in cascade order; the successor's next disc comes from
+the disc stream indexed by (state seed, d, N) and never depends on r. Work is
+counted once per scenario immediately after the move resolves; the budget is
+checked before every scenario, node and leaf; the action value is the mean
+over all T scenarios. At M = 1 this collapses to s = d, T = N — the untouched
+fast-search path, kept verbatim behind an M == 1 branch.
+
+## Why the one-entry leaf memo survives M > 1
+
+The memo (audit-06) keys on the full board via memcmp plus moves-to-rise and
+recomputes only the next-disc term. A sampled reveal that changes the board
+therefore misses — it can never alias across reveal samples — and a reveal
+sample that leaves the board unchanged hits, exactly as at M = 1. The memo
+sits below the search's work increment, so it cannot change any recorded
+observable; it stays enabled for M > 1, and the gate proves memo-on/off trace
+identity across the whole grid.
+
+## Sources
+
+- `fast-factored-search.hpp` — `FastFactoredSearch`: the fast memo engine with
+  the native factored chance node; M == 1 short-circuits to the verbatim
+  fast-search loop
+- `gate.cpp` — grid trace equivalence vs the genuine native source, C0 replay
+  finals identity, M = 1 bit-identity regression, determinism/mirror/memo
+  gates, play- and continuation-duty timing
+- `build.sh` — generates the no-entry native copies with machine-checked
+  diffs (entry-point rename plus `thread_local` on the five diagnostic
+  atomics only)
+
+Gate artifacts: `runs/RUN-20260823T215500Z-sol/fastm6/`.

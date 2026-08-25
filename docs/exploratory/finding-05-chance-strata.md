@@ -27,7 +27,13 @@ But the effect is not "more samples is better." It is an **interaction**:
 | depth 4: 7 strata − 5 strata | **+101,171** | **+47,457** | +27.50 | 41–0–23 | significant |
 | depth 3: 7 strata − 5 strata | +7,276 | −45,961 | +2.42 | 34–0–30 | not significant |
 | 7 strata: depth 4 − depth 3 | **+86,172** | **+26,468** | +22.39 | 40–0–24 | significant |
-| 5 strata: depth 4 − depth 3 | +7,723 | −42,743 | +2.69 | 29–0–35 | not significant |
+| 5 strata: depth 3 − depth 4 | +7,723 | −42,743 | +2.69 | 35–0–29 | not significant |
+
+**Correction, 2026-08-24:** this row originally labelled the contrast as depth
+4 minus depth 3 while displaying the reverse contrast's positive score, move
+delta and lower bound. The row now names depth 3 minus depth 4 and orients its
+win–tie–loss count the same way. Equivalently, depth 4 trailed depth 3 by 7,723
+points and 2.69 moves. The significance verdict is unchanged.
 
 **With a biased chance estimator, the fourth ply buys nothing. With an exact
 one, it is worth 86,000 points.** Depth and estimator quality are complements,

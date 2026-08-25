@@ -1,0 +1,28 @@
+{
+  "title": "Fast-engine speedups over the unoptimised reference — about 3x, not the hoped-for 5–10x",
+  "kind": "bar",
+  "x": { "label": "configuration (games = paired whole games; decision/probe = per-decision)" },
+  "y": { "label": "speedup vs unoptimised reference", "unit": "x" },
+  "notes": "Engineering evidence, CHECK tier: no score, strength or ranking claim is made anywhere. finding-13 section 0 headline table, all ratios measured back-to-back or interleaved in one process on a machine shared at load 14-57 — ratios are the trustworthy quantity; absolute times are inflated roughly 3x at load 50 relative to load 15, and an earlier SEQUENTIAL (non-interleaved) measurement of the same stack reported an illusory 5.51x that vanished under interleaving (recorded as the load-drift lesson). Behind every bar: identical selected columns (306 gated search moves plus 438,020 gated engine moves), identical logical work at all nine (depth, strata) configurations, identical completed depth, bit-identical leaf values over 225,183 states, and whole-game identity on the 64-game cohort (704 field comparisons, finding-15 section 1). The leaf-memo bars are a separate record (RS-20260822T074305Z-bd1697c8, metrics.timingIndicative): one-entry memo, interleaved plain/memo under load ~31, 12 roots x 3 reps (d4s5) and 6 roots x 2 reps (d4s7), flagged indicative by the record itself; the memo is deliberately NOT shipped (finding-13 section 8.4 — a cache-semantics change needing its own declaration). Not a clean performance baseline under docs/benchmarks.md; nothing here may enter research/benchmarks/profiles-v1.json.",
+  "series": [
+    {
+      "name": "fast engine (finding-13)",
+      "points": [
+        { "x": "decision d4s5", "y": 3.08, "label": "whole-decision ablation, one thread, variants interleaved within each repeat, load ~22; the leaf carries 2.61 of the 3.08", "sourceRecord": "docs/exploratory/finding-13-fast-engine.md", "sourceField": "section 0 headline table; section 3.3 ablation" },
+        { "x": "games d3s5", "y": 3.01, "label": "paired whole games in one process, best of 3 repeats, 435 moves; score/moves/work asserted identical", "sourceRecord": "docs/exploratory/finding-13-fast-engine.md", "sourceField": "section 0 headline table; section 5" },
+        { "x": "games d3s7", "y": 3.09, "label": "paired whole games, 345 moves; identical outcomes", "sourceRecord": "docs/exploratory/finding-13-fast-engine.md", "sourceField": "section 0 headline table; section 5" },
+        { "x": "games d4s5", "y": 2.88, "label": "paired whole games, 60 moves; identical outcomes", "sourceRecord": "docs/exploratory/finding-13-fast-engine.md", "sourceField": "section 0 headline table; section 5" },
+        { "x": "games d4s7", "y": 2.93, "label": "paired whole games, 12 moves; identical outcomes", "sourceRecord": "docs/exploratory/finding-13-fast-engine.md", "sourceField": "section 0 headline table; section 5" },
+        { "x": "probe d5s7", "y": 3.23, "label": "per-decision probe, 3 fixed real roots, both arms; 55,765,609 work per decision at cache 200,000", "sourceRecord": "docs/exploratory/finding-13-fast-engine.md", "sourceField": "section 0 headline table; section 5 probe table" }
+      ]
+    },
+    {
+      "name": "one-entry leaf memo (indicative)",
+      "dashed": true,
+      "points": [
+        { "x": "leaf memo d4s5", "y": 1.581, "label": "memo hit rate 61.74%; 12 real roots x 3 reps, load ~31; indicative timing, not shipped", "sourceRecord": "RS-20260822T074305Z-bd1697c8", "sourceField": "metrics.timingIndicative.d4s5" },
+        { "x": "leaf memo d4s7", "y": 1.634, "label": "memo hit rate 68.47%; 6 roots x 2 reps, load ~31; indicative timing, not shipped", "sourceRecord": "RS-20260822T074305Z-bd1697c8", "sourceField": "metrics.timingIndicative.d4s7" }
+      ]
+    }
+  ]
+}

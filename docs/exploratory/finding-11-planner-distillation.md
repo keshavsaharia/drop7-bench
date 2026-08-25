@@ -674,8 +674,8 @@ Stated precisely, with the direction of every bound made explicit:
 2. **The exploration cohort of the preregistration was not generated.**
    PREREGISTRATION §6 lists a 96-game ε = 0.15 cohort for state coverage off the
    teacher's own trajectory. The machine was shared with three other jobs at
-   load averages near 50 and the paired comparator of §3.1 was judged
-   load-bearing while the exploration cohort was not, so the driver was stopped
+   load averages near 50 and the paired comparator of §3.1 was treated as
+   required while the exploration cohort was not, so the driver was stopped
    after cohort A. **The corpus is therefore entirely on-policy**, and
    distribution shift — audit-05's class (ii), one failure of seventeen — is
    untested here. This deviation is recorded rather than hidden.

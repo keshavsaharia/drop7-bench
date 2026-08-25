@@ -1,0 +1,72 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260824T010000Z-8f3e9b4f",
+  "theoryIds": [
+    "TH-20260823-sibling-outcome-labels-fix-leaf-0c3d480d"
+  ],
+  "experimentId": "EX-20260823-fast-m6-reveal-sampling-port-be23e203",
+  "runIds": [
+    "RUN-20260824T005500Z-4cde9171"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "pass",
+  "assessment": "supported-as-tested",
+  "evidenceTier": "mechanics-only",
+  "summary": "E-FAST-M6 passes: factored reveal sampling (N disc strata x M reveal samples, native scenario indexing s = r*N + d over T = N*M) is ported into the fast memo engine as drop7::fastr::FastFactoredSearch and is trace-equivalent to the native FactoredSearch. Grid gate: 6,300 live probe decisions (525 per point over d3/d4 x N5/N7 x M1/M2/M6) with 0 column, 0 work-count and 0 completed-depth mismatches, including 549 work-limited decisions on the two budget-capped d4-M6 points where both engines degrade to completed depth 3 identically. All 3 retained C0 games replay to byte-for-value final identity with the fast engine driving (335 decisions, 0 mismatches). M=1 regression: 2,100 decisions x {memo-on, memo-off} bit-identical to the untouched fast::FastSearch on all six metric fields. Determinism byte-identical across repeated runs and {26,7,1} threads; mirror invariance exact with symmetric boards excluded (finding-13 4C; one disclosed gate-harness iteration); the one-entry leaf memo stays enabled under M>1 (board-memcmp keying cannot alias across reveal samples) with memo-on/off trace identity across the grid. Continuation duty: 8 CRN continuations (2 C0 roots, K=4, H=40) byte-identical to native. Realised speedup at d3 N7M6 is 5.5-5.8x (play duty 2.140 -> 0.385 s/move; continuation duty 0.990 -> 0.177 s/move; grid 4.38-5.87x across points), measured under the gate's own 26-thread load - well below the 10-40x hoped for in the hypothesis, because that figure divided native M6 seconds by fast M1 seconds and ignored the ~27x work ratio. P-SOL continuation labels at native D3 N7M6 semantics now cost ~0.18 s/move instead of ~1-3.4 s/move.",
+  "metrics": {
+    "gridDecisions": 6300,
+    "gridMismatches": {"column": 0, "work": 0, "completedDepth": 0},
+    "gridPointsAtLeast500Decisions": "12/12 (525 each)",
+    "c0Replay": {"games": 3, "decisions": 335, "mismatches": 0, "finalsIdentical": "3/3 (320871/95, 381355/110, 463094/130)"},
+    "m1Regression": {"decisions": 2100, "comparators": "fast::FastSearch vs port memo-on and memo-off", "metricFieldMismatches": 0},
+    "determinism": "subset output byte-identical across {repeat, 26, 7, 1} threads (sha256 645a2bb8977f4e86ad95c048964186061970183179ae615159dde8cccb0aed97)",
+    "memoUnderM6": "enabled; memo-on/off trace identity on all 12 grid points and 2,100 M=1 decisions; no aliasing possible (full-board memcmp key below the work increment)",
+    "continuationDuty": {"continuations": 8, "outcomeMismatches": 0, "nativeCpuSecondsPerMove": 0.9904, "fastCpuSecondsPerMove": 0.1767, "speedup": 5.6},
+    "playDuty": {"nativeCpuSecondsPerMove": 2.1397, "fastCpuSecondsPerMove": 0.3847, "speedup": 5.56},
+    "gridSpeedupRange": "4.38-5.87x (per-point table in timing.json)",
+    "testSuites": "npm test pass; make test pass (parity 256 seeds / 6,852 moves exact)"
+  },
+  "gateChecks": [
+    {
+      "criterion": "Equivalence: >= 500 live decisions per grid point over d3/d4 x N5/N7 x M1/M2/M6 on probe seeds and >= 3 full replayed C0 games, 0 column/work/completed-depth mismatches vs the native factored search",
+      "passed": true,
+      "observed": "525 decisions per point (6,300 total), 0/0/0 mismatches; per-point native and fast trace hashes identical; 3 C0 replays with 0 mismatches and all finals byte-for-value identical to runs/RUN-A525-reveal/d3-n7-m6.json"
+    },
+    {
+      "criterion": "M=1 regression: the port at M=1 remains bit-identical to the existing fast search",
+      "passed": true,
+      "observed": "2,100 decisions x memo-on and memo-off vs fast::FastSearch: 0 mismatches on action, completed_depth, nodes, work, cache_hits, cache_entries"
+    },
+    {
+      "criterion": "Determinism: byte-identical outputs across two runs and across thread counts; mirror invariance of decisions",
+      "passed": true,
+      "observed": "subset artifact byte-identical across {repeat at 26, 7, 1} threads; mirror invariance 0 mismatches on 114 asymmetric-board decisions (18 mirror-symmetric boards excluded per finding-13 4C; iteration 1's harness compared symmetric boards and is disclosed in gates.log)"
+    },
+    {
+      "criterion": "npm test and make test pass; default random-reveal behaviour byte-identical (latent-mode contract untouched)",
+      "passed": true,
+      "observed": "npm test pass; make test pass including TypeScript/native parity (256 seeds, 6,852 moves, exact); the change is additive (new approach directory only) and touches no engine source"
+    }
+  ],
+  "perGameArtifact": {
+    "path": "runs/RUN-20260823T215500Z-sol/fastm6/equivalence.json",
+    "sha256": "47ce32d946b75c56d111dfa66d7f1fd871ea837ccf31e7e522e25e8db35cbbfe",
+    "recordCount": 12
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260820T080056Z-376ada90.json"
+  ],
+  "artifactManifestRef": null,
+  "limitations": [
+    "The two d4 M=6 grid points run under disclosed budget-capped work bounds (51,084,852 and 100,000,000) rather than their infeasible worst-case bounds; this deliberately exercises the work-limit and LRU-eviction paths, but full-depth d4-M6 completion is not itself gated (the C0 configuration d3 N7M6 uses its exact retained bounds).",
+    "Timing was measured with CLOCK_THREAD_CPUTIME_ID while the gate itself loaded 26 threads; idle-host per-move times will be lower for both engines, and the speedup ratio (4.4-5.9x) is the robust figure, not the absolute times.",
+    "The realised speedup is ~5.5-5.8x at d3 N7M6, not the 10-40x the hypothesis projected from an M1-vs-M6 comparison; the P-SOL-3 successor's budget must be re-planned from the measured 0.177 s/move continuation rate.",
+    "Total CPU seconds are measured for stage E and rate-derived for the resumed stages (run record measurementNotes).",
+    "Self-reported; the run includes one disclosed external task kill (resumed between stages) and one disclosed gate-harness iteration on stage D."
+  ],
+  "contributionIds": [
+    "CT-20260824T005543Z-e3c8bfea"
+  ],
+  "recordedAt": "2026-08-24T01:00:00Z"
+}

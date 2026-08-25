@@ -1,0 +1,51 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260823T215500Z-fc74e0b4",
+  "experimentId": "EX-20260823-sol-corpus-and-offline-gate-4d3d86e4",
+  "lifecycle": "running",
+  "runValidity": "partial",
+  "startedAt": "2026-08-23T21:39:50Z",
+  "endedAt": "2026-08-23T21:44:36Z",
+  "protocolSha256": "017a6bcd6a44ce65ef961259e10618470213e6494236aeac3a6917d704797a37",
+  "machineProfileRef": "research/system-profiles/MACH-20260820T080056Z-376ada90.json",
+  "sourceState": {
+    "gitCommit": "49b46310315bd79f70ec3501a53cbdfab4853d3c",
+    "dirty": true,
+    "diffSha256": "0992a810bab833b2ed6399fc5b6d1e634fa1d80031e046433cd77bbcb4734d4f",
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "stage G0 gates: runs/RUN-20260823T215500Z-sol/g0/run-gates.sh <scratch> (pristine v1 binary built from git HEAD 49b4631 via git archive; gates A byte-identity / B determinism / C mirror invariance / D legality / E D3-N7M6 timing pilot, all on the already-open smoke seeds 0xa51d8000+16; log: runs/RUN-20260823T215500Z-sol/g0/gates.log)",
+    "stage G0 S1 projection: python3 runs/RUN-20260823T215500Z-sol/g0/project-budget.py (writes ladder.json; inputs: timing-pilot-d3n7m6.json and the retained C0 artifact runs/RUN-A525-reveal/d3-n7-m6.json)"
+  ],
+  "seedLeaseRefs": [
+    "SL-20260823T215000Z-a5216000"
+  ],
+  "resourceLimits": {
+    "wallSeconds": 12600,
+    "cpuThreads": 26,
+    "maxHostBytes": 34359738368,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": 289,
+    "cpuSeconds": 1450,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "Gates + pilot ran 2026-08-23T21:39:50Z-21:42:46Z on up to 26 threads; cpuSeconds is the sum of the per-run rusage figures in the panel2 summaries (pilot 589, B2 determinism runs 361, B1 runs 98) plus ~400 estimated for the gate-A v1 runs and mirror checks, which do not emit rusage. Host shared with text-only agent sessions. Budget consumed is ~0.4 CPU-h of the 16 CPU-h work-package cap; the preregistered 12.77+0.73 CPU-h G0 lines were never started (S1)."
+  },
+  "exitCode": 0,
+  "stopReason": "Stop rule S1: every D3 N7M6 stage of G0 projects to >= 19.6x its preregistered budget line (favorable bound; 76.7x at the C0 full-game cost) because the design's 292 moves/s premise belongs to the single-knob depth-3 N5M1 search, not the frozen C0 engine (N=7, M=6, work 51,084,852) at ~1.75-6.83 CPU-s per decision. Halted for coordinator decision BEFORE the first leased seed was read: lease SL-20260823T215000Z-a5216000 remains reserved with openedAt null, and no mini-ladder or ladder tau exists. Gates A-D all PASS; the panel2 pipeline is complete and validated on smoke seeds. Details: runs/RUN-20260823T215500Z-sol/g0/ladder.json and gates.log.",
+  "artifactRefs": [
+    "runs/RUN-20260823T215500Z-sol/g0/gates.log",
+    "runs/RUN-20260823T215500Z-sol/g0/ladder.json",
+    "runs/RUN-20260823T215500Z-sol/g0/timing-pilot-d3n7m6.json",
+    "runs/RUN-20260823T215500Z-sol/g0/smoke-ladder-demo.json",
+    "runs/RUN-20260823T215500Z-sol/g0/run-gates.sh",
+    "runs/RUN-20260823T215500Z-sol/g0/project-budget.py"
+  ],
+  "contributionIds": [
+    "CT-20260823T214221Z-21e433d9"
+  ]
+}

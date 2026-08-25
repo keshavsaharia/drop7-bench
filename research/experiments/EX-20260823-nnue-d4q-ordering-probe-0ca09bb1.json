@@ -1,0 +1,89 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260823-nnue-d4q-ordering-probe-0ca09bb1",
+  "theoryIds": [
+    "TH-20260823-nnue-class-holds-d4-ordering-c7b397a5"
+  ],
+  "title": "NNUE-class student on existing successor-closed D4 labels: within-root ordering probe",
+  "classification": "diagnostic",
+  "hypothesis": "Train a LeafNet-shaped student (features exactly approaches/lifetime-objective/learned-leaf/leaf_features.py applied to the afterstate board, next disc and moves-remaining columns of runs/RUN-20260821T085042Z-c5cf0e71/d4q-labels/d4q-labels.tsv; EmbeddingBag(8902,64,sum)->ReLU->Linear(64,32)->ReLU->Linear(32,1)) on the existing successor-closed exact D4 sibling values (291,890 rows, 8,639 roots, fold column as written by the d4q experiment: its train/validation/held-out origins are reused unchanged). Loss: within-root listwise softmax cross-entropy over the root's legal siblings against softmax(value/T) with T fixed at the root's value spread times 0.18 as in d4-q-clone, plus gap-weighted pairwise margin, plus 0.1 absolute MSE anchor on standardised value. 5 initialisation seeds (0xA52E01-05), 30 epochs, Adam 1e-3, batch 256 roots, OPENBLAS_NUM_THREADS=1, CPU or GPU via approaches/lifetime-objective/gpu/activate.sh. Model selection uses validation origins only; the held-out half-folds are read once for the selected seed and reported for all five.",
+  "candidate": {
+    "name": "LeafNet h64/m32 listwise student on d4q labels",
+    "entryPoint": null,
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "exact fair D4 ordering (d4q labels); exact D1 0.486 and D2 0.568 top-1 as calibration",
+    "entryPoint": "approaches/afterstate-learning/distributional-afterstate/d4q.py",
+    "manifestRef": null
+  },
+  "informationBoundary": "seed-free",
+  "benchmarkTier": "CHECK",
+  "data": {
+    "role": "no-gameplay",
+    "seedLeaseRefs": [],
+    "datasetRefs": [],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "Reads only runs/RUN-20260821T085042Z-c5cf0e71/d4q-labels (training-role roots from the 0xa52... corpus family, already opened by EX-20260821 afterstate-d4q-stage1, RS-20260821T104500Z-77d21e90). The held-out fold was already read once by that experiment, so this is a diagnostic-tier read; no new seed is opened. A pass licenses only a fresh-manifest confirmation."
+  },
+  "metrics": {
+    "primary": "held-out within-root top-1 agreement with exact D4, per half-fold",
+    "secondary": [
+      "pairwise accuracy",
+      "normalised regret (d4q.py definition)",
+      "top-2",
+      "validation-fold metrics for all 5 seeds",
+      "spread across seeds",
+      "inference cost per state of the exported student (informational)"
+    ],
+    "statisticalUnit": "root",
+    "uncertaintyMethod": "half-fold agreement plus seed spread; no interval claimed beyond the d4q gate's own"
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "Selected seed (best validation top-1) held-out top-1 >= 0.60 in each half-fold.",
+      "Pairwise >= 0.78 in each half-fold.",
+      "Normalised regret <= 0.13 in each half-fold."
+    ],
+    "failureAction": "Record valid + fail at CHECK (diagnostic): no leaf-affordable NNUE-class student of this size reproduces D4's ordering from these labels; the self-play loop TH-20260821-...-299ed02f stays blocked in its leaf form and its redesign is routed to the larger-student question.",
+    "passAction": "Record valid + pass (diagnostic, not evidence); register a fresh whole-origin label manifest confirmation (~5 CPU-h of label-d4q) as a successor experiment before any claim that stage 1 of the loop is unblocked."
+  },
+  "resources": {
+    "wallSeconds": 5400,
+    "cpuThreads": 8,
+    "maxHostBytes": 17179869184,
+    "maxGpuBytes": 8589934592,
+    "gpuDevices": [
+      "gfx1151 (optional)"
+    ]
+  },
+  "stopConditions": [
+    "Stop at 5,400 wall-seconds; record partial.",
+    "Stop if the label file's root count or row count differs from 8,639 / 291,890 (wrong artifact).",
+    "Stop on any NaN loss; record invalid for that seed."
+  ],
+  "expectedArtifacts": [
+    "runs/RUN-20260823T191900Z-b9f8f80d/kimi-k3-open-items.md (design K4-D probe, Kimi K3)",
+    "runs/RUN-20260823T191900Z-b9f8f80d/probe/train.log",
+    "runs/RUN-20260823T191900Z-b9f8f80d/probe/metrics.json (all seeds, validation and held-out)",
+    "runs/RUN-20260823T191900Z-b9f8f80d/probe/model-seed*.pt"
+  ],
+  "lifecycle": "completed",
+  "protocolSha256": "8a193bea0db608666915dbd1b5ce147d347f664c751d32fd5bf5c9fb5279ff98",
+  "amendments": [
+    {
+      "timestamp": "2026-08-23T20:56:11Z",
+      "beforeControlledData": false,
+      "reason": "Closed out after the run: lifecycle set to completed and the hash recomputed over the completed record, as EX-20260823-reveal-construction-screen-371fd638 and EX-20260823-hpool-stage-d0-e0ad1c65 were. The run record research/runs/RUN-20260823T193853Z-5abd7c95.json retains the preregistration hash 6c820078c386240d8b69ad74febce7303b040f520db96ad13a3754c3cbe2c376. Two coefficients the hypothesis text did not fix (pairwise weight 1.0; prediction-side softmax temperature 1 in standardised units) are recorded as limitations in the result."
+    }
+  ],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": null
+  },
+  "createdAt": "2026-08-23T19:30:08Z",
+  "updatedAt": "2026-08-23T20:56:11Z"
+}

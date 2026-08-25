@@ -1,0 +1,168 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260823T131226Z-16564ed9",
+  "theoryIds": [
+    "TH-20260823-reveal-construction-leaf-e8f7c78d"
+  ],
+  "experimentId": "EX-20260823-reveal-construction-screen-v2-63d73b6a",
+  "runIds": [
+    "RUN-20260823T110735Z-ba69c025"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "fail",
+  "assessment": "not-supported-as-tested",
+  "evidenceTier": "public-development",
+  "summary": "Paired 256-game SCREEN on fresh seeds 0xa52d0200-0xa52d02ff, fair D4 at seven strata with the memo engine. The preregistered primary arm A300 (aligned_double_hit +300) and the bundle arm B changed the unchanged search's column in 0.69% and 0.70% of decisions at the 32-game rarity check, below the 1% rule, and were stopped as no-measurements (partials: A300 -4,298 on 39 games, B +18,213 on 36 games, both far inside their floors). The dose arm A900 (aligned_double_hit +900), read as primary per the gate text, completed 256 games: mean 389,749 vs 386,545, paired delta +3,204 points (one-sided 95% bootstrap lower bound -26,860; Student-t -27,863; detection floor 30,957; paired sd 301,098), moves 112.55 vs 111.59 (+0.97), W-T-L 99-53-104, Q25 +18,534 (non-regression met), halves +48,762 and -42,354 (opposite signs: fail), coverage 598/28,814 = 2.08% (measured, not rarity). Predeclared mechanism directions were absent: cover reveals per move 1.1520 vs 1.1536, numbered clears per move 2.0541 vs 2.0551, occupancy 23.32 vs 23.22. Gate: FAIL. The term re-ranks about one decision in fifty at +900 and those re-rankings add no reveal flow; the score delta is a non-measurement for effects under about 31,000 points, but the flat flow statistics, whose paired noise is far smaller, reject the mechanism itself. The frozen arm is also the largest fresh-seed fair-D4 seven-stratum cohort on record: 386,545 points, 111.59 moves, 2.0551 clears and 1.1536 reveals per move over 256 never-read games, consistent with the 64-game 398,498 reference.",
+  "metrics": {
+    "A900_minus_frozen": {
+      "games": 256,
+      "meanScoreCandidate": 389749,
+      "meanScoreReference": 386545,
+      "pairedDelta": 3204,
+      "bootstrapLB95": -26860,
+      "studentTLB95": -27863,
+      "detectionFloor": 30957,
+      "pairedSd": 301098,
+      "winTieLoss": "99-53-104",
+      "medianCandidate": 326048,
+      "medianReference": 313466,
+      "q25Candidate": 215187,
+      "q25Reference": 196653,
+      "q25Delta": 18534,
+      "minCandidate": 102610,
+      "minReference": 102894,
+      "maxCandidate": 1976127,
+      "maxReference": 1656350,
+      "halves": [
+        48762,
+        -42354
+      ],
+      "movesCandidate": 112.55,
+      "movesReference": 111.59,
+      "movesDelta": 0.97,
+      "movesBootstrapLB95": -7.17
+    },
+    "flow": {
+      "A900": {
+        "numberedClearsPerMove": 2.0541,
+        "coverRevealsPerMove": 1.152,
+        "meanOccupiedCells": 23.32,
+        "maxChainDepth": 14
+      },
+      "frozen": {
+        "numberedClearsPerMove": 2.0551,
+        "coverRevealsPerMove": 1.1536,
+        "meanOccupiedCells": 23.22,
+        "maxChainDepth": 12
+      }
+    },
+    "coverage": {
+      "A900": {
+        "divergentDecisions": 598,
+        "shadowDecisions": 28814,
+        "rate": 0.0208
+      },
+      "A300_at_stop": {
+        "divergentDecisions": 27,
+        "shadowDecisions": 4052,
+        "rate": 0.0067,
+        "completedGames": 39
+      },
+      "B_at_stop": {
+        "divergentDecisions": 26,
+        "shadowDecisions": 3745,
+        "rate": 0.0069,
+        "completedGames": 36
+      }
+    },
+    "stoppedArms": {
+      "A300": {
+        "games": 39,
+        "pairedDelta": -4298,
+        "bootstrapLB95": -41726
+      },
+      "B": {
+        "games": 36,
+        "pairedDelta": 18213,
+        "bootstrapLB95": -35413
+      }
+    },
+    "integrity": {
+      "incompleteDecisions": 0,
+      "illegalDecisions": 0,
+      "censoredGames": 0,
+      "memoHitRate": {
+        "frozen": 0.648276,
+        "A900": 0.648392
+      },
+      "maxWork": 11892399,
+      "wallSecondsStage2": 5299
+    },
+    "frozenArmFreshBaseline": {
+      "games": 256,
+      "meanScore": 386545,
+      "meanMoves": 111.59,
+      "numberedClearsPerMove": 2.0551,
+      "coverRevealsPerMove": 1.1536,
+      "gamesAtOrAboveMillion": null
+    }
+  },
+  "gateChecks": [
+    {
+      "criterion": "CHECK gates at the frozen term source",
+      "passed": true,
+      "observed": "0 mismatches (gates.log, gates-phase3.log)"
+    },
+    {
+      "criterion": "Artifacts carry the lease and role; 0 incomplete and 0 illegal decisions",
+      "passed": true,
+      "observed": "SL-20260823T110000Z-a52d0200 / public-development; 0 / 0"
+    },
+    {
+      "criterion": "A300 coverage >= 2% (else inconclusive by rarity, A900 read as primary)",
+      "passed": false,
+      "observed": "0.69% at the 32-game rarity check; arm stopped; A900 read as primary at 2.08%"
+    },
+    {
+      "criterion": "Primary minus frozen: bootstrap and Student-t one-sided 95% lower bounds > 0",
+      "passed": false,
+      "observed": "A900: +3,204; LB -26,860 / -27,863"
+    },
+    {
+      "criterion": "Primary: Q25 non-regression AND both halves > 0",
+      "passed": false,
+      "observed": "Q25 +18,534 (met); halves +48,762 / -42,354 (opposite signs)"
+    },
+    {
+      "criterion": "Mechanism (reported): reveals per move above frozen",
+      "passed": false,
+      "observed": "1.1520 vs 1.1536"
+    }
+  ],
+  "perGameArtifact": {
+    "path": "runs/RUN-20260823T110735Z-ba69c025/screen.A900.json",
+    "sha256": "bcc4bc41761ec9bc14e8945f38af23e85506de2a8695eb8e9ce08383edf9e459",
+    "recordCount": 256
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260820T080056Z-376ada90.json"
+  ],
+  "artifactManifestRef": null,
+  "limitations": [
+    "A score null inside a 30,957-point floor is a non-measurement for effects below that size; the rejection rests on the flat flow statistics and the opposite-sign halves, not on the score delta.",
+    "The preregistered primary dose (+300) could not be measured: it changed under 1% of decisions and was stopped by the rarity rule; the +900 dose was read as primary under the gate's own clause and is therefore a pass-or-fail at a dose chosen after a rarity null.",
+    "The runner has no per-arm stop; the operator killed the four-arm run after the 32-game check and relaunched frozen + A900 on the same seeds (deterministic; the frozen arm reproduces stage-1 games exactly). Stage-1 partials are retained under stopped-at-32/.",
+    "The corpus value gate for this term failed before this screen (RS-20260823T110000Z-baecb816) and was disclosed in the protocol; this result is the in-play test that the blind review asked for.",
+    "Single cohort, public-development tier; not independently replicated.",
+    "The frozen-arm fresh baseline is a by-product and has not been registered as a benchmark manifest."
+  ],
+  "contributionIds": [
+    "CT-20260823T094848Z-7492d61e",
+    "CT-20260823T105658Z-8e168502",
+    "CT-20260823T111554Z-ed13568f",
+    "CT-20260823T131255Z-947ede69",
+    "CT-20260823T131256Z-ed38b778"
+  ],
+  "recordedAt": "2026-08-23T13:12:26Z"
+}

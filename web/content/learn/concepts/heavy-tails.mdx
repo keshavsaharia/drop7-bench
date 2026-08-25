@@ -5,11 +5,9 @@ order: 7
 ---
 
 The goal of this project is a policy whose **mean** score over many games is
-above one million points. That word does a lot of work. Somewhere in this
-repository is a record of a single depth-4 game that scored 1,246,684 points,
-and the research status page files it under *"Anecdote; not an average or
-qualification"*. That distinction is correct, and it determines what it takes
-instead.
+above one million points. A retained 64-game fair-D4 cohort contains one game
+that scored 1,017,234 points, but the same policy averaged 321,991.72 on that
+cohort. The single game is a milestone, not a qualification.
 
 ## Sixty-four games, one dot each
 
@@ -21,7 +19,7 @@ fair depth-4 expectimax, over 64 complete games.
 The shape is the point. Most games cluster low. A long thin tail runs off to the
 right. At the far end sits a genuine million-point game worth 1,017,234 points.
 Yet the same policy averaged
-321,991.72 and whose median was 266,282.
+321,991.72, and its median was 266,282.
 
 That single game is not a fluke to be explained away, and it is not evidence of
 a million-point policy either. **It is what a heavy tail looks like.**
@@ -56,28 +54,25 @@ Every recorded figure for the reference policy, on one axis, with the target:
     { label: "fair D4, mean of 64 games", value: 308295.578, display: "308,295.578", evidence: "ledger-recorded; broader reference cohort (status.md)" },
     { label: "fair D4, mean of 64 fresh-seed games", value: 321991.71875, display: "321,991.72", evidence: "development tier; finding 01, reproduced 2026-08-20" },
     { label: "median of those 64 fresh-seed games", value: 266282, display: "266,282", evidence: "recorded in the same run" },
-    { label: "best single game in that cohort", value: 1017234, display: "1,017,234", evidence: "one game, 280 moves, seed 0xa51d0033", tone: "anecdote" },
-    { label: "one D4 game", value: 1246684, display: "1,246,684", evidence: "task-record only; an anecdote, not an average", tone: "anecdote" }
+    { label: "best single game in that cohort", value: 1017234, display: "1,017,234", evidence: "one game, 280 moves, seed 0xa51d0033", tone: "anecdote" }
   ]}
   caption="Grey bars are single games and are not comparable with the means above them. The 8-game and 64-game ledger figures are different cohorts of the same policy; the gap between 400,675.25 and 308,295.578 is what a small sample does to a heavy-tailed mean, not a change in the policy." />
 
 Look at the first two rows. The same reference policy measured 400,675.25 over
 eight games and 308,295.578 over 64. Nothing about the policy changed. Eight
-games is simply not enough to pin down the mean of a distribution with a tail
+games is not enough to pin down the mean of a distribution with a tail
 this long, which is exactly why the repository's benchmark contract calls a
 1–8 game run a `PILOT`, whose entire permitted purpose is to *"find bugs and
 project runtime/memory"* with **no strength claim**
 ([benchmark contract](/docs/benchmarks)).
 
-Now look at the last two rows. A single million-point game is above the target
-line. It says nothing whatsoever about the mean, because you can always find the
-best game in a sample, and the best game of a heavy-tailed sample is always
-impressive.
+Now look at the last row. A single million-point game is above the target line,
+but the cohort mean is not.
 
 <Callout title="A single game can never qualify" tone="warn">
 The frozen validation protocol asks for a mean above one million over hundreds
-of games, on data the candidate has never seen, three times over. No single
-game, however large, is a step towards that; only the average is.
+of games, on data the candidate has never seen, three times over. A single game
+can be a milestone, but it cannot satisfy any qualification stage.
 </Callout>
 
 ## Comparing two policies: pair the games
@@ -135,8 +130,8 @@ The qualification ladder is built from these bounds:
 candidate has qualified and that neither the protected nor the final seeds have
 been opened.*
 
-Note the gap between the first two rows: the development gate demands 1,050,000,
-not 1,000,000. That margin exists because a mean measured on data you were
+The development gate demands 1,050,000, not 1,000,000. That margin exists
+because a mean measured on data you were
 allowed to look at is optimistic, and a heavy tail makes it more optimistic
 still.
 
@@ -149,11 +144,10 @@ still.
   matter how large.
 - **Ask whether it was paired.** An unpaired comparison of two policies on
   different seeds is mostly measuring luck.
-- **Ask what the label says.** This repository marks every figure
-  `task-record only`, `ledger-recorded`, `repository-verified` or `reproduced`,
-  and those words are not decoration. The 1,246,684-point game is
-  `task-record only`: it survives as a note in a conversation record, with no
-  run artifact behind it.
+- **Ask what the label says.** This repository marks figures as
+  `task-record only`, `ledger-recorded`, `repository-verified` or `reproduced`.
+  Those labels distinguish a retained run from a result preserved only in the
+  historical record.
 
 <TechnicalDetails title="The technical record">
 
@@ -175,10 +169,6 @@ against depth-3's 235,071.25 over the same 8. These are the ledger-recorded entr
 in [`docs/research/status.md`](/docs/research/status), labelled there as a small
 confirmation cohort and a broader reference cohort respectively. They are
 different cohorts from the finding-01 run above and must not be pooled.
-
-**The 1,246,684-point game** appears in the status snapshot as `task-record
-only`, with the explicit note "Anecdote; not an average or qualification". No
-run artifact for it exists in this checkout.
 
 **Statistical rules.** The independent unit is a complete game; report mean,
 median, lower quartile and minimum score, mean and lower-quartile lifetime,

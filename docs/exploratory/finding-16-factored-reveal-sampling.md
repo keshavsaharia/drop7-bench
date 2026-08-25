@@ -35,6 +35,13 @@ joint outcomes and those seven were perfectly correlated. Factoring the chance
 node into `--disc-samples N` × `--reveal-samples M` and raising `M` from one to
 six at depth 3 was worth **+64,116 points [95% lower bound +7,475]**.
 
+What the `M` parameter actually does inside a look-ahead, drawn:
+
+```diagram
+diagram-reveal-sampling
+caption: A covered gray disc has no value until the engine reveals it, so a search whose imagined cascade cracks one must guess the draw — M is how many guesses it averages, and averaging more can change which column looks best.
+```
+
 It closed with two named open arms and one explicit question:
 
 > **Still open:** whether the two axes *compound* when used together. The arm
@@ -96,7 +103,7 @@ depth 3 in the direction of the effect if not its significance.
 
 **2. The delta is negative but not significantly negative.** The same estimator
 puts the one-sided 95% *upper* bound at **+17,541**. Read it as "buys nothing
-measurable", not as "harms". That ceiling is the load-bearing number: had the
+measurable", not as "harms". Had the
 two axes compounded even at a quarter of the +64,116 the same knob is worth at
 depth 3, 64 paired games would have had to show it. The sign is also stable
 across both cohort halves — **−11,082** on seeds `0xa51d1000`–`0xa51d101f` and
@@ -135,6 +142,11 @@ coverage**:
 | N=7, M=3 | 42.9% | 337,306 | 98.70 | 2.0033 | 1.1111 | 23.81 |
 | **N=7, M=6** | 85.7% | **376,442** | **109.45** | **2.0447** | **1.1423** | 23.49 |
 | N=7, M=12 | **100.0%** | 349,345 | 101.92 | 2.0231 | 1.1309 | **23.39** |
+
+```figure
+reveal-ladder-saturation
+caption: The table as a curve: mean score against joint (disc, reveal) coverage. The turnover one step before full coverage is the finding; the M=6 to M=12 step is saturation, not regression.
+```
 
 **Say this as saturation, not as regression.** The M=6 → M=12 step is −27,097
 with an interval of **(−83,807, +31,209)** and 28-0-36: it does not clear zero

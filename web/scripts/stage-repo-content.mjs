@@ -50,11 +50,11 @@ for (const directory of ["approaches", "docs", "research", "src"]) {
 
 const stagedWebRoot = join(stagedRoot, "web");
 mkdirSync(stagedWebRoot, { recursive: true });
-cpSync(
-  join(webRoot, "content", "competition"),
-  join(stagedWebRoot, "content", "competition"),
-  { recursive: true },
-);
+for (const contentDir of ["competition", "figures"]) {
+  const source = join(webRoot, "content", contentDir);
+  if (!existsSync(source)) continue;
+  cpSync(source, join(stagedWebRoot, "content", contentDir), { recursive: true });
+}
 for (const { manifest, artifactPath } of competitionArtifacts) {
   const stagedArtifactPath = join(stagedRoot, manifest.artifactPath);
   mkdirSync(dirname(stagedArtifactPath), { recursive: true });

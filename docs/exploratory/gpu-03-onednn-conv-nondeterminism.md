@@ -61,7 +61,7 @@ reported failures on every head, a maximum relative error of 3.5e-2, and a
 lifetime Pearson of 0.99998 instead of 0.9999999999995. Neither run was wrong
 about the C++ code. The *reference* had moved.
 
-The generalisation is the uncomfortable part: **any measurement in this
+**Any measurement in this
 repository that compares something against a CPU PyTorch convolution — an export
 check, a distillation target, a held-out metric, a teacher label — is measuring
 that comparison plus an unknown perturbation of up to ~0.2 per logit**, unless

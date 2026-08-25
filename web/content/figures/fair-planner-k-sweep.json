@@ -1,0 +1,53 @@
+{
+  "title": "Fair planner clears per move against completions K — interior maximum near K=256",
+  "kind": "line",
+  "x": { "label": "completions K", "unit": "samples" },
+  "y": { "label": "numbered clears per move", "unit": "clears/move" },
+  "notes": "Arm B (fully fair planner) on the eight master tapes 0xa5230000-0xa5230007, 400-move cap, pooled clears per move (finding-07 section 1). The H=7 K=1024 point is from finding-12 section 3 and is a 6-of-8-tape subset (arm stopped at six games after four hours); on the same six tapes K=256 measures 2.2125, so the visible turnover is a paired -0.1178. That point belongs to a different sample than the rest of the H=7 series and is labelled as such. finding-07's 'still climbing at K=256' prose is withdrawn by finding-12: the series is unimodal, not asymptotic. Flat dashed series are recorded constants: the clairvoyant planners at the same horizon (2.3496 at H=5, 2.3601 at H=7, finding-07 section 1) and the exact survival requirement 2.400 = 12/5 (finding-01); the generator has no reference-line primitive, so each is drawn as a two-point polyline. The x axis is linear; a log axis was recommended in the plan but is not expressible by the generator. Evidence tier: exploratory; the eight-tape figures are cohort-inflated per finding-12 (fresh-tape values live in flow-requirement-gap).",
+  "series": [
+    {
+      "name": "H=5 (eight tapes)",
+      "points": [
+        { "x": 16, "y": 2.0413, "n": 8, "label": "H=5 K=16", "sourceRecord": "docs/exploratory/finding-07-fair-planning-ceiling.md", "sourceField": "section 1 K-sweep table" },
+        { "x": 64, "y": 2.0373, "n": 8, "label": "H=5 K=64", "sourceRecord": "docs/exploratory/finding-07-fair-planning-ceiling.md", "sourceField": "section 1 K-sweep table" },
+        { "x": 256, "y": 2.168, "n": 8, "label": "H=5 K=256", "sourceRecord": "docs/exploratory/finding-07-fair-planning-ceiling.md", "sourceField": "section 1 K-sweep table" },
+        { "x": 1024, "y": 2.1415, "n": 8, "label": "H=5 K=1024", "sourceRecord": "docs/exploratory/finding-07-fair-planning-ceiling.md", "sourceField": "section 1 K-sweep table" }
+      ]
+    },
+    {
+      "name": "H=7 (eight tapes; K=1024 on 6 tapes)",
+      "points": [
+        { "x": 1, "y": 1.537, "n": 8, "label": "H=7 K=1", "sourceRecord": "docs/exploratory/finding-07-fair-planning-ceiling.md", "sourceField": "section 1 K-sweep table" },
+        { "x": 4, "y": 1.7095, "n": 8, "label": "H=7 K=4", "sourceRecord": "docs/exploratory/finding-07-fair-planning-ceiling.md", "sourceField": "section 1 K-sweep table" },
+        { "x": 16, "y": 1.9279, "n": 8, "label": "H=7 K=16", "sourceRecord": "docs/exploratory/finding-07-fair-planning-ceiling.md", "sourceField": "section 1 K-sweep table" },
+        { "x": 64, "y": 2.1403, "n": 8, "label": "H=7 K=64", "sourceRecord": "docs/exploratory/finding-07-fair-planning-ceiling.md", "sourceField": "section 1 K-sweep table" },
+        { "x": 256, "y": 2.2309, "n": 8, "label": "H=7 K=256 (eight tapes; cohort-inflated per finding-12)", "sourceRecord": "docs/exploratory/finding-07-fair-planning-ceiling.md", "sourceField": "section 1 K-sweep table" },
+        { "x": 1024, "y": 2.0947, "n": 6, "label": "H=7 K=1024, 6-of-8-tape subset, stopped; K=256 on the same 6 tapes is 2.2125", "sourceRecord": "docs/exploratory/finding-12-fair-planner-ceiling-extended.md", "sourceField": "section 3 unimodal-series table" }
+      ]
+    },
+    {
+      "name": "clairvoyant at H=5 (2.3496)",
+      "dashed": true,
+      "points": [
+        { "x": 16, "y": 2.3496, "label": "clairvoyant rh-clears at H=5, same tapes", "sourceRecord": "docs/exploratory/finding-07-fair-planning-ceiling.md", "sourceField": "section 1 K-sweep table, clairvoyant column" },
+        { "x": 1024, "y": 2.3496, "label": "clairvoyant rh-clears at H=5, same tapes", "sourceRecord": "docs/exploratory/finding-07-fair-planning-ceiling.md", "sourceField": "section 1 K-sweep table, clairvoyant column" }
+      ]
+    },
+    {
+      "name": "clairvoyant at H=7 (2.3601)",
+      "dashed": true,
+      "points": [
+        { "x": 1, "y": 2.3601, "label": "clairvoyant rh-clears at H=7, same tapes", "sourceRecord": "docs/exploratory/finding-07-fair-planning-ceiling.md", "sourceField": "section 1 K-sweep table, clairvoyant column" },
+        { "x": 1024, "y": 2.3601, "label": "clairvoyant rh-clears at H=7, same tapes", "sourceRecord": "docs/exploratory/finding-07-fair-planning-ceiling.md", "sourceField": "section 1 K-sweep table, clairvoyant column" }
+      ]
+    },
+    {
+      "name": "survival requirement 2.400 = 12/5",
+      "dashed": true,
+      "points": [
+        { "x": 1, "y": 2.4, "label": "exact disc-conservation rate", "sourceRecord": "docs/exploratory/finding-01-score-is-survival.md", "sourceField": "steady-state requirement (12/5)" },
+        { "x": 1024, "y": 2.4, "label": "exact disc-conservation rate", "sourceRecord": "docs/exploratory/finding-01-score-is-survival.md", "sourceField": "steady-state requirement (12/5)" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260823-reveal-construction-screen-371fd638",
+  "theoryIds": [
+    "TH-20260823-reveal-construction-leaf-e8f7c78d"
+  ],
+  "title": "Seed-free corpus gate, then a paired 256-game SCREEN of fair D4 (seven strata, memo engine) with reveal-construction leaf terms against the unchanged leaf",
+  "classification": "algorithmic",
+  "hypothesis": "With the fast fair-D4 search at seven strata, the one-entry leaf memo (bit-exact, finding audit-06), cache 60,000, work bound worstCaseWork(4,7)+1 = 11,892,399, terminal utility -1,000,000, policy seed 0xd7075eed, 2,000-move cap, three arms play the same 256 ordered seeds 0xa52d0000-0xa52d00ff: 'frozen' (unchanged leaf, zero extra weights, gated bit-identical to FastSearch), 'A' (frozen + aligned_double_hit at +300), 'B' (frozen + aligned_double_hit +300 + chain_to_crack_cracked +150 + chain_to_crack_solid +300, all three multiplied by danger_gate = 1 if max height <= 4, 0.5 at height 5, 0 at height >= 6). Term definitions are fixed in approaches/lifetime-objective/chain-reveal-leaf/extra-terms.hpp as specified in runs/RUN-20260823T091530Z-cbe65468/kimi-k3-theory-design.md section 2 (i)-(iii). Before any leased seed is read, a seed-free corpus gate on runs/RUN-A51D-corpus/all.states (training-role data, already opened) must pass for aligned_double_hit; if it fails, the screen is not run and the record is valid + fail at mechanics tier. The primary contrast is A minus frozen; B minus A is a declared-underpowered secondary. A shadow unchanged search runs at every decision of arms A and B to measure coverage (root-argmax divergence), doubling their cost but changing no decision.",
+  "candidate": {
+    "name": "fast-d4s7-memo-reveal-construction",
+    "entryPoint": "approaches/lifetime-objective/chain-reveal-leaf/run.cpp",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "fair-d4",
+    "entryPoint": "approaches/fair-expectimax/reference/fair-only-depth4.cpp",
+    "manifestRef": "research/benchmarks/baselines-v1.json"
+  },
+  "informationBoundary": "public-policy",
+  "benchmarkTier": "SCREEN",
+  "data": {
+    "role": "public-development",
+    "seedLeaseRefs": [
+      "SL-20260823T100000Z-a52d0000"
+    ],
+    "datasetRefs": [],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "The corpus gate reads runs/RUN-A51D-corpus/all.states (training-role seeds 0xa5200000-0xa52152ff, already opened; whole-origin held-out split from afterstate-net/dataset.py) and reads no new seed. CHECK gates read previously opened development probe seeds 0xa5278000-0xa52784ff only. The screen opens the new, never-read lease 0xa52d0000-0xa52d00ff exactly once; 0xa52d0100-0xa52d01ff of the same lease stays reserved for a replication or the predeclared extension and is not read by this experiment. The lease is disjoint from every range in docs/exploratory/lease-map.md; a full-tree grep for 0xa52d found no constant."
+  },
+  "metrics": {
+    "primary": "paired mean whole-game score delta, A minus frozen, 256 games, depth 4 seven strata memo engine",
+    "secondary": [
+      "paired mean moves delta",
+      "B minus frozen and B minus A (declared underpowered)",
+      "cover reveals per move and numbered clears per move per arm (mechanism directions: reveals up, clears not down, occupancy not up)",
+      "lower quartile, median, maximum score; minimum",
+      "halves (seeds 0-127 and 128-255)",
+      "W-T-L",
+      "coverage: root decisions where the arm's column differs from the shadow unchanged search, per arm",
+      "memo hit rate, max work per decision, incomplete and illegal decisions",
+      "corpus gate: held-out partial r, incremental R^2, prevalence, uncollected-setup rate for each term"
+    ],
+    "statisticalUnit": "whole-game",
+    "uncertaintyMethod": "one-sided 95% percentile bootstrap over whole games (20,000 resamples, seed 0xb0071eaf, leaf-evolution/compare.py) and Student-t one-sided lower bound; detection floor 1.645*sd/sqrt(256) reported"
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "Corpus gate for aligned_double_hit, read once, thresholds fixed here: held-out partial correlation of the feature with log1p(remaining lifetime) beyond the 18 leaf features, occupancy and rise clock >= +0.05 AND incremental held-out R^2 >= 0.005 AND prevalence (feature > 0) >= 5% of depth-4 positions AND uncollected-setup rate (live setups with joint readiness >= 0.5 not followed by a reveal of that gray within 2 moves in the same game) >= 30%. If this fails the screen is not run. chain_to_crack is reported on the same gate but rides in arm B regardless (declared secondary).",
+      "CHECK gates passed before the lease is opened: zero-weight bit parity of the augmented leaf with fastFairLeaf on every visited board, search parity (column, work, nodes, cache hits, completed depth) with FastSearch at d4s5 and d4s7, mirror invariance of every extra feature, thread determinism at live weights, metadata blindness, memo-vs-fresh extra-feature identity.",
+      "incompleteDecisionsTotal 0 and illegalDecisionsTotal 0 in every arm.",
+      "A minus frozen: bootstrap 95% lower bound > 0 AND Student-t 95% lower bound > 0.",
+      "A minus frozen: candidate Q25 >= comparator Q25 AND both halves > 0.",
+      "Arm A coverage >= 2% of its decisions; below 2% the result is inconclusive by rarity regardless of the deltas.",
+      "Mechanism check (reported, not a pass condition): A's reveals per move exceed frozen's; a score gain with reveals per move flat is recorded as 'pass, mechanism unsupported'."
+    ],
+    "failureAction": "Record valid + fail for these exact terms and weights; report B and the corpus statistics as diagnostics; open no further cohort. If the corpus gate killed both H2 terms, or arm A recorded coverage < 2% with |delta| < 25,000, the predeclared fallback diagnostic (entombed_high soft penalty at -150, 128 paired games on a new lease, declared a non-measurement for score, judged on coverage and sign pattern) is registered as a successor experiment; it is not run under this protocol.",
+    "passAction": "Record valid + pass; register a replication on the reserved 0xa52d0100-0xa52d01ff block and a seed-free dose sweep of the weight as successor experiments; register the arm as a playground leaderboard policy. No tier above SCREEN is claimed."
+  },
+  "resources": {
+    "wallSeconds": 10800,
+    "cpuThreads": 30,
+    "maxHostBytes": 17179869184,
+    "maxGpuBytes": null,
+    "gpuDevices": []
+  },
+  "stopConditions": [
+    "Stop on any rules, information-boundary, legality, determinism, or parity failure.",
+    "Stop at 10,800 wall-seconds; a partial cohort is recorded as partial and the gate is not evaluated.",
+    "Futility: if after the first 64 games (in seed order) an arm's paired delta against frozen is below -80,000, that arm is stopped and recorded partial-negative; the other arms continue.",
+    "Rarity: if after the first 32 games an arm's coverage is below 1%, that arm is stopped as a no-measurement.",
+    "No extension beyond 256 games under this protocol; an extension is a successor experiment on the reserved block.",
+    "The screen does not start while any other cohort is running on this machine."
+  ],
+  "expectedArtifacts": [
+    "runs/RUN-20260823T091530Z-cbe65468/kimi-k3-theory-design.md (design, Kimi K3)",
+    "runs/<corpus-gate-run>/corpus-gate.json and corpus-gate.log (seed-free gate, all three terms)",
+    "runs/<gate-run>/gates.log (CHECK gates at the final extra-terms.hpp)",
+    "runs/<screen-run>/screen.json (arms index), screen.frozen.json, screen.A.json, screen.B.json (drop7-lifetime-cohort-v1)",
+    "runs/<screen-run>/compare-A.json, compare-B.json, compare-B-vs-A.json"
+  ],
+  "lifecycle": "completed",
+  "protocolSha256": "237ab81cbf5717a2d679c433b8cd3252ec9dd89d814cc4ee802a14d8de88900f",
+  "amendments": [
+    {
+      "timestamp": "2026-08-23T10:58:00Z",
+      "beforeControlledData": false,
+      "reason": "Process disclosure: the gate thresholds were written to this file at 2026-08-23T09:46:58Z (file mtime), the term source approaches/lifetime-objective/chain-reveal-leaf/extra-terms.hpp (sha256 5bcf97083f63644036fb9afaf30ce1424ebe8f858d5437b5769ad760ac209d6e) was finalised at 09:50:45Z, and the corpus gate was read once at 09:56:27Z. The researchctl freeze command was run only after the gate had been read; no field other than this amendment and lifecycle changed in between. Coordinator records this as a preregistration-by-content, not a formal freeze-before-read. Lifecycle set to completed after the gate was read; the hash is recomputed over the completed record as the sibling EX-20260822-survival-instinct-root-filter-8531cbd9 did."
+    }
+  ],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5",
+    "agentId": null
+  },
+  "createdAt": "2026-08-23T09:46:03Z",
+  "updatedAt": "2026-08-23T10:55:14Z"
+}

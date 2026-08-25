@@ -245,6 +245,15 @@ rate leave, so occupancy drifts by `12 − 5 x clears-per-move` cells per cycle.
 policy whose occupancy rises monotonically is losing the battle regardless of
 what its instantaneous clear rate looks like in any one position.
 
+That slope, drawn per policy alongside the fair-planner arms of
+[`finding-07`](finding-07-fair-planning-ceiling.md) §3 and the fresh-tape
+corrections of [`finding-12`](finding-12-fair-planner-ceiling-extended.md) §2:
+
+```figure
+occupancy-slope-by-policy
+caption: Occupancy slope — cells gained per five-move cycle — for every measured policy. Zero is survival; every legal policy sits above it, and only the clairvoyant clear-seeker reaches it.
+```
+
 The whole-game clear rate above is dragged down by the opening, where the board
 is too sparse to clear anything (§3). Excluding the first five cycles — measuring
 only moves 26 and later, once the board has reached its operating point — gives
@@ -354,6 +363,16 @@ on this table.
 
 This is the whole finding in one table.
 
+```figure
+occupancy-clear-rate-equilibrium
+caption: The same table as curves: numbered clears per move by occupancy band. The clairvoyant clear-seeker crosses the 2.400 requirement near 20 cells and is pulled back to it; fair D4 peaks just above the requirement at 25–29 cells and then falls.
+```
+
+```diagram
+diagram-occupancy-fixed-point
+caption: The mechanism, schematically: an attracting fixed point where the rising clear-rate curve crosses the 2.400 requirement, and a death spiral where fair D4's hump falls back under it. The measured curves are in the figure above.
+```
+
 **A near-empty board cannot clear.** Drop7 clears a disc when its number equals
 the length of the row or column run it lands in, so a sparse board offers almost
 nothing to match against: at 0–9 occupied cells even a clairvoyant clear-seeker
@@ -441,6 +460,14 @@ deepest-ever depth of 11 across 8,444 waves in 64 fair-D4 games.
 | **depth ≥ 11** | **0.22%** | 0.72% | 0.67% | **21.53%** | 12.36% |
 | **depth ≥ 15** | **0.00%** | 0.00% | 0.06% | **7.76%** | 2.67% |
 | deepest | 12 | 14 | 19 | **22** | 20 |
+
+The same distribution as a chart, where the `rh-points` tail stands apart from
+the near-identical survival profiles:
+
+```figure
+wave-depth-distribution
+caption: Share of waves by depth band, per policy. The survival policies — fair D4 and both clairvoyant clear-seekers — have nearly the same profile; only the score-maximizing planner routinely builds waves past depth 10, and it dies for them.
+```
 
 So the answer to "does clairvoyant play routinely reach depth 15+?" is: **only
 when it is told to maximize points.** A clairvoyant *survival* player lives at

@@ -63,7 +63,7 @@ export function Footer() {
             href="/privacy"
             className="mt-4 inline-flex rounded-full border border-emerald-900/80 bg-emerald-950/30 px-3 py-1 text-xs font-medium text-emerald-300 hover:border-emerald-700 hover:text-emerald-200"
           >
-            No client-side tracking
+            Privacy-first analytics
           </Link>
         </section>
 

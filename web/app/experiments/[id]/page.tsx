@@ -37,7 +37,7 @@ export default async function ExperimentPage({ params }: { params: Promise<{ id:
         <Mdx source={overlay.content} />
       ) : (
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4 text-sm text-zinc-400">
-          No plain-English explanation has been written for this experiment yet. Add{" "}
+          No explanation has been written for this experiment yet. Add{" "}
           <code className="text-xs">web/content/research/{experiment.experimentId}.mdx</code> and it will appear
           here. The registered protocol is shown below.
         </div>
@@ -92,7 +92,7 @@ export default async function ExperimentPage({ params }: { params: Promise<{ id:
         )}
       </section>
 
-      <section>
+      <section id="results">
         <h2 className="text-lg font-bold text-zinc-100">What happened</h2>
         {results.length === 0 ? (
           <p className="mt-1 text-sm text-zinc-500">No result has been recorded for this experiment.</p>

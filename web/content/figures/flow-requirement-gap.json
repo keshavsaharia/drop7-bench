@@ -1,0 +1,67 @@
+{
+  "title": "Flow rates per move against the survival requirement — every legal policy sits just below the line",
+  "kind": "dot",
+  "x": { "label": "policy (cohort after the dot)" },
+  "y": { "label": "rate per move", "unit": "per move" },
+  "notes": "Requirement markers are the exact disc-conservation rates 2.400 = 12/5 numbered clears and 1.400 = 7/5 covered reveals per move (finding-01); the generator has no reference-line primitive, so each requirement is drawn as a dot in every category. Cohorts differ per category and are named in the category labels: 64g = 64 games on cohort 0xa51d1000-0xa51d103f (development); 256g = 256 fresh games (RS-20260823T131226Z-16564ed9 frozenArmFreshBaseline); 128t / 32t / 64t = fresh master tapes in finding-12; 6000mv = 6,000 clairvoyant moves in finding-06. The two fair-D4-s7 points are the same policy on different cohorts and are separate categories, not a pooled value. The H=5 planner point is the 128-fresh-tape figure; the H=7 planner point is the 32-fresh-tape matched-cohort figure. Only the privileged clairvoyant planners reach the requirement; every legal policy clusters just under it. Evidence tier: mixed per source (development screens and exploratory mechanism studies); this chart assembles separate experiments, it does not pool them.",
+  "series": [
+    {
+      "name": "numbered clears per move",
+      "points": [
+        { "x": "fair D4 s5 · 64g", "y": 1.9489, "n": 64, "sourceRecord": "docs/exploratory/finding-05-chance-strata.md", "sourceField": "confirmation cohort detail table" },
+        { "x": "fair D4 s7 · 64g", "y": 2.0571, "n": 64, "sourceRecord": "docs/exploratory/finding-05-chance-strata.md", "sourceField": "confirmation cohort detail table" },
+        { "x": "d3 M=6 · 64g", "y": 2.0447, "n": 64, "sourceRecord": "RS-20260821T192140Z-189fe392", "sourceField": "metrics.ladderClearsPerMoveD3N7.M6" },
+        { "x": "learned leaf s7 · 64g", "y": 2.0714, "n": 64, "sourceRecord": "docs/exploratory/finding-08-learned-leaf.md", "sourceField": "section 8 flow table" },
+        { "x": "planner H5 K256 · 128t", "y": 2.0445, "sourceRecord": "docs/exploratory/finding-12-fair-planner-ceiling-extended.md", "sourceField": "section 2 paired re-baselined table" },
+        { "x": "planner H7 K256 · 32t", "y": 2.026, "sourceRecord": "docs/exploratory/finding-12-fair-planner-ceiling-extended.md", "sourceField": "section 2 corrected decomposition arms table" },
+        { "x": "fair D4 s7 fresh · 256g", "y": 2.0551, "n": 256, "sourceRecord": "RS-20260823T131226Z-16564ed9", "sourceField": "metrics.frozenArmFreshBaseline" },
+        { "x": "clairvoyant H9 cap1000 · 6000mv", "y": 2.3875, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 2.1 flow table" },
+        { "x": "clairvoyant H7 fresh · 64t", "y": 2.3663, "sourceRecord": "docs/exploratory/finding-12-fair-planner-ceiling-extended.md", "sourceField": "headline arms table (64 fresh tapes)" }
+      ]
+    },
+    {
+      "name": "covered reveals per move",
+      "points": [
+        { "x": "fair D4 s5 · 64g", "y": 1.0697, "n": 64, "sourceRecord": "docs/exploratory/finding-05-chance-strata.md", "sourceField": "confirmation cohort detail table" },
+        { "x": "fair D4 s7 · 64g", "y": 1.1549, "n": 64, "sourceRecord": "docs/exploratory/finding-05-chance-strata.md", "sourceField": "confirmation cohort detail table" },
+        { "x": "d3 M=6 · 64g", "y": 1.1423, "n": 64, "sourceRecord": "RS-20260821T192140Z-189fe392", "sourceField": "metrics.ladderRevealsPerMoveD3N7.M6" },
+        { "x": "learned leaf s7 · 64g", "y": 1.1595, "n": 64, "sourceRecord": "docs/exploratory/finding-08-learned-leaf.md", "sourceField": "section 8 flow table" },
+        { "x": "planner H5 K256 · 128t", "y": 1.1419, "sourceRecord": "docs/exploratory/finding-12-fair-planner-ceiling-extended.md", "sourceField": "section 2 paired re-baselined table" },
+        { "x": "planner H7 K256 · 32t", "y": 1.1256, "sourceRecord": "docs/exploratory/finding-12-fair-planner-ceiling-extended.md", "sourceField": "section 2 'what must be weakened' table" },
+        { "x": "fair D4 s7 fresh · 256g", "y": 1.1536, "n": 256, "sourceRecord": "RS-20260823T131226Z-16564ed9", "sourceField": "metrics.frozenArmFreshBaseline" },
+        { "x": "clairvoyant H9 cap1000 · 6000mv", "y": 1.3963, "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 2.1 flow table" },
+        { "x": "clairvoyant H7 fresh · 64t", "y": 1.3832, "sourceRecord": "docs/exploratory/finding-12-fair-planner-ceiling-extended.md", "sourceField": "headline arms table (64 fresh tapes)" }
+      ]
+    },
+    {
+      "name": "requirement 2.400 = 12/5 (clears)",
+      "dashed": true,
+      "points": [
+        { "x": "fair D4 s5 · 64g", "y": 2.4, "sourceRecord": "docs/exploratory/finding-01-score-is-survival.md", "sourceField": "steady-state requirement (12/5)" },
+        { "x": "fair D4 s7 · 64g", "y": 2.4, "sourceRecord": "docs/exploratory/finding-01-score-is-survival.md", "sourceField": "steady-state requirement (12/5)" },
+        { "x": "d3 M=6 · 64g", "y": 2.4, "sourceRecord": "docs/exploratory/finding-01-score-is-survival.md", "sourceField": "steady-state requirement (12/5)" },
+        { "x": "learned leaf s7 · 64g", "y": 2.4, "sourceRecord": "docs/exploratory/finding-01-score-is-survival.md", "sourceField": "steady-state requirement (12/5)" },
+        { "x": "planner H5 K256 · 128t", "y": 2.4, "sourceRecord": "docs/exploratory/finding-01-score-is-survival.md", "sourceField": "steady-state requirement (12/5)" },
+        { "x": "planner H7 K256 · 32t", "y": 2.4, "sourceRecord": "docs/exploratory/finding-01-score-is-survival.md", "sourceField": "steady-state requirement (12/5)" },
+        { "x": "fair D4 s7 fresh · 256g", "y": 2.4, "sourceRecord": "docs/exploratory/finding-01-score-is-survival.md", "sourceField": "steady-state requirement (12/5)" },
+        { "x": "clairvoyant H9 cap1000 · 6000mv", "y": 2.4, "sourceRecord": "docs/exploratory/finding-01-score-is-survival.md", "sourceField": "steady-state requirement (12/5)" },
+        { "x": "clairvoyant H7 fresh · 64t", "y": 2.4, "sourceRecord": "docs/exploratory/finding-01-score-is-survival.md", "sourceField": "steady-state requirement (12/5)" }
+      ]
+    },
+    {
+      "name": "requirement 1.400 = 7/5 (reveals)",
+      "dashed": true,
+      "points": [
+        { "x": "fair D4 s5 · 64g", "y": 1.4, "sourceRecord": "docs/exploratory/finding-01-score-is-survival.md", "sourceField": "steady-state requirement (7/5)" },
+        { "x": "fair D4 s7 · 64g", "y": 1.4, "sourceRecord": "docs/exploratory/finding-01-score-is-survival.md", "sourceField": "steady-state requirement (7/5)" },
+        { "x": "d3 M=6 · 64g", "y": 1.4, "sourceRecord": "docs/exploratory/finding-01-score-is-survival.md", "sourceField": "steady-state requirement (7/5)" },
+        { "x": "learned leaf s7 · 64g", "y": 1.4, "sourceRecord": "docs/exploratory/finding-01-score-is-survival.md", "sourceField": "steady-state requirement (7/5)" },
+        { "x": "planner H5 K256 · 128t", "y": 1.4, "sourceRecord": "docs/exploratory/finding-01-score-is-survival.md", "sourceField": "steady-state requirement (7/5)" },
+        { "x": "planner H7 K256 · 32t", "y": 1.4, "sourceRecord": "docs/exploratory/finding-01-score-is-survival.md", "sourceField": "steady-state requirement (7/5)" },
+        { "x": "fair D4 s7 fresh · 256g", "y": 1.4, "sourceRecord": "docs/exploratory/finding-01-score-is-survival.md", "sourceField": "steady-state requirement (7/5)" },
+        { "x": "clairvoyant H9 cap1000 · 6000mv", "y": 1.4, "sourceRecord": "docs/exploratory/finding-01-score-is-survival.md", "sourceField": "steady-state requirement (7/5)" },
+        { "x": "clairvoyant H7 fresh · 64t", "y": 1.4, "sourceRecord": "docs/exploratory/finding-01-score-is-survival.md", "sourceField": "steady-state requirement (7/5)" }
+      ]
+    }
+  ]
+}

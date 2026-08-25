@@ -1,0 +1,20 @@
+{
+  "title": "Terminal utility is saturated — byte-identical play across a fiftyfold increase in death cost",
+  "kind": "dot",
+  "x": { "label": "terminal utility (categories ordered by ascending magnitude; frozen value marked)" },
+  "y": { "label": "mean score", "unit": "points" },
+  "notes": "Six arms, 64 paired whole games each on seeds 0xa51d0000-0xa51d003f, depth 4, corrected 17,000-point Hardcore scoring (finding-04 Result table). The four arms at magnitude 1,000,000 and beyond produced BYTE-IDENTICAL games to the frozen reference — paired delta exactly 0, W-T-L 0-64-0 — so those points are exact and carry no statistical bound; none is drawn and none exists. The two smaller magnitudes are single-cohort estimates: -300,000 scores 321,652 (paired delta -340, one-sided 95% lower bound -1,039, W-T-L 1-62-1) and -100,000 scores 320,161 (delta -1,831, lower bound -4,563, 4-29-31). Valid negative result, evidence tier development: the risk constant is at its stop and cannot be made a lever; the figure plan allowed a dot form or a line on log|utility| — the dot form is used because the generator draws linear axes only and string categories keep the fiftyfold range readable.",
+  "series": [
+    {
+      "name": "mean score, 64 paired games per arm",
+      "points": [
+        { "x": "-100,000", "y": 320161, "n": 64, "label": "paired delta -1,831 vs frozen, 95% LB -4,563, W-T-L 4-29-31; 35 of 64 games differ", "sourceRecord": "docs/exploratory/finding-04-terminal-utility-saturated.md", "sourceField": "Result table" },
+        { "x": "-300,000", "y": 321652, "n": 64, "label": "paired delta -340, 95% LB -1,039, W-T-L 1-62-1", "sourceRecord": "docs/exploratory/finding-04-terminal-utility-saturated.md", "sourceField": "Result table" },
+        { "x": "-1,000,000 (frozen)", "y": 321992, "n": 64, "label": "the frozen reference value; 94.06 mean moves, 1.973 clears/move", "sourceRecord": "docs/exploratory/finding-04-terminal-utility-saturated.md", "sourceField": "Result table" },
+        { "x": "-3,000,000", "y": 321992, "n": 64, "label": "byte-identical games to the frozen arm; delta exactly 0, W-T-L 0-64-0", "sourceRecord": "docs/exploratory/finding-04-terminal-utility-saturated.md", "sourceField": "Result table" },
+        { "x": "-10,000,000", "y": 321992, "n": 64, "label": "byte-identical games to the frozen arm; delta exactly 0, W-T-L 0-64-0", "sourceRecord": "docs/exploratory/finding-04-terminal-utility-saturated.md", "sourceField": "Result table" },
+        { "x": "-50,000,000", "y": 321992, "n": 64, "label": "byte-identical games to the frozen arm; delta exactly 0, W-T-L 0-64-0 — fifty times the frozen magnitude changes no decision", "sourceRecord": "docs/exploratory/finding-04-terminal-utility-saturated.md", "sourceField": "Result table" }
+      ]
+    }
+  ]
+}

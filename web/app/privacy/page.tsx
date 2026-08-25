@@ -18,28 +18,39 @@ export default function PrivacyPage() {
       <p className="text-sm text-zinc-500">Effective August 23, 2026</p>
 
       <div className="my-6 rounded-xl border border-emerald-900/70 bg-emerald-950/20 p-5">
-        <p className="!m-0 font-semibold text-emerald-200">The short version</p>
+        <p className="!m-0 font-semibold text-emerald-200">Summary</p>
         <p className="!mb-0 text-zinc-300">
-          Ordinary visits are not tracked in your browser. There are no analytics scripts,
-          advertising pixels, cross-site trackers, or visitor profiles. The server keeps
-          only anonymous operational metrics for ordinary site traffic. If you choose to
-          sign in with GitHub and submit a competition run, that optional feature necessarily
-          handles the identity and game data described below.
+          Ordinary visits are measured on the server with first-party page-view analytics.
+          There are no third-party analytics scripts, advertising pixels, cross-site trackers,
+          or analytics cookies. Raw IP addresses, URL query strings, and signed-in identities
+          are not added to analytics. If you choose to sign in with GitHub and submit a
+          competition run, that optional feature necessarily handles the identity and game data
+          described below.
         </p>
       </div>
 
       <h2>Ordinary browsing</h2>
       <p>
-        Drop7 Research does not use client-side analytics, advertising technology,
-        fingerprinting, tracking pixels, or cross-site tracking. The project does not sell
-        personal information and does not build profiles of readers.
+        Drop7 Research does not use third-party client-side analytics, advertising technology,
+        tracking pixels, or cross-site tracking. A small first-party navigation hook reports only
+        the new pathname after in-site navigation so pages served from the browser&apos;s Next.js
+        prefetch cache are counted. The server constructs the analytics event from that pathname
+        and the request headers. The project does not sell personal information or combine site
+        analytics with advertising data.
       </p>
       <p>
-        The hosting stack produces simple server-side operational metrics—such as aggregate
-        request volume, performance, and error counts—to keep the site reliable. The project&apos;s
-        site metrics are anonymous and do not include names, email addresses, GitHub IDs, IP
-        addresses, user-agent strings, cookie identifiers, or other personally identifying
-        information. They are not used to follow a visitor across pages or sites.
+        For each real page navigation, the server records the time, normalized page path and
+        site host; referrer hostname and broad channel; a truncated user-agent string and
+        accepted language; country, region, and city headers supplied by the hosting network
+        when available; coarse device, browser, and operating-system families; and whether the
+        request appears automated. It does not record URL query strings, referrer paths or
+        queries, cookies, names, email addresses, GitHub IDs, or authentication state.
+      </p>
+      <p>
+        The source network address and user agent are combined with a secret in a one-way HMAC
+        to make a pseudonymous visitor ID for aggregate visitor counts. The raw network address
+        is discarded before the event enters analytics. This identifier is first-party, is not
+        placed in your browser, and is not shared with an advertising or analytics provider.
       </p>
 
       <h2>Open-source transparency</h2>
@@ -48,9 +59,9 @@ export default function PrivacyPage() {
         <a href={GITHUB_REPO} rel="noopener noreferrer">
           project repository
         </a>
-        . That includes the browser code, server routes, authentication flow, and infrastructure
-        definition. Any client-side tracking added in the future would therefore be visible in
-        the source and would require this policy to change.
+        . That includes the browser code, server-side event schema, authentication flow, admin
+        access checks, and Firehose/Iceberg/Athena infrastructure definition. Any material change
+        to that collection would be visible in the source and would require this policy to change.
       </p>
 
       <h2>Data kept in your browser</h2>
@@ -104,17 +115,21 @@ export default function PrivacyPage() {
       <h2>Service providers</h2>
       <p>
         The site uses GitHub for optional authentication and Amazon Web Services for hosting and
-        storage. Like any internet host, those providers may process technical request data as
-        needed to deliver, secure, and operate their services under their own terms. Drop7
-        Research does not add that data to product analytics or use it to profile visitors.
+        storage. First-party analytics events pass through Amazon Data Firehose and are stored as
+        Parquet data in an Apache Iceberg table in Amazon S3, with metadata in AWS Glue and
+        aggregate queries run by Amazon Athena. No separate analytics vendor receives those
+        events. Like any internet host, AWS and GitHub may also process technical request data as
+        needed to deliver, secure, and operate their services under their own terms.
       </p>
 
       <h2>Retention and your choices</h2>
       <p>
-        Anonymous operational metrics are retained only for site operations. Authentication data
-        in the encrypted session cookie lasts until sign-out, deletion, or expiry. Competition
-        submissions are retained with the public research record for as long as the project
-        maintains that competition, subject to applicable law.
+        Analytics query-result files expire after 7 days and failed Firehose delivery records
+        expire after 30 days. The underlying Iceberg page-view table is retained until the project
+        operator deletes or applies a table-retention policy to it. Authentication data in the
+        encrypted session cookie lasts until sign-out, deletion, or expiry. Competition submissions
+        are retained with the public research record for as long as the project maintains that
+        competition, subject to applicable law.
       </p>
       <p>
         You may browse and play without an account, clear local game data through your browser,

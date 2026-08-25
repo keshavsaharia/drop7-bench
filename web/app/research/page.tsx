@@ -32,7 +32,7 @@ export default function ResearchPage() {
     {
       href: "/approaches",
       title: "Approaches",
-      text: "Every strategy family in the repository, in plain language first, with the record one click deeper.",
+      text: "Every established strategy family, and the underlying approaches that are being investigated within each one.",
       hint:
         families.length === 0
           ? "none in this checkout"
@@ -41,7 +41,7 @@ export default function ResearchPage() {
     {
       href: "/theories",
       title: "Theories",
-      text: "Registered falsifiable claims: each names a mechanism and the criteria that would refute it.",
+      text: "Registered falsifiable claims - each names a mechanism and the criteria that would refute it.",
       hint:
         theories.length === 0
           ? "none in this checkout"
@@ -59,7 +59,7 @@ export default function ResearchPage() {
     {
       href: "/log",
       title: "Log",
-      text: "A dated, plain-English account of what was tried each day — including the things that did not work.",
+      text: "A dated account of what was tried each day — including the things that did not work.",
       hint: latestLog
         ? `latest: ${latestLog.date}`
         : "none in this checkout",
@@ -71,11 +71,10 @@ export default function ResearchPage() {
       <div>
         <h1 className="text-2xl font-black text-zinc-50">Research</h1>
         <p className="mt-1 max-w-3xl text-sm text-zinc-400">
-          The working record of the million-point program. Approaches are the
-          strategies that were implemented; theories are the claims those
+          The working record of the goal to build a strategy that scores an average of one million points per game. 
+          Approaches are the strategies that were implemented; theories are the claims those
           strategies rest on; experiments are the tests that were preregistered;
-          the log is the day-by-day narrative. None of these pages invent a
-          number — they render what the repository already records.
+          the log has daily narratives.
         </p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">

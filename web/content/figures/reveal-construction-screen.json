@@ -1,0 +1,22 @@
+{
+  "title": "Reveal-construction leaf term screen: candidate minus frozen fair D4 at seven strata (fresh seeds)",
+  "kind": "bar",
+  "x": { "label": "Arm (aligned_double_hit weight)" },
+  "y": { "label": "Paired mean score delta", "unit": "points" },
+  "notes": "Paired screen on fresh seeds 0xa52d0200-0xa52d02ff, fair D4 at seven strata with the memo engine. Whisker is the one-sided 95% bootstrap lower bound. A900 completed all 256 games (gate FAIL; detection floor 30,957). A300 and bundle B were stopped at the 32-game rarity check because they changed the search's column in under 1% of decisions; their deltas are partials on 39 and 36 games and are non-measurements. Run validity valid, scientific outcome fail, evidence tier public-development.",
+  "series": [
+    {
+      "name": "Completed arm (256 games)",
+      "points": [
+        { "x": "A900 (+900)", "y": 3204, "lo": -26860, "n": 256, "label": "A900 - frozen, W-T-L 99-53-104", "sourceRecord": "RS-20260823T131226Z-16564ed9", "sourceField": "metrics.A900_minus_frozen.pairedDelta / bootstrapLB95" }
+      ]
+    },
+    {
+      "name": "Stopped arms (partial, no-measurement)",
+      "points": [
+        { "x": "A300 (+300), stopped", "y": -4298, "lo": -41726, "n": 39, "label": "A300 - frozen at stop", "sourceRecord": "RS-20260823T131226Z-16564ed9", "sourceField": "metrics.stoppedArms.A300" },
+        { "x": "Bundle B, stopped", "y": 18213, "lo": -35413, "n": 36, "label": "B - frozen at stop", "sourceRecord": "RS-20260823T131226Z-16564ed9", "sourceField": "metrics.stoppedArms.B" }
+      ]
+    }
+  ]
+}

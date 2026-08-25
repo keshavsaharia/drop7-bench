@@ -1,0 +1,7 @@
+# The parity gates and benchmarks are built with the host's native ISA so the
+# PEXT/PDEP bit gathers compile to single instructions on BMI2 targets (Zen 5
+# here).  Without this, board.rs falls back to a portable bit loop that
+# produces identical words more slowly.  build.sh also sets RUSTFLAGS
+# explicitly so the choice does not depend on the caller's directory.
+[build]
+rustflags = ["-C", "target-cpu=native"]

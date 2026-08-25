@@ -68,6 +68,11 @@ function toRecordHref(repoPath: string, suffix: string): string | null {
   return null;
 }
 
+function toLogHref(repoPath: string, suffix: string): string | null {
+  const entry = /^web\/content\/log\/(\d{4}-\d{2}-\d{2})\.mdx?$/i.exec(repoPath);
+  return entry ? `/log/${entry[1]}${suffix}` : null;
+}
+
 function toSourceHref(repoPath: string, suffix: string): string | null {
   if (repoPath === "src" || repoPath.startsWith("src/")) {
     return `/${repoPath}${suffix}`;
@@ -79,7 +84,7 @@ function toSourceHref(repoPath: string, suffix: string): string | null {
 }
 
 function toConsoleHref(repoPath: string, suffix: string): string | null {
-  return toDocsHref(repoPath, suffix) ?? toApproachHref(repoPath, suffix) ?? toRecordHref(repoPath, suffix) ?? toSourceHref(repoPath, suffix);
+  return toDocsHref(repoPath, suffix) ?? toApproachHref(repoPath, suffix) ?? toRecordHref(repoPath, suffix) ?? toLogHref(repoPath, suffix) ?? toSourceHref(repoPath, suffix);
 }
 
 /**

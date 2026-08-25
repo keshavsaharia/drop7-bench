@@ -69,9 +69,6 @@ function FourOhFourBoard() {
           </div>
         </div>
       </div>
-      <figcaption className={styles.caption}>
-        The last 4 keeps trying to find the page.
-      </figcaption>
     </figure>
   );
 }
@@ -83,13 +80,12 @@ export default function NotFound() {
         <FourOhFourBoard />
 
         <div className={styles.copy}>
-          <p className={styles.eyebrow}>404 · Page not found</p>
+          <p className={styles.eyebrow}>404 · not found</p>
           <h1 id="not-found-title" className={styles.title}>
-            This page fell off the board.
+            That&apos;s not a legal move.
           </h1>
           <p className={styles.intro}>
-            The move you followed does not lead anywhere. Drop back into the
-            research, learn the game, or start a fresh round.
+            You can <Link className="text-sky-400 hover:text-sky-300 underline" href="https://github.com/keshavsaharia/drop7-bench/issues">create an issue</Link> on GitHub if you expected something else.
           </p>
 
           <div className={styles.actions}>

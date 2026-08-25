@@ -61,7 +61,7 @@ export default async function HumanReplayPage({
         <Link href="/leaderboard" className="text-sm text-sky-400 hover:text-sky-300">
           ← Leaderboard
         </Link>
-        <p className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-violet-400">
+        <p className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-sky-400">
           {isPolicy ? "Research policy" : "Human submission"} ·{" "}
           {competition.manifest.gameVersion}
         </p>

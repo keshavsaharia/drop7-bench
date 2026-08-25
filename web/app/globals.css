@@ -24,10 +24,9 @@ body:has(.source-workspace) > main {
   padding: 0;
 }
 
-/* Play CTA in the header. Painted like a numbered disc (disc 7) so it reads
-   as a Drop7 control rather than a text nav link. The shine sweep is hover-only
-   and stops under prefers-reduced-motion. */
-.play-cta {
+/* Shared primary CTA. The optional icon lets the header keep its numbered-disc
+   treatment while pages reuse the same blue shimmer without duplicating it. */
+.shimmer-button {
   position: relative;
   overflow: hidden;
   display: inline-flex;
@@ -40,17 +39,20 @@ body:has(.source-workspace) > main {
   font-size: 0.875rem;
   font-weight: 700;
   line-height: 1;
-  padding: 0.35rem 0.95rem 0.35rem 0.4rem;
+  padding: 0.55rem 0.95rem;
   box-shadow: inset 0 -0.14em 0 rgba(0, 0, 0, 0.22);
   text-decoration: none;
 }
-.play-cta-disc {
+.shimmer-button-with-icon {
+  padding: 0.35rem 0.95rem 0.35rem 0.4rem;
+}
+.shimmer-button-icon {
   display: inline-flex;
   width: 1.35rem;
   height: 1.35rem;
   font-size: 0.7rem;
 }
-.play-cta::after {
+.shimmer-button::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -63,12 +65,16 @@ body:has(.source-workspace) > main {
   transform: translateX(-130%);
   pointer-events: none;
 }
-.play-cta:hover {
+.shimmer-button:hover {
   color: #ffffff;
   filter: brightness(1.12);
 }
-.play-cta:hover::after {
+.shimmer-button:hover::after {
   animation: play-shimmer 0.7s ease-out;
+}
+.shimmer-button:focus-visible {
+  outline: 2px solid #38bdf8;
+  outline-offset: 2px;
 }
 @keyframes play-shimmer {
   to {
@@ -76,16 +82,16 @@ body:has(.source-workspace) > main {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .play-cta:hover {
+  .shimmer-button:hover {
     filter: none;
   }
-  .play-cta:hover::after {
+  .shimmer-button:hover::after {
     animation: none;
   }
 }
 
 /* Compete-page GitHub OAuth button. The shine sweep is hover-only and
-   stops under prefers-reduced-motion, matching .play-cta. */
+   stops under prefers-reduced-motion, matching .shimmer-button. */
 .github-signin {
   position: relative;
   overflow: hidden;
@@ -127,7 +133,7 @@ body:has(.source-workspace) > main {
   animation: play-shimmer 0.7s ease-out;
 }
 .github-signin:focus-visible {
-  outline: 2px solid #a78bfa;
+  outline: 2px solid #38bdf8;
   outline-offset: 2px;
 }
 .github-auth-status {
@@ -162,13 +168,84 @@ body:has(.source-workspace) > main {
   color: #fafafa;
 }
 .github-signout:focus-visible {
-  outline: 2px solid #a78bfa;
+  outline: 2px solid #38bdf8;
   outline-offset: 2px;
 }
 @media (prefers-reduced-motion: reduce) {
   .github-signin:hover::after {
     animation: none;
   }
+}
+
+/* Admin analytics controls stay intentionally quiet so the data remains the
+   visual focus. The SQL surface uses a fixed-width face for scanability. */
+.analytics-panel {
+  border: 1px solid #27272a;
+  border-radius: 0.75rem;
+  background: rgba(24, 24, 27, 0.28);
+  padding: 1.25rem;
+}
+.analytics-control {
+  display: grid;
+  gap: 0.35rem;
+  color: #71717a;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.analytics-control select {
+  min-width: 9rem;
+  border: 1px solid #3f3f46;
+  border-radius: 0.5rem;
+  background: #18181b;
+  color: #e4e4e7;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: normal;
+  padding: 0.6rem 2rem 0.6rem 0.75rem;
+  text-transform: none;
+}
+.analytics-control select:focus-visible,
+.analytics-sql:focus-visible {
+  border-color: #38bdf8;
+  outline: 2px solid rgba(56, 189, 248, 0.35);
+  outline-offset: 1px;
+}
+.analytics-run-button {
+  border: 1px solid #047857;
+  border-radius: 0.5rem;
+  background: #065f46;
+  color: #ecfdf5;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.72rem 1rem;
+}
+.analytics-run-button:hover:not(:disabled) {
+  background: #047857;
+}
+.analytics-run-button:focus-visible {
+  outline: 2px solid #6ee7b7;
+  outline-offset: 2px;
+}
+.analytics-run-button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+.analytics-sql {
+  width: 100%;
+  resize: vertical;
+  border: 1px solid #3f3f46;
+  border-radius: 0.6rem;
+  background: #0c0c0f;
+  color: #d4d4d8;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  padding: 0.9rem 1rem;
+  tab-size: 2;
 }
 
 /* Markdown/MDX prose styling (local, dependency-free alternative to the
@@ -784,4 +861,156 @@ select.tree-input {
   .tree-canvas .react-flow__edge.animated .react-flow__edge-path {
     animation: none;
   }
+}
+
+/* Generated research figures (web/components/Figure.tsx, SVGs from
+   web/scripts/figures/). The SVG carries its own fallbacks; these variables
+   let the page theme override them. Popovers are plain SVG groups shown on
+   hover or keyboard focus, so they need no JavaScript. */
+.research-fig {
+  --fig-fg: #e4e4e7;
+  --fig-muted: #a1a1aa;
+  --fig-grid: #27272a;
+  --fig-pop-bg: #18181b;
+  --fig-pop-border: #3f3f46;
+  margin: 1.2rem 0;
+  border: 1px solid #27272a;
+  border-radius: 0.75rem;
+  background: #101014;
+  padding: 1rem;
+}
+.research-fig-svg-wrap {
+  overflow: hidden;
+}
+.research-fig-svg-wrap svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+}
+.research-fig .fig-pop {
+  display: none;
+}
+.research-fig .fig-pt:hover .fig-pop,
+.research-fig .fig-pt:focus .fig-pop,
+.research-fig .fig-pt:focus-within .fig-pop {
+  display: block;
+}
+.research-fig .fig-pt:focus-visible .fig-marker {
+  stroke: var(--fig-fg);
+  stroke-width: 2;
+}
+.research-fig figcaption {
+  margin-top: 0.6rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #a1a1aa;
+}
+.research-fig-missing {
+  border-style: dashed;
+  color: #a1a1aa;
+  font-size: 0.85rem;
+}
+.research-fig-missing p {
+  margin: 0;
+}
+.research-fig-data {
+  margin-top: 0.7rem;
+  font-size: 0.78rem;
+  color: #a1a1aa;
+}
+.research-fig-data summary {
+  cursor: pointer;
+  color: #a1a1aa;
+}
+.research-fig-notes {
+  margin: 0.5rem 0 0.6rem;
+  line-height: 1.5;
+}
+.research-fig-scroll {
+  overflow-x: auto;
+}
+/* A diagram's sibling <name>.source.md rendered under its "Source" disclosure
+   (web/components/Diagram.tsx). */
+.research-fig-source-md {
+  margin: 0.5rem 0 0.6rem;
+  line-height: 1.55;
+}
+.research-fig-source-md p,
+.research-fig-source-md ul,
+.research-fig-source-md ol {
+  margin: 0.4rem 0;
+}
+.research-fig-source-md ul,
+.research-fig-source-md ol {
+  padding-left: 1.2rem;
+}
+.research-fig-source-md code {
+  font-size: 0.75rem;
+}
+.research-fig-source-md table {
+  border-collapse: collapse;
+}
+.research-fig-source-md th,
+.research-fig-source-md td {
+  padding: 0.2rem 0.6rem 0.2rem 0;
+  border-bottom: 1px solid #27272a;
+  text-align: left;
+}
+.research-fig-data table {
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+}
+.research-fig-data th,
+.research-fig-data td {
+  border: 0;
+  border-bottom: 1px solid #27272a;
+  padding: 0.35rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+  white-space: nowrap;
+}
+.research-fig-data thead th {
+  background: none;
+  border-bottom-color: #3f3f46;
+  color: #a1a1aa;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.research-fig-data th.num,
+.research-fig-data td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.research-fig-data tbody tr:last-child td {
+  border-bottom: 0;
+}
+.research-fig-label,
+.research-fig-field {
+  color: #71717a;
+  display: inline-block;
+  max-width: 22rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+.research-fig-source {
+  font-family: ui-monospace, monospace;
+  font-size: 0.72rem;
+  color: #7dd3fc;
+  text-decoration: none;
+  background: none;
+  padding: 0;
+}
+a.research-fig-source:hover {
+  text-decoration: underline;
+}
+.research-fig-spec {
+  margin: 0.6rem 0 0;
+  color: #71717a;
 }

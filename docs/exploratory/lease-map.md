@@ -37,12 +37,16 @@ constants anywhere in the repository are `0xa511e9b3`, `0xa54ff53a` and
 | `SEEDLEASE-A52-REVEAL` | `0xa5250000`–`0xa5257fff` | 32,768 | development, tuning | reveal-vs-next-disc sampling split | opened |
 | `SEEDLEASE-A52-SUITE` | `0xa5258000`–`0xa525bfff` | 16,384 | development, diagnostic | scenario-suite validation, position mode | opened |
 | `SEEDLEASE-A52-DISTILL` | `0xa5260000`–`0xa526ffff` | 65,536 | **training** | fair-planner distillation corpus | opened |
-| `SEEDLEASE-A52-FAST` | `0xa5270000`–`0xa5277fff` | 32,768 | development, equivalence gates | semantics-preserving engine optimisation | opened |
+| `SEEDLEASE-A52-FAST` | `0xa5270000`–`0xa5277fff` | 32,768 | development, equivalence gates | semantics-preserving engine optimisation; C++ fast engine used `0xa5270000`–`0xa5275fff`, Rust bitboard engine used `0xa5276000`–`0xa5277fff` (gates `…6000`–`…6fff`, benchmark `…7000`–`…7fff`) | opened |
 | `SEEDLEASE-A52` reserve | `0xa5216000`–`0xa522ffff` and `0xa5278000`–`0xa52fffff` | — | unallocated | — | reserved |
 | `SL-…-5da70000` | `0x5da70000`–`0x5da70fff` | 4,096 | public-development | a concurrent agent's afterstate track | **state disputed — under review** |
 | `SL-20260822T020000Z-a5290000` | `0xa5290000`–`0xa529ffff` | 65,536 | **training** | leaf-evolution CMA-ES fitness blocks, 32 seeds per generation from `0xa5290000` (at most 40 generations authorised: `0xa5290000`–`0xa52904ff`) | opened |
 | `SL-20260822T020000Z-a52b0000` | `0xa52b0000`–`0xa52b00ff` | 256 | public-development, held-out SCREEN | leaf-evolution held-out paired screen (first 64 seeds, read once after the candidate is frozen); remainder reserved for a replication | reserved |
 | `SL-20260822T060000Z-a52c0000` | `0xa52c0000`–`0xa52c00ff` | 256 | public-development, SCREEN | survival-instinct root-filter screen (first 128 seeds, read once after CHECK gates); remainder reserved for replication | reserved |
+| `SL-20260823T100000Z-a52d0000` | `0xa52d0000`–`0xa52d01ff` | 512 | public-development, SCREEN | reveal-construction leaf screen — corpus gate failed, never opened | cancelled-unopened |
+| `SL-20260823T110000Z-a52d0200` | `0xa52d0200`–`0xa52d03ff` | 512 | public-development, SCREEN | reveal-construction leaf successor screen (first 256 seeds read once: frozen, A900 full; A300, B stopped at 39/36 games); remainder reserved | opened |
+| `SL-20260823T200000Z-a52e0000` | `0xa52e0000`–`0xa52e01ff` | 512 | **training**, CHECK diagnostic | H-pool stage D0: 64 oracle games (0xa52e0000–0xa52e003f) and fair-D4 matched pool games (0xa52e0100–0xa52e01ff); public states exported, privileged generator only | reserved |
+| `SL-20260823T215000Z-a5216000` | `0xa5216000`–`0xa52191ff` | 2,816 used of 12,800 | **training**, CHECK | P-SOL-1 sibling-outcome corpus: G0 ladder 0xa5216000–0xa52160ff, main corpus 0xa5217000–0xa52177ff, gate set 0xa5219000–0xa52191ff (gate origins development-read on use) | reserved |
 
 Training and evaluation ranges are disjoint by construction: evaluation lives
 under `0xa51d`, training under `0xa52`. No model trained on `SEEDLEASE-A52` has

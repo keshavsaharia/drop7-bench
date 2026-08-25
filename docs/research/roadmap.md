@@ -171,26 +171,33 @@ varied depth (2, 3, 4, 5) against chance strata (5, 7), plus a factored ladder
 over reveal-sample count, on 64 paired games per cell using the bit-exact
 accelerated engine.
 
-**Depth and chance resolution interact, and the interaction has a sign.** With
-five strata the best depth is three, and the fourth ply is worth −7,723. With
-seven strata the fourth ply is worth +86,172 (95% lower bound +26,605, 40-0-24)
-— the largest verified improvement in the repository. The stratum contrast
-itself replicates at two depths: +101,171 at depth 4 and +123,613 at depth 5,
-both significant.
+**The measured findings, in three figures.** Depth and chance resolution
+interact with a sign — the fourth ply pays only under the exact chance model;
+the fifth ply is not measurable by this design, which is a different claim from
+being worthless; and the two axes substitute rather than compound, leaving
+**a budget frontier with a flat top at the fair-D4 operating point, reachable
+from either axis.** The arms, contrasts and floors are recorded in
+[`RS-20260821T205102Z-d89df4b5`](../../research/results/RS-20260821T205102Z-d89df4b5.json)
+and
+[`RS-20260821T192140Z-189fe392`](../../research/results/RS-20260821T192140Z-189fe392.json)
+and analysed in
+[finding-15](../exploratory/finding-15-depth5-exact-estimator.md) and
+[finding-16](../exploratory/finding-16-factored-reveal-sampling.md).
 
-**The fifth ply is not measurable by this design, which is a different claim
-from being worthless.** At five strata it is −8,624 over 64 paired games; at
-seven strata it is +23,367 over 32, having changed sign when the cohort grew
-from 16 games. Both sit far inside their detection floors.
+```figure
+depth-chance-factorial
+caption: Mean score by search depth and chance resolution. The sign of the depth gradient flips with the stratum count.
+```
 
-**Depth and chance resolution substitute rather than compound.** Depth 3 with
-six-fold reveal sampling (4.24M work per move, 376,442 points) and depth 4 with
-single-sample reveals (4.96M, 398,498) are the same policy strength bought two
-different ways, and doubling reveal samples on top of the fourth ply buys
-nothing measurable for 4.07x the work. Across a 1,085x range of work per move,
-every arm using the exact chance model falls between 312,327 and 398,498,
-non-monotonically. **The budget frontier has a flat top at the fair-D4
-operating point, reachable from either axis.**
+```figure
+score-vs-work-frontier
+caption: Mean score against logical work per move — the flat-topped budget frontier.
+```
+
+```figure
+detection-floor-map
+caption: The six paired contrasts against their detection floors. The nulls are non-measurements, not zeros.
+```
 
 **Consequences for the rest of this roadmap.** Priority 2's acceleration goal is
 met and no longer unlocks strength — it unlocks *data rate*, which is still

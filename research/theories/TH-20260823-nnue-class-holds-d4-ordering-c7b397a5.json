@@ -1,0 +1,33 @@
+{
+  "$schema": "../schemas/theory-v1.schema.json",
+  "format": "drop7-theory-v1",
+  "theoryId": "TH-20260823-nnue-class-holds-d4-ordering-c7b397a5",
+  "title": "A leaf-affordable NNUE-class student trained on successor-closed exact D4 sibling values reproduces D4's within-root ordering at the d4q gate thresholds",
+  "claim": "A LeafNet-shaped student (approaches/lifetime-objective/learned-leaf/leaf_features.py features, EmbeddingBag(8902,64)->32, ~572k parameters, ~1.3 us per state) trained with a within-root listwise plus pairwise loss on the existing successor-closed exact D4 sibling-value labels (runs/RUN-20260821T085042Z-c5cf0e71/d4q-labels, 291,890 afterstates over 8,639 roots) reproduces fair D4's within-root ordering on whole-origin held-out roots at the frozen d4q thresholds: top-1 >= 0.60, pairwise >= 0.78, normalised regret <= 0.13, in each half-fold.",
+  "mechanism": "RS-20260821T104500Z-77d21e90 showed a 3.4M-parameter afterstate CNN reaches only top-1 0.375 on these labels, below exact D1 (0.486), and status.md relocated the obstacle to the capacity of a compact board evaluator. The leaf-affordable NNUE class has never been trained on these labels: it was trained on played-action lifetime (saturated at Pearson 0.855-0.857, RS-20260822T024228Z-94090db1) and on planner values (finding-11). The draft self-play theory TH-20260821-search-guided-self-play-at-scale-299ed02f needs a student that both holds D4's ordering and runs at leaf cost; this probe decides whether that student can exist in the only leaf-affordable model class, on data already on disk, for about one CPU-hour. A fail is a valid negative that routes the self-play loop to a root-prior redesign. Design: runs/RUN-20260823T191900Z-b9f8f80d/kimi-k3-open-items.md (K4-D probe, Kimi K3). Designer's prior: P(pass) about 0.08.",
+  "falsificationCriteria": [
+    "Held-out (whole-origin, the d4q experiment's own split) top-1 < 0.60 OR pairwise < 0.78 OR normalised regret > 0.13 in either half-fold, for the best of 5 initialisation seeds judged on the validation origins only, refutes the claim for this model class at this size; the held-out panel is already-read diagnostic data, so even a pass is not evidence and licenses only a fresh-manifest confirmation.",
+    "A pass that fails a fresh whole-origin label manifest confirmation refutes it at one tier higher."
+  ],
+  "informationClass": "public-policy",
+  "lifecycle": "assessed",
+  "assessment": "not-supported-as-tested",
+  "evidenceTier": "pilot",
+  "dependencies": [
+    "TH-20260821-search-guided-self-play-at-scale-299ed02f",
+    "TH-20260820-distributional-afterstate-ranker-7aba7fb3"
+  ],
+  "evidenceRefs": [
+    "research/results/RS-20260821T104500Z-77d21e90.json",
+    "research/results/RS-20260822T024228Z-94090db1.json",
+    "runs/RUN-20260823T191900Z-b9f8f80d/kimi-k3-open-items.md",
+    "research/results/RS-20260823T194142Z-946e3cd1.json"
+  ],
+  "createdBy": {
+    "platform": "unknown",
+    "model": "unknown",
+    "agentId": null
+  },
+  "createdAt": "2026-08-23T19:29:58Z",
+  "updatedAt": "2026-08-23T20:56:11Z"
+}

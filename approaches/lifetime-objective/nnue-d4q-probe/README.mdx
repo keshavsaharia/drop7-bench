@@ -1,0 +1,118 @@
+---
+title: Can a leaf-sized network hold the four-ply search's ordering?
+family: lifetime-objective
+summary: Trains the smallest network that could run inside a search leaf on the exact values the four-ply search gives every sibling move, and asks whether it ranks those moves the way the search does.
+status: completed
+evidence: task-record only
+reads: diagnostic
+---
+
+Train the smallest network that could run inside a search leaf on the exact
+values the four-ply search gives every sibling move, and ask whether it ranks
+those moves the way the search does.
+
+<EvidenceLabel status="completed" evidence="task-record only" reads="diagnostic" />
+
+<Callout tone="warn">
+The held-out panel this probe is scored on had already been opened once, by the
+earlier afterstate experiment that produced the labels. Reading it a second
+time makes this a diagnostic, not evidence about fresh positions. The
+preregistration said so before the run, and a pass would only have licensed a
+confirmation on new labels.
+</Callout>
+
+## Why anyone expected this to work
+
+The [search-guided self-play](/learn/glossary) loop needs a learned board
+evaluator that does two things at once: agree with the
+[depth-4 search](/learn/concepts/expectimax) about which column is best, and
+cost about a microsecond, because the search asks that question hundreds of
+thousands of times per decision. The earlier attempt used a 3.4-million-parameter
+convolutional network, which is far too slow for a leaf and, as it turned out,
+agreed with the search on the best column only 37.5% of the time
+(result RS-20260821T104500Z-77d21e90) — worse than the one-ply search's 48.6%.
+
+The one model class that *is* cheap enough for a leaf is the
+[NNUE](/learn/glossary)-shaped network from
+[learned-leaf](/approaches/lifetime-objective/learned-leaf): 8,902 binary
+features looked up and summed, then two small dense layers. It had only ever
+been trained to predict how long a game would last, never on the search's own
+sibling values. The probe asks whether feature-space saturation on one target
+says anything about ranking on another. The designer's prior was about 8% for
+a pass.
+
+## How it works
+
+1. **Inputs.** Every row of the existing label file is one sibling move's
+   resulting board (after the drop and any clears), the visible next disc, and
+   the moves until the next rise, under one of five chance
+   [strata](/learn/concepts/expectimax), together with the exact value the
+   pinned depth-4 search assigns it. 291,890 rows over 8,639 root positions;
+   6,551 roots are the training fold and 2,088 the validation ("calibration")
+   fold, exactly as the afterstate experiment wrote them.
+2. **Student.** `leaf_features.py` from learned-leaf (imported, not copied)
+   turns each board into 135 active features; the network is
+   EmbeddingBag(8902, 64) with a bias, ReLU, Linear(64, 32), ReLU, Linear(32, 1):
+   571,905 parameters.
+3. **Per-move score.** As in the comparator's `d4q.py`, a move's score is the
+   average over the five strata of the immediate score change plus the
+   student's value of the resulting board.
+4. **Loss, within each root.** A listwise softmax cross-entropy against the
+   search's values (softened at 0.18 times the root's value spread, the
+   [d4-q-clone](/approaches/value-policy-learning/d4-q-clone) convention), a
+   gap-weighted pairwise margin, and a 0.1-weight mean-squared anchor on the
+   standardised value. Adam at 1e-3, 256 roots per batch, 30 epochs.
+5. **Selection and reading.** Five initialisation seeds (0xA52E01 to 0xA52E05).
+   The seed with the best validation top-1 is chosen, and only then is the
+   3,030-root held-out panel read — once — and reported for all five seeds,
+   split into two halves by a hash of each root's origin game. The metrics
+   (top-1, top-2, pairwise agreement, normalised regret) are the functions of
+   `d4q.py`, imported.
+
+## What happened
+
+It failed clearly. The selected seed agreed with the depth-4 search on the best
+column about 30% of the time on the held-out positions — below the convolutional
+network it was meant to replace, and below the one-ply search. Every one of the
+three preregistered thresholds failed in both half-folds, for every seed.
+
+<ResultSummary id="RS-20260823T194142Z-946e3cd1" />
+
+<TechnicalDetails title="Numbers and records">
+
+Result record `RS-20260823T194142Z-946e3cd1`, run `RUN-20260823T193853Z-5abd7c95`,
+experiment `EX-20260823-nnue-d4q-ordering-probe-0ca09bb1`, theory
+`TH-20260823-nnue-class-holds-d4-ordering-c7b397a5`. Artifacts under
+`runs/RUN-20260823T191900Z-b9f8f80d/probe/` (`train.log`, `metrics.json`,
+`model-seed*.pt`, `commands.log`, `leaf-check.log`).
+
+Selected seed 0xA52E02 (validation top-1 0.3281). Held-out, half-fold 1 / 2:
+top-1 0.2960 / 0.3011 (gate: at least 0.60); pairwise 0.6266 / 0.6259 (at least 0.78);
+normalised regret 0.3354 / 0.3379 (at most 0.13). Pooled top-1 across the five seeds
+ranged from 0.2987 to 0.3135. Comparators from RS-20260821T104500Z-77d21e90:
+afterstate CNN 0.375, exact D1 0.486, exact D2 0.568.
+
+Validation top-1 peaked at 0.352 to 0.359 between epochs 5 and 10 for every seed
+and then fell while the training loss kept falling; the protocol fixed 30 epochs
+and the final-epoch model was used. Even the best epoch is far below the gate.
+
+Exported through the existing `export_leaf.py` and timed with `leaf-check`
+(single thread, 400,000 evaluations): 1.27 microseconds per state. The student
+is leaf-affordable; it just does not know the ordering.
+
+Total wall time 166 s on 8 CPU threads; no GPU. Run validity valid, outcome
+fail, recorded at the lowest result tier (the schema has no diagnostic tier)
+because the panel had already been read once.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+A leaf-sized NNUE student of this size trained on the existing successor-closed
+depth-4 labels does not hold the search's ordering; the self-play loop cannot be
+unblocked in its leaf form by this route, and its redesign goes to the
+larger-student question. This rejects only the tested configuration: 64/32
+hidden units, these loss weights, 30 fixed epochs, 6,551 training roots. Whether
+a wider NNUE, early stopping, or far more labelled roots would change the
+picture is untested here; the fact that every seed overfits after about ten
+epochs suggests the label volume, not only the model, is binding.

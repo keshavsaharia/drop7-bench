@@ -1,0 +1,32 @@
+{
+  "title": "Label stability by aligned-scenario count K — the frozen 0.5 floor is crossed only at K=256",
+  "kind": "line",
+  "x": { "label": "aligned scenarios per root, K", "unit": "scenarios" },
+  "y": { "label": "split-half Spearman of within-root action rankings", "unit": "Spearman" },
+  "notes": "Afterstate-ranker line, H40 phase-greedy-D1 continuation labels, successor-closed corpora; all three records are pilot tier. K=8 (RS-20260820T094500Z-5c1e9a04: 0.2457 mean over 2,470 held-out roots) and K=64 (RS-20260820T114500Z-2b7c9e31: 0.4462 over 2,750 fresh held-out roots) both failed the frozen 0.5 floor and carry assessment=superseded — their stability values remain the only recorded measurements at those K. K=256 (RS-20260820T142500Z-8f4a2d17): 0.6379 unconditioned over 2,523 roots, 0.8181 on the 411 decisive roots (spread > 20k), the preregistered gate metric, which passed. Decisive-root stability is NOT recorded at K=8 or K=64 — those points are omitted from the decisive series, not zero. Later K=256 gates on different corpora replicate the crossing and are not charted (different panels): 0.8144 (RS-20260820T184500Z-63c0a8e2), 0.8244 (RS-20260821T094500Z-1a7e3c55), 0.8058 (RS-20260821T134500Z-4b9d2f68). The K=8 record's noise arithmetic (within-action scenario sd ~20,922 vs median between-action gap 7,096) predicted this dose-response. The gate series is drawn as a two-point polyline because the generator has no reference-line primitive; the 0.5 floor is recorded in each record's gateChecks. The x axis is linear; the plan's log-scale suggestion is not expressible.",
+  "series": [
+    {
+      "name": "mean over held-out roots",
+      "points": [
+        { "x": 8, "y": 0.2457, "label": "2,470 held-out roots; gate failed (inconclusive); record superseded", "sourceRecord": "RS-20260820T094500Z-5c1e9a04", "sourceField": "metrics.labelStabilityMeanSpearman" },
+        { "x": 64, "y": 0.4462, "label": "2,750 fresh held-out roots; gate failed (inconclusive); record superseded", "sourceRecord": "RS-20260820T114500Z-2b7c9e31", "sourceField": "metrics.labelStabilityMeanSpearman" },
+        { "x": 256, "y": 0.6379, "label": "2,523 held-out roots, unconditioned; floor passed", "sourceRecord": "RS-20260820T142500Z-8f4a2d17", "sourceField": "metrics.labelStabilityMeanSpearman" }
+      ]
+    },
+    {
+      "name": "decisive roots only (recorded at K=256 only)",
+      "dashed": true,
+      "points": [
+        { "x": 256, "y": 0.8181, "label": "411 decisive roots (spread > 20k); the preregistered gate metric; no K=8/K=64 value recorded", "sourceRecord": "RS-20260820T142500Z-8f4a2d17", "sourceField": "metrics.labelStabilityDecisiveSpearman" }
+      ]
+    },
+    {
+      "name": "frozen label-stability floor 0.5",
+      "dashed": true,
+      "points": [
+        { "x": 8, "y": 0.5, "label": "frozen gate: mean scenario-half Spearman >= 0.5 on held-out roots", "sourceRecord": "RS-20260820T094500Z-5c1e9a04", "sourceField": "gateChecks: label stability floor criterion" },
+        { "x": 256, "y": 0.5, "label": "frozen gate: decisive-root scenario-half Spearman >= 0.5", "sourceRecord": "RS-20260820T142500Z-8f4a2d17", "sourceField": "gateChecks: label stability floor criterion" }
+      ]
+    }
+  ]
+}

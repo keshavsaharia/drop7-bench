@@ -1,0 +1,31 @@
+{
+  "title": "Paired contrasts against their detection floors — every significant result is above its floor, every null below it",
+  "kind": "bar",
+  "x": { "label": "paired contrast (same seeds, whole games)" },
+  "y": { "label": "points", "unit": "points" },
+  "notes": "All six contrasts from RS-20260821T205102Z-d89df4b5, cohort 0xa51d1000-0xa51d103f, corrected 17,000-point Hardcore scoring; the n=32 contrasts cover the cohort's first 32 seeds (d5s7 arm stopped by decision, final). Whiskers are one-sided 95% percentile-bootstrap lower bounds (20,000 resamples, Mulberry32 domain 0xb0075eed); upper bounds are NOT recorded for these contrasts in the record and are omitted, not zero. Detection floor = 1.645 x sd / sqrt(n), the smallest true effect whose one-sided 95% bound would clear zero (metrics.detectionFloorDefinition). The d4s7-d3s7 lower bound is carried as +26,468 from metrics.bootstrapVersusNormalApproximation; status.md and the 2026-08-21 log print +26,605, which is prose drift — the record and finding-05's interaction table both say +26,468. Evidence tier: public-development.",
+  "series": [
+    {
+      "name": "paired mean delta (whisker: 95% lower bound)",
+      "points": [
+        { "x": "d4s7-d4s5 (n=64)", "y": 101171, "lo": 47447, "n": 64, "label": "strata at depth 4; W-T-L 41-0-23; 3.82x work; floor 55,192: above", "sourceRecord": "RS-20260821T205102Z-d89df4b5", "sourceField": "metrics.pairedD4s7MinusD4s5" },
+        { "x": "d4s7-d3s7 (n=64)", "y": 86172, "lo": 26468, "n": 64, "label": "depth 4 minus 3 at 7 strata; W-T-L 40-0-24; floor 61,457: above", "sourceRecord": "RS-20260821T205102Z-d89df4b5", "sourceField": "metrics.powerTable[1]; metrics.bootstrapVersusNormalApproximation" },
+        { "x": "d5s7-d5s5 (n=32)", "y": 123613, "lo": 32575, "n": 32, "label": "strata at depth 5; W-T-L 19-0-13; 5.85x work; floor 95,207: above", "sourceRecord": "RS-20260821T205102Z-d89df4b5", "sourceField": "metrics.pairedD5s7MinusD5s5" },
+        { "x": "d5s7-d3s7 (n=32)", "y": 86397, "lo": -6303, "n": 32, "label": "two plies at 7 strata; W-T-L 20-0-12; floor 97,211: below", "sourceRecord": "RS-20260821T205102Z-d89df4b5", "sourceField": "metrics.pairedD5s7MinusD3s7" },
+        { "x": "d5s5-d4s5 (n=64)", "y": -8624, "lo": -55134, "n": 64, "label": "depth at 5 strata; W-T-L 33-0-31; 23.29x work; floor 47,052: below", "sourceRecord": "RS-20260821T205102Z-d89df4b5", "sourceField": "metrics.pairedD5s5MinusD4s5" },
+        { "x": "d5s7-d4s7 (n=32)", "y": 23367, "lo": -83046, "n": 32, "label": "depth at 7 strata; W-T-L 17-0-15; 35.62x work; floor 107,988: below (22% of floor)", "sourceRecord": "RS-20260821T205102Z-d89df4b5", "sourceField": "metrics.pairedD5s7MinusD4s7" }
+      ]
+    },
+    {
+      "name": "detection floor 1.645*sd/sqrt(n)",
+      "points": [
+        { "x": "d4s7-d4s5 (n=64)", "y": 55192, "n": 64, "label": "floor for d4s7-d4s5", "sourceRecord": "RS-20260821T205102Z-d89df4b5", "sourceField": "metrics.powerTable[0].detectionFloor" },
+        { "x": "d4s7-d3s7 (n=64)", "y": 61457, "n": 64, "label": "floor for d4s7-d3s7", "sourceRecord": "RS-20260821T205102Z-d89df4b5", "sourceField": "metrics.powerTable[1].detectionFloor" },
+        { "x": "d5s7-d5s5 (n=32)", "y": 95207, "n": 32, "label": "floor for d5s7-d5s5", "sourceRecord": "RS-20260821T205102Z-d89df4b5", "sourceField": "metrics.powerTable[2].detectionFloor" },
+        { "x": "d5s7-d3s7 (n=32)", "y": 97211, "n": 32, "label": "floor for d5s7-d3s7", "sourceRecord": "RS-20260821T205102Z-d89df4b5", "sourceField": "metrics.powerTable[3].detectionFloor" },
+        { "x": "d5s5-d4s5 (n=64)", "y": 47052, "n": 64, "label": "floor for d5s5-d4s5", "sourceRecord": "RS-20260821T205102Z-d89df4b5", "sourceField": "metrics.powerTable[4].detectionFloor" },
+        { "x": "d5s7-d4s7 (n=32)", "y": 107988, "n": 32, "label": "floor for d5s7-d4s7", "sourceRecord": "RS-20260821T205102Z-d89df4b5", "sourceField": "metrics.powerTable[5].detectionFloor" }
+      ]
+    }
+  ]
+}

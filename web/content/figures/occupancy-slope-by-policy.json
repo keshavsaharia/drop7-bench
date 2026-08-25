@@ -1,0 +1,32 @@
+{
+  "title": "Occupancy slope by policy — cells gained per five-move cycle; zero is flow balance, and every fair arm is above zero",
+  "kind": "bar",
+  "x": { "label": "policy (planner = fair arm B of finding-07; rh- = clairvoyant)" },
+  "y": { "label": "occupancy slope", "unit": "cells per five-move cycle" },
+  "notes": "Slope is the mean over games of the least-squares slope of occupied cells against cycle index from cycle 2 onward (finding-06 section 2). The eight-tape series (findings 06/07, 8 games per arm, paired master tapes 0xa5230000-0xa5230007) is now known to be unrepresentative: finding-12 measured that those tapes favour long games, inflating fair D4's mean lifetime by 26%, so the fresh-tape series (finding-12 section 2; 128 tapes for fair D4 and planner H5 K256, 32 tapes for planner H7 K256) is the representative one and the two series are never pooled. The finding-12 cohort table prints fair D4's fresh slope as +1.481; its paired H=5 table prints the same arm as +1.4806 — both recorded, the cohort-table value is charted. Recorded but not charted (the plan's selection): clairvoyant rh-clears fresh-tape slopes +0.075 at H=7 (64 tapes) and +0.099 at H=9 (32 tapes) (finding-12 section 6), and rh-clears H9 cap-1000 slope -0.0015 over cycles 2-200 (finding-06 section 2.1). Every fair arm's slope is strictly positive and every fair game ended: 0 of 87 eight-tape fair-planner games and 0 of 160 fresh-tape fair games reached the cap. Evidence tier: development/pilot; small paired cohorts throughout. The eight-tape clairvoyant rows are privileged diagnostics (they read the hidden board), never deployable policies.",
+  "series": [
+    {
+      "name": "eight master tapes (findings 06/07; cohort-inflated)",
+      "points": [
+        { "x": "lowest column", "y": 4.47, "n": 8, "label": "public control; dead in 7 cycles; mean 33.12 moves", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 2 whole-game table, occupancy slope column" },
+        { "x": "fair D4", "y": 0.99, "n": 8, "label": "0/8 survive, mean 117.75 moves on these tapes (93.56 fresh)", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 2 whole-game table, occupancy slope column" },
+        { "x": "planner H5 K256", "y": 0.583, "n": 8, "label": "fair arm B; 0/8 survive, mean 128.75 moves", "sourceRecord": "docs/exploratory/finding-07-fair-planning-ceiling.md", "sourceField": "section 3 occupancy-trend table" },
+        { "x": "planner H7 K16", "y": 1.269, "n": 8, "label": "fair arm B; 0/8 survive, mean 76.25 moves", "sourceRecord": "docs/exploratory/finding-07-fair-planning-ceiling.md", "sourceField": "section 3 occupancy-trend table" },
+        { "x": "planner H7 K64", "y": 0.833, "n": 8, "label": "fair arm B; 0/8 survive, mean 155.00 moves", "sourceRecord": "docs/exploratory/finding-07-fair-planning-ceiling.md", "sourceField": "section 3 occupancy-trend table" },
+        { "x": "planner H7 K256", "y": 0.311, "n": 8, "label": "fair arm B; best fair slope; 0/8 survive, mean 200.88 moves", "sourceRecord": "docs/exploratory/finding-07-fair-planning-ceiling.md", "sourceField": "section 3 occupancy-trend table" },
+        { "x": "rh-points H9", "y": 0.44, "n": 8, "label": "clairvoyant score-seeker; 0/8 at the cap, mean 165.00 moves", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 2 whole-game table, occupancy slope column" },
+        { "x": "rh-clears H5", "y": 0.053, "n": 8, "label": "clairvoyant clear-seeker; 5/8 reach the 400-move cap alive", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 2 whole-game table, occupancy slope column" },
+        { "x": "rh-clears H7", "y": 0.014, "n": 8, "label": "clairvoyant clear-seeker; 6/8 reach the cap alive", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 2 whole-game table, occupancy slope column" },
+        { "x": "rh-clears H9", "y": -0.009, "n": 8, "label": "clairvoyant clear-seeker; 7/8 reach the cap alive; the only flat board", "sourceRecord": "docs/exploratory/finding-06-flow-ceiling.md", "sourceField": "section 2 whole-game table, occupancy slope column" }
+      ]
+    },
+    {
+      "name": "fresh master tapes (finding-12 re-baseline)",
+      "points": [
+        { "x": "fair D4", "y": 1.481, "n": 128, "label": "128 fresh tapes; mean 93.56 moves; paired H=5 table prints +1.4806", "sourceRecord": "docs/exploratory/finding-12-fair-planner-ceiling-extended.md", "sourceField": "section 2 re-baselining cohort table" },
+        { "x": "planner H5 K256", "y": 1.3753, "n": 128, "label": "128 fresh tapes; slope delta vs D4 -0.1054 straddles zero (LB -0.3069)", "sourceRecord": "docs/exploratory/finding-12-fair-planner-ceiling-extended.md", "sourceField": "section 2 paired re-baselined table (H=5)" },
+        { "x": "planner H7 K256", "y": 1.3063, "n": 32, "label": "32 fresh tapes; slope delta vs D4 -0.4338, upper bound -0.0509: advantage established", "sourceRecord": "docs/exploratory/finding-12-fair-planner-ceiling-extended.md", "sourceField": "section 2 paired re-baselined table (H=7)" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "title": "The afterstate override gate in half-folds — the frozen rule demands >= +0.01 regret gain in EACH half",
+  "kind": "bar",
+  "x": { "label": "override gate evaluation (fresh held-out roots)" },
+  "y": { "label": "eligible-root regret gain vs unchanged D4", "unit": "normalized regret" },
+  "notes": "Higher is better; the frozen criterion is a gain of at least +0.01 in EACH half-fold, drawn as the third series of +0.01 markers because the generator has no reference-line primitive. All three gates FAILED the frozen rule and all three records are pilot tier with outcome fail / not-supported-as-tested. Iteration-3 K=256 (RS-20260820T184500Z-63c0a8e2, 2,689 fresh roots, 1,030 near-tie eligible, override rate 37.0%): +0.0351 / +0.0075, pooled +0.0214 — the narrowest miss; its own record warns the half2 value 0.0075 is close to the frozen margin and should be read as a narrow failure, not evidence of no effect. Full-train 22 epochs (RS-20260821T094500Z-1a7e3c55, fresh corpus-E, 2,867 roots, 1,106 eligible, 41.1% override rate): +0.0228 / -0.0297, pooled +0.0018 — the override is actively harmful in half2. D2-teacher (RS-20260821T134500Z-4b9d2f68, K=64 D2-continuation corpus, partial at 6,535 of 8,192 roots): -0.0089 / +0.0110, pooled +0.0012 — and this record carries a disclosed confound: the model was trained on D2-continuation outcomes but gated against D1-continuation outcomes, frozen for comparability. Per the frozen failure action, no further override variants of the same checkpoint were opened; the margin bars are the recorded frozen constant 0.01 from each record's gateChecks criterion text.",
+  "series": [
+    {
+      "name": "half-fold 1",
+      "points": [
+        { "x": "iteration-3 K=256", "y": 0.0351, "label": "passes the +0.01 margin; pooled +0.0214; gate FAILED on half2", "sourceRecord": "RS-20260820T184500Z-63c0a8e2", "sourceField": "metrics.regretGainHalf1" },
+        { "x": "full-train 22 epochs", "y": 0.0228, "label": "passes the +0.01 margin; pooled +0.0018; gate FAILED on half2", "sourceRecord": "RS-20260821T094500Z-1a7e3c55", "sourceField": "metrics.overrideRegretGainHalf1" },
+        { "x": "D2-teacher K=64", "y": -0.0089, "label": "fails; pooled +0.0012; teacher/target mismatch confound disclosed", "sourceRecord": "RS-20260821T134500Z-4b9d2f68", "sourceField": "metrics.overrideRegretGainHalf1" }
+      ]
+    },
+    {
+      "name": "half-fold 2",
+      "points": [
+        { "x": "iteration-3 K=256", "y": 0.0075, "label": "below the frozen +0.01 margin by 0.0025 — the narrow failure", "sourceRecord": "RS-20260820T184500Z-63c0a8e2", "sourceField": "metrics.regretGainHalf2" },
+        { "x": "full-train 22 epochs", "y": -0.0297, "label": "negative — the override is actively harmful in this half", "sourceRecord": "RS-20260821T094500Z-1a7e3c55", "sourceField": "metrics.overrideRegretGainHalf2" },
+        { "x": "D2-teacher K=64", "y": 0.011, "label": "passes the margin; gate FAILED on half1 (-0.0089)", "sourceRecord": "RS-20260821T134500Z-4b9d2f68", "sourceField": "metrics.overrideRegretGainHalf2" }
+      ]
+    },
+    {
+      "name": "frozen margin +0.01 (each half-fold)",
+      "dashed": true,
+      "points": [
+        { "x": "iteration-3 K=256", "y": 0.01, "label": "frozen criterion: eligible-root override regret <= D4 regret - 0.01 in EACH half-fold", "sourceRecord": "RS-20260820T184500Z-63c0a8e2", "sourceField": "gateChecks: override regret criterion" },
+        { "x": "full-train 22 epochs", "y": 0.01, "label": "the same frozen criterion text", "sourceRecord": "RS-20260821T094500Z-1a7e3c55", "sourceField": "gateChecks: override regret criterion" },
+        { "x": "D2-teacher K=64", "y": 0.01, "label": "the same frozen criterion text", "sourceRecord": "RS-20260821T134500Z-4b9d2f68", "sourceField": "gateChecks: override gate criterion" }
+      ]
+    }
+  ]
+}
