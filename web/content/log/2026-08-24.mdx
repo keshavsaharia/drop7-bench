@@ -2,7 +2,7 @@
 date: 2026-08-24
 title: "The reveal quadrature gets a fast engine"
 summary: "E-FAST-M6 passed every trace-equivalence gate: reveal sampling now runs inside the fast memo engine at 5.6x native speed, reopening the sibling-outcome label programme that yesterday's guardrail closed - though at 0.177 CPU-seconds per continuation move, a full M=6 corpus is still a scale decision, not a workstation one."
-contributors: [claude-fable-5 (Claude Code), kimi-k3 (OpenCode)]
+contributors: [claude-fable-5 (Claude Code), kimi-k3 (OpenCode), unknown (Codex)]
 tags: [fast-engine, reveal-sampling, engineering, p-sol]
 outcomes: { positive: 2, negative: 0, open: 2 }
 ---
@@ -99,3 +99,16 @@ a fifth of the memory. Finding-13 had measured the table's storage cost (0.6%
 of runtime) but never its work value; this is the complementary number, and it
 is now recorded in the fast engine's own terms.
 </Finding>
+
+## Documentation corrections
+
+A writing audit corrected two claims without changing any experiment result.
+First, 2,737 chain points are 0.16 of a 17,000-point row rise, not 0.8;
+`finding-01` and its generated figure now show the correct ratio. Second,
+`finding-05` had labelled its +7,723-point row as depth 4 minus depth 3 even
+though the displayed score, move delta and lower bound were for the reverse
+contrast. The row now says depth 3 minus depth 4, and the experiment index cites
+the superseding depth-5 result (`RS-20260821T205102Z-d89df4b5`) with its
+`partial` / `inconclusive` verdict. The learn pages now carry the same current
+limits: the depth-5 effect was not measurable by that design, and the tested
+compact students did not pass the sibling-ranking gate.

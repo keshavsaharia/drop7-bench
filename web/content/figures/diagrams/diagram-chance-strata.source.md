@@ -27,7 +27,8 @@ uniform is what unlocks depth:
    cohort): **+101,171 mean points (+34%), +27.5 moves, 95% lower bound
    +47,457**.
 4. **The interaction is the point.** With 5 strata the fourth ply buys nothing
-   (+7,723 [−42,743], n.s.); with 7 strata it is worth +86,172 [+26,468]. Depth
+   measurable (it trails depth 3 by 7,723, n.s.); with 7 strata it is worth
+   +86,172 [+26,468]. Depth
    and estimator quality are complements, not independent knobs — a deeper ply
    propagates whatever the chance estimator gives it, bias or signal.
 
@@ -39,7 +40,7 @@ From `docs/exploratory/finding-05-chance-strata.md`:
   else (CHECK gate: reproduces the reference at default settings).
 - Interaction table (64 paired games per arm): d4 7−5 strata +101,171
   [LB +47,457], 41-0-23; d3 7−5 +7,276 [−45,961] n.s.; 7 strata d4−d3 +86,172
-  [+26,468]; 5 strata d4−d3 +7,723 [−42,743] n.s.
+  [+26,468]; 5 strata d3−d4 +7,723 [−42,743] n.s.
 - Work bound: worst-case depth-4 work with branching b = 7 columns × N strata
   is 3,134,950 at N=5 (fits the frozen 3,200,000 bound with 2.1% headroom) and
   11,892,398 at N=7 (exceeds it 3.7×). A 7-strata run left at the frozen bound

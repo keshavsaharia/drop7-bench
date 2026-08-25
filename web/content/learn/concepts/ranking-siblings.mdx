@@ -44,16 +44,14 @@ The repository's status summary names this directly:
 > several actions it had not observed equally well. Low value error on visited
 > states did not guarantee good root-action ranking.
 
-## Measured, not supposed
+## How the failure was measured
 
-The latest completed work built a locked panel of
-477 real positions and evaluated **every** legal sibling at each one, so that a
-model's ranking could be checked against a reference. The best
-learned ranker at the time picked the same top move as fair D4 about 29% of the
-time, against D4's own 38% agreement with the gold standard, and ordered pairs
-of siblings correctly about 60% of the time against D4's 67%. It lost on both
-counts. A second, more conservative variant barely disagreed with D4 at all and
-its few disagreements were not reliably improvements.
+An early diagnostic built a locked panel of 477 real positions and evaluated
+**every** legal sibling at each one. The best learned ranker in that study
+picked the same top move as fair D4 about 29% of the time, against D4's 38%
+agreement with the long-outcome reference, and ordered sibling pairs correctly
+about 60% of the time against D4's 67%. A conservative variant changed only 11
+of 477 decisions, and those changes were not reliably better.
 
 <details>
 <summary>The technical record</summary>
@@ -97,13 +95,15 @@ failed gate**, not as a success.
 
 <TheorySummary id="TH-20260820-distributional-afterstate-ranker-7aba7fb3" />
 
-The *data shape* was fixed and the problem moved:
-what limits the model now is the quality of its labels and its own training,
-not the sibling gap. The result record itself names an undertrained checkpoint
-(11 of 20 planned epochs) and a weak teacher as the likely bottleneck. That is a
-different, more tractable problem. It is where the
-[more-computation question](/learn/concepts/does-more-compute-help)
-picks up.
+The data shape was fixed, but that was not sufficient. The first stable
+long-outcome model still had two disclosed limitations: a weak continuation
+teacher and training stopped at 11 of 20 epochs. A later experiment removed
+both ambiguities by giving a compact student successor-closed, exact D4 search
+values for every legal sibling. It reached 0.375 top-1 agreement with D4,
+below exact D1's 0.486. A smaller leaf-affordable student reached about 0.30.
+The supported conclusion is narrower than "bigger models will work": sibling
+coverage is necessary, but the tested compact board evaluators still could not
+represent D4's ordering.
 
 <Callout title="Played-move-only data fails at any scale" tone="warn">
 Sibling labelling requires a search at every position, for every column, under
@@ -113,7 +113,8 @@ compute spent generating *played-move-only* data reproduces the failure at any
 scale; the data shape has to be right. Second, the pilot above shows that even
 with the right shape, the number of imagined futures per label is itself a
 compute dial that had to be turned up by 32× before the labels were stable
-enough to learn from. The concept page on
+enough to learn from. The later exact-label failures show that stable labels
+still do not guarantee a compact student can rank them. The concept page on
 [whether more computation helps](/learn/concepts/does-more-compute-help)
 picks both up.
 </Callout>

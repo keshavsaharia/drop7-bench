@@ -28,8 +28,8 @@ export default function ApproachesPage() {
         </Link>
         <h1 className="mt-1 text-2xl font-black text-zinc-50">Approaches</h1>
         <p className="mt-1 max-w-3xl text-sm text-zinc-400">
-          Every strategy family in the repository. Each page is the notes from
-          that directory: how the strategy works and what the evidence showed.
+          Every strategy family and approach directory in the repository, with
+          notes on how each strategy works and what its evidence showed.
         </p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
