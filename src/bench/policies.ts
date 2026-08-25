@@ -10,7 +10,11 @@ import { evaluateMctsMoves } from "../core/typescript/mcts-solver.ts";
 import { evaluateSparseExpectimaxMoves } from "../core/typescript/sparse-expectimax.ts";
 import { evaluateRiskSensitiveMoves } from "../core/typescript/risk-sensitive-planner.ts";
 import { evaluateRobustOpenLoopBeam } from "../core/typescript/robust-open-loop-beam.ts";
-import { nativeDecide } from "./native-policy.ts";
+import {
+  nativeDecide,
+  RUST_BUILD_HINT,
+  RUST_DECIDE_BINARY,
+} from "./native-policy.ts";
 
 /**
  * The Drop7 Policy Protocol (D7P) TypeScript interface, mirroring the text
