@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Drop7Intro } from "@/components/Drop7Intro";
 import { Markdown } from "@/components/Markdown";
 import { Stat } from "@/components/Board";
 import { ShimmerButton } from "@/components/ShimmerButton";
@@ -77,19 +78,22 @@ export default async function OverviewPage() {
 
   return (
     <div className="space-y-10">
-      <section>
-        <h1 className="text-3xl font-black text-zinc-50">
-          What is the best strategy in a game with chance?
-        </h1>
-        <p className="mt-2 max-w-3xl text-zinc-400">
-          Drop7 is widely considered one of the great puzzle games of all time<sup><Link href="https://en.wikipedia.org/wiki/Drop7" target="_blank" className="text-sky-400 hover:text-sky-300">1</Link></sup>.
-          The goal of this research is to find an autonomous strategy for playing the game as well as a human can.
-        </p>
-        <p className="mt-2 max-w-3xl text-zinc-400">
-          An experienced human player can score millions of points in this game with the right long-term strategic thinking. The strongest 
-          research reference so far (<Link href="/approaches/fair-expectimax/reference" className="text-sky-400 hover:text-sky-300">fair depth-4 expectimax</Link>) 
-          averages about 309k points, so the research problem is very much still open.
-        </p>
+      <section className="grid items-center gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,25rem)] lg:gap-10">
+        <div>
+          <h1 className="text-3xl font-black text-zinc-50">
+            What is the best strategy in a game with chance?
+          </h1>
+          <p className="mt-2 max-w-3xl text-zinc-400">
+            Drop7 is widely considered one of the great puzzle games of all time<sup><Link href="https://en.wikipedia.org/wiki/Drop7" target="_blank" className="text-sky-400 hover:text-sky-300">1</Link></sup>.
+            The goal of this research is to find an autonomous strategy for playing the game as well as a human can.
+          </p>
+          <p className="mt-2 max-w-3xl text-zinc-400">
+            An experienced human player can score millions of points in this game with the right long-term strategic thinking. The strongest
+            research reference so far (<Link href="/approaches/fair-expectimax/reference" className="text-sky-400 hover:text-sky-300">fair depth-4 expectimax</Link>)
+            averages about 309k points, so the research problem is very much still open.
+          </p>
+        </div>
+        <Drop7Intro />
       </section>
 
       <section className="grid gap-4 sm:grid-cols-2">

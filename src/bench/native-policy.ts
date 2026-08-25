@@ -23,13 +23,29 @@ export const NATIVE_DECIDE_BINARY = join(REPO_ROOT, "build", "leaf-evolution", "
 export const NATIVE_BUILD_HINT =
   "approaches/lifetime-objective/leaf-evolution/build.sh decide";
 
+/** The Rust bitboard engine's one-shot decision binary (cargo release build). */
+export const RUST_DECIDE_BINARY = join(
+  REPO_ROOT,
+  "approaches",
+  "fair-expectimax",
+  "rust-engine",
+  "target",
+  "release",
+  "decide",
+);
+export const RUST_BUILD_HINT =
+  "cargo build --release --manifest-path approaches/fair-expectimax/rust-engine/Cargo.toml";
+
 export interface NativeDecideOptions {
   /** Path to a leaf weights file ("name value" lines); omitted = frozen leaf. */
   weights?: string;
   depth?: number;
   chanceSamples?: number;
+  /** Total cache-entry budget; parallel binaries divide it across workers. */
   cache?: number;
   binary?: string;
+  /** Override for the build hint in the not-built error message. */
+  buildHint?: string;
 }
 
 export function nativeBinaryAvailable(binary = NATIVE_DECIDE_BINARY): boolean {
@@ -43,7 +59,9 @@ export function nativeDecide(
   if (state.gameOver) return null;
   const binary = options.binary ?? NATIVE_DECIDE_BINARY;
   if (!existsSync(binary)) {
-    throw new Error(`native policy needs ${binary}; build it with ${NATIVE_BUILD_HINT}`);
+    throw new Error(
+      `native policy needs ${binary}; build it with ${options.buildHint ?? NATIVE_BUILD_HINT}`,
+    );
   }
   const args = [
     "--board", serializeBoard(state.board),

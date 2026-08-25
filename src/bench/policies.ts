@@ -10,7 +10,11 @@ import { evaluateMctsMoves } from "../core/typescript/mcts-solver.ts";
 import { evaluateSparseExpectimaxMoves } from "../core/typescript/sparse-expectimax.ts";
 import { evaluateRiskSensitiveMoves } from "../core/typescript/risk-sensitive-planner.ts";
 import { evaluateRobustOpenLoopBeam } from "../core/typescript/robust-open-loop-beam.ts";
-import { nativeDecide } from "./native-policy.ts";
+import {
+  nativeDecide,
+  RUST_BUILD_HINT,
+  RUST_DECIDE_BINARY,
+} from "./native-policy.ts";
 
 /**
  * The Drop7 Policy Protocol (D7P) TypeScript interface, mirroring the text
@@ -228,6 +232,24 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
     publicInformation: true,
     slow: true,
     chooseColumn: (state) => nativeDecide(publicOnly(state), { chanceSamples: 7 }),
+  }),
+  define({
+    id: "rust-fair-d7-s7",
+    name: "Rust fair D7, 7 strata",
+    family: "fair-expectimax",
+    description:
+      "The Rust bitboard engine's completed full-width depth 7 with seven chance strata and the frozen fair leaf, root columns evaluated in parallel under one shared cache budget (value-identical to the sequential search), through the one-shot decide binary (cargo build --release --manifest-path approaches/fair-expectimax/rust-engine/Cargo.toml).",
+    researchPath: "/approaches/fair-expectimax/rust-engine",
+    publicInformation: true,
+    slow: true,
+    chooseColumn: (state) =>
+      nativeDecide(publicOnly(state), {
+        binary: RUST_DECIDE_BINARY,
+        buildHint: RUST_BUILD_HINT,
+        depth: 7,
+        chanceSamples: 7,
+        cache: 16_777_216,
+      }),
   }),
 ];
 

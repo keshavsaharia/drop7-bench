@@ -272,11 +272,12 @@ pub struct SearchMetrics {
 }
 
 /// Raised when the work budget is spent; unwinds to the iterative-deepening
-/// driver, which keeps the last completed depth's action.
+/// driver, which keeps the last completed depth's action.  Public so the
+/// decide binary can name the result of a single-column evaluation.
 #[derive(Debug)]
-struct WorkLimitReached;
+pub struct WorkLimitReached;
 
-type SearchResult<T> = Result<T, WorkLimitReached>;
+pub type SearchResult<T> = Result<T, WorkLimitReached>;
 
 pub struct Searcher<L: Leaf, T: TranspositionTable> {
     params: SearchParams,
@@ -286,6 +287,7 @@ pub struct Searcher<L: Leaf, T: TranspositionTable> {
     work: u64,
     leaf_calls: u64,
     move_calls: u64,
+    last: SearchMetrics,
 }
 
 impl<L: Leaf, T: TranspositionTable> Searcher<L, T> {
@@ -298,6 +300,7 @@ impl<L: Leaf, T: TranspositionTable> Searcher<L, T> {
             work: 0,
             leaf_calls: 0,
             move_calls: 0,
+            last: SearchMetrics::default(),
         }
     }
 
@@ -414,6 +417,40 @@ impl<L: Leaf, T: TranspositionTable> Searcher<L, T> {
             }
         }
         Ok(action)
+    }
+
+    /// Decide-binary support: evaluate one root column of an
+    /// already-canonical state at a fixed depth, exactly as root_decision
+    /// does, and record the work the evaluation cost.  The table persists
+    /// across calls within a decision, as it does across the columns of one
+    /// root_decision; the value returned is the same bits either way (the
+    /// table is cache-independent).
+    pub fn evaluate_root_column(
+        &mut self,
+        canonical: &State,
+        column: usize,
+        depth: i32,
+    ) -> SearchResult<f64> {
+        self.nodes = 0;
+        self.work = 0;
+        self.leaf_calls = 0;
+        self.move_calls = 0;
+        let value = self.evaluate_action(canonical, column, depth)?;
+        self.last = SearchMetrics {
+            action: column as i32,
+            completed_depth: depth,
+            nodes: self.nodes,
+            work: self.work,
+            leaf_calls: self.leaf_calls,
+            move_calls: self.move_calls,
+            cache_hits: self.table.hits(),
+        };
+        Ok(value)
+    }
+
+    /// The metrics recorded by the most recent evaluate_root_column call.
+    pub fn last_metrics(&self) -> &SearchMetrics {
+        &self.last
     }
 
     /// Gate support: evaluate every legal column of `state` at a fixed depth
@@ -552,6 +589,45 @@ mod tests {
         assert!((0..7).contains(&action));
         assert_eq!(metrics.completed_depth, 2);
         assert!(metrics.work > 0);
+    }
+
+    /// The decide binary's contract: with a completion-guaranteeing budget,
+    /// the per-column depth-D argmax (what the root-parallel decide computes)
+    /// is exactly the action choose_action returns after iterative deepening.
+    #[test]
+    fn root_parallel_argmax_matches_choose_action() {
+        for seed in [0xa527_7003u32, 0xa527_7004, 0xa527_7005] {
+            let state = State::initial_headless(seed);
+            let params = SearchParams {
+                depth: 4,
+                chance_samples: 5,
+                maximum_work: work_bound_for(4, 5) + 1,
+                ..SearchParams::default()
+            };
+            let mut sequential = Searcher::new(params, FairLeaf::default(), NoTable);
+            let (expected, metrics) = sequential.choose_action(&state);
+            assert_eq!(metrics.completed_depth, 4, "the budget must complete");
+
+            let (canonical, mirrored) = canonical_state(&state);
+            let mut parallel = Searcher::new(params, FairLeaf::default(), NoTable);
+            let mut action = -1i32;
+            let mut best = f64::NEG_INFINITY;
+            for &column in COLUMN_ORDER.iter() {
+                if canonical.board.get(0, column) == EMPTY {
+                    let value = parallel
+                        .evaluate_root_column(&canonical, column, 4)
+                        .expect("budget covers one column");
+                    if value > best {
+                        best = value;
+                        action = column as i32;
+                    }
+                }
+            }
+            if mirrored && action >= 0 {
+                action = BOARD_SIZE as i32 - 1 - action;
+            }
+            assert_eq!(action, expected, "seed {seed:#x}");
+        }
     }
 
     #[test]
