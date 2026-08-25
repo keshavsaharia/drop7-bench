@@ -41,6 +41,7 @@ export interface NativeDecideOptions {
   weights?: string;
   depth?: number;
   chanceSamples?: number;
+  /** Total cache-entry budget; parallel binaries divide it across workers. */
   cache?: number;
   binary?: string;
   /** Override for the build hint in the not-built error message. */

@@ -3,7 +3,8 @@
 // decide.cpp:
 //
 //   decide --board <49 digits> --next <1-7> --rise <1-5>
-//          [--depth 7] [--chance-samples 7] [--cache 1048576] [--threads T]
+//          [--depth 7] [--chance-samples 7]
+//          [--cache TOTAL_ENTRIES] [--threads T]
 //
 // prints "bestmove <column>" (0-6) or "bestmove none" on a terminal board, and
 // exits 0.  The board is the engine's serializeBoard encoding, row-major from
@@ -24,7 +25,8 @@
 // deterministic function of the public state -- the transposition table is
 // proven cache-independent -- so evaluating disjoint columns on separate
 // threads, each with its own searcher and table, computes bit-identical
-// values and the same argmax.  Threads change only wall-clock and memory.
+// values and the same argmax.  Threads change only wall-clock and how the
+// total cache-entry budget is partitioned; they never multiply that budget.
 
 use drop7_rs::board::{Board, BOARD_SIZE, EMPTY};
 use drop7_rs::engine::State;
@@ -69,6 +71,10 @@ fn main() {
         eprintln!("decide failed: --next must be 1-7");
         std::process::exit(2);
     }
+    if cache == 0 {
+        eprintln!("decide failed: --cache must be at least 1");
+        std::process::exit(2);
+    }
 
     // The public state only: no score, level or move number exists here, and
     // the search and leaf provably read none of them.
@@ -101,17 +107,24 @@ fn main() {
         return;
     }
 
-    let worker_count = if threads == 0 {
+    let requested_workers = if threads == 0 {
         legal
             .len()
             .min(std::thread::available_parallelism().map_or(1, |n| n.get()))
     } else {
         threads.min(legal.len()).max(1)
     };
+    // `cache` is one aggregate entry budget, not a per-worker allocation.
+    // DepthTable needs a power-of-two capacity, so round each worker's equal
+    // share down.  Capping workers by the entry budget keeps the invariant
+    // even for deliberately tiny command-line values.
+    let worker_count = requested_workers.min(cache);
+    let worker_cache = cache_entries_per_worker(cache, worker_count);
 
     // Evaluate every legal column at the full target depth, disjoint columns
-    // per worker.  Each worker owns its searcher and table; the values it
-    // returns are the same bits the sequential search would compute.
+    // per worker.  Each worker owns its searcher and its bounded slice of the
+    // total table budget; the values it returns are the same bits the
+    // sequential search would compute.
     let mut values: Vec<(usize, f64, SearchMetrics)> = Vec::new();
     std::thread::scope(|scope| {
         let mut lanes: Vec<Vec<usize>> = (0..worker_count).map(|_| Vec::new()).collect();
@@ -126,7 +139,7 @@ fn main() {
                     let mut searcher = Searcher::new(
                         params,
                         FairLeaf::default(),
-                        DepthTable::new(cache, 1),
+                        DepthTable::new(worker_cache, 1),
                     );
                     let mut out = Vec::new();
                     for column in lane {
@@ -174,5 +187,46 @@ fn main() {
     } else {
         println!("bestmove {action}");
     }
-    println!("info depth {depth} work {total_work} nodes {total_nodes} frozen 1");
+    let allocated_cache_entries = worker_cache * worker_count;
+    println!(
+        "info depth {depth} work {total_work} nodes {total_nodes} cache_entries {allocated_cache_entries} frozen 1"
+    );
+}
+
+/// Largest power-of-two per-worker table that keeps the aggregate allocation
+/// within `total_entries`.  The caller guarantees both values are positive
+/// and caps `worker_count` at `total_entries`.
+fn cache_entries_per_worker(total_entries: usize, worker_count: usize) -> usize {
+    debug_assert!(total_entries > 0);
+    debug_assert!(worker_count > 0);
+    debug_assert!(worker_count <= total_entries);
+    let share = total_entries / worker_count;
+    1usize << (usize::BITS - 1 - share.leading_zeros())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::cache_entries_per_worker;
+
+    #[test]
+    fn cache_budget_is_shared_across_root_workers() {
+        let total = 16_777_216usize;
+        let workers = 7usize;
+        let per_worker = cache_entries_per_worker(total, workers);
+
+        assert_eq!(per_worker, 2_097_152);
+        assert!(per_worker.is_power_of_two());
+        assert!(per_worker * workers <= total);
+    }
+
+    #[test]
+    fn cache_partition_never_exceeds_the_total_budget() {
+        for total in 1..=257usize {
+            for workers in 1..=total.min(7) {
+                let per_worker = cache_entries_per_worker(total, workers);
+                assert!(per_worker.is_power_of_two());
+                assert!(per_worker * workers <= total);
+            }
+        }
+    }
 }

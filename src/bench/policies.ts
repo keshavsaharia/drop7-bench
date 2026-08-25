@@ -238,7 +238,7 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
     name: "Rust fair D7, 7 strata",
     family: "fair-expectimax",
     description:
-      "The Rust bitboard engine's completed full-width depth 7 with seven chance strata and the frozen fair leaf, root columns evaluated in parallel (value-identical to the sequential search), through the one-shot decide binary (cargo build --release --manifest-path approaches/fair-expectimax/rust-engine/Cargo.toml).",
+      "The Rust bitboard engine's completed full-width depth 7 with seven chance strata and the frozen fair leaf, root columns evaluated in parallel under one shared cache budget (value-identical to the sequential search), through the one-shot decide binary (cargo build --release --manifest-path approaches/fair-expectimax/rust-engine/Cargo.toml).",
     researchPath: "/approaches/fair-expectimax/rust-engine",
     publicInformation: true,
     slow: true,
