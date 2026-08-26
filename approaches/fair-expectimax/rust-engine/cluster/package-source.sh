@@ -4,7 +4,7 @@
 set -euo pipefail
 
 usage() {
-  echo "usage: $0 [--local] <artifact-dir> [s3://bucket/prefix]" >&2
+  echo "usage: $0 [--local] runs/<run-id>/package [s3://bucket/prefix]" >&2
 }
 
 LOCAL_ONLY=0
@@ -40,9 +40,26 @@ if (( LOCAL_ONLY == 0 )); then
 fi
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
+if [[ "${ARTIFACT_DIR}" == *..* ]]; then
+  echo "artifact directory may not contain '..'" >&2
+  exit 2
+fi
+if [[ "${ARTIFACT_DIR}" == "${ROOT}/runs/"* ]]; then
+  :
+elif [[ "${ARTIFACT_DIR}" == runs/* ]]; then
+  ARTIFACT_DIR="${ROOT}/${ARTIFACT_DIR}"
+else
+  echo "artifact directory must be inside ${ROOT}/runs" >&2
+  exit 2
+fi
 mkdir -p "${ARTIFACT_DIR}"
+ARTIFACT_DIR="$(cd "${ARTIFACT_DIR}" && pwd)"
+if [[ "${ARTIFACT_DIR}" != "${ROOT}/runs/"* ]]; then
+  echo "artifact directory must be inside ${ROOT}/runs" >&2
+  exit 2
+fi
 ARCHIVE="${ARTIFACT_DIR}/drop7-source.tar.gz"
-SOURCE_LIST="$(mktemp)"
+SOURCE_LIST="$(mktemp "${ARTIFACT_DIR}/source-list.XXXXXX")"
 trap 'rm -f "${SOURCE_LIST}"' EXIT
 
 # `git ls-files` is the source boundary: committed files plus current

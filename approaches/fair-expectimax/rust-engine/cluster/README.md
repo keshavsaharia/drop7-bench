@@ -78,13 +78,18 @@ time, and work counts. After download, the orchestrator writes and re-uploads
 wall time, and busy fraction for each root/leaf/strata group. Basic sampling is
 used instead of paid detailed CloudWatch monitoring.
 
-If the local orchestrator exits or receives a signal after launch, its cleanup
-trap requests instance termination and cancels the reservation. If the local
-machine disappears without running that trap, the boot-level watchdog still
-shuts the instance down and the reservation has a finite end. The encrypted
-root volume is delete-on-termination. The S3 source and result artifacts are
-deliberately retained; the reusable IAM role and security group do not consume
-compute capacity or accrue hourly instance charges.
+If the local orchestrator exits or receives a signal during or after launch,
+both launcher cleanup layers recover resources from the unique EC2 client token
+and atomic `Project`/`RunId` tags, retry through the EC2 eventual-consistency
+window, request instance termination, and cancel the reservation. This closes
+the interval between AWS accepting a launch and the instance ID reaching the
+local log. If the local machine disappears without running either trap, the
+boot-level watchdog still shuts the instance down and the reservation has a
+finite end. The encrypted root volume is delete-on-termination. Run-owned
+source lists, IAM documents, and user data stay under `runs/<run-id>/` and are
+removed after use. The S3 source and result artifacts are deliberately
+retained; the reusable IAM role and security group do not consume compute
+capacity or accrue hourly instance charges.
 
 ## Local smoke run
 

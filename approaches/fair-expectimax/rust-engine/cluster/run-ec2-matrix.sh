@@ -2,6 +2,10 @@
 # One-command, budget-bounded EC2 orchestrator for a fixed public-root matrix.
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=aws-run-cleanup.sh
+source "${SCRIPT_DIR}/aws-run-cleanup.sh"
+
 usage() {
   cat >&2 <<'EOF'
 usage: run-ec2-matrix.sh ROUND --budget CENTS [options]
@@ -393,7 +397,7 @@ fi
 read -r AVAILABILITY_ZONE SUBNET_ID SECURITY_GROUP_ID INSTANCE_PROFILE <<< "$(
   approaches/fair-expectimax/rust-engine/cluster/ensure-aws-infrastructure.sh \
     --region "${AWS_REGION_VALUE}" --instance-type "${INSTANCE_TYPE}" \
-    --bucket "${S3_BUCKET}"
+    --bucket "${S3_BUCKET}" --state-dir "${LOCAL_RUN_DIR}/aws-state"
 )"
 
 S3_RUN_PREFIX="s3://${S3_BUCKET}/ec2/${RUN_ID}"
@@ -450,14 +454,9 @@ cleanup_cloud() {
     if [[ -z "${CAPACITY_RESERVATION_ID}" && -f "${LOCAL_RUN_DIR}/launch.log" ]]; then
       CAPACITY_RESERVATION_ID="$(awk -F= '$1 == "capacity_reservation_id" {print $2}' "${LOCAL_RUN_DIR}/launch.log")"
     fi
-    if [[ "${INSTANCE_ID}" =~ ^i-[a-f0-9]+$ ]]; then
-      aws ec2 terminate-instances --region "${AWS_REGION_VALUE}" \
-        --instance-ids "${INSTANCE_ID}" >/dev/null 2>&1
-    fi
-    if [[ "${CAPACITY_RESERVATION_ID}" =~ ^cr-[a-f0-9]+$ ]]; then
-      aws ec2 cancel-capacity-reservation --region "${AWS_REGION_VALUE}" \
-        --capacity-reservation-id "${CAPACITY_RESERVATION_ID}" >/dev/null 2>&1
-    fi
+    drop7_cleanup_run_resources "${AWS_REGION_VALUE}" "${RUN_ID}" \
+      "${INSTANCE_ID}" "${CAPACITY_RESERVATION_ID}" 1 \
+      "${USE_CAPACITY_RESERVATION}" || true
   fi
   exit "${status}"
 }

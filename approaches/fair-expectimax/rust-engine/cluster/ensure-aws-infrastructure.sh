@@ -3,12 +3,13 @@
 set -euo pipefail
 
 usage() {
-  echo "usage: $0 --region REGION --instance-type TYPE --bucket BUCKET" >&2
+  echo "usage: $0 --region REGION --instance-type TYPE --bucket BUCKET --state-dir RUNS_DIR" >&2
 }
 
 REGION=""
 INSTANCE_TYPE=""
 BUCKET=""
+STATE_DIR=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --region)
@@ -23,6 +24,10 @@ while [[ $# -gt 0 ]]; do
       BUCKET="${2:-}"
       shift 2
       ;;
+    --state-dir)
+      STATE_DIR="${2:-}"
+      shift 2
+      ;;
     --help|-h)
       usage
       exit 0
@@ -35,8 +40,29 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ -z "${REGION}" || -z "${INSTANCE_TYPE}" || -z "${BUCKET}" ]]; then
+if [[ -z "${REGION}" || -z "${INSTANCE_TYPE}" || -z "${BUCKET}" \
+   || -z "${STATE_DIR}" ]]; then
   usage
+  exit 2
+fi
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
+if [[ "${STATE_DIR}" == *..* ]]; then
+  echo "state directory may not contain '..'" >&2
+  exit 2
+fi
+if [[ "${STATE_DIR}" == "${ROOT}/runs/"* ]]; then
+  :
+elif [[ "${STATE_DIR}" == runs/* ]]; then
+  STATE_DIR="${ROOT}/${STATE_DIR}"
+else
+  echo "state directory must be inside ${ROOT}/runs" >&2
+  exit 2
+fi
+mkdir -p "${STATE_DIR}"
+STATE_DIR="$(cd "${STATE_DIR}" && pwd)"
+if [[ "${STATE_DIR}" != "${ROOT}/runs/"* ]]; then
+  echo "state directory must be inside ${ROOT}/runs" >&2
   exit 2
 fi
 if [[ ! "${REGION}" =~ ^[a-z0-9-]+$ \
@@ -166,8 +192,8 @@ fi
 
 ROLE_NAME="${DROP7_IAM_ROLE_NAME:-drop7-bench-ec2-runner}"
 PROFILE_NAME="${DROP7_IAM_INSTANCE_PROFILE:-drop7-bench-ec2-runner}"
-TRUST_FILE="$(mktemp)"
-POLICY_FILE="$(mktemp)"
+TRUST_FILE="$(mktemp "${STATE_DIR}/iam-trust.XXXXXX.json")"
+POLICY_FILE="$(mktemp "${STATE_DIR}/iam-policy.XXXXXX.json")"
 trap 'rm -f "${TRUST_FILE}" "${POLICY_FILE}"' EXIT
 
 python3 -c 'import json,sys; json.dump({"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"ec2.amazonaws.com"},"Action":"sts:AssumeRole"}]},open(sys.argv[1],"w"))' "${TRUST_FILE}"

@@ -2,8 +2,13 @@
 # Validate and launch one budget-bounded x86 EC2 search-matrix instance.
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
+# shellcheck source=aws-run-cleanup.sh
+source "${SCRIPT_DIR}/aws-run-cleanup.sh"
+
 usage() {
-  echo "usage: $0 [--plan] <ec2-run.env>" >&2
+  echo "usage: $0 [--plan] runs/<run-id>/ec2-run.env" >&2
 }
 
 PLAN=0
@@ -22,6 +27,11 @@ fi
 EC2_CONFIG="$1"
 if [[ ! -f "${EC2_CONFIG}" ]]; then
   echo "EC2 config not found: ${EC2_CONFIG}" >&2
+  exit 2
+fi
+CONFIG_DIR="$(cd "$(dirname "${EC2_CONFIG}")" && pwd)"
+if [[ "${CONFIG_DIR}" != "${ROOT}/runs/"* ]]; then
+  echo "EC2 config must be inside ${ROOT}/runs" >&2
   exit 2
 fi
 if ! command -v aws >/dev/null 2>&1; then
@@ -198,13 +208,22 @@ fi
 
 END_DATE="$(python3 -c 'import datetime,sys; print((datetime.datetime.now(datetime.timezone.utc)+datetime.timedelta(seconds=int(sys.argv[1])+900)).isoformat())' "${MAX_WALL_SECONDS}")"
 CAPACITY_RESERVATION_ID=""
-cleanup_reservation() {
-  if [[ -n "${CAPACITY_RESERVATION_ID}" ]]; then
-    aws ec2 cancel-capacity-reservation --region "${AWS_REGION}" \
-      --capacity-reservation-id "${CAPACITY_RESERVATION_ID}" >/dev/null 2>&1 || true
-  fi
+INSTANCE_ID=""
+USER_DATA=""
+LAUNCH_ATTEMPTED=0
+cleanup_launch() {
+  local status=$?
+  trap - EXIT INT TERM
+  set +e
+  [[ -n "${USER_DATA}" ]] && rm -f "${USER_DATA}"
+  drop7_cleanup_run_resources "${AWS_REGION}" "${RUN_ID}" \
+    "${INSTANCE_ID}" "${CAPACITY_RESERVATION_ID}" \
+    "${LAUNCH_ATTEMPTED}" "${USE_CAPACITY_RESERVATION}" || true
+  exit "${status}"
 }
-trap cleanup_reservation ERR INT TERM
+trap cleanup_launch EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
 
 if [[ "${USE_CAPACITY_RESERVATION}" == "1" ]]; then
   CAPACITY_RESERVATION_ID="$(aws ec2 create-capacity-reservation \
@@ -220,8 +239,7 @@ if [[ "${USE_CAPACITY_RESERVATION}" == "1" ]]; then
     --query 'CapacityReservation.CapacityReservationId' --output text)"
 fi
 
-USER_DATA="$(mktemp)"
-trap 'rm -f "${USER_DATA}"; cleanup_reservation' EXIT ERR INT TERM
+USER_DATA="$(mktemp "${CONFIG_DIR}/user-data.XXXXXX.sh")"
 {
   echo '#!/usr/bin/env bash'
   echo 'set -euo pipefail'
@@ -264,9 +282,14 @@ RUN_ARGS=(
 if [[ -n "${CAPACITY_RESERVATION_ID}" ]]; then
   RUN_ARGS+=(--capacity-reservation-specification "CapacityReservationTarget={CapacityReservationId=${CAPACITY_RESERVATION_ID}}")
 fi
+LAUNCH_ATTEMPTED=1
 INSTANCE_ID="$(aws ec2 run-instances "${RUN_ARGS[@]}" \
   --query 'Instances[0].InstanceId' --output text)"
-trap - EXIT ERR INT TERM
+if [[ ! "${INSTANCE_ID}" =~ ^i-[a-f0-9]+$ ]]; then
+  echo "run-instances returned an invalid instance id: ${INSTANCE_ID}" >&2
+  exit 2
+fi
+trap - EXIT INT TERM
 rm -f "${USER_DATA}"
 
 echo "instance_id=${INSTANCE_ID}"
