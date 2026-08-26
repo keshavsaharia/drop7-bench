@@ -1,0 +1,44 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260825T052922Z-9a61f2f0",
+  "actor": {
+    "kind": "model",
+    "platform": "Codex",
+    "model": "unknown",
+    "agentId": "root"
+  },
+  "level": "L3",
+  "roles": [
+    {
+      "role": "software",
+      "degree": "lead"
+    }
+  ],
+  "summary": "Designed, implemented, and validated the deterministic central-frontier Rust scheduler, adaptive prefix sizing, bounded per-worker tables, exact ordered reduction, fallback root scheduler, and paired parity/performance harness.",
+  "theoryIds": [
+    "TH-20260825-central-frontier-scheduler-e4f547e0"
+  ],
+  "experimentIds": [
+    "EX-20260825-central-frontier-scheduler-check-df116702"
+  ],
+  "runIds": [
+    "RUN-20260825T045058Z-b79f76a2"
+  ],
+  "artifactPaths": [
+    "approaches/fair-expectimax/rust-engine/src/parallel.rs",
+    "approaches/fair-expectimax/rust-engine/src/bin/bench.rs",
+    "runs/RUN-20260825T045058Z-b79f76a2/central-frontier/summary.json"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "cargo test --release --manifest-path approaches/fair-expectimax/rust-engine/Cargo.toml",
+    "paired D4/S7 and D5/S7 root/frontier bench with exact f64/action/task parity"
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-25T05:29:22Z"
+}

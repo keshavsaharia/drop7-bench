@@ -1,0 +1,86 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260825-rust-search-matrix-ec2-check-eb821565",
+  "theoryIds": [
+    "TH-20260825-rust-search-matrix-ec2-6fc9f806"
+  ],
+  "title": "Rust search-matrix analytics and EC2 launch reproducibility check",
+  "classification": "infrastructure",
+  "hypothesis": "A std-only Rust analyzer plus bounded AWS launcher can express and reproduce a public-root depth x strata x leaf matrix without changing search semantics: every requested cell produces one canonical record with all legal sibling values and detailed scheduler analytics; the frozen named-weight leaf matches the current fair leaf bit-for-bit; worker count affects timing/work placement but not values/actions; and an EC2 plan for 192 x86 physical cores or vCPUs is parameterized, budget-bounded, latest-AMI-resolved, and safe to inspect without provisioning. No instance is launched under this CHECK experiment.",
+  "candidate": {
+    "name": "rust-search-matrix",
+    "entryPoint": "approaches/fair-expectimax/rust-engine/src/bin/analyze.rs",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "manual local Rust invocations and current one-shot decide binary",
+    "entryPoint": "approaches/fair-expectimax/rust-engine/src/bin/decide.rs",
+    "manifestRef": null
+  },
+  "informationBoundary": "public-policy",
+  "benchmarkTier": "CHECK",
+  "data": {
+    "role": "no-gameplay",
+    "seedLeaseRefs": [],
+    "datasetRefs": [],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "No new seed is opened. Tests use seed-free constructed fixtures and the already-opened Rust gate roots from 0xa5276000-0xa5276fff. The EC2 path is syntax/plan tested only; no AWS resource or gameplay cohort is created."
+  },
+  "metrics": {
+    "primary": "Exact matrix completeness and reproducibility: requested roots x leafs x depths x strata equals emitted records; every legal-column f64 value bit and chosen action matches a direct invocation of the same fixed-work Rust search.",
+    "secondary": [
+      "per-cell work, nodes, leaf/move calls, cache hits, registered/completed tasks, split depth, planning/execution/reduction time, worker busy fraction and per-worker task distribution",
+      "cross-depth action-change and column-value comparison keyed by identical root, leaf and strata",
+      "weighted-frozen leaf bit parity with FairLeaf",
+      "source, weights, roots, config, output and machine-profile SHA-256 references",
+      "EC2 instance type vCPU/core/architecture preflight, capacity-reservation expiry, wall shutdown, memory bound, and caller-supplied cost ceiling"
+    ],
+    "statisticalUnit": "root",
+    "uncertaintyMethod": "Exact equality and record-count checks; performance fields are descriptive CHECK diagnostics and require three repeats on one retained machine profile before a speed claim."
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "A two-root x two-depth x two-strata x two-leaf smoke matrix emits exactly 16 valid JSONL records, each with every legal sibling value and all required scheduler/resource fields.",
+      "The frozen named-weight leaf matches FairLeaf value bits and root-column value bits on all Rust parity fixtures; a perturbed weight file is accepted as a distinct named leaf and remains deterministic across 1 and maximum local workers.",
+      "For fixed root/leaf/strata, output directly identifies whether each deeper search changes the selected action and retains values needed to compare every legal column; rerunning produces identical semantic rows after timing/resource fields are excluded.",
+      "The AWS scripts pass shell syntax and plan-mode tests, resolve the x86_64 AMI from the AWS public SSM parameter, verify the requested instance architecture/vCPU/core count before launch, use IMDSv2, encrypted EBS, instance-initiated termination, a fixed wall timeout, optional targeted reservation with a finite end date, and no inbound SSH rule.",
+      "A 192-worker, 262144-entry-per-worker plan reports about 2.4 GiB of transposition tables and passes the configured 8 GiB guard; an intentionally oversized cache is rejected before allocation or AWS launch.",
+      "Cargo release tests, npm test, and make test pass; existing research-validator failures caused by absent gitignored historical artifacts are disclosed and not attributed to this change."
+    ],
+    "failureAction": "Record valid + fail for the exact infrastructure configuration, launch no EC2 resource, and retain manual local commands as the fallback.",
+    "passAction": "Record valid + pass at mechanics-only tier and document the exact plan/package/launch/collect workflow. A later operator-authorized EC2 execution creates its own run record and machine profile; it does not inherit a performance claim."
+  },
+  "resources": {
+    "wallSeconds": 7200,
+    "cpuThreads": 12,
+    "maxHostBytes": 8589934592,
+    "maxGpuBytes": null,
+    "gpuDevices": []
+  },
+  "stopConditions": [
+    "Stop on any rules, information-boundary, legality, determinism, reflection, matrix-completeness, leaf-parity, or value/action failure.",
+    "Stop local checks at 2 hours wall or 8 GiB host memory; record partial rather than reducing depth/strata silently.",
+    "Do not call an AWS mutation API under this experiment; only syntax, help, and plan-mode commands are authorized.",
+    "A future cloud run must state region, availability zone, instance type, source/config/root/weight hashes, S3 artifact destination, hourly-price assertion, total cost cap, wall limit, and reservation choice before launch."
+  ],
+  "expectedArtifacts": [
+    "approaches/fair-expectimax/rust-engine/src/bin/analyze.rs",
+    "approaches/fair-expectimax/rust-engine/cluster/{package-source.sh,provision-ec2.sh,run-instance.sh,README.md}",
+    "approaches/fair-expectimax/rust-engine/experiments/example-matrix.env",
+    "runs/<run-id>/search-matrix/{config.env,roots.txt,weights/,analytics.jsonl,summary.json,machine-profile.json,manifest.sha256}",
+    "research/runs/<run-id>.json",
+    "research/results/<result-id>.json"
+  ],
+  "lifecycle": "preregistered",
+  "protocolSha256": "cf903c8e3034b053ef92f65e319976530eb9133e2f3d8f09901976e458f51c71",
+  "amendments": [],
+  "createdBy": {
+    "platform": "Codex",
+    "model": "unknown",
+    "agentId": "root"
+  },
+  "createdAt": "2026-08-25T04:52:38Z",
+  "updatedAt": "2026-08-25T04:53:45Z"
+}
