@@ -1,0 +1,85 @@
+---
+date: 2026-08-25
+title: "One deep search can now use more than seven CPUs"
+summary: "The Rust fair solver now registers continuation subtrees in a central work queue: exact local parity held, a bounded D5/S7 split improved the three-repeat median 1.1352x on 12 logical CPUs, and a reusable depth/strata/leaf matrix plus fail-closed EC2 workflow is ready for a separately authorized 192-core x86 run."
+contributors: [unknown (Codex)]
+tags: [rust-engine, parallel-search, infrastructure, teacher-search]
+outcomes: { positive: 2, negative: 1, open: 1 }
+---
+
+The Rust engine's first parallel driver assigned one root column to one worker.
+That helped batches, but one decision exposed at most seven jobs and left an
+idle tail when one column owned a larger tree. Today's change keeps the same
+completed fixed-work search and replaces that assignment with a deterministic
+prefix planner and central task registry. Workers atomically claim public-state
+continuation subtrees, keep private bounded transposition tables, and publish
+into fixed slots; the coordinator reduces those slots in the original column
+and chance order.
+
+<Finding title="The bounded central frontier passed its local speed and exactness gate" kind="positive" metric="1.1352x at D5/S7; 0 semantic mismatches">
+On the retained 12-logical-CPU arm64 profile, three interleaved repeats over
+three D5/S7 roots moved from a 22.034955 s root-scheduler median to 19.410905 s
+with the bounded frontier, a 1.1352x speedup and 88.23% task-phase occupancy.
+The eight-root D4/S7 comparison improved from 4.076978 s to 3.232507 s
+(1.2612x) with 99.51% occupancy. Root/frontier comparisons at one and 12
+workers had zero value, action, or exactly-once task mismatches; the strict-FP
+C++ comparison passed eight of eight roots. This is engineering evidence only:
+no complete games, new seeds, or strength cohort were opened
+(`RS-20260825T052959Z-1b3ed9a5`).
+</Finding>
+
+<Finding title="Maximum occupancy was not the fastest schedule" kind="negative" metric="99.63% busy, only 1.0102x">
+One preregistered D5 arm expanded an extra prefix ply and manufactured 3,667
+deduplicated tasks across the three roots. It kept workers 99.63% busy, but
+raised logical work from 381,642,037 to a median 539,523,663 (about 41%) by
+breaking useful private-table locality. Its median speedup was only 1.0102x,
+below the 10% gate. The shipped automatic rule therefore uses a small queueing
+cushion for expensive D5-and-deeper continuations and a wider one for cheap
+shallow work. Fine grain is a means to control the tail, not an objective to
+maximize blindly.
+</Finding>
+
+<Finding title="Depth, strata, and leaf comparisons now have one Rust artifact format" kind="positive" metric="16/16 matrix cells; 2.418 GB D7/S7 plan">
+The new analyzer consumes frozen public roots plus named leaf-weight files and
+writes one JSONL decision row for every root x leaf x strata x depth cell. Each
+row retains every legal sibling as decimal and exact f64 bits, the selected
+action, the previous depth's action and change flag, work/cache/task counts,
+planner/execution/reduction timings, projected memory, overall occupancy, and
+per-worker loads. The CHECK matrix emitted all 16 requested rows; frozen named
+weights matched the compiled fair leaf, and frozen plus perturbed leaves were
+worker-count independent with zero semantic mismatches.
+
+The allocation-free D7/S7 plan for 192 workers selects one internal split ply,
+bounds the worst frontier at 2,401 tasks, and projects 2,418,377,728 bytes under
+an 8 GiB guard. The old 16,777,216-entry cache multiplied per worker to
+154,618,822,656 bytes and was rejected before allocation. The package,
+preflight, launch, timeout, collection, and shutdown scripts use a latest-x86
+AMI lookup, encrypted storage, IMDSv2, no inbound security-group rule, a caller
+price cap, finite optional Capacity Reservation, preflight shutdown trap, and
+boot watchdog. A fail-closed fake-AWS plan accepted only describe, quota, and
+SSM calls and made no mutation (`RS-20260825T052959Z-57698687`).
+</Finding>
+
+<Direction title="Run the frozen harness on 192 physical x86 cores" status="proposed" owner="coordinator">
+No EC2 resource was created today, and the 2.418 GB figure is a resource plan,
+not a saturation measurement. A real `hpc7a.96xlarge` run needs a new run ID,
+current price assertion, explicit budget, exact source/config/root/weight
+hashes, live AWS preflight, exclusive machine profile, and uploaded completion
+artifacts. Its first job should compare root and frontier schedulers across the
+frozen depths before producing any teacher corpus. Only after parity and
+utilization hold on that host should a separately preregistered data lease turn
+deeper sibling values into training labels.
+</Direction>
+
+## Validation limits retained with the result
+
+Rust release tests passed all 22 current tests and the repository TypeScript
+suite passed 137 tests with one unrelated native-binary skip. The aggregate
+`make test` target still stops at research validation because this checkout is
+missing 72 gitignored historical artifacts; rerunning validation after the new
+records were completed added no error of this work. The existing C++ build also
+hits a macOS `-Werror` format mismatch. Compiling its search comparator with
+that warning relaxed but default arm64 floating contraction produced one-to-
+three-ULP differences on seven of 20 roots, with no action changes; disabling
+contraction produced exact parity on all eight retained benchmark roots. Both
+the failed default diagnostic and strict-FP pass remain in the run artifacts.

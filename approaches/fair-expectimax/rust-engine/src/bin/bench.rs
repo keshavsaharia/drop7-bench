@@ -6,6 +6,10 @@
 //                                             fixed-work decisions from a
 //                                             harvested-roots file
 //   bench scaling  --games N --max-threads T  game-level worker scaling sweep
+//   bench parallel --roots F --depth D --strata S --decisions N --repeats R
+//                  --threads T [--split-plies auto|N]
+//                                             interleaved root-column versus
+//                                             central-frontier decisions
 //
 // Timing discipline: best of R repeats, load average printed, peak resident
 // memory read from /proc/self/status.  Seeds come from the Rust benchmark
@@ -14,15 +18,17 @@
 
 use drop7_rs::board::{Board, BOARD_SIZE, MOVES_PER_LEVEL};
 use drop7_rs::engine::{center_first_move, play_headless_move, MinimalWaveSink, State};
+use drop7_rs::parallel::{
+    choose_action_frontier_parallel, choose_action_root_parallel, ParallelConfig, ParallelDecision,
+    DEFAULT_MAX_FRONTIER_TASKS, DEFAULT_MAX_HOST_BYTES,
+};
 use drop7_rs::search::{
-    work_bound_for, DepthTable, FairLeaf, Leaf, NoTable, Searcher, SearchParams,
-    TranspositionTable,
+    work_bound_for, DepthTable, FairLeaf, Leaf, NoTable, SearchParams, Searcher, TranspositionTable,
 };
 
 use std::env;
 use std::fs;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::Arc;
 use std::time::Instant;
 
 const BENCH_SEEDS: u32 = 0xa527_7000;
@@ -261,8 +267,199 @@ fn bench_search<T: TranspositionTable>(
     );
 }
 
+#[derive(Clone, Copy, Default)]
+struct ParallelObservation {
+    wall_seconds: f64,
+    execution_seconds: f64,
+    busy_core_seconds: f64,
+    capacity_core_seconds: f64,
+    work: u64,
+    nodes: u64,
+    tasks: u64,
+    planner_tasks: u64,
+    projected_table_bytes: usize,
+    projected_plan_bytes: usize,
+}
+
+impl ParallelObservation {
+    fn add(&mut self, decision: &ParallelDecision) {
+        let metrics = &decision.metrics;
+        self.wall_seconds += metrics.wall_seconds;
+        self.execution_seconds += metrics.execution_seconds;
+        let capacity = metrics.execution_seconds * metrics.worker_threads as f64;
+        self.capacity_core_seconds += capacity;
+        self.busy_core_seconds += metrics.worker_busy_fraction * capacity;
+        self.work += metrics.work;
+        self.nodes += metrics.nodes;
+        self.tasks += metrics.completed_tasks as u64;
+        self.planner_tasks += metrics.frontier_tasks as u64;
+        self.projected_table_bytes = self
+            .projected_table_bytes
+            .max(metrics.projected_table_bytes);
+        self.projected_plan_bytes = self.projected_plan_bytes.max(metrics.projected_plan_bytes);
+    }
+
+    fn busy_fraction(&self) -> f64 {
+        if self.capacity_core_seconds == 0.0 {
+            0.0
+        } else {
+            self.busy_core_seconds / self.capacity_core_seconds
+        }
+    }
+}
+
+fn same_parallel_decision(left: &ParallelDecision, right: &ParallelDecision) -> bool {
+    left.action == right.action
+        && left.column_values.len() == right.column_values.len()
+        && left
+            .column_values
+            .iter()
+            .zip(right.column_values.iter())
+            .all(|((lc, lv), (rc, rv))| lc == rc && lv.to_bits() == rv.to_bits())
+}
+
+fn median(mut values: Vec<f64>) -> f64 {
+    values.sort_by(f64::total_cmp);
+    let middle = values.len() / 2;
+    if values.len() % 2 == 0 {
+        (values[middle - 1] + values[middle]) / 2.0
+    } else {
+        values[middle]
+    }
+}
+
+fn print_parallel_observation(label: &str, repeat: usize, observation: ParallelObservation) {
+    println!(
+        "parallel repeat {} {}: wall {:.6} s execution {:.6} s busy {:.4} work {} nodes {} tasks {}/{} table-bytes {} plan-bytes {}",
+        repeat + 1,
+        label,
+        observation.wall_seconds,
+        observation.execution_seconds,
+        observation.busy_fraction(),
+        observation.work,
+        observation.nodes,
+        observation.tasks,
+        observation.planner_tasks,
+        observation.projected_table_bytes,
+        observation.projected_plan_bytes,
+    );
+}
+
+fn bench_parallel(
+    roots: &[State],
+    depth: i32,
+    strata: i32,
+    decisions: usize,
+    repeats: usize,
+    threads: usize,
+    split_plies: Option<usize>,
+    table_capacity: usize,
+    max_frontier_tasks: usize,
+    max_host_bytes: usize,
+) {
+    let params = SearchParams {
+        depth,
+        chance_samples: strata,
+        terminal_utility: -1_000_000.0,
+        maximum_work: work_bound_for(depth, strata) + 1,
+        policy_seed: 0xd707_5eed,
+    };
+    let config = ParallelConfig {
+        threads,
+        table_capacity_per_worker: table_capacity,
+        split_plies,
+        max_frontier_tasks,
+        max_host_bytes,
+        ..ParallelConfig::default()
+    };
+    let mut root_observations = Vec::with_capacity(repeats);
+    let mut frontier_observations = Vec::with_capacity(repeats);
+    let mut compared = 0usize;
+    for repeat in 0..repeats {
+        let mut root_observation = ParallelObservation::default();
+        let mut frontier_observation = ParallelObservation::default();
+        for index in 0..decisions {
+            let state = &roots[index % roots.len()];
+            // Alternate arm order to reduce drift from heating or unrelated
+            // load while keeping each root comparison adjacent.
+            let (root, frontier) = if (repeat + index) % 2 == 0 {
+                let root = choose_action_root_parallel(state, params, config)
+                    .unwrap_or_else(|error| panic!("root scheduler failed: {error}"));
+                let frontier = choose_action_frontier_parallel(state, params, config)
+                    .unwrap_or_else(|error| panic!("frontier scheduler failed: {error}"));
+                (root, frontier)
+            } else {
+                let frontier = choose_action_frontier_parallel(state, params, config)
+                    .unwrap_or_else(|error| panic!("frontier scheduler failed: {error}"));
+                let root = choose_action_root_parallel(state, params, config)
+                    .unwrap_or_else(|error| panic!("root scheduler failed: {error}"));
+                (root, frontier)
+            };
+            if !same_parallel_decision(&root, &frontier) {
+                panic!(
+                    "parallel parity mismatch at repeat {} root {}: root action {} frontier action {}",
+                    repeat + 1,
+                    index,
+                    root.action,
+                    frontier.action,
+                );
+            }
+            if frontier.metrics.completed_tasks != frontier.metrics.frontier_tasks {
+                panic!(
+                    "frontier task mismatch at repeat {} root {}: completed {} registered {}",
+                    repeat + 1,
+                    index,
+                    frontier.metrics.completed_tasks,
+                    frontier.metrics.frontier_tasks,
+                );
+            }
+            compared += 1;
+            root_observation.add(&root);
+            frontier_observation.add(&frontier);
+        }
+        print_parallel_observation("root", repeat, root_observation);
+        print_parallel_observation("frontier", repeat, frontier_observation);
+        root_observations.push(root_observation);
+        frontier_observations.push(frontier_observation);
+    }
+    let root_median = median(
+        root_observations
+            .iter()
+            .map(|row| row.wall_seconds)
+            .collect(),
+    );
+    let frontier_median = median(
+        frontier_observations
+            .iter()
+            .map(|row| row.wall_seconds)
+            .collect(),
+    );
+    let frontier_busy = median(
+        frontier_observations
+            .iter()
+            .map(ParallelObservation::busy_fraction)
+            .collect(),
+    );
+    println!("parallel parity: {compared} paired decisions, 0 value/action/task mismatches");
+    println!(
+        "parallel summary: depth {} strata {} threads {} decisions/repeat {} repeats {} root-median {:.6} s frontier-median {:.6} s speedup {:.4} frontier-busy-median {:.4}",
+        depth,
+        strata,
+        threads,
+        decisions,
+        repeats,
+        root_median,
+        frontier_median,
+        root_median / frontier_median,
+        frontier_busy,
+    );
+}
+
 fn bench_scaling(games: usize, max_threads: usize, max_moves: i32) {
-    println!("scaling mode: {} games per worker count, center policy", games);
+    println!(
+        "scaling mode: {} games per worker count, center policy",
+        games
+    );
     let mut threads = 1usize;
     while threads <= max_threads {
         let start = Instant::now();
@@ -364,6 +561,9 @@ fn main() {
     let mut repeats = 3usize;
     let mut tt = String::from("none");
     let mut tt_capacity = 65_536usize;
+    let mut split_plies = None;
+    let mut max_frontier_tasks = DEFAULT_MAX_FRONTIER_TASKS;
+    let mut max_host_bytes = DEFAULT_MAX_HOST_BYTES;
     let mut i = 1;
     if args.len() > 1 && !args[1].starts_with("--") {
         mode = args[1].clone();
@@ -382,6 +582,19 @@ fn main() {
             "--repeats" => repeats = args[i + 1].parse().unwrap(),
             "--tt" => tt = args[i + 1].clone(),
             "--tt-capacity" => tt_capacity = args[i + 1].parse().unwrap(),
+            "--split-plies" => {
+                split_plies = if args[i + 1] == "auto" {
+                    None
+                } else {
+                    Some(
+                        args[i + 1]
+                            .parse()
+                            .expect("--split-plies must be auto or an integer"),
+                    )
+                }
+            }
+            "--max-frontier-tasks" => max_frontier_tasks = args[i + 1].parse().unwrap(),
+            "--max-host-bytes" => max_host_bytes = args[i + 1].parse().unwrap(),
             _ => {}
         }
         i += 2;
@@ -400,17 +613,46 @@ fn main() {
             // caching nodes at depth >= K).  Both compute identical values;
             // only node counts and per-node cost differ.
             if tt == "none" {
-                bench_search(&roots, depth, strata, decisions, repeats, || NoTable, "no-table");
+                bench_search(
+                    &roots,
+                    depth,
+                    strata,
+                    decisions,
+                    repeats,
+                    || NoTable,
+                    "no-table",
+                );
             } else if let Some(gate) = tt.strip_prefix("gate") {
                 let from_depth: i32 = gate.parse().unwrap();
                 let name = format!("depth-gate>={from_depth} cap={tt_capacity}");
-                bench_search(&roots, depth, strata, decisions, repeats, || {
-                    DepthTable::new(tt_capacity, from_depth)
-                }, &name);
+                bench_search(
+                    &roots,
+                    depth,
+                    strata,
+                    decisions,
+                    repeats,
+                    || DepthTable::new(tt_capacity, from_depth),
+                    &name,
+                );
             } else {
                 eprintln!("unknown --tt {tt} (want none or gate<K>)");
                 std::process::exit(2);
             }
+        }
+        "parallel" => {
+            let roots = read_roots(&roots_path);
+            bench_parallel(
+                &roots,
+                depth,
+                strata,
+                decisions,
+                repeats,
+                threads,
+                split_plies,
+                tt_capacity,
+                max_frontier_tasks,
+                max_host_bytes,
+            );
         }
         _ => {
             eprintln!("unknown mode {mode}");

@@ -5,6 +5,8 @@
 //   decide --board <49 digits> --next <1-7> --rise <1-5>
 //          [--depth 7] [--chance-samples 7]
 //          [--cache TOTAL_ENTRIES] [--threads T]
+//          [--scheduler frontier|root] [--split-plies auto|N]
+//          [--max-frontier-tasks N] [--max-host-bytes N]
 //
 // prints "bestmove <column>" (0-6) or "bestmove none" on a terminal board, and
 // exits 0.  The board is the engine's serializeBoard encoding, row-major from
@@ -17,23 +19,25 @@
 // deterministic for a given board and configuration, which the benchmark
 // harness requires.
 //
-// ROOT-PARALLELISM IS VALUE-IDENTICAL, NOT AN APPROXIMATION.  The work budget
-// is work_bound_for(depth, strata) + 1, the exact worst-case work of the full
-// iterative-deepening run, so the sequential choose_action always completes
-// the target depth and its action is exactly the argmax of the per-column
-// values at that depth (ties broken by COLUMN_ORDER).  Those values are a
-// deterministic function of the public state -- the transposition table is
-// proven cache-independent -- so evaluating disjoint columns on separate
-// threads, each with its own searcher and table, computes bit-identical
-// values and the same argmax.  Threads change only wall-clock and how the
-// total cache-entry budget is partitioned; they never multiply that budget.
+// CENTRAL-FRONTIER PARALLELISM IS VALUE-IDENTICAL, NOT AN APPROXIMATION.  A
+// coordinator expands a deterministic prefix of the expectimax tree, workers
+// claim the remaining public-state continuations from a central registry, and
+// the coordinator reduces results in the original column/sample order.  This
+// exposes thousands of tasks instead of at most seven root columns.  Private
+// worker tables can change cache hits and logical work, but cached values are
+// bit-identical to recomputation, so threads change no root value or action.
+// `--scheduler root` retains the earlier coarse-grained implementation as a
+// measured fallback. `--cache` remains one aggregate entry budget, partitioned
+// across private worker tables so increasing the thread count cannot multiply
+// the caller's memory request.
 
-use drop7_rs::board::{Board, BOARD_SIZE, EMPTY};
+use drop7_rs::board::{Board, BOARD_SIZE};
 use drop7_rs::engine::State;
-use drop7_rs::search::{
-    canonical_state, work_bound_for, DepthTable, FairLeaf, SearchMetrics, SearchParams, Searcher,
-    COLUMN_ORDER,
+use drop7_rs::parallel::{
+    choose_action_frontier_parallel, choose_action_root_parallel, ParallelConfig,
+    DEFAULT_MAX_FRONTIER_TASKS, DEFAULT_MAX_HOST_BYTES,
 };
+use drop7_rs::search::{work_bound_for, SearchParams};
 
 use std::env;
 
@@ -44,10 +48,22 @@ fn main() {
     let mut depth = 7i32;
     let mut strata = 7i32;
     let mut cache = 1_048_576usize;
-    let mut threads = 0usize; // 0 = one per legal column, capped by cores
+    let mut threads = 0usize; // 0 = all CPUs visible to this process
+    let mut scheduler = String::from("frontier");
+    let mut split_plies = None;
+    let mut max_frontier_tasks = DEFAULT_MAX_FRONTIER_TASKS;
+    let mut max_host_bytes = DEFAULT_MAX_HOST_BYTES;
     let args: Vec<String> = env::args().collect();
     let mut i = 1;
-    while i + 1 < args.len() {
+    while i < args.len() {
+        if args[i] == "--help" || args[i] == "-h" {
+            eprintln!("usage: decide --board BOARD --next 1-7 --rise 1-5 [--depth N] [--chance-samples N] [--cache N] [--threads N] [--scheduler frontier|root] [--split-plies auto|N] [--max-frontier-tasks N] [--max-host-bytes N]");
+            return;
+        }
+        if i + 1 >= args.len() {
+            eprintln!("decide failed: {} needs a value", args[i]);
+            std::process::exit(2);
+        }
         match args[i].as_str() {
             "--board" => board_text = args[i + 1].clone(),
             "--next" => next = args[i + 1].parse().expect("--next must be 1-7"),
@@ -56,12 +72,32 @@ fn main() {
             "--chance-samples" => strata = args[i + 1].parse().expect("--chance-samples"),
             "--cache" => cache = args[i + 1].parse().expect("--cache"),
             "--threads" => threads = args[i + 1].parse().expect("--threads"),
+            "--scheduler" => scheduler = args[i + 1].clone(),
+            "--split-plies" => {
+                split_plies = if args[i + 1] == "auto" {
+                    None
+                } else {
+                    Some(
+                        args[i + 1]
+                            .parse()
+                            .expect("--split-plies must be auto or an integer"),
+                    )
+                }
+            }
+            "--max-frontier-tasks" => {
+                max_frontier_tasks = args[i + 1].parse().expect("--max-frontier-tasks")
+            }
+            "--max-host-bytes" => max_host_bytes = args[i + 1].parse().expect("--max-host-bytes"),
             other => {
                 eprintln!("decide failed: unknown option {other}");
                 std::process::exit(2);
             }
         }
         i += 2;
+    }
+    if depth < 1 || strata < 1 {
+        eprintln!("decide failed: depth and chance samples must be at least 1");
+        std::process::exit(2);
     }
     let Some(board) = Board::from_serialized(&board_text) else {
         eprintln!("decide failed: --board must be 49 characters of digits 0-9");
@@ -96,106 +132,65 @@ fn main() {
         policy_seed: 0xd707_5eed,
     };
 
-    let (canonical, mirrored) = canonical_state(&state);
-    let legal: Vec<usize> = COLUMN_ORDER
-        .iter()
-        .copied()
-        .filter(|&column| canonical.board.get(0, column) == EMPTY)
-        .collect();
-    if legal.is_empty() {
-        println!("bestmove none");
-        return;
-    }
-
-    let requested_workers = if threads == 0 {
-        legal
-            .len()
-            .min(std::thread::available_parallelism().map_or(1, |n| n.get()))
+    let requested_threads = if threads == 0 {
+        std::thread::available_parallelism().map_or(1, |n| n.get())
     } else {
-        threads.min(legal.len()).max(1)
+        threads
     };
-    // `cache` is one aggregate entry budget, not a per-worker allocation.
-    // DepthTable needs a power-of-two capacity, so round each worker's equal
-    // share down.  Capping workers by the entry budget keeps the invariant
-    // even for deliberately tiny command-line values.
-    let worker_count = requested_workers.min(cache);
+    // DepthTable rounds to powers of two. Partition the aggregate cache budget
+    // before constructing ParallelConfig so all private worker tables together
+    // remain at or below the caller's requested entry count.
+    let worker_count = requested_threads.min(cache);
     let worker_cache = cache_entries_per_worker(cache, worker_count);
-
-    // Evaluate every legal column at the full target depth, disjoint columns
-    // per worker.  Each worker owns its searcher and its bounded slice of the
-    // total table budget; the values it returns are the same bits the
-    // sequential search would compute.
-    let mut values: Vec<(usize, f64, SearchMetrics)> = Vec::new();
-    std::thread::scope(|scope| {
-        let mut lanes: Vec<Vec<usize>> = (0..worker_count).map(|_| Vec::new()).collect();
-        for (index, &column) in legal.iter().enumerate() {
-            lanes[index % worker_count].push(column);
+    let config = ParallelConfig {
+        threads: worker_count,
+        table_capacity_per_worker: worker_cache,
+        split_plies,
+        max_frontier_tasks,
+        max_host_bytes,
+        ..ParallelConfig::default()
+    };
+    let decision = match scheduler.as_str() {
+        "frontier" => choose_action_frontier_parallel(&state, params, config),
+        "root" => choose_action_root_parallel(&state, params, config),
+        _ => {
+            eprintln!("decide failed: --scheduler must be frontier or root");
+            std::process::exit(2);
         }
-        let handles: Vec<_> = lanes
-            .into_iter()
-            .map(|lane| {
-                let canonical = &canonical;
-                scope.spawn(move || {
-                    let mut searcher = Searcher::new(
-                        params,
-                        FairLeaf::default(),
-                        DepthTable::new(worker_cache, 1),
-                    );
-                    let mut out = Vec::new();
-                    for column in lane {
-                        // A single column's evaluation is bounded by one
-                        // seventh of a root decision, far under the per-search
-                        // budget, so the work limit can never fire here.
-                        let value = searcher
-                            .evaluate_root_column(canonical, column, depth)
-                            .expect("the completion-guaranteeing budget covers one column");
-                        out.push((column, value, searcher.last_metrics().clone()));
-                    }
-                    out
-                })
-            })
-            .collect();
-        for handle in handles {
-            values.extend(handle.join().expect("worker panicked"));
+    };
+    let decision = match decision {
+        Ok(decision) => decision,
+        Err(error) if error.contains("no legal columns") => {
+            println!("bestmove none");
+            return;
         }
-    });
-
-    // Argmax in COLUMN_ORDER with strict improvement: the same tie-break the
-    // sequential root_decision applies.
-    let mut action = -1i32;
-    let mut best_value = f64::NEG_INFINITY;
-    let mut total_work = 0u64;
-    let mut total_nodes = 0u64;
-    for &column in COLUMN_ORDER.iter() {
-        if let Some(&(_, value, ref metrics)) =
-            values.iter().find(|&&(column_, _, _)| column_ == column)
-        {
-            total_work += metrics.work;
-            total_nodes += metrics.nodes;
-            if value > best_value {
-                best_value = value;
-                action = column as i32;
-            }
+        Err(error) => {
+            eprintln!("decide failed: {error}");
+            std::process::exit(2);
         }
-    }
-    if mirrored && action >= 0 {
-        action = BOARD_SIZE as i32 - 1 - action;
-    }
-
-    if action < 0 {
-        println!("bestmove none");
-    } else {
-        println!("bestmove {action}");
-    }
-    let allocated_cache_entries = worker_cache * worker_count;
+    };
+    println!("bestmove {}", decision.action);
+    let metrics = decision.metrics;
+    let allocated_cache_entries = worker_cache * metrics.worker_threads;
     println!(
-        "info depth {depth} work {total_work} nodes {total_nodes} cache_entries {allocated_cache_entries} frozen 1"
+        "info depth {} scheduler {} threads {} tasks {} split {} work {} nodes {} busy {:.4} wall {:.6} cache-entries {} table-bytes {} frozen 1",
+        depth,
+        scheduler,
+        metrics.worker_threads,
+        metrics.frontier_tasks,
+        metrics.split_plies,
+        metrics.work,
+        metrics.nodes,
+        metrics.worker_busy_fraction,
+        metrics.wall_seconds,
+        allocated_cache_entries,
+        metrics.projected_table_bytes,
     );
 }
 
 /// Largest power-of-two per-worker table that keeps the aggregate allocation
-/// within `total_entries`.  The caller guarantees both values are positive
-/// and caps `worker_count` at `total_entries`.
+/// within `total_entries`. The caller guarantees both values are positive and
+/// caps `worker_count` at `total_entries`.
 fn cache_entries_per_worker(total_entries: usize, worker_count: usize) -> usize {
     debug_assert!(total_entries > 0);
     debug_assert!(worker_count > 0);
@@ -209,12 +204,12 @@ mod tests {
     use super::cache_entries_per_worker;
 
     #[test]
-    fn cache_budget_is_shared_across_root_workers() {
+    fn cache_budget_is_shared_across_frontier_workers() {
         let total = 16_777_216usize;
-        let workers = 7usize;
+        let workers = 192usize;
         let per_worker = cache_entries_per_worker(total, workers);
 
-        assert_eq!(per_worker, 2_097_152);
+        assert_eq!(per_worker, 65_536);
         assert!(per_worker.is_power_of_two());
         assert!(per_worker * workers <= total);
     }
@@ -222,7 +217,7 @@ mod tests {
     #[test]
     fn cache_partition_never_exceeds_the_total_budget() {
         for total in 1..=257usize {
-            for workers in 1..=total.min(7) {
+            for workers in 1..=total.min(257) {
                 let per_worker = cache_entries_per_worker(total, workers);
                 assert!(per_worker.is_power_of_two());
                 assert!(per_worker * workers <= total);
