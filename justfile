@@ -14,6 +14,7 @@ run-matrix-local *args:
 
 # Example: just play-round rust-fair-d6-s7 gauntlet-01
 # Play one policy through one scripted round; saves the leaderboard-schema game record and per-move replay under runs/.
+# Crash-safe: every move is journaled to runs/bench-checkpoints/, and rerunning the same command resumes from there.
 play-round policy="rust-fair-d6-s7" round="gauntlet-01":
     #!/usr/bin/env bash
     set -euo pipefail

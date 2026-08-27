@@ -91,6 +91,17 @@ evidence. Two dead-code warnings (`index_of` in `board.rs`, an unused
 `NoTable` import in `gate_search.rs`) were removed, leaving the release
 build warning-free.
 
+The crash also motivated crash-safety for slow playground games: the bench
+CLI now journals every completed move to
+`runs/bench-checkpoints/<policy>--<round>.jsonl` and, on rerun, replays the
+journal through the engine without policy calls, verifying board and score at
+every step before continuing from the checkpoint; a journal that diverges from
+the current code is discarded with a warning, and the journal is deleted once
+the final replay is written. A kill-mid-game drill resumed and reproduced the
+exact checksum of the retained uninterrupted record
+(`runs/BENCH-20260827T080553Z-expectimax-d2--gauntlet-01/`), and two new
+tests cover resume equivalence and mismatch rejection.
+
 Open items: this was a single-root smoke validation, not a scaling study — a
 depth-6/7 cell has not been attempted locally, and the frontier planner and
 reduction remain single-threaded phases whose share of wall time was

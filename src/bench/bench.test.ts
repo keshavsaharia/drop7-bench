@@ -14,7 +14,7 @@ import {
   COMPETITION_POLICY_IDS,
   getPolicy,
 } from "./policies.ts";
-import { playScriptedGame } from "./runner.ts";
+import { playScriptedGame, type BenchCheckpointEntry } from "./runner.ts";
 import { validateScriptedRound } from "./rounds.ts";
 import { parsePosition, stateFromPosition } from "./d7p-server.ts";
 import {
@@ -153,6 +153,51 @@ test("d7p positions become a public-only game state that policies can answer", (
   assert.ok(
     column !== null && column >= 0 && column < BOARD_SIZE,
     "policy answered with a column",
+  );
+});
+
+test("a checkpointed game resumes into an identical final result", () => {
+  const round = loadRound("gauntlet-01");
+  const policy = getPolicy("greedy");
+  const journal: BenchCheckpointEntry[] = [];
+  const full = playScriptedGame(policy, round, {
+    onFrame: (_frame, entry, resumed) => {
+      assert.equal(resumed, false, "no move is resumed in a fresh game");
+      journal.push(entry);
+    },
+  });
+  assert.equal(journal.length, full.moves);
+
+  const prefix = journal.slice(0, 10);
+  let resumedMoves = 0;
+  const resumed = playScriptedGame(policy, round, {
+    resume: prefix,
+    onFrame: (_frame, _entry, wasResumed) => {
+      if (wasResumed) resumedMoves += 1;
+    },
+  });
+  assert.equal(resumedMoves, prefix.length, "the journal prefix is replayed");
+  assert.equal(resumed.checksum, full.checksum);
+  assert.equal(resumed.score, full.score);
+  assert.equal(resumed.moves, full.moves);
+  assert.equal(resumed.illegalMoves, full.illegalMoves);
+});
+
+test("a checkpoint from different code or round is rejected, not continued", () => {
+  const round = loadRound("gauntlet-01");
+  const policy = getPolicy("greedy");
+  const journal: BenchCheckpointEntry[] = [];
+  playScriptedGame(policy, round, {
+    onFrame: (_frame, entry) => journal.push(entry),
+  });
+  const corrupted = journal.slice(0, 10);
+  corrupted[5] = {
+    ...corrupted[5],
+    board: `${corrupted[5].board.slice(0, -1)}${corrupted[5].board.endsWith("7") ? "6" : "7"}`,
+  };
+  assert.throws(
+    () => playScriptedGame(policy, round, { resume: corrupted }),
+    /checkpoint mismatch/,
   );
 });
 
