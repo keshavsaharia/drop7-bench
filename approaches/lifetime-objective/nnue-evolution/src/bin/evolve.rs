@@ -143,7 +143,7 @@ fn mutate(parent: &Nnue, seed: u32, generation: usize, child: usize, sigma_rel: 
     let mut rng = Mulberry32::new(mix32(
         seed ^ (generation as u32).wrapping_mul(0x9e37_79b9) ^ (child as u32).wrapping_add(1),
     ));
-    let mut next = |rng: &mut Mulberry32| -> f32 {
+    let next = |rng: &mut Mulberry32| -> f32 {
         let u1 = (rng.next_bits() as f64 + 1.0) / 4_294_967_297.0;
         let u2 = (rng.next_bits() as f64 + 1.0) / 4_294_967_297.0;
         ((-2.0 * u1.ln()).sqrt() * (2.0 * std::f64::consts::PI * u2).cos()) as f32

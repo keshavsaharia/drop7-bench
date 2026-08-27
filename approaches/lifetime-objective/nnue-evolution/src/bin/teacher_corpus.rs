@@ -104,8 +104,6 @@ fn assemble(out: &str) -> Result<(usize, usize), String> {
     let mut body = String::new();
     let mut roots = 0usize;
     let mut games = 0usize;
-    let mut total_score = 0i64;
-    let mut total_moves = 0i64;
     for name in &names {
         let text = std::fs::read_to_string(format!("{parts_dir}/{name}")).map_err(|e| e.to_string())?;
         for line in text.lines() {
@@ -117,7 +115,6 @@ fn assemble(out: &str) -> Result<(usize, usize), String> {
         }
         body.push_str(&text);
     }
-    let _ = (total_score, total_moves);
     std::fs::write(format!("{out}/corpus.jsonl"), &body).map_err(|e| e.to_string())?;
     std::fs::write(
         format!("{out}/corpus-summary.json"),
