@@ -109,3 +109,22 @@ negligible here (~1 ms at D5) but is untested at greater depths. The
 system-level `mpstat` capture proved too coarse for sub-two-second cells; the
 per-worker analytics rows are the instrument of record for occupancy claims.
 No complete games, strength comparisons, or research seed ranges were touched.
+
+## Review fix: the evolution's candidate freeze could rank on stale fitness
+
+External review of PR #15 caught a crash-recovery gap in the NNUE evolution
+binary (stage C of EX-20260825-nnue-evolution-d3-bca7f330): `evolve --select`
+ranked the last completed generation's population using a sidecar
+`final-fitness.json` that is only written on graceful exit, so a hard kill
+after a `gen-NNN.json` completion marker would leave `--select` pairing the
+newest population with an earlier generation's means and freezing the wrong
+finalists. The fix removes the sidecar dependency entirely: `--select` now
+re-derives each candidate's mean from the per-game scores recorded in the
+completed generation's own `gen-NNN.json`, so the ranking is atomically
+consistent with the completion marker by construction (`final-fitness.json`
+remains as a preregistered informational artifact). Verified on a throwaway
+playground-domain smoke run: a planted stale fitness file that reorders the
+finalists under the old logic now changes nothing, and a deleted fitness file
+no longer blocks selection. No research seeds were opened and the stage C
+selection procedure's preregistered semantics (top eight by final-generation
+fitness, fresh re-selection block) are unchanged.

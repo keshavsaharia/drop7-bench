@@ -435,9 +435,12 @@ fn run_evolution(config: &Config) -> Result<(), String> {
         population = next;
     }
 
-    // Persist the final fitness for --select.  Only when this process
-    // actually evaluated a generation; a no-op resume must not clobber the
-    // completing run's file.
+    // Persist the last evaluated fitness for human inspection.  This file is
+    // informational only — --select re-derives fitness from the completed
+    // generation's gen-{g}.json, so a kill that strands this file at an
+    // earlier generation cannot mis-rank the pool.  Written only when this
+    // process actually evaluated a generation; a no-op resume must not
+    // clobber the completing run's file.
     if !last_fitness.is_empty() {
         std::fs::write(
             format!("{}/final-fitness.json", config.out),
@@ -471,16 +474,55 @@ fn run_select(config: &Config) -> Result<(), String> {
     }
     let generation = found.ok_or("no completed generation found")?;
     let population = load_population(&format!("{}/population-{generation:03}.bin", config.out))?;
-    let fitness_text = std::fs::read_to_string(format!("{}/final-fitness.json", config.out))
-        .map_err(|e| e.to_string())?;
-    let fitness_json = drop7_nnue_evolution::json::parse(&fitness_text)?;
-    let fitness: Vec<f64> = fitness_json
-        .get("fitness")
+    // Fitness comes from the completed generation's own artifact, never
+    // from a sidecar file: gen-{g}.json records every candidate's games,
+    // so the ranking is atomically consistent with the completion marker.
+    // (final-fitness.json is informational only — a kill after gen-{g}.json
+    // leaves it absent or holding an earlier generation's means.)
+    let artifact_text =
+        std::fs::read_to_string(format!("{}/gen-{generation:03}.json", config.out))
+            .map_err(|e| e.to_string())?;
+    let artifact = drop7_nnue_evolution::json::parse(&artifact_text)?;
+    let individuals = artifact
+        .get("individuals")
         .and_then(Json::as_array)
-        .ok_or("final-fitness.json missing fitness")?
-        .iter()
-        .map(|v| v.as_f64().unwrap_or(f64::NEG_INFINITY))
-        .collect();
+        .ok_or("gen artifact missing individuals")?;
+    let mut fitness = vec![None::<f64>; population.len()];
+    for individual in individuals {
+        let name = individual.get("name").and_then(Json::as_str).unwrap_or("");
+        // Controls (control-fair-*, control-init-*) rank nothing here.
+        let Some(index) = name
+            .strip_prefix("candidate-")
+            .and_then(|n| n.parse::<usize>().ok())
+        else {
+            continue;
+        };
+        if index >= population.len() {
+            return Err(format!(
+                "gen artifact names {name} but population-{generation:03}.bin holds {}",
+                population.len()
+            ));
+        }
+        let games = individual
+            .get("games")
+            .and_then(Json::as_array)
+            .ok_or_else(|| format!("gen artifact {name} missing games"))?;
+        let mut sum = 0.0;
+        for game in games {
+            sum += game
+                .get("score")
+                .and_then(Json::as_f64)
+                .ok_or_else(|| format!("gen artifact {name} has a game without a score"))?;
+        }
+        fitness[index] = Some(sum / games.len().max(1) as f64);
+    }
+    let fitness: Vec<f64> = fitness
+        .into_iter()
+        .enumerate()
+        .map(|(index, mean)| {
+            mean.ok_or(format!("gen artifact is missing candidate-{index:02}"))
+        })
+        .collect::<Result<_, _>>()?;
 
     // Top 8 by final-generation fitness enter the re-selection block.
     let mut ranking: Vec<usize> = (0..population.len()).collect();
