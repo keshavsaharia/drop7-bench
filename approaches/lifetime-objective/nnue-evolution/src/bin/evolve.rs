@@ -16,10 +16,13 @@
 // 128-game block before the candidate is frozen.
 //
 // Per generation the binary writes:
-//   gen-NNN.json    population artifact (compare.py-compatible), controls
-//                   included as named individuals
-//   population.bin  all genomes, P x parameter_count little-endian f32
-//   progress.jsonl  one summary line per generation
+//   gen-NNN.json         population artifact (compare.py-compatible),
+//                        controls included as named individuals
+//   population-NNN.bin   the population that plays generation NNN (and the
+//                        successor NNN+1 is saved before gen-NNN.json marks
+//                        the generation complete — see the checkpoint
+//                        contract in run_evolution)
+//   progress.jsonl       one summary line per generation
 // and on --select:
 //   candidate-weights.bin, selection.json
 //
@@ -214,8 +217,9 @@ fn load_population(path: &str) -> Result<Vec<Nnue>, String> {
 }
 
 /// Evaluate one generation: every candidate plus the two controls on the
-/// same seed block.  Returns per-individual mean scores and writes the
-/// population artifact.
+/// same seed block.  Returns the per-individual mean scores and the
+/// population artifact as a string; the caller decides when to write it
+/// (the checkpoint contract orders the writes, see run_evolution).
 #[allow(clippy::too_many_arguments)]
 fn evaluate_generation(
     config: &Config,
@@ -223,7 +227,7 @@ fn evaluate_generation(
     init: &Nnue,
     generation: usize,
     block_start: u32,
-) -> Result<Vec<f64>, String> {
+) -> Result<(Vec<f64>, String), String> {
     let params = deployment_params();
     let individuals = population.len() + 2;
     let mut tasks = Vec::with_capacity(individuals * config.games);
@@ -276,9 +280,6 @@ fn evaluate_generation(
         config.games, config.move_cap
     );
     let artifact = population_artifact_json(&config_json, block_start, &assembled);
-    std::fs::write(format!("{}/gen-{generation:03}.json", config.out), artifact)
-        .map_err(|e| e.to_string())?;
-
     let means: Vec<f64> = assembled
         .iter()
         .map(|individual| {
@@ -286,7 +287,7 @@ fn evaluate_generation(
                 / individual.games.len().max(1) as f64
         })
         .collect();
-    Ok(means)
+    Ok((means, artifact))
 }
 
 fn run_evolution(config: &Config) -> Result<(), String> {
@@ -304,11 +305,15 @@ fn run_evolution(config: &Config) -> Result<(), String> {
     .map_err(|e| e.to_string())?;
 
     // Checkpoint contract: population-{g}.bin holds the population that PLAYS
-    // generation g, saved before the first game of g.  A generation is
-    // complete once its gen-{g}.json artifact exists.  Resume therefore loads
-    // the population after the last completed generation; a population whose
-    // generation never finished is simply replayed (training seeds are
-    // deterministic, so a replayed block is wasted compute, not new data).
+    // generation g.  Within an iteration the writes are ordered so a kill or
+    // stop can never strand a completed generation without its successor:
+    //   1. evaluate the population (means in memory only),
+    //   2. select and save population-{g+1}.bin,
+    //   3. write gen-{g}.json (the completion marker) and progress.jsonl.
+    // A kill before step 3 replays generation g (training seeds are
+    // deterministic: the replay recomputes identical fitness and an identical
+    // successor).  A stop between iterations leaves population-{g+1}.bin
+    // already saved, so resume always finds it.
     let mut start_generation = 0usize;
     let mut population: Vec<Nnue> = {
         let mut last_complete: Option<usize> = None;
@@ -337,12 +342,14 @@ fn run_evolution(config: &Config) -> Result<(), String> {
             }
             None => {
                 // Generation 0: candidate 0 is the exact init; the rest are
-                // a 2-sigma cloud around it.
+                // a 2-sigma cloud around it.  Checkpoint it before any game
+                // so the contract holds from the first iteration.
                 let mut initial = Vec::with_capacity(config.population);
                 initial.push(init.clone());
                 for child in 1..config.population {
                     initial.push(mutate(&init, config.seed, usize::MAX, child, 2.0 * config.sigma_rel));
                 }
+                save_population(&format!("{}/population-000.bin", config.out), &initial)?;
                 initial
             }
         }
@@ -359,40 +366,10 @@ fn run_evolution(config: &Config) -> Result<(), String> {
             println!("STOP file found; stopping at generation {generation}");
             break;
         }
-        // Save the population that is about to play this generation, first.
-        save_population(
-            &format!("{}/population-{generation:03}.bin", config.out),
-            &population,
-        )?;
         let block_start = config.lease_start + (generation * config.games) as u32;
-        let means = evaluate_generation(config, &population, &init, generation, block_start)?;
+        let (means, artifact) =
+            evaluate_generation(config, &population, &init, generation, block_start)?;
         last_fitness = means.clone();
-        let best = means[..config.population]
-            .iter()
-            .cloned()
-            .fold(f64::NEG_INFINITY, f64::max);
-        let mean_all: f64 =
-            means[..config.population].iter().sum::<f64>() / config.population as f64;
-        let control_fair = means[config.population];
-        let control_init = means[config.population + 1];
-        println!(
-            "generation {generation}: best {best:.0} mean {mean_all:.0} | fair {control_fair:.0} init {control_init:.0} ({:.0}s)",
-            started.elapsed().as_secs_f64()
-        );
-        let progress = format!(
-            "{{\"generation\":{generation},\"blockStart\":\"0x{block_start:08x}\",\"best\":{best},\"mean\":{mean_all},\"controlFair\":{control_fair},\"controlInit\":{control_init},\"fitness\":[{}]}}\n",
-            means[..config.population]
-                .iter()
-                .map(|v| format!("{v}"))
-                .collect::<Vec<_>>()
-                .join(",")
-        );
-        let mut file = std::fs::OpenOptions::new()
-            .create(true)
-            .append(true)
-            .open(format!("{}/progress.jsonl", config.out))
-            .map_err(|e| e.to_string())?;
-        file.write_all(progress.as_bytes()).map_err(|e| e.to_string())?;
 
         // Selection: elites cloned, the rest filled by tournament-selected,
         // mutated children.  Tournaments are ordinal, so heavy-tailed
@@ -420,9 +397,42 @@ fn run_evolution(config: &Config) -> Result<(), String> {
                 config.sigma_rel,
             ));
         }
+        // Checkpoint contract step 2: the successor population is durable
+        // BEFORE this generation is marked complete.
+        save_population(
+            &format!("{}/population-{:03}.bin", config.out, generation + 1),
+            &next,
+        )?;
+        // Step 3: only now write the completion marker and the progress line.
+        std::fs::write(format!("{}/gen-{generation:03}.json", config.out), artifact)
+            .map_err(|e| e.to_string())?;
+        let best = means[..config.population]
+            .iter()
+            .cloned()
+            .fold(f64::NEG_INFINITY, f64::max);
+        let mean_all: f64 =
+            means[..config.population].iter().sum::<f64>() / config.population as f64;
+        let control_fair = means[config.population];
+        let control_init = means[config.population + 1];
+        println!(
+            "generation {generation}: best {best:.0} mean {mean_all:.0} | fair {control_fair:.0} init {control_init:.0} ({:.0}s)",
+            started.elapsed().as_secs_f64()
+        );
+        let progress = format!(
+            "{{\"generation\":{generation},\"blockStart\":\"0x{block_start:08x}\",\"best\":{best},\"mean\":{mean_all},\"controlFair\":{control_fair},\"controlInit\":{control_init},\"fitness\":[{}]}}\n",
+            means[..config.population]
+                .iter()
+                .map(|v| format!("{v}"))
+                .collect::<Vec<_>>()
+                .join(",")
+        );
+        let mut file = std::fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(format!("{}/progress.jsonl", config.out))
+            .map_err(|e| e.to_string())?;
+        file.write_all(progress.as_bytes()).map_err(|e| e.to_string())?;
         population = next;
-        // The selected population is checkpointed at the start of the next
-        // iteration, before it plays a game (see the checkpoint contract).
     }
 
     // Persist the final fitness for --select.  Only when this process
@@ -447,15 +457,19 @@ fn run_evolution(config: &Config) -> Result<(), String> {
 }
 
 fn run_select(config: &Config) -> Result<(), String> {
-    // The final population is the last checkpoint written by the run.
+    // The candidate pool is the population that played the last COMPLETED
+    // generation (gen-{g}.json exists).  Under the checkpoint contract the
+    // successor checkpoint population-{g+1}.bin also exists but has never
+    // been evaluated, so discovery keys on the generation artifacts, not on
+    // population files.
     let mut found: Option<usize> = None;
     for generation in (0..config.generations).rev() {
-        if std::path::Path::new(&format!("{}/population-{generation:03}.bin", config.out)).exists() {
+        if std::path::Path::new(&format!("{}/gen-{generation:03}.json", config.out)).exists() {
             found = Some(generation);
             break;
         }
     }
-    let generation = found.ok_or("no population checkpoint found")?;
+    let generation = found.ok_or("no completed generation found")?;
     let population = load_population(&format!("{}/population-{generation:03}.bin", config.out))?;
     let fitness_text = std::fs::read_to_string(format!("{}/final-fitness.json", config.out))
         .map_err(|e| e.to_string())?;

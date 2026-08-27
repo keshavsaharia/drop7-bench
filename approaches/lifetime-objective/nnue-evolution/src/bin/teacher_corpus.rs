@@ -5,6 +5,15 @@
 // evaluation already prices every legal column (search.rs column_values),
 // the corpus is sibling-complete by construction: no played-action bias.
 //
+// COORDINATE FRAMES.  column_values labels its per-column values in the
+// *canonical* (reflection-normalised) frame and unmirror-maps only the chosen
+// action.  To keep every recorded field in one frame, each root is recorded
+// in the canonical frame: the board is canonicalised before recording, the
+// column labels are the canonical columns, and `chosen` is the canonical
+// action.  That is also exactly the distribution the deployed search's leaf
+// sees, since the search canonicalises every state it evaluates.  The game
+// itself is advanced in the original frame with the unmirrored action.
+//
 // OUTPUT LAYOUT (resumable).  Each completed game is written atomically to
 // <out>/parts/0x<seed>.jsonl (write-temp-then-rename), so a killed run loses
 // nothing finished and a rerun skips seeds whose part file exists.  The
@@ -23,8 +32,9 @@
 //   teacher_corpus --assemble --out DIR
 
 use drop7_rs::engine::{play_headless_move, MinimalWaveSink, State};
-use drop7_rs::search::{FairLeaf, Searcher};
+use drop7_rs::search::{canonical_state, FairLeaf, Searcher};
 use drop7_rs::search::DepthTable;
+use drop7_rs::board::BOARD_SIZE;
 use drop7_nnue_evolution::{teacher_params, TEACHER_TABLE};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Mutex;
@@ -54,11 +64,14 @@ fn play_teacher_game(seed: u32, move_cap: i32, depth: i32) -> (String, i64, i32)
     let mut lines = String::new();
     let started = std::time::Instant::now();
     while !state.game_over && state.moves_played < move_cap {
-        let (values, action) = searcher.column_values(&state, params.depth);
+        // Evaluate and record in the canonical frame (see the header note);
+        // advance the real game in the original frame.
+        let (canonical, mirrored) = canonical_state(&state);
+        let (values, action) = searcher.column_values(&canonical, params.depth);
         if action < 0 {
             break;
         }
-        let board = state.board.to_bytes();
+        let board = canonical.board.to_bytes();
         let columns: Vec<String> = values
             .iter()
             .map(|(c, v)| format!("[{c},{}]", f64_json(*v)))
@@ -72,7 +85,12 @@ fn play_teacher_game(seed: u32, move_cap: i32, depth: i32) -> (String, i64, i32)
             columns.join(","),
             action,
         ));
-        if play_headless_move(&mut state, seed, action as usize, &mut sink).is_none() {
+        let play_column = if mirrored && action >= 0 {
+            BOARD_SIZE as i32 - 1 - action
+        } else {
+            action
+        };
+        if play_headless_move(&mut state, seed, play_column as usize, &mut sink).is_none() {
             break;
         }
     }
@@ -193,12 +211,14 @@ fn main() -> Result<(), String> {
     let done = AtomicUsize::new(0);
     let started = std::time::Instant::now();
     let write_lock = Mutex::new(());
+    let failures: Mutex<Vec<String>> = Mutex::new(Vec::new());
     std::thread::scope(|scope| {
         for _ in 0..threads.max(1) {
             let pending = &pending;
             let cursor = &cursor;
             let done = &done;
             let write_lock = &write_lock;
+            let failures = &failures;
             let out = &out;
             scope.spawn(move || loop {
                 if started.elapsed().as_secs() > wall_seconds {
@@ -210,15 +230,21 @@ fn main() -> Result<(), String> {
                 }
                 let seed = pending[index];
                 let (lines, score, moves) = play_teacher_game(seed, move_cap, depth);
-                // Atomic-ish publish: write temp, fsync-free rename.
-                let body = lines;
+                // Atomic publish: write temp, then rename.  A failed write or
+                // rename must be loud — a silently missing part file would
+                // otherwise assemble into a partial corpus that reports
+                // success.
                 let tmp = format!("{}.tmp", part_path(out, seed));
                 let fin = part_path(out, seed);
-                {
+                let published = {
                     let _guard = write_lock.lock().unwrap();
-                    if std::fs::write(&tmp, &body).is_ok() {
-                        std::fs::rename(&tmp, &fin).ok();
-                    }
+                    std::fs::write(&tmp, &lines)
+                        .and_then(|_| std::fs::rename(&tmp, &fin))
+                };
+                if let Err(error) = published {
+                    eprintln!("FAILED to publish seed {seed:#010x}: {error}");
+                    failures.lock().unwrap().push(format!("{seed:#010x}: {error}"));
+                    continue;
                 }
                 let finished = done.fetch_add(1, Ordering::Relaxed) + 1;
                 eprintln!(
@@ -230,6 +256,14 @@ fn main() -> Result<(), String> {
         }
     });
 
+    let failures = failures.into_inner().unwrap();
+    if !failures.is_empty() {
+        return Err(format!(
+            "{} game(s) failed to publish their part files: {}",
+            failures.len(),
+            failures.join(", ")
+        ));
+    }
     let (games_done, roots) = assemble(&out)?;
     println!(
         "corpus stage done: {games_done} games, {roots} roots, {:.0}s wall",

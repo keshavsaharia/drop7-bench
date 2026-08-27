@@ -316,10 +316,22 @@ fn gate_teacher_equivalence(probe: &Probe) -> Result<(), String> {
 }
 
 fn gate_roundtrip(probe: &Probe, net: &Nnue) -> Result<(), String> {
-    let path = std::env::temp_dir().join("drop7-nnue-gate-roundtrip.bin");
+    // Per-process unique path: a predictable shared tempfile would let
+    // concurrent gate runs overwrite each other's artifact (and the
+    // repository forbids new shared /tmp defaults).
+    let unique = format!(
+        "drop7-nnue-gate-roundtrip-{}-{}.bin",
+        std::process::id(),
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.subsec_nanos())
+            .unwrap_or(0)
+    );
+    let path = std::env::temp_dir().join(unique);
     net.save(&path).map_err(|e| e.to_string())?;
-    let back = Nnue::load(&path)?;
+    let back = Nnue::load(&path);
     std::fs::remove_file(&path).ok();
+    let back = back?;
     for state in probe.states.iter().step_by((probe.states.len() / 32).max(1)) {
         if net.value_of_state(state).to_bits() != back.value_of_state(state).to_bits() {
             return Err("save/load changed a value".into());

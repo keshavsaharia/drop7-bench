@@ -78,6 +78,26 @@ fn load_corpus(path: &str) -> Result<(Vec<RootRow>, usize), String> {
                         pair[1].as_f64().ok_or("bad column value")?,
                     ));
                 }
+                let chosen = value.get("chosen").and_then(Json::as_f64).ok_or("missing chosen")?
+                    as usize;
+                // Frame-consistency invariant: the corpus is recorded in the
+                // canonical frame, so `chosen` must be among the recorded
+                // columns and carry the maximum value (the search breaks ties
+                // by column order, so any maximizer is valid — the check is
+                // on membership and value, not on which maximizer).  A
+                // mismatch means the coordinate frames diverged (the failure
+                // Greptile flagged on the first version of this generator).
+                let max_value = columns
+                    .iter()
+                    .map(|(_, v)| *v)
+                    .fold(f64::NEG_INFINITY, f64::max);
+                let chosen_value = columns.iter().find(|(c, _)| *c == chosen).map(|(_, v)| *v);
+                if chosen_value != Some(max_value) {
+                    return Err(format!(
+                        "line {}: chosen {chosen} is not a recorded maximizer (value {chosen_value:?} vs max {max_value})",
+                        line_number + 1
+                    ));
+                }
                 roots.push(RootRow {
                     seed,
                     board,
@@ -87,8 +107,7 @@ fn load_corpus(path: &str) -> Result<(Vec<RootRow>, usize), String> {
                         .and_then(Json::as_f64)
                         .ok_or("missing movesRemaining")? as i32,
                     columns,
-                    chosen: value.get("chosen").and_then(Json::as_f64).ok_or("missing chosen")?
-                        as usize,
+                    chosen,
                 });
             }
             _ => {}
