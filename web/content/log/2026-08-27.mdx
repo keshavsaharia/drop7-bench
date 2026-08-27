@@ -4,7 +4,7 @@ title: "Local validation of the depth matrix: the frontier scheduler saturates a
 summary: "The merged depth/strata/leaf matrix workflow was exercised end to end on the research workstation for the first time, without any EC2 launch. On gauntlet-01's initial public position the frontier scheduler held ~98-99% worker occupancy through D5/S7 and matched the root scheduler bit for bit, while the root scheduler capped at seven workers and left the rest of the machine idle. The matrix entry points were reorganized into run-matrix-ec2, run-matrix-local, and an interactive run-matrix dispatcher. make research-validate is failing on eight pre-existing references to deleted August 25 run artifacts."
 contributors: [claude-fable-5 (Claude Code)]
 tags: [rust-engine, parallel-search, infrastructure, benchmark-playground, validation]
-outcomes: { positive: 2, negative: 1, open: 2 }
+outcomes: { positive: 2, negative: 2, open: 2 }
 ---
 
 ## The depth matrix runs locally, and the frontier scheduler uses the whole machine
@@ -69,7 +69,23 @@ game record and per-move replay into a self-contained `runs/BENCH-*`
 directory (smoke record:
 `runs/BENCH-20260827T080553Z-expectimax-d2--gauntlet-01/`). A first
 depth-6 gauntlet-01 game was started and deliberately interrupted before
-completion at the operator's request, so no depth-6 game record exists yet.
+completion at the operator's request; the operator's own rerun then crashed
+partway through the game and exposed a real frontier-scheduler bug.
+
+<Finding title="The frontier planner rejected legal near-terminal positions" kind="negative" metric="deep games crashed near the rise">
+At a gauntlet-01 position with the rise clock at 2 and every column but three
+stacked to the top, every continuation inside the frontier's split prefix
+terminates, so the deterministic plan reduces entirely to constants and
+registers zero worker tasks. `choose_action_frontier_parallel` treated that
+legal state as the error "frontier construction produced no continuation
+tasks", crashing any deep (D6/D7) policy game that survived close to a board-
+filling rise — shallow policies and the depth matrix's opening roots never hit
+it. The fix lets an empty frontier reduce over constants (the idle worker path
+already handled it); the crash position is now a regression test asserting
+action and bit-for-bit value parity with the root scheduler, and the formerly
+crashing decide invocation answers in under 3 ms.
+</Finding>
+
 Scripted-round results remain playground demonstrations, never tier
 evidence. Two dead-code warnings (`index_of` in `board.rs`, an unused
 `NoTable` import in `gate_search.rs`) were removed, leaving the release
