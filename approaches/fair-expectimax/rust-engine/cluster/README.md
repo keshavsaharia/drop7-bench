@@ -22,8 +22,12 @@ before launch.
 From the repository root, the normal entry point is:
 
 ```sh
-AWS_PROFILE=personal-deploy just run-matrix gauntlet-01 --budget 10000
+AWS_PROFILE=personal-deploy just run-matrix-ec2 gauntlet-01 --budget 10000
 ```
+
+(`just run-matrix` without a suffix is an interactive dispatcher: it offers the
+EC2 path only when a valid AWS credential is present and otherwise asks for
+confirmation before running the matrix solver locally.)
 
 `--budget` is an all-in operator ceiling in integer US cents. The orchestrator
 queries the current On-Demand Linux price through the AWS Price List API,
@@ -55,7 +59,7 @@ and verifies that the instance reached `terminated`.
 For a no-launch rehearsal:
 
 ```sh
-AWS_PROFILE=personal-deploy just run-matrix gauntlet-01 --budget 10000 --plan
+AWS_PROFILE=personal-deploy just run-matrix-ec2 gauntlet-01 --budget 10000 --plan
 ```
 
 Plan mode makes read-only AWS calls and writes a local package under `runs/`;
@@ -92,6 +96,16 @@ retained; the reusable IAM role and security group do not consume compute
 capacity or accrue hourly instance charges.
 
 ## Local smoke run
+
+```sh
+just run-matrix-local gauntlet-01 --depths 2,3,4,5 --strata 7
+```
+
+`run-local-matrix.sh` derives the round's initial public position (or takes
+`--roots FILE`), freezes a generated matrix config into a unique `runs/`
+directory, and executes the same `run-matrix.sh` path the EC2 instance uses;
+`--help` lists every engine option and `--plan` prints only the per-cell
+resource projection. A hand-written config still works directly:
 
 ```sh
 approaches/fair-expectimax/rust-engine/cluster/run-matrix.sh \
@@ -206,8 +220,9 @@ success, error, signal, or timeout, then shuts itself down. The user-supplied
 hourly price assertion is a fail-closed budget input, not a live AWS price
 quote; verify it immediately before launch.
 
-There is deliberately no automatic launch in `run-matrix.sh`, `analyze`, or
-the Rust `plan` binary. `just run-matrix ...` is the complete operator entry
-point and is intentionally mutating unless given `--plan`; internally, the
-only command that creates a Capacity Reservation or EC2 instance remains
+There is deliberately no automatic launch in `run-matrix.sh`,
+`run-local-matrix.sh`, `analyze`, or the Rust `plan` binary.
+`just run-matrix-ec2 ...` is the complete cloud operator entry point and is
+intentionally mutating unless given `--plan`; internally, the only command
+that creates a Capacity Reservation or EC2 instance remains
 `provision-ec2.sh` **without** `--plan`.
