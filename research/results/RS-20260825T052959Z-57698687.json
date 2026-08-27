@@ -1,0 +1,114 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260825T052959Z-57698687",
+  "theoryIds": [
+    "TH-20260825-rust-search-matrix-ec2-6fc9f806"
+  ],
+  "experimentId": "EX-20260825-rust-search-matrix-ec2-check-eb821565",
+  "runIds": [
+    "RUN-20260825T051728Z-e588e6d9"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "pass",
+  "assessment": "supported-as-tested",
+  "evidenceTier": "mechanics-only",
+  "summary": "The reusable Rust analyzer emitted all 16 requested root x leaf x strata x depth decision rows, retaining every legal sibling's decimal and exact-f64 value, action changes across depths, task/work/cache counts, phase timings, memory projections, and per-worker load. Frozen named weights matched the compiled fair leaf exactly; frozen and perturbed leaves were worker-count independent. The D7/S7 allocation-free 192-worker plan selected one additional internal split ply, bounded the worst frontier at 2,401 tasks, and projected 2,418,377,728 bytes under an 8 GiB cap; the former 16,777,216-entry-per-worker cache was rejected at 154,618,822,656 bytes before allocation. Shell syntax and a fail-closed fake-AWS plan passed with only read-only describe, quota, and SSM operations accepted. No live AWS call, instance, Capacity Reservation, or 192-core execution occurred.",
+  "metrics": {
+    "matrix": {
+      "roots": 2,
+      "leaves": 2,
+      "strataCounts": 2,
+      "depths": 2,
+      "expectedDecisionRecords": 16,
+      "observedDecisionRecords": 16,
+      "frozenLeafMismatches": 0,
+      "workerCountMismatches": 0,
+      "perturbedWorkerCountMismatches": 0,
+      "sourceColumnSelectionMismatches": 0
+    },
+    "d7s7Plan192": {
+      "threads": 192,
+      "splitPlies": 1,
+      "worstCaseFrontierTasks": 2401,
+      "tableEntriesPerWorker": 262144,
+      "tableBytesPerWorker": 12582912,
+      "projectedTableBytes": 2415919104,
+      "projectedPlanBytes": 2458624,
+      "projectedTotalBytes": 2418377728,
+      "maxHostBytes": 8589934592
+    },
+    "oversizedPlan": {
+      "tableEntriesPerWorker": 16777216,
+      "projectedTableBytes": 154618822656,
+      "exitCode": 2
+    },
+    "ec2Plan": {
+      "fakeArchitecture": "x86_64",
+      "fakeVcpus": 192,
+      "fakePhysicalCores": 192,
+      "fakeThreadsPerCore": 1,
+      "fakeVcpuQuota": 192.0,
+      "insufficientQuotaRejected": true,
+      "projectedCostUsd": 20.0,
+      "mutatingCalls": 0,
+      "exitCode": 0
+    },
+    "sourcePackage": {
+      "localOnly": true,
+      "sha256": "14d104c0bd45034e61edecd0aa25280d9d94bc1aacd09893dc4c142e475a77d6"
+    }
+  },
+  "gateChecks": [
+    {
+      "criterion": "A 2 x 2 x 2 x 2 smoke matrix emits exactly 16 valid decision records with all sibling and scheduler fields.",
+      "passed": true,
+      "observed": "One manifest plus 16 parseable decision JSONL rows; analyzer stderr independently reported the same Cartesian count. Every row had one source-coordinate selected column matching selectedAction."
+    },
+    {
+      "criterion": "Frozen named weights match FairLeaf exactly and named perturbed weights remain deterministic across worker counts.",
+      "passed": true,
+      "observed": "Across 16 frozen/fair comparison rows and 8 perturbed comparison rows, selected actions and every legal-column f64 bit matched between 1 and 4 workers; 0 mismatches."
+    },
+    {
+      "criterion": "Cross-depth output retains actions and all legal-column values needed to identify changes.",
+      "passed": true,
+      "observed": "Each deeper row names previousDepth, previousAction, actionChangedFromPreviousDepth, selectedAction, and all legal sibling value bits."
+    },
+    {
+      "criterion": "AWS scripts are syntax-valid, inspect architecture/capacity/security/AMI/cost before mutation, and enforce termination and finite reservation safeguards.",
+      "passed": true,
+      "observed": "All four shell scripts passed bash -n. A fake CLI accepted only describe-instance-types, describe-instance-type-offerings, describe-security-groups, service-quotas list-service-quotas, and SSM get-parameter; --plan exited 0 without a mutation. Static launch arguments require a sufficient live regional vCPU quota, IMDSv2, encrypted delete-on-termination EBS, instance-initiated termination, egress-only security group, bounded caller price, a boot watchdog, runner cleanup shutdown, and a limited targeted reservation."
+    },
+    {
+      "criterion": "The safe 192-worker plan fits 8 GiB and an oversized cache is rejected before allocation or launch.",
+      "passed": true,
+      "observed": "Safe projected total 2,418,377,728 bytes; oversized worker tables 154,618,822,656 bytes and exit 2."
+    },
+    {
+      "criterion": "Release Cargo tests, npm test, and repository integration tests pass or pre-existing artifact failures are disclosed.",
+      "passed": null,
+      "observed": "Cargo release tests passed 22/22 and npm test passed 137 with 1 unrelated skip. `make test` is blocked at research validation by 72 pre-existing missing gitignored historical artifacts in this checkout; no new validation error remains after the run machine-profile path was completed."
+    }
+  ],
+  "perGameArtifact": {
+    "path": "runs/RUN-20260825T051728Z-e588e6d9/search-matrix/analytics.jsonl",
+    "sha256": "cf7b480192d564a4421ec777e538e0e41d46bbe92333b339f5b0d39c146c5401",
+    "recordCount": 16
+  },
+  "machineProfileRefs": [
+    "runs/RUN-20260825T051728Z-e588e6d9/search-matrix/MACH-20260825T052430Z-c8c492ce.json"
+  ],
+  "artifactManifestRef": "runs/RUN-20260825T051728Z-e588e6d9/search-matrix/manifest.sha256",
+  "limitations": [
+    "No live AWS API was called and no instance was launched. The fake plan proves command routing and fail-closed plan behavior, not IAM, quota, Capacity Reservation availability, package availability, S3 access, or cloud-init behavior in a real account.",
+    "The 192-worker result is an allocation-free memory/frontier plan, not an x86 throughput or CPU-saturation measurement.",
+    "The smoke roots and perturbed weights are mechanics-only examples, not training data, teacher labels, or evidence that one leaf is stronger.",
+    "The hourly price is deliberately a caller-asserted fail-closed input rather than a live price quote; the operator must refresh it immediately before a future authorized launch.",
+    "An actual EC2 run requires a new registered run, retained machine profile, exact source/config/root/weight hashes, exclusive resource lease, and uploaded completion artifacts."
+  ],
+  "contributionIds": [
+    "CT-20260825T052929Z-e1f0ad19"
+  ],
+  "recordedAt": "2026-08-25T05:29:59Z"
+}

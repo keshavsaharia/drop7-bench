@@ -1,0 +1,59 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260825T063123Z-6f4fc021",
+  "experimentId": "EX-20260825-nnue-evolution-d3-bca7f330",
+  "lifecycle": "completed",
+  "runValidity": "valid",
+  "startedAt": "2026-08-25T06:31:23Z",
+  "endedAt": "2026-08-25T08:05:00Z",
+  "protocolSha256": "a16c552439bf94f315ed92bf7ecdcdb16e55618def591660fa9b42eb55a15792",
+  "machineProfileRef": "runs/RUN-20260825T063123Z-6f4fc021/nnue-evolution/machine-profile.json",
+  "sourceState": {
+    "gitCommit": null,
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "approaches/lifetime-objective/nnue-evolution/build.sh",
+    "cargo test --release (8/8 unit tests)",
+    "target/release/gate 0xa5277000 (full CHECK suite)",
+    "teacher_corpus --seeds-start 0xa5277200 --games 4 --threads 4 --depth 3 (smoke)",
+    "pretrain --corpus corpus-smoke.jsonl --epochs 2 --batch 16 --probe-roots 8 (smoke)",
+    "evolve --lease-start 0xa5277600 --population 4 --games 4 --generations 2 (smoke, plus --select and resume)",
+    "screen --seeds-start 0xa5277400 --games 4 (smoke, four arms)",
+    "teacher_corpus --seeds-start 0xa5277500 --games 2 --threads 2 (d5s7 T0 timing pilot, real teacher configuration)"
+  ],
+  "seedLeaseRefs": [],
+  "resourceLimits": {
+    "wallSeconds": 7200,
+    "cpuThreads": 4,
+    "maxHostBytes": 4294967296,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": 5600,
+    "cpuSeconds": null,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "CHECK gates and smoke pipeline used only the already-opened development probe block 0xa5276000-0xa5277fff (the Rust engine's gate/benchmark range); zero new seeds opened, zero leased seeds read. The T0 timing pilot ran the real d5s7 teacher on 2 probe seeds: game 1 finished 75 moves in 2,479 s under concurrent smoke-test load (~33 s/decision); single-root d5s7 timing on a quiet machine measured 9.5-13.6 s on live early/mid boards and ~0.01 s near-terminal, with transposition-table size (1M/4M/16M) making no material difference. Teacher game lengths are heavy-tailed: the second pilot game (seed 0xa5277501) was still running after 2 hours and was then stopped, its diagnostic point made — a small share of teacher games can run for hours at the 2,000-move cap, so the corpus stage must use a per-game move cap (e.g. --move-cap 500, a disclosed operational parameter the frozen protocol leaves open) as well as the resumable per-game part-file writer and a wall sub-budget. Consequence recorded in the experiment plan: the corpus stage costs ~10-14 CPU-s per root; 512 games project to roughly 10-16 wall-hours on 16 dedicated cores, inside the frozen 24 h budget with the partial-corpus stop as the safety valve."
+  },
+  "exitCode": 0,
+  "stopReason": "CHECK tier complete and T0 timing measured; the gameplay tiers (corpus, evolution, screen) are preregistered and not yet launched.",
+  "artifactRefs": [
+    "runs/RUN-20260825T063123Z-6f4fc021/nnue-evolution/gates.log",
+    "runs/RUN-20260825T063123Z-6f4fc021/nnue-evolution/t0-timing.json",
+    "runs/RUN-20260825T063123Z-6f4fc021/nnue-evolution/machine-profile.json",
+    "runs/RUN-20260825T063123Z-6f4fc021/nnue-evolution/corpus-smoke.jsonl",
+    "runs/RUN-20260825T063123Z-6f4fc021/nnue-evolution/pretrain-smoke/",
+    "runs/RUN-20260825T063123Z-6f4fc021/nnue-evolution/evolve-smoke/",
+    "runs/RUN-20260825T063123Z-6f4fc021/nnue-evolution/evolve-smoke2/",
+    "runs/RUN-20260825T063123Z-6f4fc021/nnue-evolution/screen-smoke.json",
+    "runs/RUN-20260825T063123Z-6f4fc021/nnue-evolution/pilot-d5.log",
+    "runs/RUN-20260825T063123Z-6f4fc021/nnue-evolution/corpus-pilot-d5.jsonl"
+  ],
+  "contributionIds": [
+    "CT-20260825T081955Z-8d38911e"
+  ]
+}

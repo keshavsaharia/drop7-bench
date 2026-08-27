@@ -1,0 +1,17 @@
+[package]
+name = "drop7-nnue-evolution"
+version = "0.1.0"
+edition = "2021"
+description = "Depth-5-distilled, whole-game-evolved NNUE leaf for the depth-3 fair expectimax search (TH-20260825-evolved-nnue-leaf-d3-0f47e46c)"
+license = "MIT"
+
+# Std-only on purpose, matching the drop7-rs engine crate: the approach builds
+# hermetically with no network fetch.
+[dependencies]
+drop7-rs = { path = "../../fair-expectimax/rust-engine" }
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "unwind"

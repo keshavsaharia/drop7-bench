@@ -23,7 +23,7 @@
 
 use crate::board::{BOARD_SIZE, EMPTY};
 use crate::engine::{center_first_move, play_move_sampled, MinimalWaveSink, State};
-use crate::leaf::{fair_leaf, LeafScratch};
+use crate::leaf::{fair_leaf, weighted_fair_leaf, LeafScratch, LeafWeights};
 use crate::rng::{sampled_next_disc, scenario_seed_for_state, StratifiedRandom};
 
 pub const COLUMN_ORDER: [usize; BOARD_SIZE] = [3, 2, 4, 1, 5, 0, 6];
@@ -52,6 +52,29 @@ impl Leaf for FairLeaf {
     #[inline]
     fn value(&mut self, state: &State) -> f64 {
         fair_leaf(state, &mut self.scratch)
+    }
+}
+
+/// Runtime-weighted form of the exact fair leaf, used by the search-matrix
+/// analyzer. `LeafWeights::frozen()` is bit-identical to `FairLeaf`.
+pub struct WeightedLeaf {
+    pub scratch: LeafScratch,
+    pub weights: LeafWeights,
+}
+
+impl WeightedLeaf {
+    pub fn new(weights: LeafWeights) -> Self {
+        Self {
+            scratch: LeafScratch::default(),
+            weights,
+        }
+    }
+}
+
+impl Leaf for WeightedLeaf {
+    #[inline]
+    fn value(&mut self, state: &State) -> f64 {
+        weighted_fair_leaf(state, &mut self.scratch, &self.weights)
     }
 }
 
@@ -162,11 +185,21 @@ struct Slot {
 }
 
 impl DepthTable {
+    /// Exact allocation size for a requested direct-mapped capacity, before
+    /// allocating it.  Parallel schedulers use this to reject configurations
+    /// whose per-worker tables would exceed the declared host-memory budget.
+    pub fn projected_bytes(capacity: usize) -> Option<usize> {
+        capacity
+            .max(1)
+            .checked_next_power_of_two()?
+            .checked_mul(std::mem::size_of::<Slot>())
+    }
+
     pub fn new(capacity: usize, from_depth: i32) -> DepthTable {
-        let mut slots = 1usize;
-        while slots < capacity {
-            slots <<= 1;
-        }
+        let slots = capacity
+            .max(1)
+            .checked_next_power_of_two()
+            .expect("transposition-table capacity is too large");
         DepthTable {
             slots: vec![
                 Slot {
@@ -316,12 +349,7 @@ impl<L: Leaf, T: TranspositionTable> Searcher<L, T> {
         Ok(())
     }
 
-    fn evaluate_action(
-        &mut self,
-        state: &State,
-        column: usize,
-        depth: i32,
-    ) -> SearchResult<f64> {
+    fn evaluate_action(&mut self, state: &State, column: usize, depth: i32) -> SearchResult<f64> {
         let state_seed = scenario_seed_for_state(
             &state.board,
             state.next_disc,
@@ -353,8 +381,7 @@ impl<L: Leaf, T: TranspositionTable> Searcher<L, T> {
             }
             let mut next = move_result.state;
             next.score = 0;
-            next.next_disc =
-                sampled_next_disc(state_seed, sample, self.params.chance_samples);
+            next.next_disc = sampled_next_disc(state_seed, sample, self.params.chance_samples);
             let next = canonical_state(&next).0;
             value += score_delta + self.best_future_value(&next, depth - 1)?;
         }
@@ -453,6 +480,37 @@ impl<L: Leaf, T: TranspositionTable> Searcher<L, T> {
         &self.last
     }
 
+    /// Central-frontier support: clear this worker's private table once at
+    /// the beginning of a decision.  It then remains live while that worker
+    /// claims multiple independent frontier tasks, retaining useful
+    /// transpositions without sharing mutable table state across CPUs.
+    pub fn begin_parallel_decision(&mut self) {
+        self.table.clear();
+        self.last = SearchMetrics::default();
+    }
+
+    /// Evaluate one public-state continuation at a fixed remaining depth.
+    /// Metrics cover this task only; the worker's private table intentionally
+    /// persists across calls made during the same parallel decision.
+    pub fn evaluate_state_value(&mut self, state: &State, depth: i32) -> SearchResult<f64> {
+        self.nodes = 0;
+        self.work = 0;
+        self.leaf_calls = 0;
+        self.move_calls = 0;
+        let hits_before = self.table.hits();
+        let value = self.best_future_value(state, depth)?;
+        self.last = SearchMetrics {
+            action: -1,
+            completed_depth: depth,
+            nodes: self.nodes,
+            work: self.work,
+            leaf_calls: self.leaf_calls,
+            move_calls: self.move_calls,
+            cache_hits: self.table.hits().saturating_sub(hits_before),
+        };
+        Ok(value)
+    }
+
     /// Gate support: evaluate every legal column of `state` at a fixed depth
     /// (no iterative deepening, no work limit) on the canonical state, and
     /// return the per-column values in COLUMN_ORDER plus the chosen
@@ -510,7 +568,9 @@ impl<L: Leaf, T: TranspositionTable> Searcher<L, T> {
             }
         }
         if action < 0 {
-            action = center_first_move(&canonical.board).map(|c| c as i32).unwrap_or(-1);
+            action = center_first_move(&canonical.board)
+                .map(|c| c as i32)
+                .unwrap_or(-1);
         }
         metrics.completed_depth = completed_depth;
         metrics.nodes = self.nodes;
@@ -642,17 +702,26 @@ mod tests {
         };
         let state = State::initial_headless(0xa527_7002);
         let mut plain = Searcher::new(params, FairLeaf::default(), NoTable);
-        let mut cached = Searcher::new(
-            params,
-            FairLeaf::default(),
-            DepthTable::new(1024, 1),
-        );
+        let mut cached = Searcher::new(params, FairLeaf::default(), DepthTable::new(1024, 1));
         let (plain_values, plain_action) = plain.column_values(&state, 3);
         let (cached_values, cached_action) = cached.column_values(&state, 3);
         assert_eq!(plain_action, cached_action);
         for ((pc, pv), (cc, cv)) in plain_values.iter().zip(cached_values.iter()) {
             assert_eq!(pc, cc);
             assert_eq!(pv.to_bits(), cv.to_bits());
+        }
+    }
+
+    #[test]
+    fn frozen_runtime_weights_match_fair_leaf_bits() {
+        let mut fair = FairLeaf::default();
+        let mut weighted = WeightedLeaf::new(LeafWeights::frozen());
+        for seed in [0xa527_7001u32, 0xa527_7002, 0xa527_7003] {
+            let state = State::initial_headless(seed);
+            assert_eq!(
+                fair.value(&state).to_bits(),
+                weighted.value(&state).to_bits()
+            );
         }
     }
 }

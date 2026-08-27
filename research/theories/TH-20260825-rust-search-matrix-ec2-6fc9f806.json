@@ -1,0 +1,30 @@
+{
+  "$schema": "../schemas/theory-v1.schema.json",
+  "format": "drop7-theory-v1",
+  "theoryId": "TH-20260825-rust-search-matrix-ec2-6fc9f806",
+  "title": "One Rust search-matrix config reproduces depth, strata, and leaf comparisons locally and on EC2",
+  "claim": "One immutable Rust search-matrix configuration can evaluate the same ordered public roots across multiple completed depths, chance-strata counts, and named leaf-weight files on a workstation or a large x86 EC2 instance, retaining per-column values, selected actions, work, scheduling, memory, and machine analytics sufficient for exact cross-depth comparison.",
+  "mechanism": "A Rust analytics binary reads a frozen root corpus and a Cartesian matrix of depths, strata, and leaf definitions, then invokes the deterministic central-frontier scheduler for every cell and writes canonical JSONL rows. A launcher packages an exact source snapshot, resolves the regional Amazon Linux x86_64 AMI through AWS's public SSM parameter, optionally creates a time-limited targeted Capacity Reservation, launches an IMDSv2-only instance with no inbound SSH requirement, enforces a wall timer and instance-initiated termination, uploads artifacts, and records the AWS and machine identifiers. The same matrix command is used locally and remotely.",
+  "falsificationCriteria": [
+    "The frozen-weight Rust leaf differs bit-for-bit from the existing Rust fair leaf on any checked state, or the matrix binary changes an action/value when only output order or worker count changes.",
+    "The analytics output omits any requested root/depth/strata/leaf cell, legal sibling value, task/work/cache count, timing segment, worker utilization row, source/config hash, or machine profile reference.",
+    "The EC2 launcher can silently exceed its declared wall/memory/cost envelope, leaves an unlimited Capacity Reservation, uses a hard-coded regional AMI, requires public SSH ingress, or changes the matrix configuration between local and remote execution."
+  ],
+  "informationClass": "infrastructure",
+  "lifecycle": "assessed",
+  "assessment": "supported-as-tested",
+  "evidenceTier": "mechanics-only",
+  "dependencies": [
+    "TH-20260825-central-frontier-scheduler-e4f547e0"
+  ],
+  "evidenceRefs": [
+    "research/results/RS-20260825T052959Z-57698687.json"
+  ],
+  "createdBy": {
+    "platform": "Codex",
+    "model": "unknown",
+    "agentId": "root"
+  },
+  "createdAt": "2026-08-25T04:52:32Z",
+  "updatedAt": "2026-08-25T05:29:59Z"
+}

@@ -1,7 +1,7 @@
 ---
 title: Rust bitboard engine
 family: fair-expectimax
-summary: A from-scratch Rust Drop7 engine that packs the board into seven 32-bit words — so gravity is a single bit-gather instruction — and runs the fair expectimax search bit-for-bit identically to the frozen reference, faster and with a fraction of the memory.
+summary: A packed Rust Drop7 engine with a deterministic central-frontier scheduler, exact depth/strata/leaf analytics, and a bounded workflow for large x86 CPU runs.
 status: completed
 evidence: reproduced
 reads: public
@@ -135,6 +135,32 @@ the work reduction, so the shipped configuration caches every depth
 parameter — the `NoTable` arm compiles to nothing — and the values gate proves
 the choice changes no per-column value, only speed and memory.
 
+## Strategy 5: register continuation work, not root columns
+
+The first parallel decision driver assigned one legal root column to one
+worker. That was exact, but a Drop7 root has at most seven legal columns, so an
+individual deep decision could never use an eighth CPU. Uneven column trees
+also left a long idle tail after the shorter columns finished.
+
+The central-frontier scheduler expands a deterministic prefix of the same
+max/chance tree and interns equal public continuation states. Each remaining
+subtree is registered in one atomic work queue; workers claim tasks dynamically
+with private, bounded transposition tables and publish into fixed result slots.
+The coordinator then reduces those slots in the original column and chance
+sample order. This keeps floating-point accumulation and tie-breaking exact
+while exposing tens to thousands of tasks from one decision. The old root-only
+scheduler remains available as `--scheduler root` for direct comparison.
+
+Granularity is adaptive. Cheap shallow continuations need a wider queue to
+amortize scheduling; expensive depth-5-and-deeper continuations use a smaller
+queueing cushion to preserve transposition-table reuse. That distinction was
+measured rather than assumed: an over-expanded D5/S7 prefix reached 99.63%
+task-phase occupancy but created about 41% more logical work and delivered only
+1.0102× speedup. The bounded prefix retained 88.23% occupancy and improved the
+three-repeat median from 22.034955 s to 19.410905 s (1.1352×) on the retained
+12-logical-CPU arm64 profile. This is mechanics-only evidence, not a strength
+or 192-core claim (`RS-20260825T052959Z-1b3ed9a5`).
+
 ## What happened
 
 All speeds are fixed-work, complete-depth decisions on the **same 105 harvested
@@ -172,14 +198,20 @@ no-table arm, doing all 582.7M work units, takes 63,325 ms. Depth 5 is where
 memoization stops being optional, and where the Rust engine's per-work cost
 (113 vs 134 ns/work) still wins once the tables are comparably sized.
 
-**Thread scaling** is shared-nothing: an atomic game cursor, one searcher per
-worker, no shared mutable state. Whole-game throughput scales 12.6M → 129.5M
-moves/s from 1 to 16 physical cores (10.3× on the shared machine; a clean run
-measured 14.1×), with identical move counts, wave counts and scores at every
-worker count — each game is computed by exactly one worker, deterministically,
-so worker count never changes a result. This is the mode that maps to a
-192-core evaluation instance: 192 searchers with 64k-entry tables cost ~0.6 GB
-of table memory, against ~3.1 GB for the C++ fast search's tables.
+**Whole-game scaling** remains shared-nothing: an atomic game cursor, one game
+per worker, and no shared mutable state. That mode measured 12.6M → 129.5M
+moves/s from 1 to 16 physical cores. It is useful when many independent games
+are ready, but it does not solve one deep decision's seven-column ceiling.
+
+**Within-decision scaling** now uses the central frontier above. At D4/S7 on
+eight retained roots, 12 workers improved the three-repeat median from 4.076978
+s to 3.232507 s (1.2612×), with 99.51% task-phase occupancy and no value,
+action, or exactly-once task mismatches. The allocation-free D7/S7 plan for 192
+workers selects one internal split ply (at most 2,401 frontier tasks) and
+projects 2,418,377,728 bytes for 192 private 262,144-entry tables plus the plan,
+under an 8 GiB guard. The old 16,777,216-entry-per-worker setting is rejected
+before allocation at 154,618,822,656 bytes. That plan has not yet been executed
+on x86 (`RS-20260825T052959Z-57698687`).
 
 ## How it was proven to be the same game
 
@@ -250,6 +282,14 @@ engines.
 
 - Theory `TH-20260824-rust-bitboard-engine-f68fcbfd`, experiment
   `EX-20260824-rust-engine-parity-throughput-4036a91f` (engineering, CHECK tier).
+- Fine-grained scheduler: theory
+  `TH-20260825-central-frontier-scheduler-e4f547e0`, experiment
+  `EX-20260825-central-frontier-scheduler-check-df116702`, result
+  `RS-20260825T052959Z-1b3ed9a5`.
+- Search-matrix and EC2 workflow: theory
+  `TH-20260825-rust-search-matrix-ec2-6fc9f806`, experiment
+  `EX-20260825-rust-search-matrix-ec2-check-eb821565`, result
+  `RS-20260825T052959Z-57698687`. No EC2 resource was created by that check.
 - Artifacts: `runs/RUN-20260824T052018Z-b88c3e22/rust-engine/{gates.log,bench.log,benchmark.json,machine-profile.json}`.
 - Source: `approaches/fair-expectimax/rust-engine/` (std-only cargo crate, no
   dependencies). Build with `./build.sh` (sets `target-cpu=native` for
@@ -257,6 +297,13 @@ engines.
   BMI2). Gates: `target/release/gate_{trajectory,leaf,search}` against the
   C++ emitters in `cpp/` and the TypeScript driver in `ts/`.
 - Reproduce the benchmark: `./bench_all.sh <run-dir> <roots-file> 3`.
+- Reproduce the within-decision comparison with `target/release/bench parallel`;
+  run a depth/strata/leaf matrix with `cluster/run-matrix.sh`; inspect the full
+  package/plan/launch/monitor/collect procedure in `cluster/README.md`. The
+  reusable cloud entry point is
+  `AWS_PROFILE=<profile> just run-matrix gauntlet-01 --budget <cents>`; add
+  `--plan` for a no-upload, no-launch rehearsal. A live launch always needs a
+  new registered run and explicit operator budget.
 - Seed discipline: sub-blocks `0xa5276000`–`0xa5277fff` of the already-opened
   `SEEDLEASE-A52-FAST` development lease; zero new seeds opened; no strength
   claim.

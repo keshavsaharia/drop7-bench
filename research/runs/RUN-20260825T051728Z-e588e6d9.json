@@ -1,0 +1,55 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260825T051728Z-e588e6d9",
+  "experimentId": "EX-20260825-rust-search-matrix-ec2-check-eb821565",
+  "lifecycle": "completed",
+  "runValidity": "valid",
+  "startedAt": "2026-08-25T05:17:28Z",
+  "endedAt": "2026-08-25T05:28:00Z",
+  "protocolSha256": "cf903c8e3034b053ef92f65e319976530eb9133e2f3d8f09901976e458f51c71",
+  "machineProfileRef": "runs/RUN-20260825T051728Z-e588e6d9/search-matrix/MACH-20260825T052430Z-c8c492ce.json",
+  "sourceState": {
+    "gitCommit": "261b7a1794cb03c5ee35559e8875fa2e1d3e6bb2",
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": "14d104c0bd45034e61edecd0aa25280d9d94bc1aacd09893dc4c142e475a77d6"
+  },
+  "command": [
+    "approaches/fair-expectimax/rust-engine/cluster/run-matrix.sh runs/RUN-20260825T051728Z-e588e6d9/search-matrix/config.input.env",
+    "target/release/plan --depth 7 --strata 7 --threads 192 --cache 262144 --split-plies auto --max-host-bytes 8589934592",
+    "target/release/plan --depth 7 --strata 7 --threads 192 --cache 16777216 --split-plies auto --max-host-bytes 8589934592",
+    "bash -n approaches/fair-expectimax/rust-engine/cluster/*.sh"
+  ],
+  "seedLeaseRefs": [],
+  "resourceLimits": {
+    "wallSeconds": 7200,
+    "cpuThreads": 12,
+    "maxHostBytes": 8589934592,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": 632,
+    "cpuSeconds": null,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "CHECK-tier local matrix and allocation-free 192-worker resource planning on an arm64 12-logical-CPU workstation. Wall seconds are the retained run-record span; CPU seconds and peak RSS were not measured. The AWS launcher was syntax checked and exercised against a fail-closed fake describe-only CLI; no live AWS call or mutation was performed."
+  },
+  "exitCode": 0,
+  "stopReason": "completed",
+  "artifactRefs": [
+    "runs/RUN-20260825T051728Z-e588e6d9/search-matrix/analytics.jsonl",
+    "runs/RUN-20260825T051728Z-e588e6d9/search-matrix/manifest.sha256",
+    "runs/RUN-20260825T051728Z-e588e6d9/search-matrix/semantic-check.json",
+    "runs/RUN-20260825T051728Z-e588e6d9/search-matrix/resource-plan-192.json",
+    "runs/RUN-20260825T051728Z-e588e6d9/search-matrix/resource-plan-oversized.log",
+    "runs/RUN-20260825T051728Z-e588e6d9/search-matrix/ec2-plan-test.log",
+    "runs/RUN-20260825T051728Z-e588e6d9/search-matrix/ec2-quota-rejection.log",
+    "runs/RUN-20260825T051728Z-e588e6d9/search-matrix/summary.json",
+    "runs/RUN-20260825T051728Z-e588e6d9/package/drop7-source.tar.gz",
+    "runs/RUN-20260825T051728Z-e588e6d9/package/drop7-source.tar.gz.sha256"
+  ],
+  "contributionIds": [
+    "CT-20260825T052929Z-e1f0ad19"
+  ]
+}
