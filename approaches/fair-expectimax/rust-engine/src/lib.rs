@@ -15,13 +15,20 @@
 pub mod board;
 pub mod engine;
 pub mod leaf;
+pub mod parallel;
 pub mod rng;
 pub mod search;
 pub mod tables;
 
 pub use board::{Board, Scan};
 pub use engine::{FullWaveSink, MoveResult, State, Wave};
+pub use parallel::{
+    choose_action_frontier_parallel, choose_action_frontier_parallel_with_leaf,
+    choose_action_root_parallel, choose_action_root_parallel_with_leaf, plan_parallel_resources,
+    ParallelConfig, ParallelDecision, ParallelMetrics, ParallelResourcePlan, ParallelScheduler,
+    WorkerMetrics,
+};
 pub use search::{
-    canonical_state, DepthTable, FairLeaf, Leaf, NoTable, Searcher, SearchMetrics,
-    SearchParams, TranspositionTable,
+    canonical_state, DepthTable, FairLeaf, Leaf, NoTable, SearchMetrics, SearchParams, Searcher,
+    TranspositionTable, WeightedLeaf,
 };

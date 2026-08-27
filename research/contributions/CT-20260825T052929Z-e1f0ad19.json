@@ -1,0 +1,44 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260825T052929Z-e1f0ad19",
+  "actor": {
+    "kind": "model",
+    "platform": "Codex",
+    "model": "unknown",
+    "agentId": "root"
+  },
+  "level": "L3",
+  "roles": [
+    {
+      "role": "software",
+      "degree": "lead"
+    }
+  ],
+  "summary": "Designed and implemented the Rust depth-strata-leaf analytics matrix, strict runtime leaf files, resource planner, exact source packaging, and budget-bounded EC2 preflight/launch/collect workflow with failure shutdown safeguards.",
+  "theoryIds": [
+    "TH-20260825-rust-search-matrix-ec2-6fc9f806"
+  ],
+  "experimentIds": [
+    "EX-20260825-rust-search-matrix-ec2-check-eb821565"
+  ],
+  "runIds": [
+    "RUN-20260825T051728Z-e588e6d9"
+  ],
+  "artifactPaths": [
+    "approaches/fair-expectimax/rust-engine/src/bin/analyze.rs",
+    "approaches/fair-expectimax/rust-engine/cluster/provision-ec2.sh",
+    "runs/RUN-20260825T051728Z-e588e6d9/search-matrix/summary.json"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "16-cell matrix completeness plus exact frozen-leaf and worker-count semantic checks",
+    "shell syntax, fail-closed fake AWS plan mode, and 192-worker safe/oversized resource plans"
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-25T05:29:29Z"
+}

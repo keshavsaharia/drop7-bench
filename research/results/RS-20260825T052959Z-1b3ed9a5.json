@@ -1,0 +1,103 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260825T052959Z-1b3ed9a5",
+  "theoryIds": [
+    "TH-20260825-central-frontier-scheduler-e4f547e0"
+  ],
+  "experimentId": "EX-20260825-central-frontier-scheduler-check-df116702",
+  "runIds": [
+    "RUN-20260825T045058Z-b79f76a2"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "pass",
+  "assessment": "supported-as-tested",
+  "evidenceTier": "mechanics-only",
+  "summary": "A deterministic central-frontier scheduler replaced at-most-seven root-column jobs with a bounded shared registry of continuation subtrees while retaining ordered floating-point reduction and the old root scheduler as a fallback. On one retained 12-logical-CPU arm64 profile, exact root/frontier comparisons had zero value, action, or task mismatches. The preregistered D5/S7 bounded split reduced the three-repeat median for three roots from 22.034955 s to 19.410905 s (1.1352x) with 0.8823 median worker busy fraction; D4/S7 over eight roots improved from 4.076978 s to 3.232507 s (1.2612x) with 0.9951 busy fraction. A deliberately over-expanded D5 prefix reached 0.9963 busy fraction but created about 41% more logical work and achieved only 1.0102x, which falsified that split and motivated the adaptive coarse split for expensive continuations. This supports the refactor strategy locally but is not a 192-core saturation or policy-strength result.",
+  "metrics": {
+    "d4s7Threads12": {
+      "rootsPerRepeat": 8,
+      "repeats": 3,
+      "rootMedianSeconds": 4.076978,
+      "frontierMedianSeconds": 3.232507,
+      "speedup": 1.2612,
+      "frontierBusyMedian": 0.9951,
+      "pairedDecisions": 24,
+      "mismatches": 0
+    },
+    "d5s7Threads12BoundedSplit": {
+      "rootsPerRepeat": 3,
+      "repeats": 3,
+      "rootMedianSeconds": 22.034955,
+      "frontierMedianSeconds": 19.410905,
+      "speedup": 1.1352,
+      "frontierBusyMedian": 0.8823,
+      "pairedDecisions": 9,
+      "mismatches": 0
+    },
+    "d5s7Threads12OverExpandedSplit": {
+      "rootMedianSeconds": 24.959552,
+      "frontierMedianSeconds": 24.707506,
+      "speedup": 1.0102,
+      "frontierBusyMedian": 0.9963,
+      "rootLogicalWork": 381642037,
+      "frontierLogicalWorkMedian": 539523663
+    },
+    "d4s7Threads1": {
+      "rootsPerRepeat": 8,
+      "repeats": 3,
+      "rootMedianSeconds": 13.722147,
+      "frontierMedianSeconds": 13.547293,
+      "pairedDecisions": 24,
+      "mismatches": 0
+    }
+  },
+  "gateChecks": [
+    {
+      "criterion": "Sequential/C++-equivalent, root-column, and central-frontier values and actions are exact across at least eight realistic D4/S7 roots at one and maximum local workers, with every task completed exactly once.",
+      "passed": true,
+      "observed": "Eight strict-FP C++/Rust roots had 0 mismatches. Root/frontier comparisons covered 24 paired decisions at one worker and 24 at 12 workers with 0 value/action/task mismatches; registered and completed task counts matched in every row."
+    },
+    {
+      "criterion": "Three repeats are value/action deterministic at each tested worker count.",
+      "passed": true,
+      "observed": "Three repeats at one and 12 workers produced 0 semantic mismatches; worker count changed timing and task placement only."
+    },
+    {
+      "criterion": "At maximum local workers on at least three D5/S7 roots, median wall time improves at least 10% and worker busy fraction is at least 0.75.",
+      "passed": true,
+      "observed": "Three roots x three repeats: 22.034955 s root median versus 19.410905 s bounded-frontier median, 1.1352x speedup and 0.8823 median busy fraction."
+    },
+    {
+      "criterion": "The scheduler safely expresses 192 workers, bounds the frontier and memory, and rejects unsafe memory before allocation.",
+      "passed": true,
+      "observed": "The allocation-free D7/S7 192-worker plan selected split 1, bounded the worst frontier at 2,401 tasks and projected 2,418,377,728 bytes under an 8 GiB cap. A 16,777,216-entry cache per worker was rejected at 154,618,822,656 bytes; the Rust unit test covers the same fail-closed path."
+    },
+    {
+      "criterion": "Release Rust tests, native parity, determinism/reflection, npm test, and repository test integration pass or any pre-existing artifact failure is disclosed.",
+      "passed": null,
+      "observed": "Cargo release tests passed 22/22 after the analytics reflection test was added; npm test passed 137 with 1 unrelated native-binary skip and exercised the Rust decision binary. `make test` stopped at `research-validate`: after this run record was completed, 72 pre-existing gitignored historical artifacts remain absent in this checkout, so the aggregate target cannot reach later steps. The default arm64 C++ build also differed by 1-3 ULP on 7/20 roots because of contraction; the retained -ffp-contract=off comparison passed 8/8 with no action changes in the default build."
+    }
+  ],
+  "perGameArtifact": {
+    "path": "runs/RUN-20260825T045058Z-b79f76a2/central-frontier/summary.json",
+    "sha256": "c9e51481dd12c82dbc6ab550939670e112f65df9aabf3670269edaaa769db3b4",
+    "recordCount": null
+  },
+  "machineProfileRefs": [
+    "runs/RUN-20260825T045058Z-b79f76a2/central-frontier/MACH-20260825T045112Z-2d4c14b8.json"
+  ],
+  "artifactManifestRef": null,
+  "limitations": [
+    "Mechanics-only CHECK result on one shared 12-logical-CPU arm64 workstation; no x86 or 192-core timing was performed.",
+    "The timing corpus is eight reusable diagnostic roots at D4 and three at D5, not complete games or a strength cohort.",
+    "Private worker tables make logical work schedule-dependent. Fine granularity is not monotonically better: the over-expanded D5 arm increased logical work about 41% and failed the speed gate.",
+    "Worker busy fraction measures timed search-task occupancy and excludes coordinator planning, initialization, and reduction; end-to-end wall time is the primary speed metric.",
+    "Peak RSS and CPU seconds were not retained. Memory values are exact table-layout projections plus a conservative planner allowance.",
+    "The default arm64 C++ compiler contracted floating operations; bit-exact native parity on this host required -ffp-contract=off. Actions did not change in the default 20-root diagnostic."
+  ],
+  "contributionIds": [
+    "CT-20260825T052922Z-9a61f2f0"
+  ],
+  "recordedAt": "2026-08-25T05:29:59Z"
+}

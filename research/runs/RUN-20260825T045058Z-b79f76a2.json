@@ -1,0 +1,53 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260825T045058Z-b79f76a2",
+  "experimentId": "EX-20260825-central-frontier-scheduler-check-df116702",
+  "lifecycle": "completed",
+  "runValidity": "valid",
+  "startedAt": "2026-08-25T04:50:58Z",
+  "endedAt": "2026-08-25T05:28:00Z",
+  "protocolSha256": "97eb46930709425d1abedfd45ee9700d31d19369698b738fe391d5c93fda942a",
+  "machineProfileRef": "runs/RUN-20260825T045058Z-b79f76a2/central-frontier/MACH-20260825T045112Z-2d4c14b8.json",
+  "sourceState": {
+    "gitCommit": "261b7a1794cb03c5ee35559e8875fa2e1d3e6bb2",
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "RUSTFLAGS='-C target-cpu=native' cargo build --release --manifest-path approaches/fair-expectimax/rust-engine/Cargo.toml",
+    "build/rust-engine/search-trace --mode values --games 2 --max-moves 20 --limit 8 --depth 4 --strata 7 --seed-start 0xa5276900 > runs/RUN-20260825T045058Z-b79f76a2/central-frontier/roots-d4s7.trace",
+    "target/release/gate_search plus Rust root/frontier exact-value comparisons on the same roots",
+    "target/release/bench parallel --roots <trace> --depth 4|5 --strata 7 --decisions 8|3 --repeats 3 --threads 12 --tt-capacity 65536 --split-plies auto"
+  ],
+  "seedLeaseRefs": [],
+  "resourceLimits": {
+    "wallSeconds": 7200,
+    "cpuThreads": 12,
+    "maxHostBytes": 8589934592,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": 2222,
+    "cpuSeconds": null,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "CHECK-tier parity and fixed-work scheduler timing on the local 12-logical-CPU arm64 workstation. Wall seconds are the retained run-record span, not summed benchmark time; CPU seconds and peak RSS were not measured. No new seed was opened. This run cannot establish 192-core x86 saturation."
+  },
+  "exitCode": 0,
+  "stopReason": "completed",
+  "artifactRefs": [
+    "runs/RUN-20260825T045058Z-b79f76a2/central-frontier/parity.log",
+    "runs/RUN-20260825T045058Z-b79f76a2/central-frontier/parity-strictfp.log",
+    "runs/RUN-20260825T045058Z-b79f76a2/central-frontier/d4-timings.log",
+    "runs/RUN-20260825T045058Z-b79f76a2/central-frontier/d4-one-worker-timings.log",
+    "runs/RUN-20260825T045058Z-b79f76a2/central-frontier/d5-timings.log",
+    "runs/RUN-20260825T045058Z-b79f76a2/central-frontier/d5-split0-timings.log",
+    "runs/RUN-20260825T045058Z-b79f76a2/central-frontier/d5-auto-confirm.log",
+    "runs/RUN-20260825T045058Z-b79f76a2/central-frontier/summary.json"
+  ],
+  "contributionIds": [
+    "CT-20260825T052922Z-9a61f2f0"
+  ]
+}

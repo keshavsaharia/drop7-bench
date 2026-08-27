@@ -1,0 +1,28 @@
+{
+  "$schema": "../schemas/theory-v1.schema.json",
+  "format": "drop7-theory-v1",
+  "theoryId": "TH-20260825-central-frontier-scheduler-e4f547e0",
+  "title": "A centralized deterministic frontier scheduler keeps deep fair search workers busy across columns",
+  "claim": "For completed fair expectimax at depth 5 and beyond, expanding a deterministic prefix frontier and registering its independent continuation subtrees in one shared work registry exposes enough fine-grained work to use more than the seven root-column workers while preserving every root-column f64 value bit and the selected action.",
+  "mechanism": "The coordinator expands root actions, chance samples, and a fixed number of internal max/chance plies in the reference COLUMN_ORDER and sample order. Each remaining public-state continuation becomes a centrally indexed task. Worker threads atomically claim tasks, evaluate them with private searchers and bounded private transposition tables, and publish values into fixed task slots. The coordinator reduces those values in the original sequential order, so floating-point accumulation and tie-breaking stay unchanged. A deeper split creates thousands of tasks from one decision, reducing the long tail caused by assigning one uneven root column to each worker.",
+  "falsificationCriteria": [
+    "Any root-column value differs bit-for-bit from the sequential Rust/C++-equivalent search, any chosen action depends on worker count or repeat, or any task is lost or evaluated more than once.",
+    "On the local fixed-work depth-5 seven-stratum CHECK corpus, the best frontier configuration fails to reduce median wall time by at least 10% versus the existing root-column scheduler at the same maximum worker count, or its measured worker busy fraction is below 0.75.",
+    "The planner cannot bound its frontier size, per-worker table memory, or total work sufficiently to express a safe 192-thread configuration without changing search depth, chance strata, or returned values."
+  ],
+  "informationClass": "engineering",
+  "lifecycle": "assessed",
+  "assessment": "supported-as-tested",
+  "evidenceTier": "mechanics-only",
+  "dependencies": [],
+  "evidenceRefs": [
+    "research/results/RS-20260825T052959Z-1b3ed9a5.json"
+  ],
+  "createdBy": {
+    "platform": "Codex",
+    "model": "unknown",
+    "agentId": "root"
+  },
+  "createdAt": "2026-08-25T04:40:53Z",
+  "updatedAt": "2026-08-25T05:29:59Z"
+}

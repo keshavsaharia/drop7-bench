@@ -31,6 +31,133 @@ pub mod weights {
     pub const NEXT_DISC_VERTICAL_OPTIONS: f64 = 220.0;
 }
 
+pub const LEAF_TERM_NAMES: [&str; 18] = [
+    "open_columns",
+    "height_load",
+    "solid_cells",
+    "cracked_cells",
+    "numbered_cells",
+    "high_low_numbers",
+    "direct_potential",
+    "latent_chain_potential",
+    "cracked_exposure",
+    "solid_exposure",
+    "adjacent_ones",
+    "triple_twos",
+    "dead_low_numbers",
+    "covered_height_risk",
+    "low_number_height_risk",
+    "danger_height_squared",
+    "rise_pressure",
+    "next_disc_vertical_options",
+];
+
+pub const FROZEN_LEAF_WEIGHTS: [f64; 18] = [
+    weights::OPEN_COLUMNS,
+    weights::HEIGHT_LOAD,
+    weights::SOLID_CELLS,
+    weights::CRACKED_CELLS,
+    weights::NUMBERED_CELLS,
+    weights::HIGH_LOW_NUMBERS,
+    weights::DIRECT_POTENTIAL,
+    weights::LATENT_CHAIN_POTENTIAL,
+    weights::CRACKED_EXPOSURE,
+    weights::SOLID_EXPOSURE,
+    weights::ADJACENT_ONES,
+    weights::TRIPLE_TWOS,
+    weights::DEAD_LOW_NUMBERS,
+    weights::COVERED_HEIGHT_RISK,
+    weights::LOW_NUMBER_HEIGHT_RISK,
+    weights::DANGER_HEIGHT_SQUARED,
+    weights::RISE_PRESSURE,
+    weights::NEXT_DISC_VERTICAL_OPTIONS,
+];
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct LeafWeights {
+    pub values: [f64; 18],
+}
+
+impl LeafWeights {
+    pub const fn frozen() -> Self {
+        Self {
+            values: FROZEN_LEAF_WEIGHTS,
+        }
+    }
+
+    pub fn is_frozen(&self) -> bool {
+        self.values
+            .iter()
+            .zip(FROZEN_LEAF_WEIGHTS.iter())
+            .all(|(left, right)| left.to_bits() == right.to_bits())
+    }
+
+    /// Read the same strict "name value" format used by the C++ weighted
+    /// leaf. Every one of the eighteen terms must occur exactly once.
+    pub fn read_named(path: &str) -> Result<Self, String> {
+        let text = std::fs::read_to_string(path)
+            .map_err(|error| format!("cannot read leaf weights {path}: {error}"))?;
+        let mut result = Self::frozen();
+        let mut seen = [false; 18];
+        for (line_number, source) in text.lines().enumerate() {
+            let line = source.split('#').next().unwrap_or("").trim();
+            if line.is_empty() {
+                continue;
+            }
+            let fields: Vec<&str> = line.split_whitespace().collect();
+            if fields.len() != 2 {
+                return Err(format!(
+                    "{path}:{}: expected one leaf name and one value",
+                    line_number + 1
+                ));
+            }
+            let Some(index) = LEAF_TERM_NAMES.iter().position(|name| *name == fields[0]) else {
+                return Err(format!(
+                    "{path}:{}: unknown leaf term {}",
+                    line_number + 1,
+                    fields[0]
+                ));
+            };
+            if seen[index] {
+                return Err(format!(
+                    "{path}:{}: duplicate leaf term {}",
+                    line_number + 1,
+                    fields[0]
+                ));
+            }
+            let value: f64 = fields[1].parse().map_err(|_| {
+                format!(
+                    "{path}:{}: invalid value for {}",
+                    line_number + 1,
+                    fields[0]
+                )
+            })?;
+            if !value.is_finite() {
+                return Err(format!(
+                    "{path}:{}: non-finite value for {}",
+                    line_number + 1,
+                    fields[0]
+                ));
+            }
+            result.values[index] = value;
+            seen[index] = true;
+        }
+        if let Some(index) = seen.iter().position(|present| !present) {
+            return Err(format!(
+                "{path}: missing leaf term {}",
+                LEAF_TERM_NAMES[index]
+            ));
+        }
+        Ok(result)
+    }
+}
+
+impl Default for LeafWeights {
+    fn default() -> Self {
+        Self::frozen()
+    }
+}
+
 const READINESS_TABLE_SIZE: i32 = 80;
 
 /// ldexp(1.0, 1 - cost): exact powers of two.  Table lookup in the reachable
@@ -189,8 +316,13 @@ struct Features {
     next_disc_vertical_options: f64,
 }
 
-/// The fair leaf evaluator.  Bit-identical to drop7::fast::fastFairLeaf.
-pub fn fair_leaf(state: &State, scratch: &mut LeafScratch) -> f64 {
+/// The runtime-weighted fair leaf. At `LeafWeights::frozen()` this preserves
+/// the exact operation order and is bit-identical to fastFairLeaf.
+pub fn weighted_fair_leaf(
+    state: &State,
+    scratch: &mut LeafScratch,
+    leaf_weights: &LeafWeights,
+) -> f64 {
     if state.game_over {
         return weights::FAIR_TERMINAL_UTILITY;
     }
@@ -233,8 +365,7 @@ pub fn fair_leaf(state: &State, scratch: &mut LeafScratch) -> f64 {
         let elevation = (BOARD_SIZE - row) as i32;
         let mut prefix = [0i32; BOARD_SIZE + 1];
         for column in 0..BOARD_SIZE {
-            prefix[column + 1] = prefix[column]
-                + (elevation - scratch.heights[column]).max(0);
+            prefix[column + 1] = prefix[column] + (elevation - scratch.heights[column]).max(0);
         }
         let horizontal = &RUN_TABLE[scratch.row_mask[row] as usize];
         for column in 0..BOARD_SIZE {
@@ -252,8 +383,7 @@ pub fn fair_leaf(state: &State, scratch: &mut LeafScratch) -> f64 {
             if cell == SOLID || cell == CRACKED {
                 if cell == SOLID {
                     f.solid_cells += 1;
-                    f.covered_height_risk +=
-                        (elevation * elevation) as f64 * edge_multiplier;
+                    f.covered_height_risk += (elevation * elevation) as f64 * edge_multiplier;
                 } else {
                     f.cracked_cells += 1;
                     f.covered_height_risk +=
@@ -471,17 +601,13 @@ pub fn fair_leaf(state: &State, scratch: &mut LeafScratch) -> f64 {
             count += 1;
         }
         if column > 0 && scratch.present(index - 1) {
-            support[count] = union_readiness(
-                scratch.addition[index - 1],
-                scratch.release[index - 1],
-            );
+            support[count] =
+                union_readiness(scratch.addition[index - 1], scratch.release[index - 1]);
             count += 1;
         }
         if column + 1 < BOARD_SIZE && scratch.present(index + 1) {
-            support[count] = union_readiness(
-                scratch.addition[index + 1],
-                scratch.release[index + 1],
-            );
+            support[count] =
+                union_readiness(scratch.addition[index + 1], scratch.release[index + 1]);
             count += 1;
         }
         sort_descending(&mut support[..count]);
@@ -500,23 +626,53 @@ pub fn fair_leaf(state: &State, scratch: &mut LeafScratch) -> f64 {
     // The dot product, in the reference's order (L7: the roughness term is
     // exactly +0.0 and is removed, as proven in the C++ header).
     let mut result = 0.0f64;
-    result += weights::OPEN_COLUMNS * f.open_columns as f64;
-    result += weights::HEIGHT_LOAD * f.height_load;
-    result += weights::SOLID_CELLS * f.solid_cells as f64;
-    result += weights::CRACKED_CELLS * f.cracked_cells as f64;
-    result += weights::NUMBERED_CELLS * f.numbered_cells as f64;
-    result += weights::HIGH_LOW_NUMBERS * f.high_low_numbers as f64;
-    result += weights::DIRECT_POTENTIAL * f.direct_potential;
-    result += weights::LATENT_CHAIN_POTENTIAL * f.latent_chain_potential;
-    result += weights::CRACKED_EXPOSURE * f.cracked_exposure;
-    result += weights::SOLID_EXPOSURE * f.solid_exposure;
-    result += weights::ADJACENT_ONES * f.adjacent_ones;
-    result += weights::TRIPLE_TWOS * f.triple_twos;
-    result += weights::DEAD_LOW_NUMBERS * f.dead_low_numbers;
-    result += weights::COVERED_HEIGHT_RISK * f.covered_height_risk;
-    result += weights::LOW_NUMBER_HEIGHT_RISK * f.low_number_height_risk;
-    result += weights::DANGER_HEIGHT_SQUARED * f.danger_height_squared;
-    result += weights::RISE_PRESSURE * f.rise_pressure;
-    result += weights::NEXT_DISC_VERTICAL_OPTIONS * f.next_disc_vertical_options;
+    if leaf_weights.is_frozen() {
+        // Preserve the original literal-constant code path. Besides proving
+        // parity, this prevents loading the runtime array from changing
+        // contraction/register choices in the frozen reference evaluator.
+        result += weights::OPEN_COLUMNS * f.open_columns as f64;
+        result += weights::HEIGHT_LOAD * f.height_load;
+        result += weights::SOLID_CELLS * f.solid_cells as f64;
+        result += weights::CRACKED_CELLS * f.cracked_cells as f64;
+        result += weights::NUMBERED_CELLS * f.numbered_cells as f64;
+        result += weights::HIGH_LOW_NUMBERS * f.high_low_numbers as f64;
+        result += weights::DIRECT_POTENTIAL * f.direct_potential;
+        result += weights::LATENT_CHAIN_POTENTIAL * f.latent_chain_potential;
+        result += weights::CRACKED_EXPOSURE * f.cracked_exposure;
+        result += weights::SOLID_EXPOSURE * f.solid_exposure;
+        result += weights::ADJACENT_ONES * f.adjacent_ones;
+        result += weights::TRIPLE_TWOS * f.triple_twos;
+        result += weights::DEAD_LOW_NUMBERS * f.dead_low_numbers;
+        result += weights::COVERED_HEIGHT_RISK * f.covered_height_risk;
+        result += weights::LOW_NUMBER_HEIGHT_RISK * f.low_number_height_risk;
+        result += weights::DANGER_HEIGHT_SQUARED * f.danger_height_squared;
+        result += weights::RISE_PRESSURE * f.rise_pressure;
+        result += weights::NEXT_DISC_VERTICAL_OPTIONS * f.next_disc_vertical_options;
+    } else {
+        result += leaf_weights.values[0] * f.open_columns as f64;
+        result += leaf_weights.values[1] * f.height_load;
+        result += leaf_weights.values[2] * f.solid_cells as f64;
+        result += leaf_weights.values[3] * f.cracked_cells as f64;
+        result += leaf_weights.values[4] * f.numbered_cells as f64;
+        result += leaf_weights.values[5] * f.high_low_numbers as f64;
+        result += leaf_weights.values[6] * f.direct_potential;
+        result += leaf_weights.values[7] * f.latent_chain_potential;
+        result += leaf_weights.values[8] * f.cracked_exposure;
+        result += leaf_weights.values[9] * f.solid_exposure;
+        result += leaf_weights.values[10] * f.adjacent_ones;
+        result += leaf_weights.values[11] * f.triple_twos;
+        result += leaf_weights.values[12] * f.dead_low_numbers;
+        result += leaf_weights.values[13] * f.covered_height_risk;
+        result += leaf_weights.values[14] * f.low_number_height_risk;
+        result += leaf_weights.values[15] * f.danger_height_squared;
+        result += leaf_weights.values[16] * f.rise_pressure;
+        result += leaf_weights.values[17] * f.next_disc_vertical_options;
+    }
     result
+}
+
+/// The frozen fair leaf evaluator. Bit-identical to
+/// drop7::fast::fastFairLeaf.
+pub fn fair_leaf(state: &State, scratch: &mut LeafScratch) -> f64 {
+    weighted_fair_leaf(state, scratch, &LeafWeights::frozen())
 }

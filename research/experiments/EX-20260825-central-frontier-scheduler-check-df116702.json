@@ -1,0 +1,86 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260825-central-frontier-scheduler-check-df116702",
+  "theoryIds": [
+    "TH-20260825-central-frontier-scheduler-e4f547e0"
+  ],
+  "title": "Central frontier scheduler parity and within-decision scaling check",
+  "classification": "engineering",
+  "hypothesis": "At fixed completed depth, seven chance strata, policy seed, leaf, and deterministic reduction order, a central prefix-frontier scheduler will return bit-identical per-column values and actions to the existing root-column scheduler while exposing at least 32 runnable tasks per worker. On the local host at depth 5 it will reduce median decision wall time by at least 10% and sustain at least 75% worker busy time at the maximum available worker count. This is a CHECK-tier engineering comparison only; logical work may differ because private worker tables see a different schedule, and no policy-strength or 192-core performance claim follows until the same frozen harness is run on that x86 host.",
+  "candidate": {
+    "name": "rust-central-frontier-scheduler",
+    "entryPoint": "approaches/fair-expectimax/rust-engine/src/parallel.rs",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "rust-root-column-scheduler",
+    "entryPoint": "approaches/fair-expectimax/rust-engine/src/bin/decide.rs",
+    "manifestRef": null
+  },
+  "informationBoundary": "public-policy",
+  "benchmarkTier": "CHECK",
+  "data": {
+    "role": "no-gameplay",
+    "seedLeaseRefs": [],
+    "datasetRefs": [],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "No new seed is opened. Correctness and timing use only realistic roots regenerated from the already-opened Rust gate sub-block 0xa5276000-0xa5276fff of SEEDLEASE-A52-FAST, plus seed-free constructed unit fixtures. These roots are reusable development diagnostics and cannot support a strength claim."
+  },
+  "metrics": {
+    "primary": "Bit-identical per-column f64 values and selected actions versus the sequential Rust search and existing root-column scheduler, followed by median end-to-end decision wall-time ratio frontier/root at depth 5, seven strata, the same roots, worker count, compiler, cache capacity, and machine profile.",
+    "secondary": [
+      "frontier task count and exactly-once completion count",
+      "worker busy fraction, per-worker busy seconds, task-count spread, and tail idle core-seconds",
+      "logical work, nodes, leaf calls, move calls, and cache hits, reported rather than assumed equal",
+      "scaling at 1, 2, 4, 8, and every locally available logical CPU, bounded by detected availability",
+      "planner construction time, task execution time, reduction time, initialization time, and peak resident memory",
+      "projected table memory and explicit thread/cache settings for a later 192-core x86 run"
+    ],
+    "statisticalUnit": "root",
+    "uncertaintyMethod": "Exact equality for values/actions/tasks; three interleaved timing repeats per scheduler and worker count, reporting all repeats and the median."
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "Across at least 8 realistic d4s7 roots, sequential, root-column, and frontier schedulers have identical legal-column lists, identical f64 value bits for every column, and identical selected actions at 1 and maximum local workers, with 0 missing or duplicate frontier tasks.",
+      "Three repeated frontier runs return byte-identical values/actions at each tested worker count; worker count changes no value or action.",
+      "At maximum local workers on at least 3 realistic d5s7 roots, the frontier scheduler's median wall time is at least 10% lower than the root-column scheduler's median, and aggregate worker busy seconds divided by workers times task-phase wall seconds is at least 0.75.",
+      "The command line accepts an explicit 192-worker configuration, rejects zero or memory-unsafe settings before allocation, bounds the prefix frontier, reports per-worker table memory and total projected table memory, and never silently reduces depth or chance strata.",
+      "Cargo release tests, the existing Rust/C++ search-value gate, determinism/reflection checks, npm test, and make test pass; pre-existing repository-validator failures from missing gitignored historical artifacts remain disclosed separately."
+    ],
+    "failureAction": "Record valid + fail for the exact scheduler configuration, keep the existing root scheduler as default, and open no gameplay cohort. A parity failure stops timing immediately.",
+    "passAction": "Record valid + pass at mechanics-only tier, make the frontier scheduler the Rust decide binary's default with an explicit root-scheduler fallback, and provide the frozen scaling command for the 192-core x86 host. Open no gameplay cohort and make no strength claim."
+  },
+  "resources": {
+    "wallSeconds": 7200,
+    "cpuThreads": 12,
+    "maxHostBytes": 8589934592,
+    "maxGpuBytes": null,
+    "gpuDevices": []
+  },
+  "stopConditions": [
+    "Stop timing on any rules, information-boundary, legality, determinism, reflection, value-bit, action, or exactly-once task failure.",
+    "Stop the local run at 2 hours wall, 8 GiB peak host memory, or any worker panic; record partial rather than weakening the gate.",
+    "Do not access protected/final seeds or any new seed range; do not tune split depth on a gameplay-strength cohort.",
+    "Do not claim 192-core saturation from the 12-logical-CPU arm64 workstation; that requires a separate retained machine profile and execution of the frozen scaling harness on the target x86 server."
+  ],
+  "expectedArtifacts": [
+    "approaches/fair-expectimax/rust-engine/src/parallel.rs",
+    "approaches/fair-expectimax/rust-engine/src/bin/decide.rs",
+    "approaches/fair-expectimax/rust-engine/src/bin/bench.rs",
+    "runs/<run-id>/central-frontier/{machine-profile.json,parity.json,timings.json,summary.json}",
+    "research/runs/<run-id>.json",
+    "research/results/<result-id>.json"
+  ],
+  "lifecycle": "preregistered",
+  "protocolSha256": "97eb46930709425d1abedfd45ee9700d31d19369698b738fe391d5c93fda942a",
+  "amendments": [],
+  "createdBy": {
+    "platform": "Codex",
+    "model": "unknown",
+    "agentId": "root"
+  },
+  "createdAt": "2026-08-25T04:41:01Z",
+  "updatedAt": "2026-08-25T04:43:26Z"
+}
