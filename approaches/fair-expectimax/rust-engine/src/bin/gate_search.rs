@@ -8,7 +8,7 @@
 
 use drop7_rs::board::Board;
 use drop7_rs::engine::State;
-use drop7_rs::search::{DepthTable, FairLeaf, NoTable, Searcher, SearchParams};
+use drop7_rs::search::{DepthTable, FairLeaf, Searcher, SearchParams};
 
 /// Build a searcher with the requested memoization arm and run `f` on it.
 /// Both arms compute identical values (cache-independence), so the gate can
