@@ -12,6 +12,17 @@ run-matrix-local *args:
     #!/usr/bin/env bash
     exec approaches/fair-expectimax/rust-engine/cluster/run-local-matrix.sh "$@"
 
+# Example: just play-round rust-fair-d6-s7 gauntlet-01
+# Play one policy through one scripted round; saves the leaderboard-schema game record and per-move replay under runs/.
+play-round policy="rust-fair-d6-s7" round="gauntlet-01":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    OUT="runs/BENCH-$(date -u +%Y%m%dT%H%M%SZ)-${1}--${2}"
+    npm run bench -- --policies "$1" --rounds "$2" --out "${OUT}"
+    echo
+    echo "leaderboard record: ${OUT}/leaderboard.json"
+    echo "replay (every column choice + score): ${OUT}/replays/${1}--${2}.json"
+
 # Interactive dispatcher: offers EC2 with a valid AWS credential, else confirms a local run.
 run-matrix *args:
     #!/usr/bin/env bash

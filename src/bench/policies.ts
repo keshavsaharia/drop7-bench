@@ -234,6 +234,25 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
     chooseColumn: (state) => nativeDecide(publicOnly(state), { chanceSamples: 7 }),
   }),
   define({
+    id: "rust-fair-d6-s7",
+    name: "Rust fair D6, 7 strata",
+    family: "fair-expectimax",
+    description:
+      "The Rust bitboard engine's completed full-width depth 6 with seven chance strata and the frozen fair leaf, evaluated by the value-identical central-frontier scheduler under one shared cache budget, through the one-shot decide binary (cargo build --release --manifest-path approaches/fair-expectimax/rust-engine/Cargo.toml).",
+    researchPath: "/approaches/fair-expectimax/rust-engine",
+    publicInformation: true,
+    slow: true,
+    chooseColumn: (state) =>
+      nativeDecide(publicOnly(state), {
+        binary: RUST_DECIDE_BINARY,
+        buildHint: RUST_BUILD_HINT,
+        depth: 6,
+        chanceSamples: 7,
+        // The decide CLI partitions this aggregate budget across workers.
+        cache: 16_777_216,
+      }),
+  }),
+  define({
     id: "rust-fair-d7-s7",
     name: "Rust fair D7, 7 strata",
     family: "fair-expectimax",

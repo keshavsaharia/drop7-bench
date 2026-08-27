@@ -193,11 +193,13 @@ test(
       first !== null && first >= 0 && first < BOARD_SIZE,
       "rust policy answered with a column",
     );
-    const policy = getPolicy("rust-fair-d7-s7");
-    assert.equal(policy.publicInformation, true);
-    assert.equal(policy.family, "fair-expectimax");
-    // Terminal short-circuit still evaluates the policy closure, so a missing
-    // RUST_DECIDE_BINARY import fails here instead of only in a live game.
-    assert.equal(policy.chooseColumn({ ...state, gameOver: true }), null);
+    for (const id of ["rust-fair-d6-s7", "rust-fair-d7-s7"]) {
+      const policy = getPolicy(id);
+      assert.equal(policy.publicInformation, true);
+      assert.equal(policy.family, "fair-expectimax");
+      // Terminal short-circuit still evaluates the policy closure, so a missing
+      // RUST_DECIDE_BINARY import fails here instead of only in a live game.
+      assert.equal(policy.chooseColumn({ ...state, gameOver: true }), null);
+    }
   },
 );

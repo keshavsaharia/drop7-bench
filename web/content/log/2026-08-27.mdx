@@ -1,0 +1,84 @@
+---
+date: 2026-08-27
+title: "Local validation of the depth matrix: the frontier scheduler saturates a 16-core workstation"
+summary: "The merged depth/strata/leaf matrix workflow was exercised end to end on the research workstation for the first time, without any EC2 launch. On gauntlet-01's initial public position the frontier scheduler held ~98-99% worker occupancy through D5/S7 and matched the root scheduler bit for bit, while the root scheduler capped at seven workers and left the rest of the machine idle. The matrix entry points were reorganized into run-matrix-ec2, run-matrix-local, and an interactive run-matrix dispatcher. make research-validate is failing on eight pre-existing references to deleted August 25 run artifacts."
+contributors: [claude-fable-5 (Claude Code)]
+tags: [rust-engine, parallel-search, infrastructure, benchmark-playground, validation]
+outcomes: { positive: 2, negative: 1, open: 2 }
+---
+
+## The depth matrix runs locally, and the frontier scheduler uses the whole machine
+
+Until today the merged Rust matrix workflow (PR #13) had only been exercised
+through its EC2 orchestrator's plan mode on this machine. The goal was a
+purely local end-to-end validation on a small fixed-work sample: one public
+root, depths up to five, and a check that within-decision parallelism actually
+reaches every hardware thread rather than serializing on one heavy column.
+
+The machine had no Rust toolchain (an earlier one had evidently been removed;
+stale `bench`/`decide` release binaries remained), so a user-local rustup
+(stable, minimal profile) was installed, along with `just` itself via
+Homebrew. The `justfile` was then reorganized: the EC2 orchestrator moved to
+`just run-matrix-ec2`, a new `just run-matrix-local` wraps a new
+`cluster/run-local-matrix.sh` that exposes the analyzer's full option surface
+(round or roots file, depths, strata, leaves, scheduler, threads, cache,
+split-plies, frontier/host bounds, plan-only mode) and freezes its generated
+config through the existing `run-matrix.sh` path, and `just run-matrix` became
+an interactive dispatcher that offers EC2 only when a valid AWS credential is
+present and otherwise asks for confirmation before running locally.
+
+<Finding title="Frontier scheduler saturates the workstation through D5/S7" kind="positive" metric="98.4% occupancy at D5/S7 on 32 threads">
+On gauntlet-01's initial public position (playground domain; no research seed
+opened), the frontier scheduler at 32 threads completed D2/D3/D4/D5 at S7 in
+0.013 s / 0.007 s / 0.035 s / 1.400 s with worker busy fractions of 0.988 (D4)
+and 0.984 (D5), ~1005 registered continuation tasks per decision against a
+2401-task worst case, and a per-worker busy-seconds spread of only
+1.360-1.395 s at D5. A 16-thread repeat ran D5 in 1.475 s at 0.994 occupancy,
+so the 16 physical cores are the true ceiling and SMT adds only ~5%. Records:
+`runs/RUN-20260827-local-frontier-d5/analytics.jsonl`,
+`runs/RUN-20260827-local-frontier-d5-t16/analytics.jsonl`.
+</Finding>
+
+<Finding title="Root scheduler reproduces the heavy-column idle tail, with exact value parity" kind="positive" metric="0 value-bit mismatches; 7 of 32 threads used">
+The same cells under the legacy root scheduler used only seven workers
+(one per legal column) regardless of the 32 requested: D5/S7 took 2.534 s with
+per-worker busy seconds ranging 1.251-2.532 s — one light column finished a
+full core-second early while 25 hardware threads never engaged, the exact
+failure mode the frontier scheduler was built to remove. Every sibling value
+matched the frontier run bit for bit at D4 and D5, locally reproducing the
+scheduler-parity gate from the August 25 work. Record:
+`runs/RUN-20260827-local-root-d5/analytics.jsonl`.
+</Finding>
+
+<Finding title="research-validate fails on eight pre-existing missing-artifact references" kind="negative" metric="8 errors">
+`make research-validate` currently fails: two run records, two result records,
+and two contribution records from 2026-08-25 point at machine profiles and
+summaries under `runs/RUN-20260825T045058Z-b79f76a2/` and
+`runs/RUN-20260825T051728Z-e588e6d9/` that no longer exist on disk (`runs/` is
+gitignored, so those artifacts were local-only). This predates today's work
+and needs a coordinator decision: either restore the artifacts from wherever
+they were produced or mark the records accordingly.
+</Finding>
+
+Later the same day the depth ladder was extended to a D6/S7 cell
+(`runs/RUN-20260827T075718Z-local-9d85628c/analytics.jsonl`: 32.05 s wall at
+0.989 occupancy, action unchanged from D4/D5), and the playground gained a
+`rust-fair-d6-s7` policy beside the existing d7 registration, with a
+`just play-round <policy> <round>` recipe that saves the leaderboard-schema
+game record and per-move replay into a self-contained `runs/BENCH-*`
+directory (smoke record:
+`runs/BENCH-20260827T080553Z-expectimax-d2--gauntlet-01/`). A first
+depth-6 gauntlet-01 game was started and deliberately interrupted before
+completion at the operator's request, so no depth-6 game record exists yet.
+Scripted-round results remain playground demonstrations, never tier
+evidence. Two dead-code warnings (`index_of` in `board.rs`, an unused
+`NoTable` import in `gate_search.rs`) were removed, leaving the release
+build warning-free.
+
+Open items: this was a single-root smoke validation, not a scaling study — a
+depth-6/7 cell has not been attempted locally, and the frontier planner and
+reduction remain single-threaded phases whose share of wall time was
+negligible here (~1 ms at D5) but is untested at greater depths. The
+system-level `mpstat` capture proved too coarse for sub-two-second cells; the
+per-worker analytics rows are the instrument of record for occupancy claims.
+No complete games, strength comparisons, or research seed ranges were touched.
