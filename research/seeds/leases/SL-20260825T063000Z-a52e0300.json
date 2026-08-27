@@ -1,0 +1,23 @@
+{
+  "$schema": "../schemas/seed-lease-v1.schema.json",
+  "format": "drop7-seed-lease-v1",
+  "seedLeaseId": "SL-20260825T063000Z-a52e0300",
+  "experimentId": "EX-20260825-nnue-evolution-d3-bca7f330",
+  "rngAlgorithm": "mulberry32 with mix32 domain separation (src/core/native/engine.hpp); headless disc stream kNextDiscDomain, reveal stream kRevealDomain; Rust bitboard engine bit-identical (RS-20260824T075451Z-e89ea128)",
+  "domain": "environment",
+  "role": "training",
+  "rangeStartHex": "0xa52e0300",
+  "rangeEndExclusiveHex": "0xa52e1300",
+  "cohortManifestSha256": null,
+  "state": "reserved",
+  "reservedAt": "2026-08-25T06:30:00Z",
+  "openedAt": null,
+  "closedAt": null,
+  "protocolSha256": null,
+  "runIds": [],
+  "notes": [
+    "Conservative import: every 8-hex-digit constant under docs/, approaches/, src/, research/ and artifacts/ was enumerated (grep -rhoE '0x[0-9a-fA-F]{8}'); no constant falls inside 0xa52e0300-0xa52e1300. The block follows the H-pool lease 0xa52e0000-0xa52e0200 inside the SEEDLEASE-A52 reserve and the ./do-research allocator pool (0xa52c0000-0xa5300000); it overlaps no existing lease record and no protected (0x7d) or final (0xd7) prefix. The start is 0xa52e0300 rather than 0xa52e0200 because that boundary value itself appears in the tree as the predecessor lease's end marker, and the allocator discipline skips any block containing a known constant.",
+    "Sub-block allocation (all training role, whole games): 0xa52e0300-0xa52e0500 teacher corpus (512 depth-5 seven-stratum fair-expectimax games, sibling-complete root labels); 0xa52e0500-0xa52e0c80 evolution fitness blocks (60 generations x 32 paired games = 1,920, generation g plays [0xa52e0500 + 32*g, +32), every candidate and both controls on the same block); 0xa52e0c80-0xa52e0d00 final elite re-selection (128 fresh games for the top 8 of the last generation). Remainder 0xa52e0d00-0xa52e1300 stays reserved and unopened.",
+    "Training role: once read, these seeds are training data forever and can never become confirmation evidence. The deployable policy never receives seed identity; fitness games are ordinary public-information play."
+  ]
+}

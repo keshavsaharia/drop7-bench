@@ -1,0 +1,117 @@
+---
+title: An evolved NNUE leaf, distilled from a depth-5 teacher
+family: lifetime-objective
+summary: A compact neural leaf evaluator for the depth-3 fair search, warm-started by distilling a depth-5 teacher's sibling-complete root values and then refined by an evolutionary search whose fitness is whole-game score itself.
+status: preregistered
+evidence: mechanics gates only
+reads: public
+---
+
+The search that plays Drop7 best looks four moves ahead and then asks a
+hand-written function how promising the resulting board is. That function — the
+[leaf evaluator](/learn/glossary) — is where every learned-policy experiment in
+this program has gone to fail, and it failed in two distinct ways. Models
+trained to imitate a search learn the states the teacher visited and then cannot
+rank the six sibling moves it did not play (the
+[sibling trap](/learn/concepts/ranking-siblings)). And the one time the leaf was
+tuned by evolution on whole-game score directly, the optimiser followed
+selection noise into a worse evaluator
+([the CMA-ES leaf evolution](/approaches/lifetime-objective/leaf-evolution)).
+
+This approach keeps what each failure taught and changes the rest.
+
+<EvidenceLabel status="preregistered" evidence="mechanics gates only" reads="public" />
+
+<Callout title="Status" tone="info">
+This page describes a **preregistered, not yet run** experiment
+(`EX-20260825-nnue-evolution-d3-bca7f330`). The implementation is complete and
+its mechanics gates pass (determinism, reflection, information boundary,
+legality under degenerate weights, teacher-argmax equivalence); the teacher
+corpus, the evolutionary run, and the one-shot held-out screen have not been
+executed. No number on this page is a strength result.
+</Callout>
+
+## The design in three stages
+
+**Stage A — a teacher that can see a whole rise.** The frozen fair evaluator,
+driven by the [fast Rust bitboard engine](/approaches/fair-expectimax/rust-engine),
+plays training games at depth 5 with seven chance strata. Five moves is exactly
+one row-rise cycle, so every rise consequence of the root move is inside the
+teacher's horizon — the slow risks a depth-3 search cannot see (a high number
+that can no longer be cracked open, a 1 parked next to a gray disc) are visible
+to it. Every root is recorded with the teacher's value for **all seven columns**,
+which the search computes anyway: the corpus is sibling-complete by construction,
+so the coverage failure that sank earlier students is removed at the source.
+
+**Stage B — supervised warm start.** A compact NNUE-style network (the
+leaf-affordable class this repository has already characterised: 8,902 sparse
+features of which 135 are active per state, about 572k parameters, microsecond
+inference) is fitted to the teacher's state values with a whole-origin split —
+a game and all its roots are always on the same side of the split. This stage
+only needs to be a good starting region; the repository's evidence says a
+supervised student alone will not hold the teacher's ordering, and the
+preregistration says so too.
+
+**Stage C — evolution on the deployed objective.** The warm-started weights are
+then refined by a mutation-only genetic algorithm whose fitness is the thing
+the policy is actually paid for: the mean score of complete games, played by
+the exact deployed configuration (depth 3, seven strata, the candidate NNUE as
+its leaf). Every candidate in a generation plays the **same fresh block of
+seeds** (common random numbers), and the frozen fair leaf plus the unevolved
+init play every block as paired controls.
+
+## Why this might work where the first evolution failed
+
+The 18-weight CMA-ES run failed its held-out screen at −30,300 points, and the
+post-mortem was precise: fresh seeds per generation removed overfitting as
+designed, "and left selection noise alone to steer, which at 32 games per
+candidate and a paired sd near 200,000 is a random walk." This design answers
+that diagnosis directly:
+
+- **Paired blocks.** Every candidate in a generation plays identical seeds, so
+  selection compares paired differences rather than independent noisy means.
+- **An ordinal selection rule.** Tournament selection moves ranks, not
+  magnitudes, so one lucky million-point game cannot drag a generation.
+- **A warm start in weight space.** Mutation refines a functioning evaluator
+  instead of searching raw leaf constants; the per-tensor step size scales with
+  each tensor's own spread.
+- **Cheap deployment depth.** Depth 3 costs roughly a fiftieth of the depth-4
+  search the first evolution tuned, so the same machine budget buys an order of
+  magnitude more fitness games per generation.
+- **A noisy-champion guard.** The candidate is not the last generation's lucky
+  leader: the top eight elites are re-evaluated on a fresh 128-game block and
+  only the winner is frozen for the screen.
+
+Gradient-free training of networks this size and far larger is established
+(Such et al., *Deep Neuroevolution*, 2017; Salimans et al., *Evolution
+Strategies as a Scalable Alternative to RL*, 2017, whose common-random-number
+trick this design borrows), and evolving position evaluators is established in
+the sister stochastic game 2048 (Jaśkowski's coevolutionary CMA-ES line of
+work). The open question is not feasibility; it is whether whole-game evolution
+moves a leaf that distillation alone cannot.
+
+## What would count as success — or a clean rejection
+
+The frozen candidate is screened **once** on 64 never-read paired development
+games against the identical depth-3 search with the frozen fair leaf: the gate
+is a positive paired delta with both bootstrap and Student-t 95% lower bounds
+above zero, positive in both halves, and no lower-quartile regression. The
+unevolved init plays the same seeds as an ablation — if the init passes equally,
+the evolutionary stage contributed nothing and the theory's second leg is
+refuted even if the candidate stands. The fair leaf at depth 4 plays the same
+seeds as the program's standing reference. Everything is frozen in the
+[experiment record](/research) before the screen lease opens, and the seed
+leases (`0xa52e0300` training, `0xa52e1300` screen) are recorded in the
+repository's seed registry.
+
+## The implementation
+
+A std-only Rust crate (`approaches/lifetime-objective/nnue-evolution/`) with a
+path dependency on the proven engine — the reference crate is not modified.
+Five binaries: `gate` (the CHECK-tier mechanics suite), `teacher_corpus`
+(stage A), `pretrain` (stage B), `evolve` (stage C, checkpointed and
+resumable), and `screen` (stage D, emitting the population-artifact format the
+repository's existing `compare.py` consumes unchanged). The NNUE reads exactly
+the public state — visible board, visible next disc, moves until the rise — and
+the information-boundary gate proves that states differing only in score,
+level, or move count produce bit-identical evaluations.

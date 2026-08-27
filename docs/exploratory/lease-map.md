@@ -47,6 +47,8 @@ constants anywhere in the repository are `0xa511e9b3`, `0xa54ff53a` and
 | `SL-20260823T110000Z-a52d0200` | `0xa52d0200`–`0xa52d03ff` | 512 | public-development, SCREEN | reveal-construction leaf successor screen (first 256 seeds read once: frozen, A900 full; A300, B stopped at 39/36 games); remainder reserved | opened |
 | `SL-20260823T200000Z-a52e0000` | `0xa52e0000`–`0xa52e01ff` | 512 | **training**, CHECK diagnostic | H-pool stage D0: 64 oracle games (0xa52e0000–0xa52e003f) and fair-D4 matched pool games (0xa52e0100–0xa52e01ff); public states exported, privileged generator only | reserved |
 | `SL-20260823T215000Z-a5216000` | `0xa5216000`–`0xa52191ff` | 2,816 used of 12,800 | **training**, CHECK | P-SOL-1 sibling-outcome corpus: G0 ladder 0xa5216000–0xa52160ff, main corpus 0xa5217000–0xa52177ff, gate set 0xa5219000–0xa52191ff (gate origins development-read on use) | reserved |
+| `SL-20260825T063000Z-a52e0300` | `0xa52e0300`–`0xa52e12ff` | 4,096 | **training** | NNUE-evolution: teacher corpus 0xa52e0300–0xa52e04ff (512 d5s7 games), evolution fitness 0xa52e0500–0xa52e0c7f (60 generations × 32 paired games), elite re-selection 0xa52e0c80–0xa52e0cff (128 games); remainder reserved | reserved |
+| `SL-20260825T063000Z-a52e1300` | `0xa52e1300`–`0xa52e14ff` | 512 | public-development, held-out SCREEN | NNUE-evolution held-out paired screen (first 64 seeds, read once after the candidate is frozen); remainder reserved for a replication | reserved |
 
 Training and evaluation ranges are disjoint by construction: evaluation lives
 under `0xa51d`, training under `0xa52`. No model trained on `SEEDLEASE-A52` has
