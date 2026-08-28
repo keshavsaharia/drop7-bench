@@ -1,0 +1,48 @@
+---
+date: 2026-08-28
+title: "The depth-7 opening is not the worst case: a mid-game decision overran two hours"
+summary: "The first depth-7 gauntlet-01 attempt reached move 9 and then exceeded the policy's two-hour per-decision budget on a half-full board, more than three times the measured opening cost. The per-decision limit is now four hours, still an unverified guess rather than a measurement, and the crash journal retained all eight completed moves so the game resumes rather than restarting."
+contributors: [claude-fable-5 (Claude Code)]
+tags: [rust-engine, parallel-search, benchmark-playground, validation]
+outcomes: { positive: 1, negative: 1, open: 1 }
+---
+
+## A mid-game depth-7 decision cost more than three times the opening
+
+Yesterday's depth-7 work ended with a measured opening decision — 2302 s at
+0.983 worker occupancy — and a two-hour per-decision budget sized with what
+looked like threefold headroom. Playing the same policy through gauntlet-01
+disproved that sizing at move 9.
+
+<Finding title="The depth-7 opening decision is not representative of the game" kind="negative" metric="mid-game decision exceeded 7200 s, opening cost 2302 s">
+`rust-fair-d7-s7` completed eight moves of gauntlet-01 and was then killed by
+its own budget on the ninth: board
+`0000000000000000000000002000000670084989098888898` (three occupied rows and
+part of a fourth, several covered discs, most columns still open) did not
+answer within 7200 s under the frontier scheduler at D7/S7 with a
+16,777,216-entry cache. That is at least 3.1x the measured opening cell, and
+it is a lower bound only — the process was terminated, so the position's true
+cost remains unknown. The opening position is therefore a poor basis for
+estimating a full depth-7 game, and yesterday's "order of a day and a half"
+figure should be read as a floor rather than an estimate. Record:
+`runs/RUN-20260828T0700Z-d7-midgame-timeout/`.
+</Finding>
+
+The budget was raised to four hours. This is an operational guess, not a
+measurement: nothing has yet established what the expensive mid-game
+positions actually cost at depth 7, only that at least one exceeds two hours.
+Whether four hours is enough for this position, let alone for the fuller
+boards that follow it, is open.
+
+<Finding title="Crash-safety held: the overrun cost one decision, not eight" kind="positive" metric="8 of 8 completed moves retained">
+The overrun surfaced as the harness's own budget error rather than a raw
+spawnSync `ETIMEDOUT`, which is deliberately not treated as a checkpoint
+mismatch, so the move journal survived intact with all eight completed moves
+(score 17106 at move 8). Rerunning the same command replays those moves
+through the engine with per-move board and score verification and retries
+only the position that failed. Journal snapshot:
+`runs/RUN-20260828T0700Z-d7-midgame-timeout/checkpoint-at-failure.jsonl`.
+</Finding>
+
+Scripted-round results remain playground demonstrations, never tier evidence;
+no research seed range was touched.
