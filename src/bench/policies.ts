@@ -269,6 +269,9 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
         chanceSamples: 7,
         // The decide CLI partitions this aggregate budget across workers.
         cache: 16_777_216,
+        // ~15-25 minutes per decision on the 16-core workstation; the default
+        // 10-minute limit is a depth-6 budget and SIGTERMs the first move.
+        timeoutMs: 7_200_000,
       }),
   }),
 ];

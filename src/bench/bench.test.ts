@@ -246,5 +246,17 @@ test(
       // RUST_DECIDE_BINARY import fails here instead of only in a live game.
       assert.equal(policy.chooseColumn({ ...state, gameOver: true }), null);
     }
+    // A decision that overruns its wall-clock budget reports the budget and
+    // position instead of surfacing a raw spawnSync ETIMEDOUT.
+    assert.throws(
+      () =>
+        nativeDecide(state, {
+          binary: RUST_DECIDE_BINARY,
+          depth: 4,
+          chanceSamples: 7,
+          timeoutMs: 1,
+        }),
+      /exceeded its 0s budget at depth 4/,
+    );
   },
 );
