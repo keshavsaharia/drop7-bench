@@ -632,9 +632,10 @@ where
     let mut planner = PlanBuilder::new(params, config.max_frontier_tasks);
     let roots = planner.root_columns(&canonical, params.depth, split_plies)?;
     let planning_seconds = planning_start.elapsed().as_secs_f64();
-    if planner.tasks.is_empty() {
-        return Err("frontier construction produced no continuation tasks".into());
-    }
+    // An empty frontier is legal near the end of a game: every continuation
+    // inside the split prefix reached a terminal state or a depth-0 leaf, so
+    // the plan is already a constant tree. The single worker below claims no
+    // tasks and the reduction proceeds over constants alone.
     let worker_count = config.threads.min(planner.tasks.len()).max(1);
     let (table_bytes_per_worker, projected_table_bytes) =
         checked_table_bytes(config, worker_count)?;
@@ -951,6 +952,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::board::Board;
     use crate::search::work_bound_for;
 
     fn params(depth: i32, strata: i32) -> SearchParams {
@@ -1004,6 +1006,36 @@ mod tests {
         for ((oc, ov), (fc, fv)) in one.column_values.iter().zip(four.column_values.iter()) {
             assert_eq!(oc, fc);
             assert_eq!(ov.to_bits(), fv.to_bits());
+        }
+    }
+
+    #[test]
+    fn near_terminal_prefix_with_no_frontier_tasks_still_decides() {
+        // gauntlet-01 crash position: the rise clock is 2 and every column but
+        // one is stacked to the top row, so all continuations terminate inside
+        // the split prefix and the planner registers zero frontier tasks.
+        let board =
+            Board::from_serialized("0511020019921001889910388888018888809888889888888")
+                .expect("board");
+        let state = State {
+            board,
+            next_disc: 1,
+            score: 0,
+            level: 1,
+            moves_remaining: 2,
+            moves_played: 0,
+            game_over: false,
+        };
+        let frontier = choose_action_frontier_parallel(&state, params(6, 7), config(4, Some(1)))
+            .expect("empty frontier must reduce over constants, not fail");
+        assert_eq!(frontier.metrics.frontier_tasks, 0);
+        assert!(frontier.action >= 0);
+        let root = choose_action_root_parallel(&state, params(6, 7), config(4, Some(0)))
+            .expect("root scheduler");
+        assert_eq!(frontier.action, root.action);
+        for ((fc, fv), (rc, rv)) in frontier.column_values.iter().zip(root.column_values.iter()) {
+            assert_eq!(fc, rc);
+            assert_eq!(fv.to_bits(), rv.to_bits());
         }
     }
 

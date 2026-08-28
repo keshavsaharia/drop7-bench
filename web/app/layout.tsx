@@ -4,10 +4,29 @@ import { Header } from "@/components/Header";
 import { PageViewTracker } from "@/components/PageViewTracker";
 import "./globals.css";
 
+const SITE_URL = process.env.DROP7_SITE_URL ?? "https://drop7.dev";
+const SITE_TITLE = "Drop7 Research";
+const SITE_DESCRIPTION =
+  "Play Drop7 in your browser and follow the open-source search for a million-point strategy.";
+
 export const metadata: Metadata = {
-  title: "Drop7 Research",
-  description:
-    "Experiments, theories, deterministic scripted-round benchmarks, and strategy documentation for the Drop7 million-point research program.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SITE_TITLE,
+    template: `%s · ${SITE_TITLE}`,
+  },
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    type: "website",
+    siteName: SITE_TITLE,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
 };
 
 export default function RootLayout({

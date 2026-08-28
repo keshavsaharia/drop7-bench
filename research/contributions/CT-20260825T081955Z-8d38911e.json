@@ -1,0 +1,47 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260825T081955Z-8d38911e",
+  "actor": {
+    "kind": "model",
+    "platform": "OpenCode",
+    "model": "moonshotai/Kimi-K3",
+    "agentId": "opencode-evolutionary-approach"
+  },
+  "level": "L3",
+  "roles": [
+    {
+      "role": "software",
+      "degree": "lead"
+    }
+  ],
+  "summary": "Designed and implemented the evolutionary-NNUE approach (branch opencode/evolutionary-approach): a std-only Rust crate approaches/lifetime-objective/nnue-evolution/ with a path dependency on the unmodified drop7-rs engine. The NNUE leaf reuses the proven 8,902-feature/135-active sparse class (~572k params) as a drop7_rs::search::Leaf implementation with a documented determinism and information-boundary contract; the teacher corpus generator plays the fair leaf at depth 5 / 7 strata and records sibling-complete root values via column_values, with resumable per-game part files; the pretrainer does Adam with a Huber state-value loss under a whole-origin split plus a deployment-faithful ordering probe (d3s7+NNUE vs teacher argmax); the evolutionary driver is a mutation-only GA with paired common-random-number fitness blocks, tournament selection, per-tensor scaled mutation, checkpoint/resume, and a top-8 elite re-selection on a fresh block before freezing; the screen binary emits the population-artifact format consumed unchanged by the prior experiment's compare.py. Registered theory TH-20260825-evolved-nnue-leaf-d3-0f47e46c, frozen experiment EX-20260825-nnue-evolution-d3-bca7f330, and leases SL-20260825T063000Z-a52e0300 (training) / SL-20260825T063000Z-a52e1300 (screen) following the allocator's conservative-import discipline. The design is a direct response to two documented failures: sibling extrapolation (removed by sibling-complete teacher labels) and the CMA-ES leaf evolution's selection-noise random walk (answered by paired blocks, ordinal tournament selection, a warm start in weight space, and elite re-selection).",
+  "theoryIds": [
+    "TH-20260825-evolved-nnue-leaf-d3-0f47e46c"
+  ],
+  "experimentIds": [
+    "EX-20260825-nnue-evolution-d3-bca7f330"
+  ],
+  "runIds": [
+    "RUN-20260825T063123Z-6f4fc021"
+  ],
+  "artifactPaths": [
+    "approaches/lifetime-objective/nnue-evolution/",
+    "research/seeds/leases/SL-20260825T063000Z-a52e0300.json",
+    "research/seeds/leases/SL-20260825T063000Z-a52e1300.json"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "cargo test --release: 8/8 unit tests pass (feature bounds, mirror involution, mirrored-feature bag equality, serialisation round-trip, forward determinism, legal deterministic d3s7 play with a random NNUE leaf, fair-leaf d3s7 determinism, JSON parser)",
+    "CHECK gate suite (target/release/gate 0xa5277000): features, info-boundary (score/level/moves_played blindness), reflection (11 asymmetric mirrored root pairs bit-identical, finding-13 symmetric exclusion), fresh-searcher and 1-vs-4-worker determinism, legality/completion under random/zero/saturated weights, finiteness fuzz, teacher column_values-vs-choose_action argmax equivalence at d3s7 and d5s7, serialisation round-trip — ALL GATES PASSED",
+    "end-to-end smoke pipeline on already-opened probe seeds 0xa5276000+ (teacher d3 corpus -> pretrain -> evolve 2 generations -> elite select -> 4-arm screen) with compare.py consuming the screen artifact unchanged; zero new or leased seeds opened",
+    "T0 timing pilot at the real d5s7 teacher configuration: 9.5-13.6 s per live-board decision on a quiet machine, 33 s/decision under load, heavy-tailed game lengths; table size 1M/4M/16M immaterial",
+    "make research-validate OK; npm test 0 failures; web next build compiles and /approaches/lifetime-objective/nnue-evolution renders HTTP 200"
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-08-25T08:19:55Z"
+}

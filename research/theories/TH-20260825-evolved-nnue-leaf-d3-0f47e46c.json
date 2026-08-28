@@ -1,0 +1,35 @@
+{
+  "$schema": "../schemas/theory-v1.schema.json",
+  "format": "drop7-theory-v1",
+  "theoryId": "TH-20260825-evolved-nnue-leaf-d3-0f47e46c",
+  "title": "A depth-5-distilled, whole-game-evolved NNUE leaf beats the frozen fair leaf inside the same depth-3 search",
+  "claim": "A leaf-affordable NNUE evaluator (the 8,902-feature, 135-active sparse class of approaches/lifetime-objective/learned-leaf), whose weights are (a) initialised by distilling the sibling-complete root values of a depth-5 seven-stratum fair-expectimax teacher and (b) then refined by a mutation-only genetic algorithm whose fitness is the mean score of complete paired depth-3 seven-stratum games, deployed as the leaf of that same depth-3 seven-stratum search, achieves a higher mean whole-game score on never-read paired development games than the identical search using the frozen fair leaf.",
+  "mechanism": "Three documented failure modes are removed by construction. (1) Sibling extrapolation: the teacher's root evaluation already prices every legal column (search.rs column_values), so the distillation corpus is successor-closed for free — every root carries all seven sibling values, not the played action's alone. (2) Surrogate-loss mismatch: the evolutionary stage does not fit a proxy label at all; selection acts on the deployed quantity (mean whole-game score of the exact deployed configuration, d3s7 with the candidate leaf), so a leaf that prices slow risks — e.g. an uncrackable high number, or a 1 dropped next to a gray disc — is directly favoured when pricing them raises whole-game score, even though no hand-written term names them. (3) Horizon truncation: the depth-5 teacher sees one full five-move rise cycle beyond the root, so rise-boundary effects the depth-3 deployment cannot see are distilled into the leaf as state value. The prior leaf-evolution failure (RS-20260822T120736Z-662b39ca, 18 linear weights, CMA-ES, -30,300 held-out) was diagnosed as selection noise steering a random walk at 32 games per candidate with paired sd near 200,000; this design answers it with paired seeds across the whole population per generation (common random numbers), a mutation-only GA over a warm-started NNUE rather than CMA-ES over raw leaf constants, depth-3 deployment cost (~50x cheaper than d4s5) that buys far more fitness games per CPU-hour, and a final elite re-selection on a fresh 128-game block before freezing. External feasibility: gradient-free evolution of million-parameter networks is established (Such et al. 2017, arXiv:1712.06567), ES with common random numbers is established (Salimans et al. 2017, arXiv:1703.03864), and coevolutionary/CMA-ES position evaluators are established in the sister stochastic game 2048 (Jaskowski, IEEE TCIAIG 2016).",
+  "falsificationCriteria": [
+    "Supervised initialisation diagnostic: if the distilled NNUE's within-root top-1 agreement with the depth-5 teacher on whole-origin held-out roots does not exceed the C0 probe's 0.30 level materially, the warm start is uninformative; evolution may still proceed but the distillation leg of the mechanism is refuted.",
+    "Training-signal check: if the evolved population's mean fitness on training blocks does not exceed the frozen-fair-leaf d3s7 control playing the same blocks by a positive margin in the majority of the final 10 generations, whole-game selection is not steering anything and the claim fails without opening the screen.",
+    "Primary falsifier: the frozen evolved candidate's held-out 64-game paired screen against the frozen fair leaf at the identical d3s7 configuration fails any pass criterion of EX-20260825-nnue-evolution-d3-bca7f330 (bootstrap 95% LB of the paired delta <= 0, t LB <= 0, a negative half, or lower-quartile regression).",
+    "Ablative falsifier: if the evolved candidate passes but the supervised-init (unevolved) NNUE passes the same screen equally, the evolutionary stage contributes nothing and the mechanism's second leg is refuted even though the candidate stands."
+  ],
+  "informationClass": "public-policy",
+  "lifecycle": "implemented",
+  "assessment": "untested",
+  "evidenceTier": "proposal",
+  "dependencies": [
+    "TH-20260822-depth-native-leaf-weights-caa6f8ba",
+    "TH-20260823-nnue-class-holds-d4-ordering-c7b397a5",
+    "TH-20260822-nnue-leaf-capacity-saturation-9c45e42e"
+  ],
+  "evidenceRefs": [
+    "research/results/RS-20260822T120736Z-662b39ca.json",
+    "research/results/RS-20260823T194142Z-946e3cd1.json",
+    "approaches/fair-expectimax/rust-engine/README.mdx"
+  ],
+  "createdBy": {
+    "platform": "OpenCode",
+    "model": "moonshotai/Kimi-K3",
+    "agentId": "opencode-evolutionary-approach"
+  },
+  "createdAt": "2026-08-25T05:58:57Z",
+  "updatedAt": "2026-08-25T06:45:00Z"
+}

@@ -1,11 +1,13 @@
 ---
 date: 2026-08-25
-title: "One deep search can now use more than seven CPUs"
-summary: "The Rust fair solver now registers continuation subtrees in a central work queue: exact local parity held, a bounded D5/S7 split improved the three-repeat median 1.1352x on 12 logical CPUs, and a reusable depth/strata/leaf matrix plus fail-closed EC2 workflow is ready for a separately authorized 192-core x86 run."
-contributors: [unknown (Codex)]
-tags: [rust-engine, parallel-search, infrastructure, teacher-search]
-outcomes: { positive: 2, negative: 1, open: 1 }
+title: "A parallel frontier for deep search, and an evolutionary NNUE leaf designed around two failures"
+summary: "Two threads landed today. The Rust fair solver gained a central work queue for continuation subtrees: exact local parity held and a reusable depth/strata/leaf matrix plus fail-closed EC2 workflow is ready for a separately authorized 192-core run. Separately, the opencode/evolutionary-approach branch registered a depth-3 NNUE-leaf approach: warm-started on a depth-5 teacher's sibling-complete root values, then refined by whole-game evolution with paired fitness blocks - implemented, gated, frozen, and not yet launched."
+contributors: [unknown (Codex), kimi-k3 (OpenCode)]
+tags: [rust-engine, parallel-search, infrastructure, teacher-search, nnue, evolution, leaf, teacher-distillation, preregistration]
+outcomes: { positive: 3, negative: 1, open: 2 }
 ---
+
+## One deep search can now use more than seven CPUs (Codex)
 
 The Rust engine's first parallel driver assigned one root column to one worker.
 That helped batches, but one decision exposed at most seven jobs and left an
@@ -71,7 +73,7 @@ utilization hold on that host should a separately preregistered data lease turn
 deeper sibling values into training labels.
 </Direction>
 
-## Validation limits retained with the result
+### Validation limits retained with the result
 
 Rust release tests passed all 22 current tests and the repository TypeScript
 suite passed 137 tests with one unrelated native-binary skip. The aggregate
@@ -83,3 +85,75 @@ that warning relaxed but default arm64 floating contraction produced one-to-
 three-ULP differences on seven of 20 roots, with no action changes; disabling
 contraction produced exact parity on all eight retained benchmark roots. Both
 the failed default diagnostic and strict-FP pass remain in the run artifacts.
+
+## An evolutionary NNUE leaf, designed around two documented failures (Kimi K3 / OpenCode)
+
+The owner's standing hypothesis is that the computer policies mis-price slow
+risks a human sees immediately — a high number that can no longer be cracked
+open horizontally, a 1 dropped next to a gray disc — and that a learned leaf
+with the right training signal might price them. Today's work turned that into
+a registered, falsifiable experiment with a complete implementation, on the new
+branch `opencode/evolutionary-approach`.
+
+<Direction title="Why this design and not another weight sweep" status="proposed" owner="kimi-k3 (OpenCode)">
+The repository has already killed both halves of the naive version of this
+idea. Supervised NNUE students of exact search values failed the
+sibling-ranking gate (top-1 0.296 against 0.60, RS-20260823T194142Z-946e3cd1)
+because fitting played-action values does not teach a model to rank the six
+moves nobody played. And the one prior whole-game evolution — CMA-ES over the
+18 fair-leaf weights — failed its held-out screen at −30,300 points
+(RS-20260822T120736Z-662b39ca): fresh seeds per generation removed
+overfitting as designed, and left selection noise alone to steer a random
+walk. The new approach keeps the lesson and changes the mechanism: the
+teacher's root evaluation prices all seven columns anyway, so the corpus is
+sibling-complete for free; and the evolutionary stage selects on the deployed
+quantity itself — mean whole-game score of the exact d3s7 configuration —
+with every candidate in a generation playing the same fresh block of seeds,
+tournament selection (ordinal, so one lucky game moves a rank and not a
+magnitude), and a top-8 elite re-selection on 128 fresh games before anything
+is frozen.
+</Direction>
+
+<Finding title="The pipeline exists and passes its mechanics gates" kind="positive" metric="9/9 unit tests, 8/8 CHECK gates, 0 new seeds opened">
+The crate (approaches/lifetime-objective/nnue-evolution/, std-only, path
+dependency on the unmodified drop7-rs engine) ships five binaries: gate,
+teacher_corpus, pretrain, evolve, screen. The CHECK suite passes: feature
+determinism and bounds, information-boundary blindness (states differing only
+in score/level/moves_played give bit-identical evaluations), reflection
+consistency on asymmetric boards with the finding-13 symmetric exclusion,
+fresh-searcher and 1-vs-4-worker determinism, legality and completed depth
+under random, all-zero and saturated weights, finiteness fuzz, serialisation
+round-trip, and teacher argmax equivalence between column_values and
+choose_action at d3s7 and d5s7. The end-to-end smoke (teacher corpus at d3,
+pretrain, two evolution generations, elite selection, four-arm screen) ran on
+the already-opened 0xa5276*** probe block, and the screen artifact is consumed
+unchanged by the prior experiment's compare.py
+(RUN-20260825T063123Z-6f4fc021).
+</Finding>
+
+<Direction title="The T0 pilot re-priced the teacher before any lease was opened" status="proposed" owner="coordinator">
+The frozen protocol's teacher stage plays 512 complete games at depth 5 /
+seven strata. The pilot (already-opened probe seeds, no lease touched)
+measured 9.5-13.6 s per live-board d5s7 decision on a quiet machine and 33 s
+under concurrent load, with heavy-tailed game lengths — one pilot game ran
+past two hours before being stopped. Transposition-table size (1M/4M/16M) is
+immaterial. The corpus stage is therefore ~10-14 CPU-seconds per root and
+projects to 10-16 wall-hours for 512 games on 16 dedicated cores: inside the
+frozen 24 h budget, but only with the resumable per-game part-file writer
+(implemented) and the wall-budget stop as the safety valve. The frozen stop
+rule already permits a partial corpus. Evolution (~3 h) and the screen (~1 h)
+are cheap by comparison. The launch decision — a ~15-19 h dedicated-machine
+commitment — is the owner's call; the leases SL-20260825T063000Z-a52e0300
+(training) and SL-20260825T063000Z-a52e1300 (screen) stay reserved and
+unopened until then.
+</Direction>
+
+The registered chain is: theory TH-20260825-evolved-nnue-leaf-d3-0f47e46c,
+frozen experiment EX-20260825-nnue-evolution-d3-bca7f330, approach page at
+/approaches/lifetime-objective/nnue-evolution. The falsifiers are explicit: if
+evolution's training fitness does not beat the paired fair-d3s7 control, the
+mechanism is dead before the screen; if the unevolved init passes the screen
+equally, the evolutionary stage contributed nothing; and the one-shot 64-game
+held-out screen decides the claim. The Codex thread's 192-core frontier work
+above is directly relevant here: if it proves out on the authorized host, the
+teacher-corpus stage is its natural consumer.

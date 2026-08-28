@@ -6,6 +6,12 @@ The long-term goal is a public-information policy that averages more than one
 million points in Hardcore mode. No policy in this repository has met that
 standard yet.
 
+## Explore the project
+
+| [Play Drop7 in your browser](https://drop7.dev/play) | [Explore the research console](https://drop7.dev/) |
+| :---: | :---: |
+| [![The playable Drop7 board with score, rise clock, and play, evaluate, and auto controls](docs/images/play-drop7.jpg)](https://drop7.dev/play) | [![The Drop7 Research home page with the live game board and an introduction to the strategy problem](docs/images/research-console.jpg)](https://drop7.dev/) |
+
 ## Drop7 in one minute
 
 Drop7 is played on a 7-by-7 board. Each falling disc has a number from 1 to 7.

@@ -57,11 +57,6 @@ const NOT_COL6: u64 = BOARD_MASK & !0x1020_4081_0204_0u64;
 /// 49-bit board layout.
 const COL_STRIDE: u64 = 0x0040_8102_0408_1u64;
 
-#[inline(always)]
-const fn index_of(row: usize, col: usize) -> usize {
-    row * BOARD_SIZE + col
-}
-
 // ---------------------------------------------------------------------------
 // PEXT/PDEP with portable fallbacks.  The fallback is bit-identical; only the
 // instruction count differs.  Build with target-cpu=native (or BMI2 enabled)

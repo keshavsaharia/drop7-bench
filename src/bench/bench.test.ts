@@ -14,7 +14,7 @@ import {
   COMPETITION_POLICY_IDS,
   getPolicy,
 } from "./policies.ts";
-import { playScriptedGame } from "./runner.ts";
+import { playScriptedGame, type BenchCheckpointEntry } from "./runner.ts";
 import { validateScriptedRound } from "./rounds.ts";
 import { parsePosition, stateFromPosition } from "./d7p-server.ts";
 import {
@@ -156,6 +156,51 @@ test("d7p positions become a public-only game state that policies can answer", (
   );
 });
 
+test("a checkpointed game resumes into an identical final result", () => {
+  const round = loadRound("gauntlet-01");
+  const policy = getPolicy("greedy");
+  const journal: BenchCheckpointEntry[] = [];
+  const full = playScriptedGame(policy, round, {
+    onFrame: (_frame, entry, resumed) => {
+      assert.equal(resumed, false, "no move is resumed in a fresh game");
+      journal.push(entry);
+    },
+  });
+  assert.equal(journal.length, full.moves);
+
+  const prefix = journal.slice(0, 10);
+  let resumedMoves = 0;
+  const resumed = playScriptedGame(policy, round, {
+    resume: prefix,
+    onFrame: (_frame, _entry, wasResumed) => {
+      if (wasResumed) resumedMoves += 1;
+    },
+  });
+  assert.equal(resumedMoves, prefix.length, "the journal prefix is replayed");
+  assert.equal(resumed.checksum, full.checksum);
+  assert.equal(resumed.score, full.score);
+  assert.equal(resumed.moves, full.moves);
+  assert.equal(resumed.illegalMoves, full.illegalMoves);
+});
+
+test("a checkpoint from different code or round is rejected, not continued", () => {
+  const round = loadRound("gauntlet-01");
+  const policy = getPolicy("greedy");
+  const journal: BenchCheckpointEntry[] = [];
+  playScriptedGame(policy, round, {
+    onFrame: (_frame, entry) => journal.push(entry),
+  });
+  const corrupted = journal.slice(0, 10);
+  corrupted[5] = {
+    ...corrupted[5],
+    board: `${corrupted[5].board.slice(0, -1)}${corrupted[5].board.endsWith("7") ? "6" : "7"}`,
+  };
+  assert.throws(
+    () => playScriptedGame(policy, round, { resume: corrupted }),
+    /checkpoint mismatch/,
+  );
+});
+
 test(
   "the native decision binary, when built, answers a public position deterministically",
   { skip: !nativeBinaryAvailable() && `${NATIVE_DECIDE_BINARY} is not built` },
@@ -193,11 +238,13 @@ test(
       first !== null && first >= 0 && first < BOARD_SIZE,
       "rust policy answered with a column",
     );
-    const policy = getPolicy("rust-fair-d7-s7");
-    assert.equal(policy.publicInformation, true);
-    assert.equal(policy.family, "fair-expectimax");
-    // Terminal short-circuit still evaluates the policy closure, so a missing
-    // RUST_DECIDE_BINARY import fails here instead of only in a live game.
-    assert.equal(policy.chooseColumn({ ...state, gameOver: true }), null);
+    for (const id of ["rust-fair-d6-s7", "rust-fair-d7-s7"]) {
+      const policy = getPolicy(id);
+      assert.equal(policy.publicInformation, true);
+      assert.equal(policy.family, "fair-expectimax");
+      // Terminal short-circuit still evaluates the policy closure, so a missing
+      // RUST_DECIDE_BINARY import fails here instead of only in a live game.
+      assert.equal(policy.chooseColumn({ ...state, gameOver: true }), null);
+    }
   },
 );

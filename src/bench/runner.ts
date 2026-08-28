@@ -46,8 +46,41 @@ export interface BenchAnimationFrame {
   chainDepth?: number;
 }
 
+/**
+ * One line of the crash-recovery journal: the played column plus enough of the
+ * post-move state to verify a deterministic replay reproduced it exactly.
+ */
+export interface BenchCheckpointEntry {
+  /** 1-based move number, matching BenchFrame.move. */
+  move: number;
+  column: number;
+  /** Serialized 49-character board after the move resolves. */
+  board: string;
+  score: number;
+  /** The policy's original choice was illegal and a fallback was played. */
+  illegal: boolean;
+}
+
 export interface BenchRunOptions {
   captureAnimation?: boolean;
+  /**
+   * Recorded moves to replay verbatim before consulting the policy again.
+   * Each entry is applied through the engine and verified against its
+   * recorded board and score; any divergence (changed policy, engine, or
+   * round) throws a "checkpoint mismatch" error instead of continuing a
+   * different game.
+   */
+  resume?: readonly BenchCheckpointEntry[];
+  /**
+   * Called after every completed move with the frame and its journal entry;
+   * `resumed` marks moves that came from the resume journal rather than a
+   * fresh policy decision.
+   */
+  onFrame?: (
+    frame: BenchFrame,
+    entry: BenchCheckpointEntry,
+    resumed: boolean,
+  ) => void;
 }
 
 export interface BenchGameResult {
@@ -100,12 +133,30 @@ export function playScriptedGame(
   let coveredRevealed = 0;
   let illegalMoves = 0;
 
+  const resume = options.resume ?? [];
   while (!state.gameOver && state.movesPlayed < round.maximumMoves) {
     const legal = legalColumns(state.board);
-    let column = policy.chooseColumn(state);
-    if (column === null || !legal.includes(column)) {
-      illegalMoves += 1;
-      column = legal[0];
+    const recorded = resume[state.movesPlayed];
+    let column: number;
+    let illegal = false;
+    if (recorded) {
+      if (recorded.move !== state.movesPlayed + 1 || !legal.includes(recorded.column)) {
+        throw new Error(
+          `checkpoint mismatch at move ${state.movesPlayed + 1}: recorded column ${recorded.column} is not a legal continuation of this round`,
+        );
+      }
+      column = recorded.column;
+      illegal = recorded.illegal;
+      if (illegal) illegalMoves += 1;
+    } else {
+      const chosen = policy.chooseColumn(state);
+      if (chosen === null || !legal.includes(chosen)) {
+        illegal = true;
+        illegalMoves += 1;
+        column = legal[0];
+      } else {
+        column = chosen;
+      }
     }
     const disc = state.nextDisc;
     const placedBoard = placeDisc(state.board, column, disc);
@@ -145,7 +196,7 @@ export function playScriptedGame(
     }
     discsCleared += cleared;
     coveredRevealed += revealed;
-    frames.push({
+    const frame: BenchFrame = {
       move: state.movesPlayed,
       disc,
       column,
@@ -171,7 +222,27 @@ export function playScriptedGame(
             })),
           }
         : {}),
-    });
+    };
+    frames.push(frame);
+    const entry: BenchCheckpointEntry = {
+      move: frame.move,
+      column: frame.column,
+      board: frame.board,
+      score: frame.score,
+      illegal,
+    };
+    if (recorded && (recorded.board !== entry.board || recorded.score !== entry.score)) {
+      throw new Error(
+        `checkpoint mismatch at move ${frame.move}: the deterministic replay diverged from the recorded board or score`,
+      );
+    }
+    options.onFrame?.(frame, entry, recorded !== undefined);
+  }
+
+  if (resume.length > frames.length) {
+    throw new Error(
+      `checkpoint mismatch: the journal records ${resume.length} moves but the game ended after ${frames.length}`,
+    );
   }
 
   const checksum = createHash("sha256")

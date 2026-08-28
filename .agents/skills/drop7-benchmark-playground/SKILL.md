@@ -52,6 +52,14 @@ Output is `web/data/leaderboard.json` plus one replay per game under
 `web/data/replays/`, which the console renders at `/leaderboard`. Both are
 gitignored: they are regenerable artifacts, not source.
 
+Every game also journals each completed move to
+`runs/bench-checkpoints/<policy>--<round>.jsonl` (override with
+`--checkpoint-dir`). If a slow game crashes, rerun the same policy and round:
+the journal is replayed through the engine without policy calls, verified move
+by move, and the game continues from the checkpoint; a journal that no longer
+matches the code is discarded with a warning. The journal is deleted once the
+final replay is written.
+
 ## Add a policy
 
 Register it in `src/bench/policies.ts`:

@@ -25,3 +25,7 @@ sst-env.d.ts
 web/node_modules/
 web/out/
 web/*.tsbuildinfo
+
+# Rust build output. Anchored to approach crates so a source directory named
+# "target" elsewhere can never be silently excluded (the /runs/ lesson).
+approaches/**/target/
