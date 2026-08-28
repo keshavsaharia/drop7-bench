@@ -4,7 +4,7 @@ title: "Local validation of the depth matrix: the frontier scheduler saturates a
 summary: "The merged depth/strata/leaf matrix workflow was exercised end to end on the research workstation for the first time, without any EC2 launch. On gauntlet-01's initial public position the frontier scheduler held ~98-99% worker occupancy through D5/S7 and matched the root scheduler bit for bit, while the root scheduler capped at seven workers and left the rest of the machine idle. The matrix entry points were reorganized into run-matrix-ec2, run-matrix-local, and an interactive run-matrix dispatcher. make research-validate is failing on eight pre-existing references to deleted August 25 run artifacts."
 contributors: [claude-fable-5 (Claude Code)]
 tags: [rust-engine, parallel-search, infrastructure, benchmark-playground, validation]
-outcomes: { positive: 2, negative: 2, open: 2 }
+outcomes: { positive: 3, negative: 2, open: 2 }
 ---
 
 ## The depth matrix runs locally, and the frontier scheduler uses the whole machine
@@ -102,10 +102,32 @@ exact checksum of the retained uninterrupted record
 (`runs/BENCH-20260827T080553Z-expectimax-d2--gauntlet-01/`), and two new
 tests cover resume equivalence and mismatch rejection.
 
-Open items: this was a single-root smoke validation, not a scaling study — a
-depth-6/7 cell has not been attempted locally, and the frontier planner and
+The first attempted depth-7 game then exposed a harness limit rather than an
+engine one: `nativeDecide` spawned every decision under a fixed ten-minute
+`spawnSync` budget sized for depth 6, so the opening depth-7 decision was
+SIGTERMed as a raw `ETIMEDOUT`. The per-decision budget is now a per-policy
+registration option (`timeoutMs`, default unchanged), the depth-7 policy
+declares a two-hour budget, and an overrun reports the budget, depth, and
+board instead of a spawn error, leaving the crash journal intact.
+
+<Finding title="A depth-7 decision completes at full occupancy in 38 minutes" kind="positive" metric="2302 s wall at 0.983 busy on 32 threads">
+Rerun outside the harness limit, the formerly killed invocation — the
+gauntlet-01 opening public position at D7/S7 under the frontier scheduler
+with a 16,777,216-entry shared cache — completed in 2302 s at a worker busy
+fraction of 0.9833 across 32 threads, registering 1007 frontier tasks and
+86,132,823,356 nodes, and answered column 1. Against the same position's
+D6/S7 cell (32.05 s) that is a roughly 72x depth step, at the top of the
+25-50x range assumed earlier, so a full ~60-move depth-7 game costs on the
+order of a day and a half of workstation time even before mid-game boards
+are considered. Record:
+`runs/RUN-20260828T062425Z-local-d7-opening-timing/decide.log`.
+</Finding>
+
+Open items: this was a single-root smoke validation, not a scaling study —
+beyond the single D6/S7 cell and the single D7/S7 opening decision above, no
+deeper cells have been attempted locally, and the frontier planner and
 reduction remain single-threaded phases whose share of wall time was
-negligible here (~1 ms at D5) but is untested at greater depths. The
+negligible here (~1 ms at D5) but is unmeasured in isolation at D6/D7. The
 system-level `mpstat` capture proved too coarse for sub-two-second cells; the
 per-worker analytics rows are the instrument of record for occupancy claims.
 No complete games, strength comparisons, or research seed ranges were touched.
