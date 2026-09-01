@@ -1,4 +1,5 @@
 import { trackPageView } from "@/lib/analytics/ingest";
+import { readLimitedJson } from "@/lib/request-body";
 
 export const runtime = "nodejs";
 export const maxDuration = 10;
@@ -12,17 +13,11 @@ export async function POST(request: Request) {
     return Response.json({ error: "invalid-origin" }, { status: 403 });
   }
 
-  const contentLength = Number(request.headers.get("content-length") ?? 0);
-  if (contentLength > 2_048) {
-    return Response.json({ error: "request-too-large" }, { status: 413 });
+  const parsed = await readLimitedJson(request, 2_048);
+  if (!parsed.ok) {
+    return Response.json({ error: parsed.error }, { status: parsed.status });
   }
-
-  let body: PageViewBody;
-  try {
-    body = (await request.json()) as PageViewBody;
-  } catch {
-    return Response.json({ error: "invalid-json" }, { status: 400 });
-  }
+  const body = parsed.value as PageViewBody;
 
   if (!isPublicPath(body.path)) {
     return Response.json({ error: "invalid-path" }, { status: 400 });

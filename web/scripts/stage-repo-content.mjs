@@ -1,5 +1,12 @@
 import { createHash } from "node:crypto";
-import { cpSync, existsSync, mkdirSync, readFileSync, rmSync } from "node:fs";
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -36,8 +43,46 @@ const competitionArtifacts = competitionCatalog.games.map((entry) => {
       `Competition artifact hash mismatch: expected ${manifest.artifactSha256}, got ${artifactSha256}`,
     );
   }
-  return { manifest, artifactPath };
+  return {
+    gameKey: entry.gameKey,
+    manifest,
+    artifactPath,
+    round: JSON.parse(readFileSync(artifactPath, "utf8")),
+  };
 });
+
+const currentCompetition = competitionArtifacts.find(
+  (game) => game.gameKey === competitionCatalog.currentGameKey,
+);
+if (!currentCompetition) {
+  throw new Error("Current competition is not registered");
+}
+
+const publicCompetitionRoot = join(webRoot, "public", "competition");
+rmSync(publicCompetitionRoot, { recursive: true, force: true });
+mkdirSync(publicCompetitionRoot, { recursive: true });
+writeFileSync(
+  join(publicCompetitionRoot, "current.json"),
+  `${JSON.stringify({
+    format: "drop7-competition-current-v1",
+    gameKey: currentCompetition.gameKey,
+    manifest: currentCompetition.manifest,
+    round: currentCompetition.round,
+  })}\n`,
+);
+writeFileSync(
+  join(publicCompetitionRoot, "catalog.json"),
+  `${JSON.stringify({
+    format: "drop7-competition-public-catalog-v1",
+    currentGameKey: competitionCatalog.currentGameKey,
+    games: competitionArtifacts.map((game) => ({
+      format: "drop7-competition-current-v1",
+      gameKey: game.gameKey,
+      manifest: game.manifest,
+      round: game.round,
+    })),
+  })}\n`,
+);
 
 rmSync(stagedRoot, { recursive: true, force: true });
 mkdirSync(stagedRoot, { recursive: true });

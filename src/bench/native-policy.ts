@@ -46,7 +46,11 @@ export interface NativeDecideOptions {
   binary?: string;
   /** Override for the build hint in the not-built error message. */
   buildHint?: string;
+  /** Per-decision wall-clock limit; a depth step costs roughly 25-50x. */
+  timeoutMs?: number;
 }
+
+const DEFAULT_TIMEOUT_MS = 600_000;
 
 export function nativeBinaryAvailable(binary = NATIVE_DECIDE_BINARY): boolean {
   return existsSync(binary);
@@ -76,7 +80,20 @@ export function nativeDecide(
     if (!existsSync(weights)) throw new Error(`native policy weights file is missing: ${weights}`);
     args.push("--weights", weights);
   }
-  const output = execFileSync(binary, args, { encoding: "utf8", timeout: 600_000 });
+  const timeout = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  let output: string;
+  try {
+    output = execFileSync(binary, args, { encoding: "utf8", timeout });
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ETIMEDOUT") {
+      throw new Error(
+        `native decision exceeded its ${Math.round(timeout / 1000)}s budget at depth ${
+          options.depth ?? 4
+        } (board ${serializeBoard(state.board)}); raise timeoutMs in the policy registration if this depth genuinely needs longer`,
+      );
+    }
+    throw error;
+  }
   const match = output.match(/^bestmove (\d|none)$/m);
   if (!match) throw new Error(`native decision binary returned no bestmove: ${output.slice(0, 200)}`);
   return match[1] === "none" ? null : Number(match[1]);

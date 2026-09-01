@@ -11,6 +11,7 @@ export const CLEAR_BONUS = 70_000;
 export type DiscValue = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 export type CoveredCell = typeof SOLID | typeof CRACKED;
 export type Cell = typeof EMPTY | DiscValue | CoveredCell;
+export type DroppableDisc = DiscValue | typeof SOLID;
 export type Board = readonly Cell[];
 export type RandomSource = () => number;
 
@@ -75,6 +76,8 @@ export interface LatentBoardOptions {
   values: readonly (DiscValue | null)[];
   /** Supplies the seven hidden values for each newly risen covered row, in column order. */
   nextCoveredRow: () => readonly DiscValue[];
+  /** Hidden value carried by a dropped gray disc (Classic only). */
+  droppedValue?: DiscValue | null;
 }
 
 export interface PlayMoveOptions {
@@ -207,7 +210,7 @@ export function legalColumns(board: Board): number[] {
 export function placeDisc(
   board: Board,
   column: number,
-  disc: DiscValue,
+  disc: DroppableDisc,
 ): Board | null {
   assertBoard(board);
   if (
@@ -367,7 +370,7 @@ export function resolveCascade(
   return { board: result.board, score: result.score, waves: result.waves };
 }
 
-function resolveCascadeWithAnimation(
+export function resolveCascadeWithAnimation(
   board: Board,
   random: RandomSource,
   startingDepth: number,

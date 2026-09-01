@@ -1,0 +1,15 @@
+[package]
+name = "drop7-classic-engine"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+description = "Deterministic Classic/Normal Drop7 transition engine"
+
+[lib]
+name = "drop7_classic_engine"
+path = "src/lib.rs"
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"

@@ -14,6 +14,7 @@ const deployments = {
     ledgerTable: "drop7-prod-competition-ledger",
     artifactBucket: "drop7-prod-competition-artifacts",
     analyticsBucket: "drop7-prod-analytics",
+    submissionsBucket: "drop7-prod-game-submissions",
   },
   dev: {
     domain: "dev.drop7.dev",
@@ -21,6 +22,7 @@ const deployments = {
     ledgerTable: "drop7-dev-competition-ledger",
     artifactBucket: "drop7-dev-competition-artifacts",
     analyticsBucket: "drop7-dev-analytics",
+    submissionsBucket: "drop7-dev-game-submissions",
   },
 } as const;
 const DROP7_HOSTED_ZONE_ID = "Z06342693O6N64NO6EU5M";
@@ -154,6 +156,19 @@ export default $config({
         bucket: deployment ? { bucket: deployment.analyticsBucket } : undefined,
       },
     });
+    const gameSubmissionLake = new sst.aws.Bucket("GameSubmissionLake", {
+      versioning: true,
+      lifecycle: [
+        {
+          id: "expire-submission-firehose-errors",
+          prefix: "firehose-errors/",
+          expiresIn: "30 days",
+        },
+      ],
+      transform: {
+        bucket: deployment ? { bucket: deployment.submissionsBucket } : undefined,
+      },
+    });
     const analyticsDatabase = new aws.glue.CatalogDatabase(
       "AnalyticsDatabase",
       {
@@ -205,6 +220,49 @@ export default $config({
         ],
       },
     });
+    const gameSubmissionsTable = new aws.glue.CatalogTable(
+      "AnalyticsGameSubmissions",
+      {
+        name: "game_submissions",
+        databaseName: analyticsDatabase.name,
+        description: "Server-validated completed mobile games delivered by Amazon Data Firehose",
+        tableType: "EXTERNAL_TABLE",
+        parameters: {
+          EXTERNAL: "TRUE",
+          classification: "json",
+        },
+        storageDescriptor: {
+          location: gameSubmissionLake.name.apply(
+            (bucketName) => `s3://${bucketName}/game-submissions/`,
+          ),
+          inputFormat: "org.apache.hadoop.mapred.TextInputFormat",
+          outputFormat: "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat",
+          serDeInfo: {
+            serializationLibrary: "org.openx.data.jsonserde.JsonSerDe",
+          },
+          columns: [
+            { name: "event_id", type: "string" },
+            { name: "event_name", type: "string" },
+            { name: "schema_version", type: "int" },
+            { name: "received_at", type: "string" },
+            { name: "received_at_ms", type: "bigint" },
+            { name: "game_id", type: "string" },
+            { name: "started_at", type: "string" },
+            { name: "completed_at", type: "string" },
+            { name: "source_application", type: "string" },
+            { name: "source_platform", type: "string" },
+            { name: "app_version", type: "string" },
+            { name: "mode", type: "string" },
+            { name: "ruleset", type: "string" },
+            { name: "verified_score", type: "bigint" },
+            { name: "verified_level", type: "int" },
+            { name: "verified_moves", type: "int" },
+            { name: "tape_json", type: "string" },
+            { name: "stage", type: "string" },
+          ],
+        },
+      },
+    );
     const optimizerRole = new aws.iam.Role("AnalyticsIcebergOptimizerRole", {
       assumeRolePolicy: aws.iam.getPolicyDocumentOutput({
         statements: [
@@ -443,6 +501,94 @@ export default $config({
       },
       { dependsOn: [analyticsTable, firehoseRolePolicy] },
     );
+    const gameSubmissionFirehoseLogGroup = new aws.cloudwatch.LogGroup(
+      "GameSubmissionFirehoseLogGroup",
+      {
+        name: `/aws/kinesisfirehose/drop7-${$app.stage}-game-submissions`,
+        retentionInDays: 30,
+      },
+    );
+    const gameSubmissionFirehoseLogStream = new aws.cloudwatch.LogStream(
+      "GameSubmissionFirehoseLogStream",
+      {
+        name: "S3Delivery",
+        logGroupName: gameSubmissionFirehoseLogGroup.name,
+      },
+    );
+    const gameSubmissionFirehoseRole = new aws.iam.Role(
+      "GameSubmissionFirehoseRole",
+      {
+        assumeRolePolicy: aws.iam.getPolicyDocumentOutput({
+          statements: [
+            {
+              effect: "Allow",
+              actions: ["sts:AssumeRole"],
+              principals: [
+                { type: "Service", identifiers: ["firehose.amazonaws.com"] },
+              ],
+            },
+          ],
+        }).json,
+      },
+    );
+    const gameSubmissionObjectsArn = gameSubmissionLake.arn.apply(
+      (arn) => `${arn}/*`,
+    );
+    const gameSubmissionFirehoseRolePolicy = new aws.iam.RolePolicy(
+      "GameSubmissionFirehoseRolePolicy",
+      {
+        role: gameSubmissionFirehoseRole.id,
+        policy: aws.iam.getPolicyDocumentOutput({
+          statements: [
+            {
+              sid: "WriteValidatedGames",
+              effect: "Allow",
+              actions: [
+                "s3:AbortMultipartUpload",
+                "s3:GetBucketLocation",
+                "s3:GetObject",
+                "s3:ListBucket",
+                "s3:ListBucketMultipartUploads",
+                "s3:PutObject",
+              ],
+              resources: [gameSubmissionLake.arn, gameSubmissionObjectsArn],
+            },
+            {
+              sid: "WriteDeliveryLogs",
+              effect: "Allow",
+              actions: ["logs:PutLogEvents"],
+              resources: [gameSubmissionFirehoseLogStream.arn],
+            },
+          ],
+        }).json,
+      },
+    );
+    const gameSubmissionFirehose = new aws.kinesis.FirehoseDeliveryStream(
+      "GameSubmissionFirehose",
+      {
+        name: `drop7-${$app.stage}-game-submissions`,
+        destination: "extended_s3",
+        extendedS3Configuration: {
+          roleArn: gameSubmissionFirehoseRole.arn,
+          bucketArn: gameSubmissionLake.arn,
+          // Firehose's maximum time buffer is 15 minutes. Objects are grouped
+          // under an hourly prefix, so every active hour is independently queryable.
+          bufferingInterval: 900,
+          bufferingSize: 128,
+          compressionFormat: "GZIP",
+          prefix:
+            "game-submissions/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/",
+          errorOutputPrefix:
+            "firehose-errors/!{firehose:error-output-type}/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/",
+          cloudwatchLoggingOptions: {
+            enabled: true,
+            logGroupName: gameSubmissionFirehoseLogGroup.name,
+            logStreamName: gameSubmissionFirehoseLogStream.name,
+          },
+        },
+      },
+      { dependsOn: [gameSubmissionFirehoseRolePolicy] },
+    );
     const analyticsWorkgroup = new aws.athena.Workgroup(
       "AnalyticsAthenaWorkgroup",
       {
@@ -493,6 +639,8 @@ export default $config({
         DROP7_ANALYTICS_DATABASE: analyticsDatabase.name,
         DROP7_ANALYTICS_TABLE: analyticsTable.name,
         DROP7_ANALYTICS_ATHENA_WORKGROUP: analyticsWorkgroup.name,
+        DROP7_GAME_SUBMISSIONS_FIREHOSE_STREAM: gameSubmissionFirehose.name,
+        DROP7_GAME_SUBMISSIONS_TABLE: gameSubmissionsTable.name,
         ADMIN_GITHUB_USERNAME: process.env.ADMIN_GITHUB_USERNAME?.trim() ?? "",
       },
       permissions: [
@@ -509,7 +657,7 @@ export default $config({
         },
         {
           actions: ["firehose:PutRecord"],
-          resources: [analyticsFirehose.arn],
+          resources: [analyticsFirehose.arn, gameSubmissionFirehose.arn],
         },
         {
           actions: [
@@ -535,6 +683,7 @@ export default $config({
             analyticsCatalogArn,
             analyticsDatabase.arn,
             analyticsTable.arn,
+            gameSubmissionsTable.arn,
           ],
         },
         {
@@ -543,11 +692,11 @@ export default $config({
             "s3:ListBucket",
             "s3:ListBucketMultipartUploads",
           ],
-          resources: [analyticsLake.arn],
+          resources: [analyticsLake.arn, gameSubmissionLake.arn],
         },
         {
           actions: ["s3:GetObject"],
-          resources: [analyticsLakeObjectsArn],
+          resources: [analyticsLakeObjectsArn, gameSubmissionObjectsArn],
         },
         {
           actions: ["s3:AbortMultipartUpload", "s3:PutObject"],
@@ -592,6 +741,9 @@ export default $config({
       CompetitionLedger: competitionLedger.name,
       CompetitionArtifactBucket: competitionArtifacts.name,
       AnalyticsBucket: analyticsLake.name,
+      GameSubmissionBucket: gameSubmissionLake.name,
+      GameSubmissionFirehose: gameSubmissionFirehose.name,
+      GameSubmissionsTable: gameSubmissionsTable.name,
       AnalyticsFirehose: analyticsFirehose.name,
       AnalyticsDatabase: analyticsDatabase.name,
       AnalyticsTable: analyticsTable.name,

@@ -16,12 +16,12 @@ export default function TermsPage() {
         Terms of service
       </p>
       <h1 className="!mt-2">Terms for using Drop7 Research</h1>
-      <p className="text-sm text-zinc-500">Effective August 23, 2026</p>
+      <p className="text-sm text-zinc-500">Effective September 1, 2026</p>
 
       <p>
-        These terms apply when you use the Drop7 Research website, browser game, research
-        console, source browser, or competition features (together, the “site”). By using the
-        site, you agree to these terms. If you do not agree, do not use the site.
+        These terms apply when you use the Drop7 Research website, mobile app, browser game,
+        research console, source browser, or competition features (together, the “service”). By
+        using the service, you agree to these terms. If you do not agree, do not use the service.
       </p>
 
       <h2>Research project, not a commercial game service</h2>
@@ -34,8 +34,8 @@ export default function TermsPage() {
 
       <h2>Permitted use</h2>
       <p>
-        You may read the site, play the browser game, reproduce published research, inspect the
-        source, and use the public interfaces for legitimate research, education, and personal
+        You may read the site, play the games, reproduce published research, inspect the source,
+        and use the public interfaces for legitimate research, education, and personal
         experimentation. You must comply with applicable law and with any license or attribution
         terms attached to particular source files, data, or third-party materials.
       </p>
@@ -50,10 +50,11 @@ export default function TermsPage() {
 
       <h2>Competition participation</h2>
       <p>
-        You may play without signing in. Submitting a completed run requires GitHub sign-in and an
-        explicit submit action. By submitting, you confirm that you control the account used, that
-        the submitted choices came from the represented run, and that the project may validate,
-        rank, display, archive, and study that submission as described in the{" "}
+        You may play without signing in. Website leaderboard submission requires GitHub sign-in;
+        the mobile app lets you submit under a display name without an account. Both require an
+        explicit submit action. By submitting, you confirm that the submitted choices came from
+        the represented run and that the project may validate, rank, display, archive, and study
+        that submission as described in the{" "}
         <Link href="/privacy">privacy policy</Link>.
       </p>
       <p>
@@ -64,6 +65,22 @@ export default function TermsPage() {
         prize, employment offer, or promise of continued availability.
       </p>
 
+      <h2>Completed mobile games and research use</h2>
+      <p>
+        When a game finishes in the mobile app, the app automatically and silently sends its game
+        configuration, disc and covered-row tape, move sequence, timestamps, and claimed result to
+        the project. The app records delivery status on your device and retries failed deliveries.
+        The server independently replays a submission before accepting it. This collection does
+        not require an account, and the submitted record does not include an advertising or device
+        identifier.
+      </p>
+      <p>
+        By playing a completed mobile game, you grant the project a worldwide, non-exclusive,
+        royalty-free license to validate, reproduce, archive, analyze, publish, and include the
+        submitted moves and resulting game data in research datasets and outputs, as described in
+        the <Link href="/privacy">privacy policy</Link>.
+      </p>
+
       <h2>Source code, research, and trademarks</h2>
       <p>
         The site&apos;s source is publicly available in the{" "}
@@ -72,7 +89,7 @@ export default function TermsPage() {
         </a>
         . Public visibility does not replace a license: any license or notice accompanying a
         particular work governs your reuse of that work. You retain rights in material you own;
-        by deliberately submitting competition moves, you grant the project a worldwide,
+        by submitting competition moves, you grant the project a worldwide,
         non-exclusive, royalty-free license to validate, reproduce, analyze, publish, and include
         those moves and their resulting game data in the leaderboard and research archive.
       </p>
@@ -91,14 +108,14 @@ export default function TermsPage() {
 
       <h2>Availability and changes</h2>
       <p>
-        The site may change, pause, remove, or discontinue features or competitions at any time.
+        The service may change, pause, remove, or discontinue features or competitions at any time.
         Research records may be corrected through the project&apos;s documented evidence process.
         Material changes to these terms will be published here with a new effective date.
       </p>
 
       <h2>No warranties</h2>
       <p>
-        To the fullest extent permitted by law, the site and its contents are provided “as is” and
+        To the fullest extent permitted by law, the service and its contents are provided “as is” and
         “as available,” without warranties of accuracy, completeness, fitness for a particular
         purpose, non-infringement, security, or uninterrupted availability. You use research code,
         strategies, data, and game features at your own risk.
@@ -109,7 +126,7 @@ export default function TermsPage() {
         To the fullest extent permitted by law, the project owner and contributors will not be
         liable for indirect, incidental, special, consequential, exemplary, or punitive damages,
         or for lost data, profits, opportunities, or goodwill, arising from or related to your use
-        of the site. Nothing in these terms limits liability that cannot legally be limited.
+        of the service. Nothing in these terms limits liability that cannot legally be limited.
       </p>
 
       <h2>Contact</h2>

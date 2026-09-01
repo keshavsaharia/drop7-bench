@@ -325,7 +325,9 @@ function CompetitionLeaderboard({
     detail:
       (entry.kind === "ai"
         ? `${entry.policyFamily ?? "research"} · ${entry.publicInformation === false ? "extended state" : "public policy"}`
-        : entry.provider) +
+        : entry.sourceApplication === "drop7-mobile"
+          ? `mobile app${entry.sourcePlatform ? ` · ${entry.sourcePlatform}` : ""}`
+          : entry.provider) +
       " · " +
       new Date(entry.submittedAt).toLocaleDateString(),
     scoreMismatch: entry.scoreMismatch,

@@ -20,6 +20,8 @@ export interface CompetitionIdentity {
   provider: string;
   providerAccountId: string;
   displayName: string;
+  sourceApplication?: string;
+  sourcePlatform?: string;
 }
 
 export interface CompetitionSubmissionRecord {
@@ -43,6 +45,8 @@ export interface CompetitionSubmissionRecord {
   censored: boolean;
   submittedAt: string;
   validatedAt: string;
+  sourceApplication?: string;
+  sourcePlatform?: string;
   policyId?: string;
   policyFamily?: string;
   policyDescription?: string;
@@ -66,6 +70,8 @@ export interface CompetitionLeaderboardEntry {
   policyFamily: string | null;
   publicInformation: boolean | null;
   researchUrl: string | null;
+  sourceApplication: string | null;
+  sourcePlatform: string | null;
 }
 
 const documentClient = DynamoDBDocumentClient.from(new DynamoDBClient({}), {
@@ -81,11 +87,12 @@ export async function storeValidatedSubmission(input: {
   gameVersion: string;
   roundId: string;
   artifactSha256: string;
+  gameKey: string;
 }): Promise<{ record: CompetitionSubmissionRecord; duplicate: boolean }> {
   const tableName = requiredTableName();
   const packedMoves = packColumns(input.columns);
   const submissionId = createHash("sha256")
-    .update(COMPETITION_GAME_KEY)
+    .update(input.gameKey)
     .update("\0")
     .update(input.identity.userId)
     .update("\0")
@@ -95,7 +102,7 @@ export async function storeValidatedSubmission(input: {
   const record: CompetitionSubmissionRecord = {
     submissionId,
     recordType: "validated-score",
-    gameKey: COMPETITION_GAME_KEY,
+    gameKey: input.gameKey,
     competitionId: input.competitionId,
     gameVersion: input.gameVersion,
     roundId: input.roundId,
@@ -113,6 +120,8 @@ export async function storeValidatedSubmission(input: {
     censored: input.replay.censored,
     submittedAt: now,
     validatedAt: now,
+    sourceApplication: input.identity.sourceApplication,
+    sourcePlatform: input.identity.sourcePlatform,
   };
 
   try {
@@ -235,6 +244,10 @@ function toLeaderboardEntry(
         ? item.publicInformation
         : null,
     researchUrl: safeResearchUrl(item.researchUrl),
+    sourceApplication:
+      typeof item.sourceApplication === "string" ? item.sourceApplication : null,
+    sourcePlatform:
+      typeof item.sourcePlatform === "string" ? item.sourcePlatform : null,
   };
 }
 

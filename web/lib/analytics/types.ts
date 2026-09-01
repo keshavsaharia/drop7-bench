@@ -27,3 +27,18 @@ export interface DashboardData {
     engineExecutionMs: number;
   };
 }
+
+export interface IosDashboardPoint {
+  label: string;
+  bucket: string;
+  games: number;
+  moves: number;
+  averageScore: number;
+}
+
+export interface IosDashboardData {
+  summary: IosDashboardPoint;
+  timeSeries: IosDashboardPoint[];
+  breakdowns: Record<string, IosDashboardPoint[]>;
+  query: DashboardData["query"];
+}

@@ -269,6 +269,10 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
         chanceSamples: 7,
         // The decide CLI partitions this aggregate budget across workers.
         cache: 16_777_216,
+        // The measured opening decision costs 2302 s on the 16-core
+        // workstation, but a mid-game board with more live continuations
+        // overran a two-hour budget, so the limit is four hours.
+        timeoutMs: 14_400_000,
       }),
   }),
 ];
