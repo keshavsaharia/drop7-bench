@@ -3,11 +3,14 @@ import { isAnalyticsAdmin } from "@/lib/analytics/admin";
 import { runAthenaQuery } from "@/lib/analytics/athena";
 import {
   buildDashboardSql,
+  buildIosDashboardSql,
   buildReadOnlyCustomSql,
   isAnalyticsAudience,
   isAnalyticsRange,
   parseDashboardResult,
+  parseIosDashboardResult,
 } from "@/lib/analytics/queries";
+import { readLimitedJson } from "@/lib/request-body";
 
 export const runtime = "nodejs";
 export const maxDuration = 20;
@@ -31,17 +34,11 @@ export async function POST(request: Request) {
     return Response.json({ error: "invalid-origin" }, { status: 403 });
   }
 
-  const contentLength = Number(request.headers.get("content-length") ?? 0);
-  if (contentLength > 16_384) {
-    return Response.json({ error: "request-too-large" }, { status: 413 });
+  const parsed = await readLimitedJson(request, 16_384);
+  if (!parsed.ok) {
+    return Response.json({ error: parsed.error }, { status: parsed.status });
   }
-
-  let body: QueryBody;
-  try {
-    body = (await request.json()) as QueryBody;
-  } catch {
-    return Response.json({ error: "invalid-json" }, { status: 400 });
-  }
+  const body = parsed.value as QueryBody;
 
   try {
     if (body.mode === "dashboard") {
@@ -52,6 +49,14 @@ export async function POST(request: Request) {
         buildDashboardSql(body.range, body.audience),
       );
       return Response.json({ data: parseDashboardResult(result) });
+    }
+
+    if (body.mode === "ios-dashboard") {
+      if (!isAnalyticsRange(body.range)) {
+        return Response.json({ error: "invalid-ios-dashboard-query" }, { status: 400 });
+      }
+      const result = await runAthenaQuery(buildIosDashboardSql(body.range));
+      return Response.json({ data: parseIosDashboardResult(result) });
     }
 
     if (body.mode === "custom" && typeof body.sql === "string") {

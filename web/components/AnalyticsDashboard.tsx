@@ -1,13 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { FormEvent } from "react";
+import type { FormEvent, ReactNode } from "react";
 import type {
   AnalyticsAudience,
   AnalyticsRange,
   AthenaQueryResult,
   DashboardData,
   DashboardPoint,
+  IosDashboardData,
 } from "@/lib/analytics/types";
 
 const RANGE_OPTIONS: { value: AnalyticsRange; label: string }[] = [
@@ -38,11 +39,15 @@ ORDER BY 1 DESC
 LIMIT 30`;
 
 export function AnalyticsDashboard() {
+  const [view, setView] = useState<"site" | "ios">("site");
   const [range, setRange] = useState<AnalyticsRange>("30d");
   const [audience, setAudience] = useState<AnalyticsAudience>("humans");
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [iosDashboard, setIosDashboard] = useState<IosDashboardData | null>(null);
+  const [iosLoading, setIosLoading] = useState(false);
+  const [iosError, setIosError] = useState<string | null>(null);
   const [sql, setSql] = useState(DEFAULT_SQL);
   const [customResult, setCustomResult] = useState<AthenaQueryResult | null>(null);
   const [customLoading, setCustomLoading] = useState(false);
@@ -72,10 +77,37 @@ export function AnalyticsDashboard() {
     }
   }, [audience, range]);
 
+  const loadIosDashboard = useCallback(async () => {
+    setIosLoading(true);
+    setIosError(null);
+    try {
+      const response = await fetch("/api/analytics/query", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ mode: "ios-dashboard", range }),
+      });
+      const payload = (await response.json()) as {
+        data?: IosDashboardData;
+        error?: string;
+      };
+      if (!response.ok || !payload.data) {
+        throw new Error(payload.error ?? "The iOS analytics query failed.");
+      }
+      setIosDashboard(payload.data);
+    } catch (caught) {
+      setIosError(caught instanceof Error ? caught.message : "The iOS analytics query failed.");
+    } finally {
+      setIosLoading(false);
+    }
+  }, [range]);
+
   useEffect(() => {
-    const timer = window.setTimeout(() => void loadDashboard(), 0);
+    const timer = window.setTimeout(
+      () => void (view === "ios" ? loadIosDashboard() : loadDashboard()),
+      0,
+    );
     return () => window.clearTimeout(timer);
-  }, [loadDashboard]);
+  }, [loadDashboard, loadIosDashboard, view]);
 
   async function runCustomQuery(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -110,13 +142,20 @@ export function AnalyticsDashboard() {
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
             Admin · first-party analytics
           </p>
-          <h1 className="mt-2 text-3xl font-black text-zinc-50">Site analytics</h1>
+          <h1 className="mt-2 text-3xl font-black text-zinc-50">
+            {view === "ios" ? "iOS app analytics" : "Site analytics"}
+          </h1>
           <p className="mt-3 leading-relaxed text-zinc-400">
-            Aggregate server-side page views from the Firehose-backed Iceberg table.
-            The table normally trails live traffic by about five minutes. Times are UTC.
+            {view === "ios"
+              ? "Server-validated completed games submitted by the iOS app. The raw move and game tapes stay in the hourly S3 archive. Times are UTC."
+              : "Aggregate server-side page views from the Firehose-backed Iceberg table. The table normally trails live traffic by about five minutes. Times are UTC."}
           </p>
         </div>
         <div className="flex flex-wrap items-end gap-3">
+          <div className="flex rounded-lg border border-zinc-800 p-1" aria-label="Analytics view">
+            <ViewButton active={view === "site"} onClick={() => setView("site")}>Website</ViewButton>
+            <ViewButton active={view === "ios"} onClick={() => setView("ios")}>iOS app</ViewButton>
+          </div>
           <label className="analytics-control">
             <span>Window</span>
             <select value={range} onChange={(event) => setRange(event.target.value as AnalyticsRange)}>
@@ -127,32 +166,36 @@ export function AnalyticsDashboard() {
               ))}
             </select>
           </label>
-          <label className="analytics-control">
-            <span>Audience</span>
-            <select
-              value={audience}
-              onChange={(event) => setAudience(event.target.value as AnalyticsAudience)}
-            >
-              <option value="humans">People only</option>
-              <option value="all">People and bots</option>
-              <option value="bots">Bots only</option>
-            </select>
-          </label>
+          {view === "site" ? (
+            <label className="analytics-control">
+              <span>Audience</span>
+              <select
+                value={audience}
+                onChange={(event) => setAudience(event.target.value as AnalyticsAudience)}
+              >
+                <option value="humans">People only</option>
+                <option value="all">People and bots</option>
+                <option value="bots">Bots only</option>
+              </select>
+            </label>
+          ) : null}
           <button
             type="button"
             className="analytics-run-button"
-            onClick={() => void loadDashboard()}
-            disabled={loading}
+            onClick={() => void (view === "ios" ? loadIosDashboard() : loadDashboard())}
+            disabled={view === "ios" ? iosLoading : loading}
           >
-            {loading ? "Querying…" : "Refresh"}
+            {(view === "ios" ? iosLoading : loading) ? "Querying…" : "Refresh"}
           </button>
         </div>
       </section>
 
-      {error ? <ErrorNotice message={error} /> : null}
-      {loading && !dashboard ? <DashboardSkeleton /> : null}
+      {view === "site" && error ? <ErrorNotice message={error} /> : null}
+      {view === "ios" && iosError ? <ErrorNotice message={iosError} /> : null}
+      {view === "site" && loading && !dashboard ? <DashboardSkeleton /> : null}
+      {view === "ios" && iosLoading && !iosDashboard ? <DashboardSkeleton /> : null}
 
-      {dashboard ? (
+      {view === "site" && dashboard ? (
         <>
           <section className="grid gap-3 sm:grid-cols-3">
             <MetricCard label="Page views" value={dashboard.summary.views} />
@@ -170,7 +213,7 @@ export function AnalyticsDashboard() {
                 {loading ? "Refreshing…" : `${dashboard.timeSeries.length} buckets`}
               </span>
             </div>
-            <TimeSeriesChart points={dashboard.timeSeries} />
+            <TimeSeriesChart points={dashboard.timeSeries} metricLabel="page views" />
           </section>
 
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -187,6 +230,58 @@ export function AnalyticsDashboard() {
             dataScannedBytes={dashboard.query.dataScannedBytes}
             engineExecutionMs={dashboard.query.engineExecutionMs}
             queryExecutionId={dashboard.query.queryExecutionId}
+          />
+        </>
+      ) : null}
+
+      {view === "ios" && iosDashboard ? (
+        <>
+          <section className="grid gap-3 sm:grid-cols-3">
+            <MetricCard label="Completed games" value={iosDashboard.summary.games} />
+            <MetricCard label="Moves collected" value={iosDashboard.summary.moves} />
+            <MetricCard label="Average score" value={Math.round(iosDashboard.summary.averageScore)} />
+          </section>
+          <section className="analytics-panel">
+            <div className="mb-5 flex flex-wrap items-baseline justify-between gap-2">
+              <div>
+                <h2 className="text-lg font-bold text-zinc-100">Completed games over time</h2>
+                <p className="mt-1 text-sm text-zinc-500">Validated iOS submissions per reporting bucket</p>
+              </div>
+              <span className="text-xs text-zinc-600">
+                {iosLoading ? "Refreshing…" : `${iosDashboard.timeSeries.length} buckets`}
+              </span>
+            </div>
+            <TimeSeriesChart
+              points={iosDashboard.timeSeries.map((point) => ({
+                label: point.label,
+                bucket: point.bucket,
+                views: point.games,
+                visitors: point.moves,
+                paths: point.averageScore,
+              }))}
+              metricLabel="completed games"
+            />
+          </section>
+          <section className="grid gap-4 md:grid-cols-2">
+            <BreakdownCard
+              title="Game modes"
+              points={(iosDashboard.breakdowns.modes ?? []).map((point) => ({
+                label: point.label, bucket: point.bucket, views: point.games,
+                visitors: point.moves, paths: point.averageScore,
+              }))}
+            />
+            <BreakdownCard
+              title="App versions"
+              points={(iosDashboard.breakdowns.versions ?? []).map((point) => ({
+                label: point.label, bucket: point.bucket, views: point.games,
+                visitors: point.moves, paths: point.averageScore,
+              }))}
+            />
+          </section>
+          <QueryFootnote
+            dataScannedBytes={iosDashboard.query.dataScannedBytes}
+            engineExecutionMs={iosDashboard.query.engineExecutionMs}
+            queryExecutionId={iosDashboard.query.queryExecutionId}
           />
         </>
       ) : null}
@@ -236,7 +331,37 @@ function MetricCard({ label, value }: { label: string; value: number }) {
   );
 }
 
-function TimeSeriesChart({ points }: { points: DashboardPoint[] }) {
+function ViewButton({
+  active,
+  children,
+  onClick,
+}: {
+  active: boolean;
+  children: ReactNode;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      onClick={onClick}
+      className={
+        "rounded-md px-3 py-2 text-xs font-semibold transition-colors " +
+        (active ? "bg-zinc-700 text-zinc-50" : "text-zinc-500 hover:text-zinc-200")
+      }
+    >
+      {children}
+    </button>
+  );
+}
+
+function TimeSeriesChart({
+  points,
+  metricLabel,
+}: {
+  points: DashboardPoint[];
+  metricLabel: string;
+}) {
   const geometry = useMemo(() => {
     const width = 900;
     const height = 260;
@@ -257,7 +382,7 @@ function TimeSeriesChart({ points }: { points: DashboardPoint[] }) {
   }, [points]);
 
   if (points.length === 0) {
-    return <EmptyState label="No page views in this window." />;
+    return <EmptyState label={`No ${metricLabel} in this window.`} />;
   }
 
   const line = geometry.coordinates.map(({ x, y }) => `${x},${y}`).join(" ");
@@ -276,7 +401,7 @@ function TimeSeriesChart({ points }: { points: DashboardPoint[] }) {
         viewBox={`0 0 ${geometry.width} ${geometry.height}`}
         className="min-w-[42rem]"
         role="img"
-        aria-label={`Page-view time series with ${points.length} buckets and a maximum of ${geometry.max} views`}
+        aria-label={`${metricLabel} time series with ${points.length} buckets and a maximum of ${geometry.max}`}
       >
         {[0, 0.5, 1].map((fraction) => {
           const y = geometry.top + geometry.chartHeight * fraction;
@@ -308,7 +433,7 @@ function TimeSeriesChart({ points }: { points: DashboardPoint[] }) {
         />
         {geometry.coordinates.map(({ x, y, point }) => (
           <circle key={point.bucket} cx={x} cy={y} r="3" fill="#09090b" stroke="#6ee7b7" strokeWidth="2">
-            <title>{`${formatBucket(point.bucket)}: ${point.views.toLocaleString()} views`}</title>
+            <title>{`${formatBucket(point.bucket)}: ${point.views.toLocaleString()} ${metricLabel}`}</title>
           </circle>
         ))}
         {labelIndexes.map((index) => {

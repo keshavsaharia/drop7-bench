@@ -175,6 +175,35 @@ validated run so the same user/game/move stream is idempotent. Client/server sco
 mismatches remain valid submissions, but are flagged in DynamoDB and structured CloudWatch
 logs; only the independently replayed score is ranked.
 
+Mobile clients can submit to the same competition endpoint without an account by sending a
+display name, a stable per-run identifier, and `source=mobile-app`. The server still replays
+the pinned round before inserting it. Leaderboard records retain `sourceApplication` and
+`sourcePlatform`, which lets the public leaderboard distinguish mobile results from website
+and policy submissions. `web/public/competition/catalog.json` is generated at build time from
+the immutable registry so the app can switch among the current and archived games.
+
+## Completed mobile-game archive
+
+The unauthenticated `POST /api/submit/hardcore` and `POST /api/submit/classic` routes accept
+the exact version-2 mobile tape schema. The route name, ruleset, tape shape, source metadata,
+and claimed score/level/move count must agree. The Lambda independently replays every move
+through the corresponding TypeScript engine and sends only a complete matching game to the
+stage Firehose stream. Payloads contain no account or device identifier.
+
+Each stage owns a separate private, versioned S3 archive and direct-PUT Firehose stream:
+
+| SST stage | Firehose stream | S3 bucket | Glue table |
+| --- | --- | --- | --- |
+| `production` | `drop7-production-game-submissions` | `drop7-prod-game-submissions` | `game_submissions` |
+| `dev` | `drop7-dev-game-submissions` | `drop7-dev-game-submissions` | `game_submissions` |
+
+Firehose buffers for up to 15 minutes or 128 MiB and GZIP-compresses newline-delimited JSON
+under `game-submissions/year=YYYY/month=MM/day=DD/hour=HH/`. Firehose's direct-S3 maximum
+buffering interval is 15 minutes, so an hour partition can contain more than one object; the
+hour prefix is the stable unit for downstream compaction and study. Failed records go under
+`firehose-errors/` and expire after 30 days. The external Glue JSON table exposes validated
+metadata plus the exact tape JSON for Athena queries.
+
 ## Deploy and inspect locally
 
 Use an AWS profile that can create the resources SST needs:
@@ -232,7 +261,10 @@ discarded before the event is sent.
 `/analytics` and `/api/analytics/query` both require a GitHub Auth.js session whose handle
 matches `ADMIN_GITHUB_USERNAME`. Other signed-in users receive a 404. The page offers
 aggregate time series and page, acquisition, referrer, country, device, and browser
-breakdowns, plus a read-only SQL workspace. Custom SQL accepts one `SELECT` or `WITH`
+breakdowns, plus a separate iOS-app view backed by validated completed-game submissions and
+a read-only SQL workspace. The iOS view reports completed games, moves, score averages,
+mode mix, and app-version mix without joining to an account or device identifier. Custom SQL
+accepts one `SELECT` or `WITH`
 statement, returns at most 500 rows, and runs in a dedicated Athena engine-v3 workgroup
 that enforces its result location and a 1 GiB per-query scan ceiling. The site Lambda role
 can read only the analytics Glue resources and S3 bucket, write only Athena results, run

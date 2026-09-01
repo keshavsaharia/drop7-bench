@@ -71,7 +71,8 @@ export default async function HumanReplayPage({
         <p className="mt-2 text-sm text-zinc-500">
           Verified by replaying {record.moveCount} packed column choices against{" "}
           {record.roundId}. {isPolicy ? "Seeded" : "Submitted"}{" "}
-          {new Date(record.submittedAt).toLocaleString()} via {record.provider}.
+          {new Date(record.submittedAt).toLocaleString()} via{" "}
+          {record.sourceApplication === "drop7-mobile" ? "the mobile app" : record.provider}.
         </p>
         {isPolicy && record.researchUrl && (
           <p className="mt-2 text-sm">

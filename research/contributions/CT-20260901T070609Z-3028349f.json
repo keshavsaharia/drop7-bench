@@ -1,0 +1,47 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260901T070609Z-3028349f",
+  "actor": {
+    "kind": "model",
+    "platform": "Codex",
+    "model": "GPT-5",
+    "agentId": "/root"
+  },
+  "level": "L2",
+  "roles": [
+    {
+      "role": "software",
+      "degree": "substantial"
+    },
+    {
+      "role": "validation",
+      "degree": "supporting"
+    }
+  ],
+  "summary": "Implemented bounded deterministic TypeScript and Rust Classic-mode game mechanics for future research use, plus an exact recorded-game tape replay path used to validate mobile submissions. The implementations cover the decreasing per-level move clock, 7,000-point rise bonus, numbered and covered incoming discs, explicit hidden values, explicit covered rows, cascades, scoring, legality, and terminal behavior without using future information during policy play.",
+  "theoryIds": [],
+  "experimentIds": [],
+  "runIds": [],
+  "artifactPaths": [
+    "src/core/typescript/classic-engine.ts",
+    "src/core/typescript/classic-engine.test.ts",
+    "src/core/typescript/recorded-game.ts",
+    "src/core/rust/classic-engine/"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "npm test: all 145 runnable tests passed and one optional native-binary test skipped, including Classic clock, gray-disc, latent-value, exact cross-engine transition, and explicit-tape replay tests",
+    "cargo test --manifest-path src/core/rust/classic-engine/Cargo.toml: 4 passed",
+    "npm --prefix web test: all tests passed, including server-side Classic submission replay, request-size enforcement, analytics deduplication, and score-claim validation",
+    "npm --prefix web run build: Next.js production build and TypeScript checks passed"
+  ],
+  "limitations": [
+    "The TypeScript and Rust engines pass a shared exact transition conformance case, but the Rust crate is not yet integrated into the repository's native parity suite or a direct whole-trajectory parity harness.",
+    "No gameplay benchmark or strategy experiment was run; this contribution establishes mechanics and validation infrastructure only.",
+    "Self-reported contribution; not yet independently reviewed."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-09-01T07:06:09Z"
+}

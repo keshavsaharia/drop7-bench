@@ -4,6 +4,8 @@ import type {
   AthenaQueryResult,
   DashboardData,
   DashboardPoint,
+  IosDashboardData,
+  IosDashboardPoint,
 } from "@/lib/analytics/types";
 
 const RANGE_CONFIG: Record<
@@ -195,6 +197,82 @@ UNION ALL SELECT * FROM browsers
 `.trim();
 }
 
+export function buildIosDashboardSql(
+  range: AnalyticsRange,
+  now = new Date(),
+): string {
+  const database = analyticsIdentifier(
+    "DROP7_ANALYTICS_DATABASE",
+    process.env.DROP7_ANALYTICS_DATABASE,
+  );
+  const table = analyticsIdentifier(
+    "DROP7_GAME_SUBMISSIONS_TABLE",
+    process.env.DROP7_GAME_SUBMISSIONS_TABLE,
+  );
+  const { durationMs, truncation } = RANGE_CONFIG[range];
+  const endMs = now.getTime();
+  const startMs = endMs - durationMs;
+  return `
+WITH ranked_deliveries AS (
+  SELECT
+    event_id,
+    received_at_ms,
+    app_version,
+    mode,
+    verified_score,
+    verified_moves,
+    row_number() OVER (
+      PARTITION BY event_id
+      ORDER BY received_at_ms ASC
+    ) AS delivery_rank
+  FROM "${database}"."${table}"
+  WHERE event_name = 'completed_game'
+    AND source_application = 'drop7-mobile'
+    AND source_platform = 'ios'
+),
+filtered AS (
+  SELECT received_at_ms, app_version, mode, verified_score, verified_moves
+  FROM ranked_deliveries
+  WHERE delivery_rank = 1
+    AND received_at_ms >= ${startMs}
+    AND received_at_ms < ${endMs}
+),
+summary AS (
+  SELECT 'summary' AS section, 'All iOS games' AS label, '' AS bucket,
+    count(*) AS games, coalesce(sum(verified_moves), 0) AS moves,
+    coalesce(avg(verified_score), 0) AS average_score
+  FROM filtered
+),
+time_series AS (
+  SELECT 'time_series' AS section, '' AS label,
+    CAST(date_trunc('${truncation}', from_unixtime(received_at_ms / 1000.0)) AS varchar) AS bucket,
+    count(*) AS games, coalesce(sum(verified_moves), 0) AS moves,
+    coalesce(avg(verified_score), 0) AS average_score
+  FROM filtered GROUP BY 3
+),
+modes AS (
+  SELECT * FROM (
+    SELECT 'modes' AS section, mode AS label, '' AS bucket,
+      count(*) AS games, coalesce(sum(verified_moves), 0) AS moves,
+      coalesce(avg(verified_score), 0) AS average_score
+    FROM filtered GROUP BY 2 ORDER BY games DESC LIMIT 12
+  )
+),
+versions AS (
+  SELECT * FROM (
+    SELECT 'versions' AS section, app_version AS label, '' AS bucket,
+      count(*) AS games, coalesce(sum(verified_moves), 0) AS moves,
+      coalesce(avg(verified_score), 0) AS average_score
+    FROM filtered GROUP BY 2 ORDER BY games DESC LIMIT 12
+  )
+)
+SELECT * FROM summary
+UNION ALL SELECT * FROM time_series
+UNION ALL SELECT * FROM modes
+UNION ALL SELECT * FROM versions
+`.trim();
+}
+
 export function buildReadOnlyCustomSql(sql: string): string {
   const trimmed = sql.trim();
   if (!trimmed || trimmed.length > 10_000) {
@@ -254,6 +332,48 @@ export function parseDashboardResult(result: AthenaQueryResult): DashboardData {
       .map(withoutSection)
       .sort((left, right) => left.bucket.localeCompare(right.bucket)),
     breakdowns,
+    query: {
+      queryExecutionId: result.queryExecutionId,
+      dataScannedBytes: result.dataScannedBytes,
+      engineExecutionMs: result.engineExecutionMs,
+    },
+  };
+}
+
+export function parseIosDashboardResult(result: AthenaQueryResult): IosDashboardData {
+  const points = result.rows.map((row) => ({
+    section: row.section ?? "",
+    label: row.label ?? "",
+    bucket: row.bucket ?? "",
+    games: numberValue(row.games),
+    moves: numberValue(row.moves),
+    averageScore: numberValue(row.average_score),
+  }));
+  const summary = points.find((point) => point.section === "summary") ?? {
+    section: "summary",
+    label: "All iOS games",
+    bucket: "",
+    games: 0,
+    moves: 0,
+    averageScore: 0,
+  };
+  const clean = (point: typeof summary): IosDashboardPoint => ({
+    label: point.label,
+    bucket: point.bucket,
+    games: point.games,
+    moves: point.moves,
+    averageScore: point.averageScore,
+  });
+  return {
+    summary: clean(summary),
+    timeSeries: points.filter((point) => point.section === "time_series")
+      .map(clean).sort((left, right) => left.bucket.localeCompare(right.bucket)),
+    breakdowns: {
+      modes: points.filter((point) => point.section === "modes")
+        .map(clean).sort((left, right) => right.games - left.games),
+      versions: points.filter((point) => point.section === "versions")
+        .map(clean).sort((left, right) => right.games - left.games),
+    },
     query: {
       queryExecutionId: result.queryExecutionId,
       dataScannedBytes: result.dataScannedBytes,

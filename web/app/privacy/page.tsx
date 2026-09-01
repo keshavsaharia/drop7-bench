@@ -15,7 +15,7 @@ export default function PrivacyPage() {
         Privacy policy
       </p>
       <h1 className="!mt-2">Privacy without a black box</h1>
-      <p className="text-sm text-zinc-500">Effective August 23, 2026</p>
+      <p className="text-sm text-zinc-500">Effective September 1, 2026</p>
 
       <div className="my-6 rounded-xl border border-emerald-900/70 bg-emerald-950/20 p-5">
         <p className="!m-0 font-semibold text-emerald-200">Summary</p>
@@ -23,9 +23,9 @@ export default function PrivacyPage() {
           Ordinary visits are measured on the server with first-party page-view analytics.
           There are no third-party analytics scripts, advertising pixels, cross-site trackers,
           or analytics cookies. Raw IP addresses, URL query strings, and signed-in identities
-          are not added to analytics. If you choose to sign in with GitHub and submit a
-          competition run, that optional feature necessarily handles the identity and game data
-          described below.
+          are not added to analytics. The mobile app automatically contributes completed game
+          tapes for research without an account or device identifier. Competition leaderboard
+          entries handle the display name and game data described below.
         </p>
       </div>
 
@@ -71,6 +71,22 @@ export default function PrivacyPage() {
         its local best. This information stays on your device and is not sent automatically. You
         can remove it at any time by clearing site data in your browser.
       </p>
+
+      <h2>Completed games from the mobile app</h2>
+      <p>
+        When a game finishes in the mobile app, the app automatically and silently submits the
+        exact disc tape, hidden covered-disc values, covered rows, column choices, ruleset,
+        timestamps, claimed result, app version, and broad platform. The server independently
+        replays the tape and stores only games whose moves and claimed result validate. It does
+        not receive an account, advertising identifier, device identifier, contacts, or precise
+        location with this record.
+      </p>
+      <p>
+        The app stores each game and whether delivery succeeded on the device. Failed deliveries
+        remain pending and are retried without interrupting play. Validated tapes are retained in
+        an hour-partitioned Amazon S3 research archive and may be analyzed or released as research
+        data under these terms.
+      </p>
       <p>
         If you choose GitHub sign-in, the site sets a first-party, encrypted session cookie so
         you can remain signed in. It is essential to authentication, is not an advertising or
@@ -79,7 +95,7 @@ export default function PrivacyPage() {
 
       <h2>GitHub sign-in</h2>
       <p>
-        Sign-in is optional and is only needed to submit a human competition score. The site asks
+        Sign-in is optional and is only needed to submit a human competition score from the website. The site asks
         GitHub for read-only access to basic profile data. During sign-in it processes your GitHub
         numeric account ID, username or display name, and other basic profile fields returned by
         GitHub for the session. The project does not request repository access and does not store
@@ -98,12 +114,13 @@ export default function PrivacyPage() {
 
       <h2>Competition submissions</h2>
       <p>
-        Nothing is submitted merely because you play. After a run ends, you must explicitly
-        choose to contribute it. A submission stores your GitHub provider and numeric account ID,
-        GitHub username or display name, column choices, client and server-verified scores, move
-        count, game/version identifiers, validation flags, and submission timestamps. The server
-        may also write identity-linked validation or security events when it accepts or rejects a
-        submission.
+        Website competition runs require an explicit submit action and GitHub sign-in. The mobile
+        app instead lets you submit a completed competition run under any display name without an
+        account. A leaderboard submission stores its source, display name, column choices, client
+        and server-verified scores, move count, game/version identifiers, validation flags, and
+        submission timestamps. Website submissions also store the GitHub provider and numeric
+        account ID. The server may write validation or security events when it accepts or rejects
+        a submission.
       </p>
       <p>
         Your display name, score, move count, and submission time may appear publicly on the
@@ -117,9 +134,11 @@ export default function PrivacyPage() {
         The site uses GitHub for optional authentication and Amazon Web Services for hosting and
         storage. First-party analytics events pass through Amazon Data Firehose and are stored as
         Parquet data in an Apache Iceberg table in Amazon S3, with metadata in AWS Glue and
-        aggregate queries run by Amazon Athena. No separate analytics vendor receives those
-        events. Like any internet host, AWS and GitHub may also process technical request data as
-        needed to deliver, secure, and operate their services under their own terms.
+        aggregate queries run by Amazon Athena. Validated mobile game submissions pass through a
+        separate Amazon Data Firehose delivery stream into an hour-partitioned Amazon S3 archive.
+        No separate analytics vendor receives those events. Like any internet host, AWS and GitHub
+        may also process technical request data as needed to deliver, secure, and operate their
+        services under their own terms.
       </p>
 
       <h2>Retention and your choices</h2>
@@ -127,14 +146,15 @@ export default function PrivacyPage() {
         Analytics query-result files expire after 7 days and failed Firehose delivery records
         expire after 30 days. The underlying Iceberg page-view table is retained until the project
         operator deletes or applies a table-retention policy to it. Authentication data in the
-        encrypted session cookie lasts until sign-out, deletion, or expiry. Competition submissions
-        are retained with the public research record for as long as the project maintains that
-        competition, subject to applicable law.
+        encrypted session cookie lasts until sign-out, deletion, or expiry. Validated mobile game
+        tapes and competition submissions are retained as research records until the project
+        operator deletes them or applies a retention policy, subject to applicable law.
       </p>
       <p>
-        You may browse and play without an account, clear local game data through your browser,
-        sign out, or revoke GitHub authorization. For a privacy question or a reasonable request
-        to access, correct, or remove competition information, use the contact options on the{" "}
+        You may browse and play without an account, clear local game data through your browser or
+        app settings, sign out, or revoke GitHub authorization. For a privacy question or a
+        reasonable request to access, correct, or remove competition information, use the contact
+        options on the{" "}
         <a href="https://github.com/keshavsaharia" rel="noopener noreferrer">
           repository owner&apos;s GitHub profile
         </a>
