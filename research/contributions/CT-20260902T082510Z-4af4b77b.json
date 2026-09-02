@@ -1,0 +1,110 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260902T082510Z-4af4b77b",
+  "actor": {
+    "kind": "model",
+    "platform": "Claude Code",
+    "model": "claude-fable-5-1",
+    "agentId": "claude-q-learning"
+  },
+  "level": "L3",
+  "roles": [
+    {
+      "role": "conceptualization",
+      "degree": "lead"
+    },
+    {
+      "role": "methodology",
+      "degree": "lead"
+    },
+    {
+      "role": "software",
+      "degree": "lead"
+    },
+    {
+      "role": "investigation",
+      "degree": "lead"
+    },
+    {
+      "role": "formal-analysis",
+      "degree": "lead"
+    },
+    {
+      "role": "validation",
+      "degree": "substantial"
+    },
+    {
+      "role": "writing",
+      "degree": "lead"
+    },
+    {
+      "role": "compute",
+      "degree": "supporting"
+    }
+  ],
+  "summary": "Located, downloaded and read the Klein-Friedmann CS221 Q-learning report and its code (commit 8cc8a0e); registered the transfer theory and two preregistered experiments; wrote the reproduction harness that runs the upstream simulator and learner unchanged (300-game and lambda = 0 arms added), ran it (RS-20260902T082726Z-75606ce7: report reproduced, training front-loaded, regularisation claim not supported); wrote the std-only Rust crate drop7-kf-linear-q on drop7-rs (six-feature extractor, Q-learning update with exposed schedules, legal-only policy, deterministic parallel game driver, parity/train/evaluate binaries); passed the feature-parity (54,852 pairs, 0 mismatches), update-parity (250 steps, exact) and legality/determinism gates; trained ten arms on the already-open training block and evaluated them with random, centre-first, transplanted and fair-d4s7 arms on 256 previously evaluated development seeds; wrote the paired-bootstrap summariser, the result records, the approach page and the daily research log; then registered and ran a preregistered follow-up, a cross-entropy search over the six weights, whose frozen optimum beat both learned vectors on the pilot cohort (RS3).",
+  "theoryIds": [
+    "TH-20260902-kf-linear-q-transfer-68b41d66",
+    "TH-20260902-kf-six-weight-policy-search-8a6e41a8"
+  ],
+  "experimentIds": [
+    "EX-20260902-kf-report-reproduction-b7f61bf1",
+    "EX-20260902-kf-linear-q-rust-transfer-4328a730",
+    "EX-20260902-kf-six-weight-cem-d018cc89"
+  ],
+  "runIds": [
+    "RUN-20260902T081648Z-f0c96f48",
+    "RUN-20260902T081659Z-d2aa6375",
+    "RUN-20260902T083357Z-196a7b87"
+  ],
+  "artifactPaths": [
+    "approaches/value-policy-learning/klein-friedmann-linear-q/README.mdx",
+    "approaches/value-policy-learning/klein-friedmann-linear-q/reproduction/fetch-upstream.sh",
+    "approaches/value-policy-learning/klein-friedmann-linear-q/reproduction/reproduce_kf.py",
+    "approaches/value-policy-learning/klein-friedmann-linear-q/reproduction/export_parity.py",
+    "approaches/value-policy-learning/klein-friedmann-linear-q/analysis/summarize_reproduction.py",
+    "approaches/value-policy-learning/klein-friedmann-linear-q/analysis/summarize_evaluate.py",
+    "approaches/value-policy-learning/klein-friedmann-linear-q/rust/Cargo.toml",
+    "approaches/value-policy-learning/klein-friedmann-linear-q/rust/src/lib.rs",
+    "approaches/value-policy-learning/klein-friedmann-linear-q/rust/src/view.rs",
+    "approaches/value-policy-learning/klein-friedmann-linear-q/rust/src/features.rs",
+    "approaches/value-policy-learning/klein-friedmann-linear-q/rust/src/learn.rs",
+    "approaches/value-policy-learning/klein-friedmann-linear-q/rust/src/policy.rs",
+    "approaches/value-policy-learning/klein-friedmann-linear-q/rust/src/game.rs",
+    "approaches/value-policy-learning/klein-friedmann-linear-q/rust/src/bin/parity_features.rs",
+    "approaches/value-policy-learning/klein-friedmann-linear-q/rust/src/bin/parity_update.rs",
+    "approaches/value-policy-learning/klein-friedmann-linear-q/rust/src/bin/train.rs",
+    "approaches/value-policy-learning/klein-friedmann-linear-q/rust/src/bin/evaluate.rs",
+    "research/results/RS-20260902T082726Z-75606ce7.json",
+    "runs/RUN-20260902T081648Z-f0c96f48/kf-reproduction/summary.json",
+    "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/summary.json",
+    "web/content/log/2026-09-02.mdx",
+    "approaches/value-policy-learning/klein-friedmann-linear-q/rust/src/bin/search.rs",
+    "research/results/RS-20260902T084356Z-2488ecc7.json",
+    "research/results/RS-20260902T084356Z-784ebf14.json",
+    "runs/RUN-20260902T083357Z-196a7b87/kf-six-weight-cem/summary.json"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "cargo test --release in the crate: 10/10 unit tests (features on constructed boards, first-step and bootstrap-floor arithmetic, weights round trip, replay determinism, worker-count independence).",
+    "G1 feature parity: parity_features over 54,852 exported (state, action) pairs from 7,242 upstream states, 0 mismatches.",
+    "G2 update parity: parity_update over 250 upstream incorporateFeedback calls, worst relative difference 0.",
+    "G3 legality/determinism: three arms x 64 probe games byte-identical across 1 thread, 8 threads and a repeat; 0 illegal decisions in every arm of every cohort.",
+    "Reproduction gates: random and agent bands passed for all three seeds; 300-game vs 50,000-game arm within 0.0004 moves; lambda = 0 arm above random (report's prediction not supported).",
+    "make research-validate reports no error for any record created here (81 pre-existing errors about missing gitignored run artifacts of earlier records are unchanged).",
+    "node web/scripts/check-mdx.mjs on the approach page and the log entry.",
+    "Search follow-up: zero illegal decisions asserted per candidate; frozen optimum's cohort read repeated byte-identically; re-selection on a fresh 1,024-game block agreed with generation fitness to 0.04 moves."
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed.",
+    "The runtime exposes the model identifier claude-fable-5-1 on the Claude Code platform; reported as given.",
+    "All gameplay is pilot tier on previously evaluated development seeds plus a re-read training block, with zero new seeds; the coordinator has not yet confirmed the training-block reuse or assigned a fresh lease.",
+    "The fair-d4s7 comparator arm covers only the first 32 diagnostic seeds because of its cost on the laptop.",
+    "Three post-hoc arms (constant 0.01, constant 0.0001, score reward with constant 0.001) were added after the preregistered arms were trained and are labelled post hoc everywhere they appear.",
+    "No commit SHA at record time; the work is uncommitted on branch claude/q-learning."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-09-02T08:43:56Z"
+}

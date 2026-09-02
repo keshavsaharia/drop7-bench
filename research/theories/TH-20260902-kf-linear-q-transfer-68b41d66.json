@@ -1,0 +1,37 @@
+{
+  "$schema": "../schemas/theory-v1.schema.json",
+  "format": "drop7-theory-v1",
+  "theoryId": "TH-20260902-kf-linear-q-transfer-68b41d66",
+  "title": "Klein-Friedmann six-feature linear Q-learning transfers to corrected Hardcore as a survival heuristic, not a scoring policy",
+  "claim": "The six-feature linear Q-learner of Erez Klein and Ben Friedmann (Stanford CS221 final report 'Drop7', code github.com/ekreate/cs221-final-project at commit 8cc8a0e) is a survival heuristic whose quality is fixed by its features, not by its training length or its regularisation: (i) its published figures reproduce from its own code (uniform-random about 31 moves, the trained agent about 49-50 moves on 10,000 test games with no exploration); (ii) because the step size is 1/t over MOVES, the weights are effectively frozen after a few hundred games, so a 50,000-game run and a 300-game run yield policies within 2 moves of each other and the ridge term has no measurable effect on the shipped configuration; (iii) transplanted onto corrected five-move Hardcore rules in the repository engine with a legal-column argmax and re-learned with survival reward, the same six features outlive uniform-random play by a paired-significant margin but reach a mean corrected score below two thirds of the fair depth-4 ledger mean (below 205,530 against 308,296) and lose to fair d4s7 on paired seeds; and (iv) a slower step schedule (per-game, harmonic, or constant) does not raise the transplanted policy's mean lifetime over the upstream schedule by more than the pilot cohort's paired detection floor.",
+  "mechanism": "The six features (landing on a lowest column; landing on a tallest column when at most two columns share the maximum; count of discs in the landing row and column that would detonate, weighted by adjacent gray discs; whether the dropped disc itself detonates, with a gray-adjacency bonus; the same for a dropped 1) describe only the first wave of consequences of one drop plus relative column height. Nothing represents chain structure, the rise clock, the value distribution of the board, or where a gray disc will be revealed, and the model is linear so features cannot interact, so the learnable quantity is 'how many more moves will the board tolerate', not 'how many points can a chain earn'. The upstream optimizer counts iterations per MOVE and uses eta = 1/t, so the total weight movement after move t0 is bounded by roughly ln(t/t0) times the typical temporal-difference error; the weights lock in within the first few hundred games and the L2 term eta*lambda*w is on the order of 1e-5 per step for the rest of training. Regularisation therefore cannot be what stabilised the shipped code; the report's Figure 5 divergence must come from a different schedule (the report mentions an earlier eta = 1/sqrt(t)). Under corrected Hardcore scoring the score is dominated by the 17,000-point rise bonus, which is why lifetime tracks score at r = 0.9995 in this repository (status.md); a survival heuristic therefore earns a respectable absolute score simply by living, which is why the transfer claim is stated relative to fair depth-4 and not as a small absolute number.",
+  "falsificationCriteria": [
+    "(i) Reproduction: in the upstream simulator, for any of three training seeds the 10,000-game test mean (epsilon = 0) falls outside [47.6, 51.6] (report: 49.61 +/- 2.0), or the 5,000-game uniform-random mean falls outside [30.2, 32.2] (report: 31.2 +/- 1.0). Then the shipped code does not reproduce the report and every downstream claim about 'their policy' is about a different object.",
+    "(ii-a) Front-loading: the policy trained for 300 games trails the policy trained for 50,000 games by more than 2.0 moves of mean lifetime on the same 10,000 test games. Then training is not front-loaded and the step-size argument in the mechanism is wrong.",
+    "(ii-b) Ridge: the lambda = 0 arm's 10,000-game test mean falls below the uniform-random mean, as the report's Figure 5 states. Then the report's regularisation claim holds for the shipped configuration and clause (ii) is wrong.",
+    "(iii-a) Transfer as survival: the re-learned Rust arm with the upstream schedule and survival reward has a paired mean-lifetime advantage over uniform-random legal play on the 256 diagnostic games whose one-sided 95% bootstrap lower bound is at or below zero. Then the features do not transfer even as a survival heuristic.",
+    "(iii-b) Transfer as scoring: any transplanted or re-learned six-feature arm reaches a mean corrected score of 205,530 or more on the 256 diagnostic games, or the fair d4s7 arm fails to beat the best six-feature arm on the paired 32-seed subset with a one-sided 95% bootstrap lower bound above zero. Then the ceiling claim is falsified and the six features deserve a real SCREEN against depth-4.",
+    "(iv) Optimizer versus features: a slower-schedule arm (per-game 1/games, harmonic 1/(1 + t/50,000), or constant 1e-3, all with lambda = 0.1 and survival reward) beats the upstream-schedule arm's mean lifetime on the paired 256 games with a one-sided 95% lower bound above zero. Then the plateau was set by the optimizer, not the features, and the report under-trained its own model.",
+    "Coordinator's prior, stated before any registered run: an unregistered smoke run of the upstream code at the identical configuration (seeds 0-2, disclosed in the reproduction result) already showed 48.9-49.2 test means and a lambda = 0 mean of 48.97, so (i) is expected to pass and (ii-b) is expected to fall; (ii-a), (iii) and (iv) have not been observed in any form."
+  ],
+  "informationClass": "public-policy",
+  "lifecycle": "assessed",
+  "assessment": "mixed",
+  "evidenceTier": "pilot",
+  "dependencies": [],
+  "evidenceRefs": [
+    "docs/strategies.md",
+    "docs/provenance.md",
+    "approaches/value-policy-learning/klein-friedmann-linear-q/README.mdx",
+    "research/results/RS-20260902T082726Z-75606ce7.json",
+    "research/results/RS-20260902T084356Z-2488ecc7.json",
+    "research/results/RS-20260902T084356Z-784ebf14.json"
+  ],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5-1",
+    "agentId": "claude-q-learning"
+  },
+  "createdAt": "2026-09-02T08:05:17Z",
+  "updatedAt": "2026-09-02T08:43:56Z"
+}

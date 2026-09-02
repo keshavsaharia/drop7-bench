@@ -1,0 +1,34 @@
+{
+  "$schema": "../schemas/theory-v1.schema.json",
+  "format": "drop7-theory-v1",
+  "theoryId": "TH-20260902-kf-six-weight-policy-search-8a6e41a8",
+  "title": "Direct policy search over the six Klein-Friedmann feature weights beats their temporal-difference fixed point but stays far below fair depth-4",
+  "claim": "For the six Klein-Friedmann features on corrected five-move Hardcore rules, the policy plateau observed in EX-20260902-kf-linear-q-rust-transfer-4328a730 (about 36 moves for engine-learned weights, 40.5 for the authors' transplanted weights) was set by the temporal-difference optimizer, not by the feature set: a direct search over the six weights against whole-game mean lifetime on training seeds finds a weight vector that, frozen and read once on the same 256-game pilot cohort, outlives the transplanted weights by a paired one-sided 95% lower bound above zero; yet even this optimum stays below two thirds of the fair depth-4 ledger mean (205,530 points) and loses to fair d4s7 on the paired 32-seed subset.",
+  "mechanism": "Q-learning with linear function approximation converges (when it converges) to a fixed point of the projected Bellman operator, which minimises a value-prediction error, not the control objective; for a six-number linear scorer the argmax policy induced by that fixed point can be far from the best argmax policy in the same six-dimensional family. The pilot already exhibits this: two weight vectors from the same algorithm differ by 4.7 moves because of which opening the front-loaded optimizer happened to see. Whole-game lifetime is a deterministic function of the weight vector on fixed seeds, the policy is invariant to positive scaling of the weights, and one candidate costs about a second to evaluate on 256 paired games at 1.4 million moves per second, so a cross-entropy search over R^6 with common random numbers per generation is a cheap, direct optimiser of the quantity the theory is about. The feature set still describes only the first wave of one drop, so the searched optimum is expected to remain a survival heuristic an order of magnitude below the depth-4 reference.",
+  "falsificationCriteria": [
+    "(a) The frozen CEM optimum's paired mean-lifetime delta over the transplanted-weights arm on the 256 pilot games has a one-sided 95% bootstrap lower bound at or below zero. Then the accidental transplanted weights already sit at the feature set's ceiling and the plateau was the features', not the optimizer's.",
+    "(b) The frozen optimum reaches a mean corrected score of 205,530 or more on the 256 pilot games, or fair d4s7 fails to beat it on the paired 32-seed subset with a one-sided 95% lower bound above zero. Then six first-wave features are not an order of magnitude short of depth-4 and deserve a SCREEN.",
+    "(c) The search's final-generation elites, re-selected on a fresh 1,024-game training block, disagree with the generation fitness by more than the block's detection floor in the direction of no improvement over the transplanted weights (the search overfitted its 256-game fitness blocks). Recorded as inconclusive for (a).",
+    "Coordinator's prior, stated before the run: (a) is expected to pass by several moves, because the pilot's transplanted arm was never optimised for the engine's opening; (b) is expected to hold (the optimum stays a survival heuristic)."
+  ],
+  "informationClass": "public-policy",
+  "lifecycle": "assessed",
+  "assessment": "supported-as-tested",
+  "evidenceTier": "pilot",
+  "dependencies": [
+    "TH-20260902-kf-linear-q-transfer-68b41d66"
+  ],
+  "evidenceRefs": [
+    "research/experiments/EX-20260902-kf-linear-q-rust-transfer-4328a730.json",
+    "approaches/value-policy-learning/klein-friedmann-linear-q/README.mdx",
+    "research/results/RS-20260902T084356Z-784ebf14.json",
+    "research/results/RS-20260902T084356Z-2488ecc7.json"
+  ],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5-1",
+    "agentId": "claude-q-learning"
+  },
+  "createdAt": "2026-09-02T08:32:55Z",
+  "updatedAt": "2026-09-02T08:43:56Z"
+}
