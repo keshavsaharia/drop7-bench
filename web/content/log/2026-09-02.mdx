@@ -35,7 +35,11 @@ supervised stage's validation loss and ordering probe will measure next.
 
 The remaining stages (supervised warm start, sixty generations of evolution,
 elite re-selection, the one-shot held-out screen) chain automatically once the
-last teacher game finishes.
+last teacher game finishes. That chain aborted once, at 22:09 UTC, on a single
+false reading of its process-table liveness probe while the teacher binary was
+still playing its last game; no stage had started and nothing was touched. The
+probe now needs three consecutive misses before it gives up, and the chain was
+relaunched a minute later (noted in the run record).
 
 ## Can a leaf move a five-move decision at all?
 
