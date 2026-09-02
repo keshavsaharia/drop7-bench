@@ -26,7 +26,8 @@
     "RUN_ID=RUN-20260902T035644Z-c1fd8987 THREADS=32 scripts/pipeline.sh select (stage C, re-selection block 0xa52e0c80, candidate SHA-256 recorded)",
     "RUN_ID=RUN-20260902T035644Z-c1fd8987 THREADS=32 scripts/pipeline.sh screen (stage D, 0xa52e1300-0xa52e133f, once)",
     "RUN_ID=RUN-20260902T035644Z-c1fd8987 scripts/pipeline.sh compare (leaf-evolution/compare.py, bootstrap seed 0xb0071eaf)",
-    "2026-09-02 (before stage C): evolve.rs and screen.rs experiment-id string updated to EX-20260902-nnue-evolution-d3-v2-49c18bc2 and the crate rebuilt (cargo test --release rerun); teacher_corpus source unchanged and the running stage A process continued from its original image"
+    "2026-09-02 (before stage C): evolve.rs and screen.rs experiment-id string updated to EX-20260902-nnue-evolution-d3-v2-49c18bc2 and the crate rebuilt (cargo test --release rerun); teacher_corpus source unchanged and the running stage A process continued from its original image",
+    "target/release/leaf_swing --parts <run>/corpus/parts --roots {400,80,8} --depth {3,4,5} --threads 4 (diagnostic on already-opened training-role corpus roots: leaf share of sibling spread; no seed opened)"
   ],
   "seedLeaseRefs": [
     "SL-20260825T063000Z-a52e0300"
@@ -51,7 +52,10 @@
     "runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/preflight-d4-t16.log",
     "runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/preflight-d4-t32.log",
     "runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/pipeline.log",
-    "runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/rusage.jsonl"
+    "runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/rusage.jsonl",
+    "runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/leaf-swing-d3.txt",
+    "runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/leaf-swing-d4.txt",
+    "runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/leaf-swing-d5.txt"
   ],
   "contributionIds": [
     "CT-20260902T042620Z-3b4bf7a8"
