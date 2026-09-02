@@ -116,12 +116,22 @@ case "$stage" in
     # failure stops the chain; nothing is retried on a different block.  The
     # screen stage performs the held-out lease's state transition itself.
     log "chain: waiting for the corpus stage"
+    # The liveness probe is a process-table scan, which can miss once (it did,
+    # at 2026-09-02T22:09Z, with the corpus binary alive), so only three
+    # consecutive misses ten seconds apart count as "the process is gone".
+    misses=0
     while ! grep -q "corpus: done" "$OUT/pipeline.log"; do
-      if ! ps -eo cmd | grep -v grep | grep -q "teacher_corpus --seeds-start 0xa52e0300"; then
+      if pgrep -f "teacher_corpus --seeds-start 0xa52e0300" > /dev/null; then
+        misses=0
+        sleep 60
+        continue
+      fi
+      misses=$((misses + 1))
+      if [ "$misses" -ge 3 ]; then
         sleep 5
         grep -q "corpus: done" "$OUT/pipeline.log" || { log "chain: corpus process ended without its done marker; aborting"; exit 3; }
       fi
-      sleep 60
+      sleep 10
     done
     "$0" pretrain
     "$0" evolve
