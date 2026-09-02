@@ -1,0 +1,115 @@
+---
+date: 2026-09-02
+title: "The depth-5 teacher is slow, the leaf decides, and the console's charts are rebuilt"
+summary: "The evolved-NNUE-leaf run spent the whole day in its teacher stage: the depth-5 search played four to seven times slower per position than the pilot projected, so the corpus closed far short of the 512 games the protocol allowed for. A retained diagnostic answered the question of whether a leaf can move a five-move decision at all (it carries about 97% of the spread between columns). The research console's figure generator, whose fixed-box layout was colliding legends, axis labels and category names, was replaced by a measured visx chart kit, and the approach page now explains the evolutionary loop with live charts of the run."
+contributors: [claude-fable-5-1 (Claude Code)]
+tags: [nnue, evolution, leaf, teacher-distillation, web-console, figures, diagnostics]
+outcomes: { positive: 2, negative: 1, open: 2 }
+---
+
+## The teacher stage ran all day
+
+The run launched at 04:24 UTC yesterday (`RUN-20260902T035644Z-c1fd8987`,
+under the successor protocol `EX-20260902-nnue-evolution-d3-v2-49c18bc2`) was
+expected to finish its depth-5 teacher corpus in twelve to fourteen hours. It
+did not. The interim measurement recorded in the run record put the teacher at
+37 to 87 seconds per position per thread at 32 threads, four to seven times
+slower than the pilot on the probe block had projected; the run's `analysis.json`
+puts the mean at 77.6 seconds per root over the completed games. A table-size
+test on the running binary (recorded in the run record's measurement notes)
+found no configuration faster than the one in use.
+
+<Finding title="The corpus closed at roughly a third of the planned games" kind="negative" metric="175 games, 20,618 labelled roots at the 21:46 UTC snapshot">
+New teacher games stopped starting at the protocol's 46,800-second wall
+sub-budget (17:24 UTC), as preregistered; the games in flight then finished
+one by one. The committed snapshot the console draws from
+(`web/content/figures/nnue-evolution/RUN-20260902T035644Z-c1fd8987.json`,
+copied from the run's `analysis.json` and part files) records 175 complete
+games and 20,618 labelled roots with the last game still running: mean teacher
+score 416,699, median 348,400, best game 1,861,091, one game stopped at the
+500-move cap, mean 2.5 hours of depth-5 search per game. The protocol makes
+whatever whole games completed the corpus and does not depend on the count;
+whether a corpus this size warm-starts a 572,000-weight network is what the
+supervised stage's validation loss and ordering probe will measure next.
+</Finding>
+
+The remaining stages (supervised warm start, sixty generations of evolution,
+elite re-selection, the one-shot held-out screen) chain automatically once the
+last teacher game finishes.
+
+## Can a leaf move a five-move decision at all?
+
+The owner asked whether an NNUE leaf can swing the value of a leaf node enough
+to change the engine's choice once a deep search has banked the cascade points
+along each line. Rather than argue it, a diagnostic binary (`leaf_swing`) was
+added to the crate and run on a frozen 30-game snapshot of the corpus before
+any training signal was read: every root was searched twice at each depth,
+once with the frozen fair leaf and once with a leaf that returns zero, so the
+only difference between the two sets of column values is the leaf term.
+
+<Finding title="The leaf term carries about 97% of the spread between columns at every depth" kind="positive" metric="argmax changes at 55.5% / 43.8% / 50.0% of roots at depths 3 / 4 / 5">
+From the retained artifacts `leaf-swing-d3.txt`, `leaf-swing-d4.txt` and
+`leaf-swing-d5.txt` (400, 80 and 8 roots): the median ratio of leaf-term
+spread to total value spread on roots with no losing column is 0.97, 0.95 and
+0.97; the median in-tree score spread alone is 393, 643 and 1,141 points
+against a leaf-term spread of 4,033, 4,093 and 3,813 points; removing the leaf
+changes the chosen column at 55.5%, 43.8% and 50.0% of roots; and the fair leaf
+agrees with the depth-5 teacher's column at 72.0%, 73.8% and 100.0% of roots
+where the zero leaf manages 45.0%, 47.5% and 50.0%. The search does not dilute
+the leaf; it applies the same evaluator at every frontier of every line. A
+first version of these artifacts was regenerated after the corpus had grown
+under it, so the input was frozen (`leaf-swing-input/`) and the commit that
+had claimed exact reproduction was corrected in the history.
+</Finding>
+
+## The console's charts were rebuilt
+
+The owner asked for a human-readable page on how the evolutionary training
+works, with charts of the run, and pointed out that the console's existing
+figures overlap and clip. An audit of every rendered figure confirmed it: the
+string-templated SVG generator estimated text at 0.6 em per character inside a
+fixed 720 x 400 box, so line-chart legends ran into the x-axis label, the
+fourteen-category evaluator comparison and the twelve-bar closure chart piled
+their labels into an unreadable line, the forest plot truncated its title and
+row names, a work-per-move axis spanning five orders of magnitude stacked its
+ticks at the left edge, and the hover popovers were clamped inside the SVG
+where they covered the title.
+
+<Direction title="Research figures now render through a measured visx chart kit" status="closed" owner="claude-fable-5-1">
+`web/components/charts/` replaces the generator. Titles and legends are HTML
+and wrap; tick and category labels are measured with a canvas after
+hydration and the layout is recomputed at the container's real width; a
+`bar` or `dot` figure with more than six categories, or whose labels do not
+fit their slot, is drawn as rows with a measured label gutter; a numeric axis
+may declare a log scale as a presentation choice; tooltips render into a
+portal clamped to the viewport and are reachable by keyboard. The 30 figure
+specs are unchanged except for one presentation field (the work-frontier
+axis is now log-scaled), the provenance rule is enforced by
+`web/lib/charts/spec.ts` and `check-figures.mjs` instead of the generator,
+and the 30 generated SVGs were deleted. Every emitted coordinate is rounded
+to a hundredth of a pixel because the log scale's last-bit differences
+between the server's and the browser's `Math.log` produced a hydration
+mismatch. Two hand-authored diagrams (`diagram-work-budget`,
+`diagram-chance-strata`) had text running past their boxes and were edited.
+</Direction>
+
+<Direction title="The approach page explains the evolutionary loop with live charts of the run" status="running" owner="claude-fable-5-1">
+`approaches/lifetime-objective/nnue-evolution/README.mdx` was rewritten for a
+reader who has never seen a genetic algorithm: what the leaf decides, why
+imitation alone failed twice, what common random numbers buy, and one
+generation step by step. Four schematic diagrams carry the protocol's fixed
+constants and no measured value. Five data figures read a committed snapshot
+of the run (`web/scripts/extract-nnue-evolution.ts`, from `analysis.json`,
+the corpus part files, `progress.jsonl` and the screen artifacts): every
+teacher game as a dot, the supervised loss curve, fitness by generation
+against both paired controls with the population's range as a band, every
+candidate in every generation, and the per-game paired differences of the
+held-out screen with the preregistered gate checks. A stage without artifacts
+says so instead of showing a number; the snapshot is re-extracted after each
+stage completes.
+</Direction>
+
+One environment note for whoever opens the dev console from another machine:
+Next.js 16 blocks its own dev resources for any origin but localhost, which
+silently prevents hydration, so the charts render but never become
+interactive. `DROP7_DEV_ORIGINS=<host>` in `next.config.ts` allows the host.
