@@ -58,7 +58,7 @@
   },
   "resources": {
     "wallSeconds": 86400,
-    "cpuThreads": 16,
+    "cpuThreads": 32,
     "maxHostBytes": 17179869184,
     "maxGpuBytes": null,
     "gpuDevices": []
@@ -77,14 +77,25 @@
     "runs/<run-id>/nnue-evolution/evolve/{config.json,progress.jsonl,gen-*.json,population-*.bin,final-fitness.json,candidate-weights.bin,selection.json} (stage C)",
     "runs/<run-id>/nnue-evolution/screen/heldout.json + compare-*.json (stage D)"
   ],
-  "lifecycle": "preregistered",
-  "protocolSha256": "a16c552439bf94f315ed92bf7ecdcdb16e55618def591660fa9b42eb55a15792",
-  "amendments": [],
+  "lifecycle": "running",
+  "protocolSha256": "71109965ab5562df6107baac6c3817afed7042aa3b14e4b380239b2a12d5cb34",
+  "amendments": [
+    {
+      "timestamp": "2026-09-02T04:02:14Z",
+      "beforeControlledData": true,
+      "reason": "Operational parameters the frozen protocol leaves open, fixed by the coordinator before any leased seed is read, for run RUN-20260902T035644Z-c1fd8987: (1) stage A teacher corpus plays with --move-cap 500 (teacher game lengths are heavy-tailed per the T0 pilot; labels are search values, so the cap truncates the late-game state distribution but biases no label; censored games are recorded as censored) and a 46,800 s wall sub-budget after which no new corpus game starts, in-flight games finish and are kept, and the completed whole games are the corpus as the stop rule already permits; (2) stage B pretrain uses the implementation defaults batch 64, lr 3e-4, Huber delta 1.0 rise unit, seed 0x0e701e57, with 16 epochs (best epoch by validation Huber as frozen) and 256 held-out probe roots; (3) stage C uses the frozen GA constants with a 21,600 s wall sub-budget and the elite re-selection block 0xa52e0c80 exactly as leased; (4) every stage runs with 16 threads, the resource limit this record declares (the host has 16 physical cores and 32 hardware threads; SMT was measured in a seed-free preflight on the already-opened probe block and is reported in the run record, not used); (5) the held-out screen is opened once on the frozen candidate regardless of the theory's training-signal falsifier, which is evaluated and reported separately from the screen gate. No gate, metric, cohort, comparator, model class, or GA constant changes. Lifecycle advanced preregistered -> running."
+    },
+    {
+      "timestamp": "2026-09-02T04:24:10Z",
+      "beforeControlledData": true,
+      "reason": "resources.cpuThreads raised 16 -> 32 for run RUN-20260902T035644Z-c1fd8987 at the operator's direction to use the whole host, after a seed-free scaling preflight on the already-opened probe block 0xa5277800-0xa527783f (64 complete d4s7 teacher-corpus games, 7,830 roots): root/game records were bit-identical at 16 and 32 threads (thread-count independence of every label), first-wave seconds per root 1.020 (16 threads) vs 1.577 (32 threads), i.e. a 1.29x throughput gain from SMT on the 16 physical cores. Thread count changes no decision, label, seed, gate, or metric; it changes only wall time and the peak host memory (32 x 48 MiB teacher tables, well inside the 16 GiB limit). This supersedes item (4) of the previous amendment."
+    }
+  ],
   "createdBy": {
     "platform": "OpenCode",
     "model": "moonshotai/Kimi-K3",
     "agentId": "opencode-evolutionary-approach"
   },
   "createdAt": "2026-08-25T06:26:40Z",
-  "updatedAt": "2026-08-25T06:50:33Z"
+  "updatedAt": "2026-09-02T04:24:10Z"
 }

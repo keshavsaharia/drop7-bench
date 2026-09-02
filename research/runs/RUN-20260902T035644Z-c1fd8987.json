@@ -1,0 +1,58 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260902T035644Z-c1fd8987",
+  "experimentId": "EX-20260825-nnue-evolution-d3-bca7f330",
+  "lifecycle": "running",
+  "runValidity": "pending",
+  "startedAt": "2026-09-02T04:24:10Z",
+  "endedAt": null,
+  "protocolSha256": "71109965ab5562df6107baac6c3817afed7042aa3b14e4b380239b2a12d5cb34",
+  "machineProfileRef": "research/system-profiles/MACH-20260902T035644Z-f5e59b6e.json",
+  "sourceState": {
+    "gitCommit": "dbe0bc83641eb07766de2ec4c4df1149ba7b64fd",
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "approaches/lifetime-objective/nnue-evolution/build.sh (RUSTFLAGS=-C target-cpu=native, cargo 1.x stable, release, lto fat)",
+    "cargo test --release (9 unit tests)",
+    "target/release/gate 0xa5277000 -> runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/gates.log (11 CHECK gates, probe block only)",
+    "target/release/teacher_corpus --seeds-start 0xa5277800 --games 64 --threads {16,32} --depth 4 (seed-free SMT scaling preflight on the already-opened probe block)",
+    "RUN_ID=RUN-20260902T035644Z-c1fd8987 THREADS=32 CORPUS_WALL=46800 scripts/pipeline.sh corpus (stage A, seeds 0xa52e0300-0xa52e0500, --move-cap 500)",
+    "RUN_ID=RUN-20260902T035644Z-c1fd8987 THREADS=32 scripts/pipeline.sh pretrain (stage B)",
+    "RUN_ID=RUN-20260902T035644Z-c1fd8987 THREADS=32 EVOLVE_WALL=21600 scripts/pipeline.sh evolve (stage C, fitness blocks from 0xa52e0500)",
+    "RUN_ID=RUN-20260902T035644Z-c1fd8987 THREADS=32 scripts/pipeline.sh select (stage C, re-selection block 0xa52e0c80, candidate SHA-256 recorded)",
+    "RUN_ID=RUN-20260902T035644Z-c1fd8987 THREADS=32 scripts/pipeline.sh screen (stage D, 0xa52e1300-0xa52e133f, once)",
+    "RUN_ID=RUN-20260902T035644Z-c1fd8987 scripts/pipeline.sh compare (leaf-evolution/compare.py, bootstrap seed 0xb0071eaf)"
+  ],
+  "seedLeaseRefs": [
+    "SL-20260825T063000Z-a52e0300"
+  ],
+  "resourceLimits": {
+    "wallSeconds": 86400,
+    "cpuThreads": 32,
+    "maxHostBytes": 17179869184,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": null,
+    "cpuSeconds": null,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "Run in progress; per-stage kernel rusage (wall, user, system, peak RSS of the stage process) is appended to runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/rusage.jsonl by scripts/with-rusage.py and summarised at completion."
+  },
+  "exitCode": null,
+  "stopReason": null,
+  "artifactRefs": [
+    "runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/gates.log",
+    "runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/preflight-d4-t16.log",
+    "runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/preflight-d4-t32.log",
+    "runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/pipeline.log",
+    "runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/rusage.jsonl"
+  ],
+  "contributionIds": [
+    "CT-20260902T042620Z-3b4bf7a8"
+  ]
+}

@@ -1,0 +1,90 @@
+---
+date: 2026-09-01
+title: "Auditing the evolved-NNUE-leaf experiment and launching it on the whole workstation"
+summary: "The depth-5-distilled, whole-game-evolved NNUE leaf registered on 2026-08-25 was audited end to end - theory, frozen protocol, leases, and every line of the Rust crate - then launched for real. Eleven CHECK gates passed again on the rebuilt binaries, a seed-free preflight showed the teacher's labels are bit-identical at 16 and 32 threads with a 1.29x throughput gain from SMT, the protocol was amended before any leased seed was read, and the 512-game depth-5 teacher corpus began at 04:24 UTC on all 32 hardware threads."
+contributors: [claude-fable-5-1 (Claude Code)]
+tags: [nnue, evolution, leaf, teacher-distillation, audit, validation, rust-engine]
+outcomes: { positive: 2, negative: 0, open: 1 }
+---
+
+## What was audited before a single leased seed was read
+
+The request was to run the registered evolutionary-NNUE experiment to a
+verdict, with a reproducible teacher and a baseline set of weights that later
+work can improve on, using the Rust solver and the whole machine. Before
+launching, the theory (`TH-20260825-evolved-nnue-leaf-d3-0f47e46c`), the
+frozen experiment (`EX-20260825-nnue-evolution-d3-bca7f330`), both seed
+leases, the August 25 smoke-run record, and all 2,800 lines of the
+`nnue-evolution` crate were read against the methodology and benchmark
+contract. The audit found no blocking defect. The points worth writing down:
+
+- **The deployed policy is depth 3.** The depth-5 search is the teacher only:
+  its sibling-complete root values are distilled into the leaf, and the
+  candidate is then the ordinary d3s7 fair search with that leaf. Anyone
+  reading "depth 5 plus NNUE" should expect a depth-3 player that has seen a
+  depth-5 teacher, not a depth-5 player.
+- **Labels are search values, not outcomes.** That is what makes a per-game
+  move cap on the teacher stage safe: capping a heavy-tailed teacher game
+  truncates the late-game state distribution but changes no label. The
+  frozen protocol left the cap open; it was fixed at 500 moves before launch.
+- **Common random numbers hold by construction.** Every chance scenario in
+  the search is keyed on the public state and the fixed policy seed, so every
+  candidate in a generation, and both controls, face identical futures on
+  identical seeds. Fitness comparisons within a generation are paired.
+- **The information boundary is structural.** The Rust engine draws a covered
+  disc's value at reveal time, so the board bytes the NNUE reads contain no
+  hidden value to leak; the gate that disguises score, level and move count
+  then confirms the network is blind to everything else.
+- **The 64-game screen can only see a large effect.** The prior CMA-ES screen
+  at this cohort size had a detection floor near 40,000 points; a real but
+  smaller improvement will read as a non-measurement. The gate is
+  preregistered and stays as written, but the result must be read against its
+  floor.
+- **The crash-recovery fix of August 27 is in the binaries** that were rebuilt
+  today from this branch (`cargo test --release`, 9 unit tests).
+- `make research-validate` still reports the eight pre-existing errors from
+  the deleted August 25 run artifacts noted on 2026-08-27; nothing today adds
+  to them.
+
+<Finding title="All eleven CHECK gates pass on the rebuilt binaries" kind="positive" metric="11/11 gates, 160 s, probe block only">
+Feature determinism and bounds, information-boundary blindness, reflection
+consistency on eleven asymmetric mirrored roots (one symmetric board excluded
+per finding-13), fresh-searcher and 1-vs-4-worker determinism, legality and
+completed depth under random, all-zero and saturated weights, finiteness
+fuzz, teacher argmax equivalence at depth 3 and depth 5, and serialisation
+round-trip all passed against 220 harvested probe states from the
+already-opened block `0xa5277000`. Record:
+`runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/gates.log`.
+</Finding>
+
+<Finding title="The teacher's labels are bit-identical at 16 and 32 threads, and SMT is worth 1.29x" kind="positive" metric="7,830 roots identical; 1.020 vs 1.577 s per root">
+A seed-free scaling preflight played the same 64 probe games
+(`0xa5277800`, depth 4, seven strata) through the corpus generator at 16 and
+then 32 threads. Every root record and every game record was identical
+between the two runs once the wall-clock field was ignored, which is the
+thread-count independence the corpus stage relies on. In the fully concurrent
+phase a root cost 1.020 s per thread at 16 threads and 1.577 s at 32, so the
+second hardware thread on each of the 16 physical cores adds about 29% to
+total throughput. The frozen record declared 16 threads; it was amended to 32
+before any leased seed was read, with the preflight as the reason. Records:
+`runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/preflight-d4-t{16,32}.log`.
+</Finding>
+
+Two of those 64 probe-block games, played by the fair leaf at depth 4, ended
+above 1.5 million points. They are on already-read development seeds, in a
+timing preflight, with no comparator: a demonstration that the tail exists,
+not evidence about anything.
+
+<Direction title="Stage A is running: 512 depth-5 teacher games on 32 threads" status="active" owner="claude-fable-5-1 (Claude Code)">
+The training lease `SL-20260825T063000Z-a52e0300` was marked opened at
+04:24 UTC (2026-09-02) and the teacher corpus started on seeds
+`0xa52e0300-0xa52e0500` with the move cap at 500, a 46,800 s sub-budget after
+which no new game starts, and per-game part files so an interruption loses
+nothing finished. Every stage is launched through
+`scripts/pipeline.sh`, which hard-codes the leased sub-blocks and records
+wall, CPU and peak-RSS usage per stage. The supervised warm start, the
+60-generation evolution, the 128-game elite re-selection and the one-shot
+64-game screen follow in order; the screen lease stays reserved until the
+frozen candidate's SHA-256 is on disk. The approach page now carries a
+step-by-step, plain-language account of the evolutionary loop.
+</Direction>

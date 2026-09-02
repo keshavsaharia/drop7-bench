@@ -9,12 +9,14 @@
   "rangeStartHex": "0xa52e0300",
   "rangeEndExclusiveHex": "0xa52e1300",
   "cohortManifestSha256": null,
-  "state": "reserved",
+  "state": "opened",
   "reservedAt": "2026-08-25T06:30:00Z",
-  "openedAt": null,
+  "openedAt": "2026-09-02T04:24:10Z",
   "closedAt": null,
-  "protocolSha256": null,
-  "runIds": [],
+  "protocolSha256": "71109965ab5562df6107baac6c3817afed7042aa3b14e4b380239b2a12d5cb34",
+  "runIds": [
+    "RUN-20260902T035644Z-c1fd8987"
+  ],
   "notes": [
     "Conservative import: every 8-hex-digit constant under docs/, approaches/, src/, research/ and artifacts/ was enumerated (grep -rhoE '0x[0-9a-fA-F]{8}'); no constant falls inside 0xa52e0300-0xa52e1300. The block follows the H-pool lease 0xa52e0000-0xa52e0200 inside the SEEDLEASE-A52 reserve and the ./do-research allocator pool (0xa52c0000-0xa5300000); it overlaps no existing lease record and no protected (0x7d) or final (0xd7) prefix. The start is 0xa52e0300 rather than 0xa52e0200 because that boundary value itself appears in the tree as the predecessor lease's end marker, and the allocator discipline skips any block containing a known constant.",
     "Sub-block allocation (all training role, whole games): 0xa52e0300-0xa52e0500 teacher corpus (512 depth-5 seven-stratum fair-expectimax games, sibling-complete root labels); 0xa52e0500-0xa52e0c80 evolution fitness blocks (60 generations x 32 paired games = 1,920, generation g plays [0xa52e0500 + 32*g, +32), every candidate and both controls on the same block); 0xa52e0c80-0xa52e0d00 final elite re-selection (128 fresh games for the top 8 of the last generation). Remainder 0xa52e0d00-0xa52e1300 stays reserved and unopened.",

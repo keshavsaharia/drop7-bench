@@ -1,0 +1,65 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260902T042620Z-3b4bf7a8",
+  "actor": {
+    "kind": "model",
+    "platform": "Claude Code",
+    "model": "claude-fable-5-1",
+    "agentId": "claude-code-evolution-experiment"
+  },
+  "level": "L3",
+  "roles": [
+    {
+      "role": "investigation",
+      "degree": "lead"
+    },
+    {
+      "role": "validation",
+      "degree": "lead"
+    },
+    {
+      "role": "software",
+      "degree": "supporting"
+    },
+    {
+      "role": "writing",
+      "degree": "lead"
+    },
+    {
+      "role": "formal-analysis",
+      "degree": "lead"
+    }
+  ],
+  "summary": "Independent pre-launch audit and full execution of EX-20260825-nnue-evolution-d3-bca7f330 on the research workstation (run RUN-20260902T035644Z-c1fd8987): read the theory, frozen protocol, both leases, the smoke-run record and the whole nnue-evolution crate against the methodology and benchmark contract; rebuilt the crate from branch claude/evolution-experiment and re-ran the 9 unit tests and 11 CHECK gates; ran a seed-free 16-vs-32-thread scaling preflight on the already-opened probe block (labels bit-identical, 1.29x SMT throughput); recorded two pre-data amendments (teacher move cap 500 and stage sub-budgets; cpuThreads 16->32) and advanced the protocol to running; opened the training lease at process start; added the stage driver scripts/pipeline.sh (hard-coded leased sub-blocks, per-stage rusage capture), scripts/with-rusage.py and scripts/analyze.py; wrote the plain-language account of the evolutionary loop on the approach page and the 2026-09-01 research log. Result, contribution and status updates follow at completion.",
+  "theoryIds": [
+    "TH-20260825-evolved-nnue-leaf-d3-0f47e46c"
+  ],
+  "experimentIds": [
+    "EX-20260825-nnue-evolution-d3-bca7f330"
+  ],
+  "runIds": [
+    "RUN-20260902T035644Z-c1fd8987"
+  ],
+  "artifactPaths": [
+    "approaches/lifetime-objective/nnue-evolution/scripts/pipeline.sh",
+    "approaches/lifetime-objective/nnue-evolution/scripts/with-rusage.py",
+    "approaches/lifetime-objective/nnue-evolution/scripts/analyze.py",
+    "research/runs/RUN-20260902T035644Z-c1fd8987.json",
+    "web/content/log/2026-09-01.mdx"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "cargo test --release: 9/9 unit tests",
+    "target/release/gate 0xa5277000: ALL GATES PASSED (11 gates, 160 s) -> runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/gates.log",
+    "preflight teacher_corpus d4s7 64 probe games at 16 and 32 threads: 7,830 root records bit-identical ignoring wallSeconds",
+    "make research-validate: only the 8 pre-existing 2026-08-25 missing-artifact errors"
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed.",
+    "The theory, protocol, leases and Rust crate are Kimi-K3/OpenCode's work (CT-20260825T081955Z-8d38911e); this record covers only the audit, execution, analysis tooling and documentation of the run."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-09-02T04:26:20Z"
+}
