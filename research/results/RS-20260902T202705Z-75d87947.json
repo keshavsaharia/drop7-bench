@@ -1,0 +1,608 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260902T202705Z-75d87947",
+  "theoryIds": [
+    "TH-20260902-oneply-linear-q-prune-prior-28faed27"
+  ],
+  "experimentId": "EX-20260902-oneply-q-fit-and-pruned-search-panel-46c75cdf",
+  "runIds": [
+    "RUN-20260902T175250Z-3164a88a"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "fail",
+  "assessment": "mixed",
+  "evidenceTier": "pilot",
+  "summary": "A sibling-complete panel of 5,398 roots from 48 fair-d4s7 games on already-read training seeds (mean 390,143 points, 112.5 moves, no game censored) was split 32 games for fitting and 16 held out (2,060 roots). The linear action value over 32 one-ply features, fitted by ridge regression to the exact depth-4 sibling values (lambda 0.001 at the grid edge for both the raw and the per-root-centred fit; held-out R^2 0.725 raw, 0.539 within root), is a WORSE ranker of depth-4's choice than the exact one-ply value it can represent: top-1 0.308 against 0.524 (paired difference -0.216, one-sided 95% bound -0.233 over games) and recall@3 0.604 against 0.809, so clauses (a) and (b) fail. A post-hoc check shows why: the features rebuild the exact one-ply value to 6e-11, and least squares halves the held-out error (7.0e9 against 1.4e10 for an affine map of the one-ply value) by predicting deaths within four plies, which cost a million points each, while ranking live siblings worse; refitting on per-root-centred targets clipped at -50,000 recovers exactly the one-ply value's ranking (top-1 0.535, recall@3 0.809) and nothing more. Depth-three exact values rank depth-4's choice into the top three on 95.0% of roots, depth-two on 90.0%, the six-feature CEM policy on 70.1%, centre order on 40.0%. Pruning the depth-4 search at interior max nodes with the exact one-ply value as prior at width three (both interior layers) reproduces the full-width decision on 92.3% of held-out roots (lower bound 91.8%) with mean normalised regret 0.0087 (upper bound 0.0098) and mean raw regret 74 points at 26.4% of the full-width logical work (prior calls included, 5.9% of it) and 3.8x faster wall time; width four gives 93.8% / 0.0059 at 40.9% work, width two 89.3% / 0.0145 at 13.8%. The six-feature prior, which costs no engine calls, reaches 88.4% / 0.0147 at width four (34.6% work); the fitted Q prunes worst (78.8% / 0.037 at width three); centre order is useless (69.1%). Every pruned root value was at or below the full-width value on every root (0 violations of the lower-bound property), and the width-seven searcher reproduced drop7-rs values, actions and work bit for bit. Clause (c) is inconclusive by the preregistered rule: the best configuration at or under 35% work passes the regret threshold (0.0087 <= 0.02) but its agreement of 92.3% sits between the 0.90 fail line and the 0.95 pass line. On the 128-root sub-panel with exact depth-5 values (mean 1.9e8 work per root, 37x depth 4), full-width depth 4 agrees with depth 5 on 79.7% of roots with normalised regret 0.0285 and raw regret 146 points per decision; pruned depth 5 with the one-ply prior at width two on all three interior layers (1.68x the depth-4 work) agrees on 80.5% with normalised regret 0.0174 (paired reduction +0.011, bound -0.0004) but HIGHER raw regret, 189 points (paired change -43, bound -207), so clause (d) is inconclusive at best and unfavourable in points: pruning three interior layers loses the high-stakes continuations that the extra ply was supposed to find. Wider depth-5 pruning (3,3,3 at 4.5x work) reaches only 82.8%. The theory's learned-prior claim is not supported; its mechanism claim is supported for the search's own one-ply value at depth 4 and not at depth 5. Pilot tier, training-role and held-out panel data, no new seeds.",
+  "metrics": {
+    "panel": {
+      "games": 48,
+      "roots": 5398,
+      "fitGames": 32,
+      "fitRoots": 3338,
+      "fitRows": 22746,
+      "heldOutGames": 16,
+      "heldOutRoots": 2060,
+      "heldOutRows": 14184,
+      "meanScore": 390142.7083333333,
+      "meanMoves": 112.45833333333333,
+      "censoredGames": 0,
+      "maxScore": 1170447,
+      "panelWallSeconds": 1433.641253833,
+      "datasetId": "DS-20260902-fair-d4s7-sibling-panel-e4e06b7c"
+    },
+    "fit": {
+      "lambdaGrid": [
+        0.001,
+        0.01,
+        0.1,
+        1.0,
+        10.0
+      ],
+      "lambdaRaw": 0.001,
+      "lambdaCentred": 0.001,
+      "cvMse": {
+        "raw": {
+          "0.001": 9423855972.511215,
+          "0.01": 9450988319.436598,
+          "0.1": 9807155675.88466,
+          "1.0": 12311060654.178225,
+          "10.0": 23314691498.96617
+        },
+        "centred": {
+          "0.001": 2799392427.09726,
+          "0.01": 2842132115.3311243,
+          "0.1": 3109252073.898204,
+          "1.0": 4216113803.94298,
+          "10.0": 5401136647.931514
+        }
+      },
+      "r2HeldOutRaw": 0.7248227467861701,
+      "r2HeldOutCentredWithinRoot": 0.5387772239560056,
+      "bootstrapOverGames": {
+        "resamples": 10000,
+        "seed": 1801846786,
+        "lqMinusD1Top1": {
+          "lb95": -0.23333333333333334,
+          "median": -0.21591948764867339
+        },
+        "lqMinusD1Recall3": {
+          "lb95": -0.21859785783836416,
+          "median": -0.20545454545454545
+        },
+        "lqTop1": {
+          "lb95": 0.29229607250755285,
+          "ub95": 0.3271232876712329
+        },
+        "lqRecall3": {
+          "lb95": 0.5887053809270112,
+          "ub95": 0.6221122112211221
+        }
+      },
+      "weightsCentred": {
+        "leaf_open_columns": 137837.05035054608,
+        "leaf_height_load": 378.15493162200227,
+        "leaf_solid_cells": -6488.376350058256,
+        "leaf_cracked_cells": -1347.9891610194543,
+        "leaf_numbered_cells": -2718.0940143287185,
+        "leaf_high_low_numbers": -14309.699692101129,
+        "leaf_direct_potential": 7438.24694483252,
+        "leaf_latent_chain_potential": 3999.3393549715697,
+        "leaf_cracked_exposure": -3834.7383308680946,
+        "leaf_solid_exposure": -1230.210386864418,
+        "leaf_adjacent_ones": -8994.546400535399,
+        "leaf_triple_twos": -17894.66717512177,
+        "leaf_dead_low_numbers": -1394.8836678077125,
+        "leaf_covered_height_risk": 138.1181148281408,
+        "leaf_low_number_height_risk": 2044.6067294451054,
+        "leaf_danger_height_squared": -11905.00128568288,
+        "leaf_rise_pressure": -250.77179605954086,
+        "leaf_next_disc_vertical_options": 7194.234174092087,
+        "delta_mean": -1.7022997364731003,
+        "terminal_frac": -271985.9091447521,
+        "kf_min_eq_elem_True": -715.6169069695698,
+        "kf_row_dets": -995.1247128520465,
+        "kf_col_dets": -87.11521598135927,
+        "kf_max_eq_elem": -893.1574334612734,
+        "kf_1_dets": 1819.63381018512,
+        "kf_elem_det": 818.3357988713,
+        "rise_1": 5.498534063232066e-27,
+        "rise_2": 0.0,
+        "rise_3": 3.9044532890142015e-26,
+        "rise_4": 0.0,
+        "rise_5": 7.886732727277244e-27,
+        "bias": 0.0
+      },
+      "weightsRaw": {
+        "leaf_open_columns": 114553.55534099569,
+        "leaf_height_load": 508.10045642774026,
+        "leaf_solid_cells": 2795.240773212253,
+        "leaf_cracked_cells": 4991.3561115788325,
+        "leaf_numbered_cells": -5063.668265265604,
+        "leaf_high_low_numbers": 45.23948449288191,
+        "leaf_direct_potential": 8265.7972075448,
+        "leaf_latent_chain_potential": 5428.143228090926,
+        "leaf_cracked_exposure": -1649.6327969587642,
+        "leaf_solid_exposure": 1930.5984655874631,
+        "leaf_adjacent_ones": -6884.280582795504,
+        "leaf_triple_twos": -21627.68313339347,
+        "leaf_dead_low_numbers": 1928.6702180398831,
+        "leaf_covered_height_risk": -608.2755705510588,
+        "leaf_low_number_height_risk": 355.87546545118397,
+        "leaf_danger_height_squared": -11326.841612290737,
+        "leaf_rise_pressure": -402.68383731492634,
+        "leaf_next_disc_vertical_options": 16664.48169539651,
+        "delta_mean": -0.7480884248074041,
+        "terminal_frac": -165847.25884548205,
+        "kf_min_eq_elem_True": 3741.9929600424966,
+        "kf_row_dets": -965.762931881528,
+        "kf_col_dets": 680.9917005797654,
+        "kf_max_eq_elem": -848.5231274614285,
+        "kf_1_dets": -799.9510257670887,
+        "kf_elem_det": 1564.8585571935937,
+        "rise_1": 3334.778872631284,
+        "rise_2": 68092.4791433767,
+        "rise_3": -10514.084719226958,
+        "rise_4": -36234.07146504512,
+        "rise_5": -24686.450721312765,
+        "bias": -837811.4388842997
+      }
+    },
+    "rankersHeldOut": {
+      "center": {
+        "top1": 0.12944038929440388,
+        "recall2": 0.27153284671532846,
+        "recall3": 0.4,
+        "recall4": 0.5751824817518248,
+        "meanNormalisedRegret": 0.5284318790266386,
+        "meanSpearman": 0.0016937582407183735
+      },
+      "kf-cem": {
+        "top1": 0.3922141119221411,
+        "recall2": 0.5883211678832116,
+        "recall3": 0.7012165450121655,
+        "recall4": 0.7800486618004866,
+        "meanNormalisedRegret": 0.29392254047404937,
+        "meanSpearman": 0.32805537635719867
+      },
+      "d1@4": {
+        "top1": 0.5240875912408759,
+        "recall2": 0.7085158150851582,
+        "recall3": 0.8092457420924575,
+        "recall4": 0.8749391727493917,
+        "meanNormalisedRegret": 0.1977247945359712,
+        "meanSpearman": 0.5304576303984065
+      },
+      "v1": {
+        "top1": 0.5094890510948905,
+        "recall2": 0.7021897810218978,
+        "recall3": 0.8063260340632603,
+        "recall4": 0.8725060827250608,
+        "meanNormalisedRegret": 0.20330538569711679,
+        "meanSpearman": 0.5246082388132307
+      },
+      "v2": {
+        "top1": 0.6642335766423357,
+        "recall2": 0.832603406326034,
+        "recall3": 0.8997566909975669,
+        "recall4": 0.9391727493917275,
+        "meanNormalisedRegret": 0.1020330139546744,
+        "meanSpearman": 0.6952197015420939
+      },
+      "v3": {
+        "top1": 0.7659367396593674,
+        "recall2": 0.9094890510948905,
+        "recall3": 0.9503649635036496,
+        "recall4": 0.9746958637469586,
+        "meanNormalisedRegret": 0.05354802201191559,
+        "meanSpearman": 0.8244128574242736
+      },
+      "lq-centred": {
+        "top1": 0.30802919708029197,
+        "recall2": 0.4681265206812652,
+        "recall3": 0.6038929440389295,
+        "recall4": 0.7148418491484185,
+        "meanNormalisedRegret": 0.3669822136078084,
+        "meanSpearman": 0.27125798818840186
+      },
+      "lq-raw": {
+        "top1": 0.310948905109489,
+        "recall2": 0.4871046228710462,
+        "recall3": 0.6038929440389295,
+        "recall4": 0.7002433090024331,
+        "meanNormalisedRegret": 0.33960354089738665,
+        "meanSpearman": 0.2767025588604553
+      }
+    },
+    "postHoc": {
+      "label": "POST HOC: read after the preregistered held-out metrics; diagnostic only",
+      "d1RebuildWorstAbsDiff": 5.820766091346741e-11,
+      "heldOutMse": {
+        "affineOfD1": 14263295958.959597,
+        "ridgeRaw": 6991007012.784686
+      },
+      "inSampleTop1": {
+        "lqRaw": 0.3429429429429429,
+        "d1": 0.5291291291291291,
+        "lqClipped": 0.5408408408408408
+      },
+      "clippedRefitHeldOut": {
+        "ranker": "lq-clipped-posthoc",
+        "roots": 2055,
+        "top1": 0.5347931873479319,
+        "recall2": 0.7128953771289538,
+        "recall3": 0.8092457420924575,
+        "recall4": 0.8715328467153285,
+        "meanNormalisedRegret": 0.17876446074506044,
+        "meanRawRegret": 2451.3185627387434,
+        "meanSpearman": 0.5437558049669027
+      },
+      "clip": -50000.0,
+      "clipLambda": 0.001
+    },
+    "prunedDepth4HeldOut": {
+      "exact:4:7": {
+        "top1Agreement": 1.0,
+        "top1AgreementLb95": 1.0,
+        "meanNormalisedRegret": 0.0,
+        "meanNormalisedRegretUb95": 0.0,
+        "meanRawRegret": 0.0,
+        "workRatioOfMeans": 1.0,
+        "priorWorkShare": 0.0,
+        "meanPrunedNodes": 0.0,
+        "meanWallMs": 3586.82197815534,
+        "monotoneViolations": 0
+      },
+      "pruned:4:7:2,2:center": {
+        "top1Agreement": 0.6718446601941748,
+        "top1AgreementLb95": 0.6530014641288433,
+        "meanNormalisedRegret": 0.08954225360087205,
+        "meanNormalisedRegretUb95": 0.10065440043967318,
+        "meanRawRegret": 1035.1212041145582,
+        "workRatioOfMeans": 0.0987306347593485,
+        "priorWorkShare": 0.0,
+        "meanPrunedNodes": 555.9849514563107,
+        "meanWallMs": 355.22507038834954,
+        "monotoneViolations": 0
+      },
+      "pruned:4:7:3,3:center": {
+        "top1Agreement": 0.6912621359223301,
+        "top1AgreementLb95": 0.6711016498137307,
+        "meanNormalisedRegret": 0.07243603280109484,
+        "meanNormalisedRegretUb95": 0.08186125648497762,
+        "meanRawRegret": 1019.4364534987496,
+        "workRatioOfMeans": 0.20086539789815505,
+        "priorWorkShare": 0.0,
+        "meanPrunedNodes": 782.3660194174757,
+        "meanWallMs": 724.0096111650486,
+        "monotoneViolations": 0
+      },
+      "pruned:4:7:4,4:center": {
+        "top1Agreement": 0.7601941747572816,
+        "top1AgreementLb95": 0.746031746031746,
+        "meanNormalisedRegret": 0.050564549323415794,
+        "meanNormalisedRegretUb95": 0.05483149910837814,
+        "meanRawRegret": 275.2358117183954,
+        "workRatioOfMeans": 0.3567828456175557,
+        "priorWorkShare": 0.0,
+        "meanPrunedNodes": 1008.4257281553398,
+        "meanWallMs": 1286.2429427184466,
+        "monotoneViolations": 0
+      },
+      "pruned:4:7:3,2:center": {
+        "top1Agreement": 0.6932038834951456,
+        "top1AgreementLb95": 0.6731875719217492,
+        "meanNormalisedRegret": 0.0744230927879815,
+        "meanNormalisedRegretUb95": 0.08337371004876412,
+        "meanRawRegret": 1021.3906952650149,
+        "workRatioOfMeans": 0.14607414361889257,
+        "priorWorkShare": 0.0,
+        "meanPrunedNodes": 785.1558252427185,
+        "meanWallMs": 527.396241262136,
+        "monotoneViolations": 0
+      },
+      "pruned:4:7:2,2:kf=CEM": {
+        "top1Agreement": 0.8004854368932038,
+        "top1AgreementLb95": 0.7859531772575251,
+        "meanNormalisedRegret": 0.03558422297164959,
+        "meanNormalisedRegretUb95": 0.03959038006585498,
+        "meanRawRegret": 187.54459528413753,
+        "workRatioOfMeans": 0.11452471942547589,
+        "priorWorkShare": 0.0,
+        "meanPrunedNodes": 562.4218446601942,
+        "meanWallMs": 393.02444902912623,
+        "monotoneViolations": 0
+      },
+      "pruned:4:7:3,3:kf=CEM": {
+        "top1Agreement": 0.8567961165048543,
+        "top1AgreementLb95": 0.8429602888086642,
+        "meanNormalisedRegret": 0.021086296331852574,
+        "meanNormalisedRegretUb95": 0.023579960650674227,
+        "meanRawRegret": 73.70157684525323,
+        "workRatioOfMeans": 0.2185841273518822,
+        "priorWorkShare": 0.0,
+        "meanPrunedNodes": 770.3009708737864,
+        "meanWallMs": 758.5048014563107,
+        "monotoneViolations": 0
+      },
+      "pruned:4:7:4,4:kf=CEM": {
+        "top1Agreement": 0.883495145631068,
+        "top1AgreementLb95": 0.8714285714285714,
+        "meanNormalisedRegret": 0.014728398374508891,
+        "meanNormalisedRegretUb95": 0.01663775582795588,
+        "meanRawRegret": 46.405013744740785,
+        "workRatioOfMeans": 0.3462601829084701,
+        "priorWorkShare": 0.0,
+        "meanPrunedNodes": 962.2077669902912,
+        "meanWallMs": 1211.4423966019417,
+        "monotoneViolations": 0
+      },
+      "pruned:4:7:3,2:kf=CEM": {
+        "top1Agreement": 0.8402912621359223,
+        "top1AgreementLb95": 0.8290398126463701,
+        "meanNormalisedRegret": 0.023827894794645546,
+        "meanNormalisedRegretUb95": 0.0261208576781229,
+        "meanRawRegret": 86.83324592295747,
+        "workRatioOfMeans": 0.1570602664031942,
+        "priorWorkShare": 0.0,
+        "meanPrunedNodes": 772.1582524271845,
+        "meanWallMs": 542.1633383495146,
+        "monotoneViolations": 0
+      },
+      "pruned:4:7:2,2:d1": {
+        "top1Agreement": 0.8927184466019418,
+        "top1AgreementLb95": 0.8870111057460164,
+        "meanNormalisedRegret": 0.014470567742655724,
+        "meanNormalisedRegretUb95": 0.016414087093580398,
+        "meanRawRegret": 39.32288829220498,
+        "workRatioOfMeans": 0.13788754711586074,
+        "priorWorkShare": 0.08077704684687284,
+        "meanPrunedNodes": 585.5708737864078,
+        "meanWallMs": 486.68959320388353,
+        "monotoneViolations": 0
+      },
+      "pruned:4:7:3,3:d1": {
+        "top1Agreement": 0.9233009708737864,
+        "top1AgreementLb95": 0.9183673469387755,
+        "meanNormalisedRegret": 0.008725171902938053,
+        "meanNormalisedRegretUb95": 0.009818328664456312,
+        "meanRawRegret": 37.245472033413314,
+        "workRatioOfMeans": 0.26412365517834635,
+        "priorWorkShare": 0.058604965029273204,
+        "meanPrunedNodes": 813.3791262135923,
+        "meanWallMs": 940.756618446602,
+        "monotoneViolations": 0
+      },
+      "pruned:4:7:4,4:d1": {
+        "top1Agreement": 0.9383495145631068,
+        "top1AgreementLb95": 0.9320794148380356,
+        "meanNormalisedRegret": 0.005937723288311202,
+        "meanNormalisedRegretUb95": 0.007114142671203113,
+        "meanRawRegret": 16.479139605251316,
+        "workRatioOfMeans": 0.4088915163851515,
+        "priorWorkShare": 0.04723529187399504,
+        "meanPrunedNodes": 1011.6922330097087,
+        "meanWallMs": 1461.4424679611652,
+        "monotoneViolations": 0
+      },
+      "pruned:4:7:3,2:d1": {
+        "top1Agreement": 0.9194174757281554,
+        "top1AgreementLb95": 0.9124129930394431,
+        "meanNormalisedRegret": 0.010164736790420929,
+        "meanNormalisedRegretUb95": 0.011556149971795776,
+        "meanRawRegret": 40.4306973468969,
+        "workRatioOfMeans": 0.1923346177909613,
+        "priorWorkShare": 0.08054125427819368,
+        "meanPrunedNodes": 815.1140776699029,
+        "meanWallMs": 683.0928800970875,
+        "monotoneViolations": 0
+      },
+      "pruned:4:7:2,2:lq=LQ": {
+        "top1Agreement": 0.7509708737864078,
+        "top1AgreementLb95": 0.7326448651749856,
+        "meanNormalisedRegret": 0.05411436783377492,
+        "meanNormalisedRegretUb95": 0.05956016471909587,
+        "meanRawRegret": 201.29049175560357,
+        "workRatioOfMeans": 0.13112485066077184,
+        "priorWorkShare": 0.08490809248720702,
+        "meanPrunedNodes": 585.5101941747573,
+        "meanWallMs": 483.79156747572813,
+        "monotoneViolations": 0
+      },
+      "pruned:4:7:3,3:lq=LQ": {
+        "top1Agreement": 0.787864077669903,
+        "top1AgreementLb95": 0.7728407388916625,
+        "meanNormalisedRegret": 0.03704951542171021,
+        "meanNormalisedRegretUb95": 0.04126808187650467,
+        "meanRawRegret": 138.76304988428456,
+        "workRatioOfMeans": 0.2506806570071033,
+        "priorWorkShare": 0.06155591703910747,
+        "meanPrunedNodes": 811.1470873786408,
+        "meanWallMs": 921.293045145631,
+        "monotoneViolations": 0
+      },
+      "pruned:4:7:4,4:lq=LQ": {
+        "top1Agreement": 0.8174757281553398,
+        "top1AgreementLb95": 0.8035274815422477,
+        "meanNormalisedRegret": 0.03026828422300579,
+        "meanNormalisedRegretUb95": 0.034562491243831636,
+        "meanRawRegret": 100.70428388389075,
+        "workRatioOfMeans": 0.3926549153339673,
+        "priorWorkShare": 0.049028170805374575,
+        "meanPrunedNodes": 1008.6723300970874,
+        "meanWallMs": 1437.6485834951457,
+        "monotoneViolations": 0
+      },
+      "pruned:4:7:3,2:lq=LQ": {
+        "top1Agreement": 0.7786407766990291,
+        "top1AgreementLb95": 0.7629947544110635,
+        "meanNormalisedRegret": 0.04258320117462978,
+        "meanNormalisedRegretUb95": 0.047154459684503464,
+        "meanRawRegret": 151.80847382436048,
+        "workRatioOfMeans": 0.18305863131529973,
+        "priorWorkShare": 0.0843564238251205,
+        "meanPrunedNodes": 812.7985436893204,
+        "meanWallMs": 675.4971174757281,
+        "monotoneViolations": 0
+      }
+    },
+    "depth5SubPanel": {
+      "roots": 128,
+      "selection": "every 16th held-out root in cohort order, first 128",
+      "exactD5MeanWork": 190100000.0,
+      "configs": {
+        "exact:4:7": {
+          "top1Agreement": 0.796875,
+          "meanNormalisedRegret": 0.028534454558364022,
+          "meanNormalisedRegretUb95": 0.039805551246541795,
+          "meanRawRegret": 145.6493360576903,
+          "workRatioOfMeans": 1.0,
+          "meanWallMs": 4951.433984375
+        },
+        "pruned:5:7:2,2,2:d1": {
+          "top1Agreement": 0.8046875,
+          "meanNormalisedRegret": 0.0174185406181633,
+          "meanNormalisedRegretUb95": 0.024089143388780893,
+          "meanRawRegret": 188.95228904143391,
+          "workRatioOfMeans": 1.6784249101489097,
+          "meanWallMs": 8137.6058828125,
+          "pairedVsExactD4": {
+            "meanNormalisedRegretReduction": 0.011115913940200723,
+            "normalisedLb95": -0.00040497015453367405,
+            "meanRawRegretReduction": -43.3029529837436,
+            "rawLb95": -206.5648283156864,
+            "roots": 128
+          }
+        },
+        "pruned:5:7:3,3,2:d1": {
+          "top1Agreement": 0.8125,
+          "meanNormalisedRegret": 0.018169790972589587,
+          "meanNormalisedRegretUb95": 0.02441042110546193,
+          "meanRawRegret": 184.83095451696326,
+          "workRatioOfMeans": 3.2396056339962658,
+          "meanWallMs": 15777.7038515625,
+          "pairedVsExactD4": {
+            "meanNormalisedRegretReduction": 0.010364663585774437,
+            "normalisedLb95": 0.00020473149703485583,
+            "meanRawRegretReduction": -39.181618459272954,
+            "rawLb95": -202.90373072979844,
+            "roots": 128
+          }
+        },
+        "pruned:5:7:3,3,3:d1": {
+          "top1Agreement": 0.828125,
+          "meanNormalisedRegret": 0.016648691048157027,
+          "meanNormalisedRegretUb95": 0.02285396320282936,
+          "meanRawRegret": 179.88008321862785,
+          "workRatioOfMeans": 4.485747248208743,
+          "meanWallMs": 21765.4058671875,
+          "pairedVsExactD4": {
+            "meanNormalisedRegretReduction": 0.011885763510206999,
+            "normalisedLb95": 0.0009589805179580089,
+            "meanRawRegretReduction": -34.23074716093754,
+            "rawLb95": -199.11131000404507,
+            "roots": 128
+          }
+        },
+        "pruned:5:7:2,2,2:lq=LQ": {
+          "top1Agreement": 0.71875,
+          "meanNormalisedRegret": 0.048621372826074476,
+          "meanNormalisedRegretUb95": 0.0665516945622999,
+          "meanRawRegret": 216.86677315125297,
+          "workRatioOfMeans": 1.4945258397596217,
+          "meanWallMs": 7607.582859375,
+          "pairedVsExactD4": {
+            "meanNormalisedRegretReduction": -0.020086918267710453,
+            "normalisedLb95": -0.043191503402040934,
+            "meanRawRegretReduction": -71.21743709356265,
+            "rawLb95": -152.58468730165572,
+            "roots": 128
+          }
+        },
+        "pruned:5:7:3,3,2:lq=LQ": {
+          "top1Agreement": 0.8203125,
+          "meanNormalisedRegret": 0.02813916795912656,
+          "meanNormalisedRegretUb95": 0.042511994102511344,
+          "meanRawRegret": 118.21786690797722,
+          "workRatioOfMeans": 2.912019949207192,
+          "meanWallMs": 14687.9824375,
+          "pairedVsExactD4": {
+            "meanNormalisedRegretReduction": 0.0003952865992374663,
+            "normalisedLb95": -0.019901971736068284,
+            "meanRawRegretReduction": 27.431469149713084,
+            "rawLb95": -78.8987071626948,
+            "roots": 128
+          }
+        },
+        "pruned:5:7:3,3,3:lq=LQ": {
+          "top1Agreement": 0.796875,
+          "meanNormalisedRegret": 0.03375103115703759,
+          "meanNormalisedRegretUb95": 0.05100293226614321,
+          "meanRawRegret": 125.30467087004722,
+          "workRatioOfMeans": 4.021988479218297,
+          "meanWallMs": 20016.3635625,
+          "pairedVsExactD4": {
+            "meanNormalisedRegretReduction": -0.005216576598673565,
+            "normalisedLb95": -0.02770050075161443,
+            "meanRawRegretReduction": 20.34466518764309,
+            "rawLb95": -85.6609093491487,
+            "roots": 128
+          }
+        }
+      }
+    },
+    "bootstrap": {
+      "unit": "game",
+      "resamples": 10000,
+      "seed": "0x6b660002"
+    }
+  },
+  "gateChecks": [
+    {
+      "criterion": "P1 (theory a): fitted Q's held-out top-1 exceeds the exact one-ply value's",
+      "passed": false,
+      "observed": "lq-centred 0.308 (bounds 0.292-0.327) vs d1@4 0.524; paired lq-d1 top-1 difference -0.216, one-sided 95% bound -0.233 over 16 games; lq-raw 0.311"
+    },
+    {
+      "criterion": "P2 (theory b): fitted Q's held-out recall@3 >= 0.95 (fail < 0.90)",
+      "passed": false,
+      "observed": "0.604 (bounds 0.589-0.622); d1@4 0.809; v3 0.950"
+    },
+    {
+      "criterion": "P3 (theory c): a pruned-d4s7 configuration at <= 0.35 work with agreement >= 0.95 and regret <= 0.02 (fail if none reaches 0.90 / 0.05)",
+      "passed": null,
+      "observed": "inconclusive: pruned:4:7:3,3:d1 at 0.264 work has agreement 0.923 [LB 0.918] (between 0.90 and 0.95) and regret 0.0087 [UB 0.0098] (passes); pruned:4:7:3,2:d1 at 0.192 work 0.919 / 0.0102; pruned:4:7:4,4:kf at 0.346 work 0.884 / 0.0147"
+    },
+    {
+      "criterion": "P4 (theory d): a pruned-d5s7 configuration at <= 2.0x d4 work with regret under exact d5 below d4's, paired LB > 0",
+      "passed": null,
+      "observed": "inconclusive and unfavourable in points: pruned:5:7:2,2,2:d1 at 1.678x work has normalised regret 0.0174 vs d4's 0.0285 (paired reduction +0.0111, LB -0.0004) but raw regret 189 vs 146 points per decision (paired change -43, LB -207); agreement with exact d5 0.805 vs d4's 0.797; pruned:5:7:2,2,2:lq at 1.495x is worse on both (0.0486 / 217)"
+    },
+    {
+      "criterion": "Mechanics (CHECK): width-seven searcher bit-identical to drop7-rs (values, actions, work); one-ply d1 bit-identical to the depth-1 search; determinism across worker counts; legality; leaf-term accessor bit-exact",
+      "passed": true,
+      "observed": "crate tests full_width_matches_drop7_rs_bit_for_bit (d3s5, d3s7, d4s5 on 12 probe states), oneply_d1_value_matches_depth_one_search_bit_for_bit, pruned_values_are_lower_bounds_and_legal, choose_action_replays_and_stays_legal, panel_game_is_deterministic_and_sibling_complete; engine test terms_dot_frozen_weights_match_fair_leaf_bits (100 boards); 0 monotonicity violations over 2,060 x 16 pruned decisions; 0 illegal decisions"
+    }
+  ],
+  "perGameArtifact": {
+    "path": "runs/RUN-20260902T175250Z-3164a88a/oneply-q/prune-d4.ndjson",
+    "sha256": "d832f2374fda1d99ea0bbe343db31d52ce865f7ac76d9be4f739613102a69854",
+    "recordCount": 2060
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260902T080517Z-dec42aab.json"
+  ],
+  "artifactManifestRef": null,
+  "limitations": [
+    "Pilot tier on training-role seeds: 48 games, 16 held-out games (2,060 roots) for the depth-4 metrics and 128 roots from those games for depth 5; game-clustered bounds are reported but the sub-panel's paired depth-5 differences straddle zero.",
+    "Root-level regret against exact search values is a decision-quality proxy, not a strength measure; the program has seen short-horizon proxies invert three times, and the preregistered gameplay pilot EX-20260902-pruned-search-gameplay-pilot-bf465b1d is the strength test.",
+    "The ridge lambda selected by cross-validation (0.001) is the smallest value of the preregistered grid; a smaller lambda was not tried. The post-hoc clipped refit is a diagnostic read after the held-out metrics and carries no evidential weight.",
+    "The fitted Q used inside the pruned search is the per-root-centred fit, as preregistered; its poor ranking makes the lq pruning rows a test of a bad prior, not of the pruning mechanism.",
+    "Wall budget: the panel (1,434 s) plus the stages (5,958 s, run while two pilot gameplay arms shared the 12 cores) took 7,392 s, 2.7% over the preregistered 7,200 s stop, which was not enforced by a watchdog; a first panel attempt of about 1,380 s was killed by the session harness at 47/48 games before writing anything. All stage outputs are deterministic functions of the inputs, so the overrun changes no number; wall-time figures are contended and only logical work should be compared.",
+    "The comparator values are the frozen-leaf search's own values; agreement with exact depth 5 measures decision reproduction under the frozen leaf, not correctness."
+  ],
+  "contributionIds": [
+    "CT-20260902T082510Z-4af4b77b"
+  ],
+  "recordedAt": "2026-09-02T20:27:05Z"
+}

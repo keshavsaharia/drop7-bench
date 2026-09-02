@@ -1,0 +1,39 @@
+{
+  "$schema": "../schemas/dataset-v1.schema.json",
+  "format": "drop7-dataset-v1",
+  "datasetId": "DS-20260902-fair-d4s7-sibling-panel-e4e06b7c",
+  "title": "Sibling-complete root panel of 48 fair-d4s7 games on training seeds 0xa5200000-0xa520002f: exact column values at depths 1-4, 32 one-ply features and exact d1 value per legal sibling, remaining lifetime (5,398 roots; whole-game split 0-31 fit / 32-47 held out)",
+  "dataRole": "training",
+  "informationClass": "public-only",
+  "originUnit": "whole-game",
+  "originCount": 48,
+  "rowCount": 5398,
+  "wholeOriginSplit": true,
+  "seedLeaseRefs": [],
+  "parentDatasetRefs": [],
+  "fields": [
+    "game (cohort ordinal), seed (hex), move (index in game), board (canonical, row-major, row 0 top), next, movesRemaining, mirrored",
+    "legal (columns in centre-first order), v1..v4 (exact fair-d4s7-family column values at depths 1-4 in legal order, table-independent), action (canonical column played = depth-4 argmax)",
+    "scoreBefore, remainingLifetime, finalScore, finalMoves (privileged: game outcome)",
+    "siblings[]: col, d1 (exact depth-1 value under the depth-4 chance scenarios), f[32] (18 mean leaf terms of the afterstate, mean score delta, terminal fraction, 6 Klein-Friedmann drop features, rise-clock one-hot, bias)"
+  ],
+  "privilegedFields": [
+    "seed",
+    "move",
+    "scoreBefore",
+    "remainingLifetime",
+    "finalScore",
+    "finalMoves"
+  ],
+  "allowedConsumers": [
+    "EX-20260902-oneply-q-fit-and-pruned-search-panel-46c75cdf (fit on games 0-31; held-out evaluation on 32-47)",
+    "EX-20260902-treestrap-leaf-refit-panel-and-pilot-4024f360 (leaf refit on games 0-31; held-out R^2 on 32-47)",
+    "future offline ranking or leaf diagnostics that keep the whole-game split; never evaluation evidence"
+  ],
+  "artifact": {
+    "path": "runs/RUN-20260902T175250Z-3164a88a/oneply-q/panel.ndjson",
+    "sha256": "273e2ed615563d6687ddfba6917401f56bd8668fabc0e9bd95b40367738b19a1",
+    "bytes": 13327416
+  },
+  "createdAt": "2026-09-02T18:42:41Z"
+}

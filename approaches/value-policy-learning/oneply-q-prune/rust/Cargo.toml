@@ -1,0 +1,18 @@
+[package]
+name = "drop7-oneply-q"
+version = "0.1.0"
+edition = "2021"
+description = "One-ply linear action values as pruning priors and leaf terms inside fair expectimax (TH-20260902-oneply-linear-q-prune-prior-28faed27)"
+license = "MIT"
+
+# Std-only, like drop7-rs and the Klein-Friedmann crate it borrows the six
+# drop features and the cohort driver from.
+[dependencies]
+drop7-rs = { path = "../../../fair-expectimax/rust-engine" }
+drop7-kf-linear-q = { path = "../../klein-friedmann-linear-q/rust" }
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "unwind"

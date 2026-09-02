@@ -1,0 +1,36 @@
+{
+  "$schema": "../schemas/theory-v1.schema.json",
+  "format": "drop7-theory-v1",
+  "theoryId": "TH-20260902-oneply-linear-q-prune-prior-28faed27",
+  "title": "A linear action value over one-ply features prunes fair expectimax without changing its decisions",
+  "claim": "On states visited by fair d4s7 play under corrected five-move Hardcore rules, a linear action value over cheap one-ply features (the seven-stratum mean of the eighteen fair-leaf terms of the afterstate, the mean score delta, the terminal fraction, the six Klein-Friedmann drop features, a rise-clock one-hot and a bias), fitted by ridge regression to exact fair-d4s7 sibling values on training-game roots, (a) reproduces d4's top choice on held-out roots more often than the exact one-ply search value does, but only by a small margin (top-1 stays below 0.65), because a linear one-ply evaluator cannot represent the four-ply value function; (b) nevertheless keeps d4's best action inside its top three on at least 95% of held-out roots; so that (c) a fair search that expands only the prior's top three siblings at every interior max node with two or more plies remaining reproduces the full-width d4s7 action on at least 95% of held-out roots with mean normalised regret at most 0.02, at no more than 35% of the full-width logical work; and (d) the same pruning at depth five, at no more than twice the full-width d4s7 work per root, chooses actions whose mean regret under exact d5s7 values is lower than full-width d4s7's.",
+  "mechanism": "A pruning prior needs recall, not precision: the search only requires that the best continuation survive the cut at each interior max node, and a ranker with poor top-1 can still have high top-3 recall. The one-ply features are exactly the quantities the depth-1 search sums (score delta, leaf terms and terminal utility averaged over the same seven chance strata), so the fitted value contains the exact d1 value as a special case and can only add information, chiefly interactions with terminal risk and the rise clock. Interior max nodes with two or more plies remaining account for almost all of the work (the one-ply-remaining layer is 49 move-plus-leaf calls per node and is left full-width), so cutting seven siblings to three there divides d4 work by about (3/7)^2 and d5 work by about (3/7)^3. Because leaves and chance scenarios are identical under common random numbers and only the max over a subset changes, every pruned value is a lower bound on the full-width value; when the prior's recall is high the bound is tight at the argmax and the decisions coincide. The program's prior evidence says exact D1 reproduces D4's top-1 on 0.486 of roots and compact learned evaluators do worse, so the theory expects the fit to be a weak ranker and a useful pruner.",
+  "falsificationCriteria": [
+    "(a) The fitted Q's held-out top-1 agreement with exact d4s7 is at or below the exact one-ply value's top-1 agreement on the same roots. Then ridge fitting to four-ply values adds nothing over the search's own one-ply value and clause (a) fails.",
+    "(b) The fitted Q's held-out recall@3 (d4's best action inside the Q's top three) is below 0.90. Then the prior cannot protect the best continuation and clauses (c) and (d) are moot.",
+    "(c) No pruned-d4s7 configuration with logical work at most 0.35 of full width reaches top-1 agreement at least 0.90 with mean normalised regret at most 0.05 on held-out roots. A configuration between those failure thresholds and the claim's thresholds (0.95 agreement, 0.02 regret) is recorded as inconclusive for (c).",
+    "(d) Every pruned-d5s7 configuration with work at most 2.0 times full-width d4s7 has mean regret under exact d5s7 values at or above exact d4s7's own regret under those values on the sub-panel. Recorded as inconclusive rather than fail if the difference is inside the sub-panel's paired detection floor.",
+    "Coordinator's prior, stated before any panel data was read: (a) small positive margin expected; (b) expected to pass; (c) expected to pass at width three; (d) uncertain, because the program has never measured a d5-over-d4 effect above its detection floor."
+  ],
+  "informationClass": "public-policy",
+  "lifecycle": "assessed",
+  "assessment": "mixed",
+  "evidenceTier": "pilot",
+  "dependencies": [
+    "TH-20260902-kf-linear-q-transfer-68b41d66",
+    "TH-20260902-kf-six-weight-policy-search-8a6e41a8"
+  ],
+  "evidenceRefs": [
+    "research/experiments/EX-20260902-oneply-q-fit-and-pruned-search-panel-46c75cdf.json",
+    "research/results/RS-20260902T202705Z-75d87947.json",
+    "research/datasets/DS-20260902-fair-d4s7-sibling-panel-e4e06b7c.json",
+    "approaches/value-policy-learning/oneply-q-prune/README.mdx"
+  ],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5-1",
+    "agentId": "claude-q-learning"
+  },
+  "createdAt": "2026-09-02T17:39:05Z",
+  "updatedAt": "2026-09-02T20:27:05Z"
+}
