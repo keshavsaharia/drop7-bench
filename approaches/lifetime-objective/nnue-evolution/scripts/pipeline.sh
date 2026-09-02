@@ -16,7 +16,7 @@
 #   SL-20260825T063000Z-a52e1300 (public-development):
 #     0xa52e1300-0xa52e1340  stage D held-out screen, 64 games, once
 #
-# Usage: RUN_ID=RUN-... scripts/pipeline.sh <corpus|pretrain|evolve|select|screen|compare>
+# Usage: RUN_ID=RUN-... scripts/pipeline.sh <corpus|pretrain|evolve|select|screen|compare|chain>
 # Environment: THREADS (default 16), CORPUS_WALL (s, default 39600),
 #              EVOLVE_WALL (s, default 21600)
 set -euo pipefail
@@ -100,6 +100,30 @@ case "$stage" in
     "$PY" "$CMP" "$ART" --candidate init-d3s7 --reference fair-d3s7 --out "$OUT/screen/compare-init-vs-fair-d3s7.json"
     "$PY" "$CMP" "$ART" --candidate candidate --reference init-d3s7 --out "$OUT/screen/compare-candidate-vs-init.json"
     "$PY" "$CMP" "$ART" --candidate fair-d4s7 --reference fair-d3s7 --out "$OUT/screen/compare-fair-d4s7-vs-fair-d3s7.json"
+    ;;
+  chain)
+    # Unattended continuation: wait for a separately launched corpus stage to
+    # finish, then run every remaining stage in protocol order.  The screen
+    # lease is opened by scripts/open-screen-lease.py only after the select
+    # stage has written the candidate hash.  Any stage failure stops the
+    # chain; nothing is retried on a different block.
+    log "chain: waiting for the corpus stage"
+    while ! grep -q "corpus: done" "$OUT/pipeline.log"; do
+      if ! ps -eo cmd | grep -v grep | grep -q "teacher_corpus --seeds-start 0xa52e0300"; then
+        sleep 5
+        grep -q "corpus: done" "$OUT/pipeline.log" || { log "chain: corpus process ended without its done marker; aborting"; exit 3; }
+      fi
+      sleep 60
+    done
+    "$0" pretrain
+    "$0" evolve
+    "$0" select
+    log "chain: opening the screen lease"
+    "$PY" "$HERE/open-screen-lease.py" --root "$ROOT" --run "$RUN_ID" --hash-file "$OUT/evolve/candidate-weights.sha256" | tee -a "$OUT/pipeline.log"
+    "$0" screen
+    "$0" compare
+    "$PY" "$HERE/analyze.py" --run "$RUN_ID" --root "$ROOT" > /dev/null
+    log "chain: analysis written to $OUT/analysis.md"
     ;;
   *)
     echo "unknown stage $stage" >&2; exit 2 ;;
