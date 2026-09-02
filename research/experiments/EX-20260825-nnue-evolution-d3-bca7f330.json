@@ -77,14 +77,20 @@
     "runs/<run-id>/nnue-evolution/evolve/{config.json,progress.jsonl,gen-*.json,population-*.bin,final-fitness.json,candidate-weights.bin,selection.json} (stage C)",
     "runs/<run-id>/nnue-evolution/screen/heldout.json + compare-*.json (stage D)"
   ],
-  "lifecycle": "preregistered",
+  "lifecycle": "superseded",
   "protocolSha256": "a16c552439bf94f315ed92bf7ecdcdb16e55618def591660fa9b42eb55a15792",
-  "amendments": [],
+  "amendments": [
+    {
+      "timestamp": "2026-09-02T06:58:27Z",
+      "beforeControlledData": false,
+      "reason": "Superseded by EX-20260902-nnue-evolution-d3-v2-49c18bc2, whose scientific protocol is this record's verbatim plus the operational parameters this record left open (teacher move cap 500, stage wall sub-budgets, 16 pretrain epochs, 256 probe roots, 32 threads, screen opened once regardless of the training-signal falsifier). Those parameters were first written into this record on 2026-09-02 at 04:02Z and 04:23Z as in-place amendments with the hash recomputed, before the training lease opened at 04:24Z; review of PR #17 noted that the repository rule forbids editing a frozen record, so this record has been restored to its exact frozen content and the successor created. The historical protocolSha256 a16c552439bf94f315ed92bf7ecdcdb16e55618def591660fa9b42eb55a15792 is retained verbatim and is not recomputed over this supersession note. Run RUN-20260902T035644Z-c1fd8987 and the training lease, opened under the in-place-amended content (hash 71109965ab5562df6107baac6c3817afed7042aa3b14e4b380239b2a12d5cb34, visible in this branch's history at commit abfdec6), now reference the successor's preregistration hash 971a39ef6bb5275a951342245a119cb3d234bed334aa28e2ecfe44eeeeea4dae."
+    }
+  ],
   "createdBy": {
     "platform": "OpenCode",
     "model": "moonshotai/Kimi-K3",
     "agentId": "opencode-evolutionary-approach"
   },
   "createdAt": "2026-08-25T06:26:40Z",
-  "updatedAt": "2026-08-25T06:50:33Z"
+  "updatedAt": "2026-09-02T06:58:27Z"
 }

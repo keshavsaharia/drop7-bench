@@ -94,7 +94,7 @@ fn main() -> Result<(), String> {
     }
 
     let config_json = format!(
-        "{{\"experiment\":\"EX-20260825-nnue-evolution-d3-bca7f330\",\"screen\":true,\"games\":{games},\"moveCap\":{move_cap}}}"
+        "{{\"experiment\":\"EX-20260902-nnue-evolution-d3-v2-49c18bc2\",\"screen\":true,\"games\":{games},\"moveCap\":{move_cap}}}"
     );
     let artifact = population_artifact_json(&config_json, seeds_start, &individuals);
     std::fs::write(&out, artifact).map_err(|e| e.to_string())?;

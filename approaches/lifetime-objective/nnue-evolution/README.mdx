@@ -23,12 +23,14 @@ This approach keeps what each failure taught and changes the rest.
 <EvidenceLabel status="preregistered" evidence="mechanics gates only" reads="public" />
 
 <Callout title="Status" tone="info">
-This page describes a **preregistered, not yet run** experiment
-(`EX-20260825-nnue-evolution-d3-bca7f330`). The implementation is complete and
+This page describes an experiment that is **running** as of 2026-09-02
+(run `RUN-20260902T035644Z-c1fd8987` under `EX-20260902-nnue-evolution-d3-v2-49c18bc2`,
+the successor of the frozen `EX-20260825-nnue-evolution-d3-bca7f330` with the
+operational parameters fixed in its body). The implementation is complete and
 its mechanics gates pass (determinism, reflection, information boundary,
 legality under degenerate weights, teacher-argmax equivalence); the teacher
-corpus, the evolutionary run, and the one-shot held-out screen have not been
-executed. No number on this page is a strength result.
+corpus is being generated, and the evolutionary run and the one-shot held-out
+screen follow. No number on this page is a strength result yet.
 </Callout>
 
 ## The design in three stages
@@ -103,6 +105,83 @@ seeds as the program's standing reference. Everything is frozen in the
 [experiment record](/research) before the screen lease opens, and the seed
 leases (`0xa52e0300` training, `0xa52e1300` screen) are recorded in the
 repository's seed registry.
+
+## How the evolutionary training runs, step by step
+
+This section is for a reader who wants to follow the loop without reading
+`evolve.rs`. Everything below is what the binary actually does; the constants
+are the frozen protocol's.
+
+**What is being evolved.** The NNUE is a table of about 572,000 numbers. Given
+a public board, the next disc, and the moves left until the next row rise, it
+adds up 135 rows of that table (one per active feature), passes the sum through
+two small dense layers, and returns one number: how good the position is, in
+units of one row-rise bonus (17,000 points). The depth-3 search calls it at
+every leaf. Evolution never changes the search, the features, or the network's
+shape — only the 572,000 numbers.
+
+**Generation 0.** Candidate 0 is the distilled network exactly as the
+supervised stage left it. Candidates 1 to 31 are copies of it with Gaussian
+noise added to every weight, twice as wide as the noise used later, so the
+first generation already spans a small neighbourhood instead of 32 identical
+clones.
+
+**One generation, in order.**
+
+1. *Draw a fresh block of seeds.* Generation `g` plays the 32 seeds starting at
+   `0xa52e0500 + 32·g`. No block is ever reused, so a candidate cannot score
+   well by memorising particular games.
+2. *Everyone plays the same games.* Each of the 32 candidates plays all 32
+   seeds as the leaf of the depth-3, seven-stratum fair search, with the
+   ordinary 2,000-move cap. The frozen fair leaf and the unevolved
+   supervised-init network play the same 32 seeds as two control rows. That is
+   34 × 32 = 1,088 complete games per generation, spread over the machine's
+   cores one game per thread; the result of a game does not depend on which
+   thread played it.
+3. *Fitness is the mean score.* Nothing is fitted, weighted, or smoothed: a
+   candidate's fitness is the arithmetic mean of its 32 final scores. Because
+   every candidate saw the same 32 games, the only noise that matters when
+   comparing two candidates is the paired difference between them, not the
+   full game-to-game spread.
+4. *Keep the best four unchanged.* The four candidates with the highest fitness
+   are copied into the next generation exactly as they are (elitism), so the
+   population can never lose its best evaluator to a bad mutation.
+5. *Fill the other 28 slots by tournament and mutation.* For each open slot,
+   three candidates are drawn at random; the one with the highest fitness
+   wins. A copy of the winner is made, and every weight in the copy is
+   perturbed by Gaussian noise whose standard deviation is 5% of the standard
+   deviation of the tensor it belongs to (with a small floor so an all-zero
+   tensor can still move). Tournaments compare ranks, not magnitudes, so one
+   lucky million-point game moves a candidate up a few places rather than
+   dragging the whole generation toward it.
+6. *Checkpoint, then mark complete.* The new population is written to
+   `population-{g+1}.bin` before `gen-{g}.json` (every game of every candidate
+   and control, one row per game) and the `progress.jsonl` summary line are
+   written. A crash between the two replays generation `g` from identical
+   inputs and produces identical output; a crash after them resumes at `g+1`.
+   The `STOP` file and the wall budget end the loop at a generation boundary.
+
+**After the last generation.** The eight fittest candidates of the final
+generation each replay a fresh 128-game block (`0xa52e0c80`), and the one with
+the highest mean is frozen as `candidate-weights.bin`. Its SHA-256 is recorded
+before the held-out screen block is opened, so the vector that is screened is
+provably the one that was selected. This step exists because the last
+generation's leader is partly a lucky draw: the best of 32 noisy estimates is
+biased upward, and 128 fresh games shrink that bias before anything is
+claimed.
+
+**What the controls are for.** The fair leaf's row answers "is the population
+better than the evaluator it replaced, on exactly these games?" generation by
+generation; the theory's own training-signal falsifier reads it. The init's
+row answers "did evolution move anything?": if the population never separates
+from the init on the same games, mutation is a random walk around the warm
+start.
+
+**How to continue from here.** Every generation's population is on disk, so a
+later experiment can resume the loop from any `population-NNN.bin`, start a
+new run from `candidate-weights.bin`, or change one operator at a time. Doing
+so is a new experiment: it needs its own record, its own training lease
+(the fitness blocks above are spent), and a fresh never-read screen block.
 
 ## The implementation
 

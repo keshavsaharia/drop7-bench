@@ -41,7 +41,7 @@ use drop7_rs::rng::{mix32, Mulberry32};
 use drop7_rs::search::FairLeaf;
 use std::io::Write;
 
-const EXPERIMENT_ID: &str = "EX-20260825-nnue-evolution-d3-bca7f330";
+const EXPERIMENT_ID: &str = "EX-20260902-nnue-evolution-d3-v2-49c18bc2";
 
 const CONTROL_FAIR: &str = "control-fair-d3s7";
 const CONTROL_INIT: &str = "control-init-d3s7";
