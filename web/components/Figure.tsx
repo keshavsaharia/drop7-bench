@@ -1,53 +1,31 @@
 /**
  * <Figure name="score-vs-depth" caption="…" />
  *
- * Inlines a generated research figure from web/content/figures/<name>.svg and
+ * Renders a research figure from its spec, web/content/figures/<name>.json,
+ * through the visx chart kit (web/components/charts/ResearchChart.tsx), and
  * lists the spec's points with their source records under a collapsible
- * "Source data" block. The SVG is produced by web/scripts/figures/generate.mjs
- * from web/content/figures/<name>.json; every point in that spec carries a
- * `sourceRecord`, and the generator refuses to draw one without it. This
- * component draws nothing of its own and computes no number: it shows the
- * file as written and the spec as written.
+ * "Source data" block. Every point in the spec carries a `sourceRecord`, and
+ * the spec is refused without it. This component computes no number: the
+ * chart draws the values as written and the table lists them as written.
  *
- * Server component. Styled by the `.research-fig` block in globals.css.
+ * Server component; the chart itself is a client component that receives the
+ * parsed spec as a prop. Styled by the `.research-fig` and `.rchart` blocks
+ * in globals.css.
  */
 import Link from "next/link";
 import { readRepoFile } from "@/lib/repo";
-
-interface FigurePoint {
-  x: number | string;
-  y: number;
-  lo?: number;
-  hi?: number;
-  n?: number;
-  label?: string;
-  sourceRecord: string;
-  sourceField?: string;
-}
-
-interface FigureSeries {
-  name: string;
-  points: FigurePoint[];
-}
-
-interface FigureSpec {
-  title: string;
-  kind: string;
-  x?: { label: string; unit?: string };
-  y?: { label: string; unit?: string };
-  notes?: string;
-  series: FigureSeries[];
-}
+import { formatValue, validateFigureSpec, type FigureSpec } from "@/lib/charts/spec";
+import { ResearchChart } from "./charts/ResearchChart";
 
 const NAME = /^[a-z0-9-]+$/;
 
-function loadSpec(name: string): FigureSpec | null {
+function loadSpec(name: string): { spec: FigureSpec | null; error: string | null; exists: boolean } {
   const raw = readRepoFile(`web/content/figures/${name}.json`);
-  if (!raw) return null;
+  if (!raw) return { spec: null, error: null, exists: false };
   try {
-    return JSON.parse(raw) as FigureSpec;
-  } catch {
-    return null;
+    return { spec: validateFigureSpec(JSON.parse(raw), name), error: null, exists: true };
+  } catch (error) {
+    return { spec: null, error: error instanceof Error ? error.message : String(error), exists: true };
   }
 }
 
@@ -84,11 +62,6 @@ function resultHref(source: string): string | null {
   }
 }
 
-function formatValue(value: number, unit?: string) {
-  const text = Math.abs(value) >= 1000 ? value.toLocaleString("en-US", { maximumFractionDigits: 0 }) : value.toLocaleString("en-US", { maximumFractionDigits: 2 });
-  return unit ? `${text} ${unit}` : text;
-}
-
 export function Figure({ name, caption }: { name: string; caption?: string }) {
   if (!NAME.test(name)) {
     return (
@@ -97,23 +70,19 @@ export function Figure({ name, caption }: { name: string; caption?: string }) {
       </figure>
     );
   }
-  const svg = readRepoFile(`web/content/figures/${name}.svg`);
-  const spec = loadSpec(name);
+  const { spec, error, exists } = loadSpec(name);
 
-  if (!svg) {
+  if (!spec) {
     return (
       <figure className="research-fig research-fig-missing">
         <p>
-          Figure <code>{name}</code> has not been generated.
-          {spec ? (
+          {exists ? (
             <>
-              {" "}
-              Its spec exists; run <code>node web/scripts/figures/generate-all.mjs</code>.
+              Figure <code>{name}</code> has a spec that cannot be rendered: {error}
             </>
           ) : (
             <>
-              {" "}
-              No spec was found at <code>web/content/figures/{name}.json</code>.
+              Figure <code>{name}</code> has no spec at <code>web/content/figures/{name}.json</code>.
             </>
           )}
         </p>
@@ -122,83 +91,81 @@ export function Figure({ name, caption }: { name: string; caption?: string }) {
     );
   }
 
-  const sources = spec ? [...new Set(spec.series.flatMap((s) => s.points.map((p) => p.sourceRecord)))] : [];
+  const sources = [...new Set(spec.series.flatMap((s) => s.points.map((p) => p.sourceRecord)))];
 
   return (
     <figure className="research-fig">
-      <div className="research-fig-svg-wrap" dangerouslySetInnerHTML={{ __html: svg }} />
+      <ResearchChart spec={spec} id={`fig-${name}`} />
       {caption && <figcaption>{caption}</figcaption>}
-      {spec && (
-        <details className="research-fig-data">
-          <summary>Source data</summary>
-          {spec.notes && <p className="research-fig-notes">{spec.notes}</p>}
-          <div className="research-fig-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th>Series</th>
-                  <th>{spec.x?.label ?? "x"}</th>
-                  <th className="num">{spec.y?.label ?? "y"}</th>
-                  <th className="num">Bounds</th>
-                  <th className="num">n</th>
-                  <th>Source</th>
-                </tr>
-              </thead>
-              <tbody>
-                {spec.series.flatMap((s) =>
-                  s.points.map((p, i) => {
-                    const rs = resultHref(p.sourceRecord);
-                    return (
-                      <tr key={`${s.name}-${i}`}>
-                        <td>{s.name}</td>
-                        <td>
-                          {String(p.x)}
-                          {p.label && (
-                            <span className="research-fig-label" title={p.label}>
-                              {" "}
-                              {p.label}
-                            </span>
-                          )}
-                        </td>
-                        <td className="num">{formatValue(p.y, spec.y?.unit)}</td>
-                        <td className="num">
-                          {p.lo !== undefined && p.hi !== undefined
-                            ? `${formatValue(p.lo)} to ${formatValue(p.hi)}`
-                            : p.lo !== undefined
-                              ? `lower ${formatValue(p.lo)}`
-                              : p.hi !== undefined
-                                ? `upper ${formatValue(p.hi)}`
-                                : "—"}
-                        </td>
-                        <td className="num">{p.n !== undefined ? p.n.toLocaleString("en-US") : "—"}</td>
-                        <td>
-                          {rs ? (
-                            <Link href={rs} className="research-fig-source">
-                              {p.sourceRecord}
-                            </Link>
-                          ) : (
-                            <SourceRef source={p.sourceRecord} />
-                          )}
-                          {p.sourceField && (
-                            <span className="research-fig-field" title={p.sourceField}>
-                              {" "}
-                              {p.sourceField}
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  }),
-                )}
-              </tbody>
-            </table>
-          </div>
-          <p className="research-fig-spec">
-            Spec: <code>web/content/figures/{name}.json</code>
-            {sources.length > 0 && <> · {sources.length} source record{sources.length === 1 ? "" : "s"}</>}
-          </p>
-        </details>
-      )}
+      <details className="research-fig-data">
+        <summary>Source data</summary>
+        {spec.notes && <p className="research-fig-notes">{spec.notes}</p>}
+        <div className="research-fig-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Series</th>
+                <th>{spec.x?.label ?? "x"}</th>
+                <th className="num">{spec.y?.label ?? "y"}</th>
+                <th className="num">Bounds</th>
+                <th className="num">n</th>
+                <th>Source</th>
+              </tr>
+            </thead>
+            <tbody>
+              {spec.series.flatMap((s) =>
+                s.points.map((p, i) => {
+                  const rs = resultHref(p.sourceRecord);
+                  return (
+                    <tr key={`${s.name}-${i}`}>
+                      <td>{s.name}</td>
+                      <td>
+                        {String(p.x)}
+                        {p.label && (
+                          <span className="research-fig-label" title={p.label}>
+                            {" "}
+                            {p.label}
+                          </span>
+                        )}
+                      </td>
+                      <td className="num">{formatValue(p.y, spec.y?.unit)}</td>
+                      <td className="num">
+                        {p.lo !== undefined && p.hi !== undefined
+                          ? `${formatValue(p.lo)} to ${formatValue(p.hi)}`
+                          : p.lo !== undefined
+                            ? `lower ${formatValue(p.lo)}`
+                            : p.hi !== undefined
+                              ? `upper ${formatValue(p.hi)}`
+                              : "—"}
+                      </td>
+                      <td className="num">{p.n !== undefined ? p.n.toLocaleString("en-US") : "—"}</td>
+                      <td>
+                        {rs ? (
+                          <Link href={rs} className="research-fig-source">
+                            {p.sourceRecord}
+                          </Link>
+                        ) : (
+                          <SourceRef source={p.sourceRecord} />
+                        )}
+                        {p.sourceField && (
+                          <span className="research-fig-field" title={p.sourceField}>
+                            {" "}
+                            {p.sourceField}
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                }),
+              )}
+            </tbody>
+          </table>
+        </div>
+        <p className="research-fig-spec">
+          Spec: <code>web/content/figures/{name}.json</code>
+          {sources.length > 0 && <> · {sources.length} source record{sources.length === 1 ? "" : "s"}</>}
+        </p>
+      </details>
     </figure>
   );
 }
