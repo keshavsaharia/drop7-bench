@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Stage driver for EX-20260825-nnue-evolution-d3-bca7f330.
+# Stage driver for EX-20260902-nnue-evolution-d3-v2-49c18bc2 (successor of EX-20260825-nnue-evolution-d3-bca7f330).
 #
 # Every gameplay stage of the experiment is launched through this script so
 # the exact command, its wall/CPU/peak-RSS usage (scripts/with-rusage.py) and
@@ -17,7 +17,7 @@
 #     0xa52e1300-0xa52e1340  stage D held-out screen, 64 games, once
 #
 # Usage: RUN_ID=RUN-... scripts/pipeline.sh <corpus|pretrain|evolve|select|screen|compare|chain>
-# Environment: THREADS (default 16), CORPUS_WALL (s, default 39600),
+# Environment: THREADS (default 32), CORPUS_WALL (s, default 46800),
 #              EVOLVE_WALL (s, default 21600)
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -26,7 +26,7 @@ ROOT="$(cd "$APPROACH/../../.." && pwd)"
 BIN="$APPROACH/target/release"
 RUN_ID="${RUN_ID:?set RUN_ID to the research run record id}"
 OUT="$ROOT/runs/$RUN_ID/nnue-evolution"
-THREADS="${THREADS:-16}"
+THREADS="${THREADS:-32}"
 PY="${PYTHON:-/usr/bin/python3}"
 RUSAGE="$OUT/rusage.jsonl"
 mkdir -p "$OUT"
@@ -49,7 +49,7 @@ case "$stage" in
     # finish and are kept.  Resumable: rerun skips finished part files.
     run corpus "$BIN/teacher_corpus" --seeds-start 0xa52e0300 --games 512 \
       --threads "$THREADS" --depth 5 --move-cap 500 \
-      --wall-seconds "${CORPUS_WALL:-39600}" --out "$OUT/corpus" \
+      --wall-seconds "${CORPUS_WALL:-46800}" --out "$OUT/corpus" \
       > "$OUT/corpus.log" 2> "$OUT/corpus.err"
     ;;
   pretrain)
@@ -83,8 +83,17 @@ case "$stage" in
     ;;
   screen)
     # Stage D.  Opened exactly once.  The candidate hash must already be
-    # recorded (select stage) before this runs.
+    # recorded (select stage), and the held-out lease's state transition is
+    # made HERE, immediately before the first held-out seed is read, by
+    # whichever path invokes this stage: open-screen-lease.py refuses unless
+    # the hash file exists and the lease is still reserved, so a second
+    # invocation (or one after an interrupted screen) cannot re-read the
+    # block; that needs a new experiment record, as the protocol says.
     test -s "$OUT/evolve/candidate-weights.sha256" || { echo "candidate hash not recorded"; exit 2; }
+    test ! -e "$OUT/screen/heldout.json" || { echo "screen artifact already exists; the block is one-shot"; exit 2; }
+    log "screen: opening the held-out lease"
+    "$PY" "$HERE/open-screen-lease.py" --root "$ROOT" --run "$RUN_ID" \
+      --hash-file "$OUT/evolve/candidate-weights.sha256" | tee -a "$OUT/pipeline.log"
     mkdir -p "$OUT/screen"
     run screen "$BIN/screen" --candidate "$OUT/evolve/candidate-weights.bin" \
       --init "$OUT/pretrain/init.bin" --seeds-start 0xa52e1300 --games 64 \
@@ -103,10 +112,9 @@ case "$stage" in
     ;;
   chain)
     # Unattended continuation: wait for a separately launched corpus stage to
-    # finish, then run every remaining stage in protocol order.  The screen
-    # lease is opened by scripts/open-screen-lease.py only after the select
-    # stage has written the candidate hash.  Any stage failure stops the
-    # chain; nothing is retried on a different block.
+    # finish, then run every remaining stage in protocol order.  Any stage
+    # failure stops the chain; nothing is retried on a different block.  The
+    # screen stage performs the held-out lease's state transition itself.
     log "chain: waiting for the corpus stage"
     while ! grep -q "corpus: done" "$OUT/pipeline.log"; do
       if ! ps -eo cmd | grep -v grep | grep -q "teacher_corpus --seeds-start 0xa52e0300"; then
@@ -118,8 +126,6 @@ case "$stage" in
     "$0" pretrain
     "$0" evolve
     "$0" select
-    log "chain: opening the screen lease"
-    "$PY" "$HERE/open-screen-lease.py" --root "$ROOT" --run "$RUN_ID" --hash-file "$OUT/evolve/candidate-weights.sha256" | tee -a "$OUT/pipeline.log"
     "$0" screen
     "$0" compare
     "$PY" "$HERE/analyze.py" --run "$RUN_ID" --root "$ROOT" > /dev/null

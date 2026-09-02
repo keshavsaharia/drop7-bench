@@ -17,7 +17,7 @@ import os
 import time
 
 LEASE = "research/seeds/leases/SL-20260825T063000Z-a52e1300.json"
-EXPERIMENT = "research/experiments/EX-20260825-nnue-evolution-d3-bca7f330.json"
+EXPERIMENT = "research/experiments/EX-20260902-nnue-evolution-d3-v2-49c18bc2.json"
 
 
 def main() -> int:
