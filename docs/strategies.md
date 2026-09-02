@@ -456,7 +456,15 @@ are infeasible. Its reward and reported units emphasize surviving moves, and
 its environment and evaluation protocol are not interchangeable with this
 repository's corrected Hardcore score benchmark. It is useful prior work for
 feature-based Q-learning and for explaining the state-space problem, not a
-numeric baseline here.
+numeric baseline here. On 2026-09-02 the report was reproduced from its own
+code and its six features were ported onto the Rust engine
+([approach page](../approaches/value-policy-learning/klein-friedmann-linear-q/README.mdx)):
+the numbers reproduce, the training is front-loaded by its per-move 1/t step
+size, the regularisation claim does not hold for the shipped code
+([RS-20260902T082726Z-75606ce7](../research/results/RS-20260902T082726Z-75606ce7.json)),
+and on corrected Hardcore rules the features are a survival heuristic worth
+about ten moves over random at pilot tier
+([RS-20260902T084356Z-2488ecc7](../research/results/RS-20260902T084356Z-2488ecc7.json)).
 
 ### David Walton's Sequence-mode solver
 

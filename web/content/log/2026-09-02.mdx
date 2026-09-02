@@ -1,0 +1,165 @@
+---
+date: 2026-09-02
+title: "The outside Q-learning report reproduces, for a different reason than it gives, and its six features port to the Rust engine as a ten-move survival prior"
+summary: "Erez Klein and Ben Friedmann's CS221 linear Q-learning report was reproduced from its own code (49.08 vs 49.61 moves), then dissected: its per-move 1/t step size freezes the weights after a few hundred games, so a 300-game learner equals the 50,000-game one and the ridge penalty it credits for stability does nothing. Its six features were ported bit-exactly onto the Rust bitboard engine (54,852 feature pairs and 250 updates with zero mismatches) and piloted on corrected Hardcore rules: about ten moves and 35,000 points over random on 256 previously evaluated seeds, far below fair depth-4, with the authors' own weights transplanted beating the engine-trained ones by 4.7 moves. A five-second cross-entropy search over the six weights then beat both (44.8 moves, 138,973 points), so the plateau was the optimizer's, not the features'. Pilot tier, zero new seeds; a coordinator decision on the training-block reuse is requested."
+contributors: [claude-fable-5-1 (Claude Code)]
+tags: [q-learning, linear-features, reproduction, rust-engine, value-policy-learning, pilot, prior-work]
+outcomes: { positive: 4, negative: 3, open: 2 }
+---
+
+## Reading the only outside paper on this game
+
+The repository has cited Klein and Friedmann's "Final Report - Drop7" since its
+strategy landscape was written, as prior work and explicitly not as a baseline.
+Today it was read end to end, its code fetched from
+`github.com/ekreate/cs221-final-project` at the only commit that exists
+(`8cc8a0e`, March 2021), and the two were compared. The report is a Stanford
+CS221 course project; `util.py` is the course's homework scaffold and the
+learner class is "Problem 4a". Its game is a simplified Drop7: score is one
+point per move survived, the board starts empty rather than with a gray row,
+games stop at 200 moves, and dropping onto a full column ends the game. The
+learner is textbook Q-learning with a linear function of six hand-made
+features about the immediate consequences of a drop, and the code's feature
+definitions differ from the paper's prose in two places (the tallest-column
+feature carries a count, not an indicator; the column-detonation feature adds
+the landing cell's gray adjacency unconditionally). The code was ported as
+coded.
+
+The upstream repository carries no license, so it is fetched at run time into
+the run directory and never vendored; the theory, both experiments and the
+reproduction harness live under
+`approaches/value-policy-learning/klein-friedmann-linear-q/`.
+
+<Finding title="The report reproduces from its own code" kind="positive" metric="49.08 / 49.05 / 49.02 vs 49.61 reported">
+Three independent 50,000-game training runs in the authors' simulator,
+tested over 10,000 games each with no exploration, average 49.08, 49.05 and
+49.02 moves (report: 49.61, sd 11.18); uniform-random play averages 31.66,
+31.73 and 31.85 over 5,000 games each (report: 31.2). Both preregistered
+bands pass (`RS-20260902T082726Z-75606ce7`). The whole five-arm run took nine
+minutes on the laptop because the upstream simulator turns out to run at about
+ten thousand moves per second.
+</Finding>
+
+<Finding title="Training is front-loaded: 300 games equal 50,000" kind="negative" metric="49.080 vs 49.080 on the same 10,000 test games">
+The step size is one over the number of moves played, not games, so after a
+few hundred games it is below a thousandth and the weights barely move. A
+learner stopped after 300 training games (13,796 updates) tests at 49.080
+moves on the same 10,000 games as the 50,000-game learner (2,406,211 updates),
+which also tests at 49.080. The per-thousand-game training curve is at 46.8
+in its first block and 48.2 in its last. The report's 50,000-game protocol
+spends more than 99% of its compute on a frozen policy.
+</Finding>
+
+<Finding title="The regularisation claim does not hold for the shipped code" kind="negative" metric="lambda 0: 48.97 moves, not below random">
+The report's Figure 5 says the unregularised learner diverged and fell below
+random, and credits ridge regularisation for the working result. With the
+ridge constant set to zero the shipped configuration tests at 48.97 moves,
+indistinguishable from 49.08 with it. The reason is the same step size: the
+penalty term is scaled by a step of order one hundred-thousandth for almost
+all of training and cannot act. The report's divergence must have come from a
+schedule the shipped code no longer contains (it mentions an earlier one over
+the square root of the count). The numbers of this report are reliable; its
+explanation of them is not.
+</Finding>
+
+## Porting the six features onto the Rust bitboard engine
+
+A std-only crate on `drop7-rs` reimplements the feature extractor and the
+Q-learning update, with the three step-size and exploration schedules exposed
+and two necessary deviations disclosed: the argmax and the exploration draw
+range over legal columns only, and the rules engine is the repository's proven
+Hardcore engine rather than the upstream simulator, so only feature and update
+parity are claimed, not board parity. Three CHECK gates ran before any
+diagnostic seed was read: 54,852 exported (state, action) pairs from 7,242
+upstream states with zero feature mismatches after the gray-encoding swap; 250
+upstream weight updates replayed with worst relative difference zero; and 64
+probe games times three arms byte-identical across one and eight threads and
+a repeat with zero illegal decisions. Training then ran at about 1.4 million
+moves per second: each 50,000-game run took 1.3 seconds.
+
+<Finding title="Six first-wave features are a real survival prior on Hardcore rules" kind="positive" metric="+9.5 moves, +33,884 points over random (LB95 +8.85, +31,361)">
+Re-learned with the upstream schedule on the already-open training block and
+played on 256 previously evaluated development seeds
+(`0xa5277000`-`0xa52770ff`, 2,000-move cap, nothing censored), the policy
+lives 35.8 moves and scores 107,147 points on average against 26.25 moves and
+73,263 points for uniform-random legal play on the same games, winning 232 of
+256 paired games. Three exploration seeds agree to within half a move. Fair
+depth-4 search averaged 308,296 points on its own 64-game development cohort;
+on the first 32 of these seeds the depth-4 search with seven chance samples
+scored 380,205 points and lived 110.4 moves, beating every six-feature arm on at least 30 of the 32 games. Pilot tier: the cohort was read before, no new seed
+was opened, and nothing here can be promoted (RS-20260902T084356Z-2488ecc7).
+</Finding>
+
+<Finding title="The learned weights are an accident of the opening" kind="positive" metric="transplanted authors' weights: +4.74 moves over engine-trained (LB95 +3.77)">
+The weights the authors' simulator learned (Python seed 10 of the
+reproduction), transplanted unchanged onto the engine, live 40.5 moves and
+score 123,968 points, beating the weights learned in the engine by 4.7 moves
+and 16,821 points. Same six features, same update, same schedule; the only
+difference is the opening experience (empty board versus gray row) that a
+step size dying within a few hundred moves locks in. The engine-trained
+weights are dominated by "drop on the lowest column"; the authors' weights
+value detonations three times more. Neither is the best six-weight policy,
+and the temporal-difference fixed point evidently is not either.
+</Finding>
+
+<Finding title="Slower step sizes did not raise the plateau; two diverged" kind="negative" metric="constant 0.001: +0.50 moves [LB95 +0.12]; per-game and harmonic: weights to 1e9 and NaN">
+The preregistered slower schedules were a per-game step, a harmonic step with
+a 50,000-move time constant, and a constant 0.001, all with survival reward.
+The first two diverged (weights near a billion, then NaN), which is the
+deadly-triad instability the report described and which its own collapsing
+step size had hidden. The constant step gained 0.50 moves over the upstream
+schedule with a lower bound of 0.12, but two identical-configuration upstream
+seeds differ by 0.48 (lower bound 0.07), so the gain is the size of seed
+noise. Three post-hoc arms (constants 0.01 and 0.0001, and a corrected-score
+reward at 0.001) landed within 0.7 moves of the same plateau. Under the
+theory's clause (iv) this reads as mixed: the letter of the falsification
+criterion fires for the constant-step arms, the effect is under one move.
+</Finding>
+
+## Searching the six weights instead of learning them
+
+The transplant result said the plateau might be the optimizer's rather than the
+features'. Since the policy is an argmax over six numbers and one candidate
+costs about a second to play on 256 paired games, the cheapest test was a
+direct search: a second theory and preregistered experiment
+(`TH-20260902-kf-six-weight-policy-search-8a6e41a8`,
+`EX-20260902-kf-six-weight-cem-d018cc89`), cross-entropy method over the six
+weights with population 64, elite 8, 30 generations of 256 paired training
+games each, re-selection of the finalists on a fresh 1,024-game block, and a
+single read of the frozen optimum on the pilot cohort.
+
+<Finding title="A five-second search over the six weights beats both learned vectors" kind="positive" metric="44.82 moves, 138,973 points; +4.29 moves over the transplanted weights (LB95 +2.81)">
+The search converged by generation ten and finished in 4.5 seconds. Its
+frozen optimum (unit weights 0.43 lowest-column, 0.28 row detonations, 0.15
+column detonations, 0.03 tallest-column, 0.74 a-clearing-1, 0.42 the-disc-
+clears) re-selected at 43.25 moves on the fresh block against a generation
+fitness of 43.29, so it did not overfit its fitness blocks; the single-
+generation "best ever" of 44.82 re-selected to 43.12 and was correctly passed
+over. Read once on the 256 pilot games it lives 44.82 moves and scores 138,973
+points: 18.57 moves over random (lower bound 17.24) and 4.29 over the
+transplanted authors' weights (lower bound 2.81), winning 159 of 256 paired
+games against them. The optimum's direction is 0.75 cosine from the
+transplanted vector and 0.55 from the engine-learned one. Six first-wave
+features therefore top out near 45 moves and 140,000 points on Hardcore
+rules, an order of magnitude below depth-4 in points (RS-20260902T084356Z-784ebf14).
+</Finding>
+
+## What is open, and one decision for the coordinator
+
+Open: whether any of the six features, above all "a 1 that clears next to
+gray" and "lands on a lowest column", earns a place as a cheap correction term
+inside the depth-4 leaf. That is a different experiment with a different
+comparator and was not run today. The broader lesson is one this repository
+keeps meeting from the other direction: a value-prediction objective is not the
+control objective, and for a six-number policy whole-game search is both
+cheaper and better than temporal-difference learning.
+
+Decision requested: training read the first 50,000 seeds of the already-open
+SEEDLEASE-A52 d2 training block (`0xa5200000`-), whose role is unchanged by
+another training read; the search re-read the first 8,704 of them; and the
+pilot read the first 256 seeds of the Rust engine's already-read benchmark
+sub-block, twice (once per experiment). No new seed was opened and no lease
+record was written, because the seed allocator is closed to agents. The
+coordinator should either confirm that reuse in a lease note or assign a fresh
+training lease before any of these numbers is cited outside the pilot tier.
+No arm here warrants a SCREEN against depth-4 on fresh seeds.
