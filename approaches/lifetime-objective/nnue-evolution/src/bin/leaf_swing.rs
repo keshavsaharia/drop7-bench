@@ -8,7 +8,9 @@
 // decides the move.  Reads already-opened training-role corpus roots only;
 // opens no seed and makes no strength claim.
 //
-// Usage: leaf_swing --parts DIR --roots N [--depth 3] [--threads T]
+// Usage: leaf_swing --parts DIR --roots N [--depth 3] [--threads T] [--games G]
+//   --games caps the part files read (first G in seed order) so a sample
+//   drawn while the corpus is still growing can be reproduced exactly.
 
 use drop7_nnue_evolution::json::{parse, Json};
 use drop7_rs::board::Board;
@@ -30,16 +32,20 @@ struct Root {
     teacher_spread: f64,
 }
 
-fn load_roots(parts: &str, limit: usize) -> Vec<Root> {
+fn load_roots(parts: &str, limit: usize, max_games: usize) -> (Vec<Root>, Vec<String>) {
     let mut names: Vec<String> = std::fs::read_dir(parts)
         .expect("parts dir")
         .filter_map(|e| e.ok().map(|e| e.file_name().to_string_lossy().into_owned()))
         .filter(|n| n.ends_with(".jsonl"))
         .collect();
     names.sort();
+    // The corpus grows while stage A runs, so the sample is only reproducible
+    // together with the exact list of part files it was drawn from: the
+    // caller caps the games (first N in seed order) and the list is printed.
+    names.truncate(max_games);
     let mut roots = Vec::new();
     let mut all = Vec::new();
-    for name in names {
+    for name in &names {
         let text = std::fs::read_to_string(format!("{parts}/{name}")).unwrap();
         for line in text.lines() {
             let v = parse(line).unwrap();
@@ -79,7 +85,7 @@ fn load_roots(parts: &str, limit: usize) -> Vec<Root> {
             roots.push(r);
         }
     }
-    roots
+    (roots, names)
 }
 
 struct Row {
@@ -100,6 +106,7 @@ fn main() {
     let mut limit = 200usize;
     let mut depth = 3i32;
     let mut threads = 4usize;
+    let mut max_games = usize::MAX;
     let mut i = 1;
     while i < args.len() {
         let v = args.get(i + 1).map(|s| s.as_str()).unwrap_or("");
@@ -108,11 +115,17 @@ fn main() {
             "--roots" => limit = v.parse().unwrap(),
             "--depth" => depth = v.parse().unwrap(),
             "--threads" => threads = v.parse().unwrap(),
+            "--games" => max_games = v.parse().unwrap(),
             other => panic!("unknown argument {other}"),
         }
         i += 2;
     }
-    let roots = load_roots(&parts, limit);
+    let (roots, names) = load_roots(&parts, limit, max_games);
+    println!(
+        "part files read ({}): {}",
+        names.len(),
+        names.iter().map(|n| n.trim_end_matches(".jsonl")).collect::<Vec<_>>().join(" ")
+    );
     let params = SearchParams {
         depth,
         chance_samples: 7,
