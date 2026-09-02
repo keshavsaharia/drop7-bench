@@ -41,7 +41,7 @@
     "cpuSeconds": null,
     "peakHostBytes": null,
     "peakGpuBytes": null,
-    "measurementNotes": "Run in progress; per-stage kernel rusage (wall, user, system, peak RSS of the stage process) is appended to runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/rusage.jsonl by scripts/with-rusage.py and summarised at completion."
+    "measurementNotes": "Run in progress; per-stage kernel rusage is appended to runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/rusage.jsonl by scripts/with-rusage.py. Interim timing at +2.2 h (2026-09-02T06:40Z): 22 of 512 teacher games finished; finished games cost 37-87 s per depth-5 root per thread at 32 threads (teacher_corpus at 3190% CPU, 1.58 GB RSS, cores at ~3.74 GHz), 4-7x the quiet single-thread 9.5-13.6 s of the August 25 T0 pilot. A single-thread decide of one finished corpus root (seed 0xa52e0315 move 15) under the same load cost 52.7 s with the 1M-entry table (107.6M work), 56.4 s at 256K (122.7M work) and 75.4 s at 64K (160.9M work): the per-thread table is not the bottleneck and a smaller one would cost more work, so the configuration was left unchanged. Projection: roughly 200 whole teacher games by the 46,800 s new-game cutoff, then an in-flight tail; the frozen stop rule keeps whatever whole games completed as the corpus."
   },
   "exitCode": null,
   "stopReason": null,
