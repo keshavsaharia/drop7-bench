@@ -1,0 +1,82 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260902-kf-six-weight-cem-d018cc89",
+  "theoryIds": [
+    "TH-20260902-kf-six-weight-policy-search-8a6e41a8"
+  ],
+  "title": "Cross-entropy search over the six feature weights against whole-game lifetime, frozen and read once on the pilot cohort",
+  "classification": "algorithmic",
+  "hypothesis": "A cross-entropy method over the six weights (population 64, elite 8, 30 generations, isotropic Gaussian start mean 0 and sd 1, per-dimension sd floor 1e-3, fitness = mean lifetime in moves over 256 paired training games per generation from consecutive blocks of the already-open SEEDLEASE-A52 d2 training range starting at 0xa5200000, common random numbers across the population within a generation, exploration RNG in the policy-sampling domain seeded 0x6b660010, 2,000-move cap) followed by re-selection of the final elites and the running best on a fresh 1,024-game training block, frozen as unit-L2-normalised weights, and then read ONCE on the pilot cohort 0xa5277000-0xa52770ff against the pilot's existing arms, tests theory clauses (a)-(c). The candidate is the six-feature linear policy of EX-20260902-kf-linear-q-rust-transfer-4328a730 with different weights; no feature, rule or engine changes.",
+  "candidate": {
+    "name": "drop7-kf-linear-q search (CEM over six weights), frozen optimum",
+    "entryPoint": "approaches/value-policy-learning/klein-friedmann-linear-q/rust/src/bin/search.rs",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "transplanted authors' weights (pilot arm transplant-py-seed10), uniform-random legal play, and fair d4s7 on the paired 32-seed subset, all from runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q",
+    "entryPoint": "approaches/value-policy-learning/klein-friedmann-linear-q/rust/src/bin/evaluate.rs",
+    "manifestRef": null
+  },
+  "informationBoundary": "public-policy",
+  "benchmarkTier": "PILOT",
+  "data": {
+    "role": "previously-evaluated-development",
+    "seedLeaseRefs": [],
+    "datasetRefs": [],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "Zero new seeds. Search fitness and re-selection read the SEEDLEASE-A52 d2 TRAINING block (0xa5200000-0xa5201fff for 30 generations x 256 games, then 0xa5202000-0xa52023ff for re-selection), a block already re-read for training by RUN-20260902T081659Z-d2aa6375; its role is unchanged. The frozen optimum is read once on the pilot cohort 0xa5277000-0xa52770ff, which is previously evaluated development data already read by that run; this is a second diagnostic read and keeps the pilot tier. The comparator rows are the existing pilot artifact, not new games. The coordinator's confirmation of the training-block reuse requested in the 2026-09-02 log covers this experiment too."
+  },
+  "metrics": {
+    "primary": "paired mean-lifetime delta of the frozen optimum over the transplanted-weights arm on the 256 pilot games, one-sided 95% percentile-bootstrap lower bound (10,000 resamples, RNG seed 0x6b660001)",
+    "secondary": [
+      "mean corrected score and its paired delta over the transplanted arm and over uniform-random",
+      "fair d4s7 versus the optimum on the paired 32-seed subset",
+      "per-generation best and mean fitness, elite mean and sd (the search curve)",
+      "re-selection block means for every finalist versus their generation fitness (overfitting check)",
+      "the frozen weight vector and its cosine similarity to the transplanted and engine-learned vectors",
+      "wall seconds and moves per second"
+    ],
+    "statisticalUnit": "whole-game",
+    "uncertaintyMethod": "paired per-game deltas with one-sided 95% percentile bootstrap lower bounds; detection floor 1.645 sd/sqrt(n) reported"
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "S1 (theory a): the frozen optimum's paired lifetime delta over transplant-py-seed10 on the 256 pilot games has LB95 > 0.",
+      "S2 (theory b): the optimum's mean corrected score is below 205,530 and fair d4s7's paired score delta over it on the 32-seed subset has LB95 > 0.",
+      "S3 (theory c, recorded either way): the re-selection block mean of the chosen finalist is within the 1,024-game detection floor of its final-generation fitness.",
+      "Mechanics: zero illegal decisions; the evaluate rows for the optimum are byte-identical on a repeated run."
+    ],
+    "failureAction": "Record valid + fail for the exact CEM configuration; the plateau is then attributed to the features and no further six-weight search is warranted.",
+    "passAction": "Record a pilot-tier assessment; the optimum becomes the reference six-weight policy for any future correction-term test inside the depth-4 leaf. No SCREEN is opened by this record unless S2 fails."
+  },
+  "resources": {
+    "wallSeconds": 1800,
+    "cpuThreads": 8,
+    "maxHostBytes": 4294967296,
+    "maxGpuBytes": null,
+    "gpuDevices": []
+  },
+  "stopConditions": [
+    "Stop at 1,800 s wall.",
+    "No seed outside 0xa5200000-0xa52023ff (search) and 0xa5277000-0xa52770ff (single read) may be opened under this record.",
+    "Any NaN weight or illegal decision aborts the run as invalid."
+  ],
+  "expectedArtifacts": [
+    "approaches/value-policy-learning/klein-friedmann-linear-q/rust/src/bin/search.rs",
+    "runs/<run-id>/kf-six-weight-cem/search.json (generation curve, finalists, re-selection)",
+    "runs/<run-id>/kf-six-weight-cem/weights-cem.txt",
+    "runs/<run-id>/kf-six-weight-cem/evaluate-cem.json and summary.json"
+  ],
+  "lifecycle": "preregistered",
+  "protocolSha256": "b3bbe98421b41a3d4be666c36755c56d9acd14b19191d47f34923e11427d1774",
+  "amendments": [],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5-1",
+    "agentId": "claude-q-learning"
+  },
+  "createdAt": "2026-09-02T08:32:55Z",
+  "updatedAt": "2026-09-02T08:32:55Z"
+}

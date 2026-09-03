@@ -1,0 +1,287 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260903T013022Z-b0937bf9",
+  "theoryIds": [
+    "TH-20260902-treestrap-linear-leaf-refit-4b984292"
+  ],
+  "experimentId": "EX-20260902-treestrap-leaf-refit-panel-and-pilot-4024f360",
+  "runIds": [
+    "RUN-20260902T184241Z-062fef8c"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "fail",
+  "assessment": "not-supported-as-tested",
+  "evidenceTier": "pilot",
+  "summary": "Stage 1: on the EX-4 panel's fit games (2,913 roots with depth-4 root value above -50,000; 425 dropped), ridge regression of the depth-4 root value on the eighteen fair-leaf terms plus intercept (lambda 0.001 by game-grouped CV, the grid edge) reaches held-out R^2 0.852 on 1,877 held-out roots, against 0.729 for an affine rescaling of the frozen leaf (gain +0.123; P-L1 passes) and 0.852 with the best-immediate-six-feature-drop term added (gain -0.0001; P-L3 fails as predicted: the six drop features carry no leaf-relevant information the fair terms lack). The refit reweights the terms wildly relative to the frozen constants (open columns -4,232 against +180, solid exposure +3,273 against +40, intercept +45,744), which correlated terms permit. Stage 2, the disclosed biased proxy: full-width d4s7 with the refit leaf agrees with exact frozen-leaf d5s7 on 68.0% of the 128 sub-panel roots against 79.7% for the frozen leaf and loses 9,350 points per decision under those values against 146 (paired change -9,204, bound -21,308); it changes 28 of 128 decisions. Stage 3: in play on the 256 pilot games, full-width fair d4s7 with the refit leaf averages 321,045 points and 93.74 moves against 404,497 and 116.41 for the frozen leaf on the same seeds: paired delta -83,451 points (one-sided 95% bounds -118,022 and -49,021; floor 34,345) and -22.66 moves (bounds -31.98, -13.32), 104 wins to 152; upper bound below zero, so P-L2 FAILS with a measurable loss of about a fifth of the score. The leaf that predicts the depth-4 value best is a worse leaf: it explains more variance among live roots by absorbing four plies of expected score, and inside the search that reweighting mis-prices the positions the search actually has to choose between, above all near death, which the fit deliberately excluded. Unlike three earlier proxies, this one pointed the right way. Valid negative result at pilot tier; one-step linear TreeStrap on these eighteen terms is closed as tested.",
+  "metrics": {
+    "stage1": {
+      "floor": -50000.0,
+      "fitRoots": 2913,
+      "fitRootsDropped": 425,
+      "heldOutRoots": 1877,
+      "heldOutRootsDropped": 183,
+      "baselineAffine": {
+        "slope": 0.9201573066800627,
+        "intercept": 12988.05925192835,
+        "lambda": 0.001,
+        "cv": {
+          "0.001": 73401582.55798703,
+          "0.01": 73410223.47409242,
+          "0.1": 74906572.44859296,
+          "1.0": 121426385.81278844,
+          "10.0": 233085590.22473457
+        },
+        "r2HeldOut": 0.7292926216286095
+      },
+      "refit18": {
+        "weights": {
+          "open_columns": -4232.479724649859,
+          "height_load": 6.3982494857422685,
+          "solid_cells": -1201.5322499468202,
+          "cracked_cells": 284.9428050093259,
+          "numbered_cells": -338.56270952248127,
+          "high_low_numbers": -149.09867778354277,
+          "direct_potential": 863.4062902004356,
+          "latent_chain_potential": 564.1849703472006,
+          "cracked_exposure": 1538.343727637781,
+          "solid_exposure": 3272.8873247516576,
+          "adjacent_ones": -2840.1211295729054,
+          "triple_twos": -4222.770421685138,
+          "dead_low_numbers": -884.3973544151145,
+          "covered_height_risk": -158.05829195123377,
+          "low_number_height_risk": 17.67181824069021,
+          "danger_height_squared": -333.39243451239355,
+          "rise_pressure": 4.841092039340463,
+          "next_disc_vertical_options": 58.67259282191178
+        },
+        "bias": 45744.30990941367,
+        "lambda": 0.001,
+        "cv": {
+          "0.001": 37957398.97048978,
+          "0.01": 37958704.18718227,
+          "0.1": 38523932.016654596,
+          "1.0": 54358654.28993023,
+          "10.0": 153452998.57455364
+        },
+        "r2HeldOut": 0.8521123951073346,
+        "r2Fit": 0.8653875472422877
+      },
+      "refit19": {
+        "kfBeta": 325.96291476350814,
+        "bias": 45637.696612333595,
+        "lambda": 0.001,
+        "r2HeldOut": 0.8520141557677718
+      },
+      "gainOverBaseline": 0.12281977347872508,
+      "gain19Over18": -9.823933956276676e-05
+    },
+    "stage2SubPanelProxy": {
+      "roots": 128,
+      "truth": "exact frozen-leaf d5s7",
+      "configs": {
+        "exact:4:7": {
+          "roots": 128,
+          "games": 16,
+          "top1Agreement": 0.796875,
+          "meanNormalisedRegret": 0.028534454558364022,
+          "meanRawRegret": 145.6493360576903,
+          "maxNormalisedRegret": 0.6959197600437549,
+          "meanWork": 5105613.296875,
+          "workRatioOfMeans": 1.0,
+          "meanWorkRatio": 1.0,
+          "priorWorkShare": 0.0,
+          "meanPrunedNodes": 0.0,
+          "meanWallMs": 4962.1699921875,
+          "monotoneViolations": 218,
+          "top1AgreementLb95": 0.7523809523809524,
+          "meanNormalisedRegretUb95": 0.039805551246541795
+        },
+        "weights-leaf18.txt": {
+          "roots": 128,
+          "games": 16,
+          "top1Agreement": 0.6796875,
+          "meanNormalisedRegret": 0.08455128339350032,
+          "meanRawRegret": 9349.962032864452,
+          "maxNormalisedRegret": 1.0,
+          "meanWork": 5105613.296875,
+          "workRatioOfMeans": 1.0,
+          "meanWorkRatio": 1.0,
+          "priorWorkShare": 0.0,
+          "meanPrunedNodes": 0.0,
+          "meanWallMs": 4950.865609375,
+          "monotoneViolations": 861,
+          "top1AgreementLb95": 0.6129032258064516,
+          "meanNormalisedRegretUb95": 0.1320548899776153,
+          "pairedVsexact:4:7": {
+            "meanNormalisedRegretReduction": -0.05601682883513629,
+            "normalisedLb95": -0.09771583440143543,
+            "meanRawRegretReduction": -9204.312696806763,
+            "rawLb95": -21308.022154184342,
+            "roots": 128
+          }
+        },
+        "weights-leaf19.txt": {
+          "roots": 128,
+          "games": 16,
+          "top1Agreement": 0.6875,
+          "meanNormalisedRegret": 0.08663255754364882,
+          "meanRawRegret": 9352.223081352779,
+          "maxNormalisedRegret": 1.0,
+          "meanWork": 5105613.296875,
+          "workRatioOfMeans": 1.0,
+          "meanWorkRatio": 1.0,
+          "priorWorkShare": 0.0,
+          "meanPrunedNodes": 0.0,
+          "meanWallMs": 5901.216,
+          "monotoneViolations": 861,
+          "top1AgreementLb95": 0.6178861788617886,
+          "meanNormalisedRegretUb95": 0.13454948758221733,
+          "pairedVsexact:4:7": {
+            "meanNormalisedRegretReduction": -0.0580981029852848,
+            "normalisedLb95": -0.0985620215400938,
+            "meanRawRegretReduction": -9206.573745295089,
+            "rawLb95": -21291.290633395474,
+            "roots": 128
+          }
+        }
+      },
+      "refitVsFrozenD4SameAction": "100/128"
+    },
+    "stage3": {
+      "cohort": {
+        "seedsStartHex": "0xa5277000",
+        "games": 256,
+        "moveCap": 2000
+      },
+      "arms": {
+        "fair-d4s7": {
+          "games": 256,
+          "score": {
+            "mean": 404496.85546875,
+            "sd": 282958.16473424336,
+            "median": 315157.5,
+            "q25": 211976.25,
+            "min": 103308,
+            "max": 1746375
+          },
+          "moves": {
+            "mean": 116.40625,
+            "median": 90.0,
+            "q25": 65.0,
+            "min": 35,
+            "max": 475
+          },
+          "censoredGames": 0,
+          "numberedClearsPerMove": 2.0715436241610736,
+          "coveredRevealsPerMove": 1.1651677852348994,
+          "meanChainDepth": 2.1474804920594655,
+          "maximumChainDepth": 13,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "logicalWorkPerMove": 5221078.2737919465,
+          "wallSecondsPerGame": 464.770412030582
+        },
+        "leaf-d4s7-weights-leaf18": {
+          "games": 256,
+          "score": {
+            "mean": 321045.4140625,
+            "sd": 203027.97796453832,
+            "median": 264787.5,
+            "q25": 173833.0,
+            "min": 85331,
+            "max": 1275013
+          },
+          "moves": {
+            "mean": 93.7421875,
+            "median": 80.0,
+            "q25": 55.0,
+            "min": 30,
+            "max": 355
+          },
+          "censoredGames": 0,
+          "numberedClearsPerMove": 2.0144178681556797,
+          "coveredRevealsPerMove": 1.1402616884740395,
+          "meanChainDepth": 2.1225997769884226,
+          "maximumChainDepth": 12,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "logicalWorkPerMove": 5236533.431702642,
+          "wallSecondsPerGame": 358.25581587517576
+        }
+      },
+      "pairedVsFairD4s7": {
+        "leaf-d4s7-weights-leaf18": {
+          "score": {
+            "n": 256,
+            "meanDelta": -83451.44140625,
+            "sdDelta": 334053.5228320668,
+            "lb95": -118021.65234375,
+            "ub95": -49021.296875,
+            "detectionFloor": 34344.87781617187,
+            "wins": 104,
+            "ties": 0,
+            "losses": 152
+          },
+          "moves": {
+            "n": 256,
+            "meanDelta": -22.6640625,
+            "sdDelta": 90.7158699256781,
+            "lb95": -31.98046875,
+            "ub95": -13.31640625,
+            "detectionFloor": 9.32672537673378,
+            "wins": 98,
+            "ties": 9,
+            "losses": 149
+          },
+          "workPerMoveRatio": 1.0029601467551779,
+          "meanScore": 321045.4140625,
+          "referenceMeanScore": 404496.85546875
+        }
+      },
+      "wallClock": "2026-09-02T20:25:12Z to 2026-09-03T00:42:41Z on 6 threads, 15,449 s, shared with three EX-5 arms"
+    }
+  },
+  "gateChecks": [
+    {
+      "criterion": "P-L1 (theory a): held-out R^2 of refit-18 exceeds the frozen-leaf affine baseline by >= 0.05",
+      "passed": true,
+      "observed": "0.852 vs 0.729, gain +0.123 (lambda 0.001, the grid edge)"
+    },
+    {
+      "criterion": "P-L2 (theory b): refit-18 arm's paired score delta over the frozen-leaf arm has LB95 > 0; fail if UB95 < 0",
+      "passed": false,
+      "observed": "-83,451 [LB -118,022, UB -49,021], floor 34,345; moves -22.66 [LB -31.98, UB -13.32]; W/T/L 104/0/152"
+    },
+    {
+      "criterion": "P-L3 (variant): refit-19's held-out R^2 exceeds refit-18's by >= 0.01",
+      "passed": false,
+      "observed": "gain -0.0001 (kf_beta 326 on a term the eighteen already explain); no refit-19 arm run"
+    },
+    {
+      "criterion": "Mechanics: LinearLeaf at the frozen constants bit-identical to FairLeaf; zero illegal and incomplete decisions",
+      "passed": true,
+      "observed": "crate test frozen_linear_leaf_matches_fair_leaf_bits (56 boards); 0 illegal, 0 incomplete, 0 censored"
+    }
+  ],
+  "perGameArtifact": {
+    "path": "runs/RUN-20260902T184241Z-062fef8c/oneply-q/evaluate-leaf.json",
+    "sha256": "fc9cad7eb090224a67e68bd829e0b1fc661b37f7a1f848a2da7322f9d53d3be3",
+    "recordCount": 256
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260902T080517Z-dec42aab.json"
+  ],
+  "artifactManifestRef": null,
+  "limitations": [
+    "Pilot tier; the comparator rows are EX-5's full-width arm on the same seeds (RS RS-20260903T013022Z-d32ee053), read once more here.",
+    "The refit excluded death-dominated roots by design (root value above -50,000) and fitted the smallest lambda of the preregistered grid; a refit that keeps or reweights death-dominated roots, or a shrinkage toward the frozen constants, was not tested and is what would reopen the direction.",
+    "The stage-2 proxy scores the refit leaf's decisions with the frozen leaf's depth-5 values and is biased toward the frozen leaf; it is reported because it predicted the gameplay sign correctly, not as evidence on its own.",
+    "The leaf arm ran concurrently with three other arms; its 15,449 s wall plus the earlier stages exceeded the preregistered 14,400 s stop by about 1,300 s, which was not enforced; every row is deterministic and no number is affected. Wall times are contended; work per move (5.24M vs 5.22M, ratio 1.003) is the cost comparison.",
+    "Panel-derived R^2 values are on training-role roots of fair-d4s7 play and describe the depth-4 root value, not score."
+  ],
+  "contributionIds": [
+    "CT-20260902T082510Z-4af4b77b"
+  ],
+  "recordedAt": "2026-09-03T01:30:22Z"
+}

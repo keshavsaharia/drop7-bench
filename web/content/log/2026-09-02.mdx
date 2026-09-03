@@ -1,10 +1,10 @@
 ---
 date: 2026-09-02
-title: "The depth-5 teacher is slow, the leaf decides, and the console's charts are rebuilt"
-summary: "The evolved-NNUE-leaf run spent the whole day in its teacher stage: the depth-5 search played four to seven times slower per position than the pilot projected, so the corpus closed far short of the 512 games the protocol allowed for. A retained diagnostic answered the question of whether a leaf can move a five-move decision at all (it carries about 97% of the spread between columns). The research console's figure generator, whose fixed-box layout was colliding legends, axis labels and category names, was replaced by a measured visx chart kit, and the approach page now explains the evolutionary loop with live charts of the run."
+title: "The depth-5 teacher crawls, Q-learning finds a pruning prior, and the console charts are rebuilt"
+summary: "The evolved-NNUE-leaf run's teacher stage closed far short of its planned corpus after running four to seven times slower than projected, while a retained diagnostic showed that the leaf carries about 97% of the spread between columns. In a separate track, the Klein-Friedmann Q-learning report was reproduced and dissected, its features were transferred to the Rust engine, and the search's exact one-ply value pruned depth 4 to about a quarter of the work while the tested least-squares fits lost. The research console's fixed-box SVG generator was replaced by a measured visx chart kit, and the evolution approach page now explains the loop with live run figures."
 contributors: [claude-fable-5-1 (Claude Code)]
-tags: [nnue, evolution, leaf, teacher-distillation, web-console, figures, diagnostics]
-outcomes: { positive: 2, negative: 1, open: 2 }
+tags: [nnue, evolution, leaf, teacher-distillation, web-console, figures, diagnostics, q-learning, linear-features, reproduction, rust-engine, value-policy-learning, pilot, prior-work, pruning, search-efficiency, leaf-evaluation, treestrap, negative-result]
+outcomes: { positive: 8, negative: 9, open: 5 }
 ---
 
 ## The teacher stage ran all day
@@ -127,3 +127,299 @@ One environment note for whoever opens the dev console from another machine:
 Next.js 16 blocks its own dev resources for any origin but localhost, which
 silently prevents hydration, so the charts render but never become
 interactive. `DROP7_DEV_ORIGINS=<host>` in `next.config.ts` allows the host.
+
+## Reading the only outside paper on this game
+
+The repository has cited Klein and Friedmann's "Final Report - Drop7" since its
+strategy landscape was written, as prior work and explicitly not as a baseline.
+Today it was read end to end, its code fetched from
+`github.com/ekreate/cs221-final-project` at the only commit that exists
+(`8cc8a0e`, March 2021), and the two were compared. The report is a Stanford
+CS221 course project; `util.py` is the course's homework scaffold and the
+learner class is "Problem 4a". Its game is a simplified Drop7: score is one
+point per move survived, the board starts empty rather than with a gray row,
+games stop at 200 moves, and dropping onto a full column ends the game. The
+learner is textbook Q-learning with a linear function of six hand-made
+features about the immediate consequences of a drop, and the code's feature
+definitions differ from the paper's prose in two places (the tallest-column
+feature carries a count, not an indicator; the column-detonation feature adds
+the landing cell's gray adjacency unconditionally). The code was ported as
+coded.
+
+The upstream repository carries no license, so it is fetched at run time into
+the run directory and never vendored; the theory, both experiments and the
+reproduction harness live under
+`approaches/value-policy-learning/klein-friedmann-linear-q/`.
+
+<Finding title="The report reproduces from its own code" kind="positive" metric="49.08 / 49.05 / 49.02 vs 49.61 reported">
+Three independent 50,000-game training runs in the authors' simulator,
+tested over 10,000 games each with no exploration, average 49.08, 49.05 and
+49.02 moves (report: 49.61, sd 11.18); uniform-random play averages 31.66,
+31.73 and 31.85 over 5,000 games each (report: 31.2). Both preregistered
+bands pass (`RS-20260902T082726Z-75606ce7`). The whole five-arm run took nine
+minutes on the laptop because the upstream simulator turns out to run at about
+ten thousand moves per second.
+</Finding>
+
+<Finding title="Training is front-loaded: 300 games equal 50,000" kind="negative" metric="49.080 vs 49.080 on the same 10,000 test games">
+The step size is one over the number of moves played, not games, so after a
+few hundred games it is below a thousandth and the weights barely move. A
+learner stopped after 300 training games (13,796 updates) tests at 49.080
+moves on the same 10,000 games as the 50,000-game learner (2,406,211 updates),
+which also tests at 49.080. The per-thousand-game training curve is at 46.8
+in its first block and 48.2 in its last. The report's 50,000-game protocol
+spends more than 99% of its compute on a frozen policy.
+</Finding>
+
+<Finding title="The regularisation claim does not hold for the shipped code" kind="negative" metric="lambda 0: 48.97 moves, not below random">
+The report's Figure 5 says the unregularised learner diverged and fell below
+random, and credits ridge regularisation for the working result. With the
+ridge constant set to zero the shipped configuration tests at 48.97 moves,
+indistinguishable from 49.08 with it. The reason is the same step size: the
+penalty term is scaled by a step of order one hundred-thousandth for almost
+all of training and cannot act. The report's divergence must have come from a
+schedule the shipped code no longer contains (it mentions an earlier one over
+the square root of the count). The numbers of this report are reliable; its
+explanation of them is not.
+</Finding>
+
+## Porting the six features onto the Rust bitboard engine
+
+A std-only crate on `drop7-rs` reimplements the feature extractor and the
+Q-learning update, with the three step-size and exploration schedules exposed
+and two necessary deviations disclosed: the argmax and the exploration draw
+range over legal columns only, and the rules engine is the repository's proven
+Hardcore engine rather than the upstream simulator, so only feature and update
+parity are claimed, not board parity. Three CHECK gates ran before any
+diagnostic seed was read: 54,852 exported (state, action) pairs from 7,242
+upstream states with zero feature mismatches after the gray-encoding swap; 250
+upstream weight updates replayed with worst relative difference zero; and 64
+probe games times three arms byte-identical across one and eight threads and
+a repeat with zero illegal decisions. Training then ran at about 1.4 million
+moves per second: each 50,000-game run took 1.3 seconds.
+
+<Finding title="Six first-wave features are a real survival prior on Hardcore rules" kind="positive" metric="+9.5 moves, +33,884 points over random (LB95 +8.85, +31,361)">
+Re-learned with the upstream schedule on the already-open training block and
+played on 256 previously evaluated development seeds
+(`0xa5277000`-`0xa52770ff`, 2,000-move cap, nothing censored), the policy
+lives 35.8 moves and scores 107,147 points on average against 26.25 moves and
+73,263 points for uniform-random legal play on the same games, winning 232 of
+256 paired games. Three exploration seeds agree to within half a move. Fair
+depth-4 search averaged 308,296 points on its own 64-game development cohort;
+on the first 32 of these seeds the depth-4 search with seven chance samples
+scored 380,205 points and lived 110.4 moves, beating every six-feature arm on at least 30 of the 32 games. Pilot tier: the cohort was read before, no new seed
+was opened, and nothing here can be promoted (RS-20260902T084356Z-2488ecc7).
+</Finding>
+
+<Finding title="The learned weights are an accident of the opening" kind="positive" metric="transplanted authors' weights: +4.74 moves over engine-trained (LB95 +3.77)">
+The weights the authors' simulator learned (Python seed 10 of the
+reproduction), transplanted unchanged onto the engine, live 40.5 moves and
+score 123,968 points, beating the weights learned in the engine by 4.7 moves
+and 16,821 points. Same six features, same update, same schedule; the only
+difference is the opening experience (empty board versus gray row) that a
+step size dying within a few hundred moves locks in. The engine-trained
+weights are dominated by "drop on the lowest column"; the authors' weights
+value detonations three times more. Neither is the best six-weight policy,
+and the temporal-difference fixed point evidently is not either.
+</Finding>
+
+<Finding title="Slower step sizes did not raise the plateau; two diverged" kind="negative" metric="constant 0.001: +0.50 moves [LB95 +0.12]; per-game and harmonic: weights to 1e9 and NaN">
+The preregistered slower schedules were a per-game step, a harmonic step with
+a 50,000-move time constant, and a constant 0.001, all with survival reward.
+The first two diverged (weights near a billion, then NaN), which is the
+deadly-triad instability the report described and which its own collapsing
+step size had hidden. The constant step gained 0.50 moves over the upstream
+schedule with a lower bound of 0.12, but two identical-configuration upstream
+seeds differ by 0.48 (lower bound 0.07), so the gain is the size of seed
+noise. Three post-hoc arms (constants 0.01 and 0.0001, and a corrected-score
+reward at 0.001) landed within 0.7 moves of the same plateau. Under the
+theory's clause (iv) this reads as mixed: the letter of the falsification
+criterion fires for the constant-step arms, the effect is under one move.
+</Finding>
+
+## Searching the six weights instead of learning them
+
+The transplant result said the plateau might be the optimizer's rather than the
+features'. Since the policy is an argmax over six numbers and one candidate
+costs about a second to play on 256 paired games, the cheapest test was a
+direct search: a second theory and preregistered experiment
+(`TH-20260902-kf-six-weight-policy-search-8a6e41a8`,
+`EX-20260902-kf-six-weight-cem-d018cc89`), cross-entropy method over the six
+weights with population 64, elite 8, 30 generations of 256 paired training
+games each, re-selection of the finalists on a fresh 1,024-game block, and a
+single read of the frozen optimum on the pilot cohort.
+
+<Finding title="A five-second search over the six weights beats both learned vectors" kind="positive" metric="44.82 moves, 138,973 points; +4.29 moves over the transplanted weights (LB95 +2.81)">
+The search converged by generation ten and finished in 4.5 seconds. Its
+frozen optimum (unit weights 0.43 lowest-column, 0.28 row detonations, 0.15
+column detonations, 0.03 tallest-column, 0.74 a-clearing-1, 0.42 the-disc-
+clears) re-selected at 43.25 moves on the fresh block against a generation
+fitness of 43.29, so it did not overfit its fitness blocks; the single-
+generation "best ever" of 44.82 re-selected to 43.12 and was correctly passed
+over. Read once on the 256 pilot games it lives 44.82 moves and scores 138,973
+points: 18.57 moves over random (lower bound 17.24) and 4.29 over the
+transplanted authors' weights (lower bound 2.81), winning 159 of 256 paired
+games against them. The optimum's direction is 0.75 cosine from the
+transplanted vector and 0.55 from the engine-learned one. Six first-wave
+features therefore top out near 45 moves and 140,000 points on Hardcore
+rules, an order of magnitude below depth-4 in points (RS-20260902T084356Z-784ebf14).
+</Finding>
+
+## What is open, and one decision for the coordinator
+
+Open: whether any of the six features, above all "a 1 that clears next to
+gray" and "lands on a lowest column", earns a place as a cheap correction term
+inside the depth-4 leaf. That is a different experiment with a different
+comparator and was not run today. The broader lesson is one this repository
+keeps meeting from the other direction: a value-prediction objective is not the
+control objective, and for a six-number policy whole-game search is both
+cheaper and better than temporal-difference learning.
+
+Decision requested: training read the first 50,000 seeds of the already-open
+SEEDLEASE-A52 d2 training block (`0xa5200000`-), whose role is unchanged by
+another training read; the search re-read the first 8,704 of them; and the
+pilot read the first 256 seeds of the Rust engine's already-read benchmark
+sub-block, twice (once per experiment). No new seed was opened and no lease
+record was written, because the seed allocator is closed to agents. The
+coordinator should either confirm that reuse in a lease note or assign a fresh
+training lease before any of these numbers is cited outside the pilot tier.
+No arm here warrants a SCREEN against depth-4 on fresh seeds.
+
+## Later the same day: the Q-learning family inside the search
+
+The owner's response to the morning's work was to set the paper's policy
+aside and ask the questions it left: fit the linear Q to depth 4, see whether
+its ranking can prune siblings, and more generally test what Q-learning can
+do for the efficiency and the leaf of the depth-4 search. The vehicle was a
+sibling-complete panel: 48 complete fair-d4s7 games on already-read training
+seeds, every root recorded with the exact value of every legal column at
+depths one to four, the 32 one-ply numbers of every sibling (the seven-stratum
+mean of the eighteen leaf terms after the drop, the mean score gained, the
+terminal fraction, the six Klein-Friedmann features, the rise clock, a bias),
+and the game's remaining lifetime. The one-ply search value is a fixed linear
+function of those 32 numbers, so a linear fit can only add to it. Games 0-31
+fit, 32-47 held out; 5,398 roots, 2,060 of them held out
+(DS-20260902-fair-d4s7-sibling-panel-e4e06b7c). A pruned copy of the drop7-rs
+search expands only a prior's top-w siblings at interior max nodes with two
+or more plies left; at width seven it is the unchanged search bit for bit,
+and because chance scenarios and leaves are untouched every pruned value is a
+lower bound on the full-width value. The panel's first attempt was killed by
+the session harness one game short of the end and had to be replayed with a
+resumable builder; that cost 23 minutes and is recorded in the run.
+
+<Finding title="A least-squares Q fitted to depth-4 values ranks worse than the one-ply value it contains" kind="negative" metric="held-out top-1 0.308 vs 0.524; recall@3 0.604 vs 0.809">
+The ridge fit (lambda 0.001, the smallest value of the preregistered grid,
+chosen by game-grouped cross-validation) explains 72% of the held-out
+variance of the depth-4 sibling value and still puts depth-4's choice first
+on only 30.8% of held-out roots, against 52.4% for the exact one-ply value
+under the same chance outcomes; the paired difference over games has a
+one-sided bound of -0.233. The features are exact: the one-ply value rebuilds
+from them to 6e-11. The objective is the problem. Death within four plies is
+worth minus a million points, so least squares halves its error by predicting
+deaths and ranks the live siblings worse; a post-hoc refit on per-root-centred
+targets clipped at minus 50,000 recovers the one-ply ranking exactly (53.5%,
+80.9%) and nothing more. Depth-three exact values rank depth-4's choice into
+their top three on 95.0% of roots, depth two 90.0%, the six-feature CEM policy
+70.1%, centre order 40.0%. Theory clauses (a) and (b) fail
+(RS-20260902T202705Z-75d87947).
+</Finding>
+
+<Finding title="The one-ply value prunes depth 4 to a quarter of the work" kind="positive" metric="92.3% agreement [LB 91.8%], 0.87% normalised regret [UB 0.98%], 26.4% of the work, 3.8x wall">
+Expanding only the one-ply value's top three siblings at both interior layers
+reproduces the full-width depth-4 decision on 92.3% of the 2,060 held-out
+roots and gives up 0.87% of the value spread on average (74 points), at 26.4%
+of the logical work with the prior itself 5.9% of that. Width four: 93.8% at
+40.9%; width two: 89.3% at 13.8%. The six-feature policy, which needs no
+engine calls, reaches 88.4% at width four; the fitted Q is the worst learned
+prior (78.8% at width three); centre order is useless (69.1%). Zero violations
+of the lower-bound property over 33,000 decisions. By the preregistered gate
+this is a pass on regret and inconclusive on agreement (0.923 against the
+0.95 line, above the 0.90 fail line), so the gameplay pilot was run.
+</Finding>
+
+<Finding title="Pruning cannot buy a fifth ply" kind="negative" metric="pruned d5 at 1.68x d4 work: 80.5% agreement with exact d5 vs d4's 79.7%; 189 vs 146 points regret per decision">
+On 128 held-out roots with exact depth-5 values (37 times the depth-4 work
+each), full-width depth 4 agrees with depth 5 on 79.7% of decisions and loses
+146 points per decision against it. Pruned depth 5 with the one-ply prior at
+width two on all three interior layers agrees on 80.5% and loses 189 points:
+it does better on the near-tied roots (normalised regret 0.0174 against
+0.0285, paired reduction +0.011 with bound -0.0004) and worse on the
+high-stakes ones, which is where the fifth ply was supposed to help. Wider
+pruning (3,3,3) costs 4.5 times depth 4 for 82.8%. Clause (d) is inconclusive
+by the normalised metric and unfavourable in points.
+</Finding>
+
+<Finding title="In play, the pruned search is four times cheaper and probably about 8% worse; the cohort cannot tell" kind="negative" metric="256 paired games: -33,608 points [LB -69,418, UB +1,448], floor 35,114; -8.6 moves; 121 wins, 135 losses; 26.8% of the work">
+Full-width fair d4s7 on the 256 previously evaluated pilot games averages
+404,497 points and 116.4 moves (its first 32 rows reproduce the earlier
+run's checksums exactly). The pruned search with the one-ply prior at width
+three averages 370,889 and 107.8 at 26.8% of the logical work per move. The
+preregistered non-inferiority bound (-40,000) is not met and a measurable
+loss is not shown either, so gate G1 is inconclusive; but the sign agrees
+with the panel, the lifetime delta and the 32-game preview. Pruning is a
+cheaper policy, not a free speed-up, and whether it costs 0% or 17% needs a
+cohort four times this size (RS-20260903T013022Z-d32ee053).
+</Finding>
+
+<Finding title="Pruned depth 5 in play: a non-measurement pointing the same way as the panel" kind="negative" metric="128 paired games at 1.8x the depth-4 work: -21,615 points [LB -76,153, UB +31,957], floor 54,839; 62 wins, 66 losses">
+The pruned depth-5 arm (one-ply prior, width two on all three interior
+layers) was run because the preregistered normalised-regret metric had been
+favourable on the panel, although the raw-regret reading was not. In play it
+scores 383,515 on the first 128 games against the comparator's 405,130 on the
+same games. Nothing here suggests a fifth ply bought by pruning is worth its
+cost (RS-20260903T013022Z-d32ee053).
+</Finding>
+
+<Finding title="One bootstrapped leaf refit explains more of the depth-4 value and the six drop features add nothing" kind="positive" metric="held-out R^2 0.852 vs 0.729 for a rescaled frozen leaf; +0.0001 for the six-feature term">
+Ridge regression of the depth-4 root value on the eighteen fair-leaf terms
+plus intercept, on fit roots that are not about to die, explains 85.2% of
+the held-out variance against 72.9% for an affine rescaling of the frozen
+leaf, so the preregistered fit gate passed and the gameplay arm was run. The
+"best immediate Klein-Friedmann drop" term added as a nineteenth feature
+changed the held-out R^2 by -0.0001: the six drop features carry nothing the
+fair terms lack, which was the predicted answer to the morning's open
+question about a six-feature correction term (RS-20260903T013022Z-b0937bf9).
+</Finding>
+
+<Finding title="The refit leaf loses a fifth of the score inside the search" kind="negative" metric="256 paired games: -83,451 points [LB -118,022, UB -49,021], floor 34,345; -22.7 moves; 104 wins, 152 losses">
+Inside full-width fair d4s7 the refit-18 leaf averages 321,045 points and
+93.7 moves against 404,497 and 116.4 for the frozen leaf on the same games:
+a measurable loss, upper bound well below zero, and the theory is not
+supported. The disclosed proxy had pointed the right way (agreement with
+exact depth 5 fell from 80% to 68% and raw regret rose from 146 to 9,350
+points per decision). The mechanism is the one that sank the action-value
+fit too: least squares is dominated by what it can predict cheaply, here the
+expected score of the next four plies among live positions, while the
+search needs the leaf to price the positions it must choose between, above
+all the ones near death that the fit excluded. One-step linear TreeStrap on
+these eighteen terms is closed as tested (RS-20260903T013022Z-b0937bf9).
+</Finding>
+
+## What the afternoon closes, what it leaves open, and two process failures
+
+Closed at pilot tier, each for the configuration tested: a least-squares
+linear action value over one-ply features as a ranker or a pruning prior;
+pruning as a way to buy a fifth ply; a one-step linear leaf refit to the
+search's own value. The positive residue is a mechanism, not a policy: the
+search's own one-ply value keeps 92% of depth-4's decisions at a quarter of
+the work, the pruned values are provably lower bounds on the full-width
+ones, and the cost of the changed 8% of decisions is about 8% of the score
+with bounds from 17% to nothing. A 1,024-game paired screen under a
+coordinator lease is what would settle whether the pruned search can stand
+in for full-width depth 4 in future diagnostic screens. The next fit worth
+trying for the action value is a rank-aware objective within each root, and
+the leaf direction reopens only with a refit that keeps the death-dominated
+positions or shrinks toward the frozen constants.
+
+Two process failures belong in the record. The first panel build was killed
+by the session harness one game short of the end with nothing written, and
+was replayed with a builder that saves each game as it finishes (23 minutes
+lost). Then, by starting the gameplay arms while the panel stages still held
+the machine, the three runs exceeded their preregistered wall stops by 2.7%,
+2.9% and about 9%; no watchdog enforced them, every output is deterministic
+and no number is affected, but the wall-time figures throughout are
+contended and only logical work should be compared. Zero new seeds were
+opened; the morning's request stands: the coordinator should confirm the
+reuse of the training block and the pilot cohort (read a fourth time today)
+or assign fresh leases before any of these numbers is cited outside the pilot
+tier.

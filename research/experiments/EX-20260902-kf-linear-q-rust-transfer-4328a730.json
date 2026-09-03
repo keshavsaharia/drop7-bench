@@ -1,0 +1,86 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260902-kf-linear-q-rust-transfer-4328a730",
+  "theoryIds": [
+    "TH-20260902-kf-linear-q-transfer-68b41d66"
+  ],
+  "title": "Port the six-feature linear Q-learner onto the Rust bitboard engine: parity gates and a diagnostic pilot on previously evaluated development seeds",
+  "classification": "algorithmic",
+  "hypothesis": "A std-only Rust crate on drop7-rs (approaches/fair-expectimax/rust-engine) reimplements the upstream feature extractor and Q-learning update exactly (CHECK gates G1-G2), plays only legal columns deterministically (G3), and then, on corrected five-move Hardcore rules with a 2,000-move cap, tests theory clauses (iii) and (iv): the six features re-learned with survival reward (+1 per surviving move, 0 on the terminal transition) under the upstream schedule (epsilon = t^-0.25, eta = 1/t per move, lambda = 0.1, 50,000 training games) outlive uniform-random legal play (G4) but score below two thirds of the fair depth-4 ledger mean and lose to fair d4s7 on paired seeds (G5); slower schedules (per-game, harmonic tau = 50,000 moves, constant 1e-3) are compared with the upstream schedule on paired seeds (G6). Exploratory arms, reported but not gated: the Python-learned weights from the reproduction transplanted directly, and a score-delta reward (score delta / 17,000) under the harmonic schedule. Necessary deviations from upstream, all disclosed: the argmax and the exploration draw range over LEGAL columns only (upstream lets the agent drop on a full column and die); ties keep upstream's highest-index rule; the rules engine is the repository's proven Hardcore engine, not the upstream simulator, so wave-boundary semantics differ and board-level parity is not claimed -- only feature and update parity are.",
+  "candidate": {
+    "name": "drop7-kf-linear-q (Rust crate on drop7-rs): six-feature linear Q policy, several trained weight sets",
+    "entryPoint": "approaches/value-policy-learning/klein-friedmann-linear-q/rust/src/lib.rs",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "uniform-random legal policy and centre-first policy on identical seeds (primary); fair d4s7 (drop7-rs Searcher, FairLeaf, 65,536-entry depth table, terminal utility -1,000,000, policy seed 0xd7075eed) on the first 32 seeds as a diagnostic reference",
+    "entryPoint": "approaches/fair-expectimax/rust-engine/src/search.rs",
+    "manifestRef": null
+  },
+  "informationBoundary": "public-policy",
+  "benchmarkTier": "PILOT",
+  "data": {
+    "role": "previously-evaluated-development",
+    "seedLeaseRefs": [],
+    "datasetRefs": [],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "Zero new seeds are opened. The 0xa52 lease family has no machine-readable lease records yet (docs/exploratory/lease-map.md, Incident 2), so this record cites the map. TRAINING reads the first 60,000 seeds of the already-opened TRAINING-role block SEEDLEASE-A52 d2 (0xa5200000-0xa520ea5f), whose role is unchanged by another training read; every trained arm uses the same ordered training seeds (common random numbers) and its own exploration stream in a separate policy-sampling domain. The DIAGNOSTIC evaluation reads 0xa5277000-0xa52770ff, the first 256 seeds of the Rust-engine benchmark sub-block of SEEDLEASE-A52-FAST (development role, already read by the centre policy in RUN-20260824T052018Z-b88c3e22), so its evidence tier is pilot/diagnostic and it can never become confirmation evidence. CHECK probes may read 0xa5278000-0xa52784ff (already open for probes). Training and evaluation seeds are disjoint by construction. The coordinator (repository owner) is asked to confirm this reuse or to assign a fresh training lease before any of these numbers are cited outside the pilot tier."
+  },
+  "metrics": {
+    "primary": "mean lifetime in moves and mean corrected Hardcore score per arm over the 256 diagnostic games, with paired deltas against uniform-random on the same seeds and one-sided 95% bootstrap lower bounds (10,000 resamples, bootstrap RNG seed 0x6b66_0001)",
+    "secondary": [
+      "median, lower quartile, minimum and maximum score and moves",
+      "censored games at the 2,000-move cap",
+      "numbered clears and covered reveals per move; mean and maximum chain depth",
+      "illegal decisions (must be 0) and runner failures",
+      "paired lifetime and score deltas between every trained arm and the upstream-schedule arm",
+      "fair d4s7 versus the best six-feature arm on the paired 32-seed subset",
+      "training curves as per-1,000-game block means; final weights; moves per second of training and evaluation with the machine profile"
+    ],
+    "statisticalUnit": "whole-game",
+    "uncertaintyMethod": "paired per-game deltas with one-sided 95% percentile bootstrap lower bounds over whole games; the 256-game paired detection floor is reported alongside every null"
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "G1 feature parity (CHECK, seed-free): on at least 20,000 (state, action) pairs exported from the upstream simulator under random play, the Rust feature presence mask and values equal the upstream extractor's exactly after the gray-disc encoding swap (upstream 9 = untouched, 8 = cracked; engine 8 = untouched, 9 = cracked).",
+      "G2 update parity (CHECK, seed-free): replaying the transitions of at least 3 upstream training games (features of the taken action, reward, features of all seven successor actions or terminal) through the Rust learner reproduces the upstream weights after every step to within 1e-9 relative.",
+      "G3 legality and determinism (CHECK): zero illegal decisions in every arm; per-game rows byte-identical across 1 and 8 evaluation threads and across two repeated runs; the policy's input type carries only the visible board, the visible next disc and moves until the next rise.",
+      "G4 (theory iii-a): the upstream-schedule survival arm's paired mean-lifetime delta over uniform-random has a one-sided 95% bootstrap lower bound above zero.",
+      "G5 (theory iii-b): every six-feature arm's mean corrected score is below 205,530, and fair d4s7's paired score delta over the best six-feature arm on the 32-seed subset has a one-sided 95% lower bound above zero.",
+      "G6 (theory iv, recorded either way): whether any slower-schedule arm beats the upstream-schedule arm's mean lifetime with a paired one-sided 95% lower bound above zero."
+    ],
+    "failureAction": "A CHECK failure stops the pilot before any diagnostic seed is read and is recorded as a mechanics failure of the port, not of the theory. A pilot gate failure is recorded valid + fail for the exact configuration; no further cohort is opened.",
+    "passAction": "Record a pilot-tier assessment of the theory. If and only if a six-feature arm falls within the 256-game detection floor of the d4s7 arm, request a fresh public-development lease for a paired SCREEN; otherwise the port is retained as a fast laboratory for feature-based Q-learning and no later tier is opened by this record."
+  },
+  "resources": {
+    "wallSeconds": 7200,
+    "cpuThreads": 8,
+    "maxHostBytes": 8589934592,
+    "maxGpuBytes": null,
+    "gpuDevices": []
+  },
+  "stopConditions": [
+    "Any G1-G3 failure stops the run before the diagnostic cohort is read.",
+    "Stop at 7,200 s wall or 8 GiB resident; a stopped arm is recorded partial and never summarised as valid.",
+    "No seed outside 0xa5200000-0xa520ea5f (training), 0xa5277000-0xa52770ff (diagnostic) and 0xa5278000-0xa52784ff (probes) may be read under this record."
+  ],
+  "expectedArtifacts": [
+    "approaches/value-policy-learning/klein-friedmann-linear-q/rust/ (cargo crate: features, learner, game driver, parity and evaluation binaries)",
+    "approaches/value-policy-learning/klein-friedmann-linear-q/reproduction/export_parity.py (upstream feature and transition export)",
+    "runs/<run-id>/kf-linear-q/parity-features.txt and parity-update.txt (gate outputs)",
+    "runs/<run-id>/kf-linear-q/train-<arm>.json and weights-<arm>.txt",
+    "runs/<run-id>/kf-linear-q/evaluate.json (per-arm per-game rows) and summary.json (paired statistics)"
+  ],
+  "lifecycle": "preregistered",
+  "protocolSha256": "c1080a23a5bf006b72c3edb58b663bbde9d6bc8a4a858e88635c9a4fd6fd1348",
+  "amendments": [],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5-1",
+    "agentId": "claude-q-learning"
+  },
+  "createdAt": "2026-09-02T08:05:17Z",
+  "updatedAt": "2026-09-02T08:10:23Z"
+}

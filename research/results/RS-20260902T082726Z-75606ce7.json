@@ -1,0 +1,228 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260902T082726Z-75606ce7",
+  "theoryIds": [
+    "TH-20260902-kf-linear-q-transfer-68b41d66"
+  ],
+  "experimentId": "EX-20260902-kf-report-reproduction-b7f61bf1",
+  "runIds": [
+    "RUN-20260902T081648Z-f0c96f48"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "pass",
+  "assessment": "supported-as-tested",
+  "evidenceTier": "mechanics-only",
+  "summary": "The shipped Klein-Friedmann code (github.com/ekreate/cs221-final-project @ 8cc8a0edfa04f1a93088c951e217d3cd3d6013f0) reproduces its report in its own simulator: uniform-random means 31.657, 31.733, 31.851 over 5,000 games each (report 31.2), and the Q-learner's 10,000-game test means 49.080, 49.053, 49.015 moves with standard deviations near 11.7 (report 49.61, sd 11.18) after 50,000 training games each, so both preregistered bands pass. Two of the theory's clause-(ii) checks were decided here. (ii-a) Front-loading holds: a learner stopped after 300 training games (13,796 updates) tests at 49.0796 moves against 49.0795 for the 50,000-game learner (2,406,211 updates) on the same 10,000 test games, a difference of -0.0001; the per-1,000-game training curve is already at 46.8 in its first block and 48.2 in its last. (ii-b) The report's regularisation claim does NOT hold for the shipped configuration: with lambda = 0 the learner tests at 48.967 moves, indistinguishable from the lambda = 0.1 arm and far above random, where the report's Figure 5 says the unregularised agent fell below random. With eta = 1/t counted per move, the ridge step eta*lambda*w is of order 1e-5 for almost all of training, so the term cannot act; the report's divergence must come from a schedule the shipped code no longer contains. Units are the upstream simulator's (one point per surviving move, 200-move cap, empty starting board, dropping on a full column ends the game); nothing here is a corrected-Hardcore score or a repository cohort.",
+  "metrics": {
+    "report": {
+      "randomMean": 31.2,
+      "randomSd": 5.12,
+      "agentTestMean": 49.61,
+      "agentTestSd": 11.18,
+      "humanMean30Games": 73.2
+    },
+    "arms": {
+      "seed10": {
+        "randomMean5000": 31.6572,
+        "randomSd": 5.328580196767492,
+        "trainMean": 48.12422,
+        "testMean10000": 49.0795,
+        "testSd": 11.74752655617423,
+        "testMedian": 45,
+        "testMax": 145,
+        "testCapped200": 0,
+        "updateCount": 2406211,
+        "trainBlockMeans1000First2": [
+          46.83,
+          47.532
+        ],
+        "trainBlockMeans1000Last2": [
+          48.309,
+          48.231
+        ],
+        "weights": {
+          "min_eq_elem_True": 175.67544967426653,
+          "row_dets": 33.08923614095049,
+          "col_dets": 123.97361476703807,
+          "max_eq_elem": 15.424699884446161,
+          "1_dets": 49.143686787500314,
+          "elem_det": 138.66790457434547
+        },
+        "wallSeconds": 526.0967218875885
+      },
+      "seed11": {
+        "randomMean5000": 31.7332,
+        "randomSd": 5.318126949862232,
+        "trainMean": 48.19816,
+        "testMean10000": 49.0531,
+        "testSd": 11.680347744923703,
+        "testMedian": 45,
+        "testMax": 195,
+        "testCapped200": 0,
+        "updateCount": 2409908,
+        "trainBlockMeans1000First2": [
+          47.294,
+          47.54
+        ],
+        "trainBlockMeans1000Last2": [
+          47.391,
+          48.465
+        ],
+        "weights": {
+          "min_eq_elem_True": 292.46515970747635,
+          "row_dets": 55.00050321536702,
+          "col_dets": 206.39030173269006,
+          "max_eq_elem": 24.754631598890647,
+          "1_dets": 82.46026664604717,
+          "elem_det": 229.43020297939853
+        },
+        "wallSeconds": 527.6854178905487
+      },
+      "seed12": {
+        "randomMean5000": 31.851,
+        "randomSd": 5.36344593619271,
+        "trainMean": 48.18704,
+        "testMean10000": 49.0147,
+        "testSd": 11.74040321355113,
+        "testMedian": 45,
+        "testMax": 125,
+        "testCapped200": 0,
+        "updateCount": 2409352,
+        "trainBlockMeans1000First2": [
+          46.609,
+          47.289
+        ],
+        "trainBlockMeans1000Last2": [
+          48.705,
+          48.264
+        ],
+        "weights": {
+          "min_eq_elem_True": 330.0663678751449,
+          "row_dets": 62.09810166033314,
+          "col_dets": 233.18302848725637,
+          "max_eq_elem": 28.381687608468326,
+          "1_dets": 92.14821592029259,
+          "elem_det": 260.4666772614391
+        },
+        "wallSeconds": 528.1098742485046
+      },
+      "seed10-noreg": {
+        "randomMean5000": null,
+        "randomSd": null,
+        "trainMean": 48.1237,
+        "testMean10000": 48.9671,
+        "testSd": 11.836926496049863,
+        "testMedian": 45,
+        "testMax": 180,
+        "testCapped200": 0,
+        "updateCount": 2406185,
+        "trainBlockMeans1000First2": [
+          46.494,
+          47.482
+        ],
+        "trainBlockMeans1000Last2": [
+          48.395,
+          48.463
+        ],
+        "weights": {
+          "min_eq_elem_True": 440.5682338000874,
+          "row_dets": 91.68831266939486,
+          "col_dets": 331.49563503087035,
+          "max_eq_elem": 32.24727444541306,
+          "1_dets": 111.68586969317846,
+          "elem_det": 332.44039583202016
+        },
+        "wallSeconds": 501.36578583717346
+      },
+      "seed10-300": {
+        "randomMean5000": null,
+        "randomSd": null,
+        "trainMean": 45.986666666666665,
+        "testMean10000": 49.0796,
+        "testSd": 11.629530877849025,
+        "testMedian": 45,
+        "testMax": 130,
+        "testCapped200": 0,
+        "updateCount": 13796,
+        "trainBlockMeans1000First2": [
+          45.986666666666665
+        ],
+        "trainBlockMeans1000Last2": [
+          45.986666666666665
+        ],
+        "weights": {
+          "min_eq_elem_True": 33.10536273795074,
+          "row_dets": 6.203560650183819,
+          "col_dets": 26.035665339963092,
+          "max_eq_elem": 4.728435115276814,
+          "1_dets": 9.290439918255924,
+          "elem_det": 28.60057784113305
+        },
+        "wallSeconds": 72.77721118927002
+      }
+    },
+    "smokeRunDisclosed": {
+      "pythonSeeds": [
+        0,
+        1,
+        2
+      ],
+      "testMeansLambda0p1": [
+        48.915,
+        49.2441,
+        49.1112
+      ],
+      "lambda0TestMeanSeed0": 48.9674,
+      "randomMeans5000": [
+        31.7044,
+        31.8152,
+        31.8732
+      ],
+      "note": "unregistered scratchpad run preceding preregistration; no phase reseeding; not evidence"
+    }
+  },
+  "gateChecks": [
+    {
+      "criterion": "Random: 5,000-game uniform-random mean within [30.2, 32.2] for each of the three seeds",
+      "passed": true,
+      "observed": "means ['31.657', '31.733', '31.851']"
+    },
+    {
+      "criterion": "Agent: 10,000-game test mean within [47.6, 51.6] for each of the three lambda = 0.1 seeds",
+      "passed": true,
+      "observed": "means ['49.080', '49.053', '49.015'] (report 49.61)"
+    },
+    {
+      "criterion": "Clause (ii-a): the 300-game arm's test mean is within 2.0 moves of the seed-10 50,000-game arm on the same test seeds",
+      "passed": true,
+      "observed": "50,000-game 49.080; 300-game 49.080; difference -0.000"
+    },
+    {
+      "criterion": "Clause (ii-b): the lambda = 0 arm's test mean compared with the random mean (report's Figure 5 predicts below random)",
+      "passed": false,
+      "observed": "lambda = 0 test mean 48.967; random 31.657; lambda = 0.1 test mean 49.080; 'passed' here means the report's prediction held"
+    }
+  ],
+  "perGameArtifact": {
+    "path": "runs/RUN-20260902T081648Z-f0c96f48/kf-reproduction/seed10.json",
+    "sha256": "03d4db87000832bc93bd43905ff791b4e45fb8b45d270fbb4f28ed665224c2e7",
+    "recordCount": 65000
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260902T080517Z-dec42aab.json"
+  ],
+  "artifactManifestRef": "runs/RUN-20260902T081648Z-f0c96f48/kf-reproduction/manifest.json",
+  "limitations": [
+    "CHECK/validation tier: an external simulator with its own rules (survival score, 200-move cap, empty opening board, full-column drops end the game, sequential within-wave reveal semantics). No repository seed was read and no Hardcore score exists here.",
+    "The gate on clause (ii-b) is recorded as failed because the report's prediction (unregularised below random) did not hold; this is a finding against the report's explanation, not a defect of the run.",
+    "The 300-game and 50,000-game arms share their 10,000 test seeds by phase reseeding of Python's global RNG, a harness convention the upstream code lacks; the upstream flow would have compared different test games.",
+    "An unregistered smoke run at the identical configuration (Python seeds 0-2) preceded preregistration and is disclosed in metrics.smokeRunDisclosed; the registered arms used disjoint seeds 10-12.",
+    "Five arms ran concurrently on a 12-core laptop; wall times are indicative only. The upstream repository has no license, so its files are not retained in this repository; the run directory keeps a fetched copy and the manifest records its hashes.",
+    "Three training seeds cannot estimate the between-seed spread of the agent mean more precisely than about 0.03 moves; the bands, not the spread, are the gate."
+  ],
+  "contributionIds": [
+    "CT-20260902T082510Z-4af4b77b"
+  ],
+  "recordedAt": "2026-09-02T08:27:26Z"
+}

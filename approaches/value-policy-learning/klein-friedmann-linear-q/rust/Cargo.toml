@@ -1,0 +1,17 @@
+[package]
+name = "drop7-kf-linear-q"
+version = "0.1.0"
+edition = "2021"
+description = "Klein & Friedmann six-feature linear Q-learning ported onto the drop7-rs bitboard engine (TH-20260902-kf-linear-q-transfer-68b41d66)"
+license = "MIT"
+
+# Std-only on purpose, matching the drop7-rs engine crate: the approach builds
+# hermetically with no network fetch.
+[dependencies]
+drop7-rs = { path = "../../../fair-expectimax/rust-engine" }
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "unwind"
