@@ -482,7 +482,7 @@ export function ScreenPairs({ contrast, arms, candidateLabel, referenceLabel }: 
         <ZeroLine x1={frame.plotLeft} x2={frame.plotRight} y1={zeroY} y2={zeroY} />
         {half !== null && <line x1={frame.xScale(half)} x2={frame.xScale(half)} y1={frame.plotTop} y2={frame.plotBottom} stroke={MUTED} strokeDasharray="2 4" />}
         <line x1={frame.plotLeft} x2={frame.plotRight} y1={frame.yScale(contrast.meanDelta)} y2={frame.yScale(contrast.meanDelta)} stroke={CYAN} strokeDasharray="5 4" />
-        <text x={frame.plotRight} y={frame.yScale(contrast.meanDelta) - 5} textAnchor="end" fontSize={10} fill={CYAN}>
+        <text x={frame.plotLeft + 6} y={frame.yScale(contrast.meanDelta) - 5} textAnchor="start" fontSize={10} fill={CYAN}>
           recorded mean {formatSigned(contrast.meanDelta)}
         </text>
         {points.map((p) => (
