@@ -15,6 +15,16 @@
 // ordinal, scale-free rule), and a final elite re-selection on a fresh
 // 128-game block before the candidate is frozen.
 //
+// Continuation runs (added after the first 60-generation run,
+// RS-20260903T025751Z-6577b33e) may resume from a checkpointed population of
+// an earlier run (--resume-population), carry a third paired control
+// (--baseline, e.g. the earlier run's frozen candidate), anneal the mutation
+// size (--sigma-decay-tau, --sigma-floor; see schedule.rs) and stop on a
+// preregistered plateau rule (--plateau-window, --plateau-check-every,
+// --plateau-min-generations): every check is appended to plateau.jsonl and a
+// stop writes the PLATEAU marker.  With none of those flags the binary
+// behaves exactly as it did for the first run.
+//
 // Per generation the binary writes:
 //   gen-NNN.json         population artifact (compare.py-compatible),
 //                        controls included as named individuals
@@ -31,20 +41,26 @@
 //          [--games 32] [--generations 60] [--elites 4] [--tournament 3]
 //          [--sigma-rel 0.05] [--seed 0x...] [--threads 16]
 //          [--wall-seconds N] [--move-cap 2000]
+//          [--resume-population FILE] [--baseline FILE]
+//          [--sigma-decay-tau G] [--sigma-floor S]
+//          [--plateau-window W] [--plateau-check-every K] [--plateau-min-generations M]
+//          [--experiment-id EX-...]
 //   evolve --select --lease-start 0x... --out DIR [--select-games 128]
 
 use drop7_nnue_evolution::game::{evaluate_tasks, population_artifact_json, EvalLeaf, EvalTask, Individual, MOVE_CAP};
 use drop7_nnue_evolution::json::Json;
 use drop7_nnue_evolution::nnue::{Nnue, NnueLeaf};
+use drop7_nnue_evolution::schedule::{plateau_check, sigma_for};
 use drop7_nnue_evolution::{deployment_params, DEPLOYMENT_TABLE};
 use drop7_rs::rng::{mix32, Mulberry32};
 use drop7_rs::search::FairLeaf;
 use std::io::Write;
 
-const EXPERIMENT_ID: &str = "EX-20260902-nnue-evolution-d3-v2-49c18bc2";
+const DEFAULT_EXPERIMENT_ID: &str = "EX-20260902-nnue-evolution-d3-v2-49c18bc2";
 
 const CONTROL_FAIR: &str = "control-fair-d3s7";
 const CONTROL_INIT: &str = "control-init-d3s7";
+const CONTROL_BASELINE: &str = "control-baseline-d3s7";
 
 struct Config {
     init: String,
@@ -62,6 +78,15 @@ struct Config {
     move_cap: i32,
     select: bool,
     select_games: usize,
+    // continuation options
+    resume_population: Option<String>,
+    baseline: Option<String>,
+    sigma_decay_tau: f32,
+    sigma_floor: f32,
+    plateau_window: usize,
+    plateau_check_every: usize,
+    plateau_min_generations: usize,
+    experiment_id: String,
 }
 
 fn parse_args() -> Result<Config, String> {
@@ -81,6 +106,14 @@ fn parse_args() -> Result<Config, String> {
         move_cap: MOVE_CAP,
         select: false,
         select_games: 128,
+        resume_population: None,
+        baseline: None,
+        sigma_decay_tau: 0.0,
+        sigma_floor: 0.0,
+        plateau_window: 0,
+        plateau_check_every: 50,
+        plateau_min_generations: 100,
+        experiment_id: DEFAULT_EXPERIMENT_ID.to_string(),
     };
     let args: Vec<String> = std::env::args().collect();
     let mut i = 1;
@@ -123,6 +156,26 @@ fn parse_args() -> Result<Config, String> {
             "--select-games" => {
                 config.select_games = value.parse().map_err(|_| "bad --select-games")?
             }
+            "--resume-population" => config.resume_population = Some(value.to_string()),
+            "--baseline" => config.baseline = Some(value.to_string()),
+            "--sigma-decay-tau" => {
+                config.sigma_decay_tau = value.parse().map_err(|_| "bad --sigma-decay-tau")?
+            }
+            "--sigma-floor" => {
+                config.sigma_floor = value.parse().map_err(|_| "bad --sigma-floor")?
+            }
+            "--plateau-window" => {
+                config.plateau_window = value.parse().map_err(|_| "bad --plateau-window")?
+            }
+            "--plateau-check-every" => {
+                config.plateau_check_every =
+                    value.parse().map_err(|_| "bad --plateau-check-every")?
+            }
+            "--plateau-min-generations" => {
+                config.plateau_min_generations =
+                    value.parse().map_err(|_| "bad --plateau-min-generations")?
+            }
+            "--experiment-id" => config.experiment_id = value.to_string(),
             other => return Err(format!("unknown argument {other}")),
         }
         i += 2;
@@ -135,6 +188,9 @@ fn parse_args() -> Result<Config, String> {
     }
     if !config.select && config.init.is_empty() {
         return Err("--init required".into());
+    }
+    if config.sigma_floor > config.sigma_rel {
+        return Err("--sigma-floor must not exceed --sigma-rel".into());
     }
     Ok(config)
 }
@@ -216,20 +272,73 @@ fn load_population(path: &str) -> Result<Vec<Nnue>, String> {
     Ok(unflat_population(&flat, count))
 }
 
-/// Evaluate one generation: every candidate plus the two controls on the
-/// same seed block.  Returns the per-individual mean scores and the
-/// population artifact as a string; the caller decides when to write it
-/// (the checkpoint contract orders the writes, see run_evolution).
-#[allow(clippy::too_many_arguments)]
+/// Hex SHA-256 of a file, for recording which population a run resumed from.
+/// Std-only: a compact SHA-256 so the crate keeps its no-dependency build.
+fn sha256_hex(bytes: &[u8]) -> String {
+    const K: [u32; 64] = [
+        0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+        0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+        0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+        0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+        0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+        0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+        0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+        0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,
+    ];
+    let mut h: [u32; 8] = [
+        0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,
+    ];
+    let mut data = bytes.to_vec();
+    let bit_len = (bytes.len() as u64).wrapping_mul(8);
+    data.push(0x80);
+    while data.len() % 64 != 56 {
+        data.push(0);
+    }
+    data.extend_from_slice(&bit_len.to_be_bytes());
+    for chunk in data.chunks_exact(64) {
+        let mut w = [0u32; 64];
+        for (i, word) in chunk.chunks_exact(4).enumerate() {
+            w[i] = u32::from_be_bytes(word.try_into().unwrap());
+        }
+        for i in 16..64 {
+            let s0 = w[i - 15].rotate_right(7) ^ w[i - 15].rotate_right(18) ^ (w[i - 15] >> 3);
+            let s1 = w[i - 2].rotate_right(17) ^ w[i - 2].rotate_right(19) ^ (w[i - 2] >> 10);
+            w[i] = w[i - 16].wrapping_add(s0).wrapping_add(w[i - 7]).wrapping_add(s1);
+        }
+        let mut a = h;
+        for i in 0..64 {
+            let s1 = a[4].rotate_right(6) ^ a[4].rotate_right(11) ^ a[4].rotate_right(25);
+            let ch = (a[4] & a[5]) ^ (!a[4] & a[6]);
+            let t1 = a[7].wrapping_add(s1).wrapping_add(ch).wrapping_add(K[i]).wrapping_add(w[i]);
+            let s0 = a[0].rotate_right(2) ^ a[0].rotate_right(13) ^ a[0].rotate_right(22);
+            let maj = (a[0] & a[1]) ^ (a[0] & a[2]) ^ (a[1] & a[2]);
+            let t2 = s0.wrapping_add(maj);
+            a = [t1.wrapping_add(t2), a[0], a[1], a[2], a[3].wrapping_add(t1), a[4], a[5], a[6]];
+        }
+        for i in 0..8 {
+            h[i] = h[i].wrapping_add(a[i]);
+        }
+    }
+    h.iter().map(|v| format!("{v:08x}")).collect()
+}
+
+/// Evaluate one generation: every candidate plus the controls on the same
+/// seed block.  Returns the per-individual mean scores and the population
+/// artifact as a string; the caller decides when to write it (the checkpoint
+/// contract orders the writes, see run_evolution).  Control order after the
+/// population: fair, init, then the optional baseline.
 fn evaluate_generation(
     config: &Config,
     population: &[Nnue],
     init: &Nnue,
+    baseline: Option<&Nnue>,
     generation: usize,
     block_start: u32,
+    sigma_rel: f32,
 ) -> Result<(Vec<f64>, String), String> {
     let params = deployment_params();
-    let individuals = population.len() + 2;
+    let controls = 2 + usize::from(baseline.is_some());
+    let individuals = population.len() + controls;
     let mut tasks = Vec::with_capacity(individuals * config.games);
     for individual in 0..individuals {
         for game in 0..config.games {
@@ -246,8 +355,12 @@ fn evaluate_generation(
             })
         } else if index == population.len() {
             EvalLeaf::Fair(FairLeaf::default())
-        } else {
+        } else if index == population.len() + 1 {
             EvalLeaf::Nnue(NnueLeaf { net: init.clone() })
+        } else {
+            EvalLeaf::Nnue(NnueLeaf {
+                net: baseline.expect("baseline control present").clone(),
+            })
         }
     };
     let records = evaluate_tasks(
@@ -266,8 +379,10 @@ fn evaluate_generation(
             format!("candidate-{index:02}")
         } else if index == population.len() {
             CONTROL_FAIR.to_string()
-        } else {
+        } else if index == population.len() + 1 {
             CONTROL_INIT.to_string()
+        } else {
+            CONTROL_BASELINE.to_string()
         };
         let start = index * config.games;
         assembled.push(Individual {
@@ -276,8 +391,8 @@ fn evaluate_generation(
         });
     }
     let config_json = format!(
-        "{{\"experiment\":\"{EXPERIMENT_ID}\",\"generation\":{generation},\"depth\":3,\"strata\":7,\"games\":{},\"moveCap\":{}}}",
-        config.games, config.move_cap
+        "{{\"experiment\":\"{}\",\"generation\":{generation},\"depth\":3,\"strata\":7,\"games\":{},\"moveCap\":{},\"sigmaRel\":{sigma_rel}}}",
+        config.experiment_id, config.games, config.move_cap
     );
     let artifact = population_artifact_json(&config_json, block_start, &assembled);
     let means: Vec<f64> = assembled
@@ -290,19 +405,66 @@ fn evaluate_generation(
     Ok((means, artifact))
 }
 
+/// The tracked plateau statistic of one completed generation, rebuilt from
+/// progress.jsonl on resume so the rule sees the whole run.
+fn load_margin_series(out: &str) -> Result<Vec<f64>, String> {
+    let path = format!("{out}/progress.jsonl");
+    if !std::path::Path::new(&path).exists() {
+        return Ok(Vec::new());
+    }
+    let text = std::fs::read_to_string(&path).map_err(|e| e.to_string())?;
+    let mut series = Vec::new();
+    for line in text.lines().filter(|l| !l.trim().is_empty()) {
+        let row = drop7_nnue_evolution::json::parse(line)?;
+        let mean = row.get("mean").and_then(Json::as_f64).ok_or("progress row missing mean")?;
+        let fair = row
+            .get("controlFair")
+            .and_then(Json::as_f64)
+            .ok_or("progress row missing controlFair")?;
+        series.push(mean - fair);
+    }
+    Ok(series)
+}
+
 fn run_evolution(config: &Config) -> Result<(), String> {
     let init = Nnue::load(std::path::Path::new(&config.init))?;
+    let baseline = match &config.baseline {
+        Some(path) => Some(Nnue::load(std::path::Path::new(path))?),
+        None => None,
+    };
     std::fs::create_dir_all(&config.out).map_err(|e| e.to_string())?;
+    let resume_sha = match &config.resume_population {
+        Some(path) => {
+            let bytes = std::fs::read(path).map_err(|e| e.to_string())?;
+            Some(sha256_hex(&bytes))
+        }
+        None => None,
+    };
+    let baseline_sha = match &config.baseline {
+        Some(path) => Some(sha256_hex(&std::fs::read(path).map_err(|e| e.to_string())?)),
+        None => None,
+    };
     std::fs::write(
         format!("{}/config.json", config.out),
         format!(
-            "{{\"population\":{},\"games\":{},\"generations\":{},\"elites\":{},\"tournament\":{},\"sigmaRel\":{},\"seed\":\"0x{:08x}\",\"leaseStart\":\"0x{:08x}\",\"moveCap\":{},\"wallSeconds\":{}}}\n",
+            "{{\"experiment\":\"{}\",\"population\":{},\"games\":{},\"generations\":{},\"elites\":{},\"tournament\":{},\"sigmaRel\":{},\"sigmaDecayTau\":{},\"sigmaFloor\":{},\"seed\":\"0x{:08x}\",\"leaseStart\":\"0x{:08x}\",\"moveCap\":{},\"wallSeconds\":{},\"resumePopulation\":{},\"resumePopulationSha256\":{},\"baseline\":{},\"baselineSha256\":{},\"plateauWindow\":{},\"plateauCheckEvery\":{},\"plateauMinGenerations\":{}}}\n",
+            config.experiment_id,
             config.population, config.games, config.generations, config.elites,
-            config.tournament, config.sigma_rel, config.seed, config.lease_start,
-            config.move_cap, config.wall_seconds
+            config.tournament, config.sigma_rel, config.sigma_decay_tau, config.sigma_floor,
+            config.seed, config.lease_start, config.move_cap, config.wall_seconds,
+            json_string_or_null(config.resume_population.as_deref()),
+            json_string_or_null(resume_sha.as_deref()),
+            json_string_or_null(config.baseline.as_deref()),
+            json_string_or_null(baseline_sha.as_deref()),
+            config.plateau_window, config.plateau_check_every, config.plateau_min_generations
         ),
     )
     .map_err(|e| e.to_string())?;
+
+    if std::path::Path::new(&format!("{}/PLATEAU", config.out)).exists() {
+        println!("PLATEAU marker present; the run already stopped on the plateau rule");
+        return Ok(());
+    }
 
     // Checkpoint contract: population-{g}.bin holds the population that PLAYS
     // generation g.  Within an iteration the writes are ordered so a kill or
@@ -341,19 +503,46 @@ fn run_evolution(config: &Config) -> Result<(), String> {
                 Vec::new()
             }
             None => {
-                // Generation 0: candidate 0 is the exact init; the rest are
-                // a 2-sigma cloud around it.  Checkpoint it before any game
-                // so the contract holds from the first iteration.
-                let mut initial = Vec::with_capacity(config.population);
-                initial.push(init.clone());
-                for child in 1..config.population {
-                    initial.push(mutate(&init, config.seed, usize::MAX, child, 2.0 * config.sigma_rel));
-                }
+                let initial = match &config.resume_population {
+                    // Continuation: generation 0 plays the earlier run's
+                    // checkpointed population exactly as saved.
+                    Some(path) => {
+                        let loaded = load_population(path)?;
+                        if loaded.len() != config.population {
+                            return Err(format!(
+                                "{path} holds {} vectors but --population is {}",
+                                loaded.len(),
+                                config.population
+                            ));
+                        }
+                        println!("generation 0 is the resumed population {path}");
+                        loaded
+                    }
+                    // Fresh start: candidate 0 is the exact init; the rest are
+                    // a 2-sigma cloud around it.
+                    None => {
+                        let mut initial = Vec::with_capacity(config.population);
+                        initial.push(init.clone());
+                        for child in 1..config.population {
+                            initial.push(mutate(&init, config.seed, usize::MAX, child, 2.0 * config.sigma_rel));
+                        }
+                        initial
+                    }
+                };
+                // Checkpoint it before any game so the contract holds from
+                // the first iteration.
                 save_population(&format!("{}/population-000.bin", config.out), &initial)?;
                 initial
             }
         }
     };
+    let mut margin_series = load_margin_series(&config.out)?;
+    if margin_series.len() != start_generation {
+        return Err(format!(
+            "progress.jsonl holds {} rows but {start_generation} generations are complete",
+            margin_series.len()
+        ));
+    }
 
     let started = std::time::Instant::now();
     let mut last_fitness: Vec<f64> = Vec::new();
@@ -366,9 +555,17 @@ fn run_evolution(config: &Config) -> Result<(), String> {
             println!("STOP file found; stopping at generation {generation}");
             break;
         }
+        let sigma_rel = sigma_for(generation, config.sigma_rel, config.sigma_decay_tau, config.sigma_floor);
         let block_start = config.lease_start + (generation * config.games) as u32;
-        let (means, artifact) =
-            evaluate_generation(config, &population, &init, generation, block_start)?;
+        let (means, artifact) = evaluate_generation(
+            config,
+            &population,
+            &init,
+            baseline.as_ref(),
+            generation,
+            block_start,
+            sigma_rel,
+        )?;
         last_fitness = means.clone();
 
         // Selection: elites cloned, the rest filled by tournament-selected,
@@ -394,7 +591,7 @@ fn run_evolution(config: &Config) -> Result<(), String> {
                 config.seed,
                 generation,
                 next.len(),
-                config.sigma_rel,
+                sigma_rel,
             ));
         }
         // Checkpoint contract step 2: the successor population is durable
@@ -414,12 +611,19 @@ fn run_evolution(config: &Config) -> Result<(), String> {
             means[..config.population].iter().sum::<f64>() / config.population as f64;
         let control_fair = means[config.population];
         let control_init = means[config.population + 1];
+        let control_baseline = baseline.as_ref().map(|_| means[config.population + 2]);
         println!(
-            "generation {generation}: best {best:.0} mean {mean_all:.0} | fair {control_fair:.0} init {control_init:.0} ({:.0}s)",
+            "generation {generation}: best {best:.0} mean {mean_all:.0} | fair {control_fair:.0} init {control_init:.0}{} sigma {sigma_rel:.4} ({:.0}s)",
+            control_baseline
+                .map(|b| format!(" baseline {b:.0}"))
+                .unwrap_or_default(),
             started.elapsed().as_secs_f64()
         );
         let progress = format!(
-            "{{\"generation\":{generation},\"blockStart\":\"0x{block_start:08x}\",\"best\":{best},\"mean\":{mean_all},\"controlFair\":{control_fair},\"controlInit\":{control_init},\"fitness\":[{}]}}\n",
+            "{{\"generation\":{generation},\"blockStart\":\"0x{block_start:08x}\",\"best\":{best},\"mean\":{mean_all},\"controlFair\":{control_fair},\"controlInit\":{control_init},\"controlBaseline\":{},\"sigmaRel\":{sigma_rel},\"fitness\":[{}]}}\n",
+            control_baseline
+                .map(|b| format!("{b}"))
+                .unwrap_or_else(|| "null".to_string()),
             means[..config.population]
                 .iter()
                 .map(|v| format!("{v}"))
@@ -433,6 +637,46 @@ fn run_evolution(config: &Config) -> Result<(), String> {
             .map_err(|e| e.to_string())?;
         file.write_all(progress.as_bytes()).map_err(|e| e.to_string())?;
         population = next;
+
+        // Preregistered plateau rule on the paired margin over the fair
+        // control.  Every check is recorded whether or not it stops the run.
+        margin_series.push(mean_all - control_fair);
+        if let Some(check) = plateau_check(
+            &margin_series,
+            config.plateau_window,
+            config.plateau_check_every,
+            config.plateau_min_generations,
+        ) {
+            let line = format!(
+                "{{\"generation\":{},\"window\":{},\"slopePerGeneration\":{},\"standardError\":{},\"lowerBound95\":{},\"windowMeanFirstHalf\":{},\"windowMeanSecondHalf\":{},\"stop\":{}}}\n",
+                check.generation,
+                check.window,
+                check.slope_per_generation,
+                check.standard_error,
+                check.lower_bound_95,
+                check.window_mean_first_half,
+                check.window_mean_second_half,
+                check.stop
+            );
+            let mut file = std::fs::OpenOptions::new()
+                .create(true)
+                .append(true)
+                .open(format!("{}/plateau.jsonl", config.out))
+                .map_err(|e| e.to_string())?;
+            file.write_all(line.as_bytes()).map_err(|e| e.to_string())?;
+            println!(
+                "plateau check after generation {}: slope {:.1}/gen, se {:.1}, lower bound {:.1} -> {}",
+                check.generation,
+                check.slope_per_generation,
+                check.standard_error,
+                check.lower_bound_95,
+                if check.stop { "STOP (no detectable improvement)" } else { "continue" }
+            );
+            if check.stop {
+                std::fs::write(format!("{}/PLATEAU", config.out), line).map_err(|e| e.to_string())?;
+                break;
+            }
+        }
     }
 
     // Persist the last evaluated fitness for human inspection.  This file is
@@ -457,6 +701,13 @@ fn run_evolution(config: &Config) -> Result<(), String> {
     }
     println!("evolution complete; run with --select to pick and freeze the candidate");
     Ok(())
+}
+
+fn json_string_or_null(value: Option<&str>) -> String {
+    match value {
+        Some(text) => format!("\"{}\"", text.replace('\\', "\\\\").replace('"', "\\\"")),
+        None => "null".to_string(),
+    }
 }
 
 fn run_select(config: &Config) -> Result<(), String> {
@@ -490,7 +741,7 @@ fn run_select(config: &Config) -> Result<(), String> {
     let mut fitness = vec![None::<f64>; population.len()];
     for individual in individuals {
         let name = individual.get("name").and_then(Json::as_str).unwrap_or("");
-        // Controls (control-fair-*, control-init-*) rank nothing here.
+        // Controls (control-*) rank nothing here.
         let Some(index) = name
             .strip_prefix("candidate-")
             .and_then(|n| n.parse::<usize>().ok())
@@ -524,11 +775,15 @@ fn run_select(config: &Config) -> Result<(), String> {
         })
         .collect::<Result<_, _>>()?;
 
-    // Top 8 by final-generation fitness enter the re-selection block.
+    // Top 8 by final-generation fitness enter the re-selection block: the
+    // `select_games` seeds immediately after the last fitness block that was
+    // played, so an early (plateau or budget) stop still re-selects on fresh
+    // seeds inside the lease.  For a run that used every generation this is
+    // the same block as lease_start + generations * games.
     let mut ranking: Vec<usize> = (0..population.len()).collect();
     ranking.sort_by(|&a, &b| fitness[b].partial_cmp(&fitness[a]).unwrap());
     let finalists: Vec<usize> = ranking.into_iter().take(8).collect();
-    let block_start = config.lease_start + (config.generations * config.games) as u32;
+    let block_start = config.lease_start + ((generation + 1) * config.games) as u32;
     println!(
         "re-selecting among {:?} on {} fresh games from {block_start:#010x}",
         finalists, config.select_games

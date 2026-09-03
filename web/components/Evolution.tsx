@@ -256,6 +256,22 @@ export function EvolutionFigure({ run, caption }: { run: string; caption?: strin
           { label: `mean above fair, last ${check.window.length}`, value: `${check.generationsMeanAboveFair} of ${check.window.length}` },
           { label: "mean margin over fair", value: check.meanMarginLast10 !== null ? formatSigned(check.meanMarginLast10) : "n/a" },
           { label: "training-signal falsifier", value: check.passed === null ? "pending" : check.passed ? "signal present" : "no signal" },
+          ...(typeof last.controlBaseline === "number"
+            ? [
+                { label: "latest first-run-candidate control", value: formatValue(last.controlBaseline) },
+                { label: "latest mean minus first run's candidate", value: formatSigned(last.mean - last.controlBaseline) },
+              ]
+            : []),
+          ...(typeof last.sigmaRel === "number" ? [{ label: "mutation sigma (latest)", value: last.sigmaRel.toFixed(4) }] : []),
+          ...(evolve.plateauChecks && evolve.plateauChecks.length > 0
+            ? [
+                {
+                  label: `plateau check after gen ${evolve.plateauChecks[evolve.plateauChecks.length - 1].generation}`,
+                  value: `slope ${formatSigned(evolve.plateauChecks[evolve.plateauChecks.length - 1].slopePerGeneration)}/gen, lower bound ${formatSigned(evolve.plateauChecks[evolve.plateauChecks.length - 1].lowerBound95)} → ${evolve.plateauChecks[evolve.plateauChecks.length - 1].stop ? "stop" : "continue"}`,
+                },
+              ]
+            : []),
+          ...(evolve.stoppedOnPlateau ? [{ label: "stopped by the plateau rule", value: "yes" }] : []),
           { label: "illegal / incomplete decisions", value: `${evolve.artifactIntegrity.illegalDecisions} / ${evolve.artifactIntegrity.incompleteDecisions}` },
         ]}
       />
