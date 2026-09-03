@@ -2,8 +2,8 @@
 title: An evolved NNUE leaf, distilled from a depth-5 teacher
 family: lifetime-objective
 summary: A compact neural leaf evaluator for the depth-3 fair search, warm-started by distilling a depth-5 teacher's sibling-complete root values and then refined by an evolutionary search whose fitness is whole-game score itself.
-status: preregistered
-evidence: mechanics gates only
+status: rejected
+evidence: ledger-recorded
 reads: public
 ---
 
@@ -14,16 +14,19 @@ network is first taught to imitate a slower search that looks five moves ahead,
 and then improved by evolution on the only thing the program is paid for: the
 final score of complete games.
 
-<EvidenceLabel status="preregistered" evidence="mechanics gates only" reads="public" />
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
 
-<Callout title="Where the run stands" tone="info">
-This page describes an experiment that is **running** as of 2026-09-02, run
-`RUN-20260902T035644Z-c1fd8987` under the frozen protocol
-`EX-20260902-nnue-evolution-d3-v2-49c18bc2`. The figures below are drawn from a
-committed snapshot of the run's artifacts and say when the snapshot was taken.
-A stage that has produced no artifacts yet says so instead of showing a number.
-Nothing on this page is a strength result until the held-out screen has been
-played once and recorded.
+<Callout title="The result, in one paragraph" tone="warn">
+The experiment ran to completion on 2026-09-03 (run `RUN-20260902T035644Z-c1fd8987`
+under the frozen protocol `EX-20260902-nnue-evolution-d3-v2-49c18bc2`, result
+`RS-20260903T025751Z-6577b33e`). On the 64 never-read held-out games the evolved leaf
+scored **106,964 points less per game** than the frozen fair leaf inside the
+same depth-3 search (bootstrap 95% lower bound −146,580, 14 wins to 50), so the
+preregistered gate fails and the theory's claim is not supported as tested. The
+same screen shows what evolution did do: the evolved leaf beat its own unevolved
+warm start by **35,375 points** on the same seeds (lower bound +16,899), a
+significant gain, from a warm start that played at half the fair leaf's level.
+The figures below are the run's own artifacts.
 </Callout>
 
 <EvolutionStatus run="RUN-20260902T035644Z-c1fd8987" />
@@ -136,10 +139,15 @@ neighbourhood instead of thirty-two identical clones.
    belongs to, with a small floor so an all-zero tensor can still move.
 6. *Checkpoint, then mark complete.* The next population is written to disk
    before the generation's artifact (every game of every candidate and control,
-   one row per game) and its summary line. A crash between the two replays the
-   generation from identical inputs and produces identical output; a crash
-   after them resumes at the next generation. A `STOP` file or the wall budget
-   ends the loop at a generation boundary.
+   one row per game), which is committed atomically as the completion marker.
+   A crash before that marker replays the generation from identical inputs and
+   produces identical output. A crash after it rebuilds any missing summary or
+   plateau decision from the committed artifact before another seed can be
+   read. The plateau marker is likewise restored from committed progress if an
+   interruption landed between the decision and the marker write. A `STOP`
+   file or the wall budget ends the loop at a generation boundary; the first
+   evolve invocation pins the wall deadline in `wall-budget.json`, so a resume
+   cannot reset or extend the allowance.
 
 **After the last generation.** The eight fittest candidates of the final
 generation each replay a fresh 128-game block, and the one with the highest
@@ -165,7 +173,7 @@ start (the ablation, isolating what evolution added), and the fair leaf at
 depth 4 (the program's standing reference, diagnostic only). The screen is
 played exactly once, whatever it shows.
 
-## What the run has produced so far
+## What the run produced
 
 <CorpusFigure run="RUN-20260902T035644Z-c1fd8987" caption="Stage A. Each dot is one complete teacher game, in the order the games finished; hover a dot for its seed, score, length and how long the depth-5 search took to play it. Games are heavy-tailed: most end in the low hundreds of thousands and a few run far longer. The teacher turned out four to seven times slower per position than the pilot had projected, so the stage reached its wall budget well short of the 512 games the protocol allowed for; the protocol makes the completed games the corpus and does not depend on the count." />
 
@@ -178,6 +186,67 @@ played exactly once, whatever it shows.
 <ScreenFigure run="RUN-20260902T035644Z-c1fd8987" caption="Stage D, the primary contrast. One bar per held-out game: the evolved candidate's score minus the frozen fair leaf's score on the same seed, in seed order. The dashed line is the recorded paired mean and the vertical divider separates the two halves the gate checks separately." />
 
 <ScreenGateTable run="RUN-20260902T035644Z-c1fd8987" />
+
+## The continuation: evolving on from generation 60
+
+The first run's curve had not flattened when its protocol stopped it: over
+its sixty generations the paired margin over the fair leaf rose by about 676
+points per generation, with a one-sided 95% lower bound of +200 (the numbers
+are in the continuation's experiment record, computed from the first run's
+`progress.jsonl`). So a second, longer experiment was registered under the
+same theory, `EX-20260903-nnue-evolution-continuation-d3-f8ce9181`, and
+launched on 2026-09-03 as run `RUN-20260903T032832Z-a76a6cf7`. It asks three
+things: does the leaf keep improving, where does it stop improving, and does
+the leaf it stops at beat the fair leaf on never-read games.
+
+**What is the same.** The search, the network, the population of 32, the 32
+paired games per candidate on a fresh block each generation, four elites,
+tournaments of three, the same two controls, the elite re-selection on 128
+fresh games, and a one-shot 64-game screen at the end.
+
+**What is different.**
+
+- *It starts where the first run stopped.* Generation 0 is the population the
+  first run's generation-59 selection produced and never played, loaded from
+  its checkpoint exactly as saved (its SHA-256 is recorded in the run's
+  configuration).
+- *A third control.* The first run's frozen candidate plays every block
+  alongside the fair leaf and the warm start, so the curve shows directly how
+  far the population has moved from where it began.
+- *The mutation size anneals.* The relative sigma starts at the first run's
+  0.05 and decays with a 400-generation time constant to a floor of 0.01:
+  0.030 at generation 200, 0.018 at 400, and the floor from generation 644
+  onward. Large steps early, fine steps late.
+- *It stops when it stops improving.* After every fiftieth generation from the
+  hundredth, a straight line is fitted to the paired margin over the fair
+  leaf across the last hundred generations. If the slope's one-sided 95%
+  lower bound is not positive, the last hundred generations have shown no
+  detectable improvement and the run stops there; otherwise it continues, to
+  a maximum of 1,000 generations or 72 hours. Given the generation-to-
+  generation scatter the first run showed (about 38,800 points around its
+  trend), the rule detects slopes of roughly 220 points per generation, or
+  22,000 per hundred generations; the first run's own slope would have kept
+  it going. Every check is written to `plateau.jsonl` whether or not it stops
+  the run.
+- *Fresh seeds.* A new training lease (0xa52e2000 onward, 32,768 seeds: room
+  for 1,000 blocks plus the re-selection) and a new 64-seed screen block
+  (0xa52ea000), both checked against every constant in the repository.
+
+At about four minutes per generation, 1,000 generations would take close to
+three days; the plateau rule is expected to stop it sooner. The figures below
+are the continuation's own artifacts and refresh as the run progresses.
+
+<EvolutionStatus run="RUN-20260903T032832Z-a76a6cf7" continuation />
+
+<EvolutionFigure run="RUN-20260903T032832Z-a76a6cf7" caption="Continuation, stage C. Generation 0 is the first run's generation-60 population. The violet dashed line is the first run's frozen candidate playing the same seeds each generation: the vertical distance between the population lines and it is a paired measure of what the continuation has added. Hover a generation for its sigma and the latest plateau check appears in the summary below the chart." />
+
+<SwarmFigure run="RUN-20260903T032832Z-a76a6cf7" caption="Every candidate of the continuation in every generation. As sigma anneals, the cloud should tighten; whether it also keeps drifting upward relative to the amber fair-leaf ticks is the question the plateau rule answers." />
+
+<ScreenFigure run="RUN-20260903T032832Z-a76a6cf7" caption="Continuation, stage D, the primary contrast on the new held-out block: continued candidate minus the fair leaf, one bar per game." />
+
+<ScreenFigure run="RUN-20260903T032832Z-a76a6cf7" contrast="candidate-vs-baseline-run1" caption="The continuation's own question, out of sample: continued candidate minus the first run's frozen candidate on the same 64 never-read games." />
+
+<ScreenGateTable run="RUN-20260903T032832Z-a76a6cf7" />
 
 ## How much can a leaf change a decision?
 
@@ -232,19 +301,36 @@ optimiser and budget, this deployment depth. It does not reject the idea of a
 learned leaf, and the retained corpus, warm start and populations remain
 available for a successor experiment with its own record and leases.
 
-## What this taught us so far, and what is still open
+## What this taught us, and what is still open
 
-- **The teacher is the expensive part.** A depth-5, seven-stratum search costs
-  tens of seconds per position on this machine at full parallelism, far more
-  than the pilot projected, and long games take hours. The corpus is therefore
-  smaller than planned. Whether it is large enough to warm-start a 572,000-
-  weight network is what stage B's validation loss and ordering probe measure.
+- **Whole-game evolution with common random numbers moves a 572,000-weight
+  leaf.** That is the finding the first, CMA-ES leaf evolution could not
+  produce. The population separated from its warm start steadily across all
+  sixty generations, the ten-generation paired margins rising from about
+  +5,000 to about +40,000 for the mean and to +77,000 for the best candidate,
+  and the held-out ablation confirmed it out of sample at +35,375 with a lower
+  bound well above zero. The curve had not flattened at generation 60.
+- **Imitation of state values is the weak link.** The warm start fitted the
+  teacher's numbers closely (validation Pearson 0.95) yet, placed inside the
+  real depth-3 search, it picked the teacher's column only 44% of the time,
+  about what a leaf that returns zero manages, and it played at half the fair
+  leaf's level. Evolution then had roughly 150,000 paired points to make up
+  and made up a quarter of them.
+- **The teacher is the expensive part.** A depth-5, seven-stratum search cost
+  about 78 seconds per position at full parallelism, four to seven times the
+  pilot's projection, so the corpus closed at 177 games instead of 512. Whether
+  a larger corpus would have produced a warm start that holds the ordering is
+  untested.
 - **The leaf decides.** The leaf-swing diagnostic above turned a design
-  assumption into a measured fact before any training signal was read.
-- **Open until the screen is played:** whether whole-game evolution with
-  common random numbers moves a leaf that imitation alone cannot, which is the
-  theory's claim, and whether it moves it in the direction the held-out block
-  rewards.
+  assumption into a measured fact before any training signal was read, and the
+  screen agrees: swapping the leaf moved the mean by more than 100,000 points
+  in both directions.
+- **Open.** Where the still-rising curve plateaus (a continuation from the
+  generation-60 population on a fresh lease would tell), whether a warm start
+  trained on ordering rather than value closes the gap, and whether a larger
+  teacher corpus changes either answer. Each is a new experiment with its own
+  record and leases; the retained corpus, warm start and populations are the
+  starting material.
 
 <TechnicalDetails title="The technical record">
 
@@ -292,9 +378,13 @@ available for a successor experiment with its own record and leases.
   usage per stage), `analysis.json` and `analysis.md` (the summary this page's
   snapshot copies), and the leaf-swing diagnostic (`leaf-swing-d{3,4,5}.txt`
   with the frozen 30-game input under `leaf-swing-input/`).
+- Result record `RS-20260903T025751Z-6577b33e` (valid run, scientific outcome fail,
+  assessment not-supported-as-tested, evidence tier public-development);
+  compact evidence promoted with a manifest under
+  `artifacts/results/EX-20260902-nnue-evolution-d3-v2-49c18bc2/RUN-20260902T035644Z-c1fd8987/`,
+  including the frozen candidate and the warm start weights.
 - The page's figures read `web/content/figures/nnue-evolution/RUN-20260902T035644Z-c1fd8987.json`,
-  written by `web/scripts/extract-nnue-evolution.ts`; re-run it after each
-  stage to refresh them.
+  written by `web/scripts/extract-nnue-evolution.ts` from the run's artifacts.
 
 </TechnicalDetails>
 
@@ -314,7 +404,9 @@ The stages are driven by `scripts/pipeline.sh` (`RUN_ID=… THREADS=32
 scripts/pipeline.sh corpus|pretrain|evolve|select|screen|compare|chain`), which
 wraps every stage in `scripts/with-rusage.py` so wall, CPU and peak memory land
 in `rusage.jsonl`, opens the screen lease through `scripts/open-screen-lease.py`
-only when the candidate hash file exists, and refuses to run the screen twice.
+only when the candidate hash file exists, refuses to run the screen twice, and
+passes the original total evolve allowance on every resume while the binary's
+durable deadline prevents that allowance from starting over.
 `scripts/analyze.py --run <run>` summarises whatever artifacts exist into
 `analysis.json` and `analysis.md`.
 

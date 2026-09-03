@@ -27,6 +27,11 @@ const GREEN = PALETTE[2];
 const PINK = PALETTE[3];
 const RED = PALETTE[4];
 const CYAN = PALETTE[6];
+const VIOLET = PALETTE[7];
+
+function hasBaseline(generations: Generation[]): boolean {
+  return generations.some((g) => typeof g.controlBaseline === "number");
+}
 
 interface Frame {
   width: number;
@@ -145,7 +150,7 @@ export function EvolutionCurve({ generations }: { generations: Generation[] }) {
   const measure = useMeasurer(mounted);
   const [ref, width] = useContainerWidth<HTMLDivElement>(DEFAULT_WIDTH);
   const frame = useMemo(() => {
-    const ys = generations.flatMap((g) => [g.best, g.mean, g.top4Mean, g.controlFair, g.controlInit, ...g.fitness]);
+    const ys = generations.flatMap((g) => [g.best, g.mean, g.top4Mean, g.controlFair, g.controlInit, ...(typeof g.controlBaseline === "number" ? [g.controlBaseline] : []), ...g.fitness]);
     const xs = generations.map((g) => g.generation);
     return makeFrame(width, measure, [Math.min(...xs), Math.max(...xs, Math.min(...xs) + 1)], [Math.min(...ys), Math.max(...ys)], {
       yLabel: "mean score of 32 paired games (points)",
@@ -167,7 +172,10 @@ export function EvolutionCurve({ generations }: { generations: Generation[] }) {
         { text: `population mean: ${formatValue(g.mean)}`, swatch: GREEN },
         { text: `fair leaf control: ${formatValue(g.controlFair)}`, swatch: AMBER },
         { text: `unevolved init control: ${formatValue(g.controlInit)}`, swatch: PINK },
+        ...(typeof g.controlBaseline === "number" ? [{ text: `first run's candidate control: ${formatValue(g.controlBaseline)}`, swatch: VIOLET }] : []),
         { text: `population mean minus fair: ${formatSigned(g.mean - g.controlFair)}`, muted: true },
+        ...(typeof g.controlBaseline === "number" ? [{ text: `population mean minus first run's candidate: ${formatSigned(g.mean - g.controlBaseline)}`, muted: true }] : []),
+        ...(typeof g.sigmaRel === "number" ? [{ text: `mutation sigma this generation: ${g.sigmaRel.toFixed(4)}`, muted: true }] : []),
         ...(sorted.length ? [{ text: `${sorted.length} candidates, lowest ${formatValue(sorted[sorted.length - 1])}`, muted: true }] : []),
       ];
     },
@@ -183,9 +191,11 @@ export function EvolutionCurve({ generations }: { generations: Generation[] }) {
     return `M${top.join(" L")} L${bottom.join(" L")} Z`;
   }, [generations, frame]);
 
+  const withBaseline = hasBaseline(generations);
   const series: { key: keyof Generation; color: string; dashed?: boolean }[] = [
     { key: "controlFair", color: AMBER, dashed: true },
     { key: "controlInit", color: PINK, dashed: true },
+    ...(withBaseline ? [{ key: "controlBaseline" as keyof Generation, color: VIOLET, dashed: true }] : []),
     { key: "mean", color: GREEN },
     { key: "top4Mean", color: CYAN },
     { key: "best", color: BLUE },
@@ -199,7 +209,7 @@ export function EvolutionCurve({ generations }: { generations: Generation[] }) {
         {series.map((s) => (
           <LinePath<Generation>
             key={s.key}
-            data={generations}
+            data={generations.filter((g) => typeof g[s.key] === "number")}
             x={(g) => frame.xScale(g.generation)}
             y={(g) => frame.yScale(g[s.key] as number)}
             stroke={s.color}
@@ -213,9 +223,11 @@ export function EvolutionCurve({ generations }: { generations: Generation[] }) {
         {hover.index !== null && (
           <g>
             <line x1={frame.xScale(xs[hover.index])} x2={frame.xScale(xs[hover.index])} y1={frame.plotTop} y2={frame.plotBottom} stroke={INK} strokeOpacity={0.35} strokeDasharray="3 3" />
-            {series.map((s) => (
-              <circle key={s.key} cx={frame.xScale(xs[hover.index!])} cy={frame.yScale(generations[hover.index!][s.key] as number)} r={4.5} fill={s.color} stroke={INK} strokeWidth={1.5} />
-            ))}
+            {series
+              .filter((s) => typeof generations[hover.index!][s.key] === "number")
+              .map((s) => (
+                <circle key={s.key} cx={frame.xScale(xs[hover.index!])} cy={frame.yScale(generations[hover.index!][s.key] as number)} r={4.5} fill={s.color} stroke={INK} strokeWidth={1.5} />
+              ))}
           </g>
         )}
       </svg>
@@ -227,6 +239,7 @@ export function EvolutionCurve({ generations }: { generations: Generation[] }) {
           { name: "population range (lowest to highest candidate)", color: BLUE, band: true },
           { name: "fair leaf control (same seeds)", color: AMBER, dashed: true },
           { name: "unevolved init control (same seeds)", color: PINK, dashed: true },
+          ...(withBaseline ? [{ name: "first run's frozen candidate (same seeds)", color: VIOLET, dashed: true }] : []),
         ]}
       />
       <ChartTooltip state={hover.tooltip} />
@@ -482,7 +495,7 @@ export function ScreenPairs({ contrast, arms, candidateLabel, referenceLabel }: 
         <ZeroLine x1={frame.plotLeft} x2={frame.plotRight} y1={zeroY} y2={zeroY} />
         {half !== null && <line x1={frame.xScale(half)} x2={frame.xScale(half)} y1={frame.plotTop} y2={frame.plotBottom} stroke={MUTED} strokeDasharray="2 4" />}
         <line x1={frame.plotLeft} x2={frame.plotRight} y1={frame.yScale(contrast.meanDelta)} y2={frame.yScale(contrast.meanDelta)} stroke={CYAN} strokeDasharray="5 4" />
-        <text x={frame.plotRight} y={frame.yScale(contrast.meanDelta) - 5} textAnchor="end" fontSize={10} fill={CYAN}>
+        <text x={frame.plotLeft + 6} y={frame.yScale(contrast.meanDelta) - 5} textAnchor="start" fontSize={10} fill={CYAN}>
           recorded mean {formatSigned(contrast.meanDelta)}
         </text>
         {points.map((p) => (

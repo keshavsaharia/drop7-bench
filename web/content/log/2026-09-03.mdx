@@ -1,0 +1,130 @@
+---
+date: 2026-09-03
+title: "The evolved NNUE leaf loses its screen by 107,000 points, and evolution still moved it"
+summary: "The depth-5-distilled, whole-game-evolved NNUE leaf finished its preregistered run: 60 generations, a 128-game re-selection, and one look at 64 never-read games. It scored 106,964 paired points below the frozen fair leaf inside the same depth-3 search, so the gate fails and the claim is not supported as tested. The same screen shows evolution beat its own unevolved warm start by 35,375 points with a lower bound well above zero, the first time whole-game evolution has demonstrably moved a leaf in this program. The warm start, not the evolution, was the weak link: fitted to the teacher's values, it ranked columns about as well as no leaf at all."
+contributors: [claude-fable-5-1 (Claude Code)]
+tags: [nnue, evolution, leaf, teacher-distillation, held-out-screen, negative-result]
+outcomes: { positive: 1, negative: 2, open: 2 }
+---
+
+## Overnight: sixty generations, one re-selection, one screen
+
+The unattended chain took over at 22:42 UTC yesterday once the last teacher
+game had finished (177 games, 21,618 labelled roots) and ran the rest of the
+protocol without intervention: the supervised warm start in 14 seconds, sixty
+generations of evolution in 3.9 hours, the elite re-selection in four minutes,
+and the held-out screen in eleven. Every one of the 60 generation artifacts
+and the screen artifact records zero illegal and zero incomplete decisions.
+The result is `RS-20260903T025751Z-6577b33e`; compact evidence, including the
+frozen candidate and the warm-start weights, is promoted with a manifest under
+`artifacts/results/EX-20260902-nnue-evolution-d3-v2-49c18bc2/RUN-20260902T035644Z-c1fd8987/`.
+
+<Finding title="The warm start fits the teacher's values but not its ordering" kind="negative" metric="top-1 agreement 0.441 inside the real depth-3 search">
+Sixteen epochs of Adam on a whole-origin split (17,641 training roots, 3,977
+validation) reached validation Huber 0.687 rise units at epoch 8 with Pearson
+0.950. Placed inside the deployed depth-3 search on 256 held-out roots, that
+network picked the depth-5 teacher's column 44.1% of the time with a mean
+teacher-value regret of 2,395 points. For scale, the leaf-swing diagnostic on a
+different sample put the frozen fair leaf at 72.0% and a leaf that returns
+zero at 45.0%. On the training blocks the warm start then played at about half
+the fair leaf's level (159,811 against 344,537 in generation 0). The theory's
+own diagnostic threshold for this leg was 0.30, which the probe clears, but the
+number says imitation of state values bought almost no ordering.
+</Finding>
+
+<Finding title="Whole-game evolution with common random numbers moves the leaf" kind="positive" metric="+35,375 over the warm start on the held-out games, lower bound +16,899">
+Across all sixty generations the population separated steadily from its warm
+start on paired seeds: ten-generation average margins of +4,682, +15,853,
++22,704, +32,278, +34,037 and +40,431 points for the population mean, and
++76,679 for the best candidate in the last block. The curve had not flattened
+at generation 60. The re-selection replayed the eight fittest on 128 fresh
+games and froze candidate-29 at 202,237, the finalists spanning 187,352 to
+202,237 where their 32-game leaders had read 220,000 to 270,000, which is the
+best-of-32 bias the step exists to remove. On the 64 never-read screen games
+the frozen candidate averaged 190,961 against the unevolved warm start's
+155,586 on the same seeds: paired +35,375, bootstrap lower bound +16,899,
+Student-t lower bound +16,145, detection floor 18,949, 36 wins to 28, both
+halves positive. The first leaf evolution in this program, 18 linear weights
+under CMA-ES, could not show any such movement; paired blocks, rank selection
+and a warm start in weight space did.
+</Finding>
+
+<Finding title="The gate fails: the evolved leaf is 106,964 paired points behind the fair leaf" kind="negative" metric="bootstrap 95% lower bound −146,580, W-T-L 14-0-50">
+Against the frozen fair leaf at the identical depth-3 configuration the
+candidate scored 190,961 to 297,926: paired delta −106,964, bootstrap 95%
+bounds −146,580 to −69,983, Student-t lower bound −145,890, both halves
+negative (−109,139 and −104,790), lower quartile 122,253 against 158,387. Every
+preregistered criterion except artifact integrity and candidate identity
+fails, and the training-signal falsifier had already failed: the population
+mean was above the fair control in 0 of the final ten generations (margin
+−121,896). The reference arm reproduced the standing result, fair depth 4 over
+fair depth 3 by +97,059 with a lower bound of +29,330. Scientific outcome fail,
+run valid, evidence tier public-development; the theory is assessed
+not-supported-as-tested and its record now points at the result.
+</Finding>
+
+## What the negative result does and does not say
+
+It rejects this exact configuration: this model class, a depth-5 teacher
+corpus of 177 games, sixteen epochs of value imitation, and sixty generations
+of a population of thirty-two at 32 paired games each, deployed at depth 3. It
+does not reject the design at the 512 teacher games the protocol allowed for,
+because the depth-5 teacher ran four to seven times slower than its pilot and
+the stage closed on its wall budget. It does not say evolution cannot improve a
+leaf; the ablation says it can, by about a quarter of the distance it had to
+cover. It says the distance was set by a warm start that held the teacher's
+numbers and not its ordering, and that no plausible number of generations at
+this rate would have covered it.
+
+<Direction title="Continue evolving from the generation-60 population" status="running" owner="claude-fable-5-1">
+The owner asked overnight whether the run could go to 100 generations to see
+whether the curve flattens, then asked for a long run: keep evolving, up to
+about 1,000 generations with a decaying mutation size, and stop only when the
+last 50 to 100 generations show no noticeable improvement. Not possible inside
+the first run (its frozen protocol says 60, its training lease ends exactly
+where the re-selection block begins, and its 24-hour budget ended with the
+screen), so a successor experiment was preregistered and frozen,
+`EX-20260903-nnue-evolution-continuation-d3-f8ce9181`, and launched at 03:34
+UTC as `RUN-20260903T032832Z-a76a6cf7` on fresh leases (training 0xa52e2000
+onward, a 64-seed screen block at 0xa52ea000). It resumes from the first
+run's checkpointed generation-60 population, adds the first run's frozen
+candidate as a third paired control, anneals the relative mutation sigma from
+0.05 with a 400-generation time constant to a 0.01 floor, and stops when the
+one-sided 95% lower bound of the fitted slope of the paired margin over the
+fair leaf across the last 100 generations is not positive, checked every 50
+generations from the 100th, or at 1,000 generations or 72 hours. From the
+first run's artifacts the rule detects slopes of about 221 points per
+generation; the first run's slope of 676 would have kept it going. The evolve
+binary gained resume, baseline-control, decay and plateau flags, the screen
+binary an extra arm, all covered by unit tests, a smoke test and the eleven
+CHECK gates on the rebuilt binaries before the first leased seed was read.
+</Direction>
+
+<Direction title="A warm start trained on ordering rather than value" status="proposed" owner="claude-fable-5-1">
+The corpus is sibling-complete, so a ranking loss over each root's seven
+column values is available at no extra cost, and the deployment-faithful probe
+already exists to score it. Whether such a warm start starts closer to the
+fair leaf is the cheapest question this result leaves open.
+</Direction>
+
+## Housekeeping
+
+The approach page carries the result in its opening callout and its figures
+now show every stage, including the screen's per-game paired differences and
+the gate table. The experiment index row and the closed-directions table in
+the status document are updated. The frozen candidate (`candidate-weights.bin`,
+SHA-256 beginning edd0d2ef) and the warm start (`init.bin`) are committed with
+the promoted artifacts so continuation work has its baseline vectors in the
+repository.
+
+A code-review pass then found two interruption-only faults in the continuation
+driver: a completed generation could be stranded without its progress row or
+plateau marker, and restarting the evolve stage granted a fresh wall allowance.
+The repair makes generation artifacts atomic recovery records, reconstructs
+the compact progress and plateau indexes before reading another seed, and pins
+one durable evolve deadline across resumes. Focused regression tests exercise
+both interrupted-write windows and the non-resetting deadline; no gameplay data
+or protected/final cohort was opened for this maintenance work. The already
+launched run remains attributable to its recorded source commit; if that
+process is interrupted, its disposition must be recorded before changing the
+executable used for a resume.

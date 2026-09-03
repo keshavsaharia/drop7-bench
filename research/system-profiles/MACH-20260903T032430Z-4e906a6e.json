@@ -1,0 +1,70 @@
+{
+  "$schema": "../schemas/machine-v1.schema.json",
+  "format": "drop7-machine-v1",
+  "machineProfileId": "MACH-20260903T032430Z-4e906a6e",
+  "capturedAt": "2026-09-03T03:24:30Z",
+  "operatingSystem": {
+    "system": "Linux",
+    "release": "6.18.35+rex+2-amd64",
+    "version": "#1 SMP PREEMPT_DYNAMIC AMD Ryzen™ AI Developer Platform 6.18.3",
+    "architecture": "x86_64",
+    "distribution": "AMD Ryzen AI Developer Platform 1 (rex)",
+    "container": null
+  },
+  "cpu": {
+    "model": "AMD RYZEN AI MAX+ 395 w/ Radeon 8060S",
+    "physicalCores": 16,
+    "logicalCpus": 32,
+    "affinityLogicalCpus": 32,
+    "numaNodes": 1,
+    "governor": "powersave"
+  },
+  "memory": {
+    "totalBytes": 134315749376,
+    "availableBytes": 116393947136,
+    "swapTotalBytes": 0,
+    "pageSizeBytes": 4096
+  },
+  "limits": {
+    "cgroupVersion": "v2",
+    "memoryMaxBytes": null,
+    "cpuQuota": null,
+    "cpuAffinity": "0-31"
+  },
+  "gpu": {
+    "devices": [
+      {
+        "name": "AMD RYZEN AI MAX+ 395 w/ Radeon 8060S",
+        "target": "gfx11",
+        "memoryBytes": null
+      },
+      {
+        "name": "Radeon 8060S Graphics",
+        "target": "gfx1151",
+        "memoryBytes": null
+      }
+    ],
+    "rocmVersion": "7.13.0",
+    "hipVersion": "HIP version: 7.13.99004-3309c6114a",
+    "sharedSystemMemory": null,
+    "detectionNotes": "PyTorch probe: exit 1: Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import json, torch; print(json.dumps({'version':torch.__version__, 'hip':torch.version.hip, 'available':torch.cuda.is_available(), 'devices':[torch.cuda.get_device_name(i) for i in range(torch.cuda.device_count())]}))\n    ; Confirm integrated/shared-memory status from the exact detected hardware."
+  },
+  "toolchain": {
+    "python": "Python 3.14.6",
+    "node": "v26.5.0",
+    "clang": "AMD clang version 23.0.0git (https://github.com/ROCm/llvm-project.git 43215c73116c407735c85a180d174f718798c328+PATCHED:2506c552d8428e2cc1778bef048b20f818e06bb3)",
+    "gcc": "g++ (Debian 14.2.0-19) 14.2.0",
+    "make": "GNU Make 4.4.1",
+    "cmake": null,
+    "hipcc": "HIP version: 7.13.99004-3309c6114a"
+  },
+  "profilers": {
+    "perf": false,
+    "rocprofv3": true,
+    "rocm-smi": true,
+    "numactl": false
+  },
+  "notes": [
+    "PyTorch unavailable or not importable"
+  ]
+}

@@ -123,6 +123,7 @@ def evolve_summary(out):
     gens = []
     for row in rows:
         fitness = sorted(row["fitness"], reverse=True)
+        baseline = row.get("controlBaseline")
         gens.append({
             "generation": row["generation"],
             "blockStart": row["blockStart"],
@@ -132,10 +133,31 @@ def evolve_summary(out):
             "median": q(row["fitness"], 0.5),
             "controlFair": row["controlFair"],
             "controlInit": row["controlInit"],
+            "controlBaseline": baseline,
+            "sigmaRel": row.get("sigmaRel"),
             "meanMinusFair": row["mean"] - row["controlFair"],
             "bestMinusFair": row["best"] - row["controlFair"],
             "top4MinusFair": st.fmean(fitness[:4]) - row["controlFair"],
             "initMinusFair": row["controlInit"] - row["controlFair"],
+            "meanMinusBaseline": (row["mean"] - baseline) if baseline is not None else None,
+            "bestMinusBaseline": (row["best"] - baseline) if baseline is not None else None,
+        })
+    plateau_path = os.path.join(out, "evolve", "plateau.jsonl")
+    plateau = [json.loads(l) for l in open(plateau_path, encoding="utf-8") if l.strip()] if os.path.exists(plateau_path) else []
+    blocks = []
+    for lo in range(0, len(gens), 10):
+        w = gens[lo:lo + 10]
+        if len(w) < 10:
+            break
+        blocks.append({
+            "generations": f"{lo}-{lo + 9}",
+            "populationMean": st.fmean(g["mean"] for g in w),
+            "top4Mean": st.fmean(g["top4Mean"] for g in w),
+            "best": st.fmean(g["best"] for g in w),
+            "meanMinusFair": st.fmean(g["meanMinusFair"] for g in w),
+            "bestMinusFair": st.fmean(g["bestMinusFair"] for g in w),
+            "meanMinusInit": st.fmean(g["mean"] - g["controlInit"] for g in w),
+            "meanMinusBaseline": st.fmean(g["meanMinusBaseline"] for g in w) if all(g["meanMinusBaseline"] is not None for g in w) else None,
         })
     last10 = gens[-10:]
     # Per-generation artifact integrity (gate criterion: zero illegal and
@@ -154,6 +176,9 @@ def evolve_summary(out):
         "config": load_json(config) if os.path.exists(config) else None,
         "generationsCompleted": len(gens),
         "generations": gens,
+        "tenGenerationBlocks": blocks,
+        "plateauChecks": plateau,
+        "stoppedOnPlateau": os.path.exists(os.path.join(out, "evolve", "PLATEAU")),
         "trainingSignalCheck": {
             "rule": "population mean fitness > paired fair-d3s7 control in the majority of the final 10 completed generations (theory falsifier 2)",
             "window": [g["generation"] for g in last10],
@@ -197,7 +222,7 @@ def screen_summary(out):
     art = load_json(heldout)
     arms = {ind["name"]: ind for ind in art["individuals"]}
     reports = {}
-    for name in ("candidate-vs-fair-d3s7", "init-vs-fair-d3s7", "candidate-vs-init", "fair-d4s7-vs-fair-d3s7"):
+    for name in ("candidate-vs-fair-d3s7", "init-vs-fair-d3s7", "candidate-vs-init", "fair-d4s7-vs-fair-d3s7", "candidate-vs-baseline-run1", "baseline-run1-vs-fair-d3s7"):
         path = os.path.join(out, "screen", f"compare-{name}.json")
         if os.path.exists(path):
             reports[name] = load_json(path)
@@ -285,9 +310,18 @@ def markdown(run_id, a):
     if e:
         lines += ["## Stage C: evolution", "",
                   f"- generations completed {e['generationsCompleted']}; artifacts {e['artifactIntegrity']['generationArtifacts']}, illegal {e['artifactIntegrity']['illegalDecisions']}, incomplete {e['artifactIntegrity']['incompleteDecisions']}, censored {e['artifactIntegrity']['censoredGames']}",
-                  "", "| gen | best | top-4 mean | pop mean | fair ctrl | init ctrl | mean-fair | top4-fair |", "| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |"]
+                  "", "| gen | best | top-4 mean | pop mean | fair ctrl | init ctrl | baseline ctrl | sigma | mean-fair | top4-fair |", "| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |"]
         for g in e["generations"]:
-            lines.append(f"| {g['generation']} | {fmt(g['best'])} | {fmt(g['top4Mean'])} | {fmt(g['mean'])} | {fmt(g['controlFair'])} | {fmt(g['controlInit'])} | {fmt(g['meanMinusFair'])} | {fmt(g['top4MinusFair'])} |")
+            lines.append(f"| {g['generation']} | {fmt(g['best'])} | {fmt(g['top4Mean'])} | {fmt(g['mean'])} | {fmt(g['controlFair'])} | {fmt(g['controlInit'])} | {fmt(g['controlBaseline'])} | {g['sigmaRel'] if g['sigmaRel'] is not None else 'n/a'} | {fmt(g['meanMinusFair'])} | {fmt(g['top4MinusFair'])} |")
+        if e.get("tenGenerationBlocks"):
+            lines += ["", "| block | pop mean | top-4 | best | mean-fair | best-fair | mean-init | mean-baseline |", "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |"]
+            for b in e["tenGenerationBlocks"]:
+                lines.append(f"| {b['generations']} | {fmt(b['populationMean'])} | {fmt(b['top4Mean'])} | {fmt(b['best'])} | {fmt(b['meanMinusFair'])} | {fmt(b['bestMinusFair'])} | {fmt(b['meanMinusInit'])} | {fmt(b['meanMinusBaseline'])} |")
+        if e.get("plateauChecks"):
+            lines += ["", "| plateau check after gen | window | slope/gen | se | lower bound 95 | first-half mean | second-half mean | stop |", "| ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |"]
+            for c in e["plateauChecks"]:
+                lines.append(f"| {c['generation']} | {c['window']} | {fmt(c['slopePerGeneration'],1)} | {fmt(c['standardError'],1)} | {fmt(c['lowerBound95'],1)} | {fmt(c['windowMeanFirstHalf'])} | {fmt(c['windowMeanSecondHalf'])} | {c['stop']} |")
+            lines.append(f"- stopped on the plateau rule: {e.get('stoppedOnPlateau')}")
         t = e["trainingSignalCheck"]
         lines += ["", f"- training-signal check (last {len(t['window'])} generations): population mean above fair in {t['generationsMeanAboveFair']}, top-4 above fair in {t['generationsTop4AboveFair']}, best above fair in {t['generationsBestAboveFair']}, init above fair in {t['generationsInitAboveFair']}; mean margin {fmt(t['meanMarginLast10'])}, top-4 margin {fmt(t['top4MarginLast10'])}; passed: {t['passed']}", ""]
     s = a.get("select")

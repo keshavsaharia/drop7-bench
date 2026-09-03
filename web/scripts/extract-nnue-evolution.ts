@@ -133,7 +133,7 @@ const pretrain: EvolutionSnapshot["pretrain"] = analysis.pretrain
 /* ---- stage C ---------------------------------------------------------- */
 let evolve: EvolutionSnapshot["evolve"] = null;
 if (analysis.evolve) {
-  const progress = readJsonl<{ generation: number; blockStart: string; best: number; mean: number; controlFair: number; controlInit: number; fitness: number[] }>(
+  const progress = readJsonl<{ generation: number; blockStart: string; best: number; mean: number; controlFair: number; controlInit: number; controlBaseline?: number | null; sigmaRel?: number | null; fitness: number[] }>(
     join(runDir, "evolve", "progress.jsonl"),
   ) ?? [];
   const byGeneration = new Map(progress.map((row) => [row.generation, row]));
@@ -145,6 +145,8 @@ if (analysis.evolve) {
     top4Mean: g.top4Mean,
     controlFair: g.controlFair,
     controlInit: g.controlInit,
+    controlBaseline: byGeneration.get(g.generation)?.controlBaseline ?? null,
+    sigmaRel: byGeneration.get(g.generation)?.sigmaRel ?? null,
     fitness: byGeneration.get(g.generation)?.fitness ?? [],
   }));
   evolve = {
@@ -152,6 +154,8 @@ if (analysis.evolve) {
     generationsCompleted: analysis.evolve.generationsCompleted,
     generations,
     trainingSignalCheck: analysis.evolve.trainingSignalCheck,
+    plateauChecks: analysis.evolve.plateauChecks ?? [],
+    stoppedOnPlateau: analysis.evolve.stoppedOnPlateau ?? false,
     artifactIntegrity: analysis.evolve.artifactIntegrity,
   };
 }
@@ -179,6 +183,8 @@ if (analysis.screen) {
     arms[name] = { ...arm, perGame: gamesByArm.get(name) ?? [] };
   }
   const pairs: Record<string, [string, string]> = {
+    "candidate-vs-baseline-run1": ["candidate", "baseline-run1"],
+    "baseline-run1-vs-fair-d3s7": ["baseline-run1", "fair-d3s7"],
     "candidate-vs-fair-d3s7": ["candidate", "fair-d3s7"],
     "init-vs-fair-d3s7": ["init-d3s7", "fair-d3s7"],
     "candidate-vs-init": ["candidate", "init-d3s7"],

@@ -1,0 +1,90 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260903-nnue-evolution-continuation-d3-f8ce9181",
+  "theoryIds": [
+    "TH-20260825-evolved-nnue-leaf-d3-0f47e46c"
+  ],
+  "title": "Continued whole-game evolution of the depth-5-distilled NNUE leaf from the first run's generation-60 population, with annealed mutation and a preregistered plateau stop (up to 1,000 generations)",
+  "classification": "algorithmic",
+  "hypothesis": "Successor experiment to EX-20260902-nnue-evolution-d3-v2-49c18bc2 (result RS-20260903T025751Z-6577b33e: the 60-generation candidate lost its held-out screen to the frozen fair leaf by -106,964 paired points while beating its own unevolved warm start by +35,375, and the paired margin over the fair control was still rising at generation 60: OLS slope over the 60 generations +676 points per generation, one-sided 95% lower bound +200). Question: with a much longer budget and an annealed mutation size, does whole-game evolution with common random numbers keep improving the depth-3 NNUE leaf, where does the improvement plateau, and does the plateau candidate beat the frozen fair leaf on never-read games? Candidate: the identical deployed configuration (stock fair expectimax, depth 3, seven chance strata, terminal utility -1,000,000, policy seed 0xd7075eed, completion-guaranteeing work bound, 64k-entry table, NNUE leaf 8,902-feature sparse class, 135 active, EmbeddingBag(8902,64)->ReLU->32->ReLU->1, x17,000 points). Starting population: the 32 vectors of runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/evolve/population-060.bin, the population the first run's generation-59 selection produced and never evaluated (SHA-256 3da5021531898f08254d35cad5486fbbc12092770216bcdaea988d3724422cb8); generation 0 of this run plays it exactly as saved (no re-noising). GA per generation, unchanged from the first run except where stated: population 32; every candidate plays the same fresh block of 32 training seeds, generation g playing [0xa52e2000 + 32 g, +32); fitness = mean final score of the 32 complete games (2,000-move cap); 4 elites cloned; the other 28 slots filled by tournaments of 3 whose winner is copied and mutated per tensor with Gaussian noise; evolution seed 0x0e701e59 (fresh, so no mutation realisation of the first run repeats). Annealed mutation (new): sigma_rel(g) = max(0.01, 0.05 x exp(-g / 400)), i.e. equal to the first run's constant 0.05 at g = 0, 0.030 at g = 200, 0.018 at g = 400, and the 0.01 floor from g = 644 onward (per-tensor sigma = sigma_rel x tensor std, floor 1e-4, as before). Three paired controls play every block and are never selected: the frozen fair leaf (control-fair-d3s7), the first run's supervised warm start (artifacts/results/EX-20260902-nnue-evolution-d3-v2-49c18bc2/RUN-20260902T035644Z-c1fd8987/pretrain/init.bin, SHA-256 7d6fa5563de6716a4a895fb224bbe7f81c568391b6b737f85acc110872c075e0; control-init-d3s7) and the first run's frozen screened candidate (artifacts/results/EX-20260902-nnue-evolution-d3-v2-49c18bc2/RUN-20260902T035644Z-c1fd8987/evolve/candidate-weights.bin, SHA-256 edd0d2efd181de43f35d62c4df784cb2c789db3ae296be93a1c6c59082034a9f; control-baseline-d3s7), the last being the direct paired measure of improvement over where this run started. Preregistered plateau stop (new; the owner's request was to keep evolving as long as the last 50-100 generations show noticeable improvement): the tracked statistic is the paired margin m_g = population mean fitness minus the fair control on generation g's block. After every 50th completed generation from the 100th onward, ordinary least squares regresses m over generation index across the last 100 generations; the run stops when the slope's one-sided 95% lower bound (slope - 1.645 x standard error, residual-based, n-2 degrees of freedom) is not greater than zero, i.e. when 100 generations show no detectable improvement. Every check is appended to plateau.jsonl and a stop writes the PLATEAU marker. Sensitivity, from the first run's artifacts: the residual scatter of m_g about its trend was 38,813 points, at which a 100-generation window detects slopes of about 221 points per generation (22,100 per 100 generations); the first run's own slope of 676 would not have stopped it. Other stops: 1,000 generations; a 259,200 s (72 h) evolve wall budget; a STOP file. Final candidate: the top 8 of the last completed generation each replay the 128 fresh training seeds immediately after the last fitness block played (so an early stop still re-selects on fresh seeds inside the lease); the highest mean is frozen as candidate-weights.bin and its SHA-256 recorded before the screen lease opens. Held-out screen, once: 64 never-read public-development seeds 0xa52ea000-0xa52ea03f, five arms on identical seeds: candidate, baseline-run1 (the first run's frozen candidate), init-d3s7 (the first run's warm start), fair-d3s7 (the primary comparator, identical search) and fair-d4s7 (the program's standing reference, diagnostic only). Primary contrast candidate minus fair-d3s7 as in the first run's gate; preregistered secondary contrast candidate minus baseline-run1, the out-of-sample measure of what the continuation added. Operational: 32 threads (the first run's SMT preflight), every stage through scripts/pipeline.sh (env: EXPERIMENT_ID, LEASE_START 0xa52e2000, SCREEN_START 0xa52ea000, GENERATIONS 1000, EVOLVE_SEED 0x0e701e59, RESUME_POP, BASELINE, INIT, SIGMA_TAU 400, SIGMA_FLOOR 0.01, PLATEAU_WINDOW 100, PLATEAU_EVERY 50, PLATEAU_MIN 100, EVOLVE_WALL 259200) with per-stage rusage; the evolve binary's checkpoint contract (population-{g+1}.bin before gen-{g}.json) makes the run resumable after a kill without replaying a block. The first run's chain faults are addressed: the driver is not edited while a stage runs.",
+  "candidate": {
+    "name": "d3s7-evolved-nnue-leaf-continued",
+    "entryPoint": "approaches/lifetime-objective/nnue-evolution/src/bin/evolve.rs",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "fair-d3s7",
+    "entryPoint": "approaches/fair-expectimax/rust-engine/src/leaf.rs",
+    "manifestRef": "research/benchmarks/baselines-v1.json"
+  },
+  "informationBoundary": "public-policy",
+  "benchmarkTier": "SCREEN",
+  "data": {
+    "role": "public-development",
+    "seedLeaseRefs": [
+      "SL-20260903T033000Z-a52e2000",
+      "SL-20260903T033000Z-a52ea000"
+    ],
+    "datasetRefs": [],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "The starting population, the warm-start control and the baseline control are products of EX-20260902-nnue-evolution-d3-v2-49c18bc2's training data (lease SL-20260825T063000Z-a52e0300), already read; no seed of that lease is read again. CHECK gates for the rebuilt binaries and a 3-generation smoke test of the new flags (population 32, 2 games, 60-move cap) read only the already-opened development probe block 0xa5277000-0xa5277107. Fitness blocks and the re-selection open training-lease seeds 0xa52e2000-0xa52ea000 (1,000 blocks of 32 = 32,000 seeds plus 128 re-selection seeds; the 640 seeds above 32,128 stay unopened); the screen opens 0xa52ea000-0xa52ea03f exactly once, after the candidate is frozen. Neither range contains any 8-hex-digit constant present in docs/, approaches/, src/, research/, artifacts/ or web/content/ (checked 2026-09-03), and both are disjoint from every existing lease."
+  },
+  "metrics": {
+    "primary": "paired mean whole-game score delta, continued candidate minus frozen fair leaf, both at the identical d3s7 configuration, 64 held-out games",
+    "secondary": [
+      "paired mean score delta, continued candidate minus the first run's frozen candidate (baseline-run1), same 64 games: what the continuation added out of sample",
+      "paired mean moves delta; numbered clears per move and cover reveals per move; lower quartile, median, maximum; W-T-L; first-half and second-half deltas, for every arm pair",
+      "training curve: per-generation population mean, top-4 mean, best, and the three paired controls; the plateau statistic m_g and every plateau check (slope, standard error, lower bound); the generation at which the run stopped and why",
+      "ten-generation block averages of population mean minus each control, continuing the first run's table",
+      "reference arm fair-d4s7 vs fair-d3s7, diagnostic only"
+    ],
+    "statisticalUnit": "whole-game",
+    "uncertaintyMethod": "one-sided 95% percentile bootstrap over whole games, 20,000 resamples, RNG seed 0xb0071eaf (the unchanged compare.py), plus a one-sided 95% Student-t lower bound; detection floor 1.645*sd/sqrt(n) reported; plateau rule as stated in the hypothesis"
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "All 11 CHECK gates passed on the rebuilt binaries before the first leased seed was read (gates.log in the run directory).",
+      "Every generation artifact and the screen artifact have illegalDecisions 0, incompleteDecisions 0, and censored games reported as censored.",
+      "Held-out screen, 64 paired games on 0xa52ea000-0xa52ea03f, candidate vs fair-d3s7: bootstrap 95% lower bound of the paired score delta > 0 AND Student-t 95% lower bound > 0.",
+      "Held-out screen: paired mean score delta > 0 in both halves (seeds 0-31 and 32-63).",
+      "Held-out screen: candidate lower-quartile score >= fair-d3s7 lower-quartile score.",
+      "The screened candidate is the exact frozen winner of the elite re-selection (candidate-weights.bin, SHA-256 recorded before the screen lease opens); no other vector is screened.",
+      "Reported alongside the gate, not part of it: candidate vs baseline-run1 bootstrap 95% lower bound > 0 establishes that the continuation improved the leaf out of sample; the generation of the stop and the plateau statistics establish where the training curve levelled."
+    ],
+    "failureAction": "Record a valid run with scientific outcome fail for this configuration (this model class, this population and games-per-candidate budget, this annealing schedule, deployment depth 3), reporting separately whether the continuation beat the first run's candidate and at what generation the curve plateaued; do not adopt the vector; open no further cohort for it.",
+    "passAction": "Freeze candidate-weights.bin with its SHA-256; register a fresh-block replication by a different runner and a fresh-development STANDARD evaluation as successors; do not open protected or final seeds."
+  },
+  "resources": {
+    "wallSeconds": 275000,
+    "cpuThreads": 32,
+    "maxHostBytes": 17179869184,
+    "maxGpuBytes": null,
+    "gpuDevices": []
+  },
+  "stopConditions": [
+    "Stop on any rules, information-boundary, legality, determinism, or parity failure.",
+    "Evolution stops at the preregistered plateau rule (one-sided 95% lower bound of the OLS slope of the paired margin over the fair control across the last 100 generations <= 0, checked after every 50th completed generation from the 100th), at 1,000 generations, at 259,200 s of evolve wall time, or when a STOP file appears; the candidate is then the elite re-selection over the last completed generation's population on the 128 seeds following the last fitness block.",
+    "A generation or screen artifact with any illegal or incomplete decision voids the run (invalid), not the candidate.",
+    "The screen is evaluated exactly once; no re-run on the same or a different held-out block without a new experiment record.",
+    "The run may be killed and resumed at a generation boundary (checkpoint contract); a resume replays no seed and is recorded in the run record."
+  ],
+  "expectedArtifacts": [
+    "runs/<run-id>/nnue-evolution/gates.log (CHECK, rebuilt binaries)",
+    "runs/<run-id>/nnue-evolution/evolve/{config.json (with resumePopulationSha256 and baselineSha256),progress.jsonl (per generation: best, mean, controlFair, controlInit, controlBaseline, sigmaRel, fitness[]),plateau.jsonl,PLATEAU (if the rule stopped the run),gen-*.json,population-*.bin,final-fitness.json,candidate-weights.bin,candidate-weights.sha256,selection.json}",
+    "runs/<run-id>/nnue-evolution/screen/heldout.json (five arms) + compare-{candidate-vs-fair-d3s7,candidate-vs-baseline-run1,baseline-run1-vs-fair-d3s7,init-vs-fair-d3s7,candidate-vs-init,fair-d4s7-vs-fair-d3s7}.json",
+    "runs/<run-id>/nnue-evolution/{pipeline.log,rusage.jsonl,evolve.log,select.log,screen.log,analysis.json,analysis.md}",
+    "artifacts emitted by evolve and screen carry this experiment id in their config field"
+  ],
+  "lifecycle": "preregistered",
+  "protocolSha256": "9a094a0a9e39eac372bfa7366ffadec440e4e68b207299d613a10c9cad99466a",
+  "amendments": [],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5-1",
+    "agentId": "claude-code-evolution-experiment"
+  },
+  "createdAt": "2026-09-03T03:24:30Z",
+  "updatedAt": "2026-09-03T03:27:46Z"
+}

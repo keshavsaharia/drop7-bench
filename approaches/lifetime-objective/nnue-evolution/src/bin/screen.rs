@@ -1,18 +1,29 @@
 // Stage D: the held-out screen.  Plays the preregistered never-read cohort
-// once, with four arms on identical seeds: the frozen evolved candidate, the
-// unevolved supervised init (the ablation that isolates the evolutionary
-// stage), the fair leaf at the identical d3s7 configuration (the primary
-// comparator), and the fair leaf at d4s7 (the program's standing reference,
-// diagnostic only).  Emits one population artifact; the unchanged compare.py
-// of the prior leaf-evolution experiment computes the paired statistics.
+// once, with arms on identical seeds: the frozen evolved candidate, any
+// extra NNUE arms named on the command line (for the continuation
+// experiment: the earlier run's frozen candidate), the unevolved supervised
+// init (the ablation that isolates the evolutionary stage), the fair leaf at
+// the identical d3s7 configuration (the primary comparator), and the fair
+// leaf at d4s7 (the program's standing reference, diagnostic only).  Emits
+// one population artifact; the unchanged compare.py of the prior
+// leaf-evolution experiment computes the paired statistics.
 //
 // Usage: screen --candidate FILE --init FILE --seeds-start 0x... --games 64
 //               --threads T --out FILE [--move-cap 2000]
+//               [--arm NAME=FILE]... [--experiment-id EX-...]
 
 use drop7_nnue_evolution::game::{evaluate_tasks, population_artifact_json, EvalLeaf, EvalTask, Individual, MOVE_CAP};
 use drop7_nnue_evolution::nnue::{Nnue, NnueLeaf};
 use drop7_nnue_evolution::{deployment_params, DEPLOYMENT_TABLE};
 use drop7_rs::search::{work_bound_for, FairLeaf, SearchParams};
+
+const DEFAULT_EXPERIMENT_ID: &str = "EX-20260902-nnue-evolution-d3-v2-49c18bc2";
+
+enum Arm {
+    Net(Nnue),
+    FairD3,
+    FairD4,
+}
 
 fn main() -> Result<(), String> {
     let mut candidate = None;
@@ -22,6 +33,8 @@ fn main() -> Result<(), String> {
     let mut threads = 16usize;
     let mut out = None;
     let mut move_cap = MOVE_CAP;
+    let mut extra: Vec<(String, String)> = Vec::new();
+    let mut experiment_id = DEFAULT_EXPERIMENT_ID.to_string();
     let args: Vec<String> = std::env::args().collect();
     let mut i = 1;
     while i < args.len() {
@@ -39,6 +52,16 @@ fn main() -> Result<(), String> {
             "--threads" => threads = value.parse().map_err(|_| "bad --threads")?,
             "--move-cap" => move_cap = value.parse().map_err(|_| "bad --move-cap")?,
             "--out" => out = Some(value.to_string()),
+            "--arm" => {
+                let (name, path) = value
+                    .split_once('=')
+                    .ok_or("--arm expects NAME=FILE")?;
+                if name.is_empty() || name.contains('"') || name.contains(char::is_whitespace) {
+                    return Err(format!("bad --arm name {name:?}"));
+                }
+                extra.push((name.to_string(), path.to_string()));
+            }
+            "--experiment-id" => experiment_id = value.to_string(),
             other => return Err(format!("unknown argument {other}")),
         }
         i += 2;
@@ -48,10 +71,25 @@ fn main() -> Result<(), String> {
     let seeds_start = seeds_start.ok_or("--seeds-start required")?;
     let out = out.ok_or("--out required")?;
 
-    // Arm order: candidate, init, fair-d3s7, fair-d4s7.  The d4 arm carries
-    // its own search parameters; evaluate_tasks takes one params value, so
-    // the d4 arm is evaluated in a second pass and merged.
-    let names = ["candidate", "init-d3s7", "fair-d3s7", "fair-d4s7"];
+    // Arm order: candidate, extra arms in command-line order, init, fair-d3s7,
+    // fair-d4s7.  The d4 arm carries its own search parameters; evaluate_tasks
+    // takes one params value, so each arm is evaluated in its own pass.
+    let mut arms: Vec<(String, Arm)> = vec![("candidate".to_string(), Arm::Net(candidate))];
+    for (name, path) in &extra {
+        for (existing, _) in &arms {
+            if existing == name {
+                return Err(format!("duplicate arm name {name}"));
+            }
+        }
+        if ["init-d3s7", "fair-d3s7", "fair-d4s7"].contains(&name.as_str()) {
+            return Err(format!("arm name {name} is reserved"));
+        }
+        arms.push((name.clone(), Arm::Net(Nnue::load(std::path::Path::new(path))?)));
+    }
+    arms.push(("init-d3s7".to_string(), Arm::Net(init)));
+    arms.push(("fair-d3s7".to_string(), Arm::FairD3));
+    arms.push(("fair-d4s7".to_string(), Arm::FairD4));
+
     let d3 = deployment_params();
     let d4 = SearchParams {
         depth: 4,
@@ -62,11 +100,10 @@ fn main() -> Result<(), String> {
     };
 
     let mut individuals: Vec<Individual> = Vec::new();
-    for (arm, name) in names.iter().enumerate() {
-        let (params, table) = if arm == 3 {
-            (d4, 1_048_576usize)
-        } else {
-            (d3, DEPLOYMENT_TABLE)
+    for (name, arm) in &arms {
+        let (params, table) = match arm {
+            Arm::FairD4 => (d4, 1_048_576usize),
+            _ => (d3, DEPLOYMENT_TABLE),
         };
         let tasks: Vec<EvalTask> = (0..games)
             .map(|game| EvalTask {
@@ -76,25 +113,25 @@ fn main() -> Result<(), String> {
             .collect();
         let leaf_for = |_index: usize| -> EvalLeaf {
             match arm {
-                0 => EvalLeaf::Nnue(NnueLeaf {
-                    net: candidate.clone(),
-                }),
-                1 => EvalLeaf::Nnue(NnueLeaf { net: init.clone() }),
-                _ => EvalLeaf::Fair(FairLeaf::default()),
+                Arm::Net(net) => EvalLeaf::Nnue(NnueLeaf { net: net.clone() }),
+                Arm::FairD3 | Arm::FairD4 => EvalLeaf::Fair(FairLeaf::default()),
             }
         };
         let records = evaluate_tasks(&leaf_for, &params, table, &tasks, threads, move_cap);
+        let mean = records.iter().map(|g| g.score as f64).sum::<f64>() / games as f64;
+        eprintln!("arm {name}: mean {mean:.0} over {games} games");
         individuals.push(Individual {
-            name: name.to_string(),
+            name: name.clone(),
             games: records,
         });
-        let last = &individuals[arm];
-        let mean = last.games.iter().map(|g| g.score as f64).sum::<f64>() / games as f64;
-        eprintln!("arm {name}: mean {mean:.0} over {games} games");
     }
 
     let config_json = format!(
-        "{{\"experiment\":\"EX-20260902-nnue-evolution-d3-v2-49c18bc2\",\"screen\":true,\"games\":{games},\"moveCap\":{move_cap}}}"
+        "{{\"experiment\":\"{experiment_id}\",\"screen\":true,\"games\":{games},\"moveCap\":{move_cap},\"arms\":[{}]}}",
+        arms.iter()
+            .map(|(name, _)| format!("\"{name}\""))
+            .collect::<Vec<_>>()
+            .join(",")
     );
     let artifact = population_artifact_json(&config_json, seeds_start, &individuals);
     std::fs::write(&out, artifact).map_err(|e| e.to_string())?;

@@ -119,26 +119,39 @@ function hours(seconds: number): string {
 
 type StageState = "done" | "running" | "pending";
 
-export function EvolutionStatus({ run }: { run: string }) {
+export function EvolutionStatus({ run, continuation = false }: { run: string; continuation?: boolean }) {
   const snapshot = loadSnapshot(run);
   if (!snapshot) return <Absent run={run} stage="whole" />;
   const { corpus, pretrain, evolve, select, screen } = snapshot;
   const generationsPlanned = typeof evolve?.config?.generations === "number" ? (evolve.config.generations as number) : 60;
+  const stoppedEarly = Boolean(evolve?.stoppedOnPlateau);
+  const inherited: { name: string; state: StageState; detail: string }[] = [
+    { name: "A · teacher corpus", state: "done", detail: "inherited from the first run (177 games, 21,618 roots); no new teacher game" },
+    { name: "B · supervised warm start", state: "done", detail: "inherited from the first run; the population resumes from its generation-60 checkpoint" },
+  ];
   const stages: { name: string; state: StageState; detail: string }[] = [
-    {
-      name: "A · teacher corpus",
-      state: corpus ? (pretrain ? "done" : "running") : "pending",
-      detail: corpus ? `${formatValue(corpus.games)} complete games, ${formatValue(corpus.roots)} labelled roots` : "no games yet",
-    },
-    {
-      name: "B · supervised warm start",
-      state: pretrain ? "done" : corpus ? "pending" : "pending",
-      detail: pretrain ? `best epoch ${pretrain.report.bestEpoch} of ${pretrain.report.epochs}, validation Huber ${pretrain.report.bestValHuber.toFixed(4)}` : "waits for the corpus",
-    },
+    ...(continuation
+      ? inherited
+      : [
+          {
+            name: "A · teacher corpus",
+            state: (corpus ? (pretrain ? "done" : "running") : "pending") as StageState,
+            detail: corpus ? `${formatValue(corpus.games)} complete games, ${formatValue(corpus.roots)} labelled roots` : "no games yet",
+          },
+          {
+            name: "B · supervised warm start",
+            state: (pretrain ? "done" : "pending") as StageState,
+            detail: pretrain ? `best epoch ${pretrain.report.bestEpoch} of ${pretrain.report.epochs}, validation Huber ${pretrain.report.bestValHuber.toFixed(4)}` : "waits for the corpus",
+          },
+        ]),
     {
       name: "C · evolution",
-      state: evolve ? (select ? "done" : "running") : "pending",
-      detail: evolve ? `${evolve.generationsCompleted} of ${generationsPlanned} generations completed` : "waits for the warm start",
+      state: evolve ? (select || stoppedEarly ? "done" : "running") : "pending",
+      detail: evolve
+        ? `${evolve.generationsCompleted} of up to ${generationsPlanned} generations completed${stoppedEarly ? "; stopped by the plateau rule" : ""}`
+        : continuation
+          ? "waits for the first generation"
+          : "waits for the warm start",
     },
     {
       name: "C · elite re-selection",
@@ -256,6 +269,22 @@ export function EvolutionFigure({ run, caption }: { run: string; caption?: strin
           { label: `mean above fair, last ${check.window.length}`, value: `${check.generationsMeanAboveFair} of ${check.window.length}` },
           { label: "mean margin over fair", value: check.meanMarginLast10 !== null ? formatSigned(check.meanMarginLast10) : "n/a" },
           { label: "training-signal falsifier", value: check.passed === null ? "pending" : check.passed ? "signal present" : "no signal" },
+          ...(typeof last.controlBaseline === "number"
+            ? [
+                { label: "latest first-run-candidate control", value: formatValue(last.controlBaseline) },
+                { label: "latest mean minus first run's candidate", value: formatSigned(last.mean - last.controlBaseline) },
+              ]
+            : []),
+          ...(typeof last.sigmaRel === "number" ? [{ label: "mutation sigma (latest)", value: last.sigmaRel.toFixed(4) }] : []),
+          ...(evolve.plateauChecks && evolve.plateauChecks.length > 0
+            ? [
+                {
+                  label: `plateau check after gen ${evolve.plateauChecks[evolve.plateauChecks.length - 1].generation}`,
+                  value: `slope ${formatSigned(evolve.plateauChecks[evolve.plateauChecks.length - 1].slopePerGeneration)}/gen, lower bound ${formatSigned(evolve.plateauChecks[evolve.plateauChecks.length - 1].lowerBound95)} → ${evolve.plateauChecks[evolve.plateauChecks.length - 1].stop ? "stop" : "continue"}`,
+                },
+              ]
+            : []),
+          ...(evolve.stoppedOnPlateau ? [{ label: "stopped by the plateau rule", value: "yes" }] : []),
           { label: "illegal / incomplete decisions", value: `${evolve.artifactIntegrity.illegalDecisions} / ${evolve.artifactIntegrity.incompleteDecisions}` },
         ]}
       />
