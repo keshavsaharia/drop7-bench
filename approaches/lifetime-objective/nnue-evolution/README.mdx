@@ -274,6 +274,39 @@ would let selection see the small differences that remain once sigma is
 small. A constant-sigma continuation from the same population would answer
 the first; doubling the games per candidate the second.
 
+## A second continuation: does more room to explore change the answer?
+
+The first continuation's mutation size had annealed from 0.05 to 0.034 by the
+time its plateau rule fired, so that design could not tell whether the leaf
+class had genuinely run out of improvement or the shrinking step size had
+simply become too small to find more before the rule's window could detect
+it. A third experiment under the same theory,
+`EX-20260903-nnue-evolution-continuation2-d3-80eebad3`, tests the second
+explanation directly: it resumes from the exact population where the first
+continuation stopped (generation 150) and repeats the identical process with
+sigma decaying **3.75 times more slowly** — a 1,500-generation time constant
+instead of 400, so sigma sits at 0.045 rather than 0.034 at the equivalent
+point and does not reach its floor within the run's 1,000-generation cap.
+Everything else is unchanged: the same plateau rule, the same window, the
+same checks every 50 generations from the 100th. The immediately prior
+candidate (the first continuation's frozen result) plays every block as the
+third control, so the curve shows directly whether the slower decay finds
+anything the faster one could not. It launched on 2026-09-03 as run
+`RUN-20260903T190433Z-a87fd7fc`, on fresh leases free of any constant in the
+repository.
+
+<EvolutionStatus run="RUN-20260903T190433Z-a87fd7fc" continuation />
+
+<EvolutionFigure run="RUN-20260903T190433Z-a87fd7fc" caption="Second continuation, stage C. Generation 0 is the first continuation's generation-150 population. The violet dashed line is that run's frozen candidate playing the same seeds each generation." />
+
+<SwarmFigure run="RUN-20260903T190433Z-a87fd7fc" caption="Every candidate of the second continuation in every generation." />
+
+<ScreenFigure run="RUN-20260903T190433Z-a87fd7fc" caption="Second continuation, stage D, the primary contrast on the new held-out block: candidate minus the fair leaf." />
+
+<ScreenFigure run="RUN-20260903T190433Z-a87fd7fc" contrast="candidate-vs-baseline-run1" caption="The second continuation's own question, out of sample: this candidate minus the immediately prior candidate on the same 64 never-read games." />
+
+<ScreenGateTable run="RUN-20260903T190433Z-a87fd7fc" />
+
 ## How much can a leaf change a decision?
 
 A fair question about this whole design is whether a leaf evaluator can move a
