@@ -43,7 +43,7 @@
       "degree": "supporting"
     }
   ],
-  "summary": "Located, downloaded and read the Klein-Friedmann CS221 Q-learning report and its code (commit 8cc8a0e); registered the transfer theory and two preregistered experiments; wrote the reproduction harness that runs the upstream simulator and learner unchanged (300-game and lambda = 0 arms added), ran it (RS-20260902T082726Z-75606ce7: report reproduced, training front-loaded, regularisation claim not supported); wrote the std-only Rust crate drop7-kf-linear-q on drop7-rs (six-feature extractor, Q-learning update with exposed schedules, legal-only policy, deterministic parallel game driver, parity/train/evaluate binaries); passed the feature-parity (54,852 pairs, 0 mismatches), update-parity (250 steps, exact) and legality/determinism gates; trained ten arms on the already-open training block and evaluated them with random, centre-first, transplanted and fair-d4s7 arms on 256 previously evaluated development seeds; wrote the paired-bootstrap summariser, the result records, the approach page and the daily research log; then registered and ran a preregistered follow-up, a cross-entropy search over the six weights, whose frozen optimum beat both learned vectors on the pilot cohort (RS3). Second directive (disregard the paper's policy; test the Q-learning family for search efficiency and leaf evaluation): registered a pruning-prior theory and a leaf-refit theory with three preregistered experiments; added a pure accessor for the eighteen leaf terms and a public table key to drop7-rs (bit-exact tests); wrote the std-only crate drop7-oneply-q (32 one-ply features whose frozen dot product is the exact depth-1 value, four sibling-ranking priors, a pruned fair searcher that is the unchanged drop7-rs search bit for bit at full width, a resumable sibling-complete panel builder, a linear leaf with intercept, and the panel / prune_eval / evaluate / leaf_terms binaries); built the 48-game depth-4 sibling panel on already-read training seeds and registered it as a dataset; fitted the linear Q (ridge, game-grouped CV) and found it ranks depth-4's choice worse than the exact one-ply value it contains, traced that to the death-dominated least-squares target with a labelled post-hoc clipped refit that recovers exactly the one-ply ranking; measured sixteen pruned depth-4 configurations and six pruned depth-5 configurations against exact values on held-out roots (one-ply prior at width three: 92.3% agreement, 0.9% regret, 26% work; pruned depth 5 no better than depth 4 in points); refit the leaf to the depth-4 root value (held-out R^2 0.852 against 0.729 for a rescaled frozen leaf); and launched the preregistered gameplay pilots.",
+  "summary": "Located, downloaded and read the Klein-Friedmann CS221 Q-learning report and its code (commit 8cc8a0e); registered the transfer theory and two preregistered experiments; wrote the reproduction harness that runs the upstream simulator and learner unchanged (300-game and lambda = 0 arms added), ran it (RS-20260902T082726Z-75606ce7: report reproduced, training front-loaded, regularisation claim not supported); wrote the std-only Rust crate drop7-kf-linear-q on drop7-rs (six-feature extractor, Q-learning update with exposed schedules, legal-only policy, deterministic parallel game driver, parity/train/evaluate binaries); passed the feature-parity (54,852 pairs, 0 mismatches), update-parity (250 steps, exact) and legality/determinism gates; trained ten arms on the already-open training block and evaluated them with random, centre-first, transplanted and fair-d4s7 arms on 256 previously evaluated development seeds; wrote the paired-bootstrap summariser, the result records, the approach page and the daily research log; then registered and ran a preregistered follow-up, a cross-entropy search over the six weights, whose frozen optimum beat both learned vectors on the pilot cohort (RS3). Second directive (disregard the paper's policy; test the Q-learning family for search efficiency and leaf evaluation): registered a pruning-prior theory and a leaf-refit theory with three preregistered experiments; added a pure accessor for the eighteen leaf terms and a public table key to drop7-rs (bit-exact tests); wrote the std-only crate drop7-oneply-q (32 one-ply features whose frozen dot product is the exact depth-1 value, four sibling-ranking priors, a pruned fair searcher that is the unchanged drop7-rs search bit for bit at full width, a resumable sibling-complete panel builder, a linear leaf with intercept, and the panel / prune_eval / evaluate / leaf_terms binaries); built the 48-game depth-4 sibling panel on already-read training seeds and registered it as a dataset; fitted the linear Q (ridge, game-grouped CV) and found it ranks depth-4's choice worse than the exact one-ply value it contains, traced that to the death-dominated least-squares target with a labelled post-hoc clipped refit that recovers exactly the one-ply ranking; measured sixteen pruned depth-4 configurations and six pruned depth-5 configurations against exact values on held-out roots (one-ply prior at width three: 92.3% agreement, 0.9% regret, 26% work; pruned depth 5 no better than depth 4 in points); refit the leaf to the depth-4 root value (held-out R^2 0.852 against 0.729 for a rescaled frozen leaf); and launched the preregistered gameplay pilots. Completed the two gameplay pilots and recorded them: the one-ply-pruned depth-4 search is a non-measurement leaning about 8% below full-width depth 4 at 27% of the work (RS-20260903T013022Z-d32ee053), pruned depth 5 likewise, and the refit leaf loses a fifth of the score (RS-20260903T013022Z-b0937bf9, valid negative); wrote the approach page, the index row, the strategy note and the afternoon half of the daily log.",
   "theoryIds": [
     "TH-20260902-kf-linear-q-transfer-68b41d66",
     "TH-20260902-kf-six-weight-policy-search-8a6e41a8",
@@ -92,8 +92,8 @@
     "research/results/RS-20260902T084356Z-2488ecc7.json",
     "research/results/RS-20260902T084356Z-784ebf14.json",
     "runs/RUN-20260902T083357Z-196a7b87/kf-six-weight-cem/summary.json",
-    "approaches/fair-expectimax/rust-engine/src/leaf.rs (fair_leaf_terms accessor, additive)",
-    "approaches/fair-expectimax/rust-engine/src/search.rs (PackedKey::new and hash_key made public, additive)",
+    "approaches/fair-expectimax/rust-engine/src/leaf.rs",
+    "approaches/fair-expectimax/rust-engine/src/search.rs",
     "approaches/value-policy-learning/oneply-q-prune/rust/src/oneply.rs",
     "approaches/value-policy-learning/oneply-q-prune/rust/src/prior.rs",
     "approaches/value-policy-learning/oneply-q-prune/rust/src/prune.rs",
@@ -112,7 +112,15 @@
     "research/datasets/DS-20260902-fair-d4s7-sibling-panel-e4e06b7c.json",
     "runs/RUN-20260902T175250Z-3164a88a/oneply-q/prune-d4-summary.json",
     "runs/RUN-20260902T175250Z-3164a88a/oneply-q/prune-d5-summary.json",
-    "runs/RUN-20260902T184241Z-062fef8c/oneply-q/fit-leaf.json"
+    "runs/RUN-20260902T184241Z-062fef8c/oneply-q/fit-leaf.json",
+    "approaches/value-policy-learning/oneply-q-prune/README.mdx",
+    "approaches/value-policy-learning/oneply-q-prune/analysis/paired_bounds.py",
+    "approaches/value-policy-learning/oneply-q-prune/scripts/run-ex5-pilot.sh",
+    "approaches/value-policy-learning/oneply-q-prune/scripts/run-ex6-leaf.sh",
+    "research/results/RS-20260903T013022Z-d32ee053.json",
+    "research/results/RS-20260903T013022Z-b0937bf9.json",
+    "runs/RUN-20260902T184241Z-43722e86/oneply-q/pilot-bounds.json",
+    "runs/RUN-20260902T184241Z-062fef8c/oneply-q/leaf-bounds.json"
   ],
   "commitShas": [],
   "validationPerformed": [
@@ -127,7 +135,9 @@
     "drop7-rs cargo test --release: 23/23 including terms_dot_frozen_weights_match_fair_leaf_bits (100 boards, bit-exact reconstruction of the frozen leaf from the exposed terms).",
     "drop7-oneply-q cargo test --release: 8/8 including full_width_matches_drop7_rs_bit_for_bit (per-column values, actions and work at d3s5, d3s7, d4s5 on 12 probe states), oneply_d1_value_matches_depth_one_search_bit_for_bit, pruned_values_are_lower_bounds_and_legal, choose_action_replays_and_stays_legal, frozen_linear_leaf_matches_fair_leaf_bits.",
     "Post-hoc bug check on the fit: the exact one-ply value rebuilt from the 32 features to a worst absolute difference of 5.8e-11 over all 36,930 sibling rows; 0 monotonicity violations over 2,060 x 16 pruned decisions.",
-    "make research-validate: no error for any record created in this session."
+    "make research-validate: no error for any record created in this session.",
+    "Pilot comparator gate: the new fair-d4s7 arm's first 32 rows reproduce RUN-20260902T081659Z-d2aa6375's rows exactly (checksum, score, moves, logical work; 0 mismatches).",
+    "Every pilot arm: 0 illegal, 0 incomplete, 0 censored games; paired bounds recomputed by two independent stdlib scripts (summarize_evaluate.py and paired_bounds.py) with identical lower bounds."
   ],
   "limitations": [
     "Self-reported contribution; not yet independently reviewed.",
@@ -137,9 +147,10 @@
     "Three post-hoc arms (constant 0.01, constant 0.0001, score reward with constant 0.001) were added after the preregistered arms were trained and are labelled post hoc everywhere they appear.",
     "No commit SHA at record time; the work is uncommitted on branch claude/q-learning.",
     "The EX-4 run exceeded its preregistered 7,200 s wall stop by 192 s (2.7%) under self-inflicted CPU contention; no watchdog enforced the stop; every output is deterministic (disclosed in RS-20260902T202705Z-75d87947).",
-    "The gameplay pilots (EX-5, EX-6 stage 3) share the machine with each other; their wall-time figures are contended and only logical work should be compared."
+    "The gameplay pilots (EX-5, EX-6 stage 3) share the machine with each other; their wall-time figures are contended and only logical work should be compared.",
+    "EX-5 and EX-6 also exceeded their preregistered wall stops (2.9% and about 9%) for the same contention reason; disclosed in their result records."
   ],
   "selfReported": true,
   "reviewedBy": null,
-  "recordedAt": "2026-09-02T20:28:30Z"
+  "recordedAt": "2026-09-03T01:32:13Z"
 }
