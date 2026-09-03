@@ -119,26 +119,39 @@ function hours(seconds: number): string {
 
 type StageState = "done" | "running" | "pending";
 
-export function EvolutionStatus({ run }: { run: string }) {
+export function EvolutionStatus({ run, continuation = false }: { run: string; continuation?: boolean }) {
   const snapshot = loadSnapshot(run);
   if (!snapshot) return <Absent run={run} stage="whole" />;
   const { corpus, pretrain, evolve, select, screen } = snapshot;
   const generationsPlanned = typeof evolve?.config?.generations === "number" ? (evolve.config.generations as number) : 60;
+  const stoppedEarly = Boolean(evolve?.stoppedOnPlateau);
+  const inherited: { name: string; state: StageState; detail: string }[] = [
+    { name: "A · teacher corpus", state: "done", detail: "inherited from the first run (177 games, 21,618 roots); no new teacher game" },
+    { name: "B · supervised warm start", state: "done", detail: "inherited from the first run; the population resumes from its generation-60 checkpoint" },
+  ];
   const stages: { name: string; state: StageState; detail: string }[] = [
-    {
-      name: "A · teacher corpus",
-      state: corpus ? (pretrain ? "done" : "running") : "pending",
-      detail: corpus ? `${formatValue(corpus.games)} complete games, ${formatValue(corpus.roots)} labelled roots` : "no games yet",
-    },
-    {
-      name: "B · supervised warm start",
-      state: pretrain ? "done" : corpus ? "pending" : "pending",
-      detail: pretrain ? `best epoch ${pretrain.report.bestEpoch} of ${pretrain.report.epochs}, validation Huber ${pretrain.report.bestValHuber.toFixed(4)}` : "waits for the corpus",
-    },
+    ...(continuation
+      ? inherited
+      : [
+          {
+            name: "A · teacher corpus",
+            state: (corpus ? (pretrain ? "done" : "running") : "pending") as StageState,
+            detail: corpus ? `${formatValue(corpus.games)} complete games, ${formatValue(corpus.roots)} labelled roots` : "no games yet",
+          },
+          {
+            name: "B · supervised warm start",
+            state: (pretrain ? "done" : "pending") as StageState,
+            detail: pretrain ? `best epoch ${pretrain.report.bestEpoch} of ${pretrain.report.epochs}, validation Huber ${pretrain.report.bestValHuber.toFixed(4)}` : "waits for the corpus",
+          },
+        ]),
     {
       name: "C · evolution",
-      state: evolve ? (select ? "done" : "running") : "pending",
-      detail: evolve ? `${evolve.generationsCompleted} of ${generationsPlanned} generations completed` : "waits for the warm start",
+      state: evolve ? (select || stoppedEarly ? "done" : "running") : "pending",
+      detail: evolve
+        ? `${evolve.generationsCompleted} of up to ${generationsPlanned} generations completed${stoppedEarly ? "; stopped by the plateau rule" : ""}`
+        : continuation
+          ? "waits for the first generation"
+          : "waits for the warm start",
     },
     {
       name: "C · elite re-selection",

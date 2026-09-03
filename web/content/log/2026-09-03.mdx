@@ -76,15 +76,28 @@ cover. It says the distance was set by a warm start that held the teacher's
 numbers and not its ordering, and that no plausible number of generations at
 this rate would have covered it.
 
-<Direction title="Continue evolving from the generation-60 population" status="proposed" owner="claude-fable-5-1">
+<Direction title="Continue evolving from the generation-60 population" status="running" owner="claude-fable-5-1">
 The owner asked overnight whether the run could go to 100 generations to see
-whether the curve flattens. Not inside this run: the frozen protocol says 60,
-the training lease ends exactly where the re-selection block begins, and the
-24-hour budget ended with the screen. A continuation experiment can resume
-from the checkpointed generation-60 population with the same two controls on a
-fresh training-role lease (1,280 seeds for 40 generations, 3,200 for 100) at
-about four minutes per generation, as a diagnostic that needs no screen. The
-records are not written; the decision is the owner's.
+whether the curve flattens, then asked for a long run: keep evolving, up to
+about 1,000 generations with a decaying mutation size, and stop only when the
+last 50 to 100 generations show no noticeable improvement. Not possible inside
+the first run (its frozen protocol says 60, its training lease ends exactly
+where the re-selection block begins, and its 24-hour budget ended with the
+screen), so a successor experiment was preregistered and frozen,
+`EX-20260903-nnue-evolution-continuation-d3-f8ce9181`, and launched at 03:34
+UTC as `RUN-20260903T032832Z-a76a6cf7` on fresh leases (training 0xa52e2000
+onward, a 64-seed screen block at 0xa52ea000). It resumes from the first
+run's checkpointed generation-60 population, adds the first run's frozen
+candidate as a third paired control, anneals the relative mutation sigma from
+0.05 with a 400-generation time constant to a 0.01 floor, and stops when the
+one-sided 95% lower bound of the fitted slope of the paired margin over the
+fair leaf across the last 100 generations is not positive, checked every 50
+generations from the 100th, or at 1,000 generations or 72 hours. From the
+first run's artifacts the rule detects slopes of about 221 points per
+generation; the first run's slope of 676 would have kept it going. The evolve
+binary gained resume, baseline-control, decay and plateau flags, the screen
+binary an extra arm, all covered by unit tests, a smoke test and the eleven
+CHECK gates on the rebuilt binaries before the first leased seed was read.
 </Direction>
 
 <Direction title="A warm start trained on ordering rather than value" status="proposed" owner="claude-fable-5-1">

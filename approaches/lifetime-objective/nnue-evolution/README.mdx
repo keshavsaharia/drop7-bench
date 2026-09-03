@@ -182,6 +182,67 @@ played exactly once, whatever it shows.
 
 <ScreenGateTable run="RUN-20260902T035644Z-c1fd8987" />
 
+## The continuation: evolving on from generation 60
+
+The first run's curve had not flattened when its protocol stopped it: over
+its sixty generations the paired margin over the fair leaf rose by about 676
+points per generation, with a one-sided 95% lower bound of +200 (the numbers
+are in the continuation's experiment record, computed from the first run's
+`progress.jsonl`). So a second, longer experiment was registered under the
+same theory, `EX-20260903-nnue-evolution-continuation-d3-f8ce9181`, and
+launched on 2026-09-03 as run `RUN-20260903T032832Z-a76a6cf7`. It asks three
+things: does the leaf keep improving, where does it stop improving, and does
+the leaf it stops at beat the fair leaf on never-read games.
+
+**What is the same.** The search, the network, the population of 32, the 32
+paired games per candidate on a fresh block each generation, four elites,
+tournaments of three, the same two controls, the elite re-selection on 128
+fresh games, and a one-shot 64-game screen at the end.
+
+**What is different.**
+
+- *It starts where the first run stopped.* Generation 0 is the population the
+  first run's generation-59 selection produced and never played, loaded from
+  its checkpoint exactly as saved (its SHA-256 is recorded in the run's
+  configuration).
+- *A third control.* The first run's frozen candidate plays every block
+  alongside the fair leaf and the warm start, so the curve shows directly how
+  far the population has moved from where it began.
+- *The mutation size anneals.* The relative sigma starts at the first run's
+  0.05 and decays with a 400-generation time constant to a floor of 0.01:
+  0.030 at generation 200, 0.018 at 400, and the floor from generation 644
+  onward. Large steps early, fine steps late.
+- *It stops when it stops improving.* After every fiftieth generation from the
+  hundredth, a straight line is fitted to the paired margin over the fair
+  leaf across the last hundred generations. If the slope's one-sided 95%
+  lower bound is not positive, the last hundred generations have shown no
+  detectable improvement and the run stops there; otherwise it continues, to
+  a maximum of 1,000 generations or 72 hours. Given the generation-to-
+  generation scatter the first run showed (about 38,800 points around its
+  trend), the rule detects slopes of roughly 220 points per generation, or
+  22,000 per hundred generations; the first run's own slope would have kept
+  it going. Every check is written to `plateau.jsonl` whether or not it stops
+  the run.
+- *Fresh seeds.* A new training lease (0xa52e2000 onward, 32,768 seeds: room
+  for 1,000 blocks plus the re-selection) and a new 64-seed screen block
+  (0xa52ea000), both checked against every constant in the repository.
+
+At about four minutes per generation, 1,000 generations would take close to
+three days; the plateau rule is expected to stop it sooner. The figures below
+are the continuation's own artifacts and refresh as the run progresses.
+
+<EvolutionStatus run="RUN-20260903T032832Z-a76a6cf7" continuation />
+
+<EvolutionFigure run="RUN-20260903T032832Z-a76a6cf7" caption="Continuation, stage C. Generation 0 is the first run's generation-60 population. The violet dashed line is the first run's frozen candidate playing the same seeds each generation: the vertical distance between the population lines and it is a paired measure of what the continuation has added. Hover a generation for its sigma and the latest plateau check appears in the summary below the chart." />
+
+<SwarmFigure run="RUN-20260903T032832Z-a76a6cf7" caption="Every candidate of the continuation in every generation. As sigma anneals, the cloud should tighten; whether it also keeps drifting upward relative to the amber fair-leaf ticks is the question the plateau rule answers." />
+
+<ScreenFigure run="RUN-20260903T032832Z-a76a6cf7" caption="Continuation, stage D, the primary contrast on the new held-out block: continued candidate minus the fair leaf, one bar per game." />
+
+<ScreenFigure run="RUN-20260903T032832Z-a76a6cf7" contrast="candidate-vs-baseline-run1" caption="The continuation's own question, out of sample: continued candidate minus the first run's frozen candidate on the same 64 never-read games." />
+
+<ScreenGateTable run="RUN-20260903T032832Z-a76a6cf7" />
+
 ## How much can a leaf change a decision?
 
 A fair question about this whole design is whether a leaf evaluator can move a
