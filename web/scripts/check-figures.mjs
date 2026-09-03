@@ -1,16 +1,19 @@
 #!/usr/bin/env node
 /**
- * Verifies every figure/diagram embed points at an existing file:
+ * Verifies every figure/diagram embed points at a renderable file:
  *   - ```figure <name>``` / ```figure\n<name>\n...``` fences and
- *     <Figure name="…"/> tags -> web/content/figures/<name>.svg
+ *     <Figure name="…"/> tags -> web/content/figures/<name>.json, which must
+ *     validate as a figure spec (every point carries a sourceRecord);
  *   - ```diagram ...``` fences and <Diagram name="…"/> tags
- *     -> web/content/figures/diagrams/<name>.svg
+ *     -> web/content/figures/diagrams/<name>.svg.
+ * Also validates every spec under web/content/figures, referenced or not.
  * Scans docs/**\/*.md and web/content/**\/*.mdx by default, or the paths given.
  * Usage: node web/scripts/check-figures.mjs [file-or-directory ...]
- * Exit code 1 if any reference is unresolved.
+ * Exit code 1 if any reference is unresolved or any spec is invalid.
  */
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
+import { validateFigureSpec } from "../lib/charts/spec.ts";
 
 const webDir = resolve(new URL(".", import.meta.url).pathname, "..");
 const repoRoot = resolve(webDir, "..");
@@ -35,7 +38,7 @@ function* fenceRefs(text) {
     const [, , kind, meta, body] = m;
     const line = text.slice(0, m.index).split("\n").length;
     const lines = body.split("\n").map((l) => l.trim()).filter(Boolean);
-    const name = (meta.trim().split(/\s+/)[0] || lines[0] || "");
+    const name = meta.trim().split(/\s+/)[0] || lines[0] || "";
     yield { kind, name, line, form: "fence" };
   }
 }
@@ -49,7 +52,7 @@ function* tagRefs(text) {
 }
 
 function target(ref) {
-  return ref.kind === "diagram" ? join(figuresDir, "diagrams", `${ref.name}.svg`) : join(figuresDir, `${ref.name}.svg`);
+  return ref.kind === "diagram" ? join(figuresDir, "diagrams", `${ref.name}.svg`) : join(figuresDir, `${ref.name}.json`);
 }
 
 const args = process.argv.slice(2);
@@ -81,5 +84,22 @@ for (const root of roots) {
     }
   }
 }
-console.log(`${files} files scanned, ${refs} figure/diagram references, ${failures} unresolved`);
+
+// Every spec must validate, whether or not a page embeds it yet.
+let specs = 0;
+if (existsSync(figuresDir)) {
+  for (const entry of readdirSync(figuresDir)) {
+    if (!entry.endsWith(".json")) continue;
+    specs += 1;
+    const path = join(figuresDir, entry);
+    try {
+      validateFigureSpec(JSON.parse(readFileSync(path, "utf8")), relative(repoRoot, path));
+    } catch (error) {
+      failures += 1;
+      console.log(`FAIL ${error.message}`);
+    }
+  }
+}
+
+console.log(`${files} documents scanned, ${refs} embeds resolved, ${specs} specs validated, ${failures} failures`);
 process.exit(failures ? 1 : 0);

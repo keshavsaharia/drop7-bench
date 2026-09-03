@@ -7,190 +7,319 @@ evidence: mechanics gates only
 reads: public
 ---
 
-The search that plays Drop7 best looks four moves ahead and then asks a
-hand-written function how promising the resulting board is. That function — the
-[leaf evaluator](/learn/glossary) — is where every learned-policy experiment in
-this program has gone to fail, and it failed in two distinct ways. Models
-trained to imitate a search learn the states the teacher visited and then cannot
-rank the six sibling moves it did not play (the
-[sibling trap](/learn/concepts/ranking-siblings)). And the one time the leaf was
-tuned by evolution on whole-game score directly, the optimiser followed
-selection noise into a worse evaluator
-([the CMA-ES leaf evolution](/approaches/lifetime-objective/leaf-evolution)).
-
-This approach keeps what each failure taught and changes the rest.
+The search that plays Drop7 looks a few moves ahead and then asks a hand-written
+formula how promising each board it can reach looks. This experiment replaces
+that formula, for the three-move search, with a small neural network. The
+network is first taught to imitate a slower search that looks five moves ahead,
+and then improved by evolution on the only thing the program is paid for: the
+final score of complete games.
 
 <EvidenceLabel status="preregistered" evidence="mechanics gates only" reads="public" />
 
-<Callout title="Status" tone="info">
-This page describes an experiment that is **running** as of 2026-09-02
-(run `RUN-20260902T035644Z-c1fd8987` under `EX-20260902-nnue-evolution-d3-v2-49c18bc2`,
-the successor of the frozen `EX-20260825-nnue-evolution-d3-bca7f330` with the
-operational parameters fixed in its body). The implementation is complete and
-its mechanics gates pass (determinism, reflection, information boundary,
-legality under degenerate weights, teacher-argmax equivalence); the teacher
-corpus is being generated, and the evolutionary run and the one-shot held-out
-screen follow. No number on this page is a strength result yet.
+<Callout title="Where the run stands" tone="info">
+This page describes an experiment that is **running** as of 2026-09-02, run
+`RUN-20260902T035644Z-c1fd8987` under the frozen protocol
+`EX-20260902-nnue-evolution-d3-v2-49c18bc2`. The figures below are drawn from a
+committed snapshot of the run's artifacts and say when the snapshot was taken.
+A stage that has produced no artifacts yet says so instead of showing a number.
+Nothing on this page is a strength result until the held-out screen has been
+played once and recorded.
 </Callout>
 
-## The design in three stages
+<EvolutionStatus run="RUN-20260902T035644Z-c1fd8987" />
 
-**Stage A — a teacher that can see a whole rise.** The frozen fair evaluator,
-driven by the [fast Rust bitboard engine](/approaches/fair-expectimax/rust-engine),
-plays training games at depth 5 with seven chance strata. Five moves is exactly
-one row-rise cycle, so every rise consequence of the root move is inside the
-teacher's horizon — the slow risks a depth-3 search cannot see (a high number
-that can no longer be cracked open, a 1 parked next to a gray disc) are visible
-to it. Every root is recorded with the teacher's value for **all seven columns**,
-which the search computes anyway: the corpus is sibling-complete by construction,
-so the coverage failure that sank earlier students is removed at the source.
+## The idea in one picture
 
-**Stage B — supervised warm start.** A compact NNUE-style network (the
-leaf-affordable class this repository has already characterised: 8,902 sparse
-features of which 135 are active per state, about 572k parameters, microsecond
-inference) is fitted to the teacher's state values with a whole-origin split —
-a game and all its roots are always on the same side of the split. This stage
-only needs to be a good starting region; the repository's evidence says a
-supervised student alone will not hold the teacher's ordering, and the
-preregistration says so too.
+Every search in this repository has the same shape: imagine each legal column,
+imagine the next disc, imagine the reply, and so on for a few moves, then stop
+and ask a [leaf evaluator](/learn/glossary) how good the board at the end of
+each imagined line is. The points won along the way are known exactly; the leaf
+guesses the rest. The frozen fair leaf is a sum of eighteen hand-written terms.
+On the positions the teacher has recorded so far, that guess carries roughly
+nineteen twentieths of the difference between one column and another, so the
+leaf is where the decision is made.
 
-**Stage C — evolution on the deployed objective.** The warm-started weights are
-then refined by a mutation-only genetic algorithm whose fitness is the thing
-the policy is actually paid for: the mean score of complete games, played by
-the exact deployed configuration (depth 3, seven strata, the candidate NNUE as
-its leaf). Every candidate in a generation plays the **same fresh block of
-seeds** (common random numbers), and the frozen fair leaf plus the unevolved
-init play every block as paired controls.
+<NnueSketch caption="The NNUE reads exactly what a player can see, turns it into 135 active features out of 8,902 possible ones, sums the matching rows of a weight table, passes the sum through two small layers, and returns one number in units of a row rise (17,000 points). Evolution changes the weights only." />
 
-## Why this might work where the first evolution failed
+An [NNUE](/learn/glossary) is a network built for exactly this job: it is
+sparse enough to evaluate in a microsecond, which is what a leaf that is called
+hundreds of thousands of times per decision can afford, and it is expressive
+enough to encode board patterns that eighteen linear terms cannot. The one on
+this page has about 572,000 weights, almost all of them in the first table.
 
-The 18-weight CMA-ES run failed its held-out screen at −30,300 points, and the
-post-mortem was precise: fresh seeds per generation removed overfitting as
-designed, "and left selection noise alone to steer, which at 32 games per
-candidate and a paired sd near 200,000 is a random walk." This design answers
-that diagnosis directly:
+## Why evolve, when you could just imitate?
 
-- **Paired blocks.** Every candidate in a generation plays identical seeds, so
-  selection compares paired differences rather than independent noisy means.
-- **An ordinal selection rule.** Tournament selection moves ranks, not
-  magnitudes, so one lucky million-point game cannot drag a generation.
-- **A warm start in weight space.** Mutation refines a functioning evaluator
-  instead of searching raw leaf constants; the per-tensor step size scales with
-  each tensor's own spread.
-- **Cheap deployment depth.** Depth 3 costs roughly a fiftieth of the depth-4
-  search the first evolution tuned, so the same machine budget buys an order of
-  magnitude more fitness games per generation.
-- **A noisy-champion guard.** The candidate is not the last generation's lucky
-  leader: the top eight elites are re-evaluated on a fresh 128-game block and
-  only the winner is frozen for the screen.
+Two earlier lines of work in this program each failed in an instructive way.
+Networks trained to imitate a search learned the positions the teacher visited
+and then could not rank the six sibling moves it never played (the
+[sibling trap](/learn/concepts/ranking-siblings)). And the one time a leaf was
+tuned by evolution on whole-game score directly, the eighteen hand-written
+weights of the fair leaf under CMA-ES, the optimiser followed selection noise
+into a worse evaluator
+([the first leaf evolution](/approaches/lifetime-objective/leaf-evolution)).
+Its post-mortem was precise: with 32 games per candidate and a paired standard
+deviation near 200,000 points, fresh seeds every generation left selection
+noise alone to steer.
 
-Gradient-free training of networks this size and far larger is established
-(Such et al., *Deep Neuroevolution*, 2017; Salimans et al., *Evolution
-Strategies as a Scalable Alternative to RL*, 2017, whose common-random-number
-trick this design borrows), and evolving position evaluators is established in
-the sister stochastic game 2048 (Jaśkowski's coevolutionary CMA-ES line of
-work). The open question is not feasibility; it is whether whole-game evolution
-moves a leaf that distillation alone cannot.
+This design keeps what each failure taught. Imitation is used only as a warm
+start, from a corpus that records the teacher's value for every legal column at
+every position, so the sibling-coverage hole is closed at the source. Evolution
+then refines the warm start on the deployed objective, but with the noise
+handled: every candidate in a generation plays the same games.
 
-## What would count as success — or a clean rejection
+<PairedSeedsSketch caption="Common random numbers. Because every candidate and both controls play exactly the same seeds in a generation, the difference between two candidates' mean scores is a difference in evaluators, not in the discs they were dealt. Selection then compares ranks, so one lucky game moves a candidate up a few places rather than dragging the whole generation." />
 
-The frozen candidate is screened **once** on 64 never-read paired development
-games against the identical depth-3 search with the frozen fair leaf: the gate
-is a positive paired delta with both bootstrap and Student-t 95% lower bounds
-above zero, positive in both halves, and no lower-quartile regression. The
-unevolved init plays the same seeds as an ablation — if the init passes equally,
-the evolutionary stage contributed nothing and the theory's second leg is
-refuted even if the candidate stands. The fair leaf at depth 4 plays the same
-seeds as the program's standing reference. Everything is frozen in the
-[experiment record](/research) before the screen lease opens, and the seed
-leases (`0xa52e0300` training, `0xa52e1300` screen) are recorded in the
-repository's seed registry.
+## How it works, stage by stage
 
-## How the evolutionary training runs, step by step
+<EvolutionPipeline caption="Four stages. The teacher, the corpus, the warm start, the evolution and the elite re-selection all read seeds from the training lease, which may be read again. The screen reads a separate block of seeds that nothing has ever opened, exactly once, after the candidate's weights are frozen and hashed." />
 
-This section is for a reader who wants to follow the loop without reading
-`evolve.rs`. Everything below is what the binary actually does; the constants
-are the frozen protocol's.
+### Stage A: a teacher that can see a whole rise
 
-**What is being evolved.** The NNUE is a table of about 572,000 numbers. Given
-a public board, the next disc, and the moves left until the next row rise, it
-adds up 135 rows of that table (one per active feature), passes the sum through
-two small dense layers, and returns one number: how good the position is, in
-units of one row-rise bonus (17,000 points). The depth-3 search calls it at
-every leaf. Evolution never changes the search, the features, or the network's
-shape — only the 572,000 numbers.
+The frozen fair evaluator, driven by the
+[fast Rust bitboard engine](/approaches/fair-expectimax/rust-engine), plays
+training games at depth 5 with seven chance strata. Five moves is one full
+row-rise cycle, so every rise consequence of a root move is inside the teacher's
+horizon: the slow risks a three-move search cannot see, such as a high number
+that can no longer be cracked open or a 1 parked beside a gray disc, are visible
+to it. At every position the teacher faced, the corpus records the board, the
+next disc, the moves until the rise, and the teacher's value for all seven
+columns. The search computes those seven values anyway, so the corpus is
+sibling-complete for free. Each teacher game is capped at 500 moves, and the
+stage stops starting new games after a fixed wall-clock budget; whatever whole
+games have completed are the corpus.
 
-**Generation 0.** Candidate 0 is the distilled network exactly as the
-supervised stage left it. Candidates 1 to 31 are copies of it with Gaussian
-noise added to every weight, twice as wide as the noise used later, so the
-first generation already spans a small neighbourhood instead of 32 identical
-clones.
+### Stage B: imitation as a warm start
+
+The NNUE is fitted to the teacher's values with the Adam optimiser on a Huber
+loss measured in rise units, with a whole-origin split: a game and all of its
+positions are always on the same side of the split, so validation never sees a
+position from a game it trained on. Training runs for 16 epochs and the epoch
+with the lowest validation loss is frozen as the warm start. A deployment-
+faithful probe then puts that network inside the real depth-3 search on
+held-out positions and asks how often the search now picks the teacher's
+column. This stage only has to land in a good region; the repository's own
+evidence says a supervised student alone does not hold the teacher's ordering,
+and the theory says so too.
+
+### Stage C: evolution inside the deployed search
+
+<GenerationLoop caption="One generation. Thirty-two candidates play the same fresh block of thirty-two seeds as the leaf of the real depth-3 search; the four fittest are copied unchanged; the other twenty-eight slots are filled by tournaments of three whose winner is copied and mutated. The frozen fair leaf and the unevolved warm start play every block as controls and are never selected." />
+
+**Generation 0.** Candidate 0 is the warm start exactly as stage B left it.
+Candidates 1 to 31 are copies with Gaussian noise added to every weight, twice
+as wide as the noise used later, so the first generation spans a small
+neighbourhood instead of thirty-two identical clones.
 
 **One generation, in order.**
 
 1. *Draw a fresh block of seeds.* Generation `g` plays the 32 seeds starting at
    `0xa52e0500 + 32·g`. No block is ever reused, so a candidate cannot score
    well by memorising particular games.
-2. *Everyone plays the same games.* Each of the 32 candidates plays all 32
-   seeds as the leaf of the depth-3, seven-stratum fair search, with the
-   ordinary 2,000-move cap. The frozen fair leaf and the unevolved
-   supervised-init network play the same 32 seeds as two control rows. That is
-   34 × 32 = 1,088 complete games per generation, spread over the machine's
-   cores one game per thread; the result of a game does not depend on which
-   thread played it.
-3. *Fitness is the mean score.* Nothing is fitted, weighted, or smoothed: a
+2. *Everyone plays the same games.* Each candidate plays all 32 seeds as the
+   leaf of the depth-3, seven-stratum fair search with the ordinary 2,000-move
+   cap. The frozen fair leaf and the unevolved warm start play the same seeds
+   as two control rows. That is 34 × 32 = 1,088 complete games per generation,
+   one game per thread across the machine; a game's result does not depend on
+   which thread played it.
+3. *Fitness is the mean score.* Nothing is fitted, weighted or smoothed: a
    candidate's fitness is the arithmetic mean of its 32 final scores. Because
-   every candidate saw the same 32 games, the only noise that matters when
-   comparing two candidates is the paired difference between them, not the
-   full game-to-game spread.
-4. *Keep the best four unchanged.* The four candidates with the highest fitness
-   are copied into the next generation exactly as they are (elitism), so the
-   population can never lose its best evaluator to a bad mutation.
+   every candidate saw the same games, the only noise that matters when
+   comparing two of them is the paired difference, not the game-to-game
+   spread.
+4. *Keep the best four unchanged.* The four fittest candidates are copied into
+   the next generation as they are, so the population can never lose its best
+   evaluator to a bad mutation.
 5. *Fill the other 28 slots by tournament and mutation.* For each open slot,
-   three candidates are drawn at random; the one with the highest fitness
-   wins. A copy of the winner is made, and every weight in the copy is
-   perturbed by Gaussian noise whose standard deviation is 5% of the standard
-   deviation of the tensor it belongs to (with a small floor so an all-zero
-   tensor can still move). Tournaments compare ranks, not magnitudes, so one
-   lucky million-point game moves a candidate up a few places rather than
-   dragging the whole generation toward it.
-6. *Checkpoint, then mark complete.* The new population is written to
-   `population-{g+1}.bin` before `gen-{g}.json` (every game of every candidate
-   and control, one row per game) and the `progress.jsonl` summary line are
-   written. A crash between the two replays generation `g` from identical
-   inputs and produces identical output; a crash after them resumes at `g+1`.
-   The `STOP` file and the wall budget end the loop at a generation boundary.
+   three candidates are drawn at random and the fittest wins. A copy of the
+   winner is made, and every weight in the copy is perturbed by Gaussian noise
+   whose standard deviation is 5% of the standard deviation of the tensor it
+   belongs to, with a small floor so an all-zero tensor can still move.
+6. *Checkpoint, then mark complete.* The next population is written to disk
+   before the generation's artifact (every game of every candidate and control,
+   one row per game) and its summary line. A crash between the two replays the
+   generation from identical inputs and produces identical output; a crash
+   after them resumes at the next generation. A `STOP` file or the wall budget
+   ends the loop at a generation boundary.
 
 **After the last generation.** The eight fittest candidates of the final
-generation each replay a fresh 128-game block (`0xa52e0c80`), and the one with
-the highest mean is frozen as `candidate-weights.bin`. Its SHA-256 is recorded
-before the held-out screen block is opened, so the vector that is screened is
-provably the one that was selected. This step exists because the last
-generation's leader is partly a lucky draw: the best of 32 noisy estimates is
-biased upward, and 128 fresh games shrink that bias before anything is
-claimed.
+generation each replay a fresh 128-game block, and the one with the highest
+mean is frozen as the candidate. Its SHA-256 is recorded before the screen
+block is opened, so the vector that is screened is provably the one that was
+selected. This step exists because the last generation's leader is partly a
+lucky draw: the best of thirty-two noisy estimates is biased upward, and 128
+fresh games shrink that bias before anything is claimed.
 
-**What the controls are for.** The fair leaf's row answers "is the population
-better than the evaluator it replaced, on exactly these games?" generation by
-generation; the theory's own training-signal falsifier reads it. The init's
-row answers "did evolution move anything?": if the population never separates
-from the init on the same games, mutation is a random walk around the warm
-start.
+**What the controls are for.** The fair leaf's row answers, generation by
+generation, "is the population better than the evaluator it replaced, on
+exactly these games?" The theory's training-signal falsifier reads that row.
+The warm start's row answers "did evolution move anything?": if the population
+never separates from the unevolved network on the same games, mutation is a
+random walk around the starting point.
 
-**How to continue from here.** Every generation's population is on disk, so a
-later experiment can resume the loop from any `population-NNN.bin`, start a
-new run from `candidate-weights.bin`, or change one operator at a time. Doing
-so is a new experiment: it needs its own record, its own training lease
-(the fitness blocks above are spent), and a fresh never-read screen block.
+### Stage D: one look at never-read games
+
+The frozen candidate plays 64 games on a seed block nothing has ever opened,
+against three other arms on the identical seeds: the same depth-3 search with
+the frozen fair leaf (the comparator), the same search with the unevolved warm
+start (the ablation, isolating what evolution added), and the fair leaf at
+depth 4 (the program's standing reference, diagnostic only). The screen is
+played exactly once, whatever it shows.
+
+## What the run has produced so far
+
+<CorpusFigure run="RUN-20260902T035644Z-c1fd8987" caption="Stage A. Each dot is one complete teacher game, in the order the games finished; hover a dot for its seed, score, length and how long the depth-5 search took to play it. Games are heavy-tailed: most end in the low hundreds of thousands and a few run far longer. The teacher turned out four to seven times slower per position than the pilot had projected, so the stage reached its wall budget well short of the 512 games the protocol allowed for; the protocol makes the completed games the corpus and does not depend on the count." />
+
+<PretrainFigure run="RUN-20260902T035644Z-c1fd8987" caption="Stage B. Training and validation loss by epoch, in rise units; the dashed line marks the epoch frozen as the warm start. The ordering probe below the chart is the number that matters for deployment: how often the real depth-3 search, with this network as its leaf, picks the column the depth-5 teacher picked on held-out positions." />
+
+<EvolutionFigure run="RUN-20260902T035644Z-c1fd8987" caption="Stage C. Best candidate, top-four mean and population mean by generation, with the two controls that played the same seeds each generation. Because every line in a generation was measured on the same 32 games, the vertical distance between a line and the fair control is a paired difference. The shaded band is the whole population's range. The theory's training-signal falsifier asks whether the population mean sits above the fair control in most of the final ten generations." />
+
+<SwarmFigure run="RUN-20260902T035644Z-c1fd8987" caption="The same generations with every candidate drawn. Selection pressure shows up as the cloud tightening and drifting; a population that stays centred on the pink control line has not moved away from the warm start." />
+
+<ScreenFigure run="RUN-20260902T035644Z-c1fd8987" caption="Stage D, the primary contrast. One bar per held-out game: the evolved candidate's score minus the frozen fair leaf's score on the same seed, in seed order. The dashed line is the recorded paired mean and the vertical divider separates the two halves the gate checks separately." />
+
+<ScreenGateTable run="RUN-20260902T035644Z-c1fd8987" />
+
+## How much can a leaf change a decision?
+
+A fair question about this whole design is whether a leaf evaluator can move a
+decision at all once a five-move search has banked the cascade points along
+each line. The run answered it with a retained diagnostic before evolution
+started: on a frozen snapshot of thirty teacher games, every root was searched
+twice at each depth, once with the fair leaf and once with a leaf that returns
+zero, so the only difference between the two sets of column values is the leaf
+term. The numbers below are copied from those artifacts.
+
+<ArmTable
+  caption="Leaf-swing diagnostic on a frozen 30-game snapshot of the corpus (run artifacts leaf-swing-d3.txt, leaf-swing-d4.txt, leaf-swing-d5.txt). Spreads are medians over roots of the difference between the best and worst legal column. The leaf's share is the median ratio of leaf-term spread to total value spread on roots with no losing column."
+  columns={[
+    { key: "depth", label: "search depth" },
+    { key: "roots", label: "roots", numeric: true },
+    { key: "share", label: "leaf's share of the column spread", numeric: true },
+    { key: "intree", label: "in-tree score spread (points)", numeric: true },
+    { key: "leaf", label: "leaf-term spread (points)", numeric: true },
+    { key: "flip", label: "decisions that change without the leaf", numeric: true },
+    { key: "agree", label: "agreement with the depth-5 teacher, fair leaf / zero leaf" },
+  ]}
+  rows={[
+    { depth: "3 plies", roots: "400", share: "0.97", intree: "393", leaf: "4,033", flip: "55.5%", agree: "72.0% / 45.0%" },
+    { depth: "4 plies", roots: "80", share: "0.95", intree: "643", leaf: "4,093", flip: "43.8%", agree: "73.8% / 47.5%" },
+    { depth: "5 plies", roots: "8", share: "0.97", intree: "1,141", leaf: "3,813", flip: "50.0%", agree: "100.0% / 50.0%" },
+  ]}
+/>
+
+At every depth the leaf term carries about nineteen twentieths of the spread
+between columns, and removing it changes the chosen column at roughly half of
+the roots. The search does not dilute the leaf; it multiplies it, because the
+same evaluator is applied at every frontier position of every line. That is
+why a better leaf is worth pursuing and why a worse one is dangerous.
+
+## What would count as success, and what a clean rejection looks like
+
+The gate was fixed before any leased seed was read. On the 64 held-out games,
+the evolved candidate must beat the frozen fair leaf at the identical depth-3
+configuration with a paired mean difference whose one-sided 95% bootstrap lower
+bound and Student-t lower bound are both above zero, the difference must be
+positive in both halves of the block, and the candidate's lower-quartile score
+may not fall below the fair leaf's. Every generation artifact and the screen
+artifact must record zero illegal and zero incomplete decisions, and the
+screened weights must hash to the value recorded before the screen lease opened.
+
+If the candidate passes but the unevolved warm start passes equally on the same
+seeds, the evolutionary stage contributed nothing and the theory's second leg
+is refuted even though the network stands. If the candidate fails, the result
+rejects this exact configuration: this model class, this teacher depth, this
+optimiser and budget, this deployment depth. It does not reject the idea of a
+learned leaf, and the retained corpus, warm start and populations remain
+available for a successor experiment with its own record and leases.
+
+## What this taught us so far, and what is still open
+
+- **The teacher is the expensive part.** A depth-5, seven-stratum search costs
+  tens of seconds per position on this machine at full parallelism, far more
+  than the pilot projected, and long games take hours. The corpus is therefore
+  smaller than planned. Whether it is large enough to warm-start a 572,000-
+  weight network is what stage B's validation loss and ordering probe measure.
+- **The leaf decides.** The leaf-swing diagnostic above turned a design
+  assumption into a measured fact before any training signal was read.
+- **Open until the screen is played:** whether whole-game evolution with
+  common random numbers moves a leaf that imitation alone cannot, which is the
+  theory's claim, and whether it moves it in the direction the held-out block
+  rewards.
+
+<TechnicalDetails title="The technical record">
+
+- Theory `TH-20260825-evolved-nnue-leaf-d3-0f47e46c`; frozen protocol
+  `EX-20260902-nnue-evolution-d3-v2-49c18bc2` (successor to the frozen
+  `EX-20260825-nnue-evolution-d3-bca7f330`, whose scientific protocol it
+  carries verbatim plus the operational parameters that record left open);
+  run `RUN-20260902T035644Z-c1fd8987`, started 2026-09-02T04:24:10Z with
+  32 threads on the Ryzen AI MAX+ 395 workstation
+  (`research/system-profiles/MACH-20260902T035644Z-f5e59b6e.json`).
+- Seed leases: training `SL-20260825T063000Z-a52e0300` (opened at launch;
+  teacher corpus from `0xa52e0300`, fitness blocks from `0xa52e0500`,
+  re-selection at `0xa52e0c80`) and screen `SL-20260825T063000Z-a52e1300`
+  (64 seeds; opened only by the screen stage, after the candidate's SHA-256 is
+  recorded). Training and screen ranges are disjoint by construction.
+- Search: fair expectimax, depth 3, seven stratified chance samples, terminal
+  utility -1,000,000, policy seed `0xd7075eed`, completion-guaranteeing work
+  bound, 64k-entry depth-gated table; the teacher is the same search at
+  depth 5 with the frozen fair leaf.
+- Network: 8,902 sparse features, 135 active per position;
+  EmbeddingBag(8,902 × 64) → ReLU → 32 → ReLU → 1, output scaled by 17,000
+  points; about 572k parameters.
+- Stage A: 512 seeds requested, 500-move cap, new games stop at 46,800 s of
+  wall clock. Stage B: Adam, learning rate 3e-4, batch 64, Huber δ = 1 rise,
+  16 epochs, seed `0x0e701e57`, 256 probe roots. Stage C: population 32,
+  60 generations, 32 paired games per candidate per generation, 4 elites,
+  tournament size 3, per-tensor σ = 5% of tensor standard deviation
+  (floor 1e-4), initial cloud 2σ, evolution seed `0x0e701e58`, 21,600 s
+  sub-budget; top 8 re-evaluated on 128 fresh games. Stage D: four arms on
+  64 seeds, `compare.py` with 20,000 bootstrap resamples at seed
+  `0xb0071eaf`.
+- Gates before the first leased seed: 11 CHECK gates on the already-open probe
+  block (feature determinism and bounds, information-boundary blindness to
+  score, level and move count, reflection consistency, fresh-searcher and
+  multi-worker determinism, legality and completed depth under random, zero
+  and saturated weights, leaf finiteness, serialisation round-trip), all
+  passed; a seed-free SMT preflight on the same probe block chose 32 threads
+  over 16.
+- Artifacts under `runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/`:
+  `gates.log`, the preflight logs, `corpus/parts/*.jsonl` (one file per
+  teacher game, resumable), `corpus.err` (one line per completed game),
+  `pretrain/{init.bin,report.json,probe.json}`,
+  `evolve/{config.json,progress.jsonl,gen-*.json,population-*.bin,selection.json,candidate-weights.bin,candidate-weights.sha256}`,
+  `screen/{heldout.json,compare-*.json}`, `rusage.jsonl` (kernel resource
+  usage per stage), `analysis.json` and `analysis.md` (the summary this page's
+  snapshot copies), and the leaf-swing diagnostic (`leaf-swing-d{3,4,5}.txt`
+  with the frozen 30-game input under `leaf-swing-input/`).
+- The page's figures read `web/content/figures/nnue-evolution/RUN-20260902T035644Z-c1fd8987.json`,
+  written by `web/scripts/extract-nnue-evolution.ts`; re-run it after each
+  stage to refresh them.
+
+</TechnicalDetails>
 
 ## The implementation
 
 A std-only Rust crate (`approaches/lifetime-objective/nnue-evolution/`) with a
-path dependency on the proven engine — the reference crate is not modified.
-Five binaries: `gate` (the CHECK-tier mechanics suite), `teacher_corpus`
-(stage A), `pretrain` (stage B), `evolve` (stage C, checkpointed and
-resumable), and `screen` (stage D, emitting the population-artifact format the
-repository's existing `compare.py` consumes unchanged). The NNUE reads exactly
-the public state — visible board, visible next disc, moves until the rise — and
-the information-boundary gate proves that states differing only in score,
-level, or move count produce bit-identical evaluations.
+path dependency on the proven engine; the reference crate is not modified. Five
+binaries: `gate` (the CHECK-tier mechanics suite), `teacher_corpus` (stage A),
+`pretrain` (stage B), `evolve` (stage C, checkpointed and resumable, with
+`--select` for the elite re-selection), and `screen` (stage D, emitting the
+population-artifact format the repository's existing `compare.py` consumes
+unchanged). The NNUE reads exactly the public state, and the
+information-boundary gate proves that states differing only in score, level or
+move count produce bit-identical evaluations.
+
+The stages are driven by `scripts/pipeline.sh` (`RUN_ID=… THREADS=32
+scripts/pipeline.sh corpus|pretrain|evolve|select|screen|compare|chain`), which
+wraps every stage in `scripts/with-rusage.py` so wall, CPU and peak memory land
+in `rusage.jsonl`, opens the screen lease through `scripts/open-screen-lease.py`
+only when the candidate hash file exists, and refuses to run the screen twice.
+`scripts/analyze.py --run <run>` summarises whatever artifacts exist into
+`analysis.json` and `analysis.md`.
+
+**How to continue from here.** Every generation's population is on disk, so a
+later experiment can resume the loop from any `population-NNN.bin`, start a new
+run from `candidate-weights.bin`, or change one operator at a time. Doing so is
+a new experiment: it needs its own record, its own training lease (the fitness
+blocks above are spent), and a fresh never-read screen block.

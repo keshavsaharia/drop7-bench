@@ -24,6 +24,7 @@ const KNOWN = new Set([
   "OracleSplit","TeacherStudentFlow","NTupleWindows","ValueNetShape","PolicyNetShape","MctsTreeGrowth",
   "EvidenceLabel","ExperimentSummary","ResultSummary","TechnicalDetails","TheorySummary",
   "GameTreeFigure","Drop7Board","Drop7Game","Diagram","Figure","ArmTable","DeadEnd","Direction","Finding","LogQuote","Timeline",
+  "EvolutionStatus","CorpusFigure","PretrainFigure","EvolutionFigure","SwarmFigure","ScreenFigure","ScreenGateTable","EvolutionPipeline","GenerationLoop","NnueSketch","PairedSeedsSketch",
 ]);
 
 function* walk(path) {

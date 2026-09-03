@@ -1014,3 +1014,253 @@ a.research-fig-source:hover {
   margin: 0.6rem 0 0;
   color: #71717a;
 }
+
+/* The visx chart kit (web/components/charts/). Title and legend are HTML so
+   they wrap instead of colliding with the plot; the tooltip is a portal into
+   <body>, positioned in viewport coordinates and clamped inside it. Written
+   unlayered because these charts render inside .prose-drop7. */
+.rchart {
+  width: 100%;
+  min-width: 0;
+}
+.rchart-title {
+  margin: 0 0 0.6rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #f4f4f5;
+}
+.rchart-svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  overflow: visible;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.rchart-svg text {
+  user-select: none;
+}
+.rchart-svg [tabindex]:focus-visible circle {
+  stroke: #fafafa;
+  stroke-width: 2;
+  fill: rgba(250, 250, 250, 0.08);
+}
+.prose-drop7 .rchart-legend,
+.rchart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.1rem;
+  margin: 0.55rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: #d4d4d8;
+}
+.prose-drop7 .rchart-legend li,
+.rchart-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+}
+.rchart-swatch {
+  flex: none;
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: #3987e5;
+  box-sizing: border-box;
+}
+.rchart-swatch.is-dashed {
+  background: transparent;
+  border: 2px dashed #3987e5;
+}
+.rchart-empty {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.rchart-tooltip {
+  max-width: min(360px, calc(100vw - 16px));
+  padding: 0.5rem 0.65rem;
+  border: 1px solid #3f3f46;
+  border-radius: 0.5rem;
+  background: #18181b;
+  color: #e4e4e7;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.rchart-tooltip-line {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  overflow-wrap: anywhere;
+}
+.rchart-tooltip-line.is-strong {
+  font-weight: 600;
+  color: #fafafa;
+}
+.rchart-tooltip-line.is-muted {
+  color: #a1a1aa;
+  font-size: 0.7rem;
+  margin-top: 0.15rem;
+}
+.rchart-tooltip .rchart-swatch {
+  position: relative;
+  top: 1px;
+}
+
+/* nnue-evolution approach figures (web/components/Evolution.tsx). */
+.evo-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.5rem 1rem;
+  margin: 0.8rem 0 0;
+  padding: 0.7rem 0 0;
+  border-top: 1px solid #27272a;
+}
+.evo-stats > div {
+  min-width: 0;
+}
+.evo-stats dt {
+  font-size: 0.7rem;
+  line-height: 1.3;
+  color: #71717a;
+}
+.evo-stats dd {
+  margin: 0.1rem 0 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #f4f4f5;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.prose-drop7 .evo-sources,
+.evo-sources {
+  margin: 0.3rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+.prose-drop7 .evo-sources li,
+.evo-sources li {
+  margin: 0;
+}
+.evo-status-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.3rem 1rem;
+  font-size: 0.78rem;
+  color: #a1a1aa;
+}
+.evo-status-time {
+  color: #71717a;
+}
+.prose-drop7 .evo-stages,
+.evo-stages {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.6rem;
+  margin: 0.8rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.prose-drop7 .evo-stages li,
+.evo-stages li {
+  position: relative;
+  margin: 0;
+  padding: 0.55rem 0.7rem 0.55rem 1.5rem;
+  border: 1px solid #27272a;
+  border-radius: 0.5rem;
+  background: #0c0c10;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: #a1a1aa;
+}
+.evo-stage-dot {
+  position: absolute;
+  left: 0.6rem;
+  top: 0.78rem;
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: #3f3f46;
+}
+.evo-stages li.is-done .evo-stage-dot {
+  background: #22c55e;
+}
+.evo-stages li.is-running .evo-stage-dot {
+  background: #3987e5;
+  box-shadow: 0 0 0 3px rgba(57, 135, 229, 0.25);
+}
+.evo-stage-name {
+  display: block;
+  font-weight: 600;
+  color: #f4f4f5;
+}
+.evo-stage-state {
+  display: inline-block;
+  margin: 0.15rem 0;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: #18181b;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #71717a;
+}
+.evo-stages li.is-done .evo-stage-state {
+  color: #86efac;
+}
+.evo-stages li.is-running .evo-stage-state {
+  color: #93c5fd;
+}
+.evo-stage-detail {
+  display: block;
+}
+.prose-drop7 .evo-checks,
+.evo-checks {
+  margin: 0.8rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+.prose-drop7 .evo-checks li,
+.evo-checks li {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0.25rem 0;
+  color: #d4d4d8;
+}
+.evo-checks li.is-total {
+  margin-top: 0.6rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #27272a;
+  font-weight: 600;
+}
+.evo-check-mark {
+  flex: none;
+  width: 1.1rem;
+  text-align: center;
+  font-weight: 700;
+}
+.evo-checks li.is-pass .evo-check-mark {
+  color: #22c55e;
+}
+.evo-checks li.is-fail .evo-check-mark {
+  color: #f87171;
+}
+.evo-gate table {
+  font-size: 0.8rem;
+}
+.evo-gate td.num,
+.evo-gate th.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}

@@ -1,11 +1,132 @@
 ---
 date: 2026-09-02
-title: "The outside Q-learning report reproduces for a different reason than it gives; then the Q-learning family is turned on the search itself, where a one-ply value prunes depth 4 to a quarter of the work and every least-squares fit loses"
-summary: "Morning: Klein and Friedmann's CS221 linear Q-learning report was reproduced from its own code (49.08 vs 49.61 moves) and dissected (its per-move 1/t step freezes the weights after a few hundred games; the ridge penalty it credits does nothing); its six features, ported bit-exactly onto the Rust engine, are a ten-move survival prior far below fair depth-4, and a five-second cross-entropy search over the six weights beat both learned vectors. Afternoon, on the owner's direction to test the Q-learning family inside the search: a sibling-complete panel of 5,398 fair-d4s7 roots showed that a least-squares linear Q fitted to exact depth-4 values ranks worse than the one-ply value it contains (top-1 0.31 vs 0.52, because million-point deaths dominate the objective), that the exact one-ply value used as a pruning prior keeps 92% of depth-4's decisions at 26% of the work with about 8% of the score at stake in play (a non-measurement on 256 games), that pruning cannot buy a fifth ply, and that a one-step linear leaf refit to the search's own value explains more of that value and then loses a fifth of the score in play. Pilot tier, zero new seeds, three wall-stop overruns disclosed, coordinator decision on seed reuse still requested."
+title: "The depth-5 teacher crawls, Q-learning finds a pruning prior, and the console charts are rebuilt"
+summary: "The evolved-NNUE-leaf run's teacher stage closed far short of its planned corpus after running four to seven times slower than projected, while a retained diagnostic showed that the leaf carries about 97% of the spread between columns. In a separate track, the Klein-Friedmann Q-learning report was reproduced and dissected, its features were transferred to the Rust engine, and the search's exact one-ply value pruned depth 4 to about a quarter of the work while the tested least-squares fits lost. The research console's fixed-box SVG generator was replaced by a measured visx chart kit, and the evolution approach page now explains the loop with live run figures."
 contributors: [claude-fable-5-1 (Claude Code)]
-tags: [q-learning, linear-features, reproduction, rust-engine, value-policy-learning, pilot, prior-work, pruning, search-efficiency, leaf-evaluation, treestrap, negative-result]
-outcomes: { positive: 6, negative: 8, open: 3 }
+tags: [nnue, evolution, leaf, teacher-distillation, web-console, figures, diagnostics, q-learning, linear-features, reproduction, rust-engine, value-policy-learning, pilot, prior-work, pruning, search-efficiency, leaf-evaluation, treestrap, negative-result]
+outcomes: { positive: 8, negative: 9, open: 5 }
 ---
+
+## The teacher stage ran all day
+
+The run launched at 04:24 UTC yesterday (`RUN-20260902T035644Z-c1fd8987`,
+under the successor protocol `EX-20260902-nnue-evolution-d3-v2-49c18bc2`) was
+expected to finish its depth-5 teacher corpus in twelve to fourteen hours. It
+did not. The interim measurement recorded in the run record put the teacher at
+37 to 87 seconds per position per thread at 32 threads, four to seven times
+slower than the pilot on the probe block had projected; the run's `analysis.json`
+puts the mean at 77.6 seconds per root over the completed games. A table-size
+test on the running binary (recorded in the run record's measurement notes)
+found no configuration faster than the one in use.
+
+<Finding title="The corpus closed at roughly a third of the planned games" kind="negative" metric="175 games, 20,618 labelled roots at the 21:46 UTC snapshot">
+New teacher games stopped starting at the protocol's 46,800-second wall
+sub-budget (17:24 UTC), as preregistered; the games in flight then finished
+one by one. The committed snapshot the console draws from
+(`web/content/figures/nnue-evolution/RUN-20260902T035644Z-c1fd8987.json`,
+copied from the run's `analysis.json` and part files) records 175 complete
+games and 20,618 labelled roots with the last game still running: mean teacher
+score 416,699, median 348,400, best game 1,861,091, one game stopped at the
+500-move cap, mean 2.5 hours of depth-5 search per game. The protocol makes
+whatever whole games completed the corpus and does not depend on the count;
+whether a corpus this size warm-starts a 572,000-weight network is what the
+supervised stage's validation loss and ordering probe will measure next.
+</Finding>
+
+The remaining stages (supervised warm start, sixty generations of evolution,
+elite re-selection, the one-shot held-out screen) chain automatically once the
+last teacher game finishes. That chain aborted once, at 22:09 UTC, on a single
+false reading of its process-table liveness probe while the teacher binary was
+still playing its last game; no stage had started and nothing was touched. The
+probe now needs three consecutive misses before it gives up, and the chain was
+relaunched a minute later. That repair caused a second fault of its own: the
+script was replaced by rename in the belief that the still-running corpus stage
+would keep its original copy, and it did not. The teacher binary finished
+cleanly at 22:39 UTC with 177 games and 21,618 roots, its summary and resource
+record written, but the stage's shell then read the replaced file, failed with
+a syntax error on its last line, and never logged the completion marker, so the
+chain aborted a second time. The marker was appended to the pipeline log by
+hand, with a note saying so, and the chain was relaunched; the supervised stage
+started at 22:42 UTC. No corpus artifact was affected. Both faults are in the
+run record's measurement notes, and the script is not touched again while a
+stage is executing.
+
+## Can a leaf move a five-move decision at all?
+
+The owner asked whether an NNUE leaf can swing the value of a leaf node enough
+to change the engine's choice once a deep search has banked the cascade points
+along each line. Rather than argue it, a diagnostic binary (`leaf_swing`) was
+added to the crate and run on a frozen 30-game snapshot of the corpus before
+any training signal was read: every root was searched twice at each depth,
+once with the frozen fair leaf and once with a leaf that returns zero, so the
+only difference between the two sets of column values is the leaf term.
+
+<Finding title="The leaf term carries about 97% of the spread between columns at every depth" kind="positive" metric="argmax changes at 55.5% / 43.8% / 50.0% of roots at depths 3 / 4 / 5">
+From the retained artifacts `leaf-swing-d3.txt`, `leaf-swing-d4.txt` and
+`leaf-swing-d5.txt` (400, 80 and 8 roots): the median ratio of leaf-term
+spread to total value spread on roots with no losing column is 0.97, 0.95 and
+0.97; the median in-tree score spread alone is 393, 643 and 1,141 points
+against a leaf-term spread of 4,033, 4,093 and 3,813 points; removing the leaf
+changes the chosen column at 55.5%, 43.8% and 50.0% of roots; and the fair leaf
+agrees with the depth-5 teacher's column at 72.0%, 73.8% and 100.0% of roots
+where the zero leaf manages 45.0%, 47.5% and 50.0%. The search does not dilute
+the leaf; it applies the same evaluator at every frontier of every line. A
+first version of these artifacts was regenerated after the corpus had grown
+under it, so the input was frozen (`leaf-swing-input/`) and the commit that
+had claimed exact reproduction was corrected in the history.
+</Finding>
+
+## The console's charts were rebuilt
+
+The owner asked for a human-readable page on how the evolutionary training
+works, with charts of the run, and pointed out that the console's existing
+figures overlap and clip. An audit of every rendered figure confirmed it: the
+string-templated SVG generator estimated text at 0.6 em per character inside a
+fixed 720 x 400 box, so line-chart legends ran into the x-axis label, the
+fourteen-category evaluator comparison and the twelve-bar closure chart piled
+their labels into an unreadable line, the forest plot truncated its title and
+row names, a work-per-move axis spanning five orders of magnitude stacked its
+ticks at the left edge, and the hover popovers were clamped inside the SVG
+where they covered the title.
+
+<Direction title="Research figures now render through a measured visx chart kit" status="closed" owner="claude-fable-5-1">
+`web/components/charts/` replaces the generator. Titles and legends are HTML
+and wrap; tick and category labels are measured with a canvas after
+hydration and the layout is recomputed at the container's real width; a
+`bar` or `dot` figure with more than six categories, or whose labels do not
+fit their slot, is drawn as rows with a measured label gutter; a numeric axis
+may declare a log scale as a presentation choice; tooltips render into a
+portal clamped to the viewport and are reachable by keyboard. The 30 figure
+specs are unchanged except for one presentation field (the work-frontier
+axis is now log-scaled), the provenance rule is enforced by
+`web/lib/charts/spec.ts` and `check-figures.mjs` instead of the generator,
+and the 30 generated SVGs were deleted. Every emitted coordinate is rounded
+to a hundredth of a pixel because the log scale's last-bit differences
+between the server's and the browser's `Math.log` produced a hydration
+mismatch. Two hand-authored diagrams (`diagram-work-budget`,
+`diagram-chance-strata`) had text running past their boxes and were edited.
+</Direction>
+
+<Direction title="The approach page explains the evolutionary loop with live charts of the run" status="running" owner="claude-fable-5-1">
+`approaches/lifetime-objective/nnue-evolution/README.mdx` was rewritten for a
+reader who has never seen a genetic algorithm: what the leaf decides, why
+imitation alone failed twice, what common random numbers buy, and one
+generation step by step. Four schematic diagrams carry the protocol's fixed
+constants and no measured value. Five data figures read a committed snapshot
+of the run (`web/scripts/extract-nnue-evolution.ts`, from `analysis.json`,
+the corpus part files, `progress.jsonl` and the screen artifacts): every
+teacher game as a dot, the supervised loss curve, fitness by generation
+against both paired controls with the population's range as a band, every
+candidate in every generation, and the per-game paired differences of the
+held-out screen with the preregistered gate checks. A stage without artifacts
+says so instead of showing a number; the snapshot is re-extracted after each
+stage completes.
+</Direction>
+
+One environment note for whoever opens the dev console from another machine:
+Next.js 16 blocks its own dev resources for any origin but localhost, which
+silently prevents hydration, so the charts render but never become
+interactive. `DROP7_DEV_ORIGINS=<host>` in `next.config.ts` allows the host.
 
 ## Reading the only outside paper on this game
 
