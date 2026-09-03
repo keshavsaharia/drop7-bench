@@ -81,14 +81,20 @@
     "runs/<run-id>/nnue-evolution/{pipeline.log,rusage.jsonl,preflight-d4-t16.log,preflight-d4-t32.log,analysis.json,analysis.md}",
     "artifacts emitted by evolve and screen carry this experiment id in their config field"
   ],
-  "lifecycle": "preregistered",
-  "protocolSha256": "971a39ef6bb5275a951342245a119cb3d234bed334aa28e2ecfe44eeeeea4dae",
-  "amendments": [],
+  "lifecycle": "completed",
+  "protocolSha256": "66d163bb2d39cf4da157a1044be766eb124af28c158a7750e2064ad61edda942",
+  "amendments": [
+    {
+      "timestamp": "2026-09-03T02:57:51Z",
+      "beforeControlledData": false,
+      "reason": "lifecycle advanced running -> completed after run RUN-20260902T035644Z-c1fd8987 and result RS-20260903T025751Z-6577b33e were written; protocol content otherwise unchanged. The preregistration hash 971a39ef6bb5275a951342245a119cb3d234bed334aa28e2ecfe44eeeeea4dae is retained in the run and lease records."
+    }
+  ],
   "createdBy": {
     "platform": "Claude Code",
     "model": "claude-fable-5-1",
     "agentId": "claude-code-evolution-experiment"
   },
   "createdAt": "2026-09-02T06:57:41Z",
-  "updatedAt": "2026-09-02T06:58:27Z"
+  "updatedAt": "2026-09-03T02:57:51Z"
 }

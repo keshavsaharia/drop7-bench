@@ -49,14 +49,17 @@
     "approaches/lifetime-objective/nnue-evolution/scripts/with-rusage.py",
     "research/experiments/EX-20260902-nnue-evolution-d3-v2-49c18bc2.json",
     "research/runs/RUN-20260902T035644Z-c1fd8987.json",
-    "web/content/log/2026-09-01.mdx"
+    "web/content/log/2026-09-01.mdx",
+    "research/results/RS-20260903T025751Z-6577b33e.json",
+    "artifacts/results/EX-20260902-nnue-evolution-d3-v2-49c18bc2/RUN-20260902T035644Z-c1fd8987/manifest.json"
   ],
   "commitShas": [],
   "validationPerformed": [
     "cargo test --release: 9/9 unit tests",
     "target/release/gate 0xa5277000: ALL GATES PASSED (11 gates, 160 s) -> runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/gates.log",
     "preflight teacher_corpus d4s7 64 probe games at 16 and 32 threads: 7,830 root records bit-identical ignoring wallSeconds",
-    "make research-validate: only the 8 pre-existing 2026-08-25 missing-artifact errors"
+    "make research-validate: only the 8 pre-existing 2026-08-25 missing-artifact errors",
+    "Closed the run: analysis.py over every stage, result record RS-20260903T025751Z-6577b33e written from analysis.json and the compare.py reports, artifacts promoted with a manifest (23 files)"
   ],
   "limitations": [
     "Self-reported contribution; not yet independently reviewed.",

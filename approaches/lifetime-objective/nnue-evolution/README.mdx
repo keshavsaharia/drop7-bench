@@ -2,8 +2,8 @@
 title: An evolved NNUE leaf, distilled from a depth-5 teacher
 family: lifetime-objective
 summary: A compact neural leaf evaluator for the depth-3 fair search, warm-started by distilling a depth-5 teacher's sibling-complete root values and then refined by an evolutionary search whose fitness is whole-game score itself.
-status: preregistered
-evidence: mechanics gates only
+status: rejected
+evidence: ledger-recorded
 reads: public
 ---
 
@@ -14,16 +14,19 @@ network is first taught to imitate a slower search that looks five moves ahead,
 and then improved by evolution on the only thing the program is paid for: the
 final score of complete games.
 
-<EvidenceLabel status="preregistered" evidence="mechanics gates only" reads="public" />
+<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
 
-<Callout title="Where the run stands" tone="info">
-This page describes an experiment that is **running** as of 2026-09-02, run
-`RUN-20260902T035644Z-c1fd8987` under the frozen protocol
-`EX-20260902-nnue-evolution-d3-v2-49c18bc2`. The figures below are drawn from a
-committed snapshot of the run's artifacts and say when the snapshot was taken.
-A stage that has produced no artifacts yet says so instead of showing a number.
-Nothing on this page is a strength result until the held-out screen has been
-played once and recorded.
+<Callout title="The result, in one paragraph" tone="warn">
+The experiment ran to completion on 2026-09-03 (run `RUN-20260902T035644Z-c1fd8987`
+under the frozen protocol `EX-20260902-nnue-evolution-d3-v2-49c18bc2`, result
+`RS-20260903T025751Z-6577b33e`). On the 64 never-read held-out games the evolved leaf
+scored **106,964 points less per game** than the frozen fair leaf inside the
+same depth-3 search (bootstrap 95% lower bound −146,580, 14 wins to 50), so the
+preregistered gate fails and the theory's claim is not supported as tested. The
+same screen shows what evolution did do: the evolved leaf beat its own unevolved
+warm start by **35,375 points** on the same seeds (lower bound +16,899), a
+significant gain, from a warm start that played at half the fair leaf's level.
+The figures below are the run's own artifacts.
 </Callout>
 
 <EvolutionStatus run="RUN-20260902T035644Z-c1fd8987" />
@@ -165,7 +168,7 @@ start (the ablation, isolating what evolution added), and the fair leaf at
 depth 4 (the program's standing reference, diagnostic only). The screen is
 played exactly once, whatever it shows.
 
-## What the run has produced so far
+## What the run produced
 
 <CorpusFigure run="RUN-20260902T035644Z-c1fd8987" caption="Stage A. Each dot is one complete teacher game, in the order the games finished; hover a dot for its seed, score, length and how long the depth-5 search took to play it. Games are heavy-tailed: most end in the low hundreds of thousands and a few run far longer. The teacher turned out four to seven times slower per position than the pilot had projected, so the stage reached its wall budget well short of the 512 games the protocol allowed for; the protocol makes the completed games the corpus and does not depend on the count." />
 
@@ -232,19 +235,36 @@ optimiser and budget, this deployment depth. It does not reject the idea of a
 learned leaf, and the retained corpus, warm start and populations remain
 available for a successor experiment with its own record and leases.
 
-## What this taught us so far, and what is still open
+## What this taught us, and what is still open
 
-- **The teacher is the expensive part.** A depth-5, seven-stratum search costs
-  tens of seconds per position on this machine at full parallelism, far more
-  than the pilot projected, and long games take hours. The corpus is therefore
-  smaller than planned. Whether it is large enough to warm-start a 572,000-
-  weight network is what stage B's validation loss and ordering probe measure.
+- **Whole-game evolution with common random numbers moves a 572,000-weight
+  leaf.** That is the finding the first, CMA-ES leaf evolution could not
+  produce. The population separated from its warm start steadily across all
+  sixty generations, the ten-generation paired margins rising from about
+  +5,000 to about +40,000 for the mean and to +77,000 for the best candidate,
+  and the held-out ablation confirmed it out of sample at +35,375 with a lower
+  bound well above zero. The curve had not flattened at generation 60.
+- **Imitation of state values is the weak link.** The warm start fitted the
+  teacher's numbers closely (validation Pearson 0.95) yet, placed inside the
+  real depth-3 search, it picked the teacher's column only 44% of the time,
+  about what a leaf that returns zero manages, and it played at half the fair
+  leaf's level. Evolution then had roughly 150,000 paired points to make up
+  and made up a quarter of them.
+- **The teacher is the expensive part.** A depth-5, seven-stratum search cost
+  about 78 seconds per position at full parallelism, four to seven times the
+  pilot's projection, so the corpus closed at 177 games instead of 512. Whether
+  a larger corpus would have produced a warm start that holds the ordering is
+  untested.
 - **The leaf decides.** The leaf-swing diagnostic above turned a design
-  assumption into a measured fact before any training signal was read.
-- **Open until the screen is played:** whether whole-game evolution with
-  common random numbers moves a leaf that imitation alone cannot, which is the
-  theory's claim, and whether it moves it in the direction the held-out block
-  rewards.
+  assumption into a measured fact before any training signal was read, and the
+  screen agrees: swapping the leaf moved the mean by more than 100,000 points
+  in both directions.
+- **Open.** Where the still-rising curve plateaus (a continuation from the
+  generation-60 population on a fresh lease would tell), whether a warm start
+  trained on ordering rather than value closes the gap, and whether a larger
+  teacher corpus changes either answer. Each is a new experiment with its own
+  record and leases; the retained corpus, warm start and populations are the
+  starting material.
 
 <TechnicalDetails title="The technical record">
 
@@ -292,9 +312,13 @@ available for a successor experiment with its own record and leases.
   usage per stage), `analysis.json` and `analysis.md` (the summary this page's
   snapshot copies), and the leaf-swing diagnostic (`leaf-swing-d{3,4,5}.txt`
   with the frozen 30-game input under `leaf-swing-input/`).
+- Result record `RS-20260903T025751Z-6577b33e` (valid run, scientific outcome fail,
+  assessment not-supported-as-tested, evidence tier public-development);
+  compact evidence promoted with a manifest under
+  `artifacts/results/EX-20260902-nnue-evolution-d3-v2-49c18bc2/RUN-20260902T035644Z-c1fd8987/`,
+  including the frozen candidate and the warm start weights.
 - The page's figures read `web/content/figures/nnue-evolution/RUN-20260902T035644Z-c1fd8987.json`,
-  written by `web/scripts/extract-nnue-evolution.ts`; re-run it after each
-  stage to refresh them.
+  written by `web/scripts/extract-nnue-evolution.ts` from the run's artifacts.
 
 </TechnicalDetails>
 
