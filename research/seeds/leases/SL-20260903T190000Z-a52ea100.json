@@ -6,19 +6,22 @@
   "domain": "environment",
   "cohortManifestSha256": null,
   "reservedAt": "2026-09-03T19:04:13Z",
-  "openedAt": null,
+  "openedAt": "2026-09-03T19:10:49Z",
   "closedAt": null,
   "protocolSha256": "d1a8f687327b382459096fd5db0bf45c201f7147b8b4b30a707ebd00cfa1889c",
-  "runIds": [],
+  "runIds": [
+    "RUN-20260903T190433Z-a87fd7fc"
+  ],
   "seedLeaseId": "SL-20260903T190000Z-a52ea100",
   "role": "training",
   "rangeStartHex": "0xa52ea100",
   "rangeEndExclusiveHex": "0xa52f2100",
-  "state": "reserved",
+  "state": "opened",
   "notes": [
     "Conservative import 2026-09-03: every 8-hex-digit constant under docs/, approaches/, src/, research/, artifacts/ and web/content/ was enumerated (grep -rhoE '0x[0-9a-fA-F]{8}'); no constant falls inside 0xa52ea100-0xa52f2140. The block lies inside the ./do-research allocator pool (0xa52c0000-0xa5300000), above the second experiment's leases (0xa52e2000-0xa52ea040), and overlaps no existing lease record and no protected (0x7d) or final (0xd7) prefix.",
     "Sub-block allocation (training role, whole games): fitness blocks 0xa52ea100-0xa52f1e00, generation g plays [0xa52ea100 + 32*g, +32) for up to 1,000 generations; the elite re-selection plays the 128 seeds immediately after the last fitness block actually played. The remainder up to 0xa52f2100 stays unopened.",
     "Training role: once read, these seeds are training data forever and can never become confirmation evidence. The deployable policy never receives seed identity; fitness games are ordinary public-information play.",
-    "Reserved for EX-20260903-nnue-evolution-continuation2-d3-80eebad3; opened by the run at its first fitness block."
+    "Reserved for EX-20260903-nnue-evolution-continuation2-d3-80eebad3; opened by the run at its first fitness block.",
+    "Opened 2026-09-03T19:10:49Z by run RUN-20260903T190433Z-a87fd7fc at its first fitness block (generation 0 plays 0xa52ea100-0xa52ea11f); protocol hash d1a8f687327b382459096fd5db0bf45c201f7147b8b4b30a707ebd00cfa1889c."
   ]
 }

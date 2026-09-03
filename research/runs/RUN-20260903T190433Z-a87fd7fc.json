@@ -3,15 +3,15 @@
   "format": "drop7-run-v1",
   "runId": "RUN-20260903T190433Z-a87fd7fc",
   "experimentId": "EX-20260903-nnue-evolution-continuation2-d3-80eebad3",
-  "lifecycle": "planned",
+  "lifecycle": "running",
   "runValidity": "pending",
-  "startedAt": null,
+  "startedAt": "2026-09-03T19:10:49Z",
   "endedAt": null,
   "protocolSha256": "d1a8f687327b382459096fd5db0bf45c201f7147b8b4b30a707ebd00cfa1889c",
   "machineProfileRef": "research/system-profiles/MACH-20260903T190714Z-20004b2f.json",
   "sourceState": {
-    "gitCommit": "564c027b20e4761997f6154c548cf76418a85e8f",
-    "dirty": true,
+    "gitCommit": "203e08b286a3e58b317ebaa95f3a1dc344a2c526",
+    "dirty": false,
     "diffSha256": null,
     "sourceArchiveSha256": null
   },
@@ -36,7 +36,7 @@
     "cpuSeconds": null,
     "peakHostBytes": null,
     "peakGpuBytes": null,
-    "measurementNotes": "Planned. Per-stage kernel rusage is appended to rusage.jsonl by scripts/with-rusage.py; the second experiment measured about 304 s per generation for 35 rows of 32 depth-3 games at 32 threads with three controls, so this run (also 35 rows) should take about the same per generation, roughly 84.4 h for 1,000 generations if the plateau rule never fires; the 72 h evolve wall budget would end the run near generation 850 in that case."
+    "measurementNotes": "Launched 2026-09-03T19:10:49Z from commit 203e08b286a3e58b317ebaa95f3a1dc344a2c526 (clean tree) with scripts/pipeline.sh chain-evolve. Planned. Per-stage kernel rusage is appended to rusage.jsonl by scripts/with-rusage.py; the second experiment measured about 304 s per generation for 35 rows of 32 depth-3 games at 32 threads with three controls, so this run (also 35 rows) should take about the same per generation, roughly 84.4 h for 1,000 generations if the plateau rule never fires; the 72 h evolve wall budget would end the run near generation 850 in that case."
   },
   "exitCode": null,
   "stopReason": null,
