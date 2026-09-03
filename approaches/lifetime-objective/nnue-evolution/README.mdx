@@ -232,9 +232,21 @@ fresh games, and a one-shot 64-game screen at the end.
   for 1,000 blocks plus the re-selection) and a new 64-seed screen block
   (0xa52ea000), both checked against every constant in the repository.
 
-At about four minutes per generation, 1,000 generations would take close to
-three days; the plateau rule is expected to stop it sooner. The figures below
-are the continuation's own artifacts and refresh as the run progresses.
+<Callout title="What the continuation found" tone="warn">
+The plateau rule stopped evolution after generation 149. At the first check,
+after generation 99, the paired margin over the fair leaf was rising at 239
+points per generation (lower bound +30); at the second, over generations 50 to
+149, the slope was 37 per generation with a lower bound of −159, no detectable
+improvement, so the run stopped. On 64 fresh never-read games the continued
+candidate scored **251,667 against the fair leaf's 320,108**, paired −68,441
+(bootstrap lower bound −112,090, 25 wins to 39): the gate fails again and the
+claim stays not supported. The continuation's own question came out positive:
+the continued candidate beat the first run's frozen candidate on the same
+seeds by **36,278 points** (lower bound +9,085, 41 wins to 23), and the first
+run's candidate reproduced its earlier loss on the fresh block (−104,719
+against −106,964 before). Result `RS-20260903T163321Z-733076b5`. The figures below are the
+continuation's own artifacts.
+</Callout>
 
 <EvolutionStatus run="RUN-20260903T032832Z-a76a6cf7" continuation />
 
@@ -247,6 +259,20 @@ are the continuation's own artifacts and refresh as the run progresses.
 <ScreenFigure run="RUN-20260903T032832Z-a76a6cf7" contrast="candidate-vs-baseline-run1" caption="The continuation's own question, out of sample: continued candidate minus the first run's frozen candidate on the same 64 never-read games." />
 
 <ScreenGateTable run="RUN-20260903T032832Z-a76a6cf7" />
+
+**What the continuation taught.** Evolution kept working for roughly a hundred
+more generations and then levelled: fifty-generation averages of the
+population mean went 204,748, 228,706, 237,946, and the last five
+ten-generation blocks sat between 232,000 and 240,500 with no trend. That
+plateau lies about 45,000 paired points above where the continuation started
+and about 90,000 below the fair leaf on the training blocks, and the screen
+agrees. The best candidate beat the fair leaf on nine blocks out of 150, the
+population mean on none. Two things the design cannot separate: whether the
+leaf class ran out of improvement or the annealed step size, which had fallen
+from 0.050 to 0.034, starved the search; and whether more games per candidate
+would let selection see the small differences that remain once sigma is
+small. A constant-sigma continuation from the same population would answer
+the first; doubling the games per candidate the second.
 
 ## How much can a leaf change a decision?
 
@@ -325,10 +351,10 @@ available for a successor experiment with its own record and leases.
   assumption into a measured fact before any training signal was read, and the
   screen agrees: swapping the leaf moved the mean by more than 100,000 points
   in both directions.
-- **Open.** Where the still-rising curve plateaus (a continuation from the
-  generation-60 population on a fresh lease would tell), whether a warm start
-  trained on ordering rather than value closes the gap, and whether a larger
-  teacher corpus changes either answer. Each is a new experiment with its own
+- **Open.** Whether a warm start trained on ordering rather than value closes
+  the gap, whether a larger teacher corpus changes that answer, and, after the
+  continuation below levelled off, whether the plateau belongs to the leaf
+  class or to the annealed step size. Each is a new experiment with its own
   record and leases; the retained corpus, warm start and populations are the
   starting material.
 
