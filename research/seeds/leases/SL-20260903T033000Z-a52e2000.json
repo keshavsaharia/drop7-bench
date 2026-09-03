@@ -6,19 +6,22 @@
   "domain": "environment",
   "cohortManifestSha256": null,
   "reservedAt": "2026-09-03T03:27:46Z",
-  "openedAt": null,
+  "openedAt": "2026-09-03T03:34:49Z",
   "closedAt": null,
   "protocolSha256": "9a094a0a9e39eac372bfa7366ffadec440e4e68b207299d613a10c9cad99466a",
-  "runIds": [],
+  "runIds": [
+    "RUN-20260903T032832Z-a76a6cf7"
+  ],
   "seedLeaseId": "SL-20260903T033000Z-a52e2000",
   "role": "training",
   "rangeStartHex": "0xa52e2000",
   "rangeEndExclusiveHex": "0xa52ea000",
-  "state": "reserved",
+  "state": "opened",
   "notes": [
     "Conservative import 2026-09-03: every 8-hex-digit constant under docs/, approaches/, src/, research/, artifacts/ and web/content/ was enumerated (grep -rhoE '0x[0-9a-fA-F]{8}'); no constant falls inside 0xa52e2000-0xa52ea040. The block lies inside the ./do-research allocator pool (0xa52c0000-0xa5300000), above the first evolution run's leases (0xa52e0300-0xa52e1500), and overlaps no existing lease record and no protected (0x7d) or final (0xd7) prefix.",
     "Sub-block allocation (training role, whole games): fitness blocks 0xa52e2000-0xa52e9d00, generation g of the continuation plays [0xa52e2000 + 32*g, +32) for up to 1,000 generations; the elite re-selection plays the 128 seeds immediately after the last fitness block actually played (at most 0xa52e9d00-0xa52e9d80). The remainder up to 0xa52ea000 stays unopened.",
     "Training role: once read, these seeds are training data forever and can never become confirmation evidence. The deployable policy never receives seed identity; fitness games are ordinary public-information play.",
-    "Reserved for EX-20260903-nnue-evolution-continuation-d3-f8ce9181; opened by the run at its first fitness block (the run record and this lease record the time)."
+    "Reserved for EX-20260903-nnue-evolution-continuation-d3-f8ce9181; opened by the run at its first fitness block (the run record and this lease record the time).",
+    "Opened 2026-09-03T03:34:49Z by run RUN-20260903T032832Z-a76a6cf7 at its first fitness block (generation 0 plays 0xa52e2000-0xa52e201f); protocol hash 9a094a0a9e39eac372bfa7366ffadec440e4e68b207299d613a10c9cad99466a."
   ]
 }
