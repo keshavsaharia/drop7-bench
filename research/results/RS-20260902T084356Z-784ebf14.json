@@ -1,0 +1,363 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260902T084356Z-784ebf14",
+  "theoryIds": [
+    "TH-20260902-kf-six-weight-policy-search-8a6e41a8"
+  ],
+  "experimentId": "EX-20260902-kf-six-weight-cem-d018cc89",
+  "runIds": [
+    "RUN-20260902T083357Z-196a7b87"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "pass",
+  "assessment": "supported-as-tested",
+  "evidenceTier": "pilot",
+  "summary": "A cross-entropy search over the six Klein-Friedmann feature weights against whole-game lifetime (population 64, elite 8, 30 generations of 256 paired training games, then re-selection of nine finalists on a fresh 1,024-game block) converged by generation ten and finished in 4.5 s. Its frozen unit-normalised optimum (0.429, 0.277, 0.145, 0.033, 0.736, 0.419 for lowest-column, row detonations, column detonations, tallest-column, a-clearing-1, the-disc-clears), read once on the 256 pilot games, lives 44.82 moves and scores 138973 points: +18.57 moves over uniform-random [LB95 +17.24] and +4.29 moves [LB95 +2.81], +15005 points [LB95 +9755] over the transplanted authors' weights, winning 136 of 256 paired games. So the plateau of the temporal-difference-learned weights (about 36 moves engine-learned, 40.5 transplanted) was set by the optimizer, not by the feature set. The ceiling of the six features under this search is about 45 moves and 139,000 points; fair d4s7 on the first 32 seeds still beats the optimum by +233362 points [LB95 +153370] on 30 of 32 games, so no SCREEN against depth-4 is warranted. The optimum's direction is 0.75 cosine from the transplanted vector and 0.55 from the engine-learned one; it puts its largest weight on a clearing 1 next to gray discs and nearly none on the tallest-column feature. All three theory clauses are supported as tested at pilot tier.",
+  "metrics": {
+    "search": {
+      "generations": 30,
+      "population": 64,
+      "elite": 8,
+      "gamesPerGeneration": 256,
+      "selectGames": 1024,
+      "wallSeconds": 4.5392155,
+      "bestMovesByGeneration": [
+        39.91796875,
+        42.1171875,
+        42.78515625,
+        44.609375,
+        44.48828125,
+        43.83203125,
+        42.9453125,
+        43.15234375,
+        43.51953125,
+        43.83203125,
+        43.140625,
+        43.6015625,
+        43.609375,
+        43.55859375,
+        44.40234375,
+        43.03515625,
+        43.4296875,
+        42.5625,
+        43.25,
+        42.74609375,
+        44.8203125,
+        42.34375,
+        42.1015625,
+        42.39453125,
+        44.34765625,
+        43.08984375,
+        43.51953125,
+        43.62109375,
+        42.328125,
+        43.2890625
+      ],
+      "meanMovesByGeneration": [
+        27.93084716796875,
+        37.33294677734375,
+        40.4876708984375,
+        42.81854248046875,
+        42.51702880859375,
+        42.75213623046875,
+        41.81170654296875,
+        42.38702392578125,
+        42.83831787109375,
+        42.77655029296875,
+        42.42974853515625,
+        42.87353515625,
+        42.73150634765625,
+        42.8416748046875,
+        43.878662109375,
+        42.62353515625,
+        42.97613525390625,
+        42.40118408203125,
+        43.10260009765625,
+        42.5545654296875,
+        44.49322509765625,
+        42.121337890625,
+        41.95745849609375,
+        42.203857421875,
+        44.1593017578125,
+        42.8648681640625,
+        43.4154052734375,
+        43.412841796875,
+        42.26873779296875,
+        43.24652099609375
+      ],
+      "finalists": [
+        {
+          "finalist": 0,
+          "generationFitness": 43.2890625,
+          "selectMeanMoves": 43.2255859375,
+          "selectMeanScore": 133455.1669921875,
+          "weights": [
+            1.4031066208919742,
+            0.9097595094850165,
+            0.4754831891530652,
+            0.10850415623048457,
+            2.414066290347361,
+            1.371801921063683
+          ]
+        },
+        {
+          "finalist": 1,
+          "generationFitness": 43.2890625,
+          "selectMeanMoves": 43.23046875,
+          "selectMeanScore": 133471.171875,
+          "weights": [
+            1.4076812161767618,
+            0.9060465627424478,
+            0.47553773050375125,
+            0.10863375896661435,
+            2.415429625218788,
+            1.3704759693867283
+          ]
+        },
+        {
+          "finalist": 2,
+          "generationFitness": 43.2890625,
+          "selectMeanMoves": 43.2275390625,
+          "selectMeanScore": 133455.2119140625,
+          "weights": [
+            1.401681767989201,
+            0.9083781290531697,
+            0.4752598021380468,
+            0.1079052023045874,
+            2.4100232440833245,
+            1.3684290713524254
+          ]
+        },
+        {
+          "finalist": 3,
+          "generationFitness": 43.2890625,
+          "selectMeanMoves": 43.2548828125,
+          "selectMeanScore": 133563.5380859375,
+          "weights": [
+            1.4063870378342238,
+            0.9072491382283718,
+            0.4758100614120374,
+            0.10826491612883167,
+            2.4152703217495564,
+            1.3735875073730908
+          ]
+        },
+        {
+          "finalist": 4,
+          "generationFitness": 43.26953125,
+          "selectMeanMoves": 43.1748046875,
+          "selectMeanScore": 133294.2392578125,
+          "weights": [
+            1.4080435353662806,
+            0.9077761687351028,
+            0.4768371748450272,
+            0.109108064655972,
+            2.413832149520964,
+            1.3712328565313376
+          ]
+        },
+        {
+          "finalist": 5,
+          "generationFitness": 43.26953125,
+          "selectMeanMoves": 43.1748046875,
+          "selectMeanScore": 133294.2392578125,
+          "weights": [
+            1.4031915053731923,
+            0.9086683812646789,
+            0.4759995704008951,
+            0.11149185411563291,
+            2.410673475358171,
+            1.3709550796280516
+          ]
+        },
+        {
+          "finalist": 6,
+          "generationFitness": 43.26953125,
+          "selectMeanMoves": 43.1767578125,
+          "selectMeanScore": 133294.2841796875,
+          "weights": [
+            1.4054510945845677,
+            0.9093534079795847,
+            0.47696168248978454,
+            0.1106792451516473,
+            2.4132309483993906,
+            1.369979741711727
+          ]
+        },
+        {
+          "finalist": 7,
+          "generationFitness": 43.26953125,
+          "selectMeanMoves": 43.1748046875,
+          "selectMeanScore": 133294.2392578125,
+          "weights": [
+            1.4089006708152507,
+            0.9077690185280578,
+            0.4761563082402229,
+            0.11096075695614545,
+            2.4101187361080294,
+            1.3709029199056162
+          ]
+        },
+        {
+          "finalist": 8,
+          "generationFitness": 44.8203125,
+          "selectMeanMoves": 43.1201171875,
+          "selectMeanScore": 133081.6416015625,
+          "weights": [
+            1.397157884938752,
+            0.9119226513364751,
+            0.48328159894611855,
+            0.09836136250829154,
+            2.409901523444557,
+            1.3698856215226818
+          ]
+        }
+      ],
+      "chosen": {
+        "generationFitness": 43.2890625,
+        "selectMeanMoves": 43.2548828125,
+        "selectMeanScore": 133563.5380859375,
+        "rawWeights": [
+          1.4063870378342238,
+          0.9072491382283718,
+          0.4758100614120374,
+          0.10826491612883167,
+          2.4152703217495564,
+          1.3735875073730908
+        ],
+        "frozenUnitWeights": [
+          0.42875630348507293,
+          0.2765872952340636,
+          0.14505719805708117,
+          0.0330060388696436,
+          0.7363281566255506,
+          0.4187569184948516
+        ]
+      }
+    },
+    "cohortArm": {
+      "games": 256,
+      "meanScore": 138972.55859375,
+      "medianScore": 121323.0,
+      "q25Score": 103931.75,
+      "minScore": 85355,
+      "maxScore": 350157,
+      "meanMoves": 44.81640625,
+      "q25Moves": 35.0,
+      "censored": 0,
+      "clearsPerMove": 1.5067549899764665,
+      "revealsPerMove": 0.7415671576745402,
+      "meanChainDepth": 1.535273504096366,
+      "maxChainDepth": 9,
+      "illegal": 0,
+      "incomplete": 0,
+      "wallSecondsPerGame": 4.17820859375e-05
+    },
+    "pairedVsRandom": {
+      "score": {
+        "meanDelta": 65709.80859375,
+        "lowerBound95OneSided": 60921.25390625,
+        "detectionFloor": 4796.469868835135,
+        "wins": 249,
+        "ties": 0,
+        "losses": 7,
+        "n": 256
+      },
+      "moves": {
+        "meanDelta": 18.5703125,
+        "lowerBound95OneSided": 17.2421875,
+        "detectionFloor": 1.3308394917743682,
+        "wins": 248,
+        "ties": 7,
+        "losses": 1,
+        "n": 256
+      }
+    },
+    "pairedVsTransplant": {
+      "score": {
+        "meanDelta": 15004.5625,
+        "lowerBound95OneSided": 9754.625,
+        "detectionFloor": 5205.541075663538,
+        "wins": 159,
+        "ties": 1,
+        "losses": 96,
+        "n": 256
+      },
+      "moves": {
+        "meanDelta": 4.28515625,
+        "lowerBound95OneSided": 2.8125,
+        "detectionFloor": 1.4604198751884843,
+        "wins": 136,
+        "ties": 42,
+        "losses": 78,
+        "n": 256
+      }
+    },
+    "fairD4s7MinusOptimumOn32Seeds": {
+      "score": {
+        "n": 32,
+        "meanDelta": 233361.8125,
+        "lowerBound95OneSided": 153370.25,
+        "detectionFloor": 84813.95586521014,
+        "d4Wins": 30
+      },
+      "moves": {
+        "n": 32,
+        "meanDelta": 63.28125,
+        "lowerBound95OneSided": 41.375,
+        "detectionFloor": 23.24530659680475,
+        "d4Wins": 30
+      }
+    },
+    "cosineToTransplant": 0.75,
+    "cosineToEngineLearnedV1a": 0.547,
+    "bootstrap": {
+      "resamples": 10000,
+      "rngSeedHex": "0x6b660001",
+      "method": "percentile, one-sided 95% lower bound"
+    }
+  },
+  "gateChecks": [
+    {
+      "criterion": "S1 (theory a): frozen optimum's paired lifetime delta over transplant-py-seed10 on the 256 pilot games has LB95 > 0",
+      "passed": true,
+      "observed": "+4.29 moves [LB95 +2.81] (floor 1.46), 136/42/78; score +15005 [LB95 +9755]"
+    },
+    {
+      "criterion": "S2 (theory b): optimum's mean corrected score < 205,530 and fair d4s7 beats it on the 32-seed subset with LB95 > 0",
+      "passed": true,
+      "observed": "mean score 138973; fair d4s7 minus optimum +233362 points [LB95 +153370], d4s7 wins 30/32; +63.28 moves [LB95 +41.38]"
+    },
+    {
+      "criterion": "S3 (theory c): chosen finalist's re-selection block mean within the 1,024-game detection floor of its final-generation fitness",
+      "passed": true,
+      "observed": "generation fitness 43.29 moves vs re-selection 43.25 on the fresh 1,024-game block; the single-generation best-ever (44.82 on its 256 games) re-selected to 43.12 and was passed over"
+    },
+    {
+      "criterion": "Mechanics: zero illegal decisions; evaluate rows byte-identical on a repeated run",
+      "passed": true,
+      "observed": "0 illegal decisions in the search (asserted per candidate) and the cohort read; evaluate-cem.json and evaluate-cem-repeat.json identical apart from wall time (repeat-check.txt)"
+    }
+  ],
+  "perGameArtifact": {
+    "path": "runs/RUN-20260902T083357Z-196a7b87/kf-six-weight-cem/evaluate-cem.json",
+    "sha256": "b7690c9e2fd3414a3f7153ba60a989a439d1b3faf76fd2eee034a321393a483b",
+    "recordCount": 256
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260902T080517Z-dec42aab.json"
+  ],
+  "artifactManifestRef": "runs/RUN-20260902T083357Z-196a7b87/kf-six-weight-cem/manifest.json",
+  "limitations": [
+    "Pilot tier: the frozen optimum was read once on a previously evaluated development cohort that the parent pilot had already read; the comparator rows are that pilot's artifact. Nothing here can be promoted.",
+    "Search fitness re-read 8,704 seeds of the already-open training block without a new lease record; the coordinator's confirmation requested for the parent pilot covers this run and is still pending.",
+    "One search configuration and one policy-sampling seed; the ceiling figure (about 45 moves) is a lower bound on what the six features can reach, not a proof of their optimum.",
+    "The fair d4s7 comparison uses 32 games with a detection floor near 85,000 points.",
+    "Ran concurrently with the fair-d4s7 arm on the same laptop; the 4.5 s wall time is indicative."
+  ],
+  "contributionIds": [
+    "CT-20260902T082510Z-4af4b77b"
+  ],
+  "recordedAt": "2026-09-02T08:43:56Z"
+}

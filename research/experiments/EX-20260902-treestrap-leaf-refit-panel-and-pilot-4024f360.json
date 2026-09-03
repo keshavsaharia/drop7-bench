@@ -1,0 +1,79 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260902-treestrap-leaf-refit-panel-and-pilot-4024f360",
+  "theoryIds": [
+    "TH-20260902-treestrap-linear-leaf-refit-4b984292"
+  ],
+  "title": "Linear leaf refit to the depth-4 root value: held-out fit, depth-5 agreement proxy, and gameplay pilot",
+  "classification": "algorithmic",
+  "hypothesis": "Stage 1 (no new seeds): on the EX-4 panel, compute the eighteen fair-leaf terms, the frozen leaf value and the best immediate six-feature drop value of every root; fit ridge regressions of the depth-4 root value (max over legal columns of v4) on (i) the eighteen terms plus intercept and (ii) the same plus the drop term, using fit games 0-31 restricted to roots with root value above -50,000, lambda from {0.001, 0.01, 0.1, 1, 10} by 4-fold game-grouped CV; report held-out R^2 (games 32-47, same filter) against the frozen-leaf affine baseline. Stage 2 (no new seeds): on EX-4's 128-root depth-5 sub-panel, decide every root with full-width d4s7 using the refit-18 leaf and report its regret under exact d5s7 (frozen leaf) next to frozen d4s7's, as a disclosed biased proxy. Stage 3 (pilot cohort, only if P-L1 passes): 256 games of full-width d4s7 with the refit-18 leaf on 0xa5277000-0xa52770ff, paired against EX-5's full-width frozen-leaf arm; the refit-19 leaf is a second arm only if its held-out R^2 exceeds refit-18's by at least 0.01.",
+  "candidate": {
+    "name": "full-width fair d4s7 with a refit LinearLeaf (drop7-oneply-q leaf.rs; evaluate --arm leaf:4:7:FILE)",
+    "entryPoint": "approaches/value-policy-learning/oneply-q-prune/rust/src/bin/leaf_terms.rs",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "full-width fair d4s7 with the frozen fair leaf: EX-5's 256-game arm on the same seeds, and exact d5s7 values on the sub-panel",
+    "entryPoint": "approaches/value-policy-learning/oneply-q-prune/rust/src/bin/evaluate.rs",
+    "manifestRef": null
+  },
+  "informationBoundary": "public-policy",
+  "benchmarkTier": "PILOT",
+  "data": {
+    "role": "previously-evaluated-development",
+    "seedLeaseRefs": [],
+    "datasetRefs": [],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "Zero new seeds. Stages 1 and 2 read only the EX-4 panel (training-role seeds 0xa5200000-0xa520002f, whole-game split 0-31 fit / 32-47 held out). Stage 3 reads the previously evaluated pilot cohort 0xa5277000-0xa52770ff once more, as EX-5 does, and pairs against EX-5's rows. The coordinator's confirmation requested in the 2026-09-02 log covers this record too."
+  },
+  "metrics": {
+    "primary": "paired per-game corrected-score delta of the refit-18 arm over the frozen-leaf arm on 256 games, one-sided 95% percentile-bootstrap lower and upper bounds (10,000 resamples, RNG seed 0x6b660001), detection floor stated",
+    "secondary": [
+      "held-out R^2 of the depth-4 root value for the frozen-leaf affine baseline, refit-18 and refit-19; CV curves and selected lambdas; the refit weight vectors next to the frozen constants",
+      "sub-panel: regret under exact d5s7 of d4s7-refit-18 versus d4s7-frozen, top-1 agreement with d5, and the d4-refit-vs-d4-frozen disagreement rate",
+      "paired lifetime delta, work per move, wall per game, score quartiles, mechanics counts"
+    ],
+    "statisticalUnit": "whole-game",
+    "uncertaintyMethod": "paired per-game deltas with one-sided 95% percentile bootstrap bounds; root-level proxies with game-clustered bootstrap"
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "P-L1 (theory a): held-out R^2 of refit-18 exceeds the frozen-leaf affine baseline's by at least 0.05; otherwise no gameplay arm is run and the theory's clause (a) fails.",
+      "P-L2 (theory b): the refit-18 arm's paired score delta over the frozen-leaf arm has LB95 above zero; fail if UB95 is below zero; otherwise inconclusive with the floor stated.",
+      "P-L3 (variant): refit-19's held-out R^2 exceeds refit-18's by at least 0.01 (expected to fail; a pass adds the refit-19 arm).",
+      "Mechanics: LinearLeaf at the frozen constants is bit-identical to FairLeaf (crate test); zero illegal and incomplete decisions."
+    ],
+    "failureAction": "Record valid + fail for the exact refit; the negative result closes one-step linear TreeStrap on these eighteen terms at pilot tier.",
+    "passAction": "Record a pilot-tier assessment; a P-L2 pass warrants a SCREEN on fresh seeds under a coordinator lease and a second TreeStrap iteration (re-panel with the refit leaf)."
+  },
+  "resources": {
+    "wallSeconds": 14400,
+    "cpuThreads": 12,
+    "maxHostBytes": 8589934592,
+    "maxGpuBytes": null,
+    "gpuDevices": []
+  },
+  "stopConditions": [
+    "Stop at 14,400 s wall over all stages.",
+    "No seed outside 0xa5200000-0xa520002f (panel, already read) and 0xa5277000-0xa52770ff (pilot cohort) may be read under this record.",
+    "Any non-finite leaf value, illegal decision or runner failure marks the affected stage invalid."
+  ],
+  "expectedArtifacts": [
+    "runs/<run-id>/oneply-q/root-terms.ndjson",
+    "runs/<run-id>/oneply-q/fit-leaf.json, weights-leaf18.txt, weights-leaf19.txt",
+    "runs/<run-id>/oneply-q/leaf-d5.ndjson and leaf-d5-summary.json",
+    "runs/<run-id>/oneply-q/evaluate-leaf.json and leaf-pilot-summary.json"
+  ],
+  "lifecycle": "preregistered",
+  "amendments": [],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5-1",
+    "agentId": "claude-q-learning"
+  },
+  "createdAt": "2026-09-02T17:59:06Z",
+  "updatedAt": "2026-09-02T18:41:12Z",
+  "protocolSha256": "79d85f7ea7273d92382d12b0b8e33fd9fe2a1cd2efce4cf5d43257d8c3503134"
+}

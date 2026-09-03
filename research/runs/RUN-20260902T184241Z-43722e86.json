@@ -1,0 +1,57 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "lifecycle": "completed",
+  "runValidity": "valid",
+  "startedAt": "2026-09-02T18:42:41Z",
+  "endedAt": "2026-09-03T00:53:23Z",
+  "machineProfileRef": "research/system-profiles/MACH-20260902T080517Z-dec42aab.json",
+  "sourceState": {
+    "gitCommit": "61c18eb019f8ab82634ecdcc984188b183492f20",
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "seedLeaseRefs": [],
+  "exitCode": 0,
+  "stopReason": "completed",
+  "artifactRefs": [
+    "runs/RUN-20260902T184241Z-43722e86/oneply-q/evaluate-pilot-fair.json",
+    "runs/RUN-20260902T184241Z-43722e86/oneply-q/evaluate-pilot-pruned-d4.json",
+    "runs/RUN-20260902T184241Z-43722e86/oneply-q/evaluate-pilot-pruned-d5.json",
+    "runs/RUN-20260902T184241Z-43722e86/oneply-q/pilot-summary.json",
+    "runs/RUN-20260902T184241Z-43722e86/oneply-q/pilot-bounds.json",
+    "runs/RUN-20260902T184241Z-43722e86/oneply-q/pilot-summary-d4.json",
+    "runs/RUN-20260902T184241Z-43722e86/oneply-q/pilot-bounds-d4.json",
+    "runs/RUN-20260902T184241Z-43722e86/oneply-q/checksum-check.txt",
+    "runs/RUN-20260902T184241Z-43722e86/oneply-q/evaluate-pilot-fair.log",
+    "runs/RUN-20260902T184241Z-43722e86/oneply-q/evaluate-pilot-pruned-d4.log",
+    "runs/RUN-20260902T184241Z-43722e86/oneply-q/evaluate-pilot-pruned-d5.log",
+    "research/results/RS-20260903T013022Z-d32ee053.json"
+  ],
+  "contributionIds": [
+    "CT-20260902T082510Z-4af4b77b"
+  ],
+  "runId": "RUN-20260902T184241Z-43722e86",
+  "experimentId": "EX-20260902-pruned-search-gameplay-pilot-bf465b1d",
+  "protocolSha256": "75fd3f128d3fea5fa1a2828efc44962c7090c778a7d730d7fc40303dce62befe",
+  "command": [
+    "target/release/evaluate --seeds-start 0xa5277000 --games 256 --move-cap 2000 --threads 6 --table 65536 --out runs/RUN-20260902T184241Z-43722e86/oneply-q/evaluate-pilot-fair.json --arm fair:4:7  (started while the EX-4 stages were still using 12 threads; wall times are contended, logical work is not)",
+    "target/release/evaluate --seeds-start 0xa5277000 --games 256 --move-cap 2000 --threads 6 --table 65536 --out runs/RUN-20260902T184241Z-43722e86/oneply-q/evaluate-pilot-pruned-d4.json --arm pruned:4:7:3,3:d1",
+    "target/release/evaluate --seeds-start 0xa5277000 --games 256 --move-cap 2000 --threads 6 --table 65536 --out runs/RUN-20260902T184241Z-43722e86/oneply-q/evaluate-pilot-pruned-d5.json --arm pruned:5:7:2,2,2:d1:128",
+    "python3 analysis/paired_bounds.py runs/RUN-20260902T184241Z-43722e86/oneply-q/evaluate-pilot-fair.json runs/RUN-20260902T184241Z-43722e86/oneply-q/evaluate-pilot-pruned-d4.json runs/RUN-20260902T184241Z-43722e86/oneply-q/evaluate-pilot-pruned-d5.json --reference fair-d4s7 --out runs/RUN-20260902T184241Z-43722e86/oneply-q/pilot-bounds.json; python3 .../klein-friedmann-linear-q/analysis/summarize_evaluate.py (same inputs) --reference fair-d4s7 --out runs/RUN-20260902T184241Z-43722e86/oneply-q/pilot-summary.json"
+  ],
+  "resourceLimits": {
+    "wallSeconds": 21600,
+    "cpuThreads": 12,
+    "maxHostBytes": 8589934592,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": 22230,
+    "cpuSeconds": null,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "Three arms on 6 threads each, concurrent with one another, with the EX-6 leaf arm and (until 20:20 UTC) the EX-4 stages on the 12-core laptop: fair-d4s7 18:42:52-00:18:15 (20,122 s), pruned-d4s7-w3,3-d1 19:29:35-21:09:36 (6,001 s), pruned-d5s7-w2,2,2-d1 (128 games) 20:25:44-00:53:23 (16,059 s). Overall span 22,230 s exceeds the preregistered 21,600 s stop by 630 s; no watchdog enforced it and no arm was cut short; all rows are deterministic. Seeds: 0xa5277000-0xa52770ff, repeat read of previously evaluated development data; zero new seeds."
+  }
+}

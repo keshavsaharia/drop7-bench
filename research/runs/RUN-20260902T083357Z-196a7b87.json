@@ -1,0 +1,55 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260902T083357Z-196a7b87",
+  "experimentId": "EX-20260902-kf-six-weight-cem-d018cc89",
+  "lifecycle": "completed",
+  "runValidity": "valid",
+  "startedAt": "2026-09-02T08:33:57Z",
+  "endedAt": "2026-09-02T08:34:02Z",
+  "protocolSha256": "b3bbe98421b41a3d4be666c36755c56d9acd14b19191d47f34923e11427d1774",
+  "machineProfileRef": "research/system-profiles/MACH-20260902T080517Z-dec42aab.json",
+  "sourceState": {
+    "gitCommit": "dbe0bc83641eb07766de2ec4c4df1149ba7b64fd",
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "cargo build --release  (in approaches/value-policy-learning/klein-friedmann-linear-q/rust)",
+    "target/release/search --seeds-start 0xa5200000 --generations 30 --population 64 --elite 8 --games-per-gen 256 --select-games 1024 --move-cap 2000 --threads 8 --policy-seed 0x6b660010 --weights runs/RUN-20260902T083357Z-196a7b87/kf-six-weight-cem/weights-cem.txt --log runs/RUN-20260902T083357Z-196a7b87/kf-six-weight-cem/search.json",
+    "target/release/evaluate --seeds-start 0xa5277000 --games 256 --move-cap 2000 --threads 4 --out runs/RUN-20260902T083357Z-196a7b87/kf-six-weight-cem/evaluate-cem.json --arm kf:cem-optimum=runs/RUN-20260902T083357Z-196a7b87/kf-six-weight-cem/weights-cem.txt  (and once more to evaluate-cem-repeat.json for the byte-identity check)",
+    "python approaches/value-policy-learning/klein-friedmann-linear-q/analysis/summarize_evaluate.py runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/evaluate.json runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/evaluate-transplant.json runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/evaluate-fair-d4s7.json runs/RUN-20260902T083357Z-196a7b87/kf-six-weight-cem/evaluate-cem.json --reference random --baseline transplant-py-seed10 --out runs/RUN-20260902T083357Z-196a7b87/kf-six-weight-cem/summary.json"
+  ],
+  "seedLeaseRefs": [],
+  "resourceLimits": {
+    "wallSeconds": 1800,
+    "cpuThreads": 8,
+    "maxHostBytes": 4294967296,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": 5.0,
+    "cpuSeconds": null,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "Search wall 4.5 s for 30 generations x 64 candidates x 256 games plus 9 finalists x 1,024 games, 8 threads, while the fair-d4s7 arm of RUN-20260902T081659Z-d2aa6375 was running concurrently on the same laptop. Seeds read: 0xa5200000-0xa52021ff (training block, fitness and re-selection) and 0xa5277000-0xa52770ff (pilot cohort, single read plus an identical repeat). Zero new seeds opened."
+  },
+  "exitCode": 0,
+  "stopReason": "completed",
+  "artifactRefs": [
+    "runs/RUN-20260902T083357Z-196a7b87/kf-six-weight-cem/search.json",
+    "runs/RUN-20260902T083357Z-196a7b87/kf-six-weight-cem/search.log",
+    "runs/RUN-20260902T083357Z-196a7b87/kf-six-weight-cem/weights-cem.txt",
+    "runs/RUN-20260902T083357Z-196a7b87/kf-six-weight-cem/evaluate-cem.json",
+    "runs/RUN-20260902T083357Z-196a7b87/kf-six-weight-cem/evaluate-cem-repeat.json",
+    "runs/RUN-20260902T083357Z-196a7b87/kf-six-weight-cem/repeat-check.txt",
+    "runs/RUN-20260902T083357Z-196a7b87/kf-six-weight-cem/summary.json",
+    "runs/RUN-20260902T083357Z-196a7b87/kf-six-weight-cem/manifest.json",
+    "research/results/RS-20260902T084356Z-784ebf14.json",
+    "runs/RUN-20260902T083357Z-196a7b87/kf-six-weight-cem/summary-vs-transplant.json"
+  ],
+  "contributionIds": [
+    "CT-20260902T082510Z-4af4b77b"
+  ]
+}

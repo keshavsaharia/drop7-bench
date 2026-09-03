@@ -1,0 +1,80 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260902-pruned-search-gameplay-pilot-bf465b1d",
+  "theoryIds": [
+    "TH-20260902-oneply-linear-q-prune-prior-28faed27"
+  ],
+  "title": "Pruned fair search against full-width fair d4s7 on the previously evaluated 256-game pilot cohort",
+  "classification": "algorithmic",
+  "hypothesis": "On the previously evaluated pilot cohort 0xa5277000-0xa52770ff, the pruned-d4s7 configuration selected by EX-20260902-oneply-q-fit-and-pruned-search-panel-46c75cdf (lowest held-out normalised regret among the preregistered depth-4 configurations with work ratio at most 0.35) plays complete games whose paired score and lifetime are not measurably below full-width fair d4s7 at a fraction of the logical work; and, if EX-4's depth-5 point estimate was favourable, the selected pruned-d5s7 configuration (lowest regret under exact d5 among the preregistered depth-5 configurations with work at most 2.0 times d4s7) is compared to full-width d4s7 on the first 128 seeds with its detection floor stated.",
+  "candidate": {
+    "name": "pruned fair expectimax (drop7-oneply-q evaluate --arm pruned:...)",
+    "entryPoint": "approaches/value-policy-learning/oneply-q-prune/rust/src/bin/evaluate.rs",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "full-width fair d4s7 (the same FairSearch policy as RUN-20260902T081659Z-d2aa6375's fair-d4s7 arm), 256 games on the same seeds",
+    "entryPoint": "approaches/value-policy-learning/klein-friedmann-linear-q/rust/src/policy.rs",
+    "manifestRef": null
+  },
+  "informationBoundary": "public-policy",
+  "benchmarkTier": "PILOT",
+  "data": {
+    "role": "previously-evaluated-development",
+    "seedLeaseRefs": [],
+    "datasetRefs": [],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "Zero new seeds. The cohort 0xa5277000-0xa52770ff is the first 256 seeds of the Rust-engine benchmark sub-block of SEEDLEASE-A52-FAST (development role), already read by RUN-20260824T052018Z-b88c3e22, RUN-20260902T081659Z-d2aa6375 (256 games of eleven arms, 32 of fair d4s7) and RUN-20260902T083357Z-196a7b87; this is a further diagnostic read and keeps the pilot tier. Nothing selected here was tuned on this cohort: the configurations are chosen by EX-4's held-out panel metrics on training-role seeds. The coordinator's confirmation of the cohort reuse requested in the 2026-09-02 log covers this record too."
+  },
+  "metrics": {
+    "primary": "paired per-game corrected-score delta of the selected pruned-d4s7 arm over full-width fair d4s7 on 256 games, one-sided 95% percentile-bootstrap lower and upper bounds (10,000 resamples, RNG seed 0x6b660001), with the detection floor 1.645 sd/sqrt(n)",
+    "secondary": [
+      "paired lifetime (moves) delta with the same bounds",
+      "ratio of mean logical work per move (candidate over comparator), prior work included",
+      "wall seconds per game per thread for each arm",
+      "the pruned-d5s7 arm's paired score and lifetime deltas over full-width d4s7 on the first 128 seeds, with bounds and floor",
+      "mechanics: illegal decisions, incomplete decisions, censored games; the first 32 rows of the full-width arm must reproduce RUN-20260902T081659Z-d2aa6375's fair-d4s7 trajectory checksums",
+      "score distribution (median, lower quartile, minimum, maximum) per arm"
+    ],
+    "statisticalUnit": "whole-game",
+    "uncertaintyMethod": "paired per-game deltas with one-sided 95% percentile bootstrap lower and upper bounds; detection floor reported"
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "G1 (theory c in play): the pruned-d4s7 arm's paired score delta has LB95 above -40,000 and its paired lifetime delta has LB95 above -5 moves, with a work ratio at most 0.35; it fails if UB95 of the score delta is below zero (a measurable loss); otherwise inconclusive at pilot precision.",
+      "G2 (theory d in play, recorded either way): the pruned-d5s7 arm's paired score delta over full-width d4s7 on 128 games; LB95 above zero would warrant a SCREEN on fresh seeds under a coordinator lease; UB95 below zero is a fail for clause (d) in play.",
+      "Mechanics: zero illegal and zero incomplete decisions in every arm; the full-width arm's first 32 rows byte-identical (checksums) to the existing fair-d4s7 rows."
+    ],
+    "failureAction": "Record valid + fail for the exact configuration; the pruning stays an algorithmic candidate that changes decisions, not an engineering speed-up.",
+    "passAction": "Record a pilot-tier assessment. A G1 pass makes the pruned search a candidate stand-in for full-width d4s7 in future diagnostic screens at a fifth of the cost, subject to a coordinator decision; it upgrades nothing about the comparator itself."
+  },
+  "resources": {
+    "wallSeconds": 21600,
+    "cpuThreads": 12,
+    "maxHostBytes": 8589934592,
+    "maxGpuBytes": null,
+    "gpuDevices": []
+  },
+  "stopConditions": [
+    "Stop at 21,600 s wall over all arms; an arm cut short is recorded as partial.",
+    "No seed outside 0xa5277000-0xa52770ff may be read under this record.",
+    "Any illegal decision or runner failure marks the arm invalid."
+  ],
+  "expectedArtifacts": [
+    "runs/<run-id>/oneply-q/evaluate-pilot.json (arms fair-d4s7, pruned-d4, optionally pruned-d5)",
+    "runs/<run-id>/oneply-q/pilot-summary.json (summarize_evaluate.py output)",
+    "runs/<run-id>/oneply-q/checksum-check.txt"
+  ],
+  "lifecycle": "preregistered",
+  "amendments": [],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5-1",
+    "agentId": "claude-q-learning"
+  },
+  "createdAt": "2026-09-02T17:59:06Z",
+  "updatedAt": "2026-09-02T18:41:12Z",
+  "protocolSha256": "75fd3f128d3fea5fa1a2828efc44962c7090c778a7d730d7fc40303dce62befe"
+}

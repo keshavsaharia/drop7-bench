@@ -1,0 +1,284 @@
+---
+title: One-ply Q as a pruning prior and a refit leaf
+family: value-policy-learning
+summary: Fit a linear action value to the depth-4 search's own sibling values, then use it not to play but to decide which siblings the search may skip, and separately refit the leaf to the search's own value.
+status: completed
+evidence: reproduced
+reads: public
+---
+
+Fit a linear action value to the depth-4 search's own sibling values, then
+use it not to play but to decide which siblings the search may skip; and,
+separately, refit the leaf to the search's own value. This page follows the
+[Klein-Friedmann reproduction](/approaches/value-policy-learning/klein-friedmann-linear-q),
+whose six-feature policy turned out to be a survival heuristic an order of
+magnitude below the depth-4 reference, and asks the two questions that were
+left: can a cheap learned value make the reference search *cheaper*, and can
+the search's own value teach its leaf?
+
+<EvidenceLabel status="completed" evidence="reproduced" reads="public" />
+
+Everything here reads the public state: the visible board, the visible next
+disc and the moves until the next rise. The exact search values used as
+regression targets are computed from that same public state by the reference
+search; no seed, hidden disc or future is touched.
+
+## The intuition
+
+A depth-4 search is expensive because at every position it tries all seven
+columns, and for each column all seven ways the chance can fall, four times
+over. Almost all of that work is spent on continuations the search will not
+choose. If something cheap could say "these three columns are the only ones
+worth a look" at each inner position, the search could skip the other four
+and do a fraction of the work. The thing that says it is a *prior*: it needs
+no precision, only recall. It may rank the best column second or third as
+often as it likes, as long as the best column is rarely outside its top three.
+
+The obvious prior is the search's own one-ply value: play each column under
+the seven chance outcomes, score the result with the leaf, average. It costs
+about one hundredth of expanding a column to full depth. The question this
+page asks is whether a *learned* linear value, fitted to what the depth-4
+search actually concluded about each sibling, can do better than that one-ply
+value, and whether either is good enough to prune with.
+
+The second question turns the same data around. The depth-4 root value is
+"expected score over four plies, plus the leaf four plies ahead". Regressing
+the leaf's own eighteen terms onto that value is one step of bootstrapped
+value learning: whatever part of the four-ply future is linear in the leaf
+terms gets folded into the leaf, and a depth-4 search over the refit leaf
+effectively sees further for that part. Every learned leaf the program has
+tried so far lost; this one is different in that its target is the search's
+own value rather than a short-horizon proxy.
+
+## How it works, step by step
+
+1. **Build a sibling-complete panel.** Play 48 complete games with the
+   unchanged fair depth-4 search on already-read training seeds. At every
+   position record the exact search value of *every* legal column at depths
+   one to four, and for every legal column the 32 one-ply numbers: the
+   seven-stratum mean of the eighteen leaf terms after the drop, the mean
+   score gained, the fraction of chance outcomes that end the game, the six
+   Klein-Friedmann drop features, the rise clock and a bias. The one-ply
+   search value is a fixed linear function of those 32 numbers, so a linear
+   fit can only add to it. Split the games 32 for fitting, 16 held out.
+2. **Fit the linear action value** by ridge regression to the depth-4 sibling
+   values, choosing the penalty by cross-validation over games.
+3. **Score every ranker on the held-out games** against the depth-4 choice:
+   centre-first order, the six-feature policy, the exact one-ply value, the
+   exact depth-two and depth-three values, and the fitted value. Report how
+   often each puts the depth-4 choice first, second, third.
+4. **Prune the search.** Inside the depth-4 search, at every inner position
+   with two or more plies still to go, let the prior rank the legal columns
+   and expand only the top *w*. The root and the last ply stay full width.
+   Chance outcomes and the leaf are untouched, so every pruned value is a
+   lower bound on the full-width value and, with *w* = 7, the search is the
+   unchanged reference bit for bit. Run it on every held-out position with
+   *w* of 2, 3 and 4 and each prior; measure how often the decision matches
+   full-width depth 4, how much value it gives up when it does not, and the
+   work.
+5. **Try depth five at depth-four cost.** On 128 held-out positions compute
+   exact depth-5 values, then compare pruned depth-5 decisions and full-width
+   depth-4 decisions against them.
+6. **Play games.** The best pruned configuration plays 256 complete games on
+   the previously evaluated pilot cohort against full-width depth 4.
+7. **Refit the leaf** to the depth-4 root value on positions that are not
+   about to die, check it explains more held-out variance than a rescaled
+   frozen leaf, and play it inside the full-width search on the same 256
+   games.
+
+## What happened
+
+**The fitted value is a worse ranker than the one-ply value it contains.**
+On the 2,060 held-out positions, the ridge fit puts the depth-4 choice first
+on 30.8% of positions and in its top three on 60.4%; the exact one-ply value
+under the same chance outcomes scores 52.4% and 80.9%. This is not a bug: the
+32 features rebuild the one-ply value to eleven decimal places. It is the
+objective. A death within four plies is worth minus a million points, so
+least squares halves its held-out error by predicting deaths and, in
+exchange, ranks the live siblings worse. A post-hoc refit on targets clipped
+at minus 50,000 recovers exactly the one-ply ranking (53.5%, 80.9%) and
+nothing beyond it. So the answer to "fit a linear Q to depth 4" is that a
+linear function of one-ply features cannot beat the one-ply value at
+reproducing depth-4's choice, and a least-squares fit does not even reach it
+([RS-20260902T202705Z-75d87947](/research/results/RS-20260902T202705Z-75d87947)).
+For scale: the exact depth-3 value ranks depth-4's choice into its top three
+on 95.0% of positions, depth two on 90.0%, the six-feature policy on 70.1%,
+and centre order on 40.0%.
+
+**The one-ply value prunes depth 4 to a quarter of the work.** Expanding
+only the one-ply value's top three siblings at both interior layers of the
+depth-4 search reproduces the full-width decision on 92.3% of held-out
+positions (lower bound 91.8%), gives up 0.87% of the value spread on average
+when it differs (upper bound 0.98%), and costs 26.4% of the logical work, of
+which the prior itself is 5.9%; in wall time it is 3.8 times faster. Width
+four gives 93.8% at 41% of the work, width two 89.3% at 14%. The six-feature
+policy, which costs no engine calls at all, reaches 88.4% at width four. The
+fitted value prunes worst of the three (78.8% at width three), and centre
+order is useless (69%). Every pruned root value was at or below the
+full-width value on every one of the 33,000 decisions, the lower-bound
+property the design predicts. Against the preregistered gate this is a pass
+on regret and inconclusive on agreement (0.923 against 0.95).
+
+**Pruning cannot buy a fifth ply.** On 128 held-out positions with exact
+depth-5 values (37 times the depth-4 work each), full-width depth 4 agrees
+with depth 5 on 79.7% and loses 146 points per decision against it. Pruned
+depth 5 with the one-ply prior at width two on all three interior layers
+costs 1.68 times depth 4 and agrees on 80.5%, but loses 189 points per
+decision: it gives up less on the near-tied positions and more on the
+high-stakes ones, which is exactly where the fifth ply was supposed to help.
+Wider pruning (three, three, three) costs 4.5 times depth 4 for 82.8%.
+
+**In play, the pruned search is cheaper and probably a little worse.** On
+the 256 previously evaluated pilot games, full-width fair depth 4 (seven
+strata) averages 404,497 points and 116.4 moves; the pruned search with the
+one-ply prior at width three averages 370,889 points and 107.8 moves at 26.8%
+of the logical work per move. The paired difference is 33,608 points
+(one-sided 95% bounds from 69,418 below to 1,448 above; detection floor
+35,114) and 8.6 moves (from 18.4 below to 0.9 above), with the pruned search
+winning 121 games and losing 135. That is a non-measurement by the
+preregistered rule, since neither the non-inferiority bound nor a measurable
+loss is reached, but the sign agrees with the panel: the 8% of decisions the
+pruning changes are near-ties in value and still cost something in play. The
+pruned search is not a free speed-up; it is a four-times-cheaper policy that
+appears to give up about 8% of the score, and the pilot cannot yet say whether
+that is 0% or 17%. The pruned depth-5 arm, at 1.8 times the depth-4 work on the first 128 games, is a non-measurement whose point estimate is also negative: 21,615 points below full-width depth 4 (bounds 76,153 below to 31,957 above; floor 54,839), 62 wins to 66 ([RS-20260903T013022Z-d32ee053](/research/results/RS-20260903T013022Z-d32ee053)).
+
+**The leaf that predicts the search's value best is a worse leaf.** Refit
+by ridge regression to the depth-4 root value on positions that are not
+about to die, the eighteen-term leaf explains 85.2% of the held-out variance
+of that value, against 72.9% for an affine rescaling of the frozen leaf, and
+adding the best immediate six-feature drop as a nineteenth term adds nothing
+(minus 0.01%). The refit weights bear little resemblance to the frozen ones:
+open columns go from +180 to −4,232, solid exposure from +40 to +3,273, with
+an intercept of 45,744 absorbing four plies of expected score. Inside the
+full-width depth-4 search that leaf averages 321,045 points and 93.7 moves on
+the same 256 games, 83,451 points below the frozen leaf (bounds 118,022 to
+49,021 below; floor 34,345), 104 wins to 152: a measurable loss of about a
+fifth of the score, and the theory is not supported
+([RS-20260903T013022Z-b0937bf9](/research/results/RS-20260903T013022Z-b0937bf9)).
+The disclosed proxy had said so: with the refit leaf, depth 4 agreed with
+exact depth 5 on 68% of the sub-panel positions instead of 80% and lost 9,350
+points per decision against it instead of 146. The mechanism is the same one
+that sank the fit of the action value: a least-squares fit is dominated by
+what it can predict cheaply, here the expected score of the next four plies
+among live positions, while the search needs the leaf to price the positions
+it must choose between, above all the ones near death that the fit excluded.
+
+## What this closes, and what it leaves open
+
+Closed at pilot tier, each for the exact configuration tested: a
+least-squares linear action value over one-ply features as a ranker or a
+pruning prior (dominated by the one-ply value it contains); pruning as a way
+to buy a fifth ply (no better than depth 4 in points at 1.7 to 1.8 times the
+cost); one-step linear TreeStrap on the eighteen leaf terms (a fifth of the
+score lost). Still open: the one-ply prior does deliver depth-4 decisions at
+a quarter of the work with about 8% of the score at stake, an amount this
+cohort cannot resolve; a 1,024-game paired screen under a coordinator lease
+would settle whether it is a usable stand-in for full-width depth 4 in future
+diagnostic screens. A rank-aware objective (pairwise or listwise within a
+root) is the natural next fit for the action value, and a leaf refit that
+keeps the death-dominated positions, or shrinks toward the frozen constants,
+is what would reopen the leaf direction.
+
+<TechnicalDetails title="The technical record">
+
+Theories
+[TH-20260902-oneply-linear-q-prune-prior-28faed27](/research/theories/TH-20260902-oneply-linear-q-prune-prior-28faed27)
+(assessed mixed) and
+[TH-20260902-treestrap-linear-leaf-refit-4b984292](/research/theories/TH-20260902-treestrap-linear-leaf-refit-4b984292)
+(not supported as tested); experiments
+[EX-20260902-oneply-q-fit-and-pruned-search-panel-46c75cdf](/research/experiments/EX-20260902-oneply-q-fit-and-pruned-search-panel-46c75cdf),
+[EX-20260902-pruned-search-gameplay-pilot-bf465b1d](/research/experiments/EX-20260902-pruned-search-gameplay-pilot-bf465b1d)
+and
+[EX-20260902-treestrap-leaf-refit-panel-and-pilot-4024f360](/research/experiments/EX-20260902-treestrap-leaf-refit-panel-and-pilot-4024f360)
+(all algorithmic, PILOT); results
+[RS-20260902T202705Z-75d87947](/research/results/RS-20260902T202705Z-75d87947),
+[RS-20260903T013022Z-d32ee053](/research/results/RS-20260903T013022Z-d32ee053) and
+[RS-20260903T013022Z-b0937bf9](/research/results/RS-20260903T013022Z-b0937bf9);
+panel dataset
+[DS-20260902-fair-d4s7-sibling-panel-e4e06b7c](/research/datasets/DS-20260902-fair-d4s7-sibling-panel-e4e06b7c).
+Machine profile `MACH-20260902T080517Z-dec42aab` (Apple M3 Pro, 12 cores,
+18 GiB).
+
+**Code.** `rust/` is the std-only crate `drop7-oneply-q` on `drop7-rs` and
+`drop7-kf-linear-q`: `oneply.rs` (32 features; the frozen dot product is the
+exact depth-1 value, bit for bit), `prior.rs` (centre, six-feature, exact
+one-ply, fitted linear), `prune.rs` (the drop7-rs search with interior-node
+pruning; width seven reproduces drop7-rs values, actions and work bit for
+bit), `panel.rs` (resumable sibling-complete panel), `leaf.rs` (linear leaf
+with intercept and an optional six-feature term; frozen constants reproduce
+the fair leaf bit for bit), binaries `panel`, `prune_eval`, `evaluate`,
+`leaf_terms`. `drop7-rs` gained a pure accessor `fair_leaf_terms` and public
+`PackedKey::new` / `hash_key`; its 23 tests pass, including a bit-exact
+reconstruction of the frozen leaf from the terms. `analysis/` holds the
+stdlib-only fitting and metric scripts.
+
+**Panel.** 48 fair-d4s7 games on `0xa5200000`-`0xa520002f` (the
+already-open SEEDLEASE-A52 d2 training block, role unchanged), 65,536-entry
+depth table, 2,000-move cap: 5,398 roots, mean 390,143 points and 112.5
+moves, none censored. Games 0-31 fit (3,338 roots, 22,746 sibling rows),
+32-47 held out (2,060 roots, 14,184 rows). The depth-5 sub-panel is every
+16th held-out root, 128 roots, exact d5s7 at 1.9e8 work each. A first panel
+attempt was killed by the session harness at 47 of 48 games before writing
+anything; the builder now writes each game as it finishes.
+
+**Rankers on the held-out roots** (top-1 / recall@3 / normalised regret
+against exact d4s7): centre order 0.129 / 0.400 / 0.528; six-feature CEM
+policy 0.392 / 0.701 / 0.294; exact d1 under the depth-4 scenarios 0.524 /
+0.809 / 0.198; exact d1 (own scenarios) 0.509 / 0.806 / 0.203; exact d2
+0.664 / 0.900 / 0.102; exact d3 0.766 / 0.950 / 0.054; fitted Q, per-root
+centred 0.308 / 0.604 / 0.367; fitted Q, raw 0.311 / 0.604 / 0.340. Ridge
+lambda 0.001 (grid edge) for both; held-out R² 0.725 raw, 0.539 within
+root. Post hoc (no evidential weight): the one-ply value rebuilds from the
+features to 6e-11; least-squares MSE 7.0e9 against 1.4e10 for an affine
+map of the one-ply value; a per-root-centred fit on targets clipped at
+−50,000 scores 0.535 / 0.809 / 0.179.
+
+**Pruned depth 4 on the 2,060 held-out roots** (agreement [LB95] /
+normalised regret [UB95] / work ratio, prior work included): one-ply prior
+widths (2,2) 0.893 [0.887] / 0.0145 [0.0164] / 0.138; (3,3) 0.923 [0.918]
+/ 0.0087 [0.0098] / 0.264; (4,4) 0.938 [0.932] / 0.0059 [0.0071] / 0.409;
+(3,2) 0.919 [0.912] / 0.0102 [0.0116] / 0.192. Six-feature prior (4,4)
+0.884 [0.871] / 0.0147 [0.0166] / 0.346; (3,3) 0.857 / 0.0211 / 0.219.
+Fitted Q (3,3) 0.788 / 0.037 / 0.251. Centre order (3,3) 0.691 / 0.072 /
+0.201. Zero monotonicity violations; full-width wall 3,587 ms per root,
+one-ply (3,3) 941 ms.
+
+**Depth 5 on the 128-root sub-panel** (agreement with exact d5s7 /
+normalised regret / raw regret in points / work relative to d4s7): exact
+d4s7 0.797 / 0.0285 / 146 / 1.00; pruned d5 one-ply prior (2,2,2) 0.805 /
+0.0174 / 189 / 1.68; (3,3,2) 0.812 / 0.0182 / 185 / 3.24; (3,3,3) 0.828 /
+0.0166 / 180 / 4.49; fitted-Q prior (2,2,2) 0.719 / 0.0486 / 217 / 1.50.
+Paired against d4s7 over games, the (2,2,2) one-ply configuration reduces
+normalised regret by 0.011 [LB −0.0004] and raises raw regret by 43 points
+[LB −207].
+
+**Pilot cohort** `0xa5277000`-`0xa52770ff` (previously evaluated
+development, fourth read; 2,000-move cap; nothing censored; zero illegal or
+incomplete decisions; the comparator's first 32 rows reproduce the earlier
+run's checksums). Paired one-sided 95% percentile-bootstrap bounds, 10,000
+resamples, RNG seed `0x6b660001`; floors 1.645·sd/√n.
+
+| Arm | Games | Mean score | Mean moves | Work/move | Δ score vs fair d4s7 [LB, UB] (floor) | Δ moves [LB, UB] | W/L |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| fair d4s7, frozen leaf | 256 | 404,497 | 116.41 | 5.22M | reference | | |
+| pruned d4s7, one-ply prior, widths 3,3 | 256 | 370,889 | 107.77 | 1.40M | −33,608 [−69,418, +1,448] (35,114) | −8.64 [−18.35, +0.89] | 121/135 |
+| pruned d5s7, one-ply prior, widths 2,2,2 | 128 | 383,515 | 111.17 | 9.37M | −21,615 [−76,153, +31,957] (54,839) | −5.60 [−20.37, +8.95] | 62/66 |
+| fair d4s7, refit-18 leaf | 256 | 321,045 | 93.74 | 5.24M | −83,451 [−118,022, −49,021] (34,345) | −22.66 [−31.98, −13.32] | 104/152 |
+
+**Leaf refit.** Fit roots: 2,913 (425 death-dominated roots dropped); held
+out 1,877 (183 dropped). Held-out R² of the depth-4 root value: frozen leaf
+affine 0.729, refit-18 0.852 (in-sample 0.865), refit-19 0.852; lambda 0.001
+for all. Sub-panel proxy with the refit-18 leaf: agreement with exact d5s7
+0.680, normalised regret 0.085, raw regret 9,350 points per decision (paired
+change vs frozen d4s7 −9,204 [LB −21,308]); 28 of 128 decisions changed.
+
+**Process failures, recorded.** The three runs exceeded their preregistered
+wall stops (by 2.7%, 2.9% and about 9%) because the pilot arms were started
+while the panel stages still held the machine; no watchdog enforced the stops
+and every output is a deterministic function of its inputs, so no number is
+affected, but wall-time figures are contended throughout and only logical
+work should be compared. Zero new seeds were opened; the training-block and
+cohort reuse still awaits the coordinator's confirmation.
+
+</TechnicalDetails>

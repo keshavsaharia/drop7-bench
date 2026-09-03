@@ -1,0 +1,83 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260902-kf-report-reproduction-b7f61bf1",
+  "theoryIds": [
+    "TH-20260902-kf-linear-q-transfer-68b41d66"
+  ],
+  "title": "Reproduce the Klein-Friedmann Q-learning report in its own simulator at pinned commit 8cc8a0e",
+  "classification": "validation",
+  "hypothesis": "Running the upstream code unchanged (github.com/ekreate/cs221-final-project, commit 8cc8a0e; Drop7 simulator main.py, homework scaffold util.py, learner and features Drop7QLearning.py) with the report's protocol -- 50,000 epsilon-greedy training games with epsilon = t^-0.25 and eta = 1/t counted per move, lambda = 0.1 ridge, then 10,000 test games with epsilon = 0, plus 5,000 uniform-random games -- reproduces the report's figures (random 31.2 +/- 5.12; agent 49.61 +/- 11.18) within the fixed bands of theory clause (i). Two additional arms test clause (ii): the same learner stopped after 300 training games, and the same learner with lambda = 0. Only logging differs from upstream: the per-step weight history list is not kept (memory) and the ridge constant is exposed as a parameter; the update formula is upstream line 79 verbatim.",
+  "candidate": {
+    "name": "upstream cs221-final-project Q-learner (external Python simulator, commit 8cc8a0e)",
+    "entryPoint": "approaches/value-policy-learning/klein-friedmann-linear-q/reproduction/reproduce_kf.py",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "uniform-random policy in the same upstream simulator (the report's baseline)",
+    "entryPoint": "approaches/value-policy-learning/klein-friedmann-linear-q/reproduction/reproduce_kf.py",
+    "manifestRef": null
+  },
+  "informationBoundary": "not-applicable",
+  "benchmarkTier": "CHECK",
+  "data": {
+    "role": "no-gameplay",
+    "seedLeaseRefs": [],
+    "datasetRefs": [],
+    "wholeOriginSplit": false,
+    "reuseDisclosure": "No repository seed is read: the upstream simulator draws from Python's Mersenne Twister seeded by the arm's integer seed. An UNREGISTERED smoke run at the identical configuration preceded this record (Python seeds 0, 1, 2 for lambda = 0.1; seed 0 for lambda = 0) and its numbers are disclosed in the result record's limitations; the registered run uses disjoint Python seeds 10, 11, 12 (lambda = 0.1), 10 (lambda = 0) and 10 (300-game arm). The upstream repository carries no license, so its files are fetched at run time into the run directory and are never vendored into this repository."
+  },
+  "metrics": {
+    "primary": "mean moves survived over 10,000 test games (epsilon = 0) per training seed, in the upstream simulator's own units (one point per move, 200-move cap)",
+    "secondary": [
+      "standard deviation, median, min, max and 200-cap count of the test games",
+      "5,000-game uniform-random mean and standard deviation per seed",
+      "training curve as per-1,000-game block means over the 50,000 training games",
+      "final weights per arm and total update count",
+      "lambda = 0 arm test mean relative to the random mean (clause ii-b)",
+      "300-game arm test mean relative to the 50,000-game arm on the same test seeds (clause ii-a)",
+      "wall seconds per arm"
+    ],
+    "statisticalUnit": "whole-game",
+    "uncertaintyMethod": "three independent training seeds against the report's fixed tolerance bands; standard deviation over games as the report does; no confidence interval is claimed"
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "Random: 5,000-game uniform-random mean within [30.2, 32.2] for each of the three seeds.",
+      "Agent: 10,000-game test mean within [47.6, 51.6] for each of the three lambda = 0.1 seeds.",
+      "Clause (ii-a) check, recorded either way: the 300-game arm's test mean is within 2.0 moves of the seed-10 50,000-game arm's test mean on the same 10,000 test seeds.",
+      "Clause (ii-b) check, recorded either way: the lambda = 0 arm's test mean is compared with the random mean; the report's Figure 5 predicts it falls below random."
+    ],
+    "failureAction": "Record valid + fail: the shipped code does not reproduce the report; the theory's transfer clauses are then about the shipped code, not the report, and the result says so.",
+    "passAction": "Record valid + pass at CHECK/validation tier; the frozen upstream commit, weights and per-game rows become the reference for the Rust port's parity gates (EX-20260902-kf-linear-q-rust-transfer-4328a730). No repository cohort is opened by this record."
+  },
+  "resources": {
+    "wallSeconds": 3600,
+    "cpuThreads": 5,
+    "maxHostBytes": 4294967296,
+    "maxGpuBytes": null,
+    "gpuDevices": []
+  },
+  "stopConditions": [
+    "Stop if the fetched upstream tree is not at commit 8cc8a0e or its three files' SHA-256 differ from the values recorded in the run.",
+    "Stop at 3,600 s wall or on any Python exception; a partial arm is recorded as partial, never summarised.",
+    "No repository seed may be read under this record."
+  ],
+  "expectedArtifacts": [
+    "approaches/value-policy-learning/klein-friedmann-linear-q/reproduction/ (fetch script, harness, requirements)",
+    "runs/<run-id>/kf-reproduction/upstream-commit.txt (commit and file hashes)",
+    "runs/<run-id>/kf-reproduction/seed10.json, seed11.json, seed12.json, seed10-noreg.json, seed10-300.json (per-game scores, weights, curves)",
+    "runs/<run-id>/kf-reproduction/summary.json"
+  ],
+  "lifecycle": "preregistered",
+  "protocolSha256": "3f17b7a1df011ad14f95903d7f39e60683bd7c68dbf0426759827d65692c5a63",
+  "amendments": [],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5-1",
+    "agentId": "claude-q-learning"
+  },
+  "createdAt": "2026-09-02T08:05:17Z",
+  "updatedAt": "2026-09-02T08:10:23Z"
+}

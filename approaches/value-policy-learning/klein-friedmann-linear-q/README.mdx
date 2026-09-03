@@ -1,0 +1,248 @@
+---
+title: Klein-Friedmann linear Q-learning
+family: value-policy-learning
+summary: Score each column with six hand-made numbers about what the drop does right now, learn the six weights from experience, and find out how much of Drop7 that can see.
+status: completed
+evidence: reproduced
+reads: public
+---
+
+Score each column with six hand-made numbers about what the drop does right
+now, learn the six weights from experience, and find out how much of Drop7
+that can see. That is Erez Klein and Ben Friedmann's Stanford CS221 final
+project, "Drop7", the only outside attempt at this game the repository knows
+of. This page reproduces it from its own code, ports it onto the repository's
+rules engine, and measures where it stops.
+
+<EvidenceLabel status="completed" evidence="reproduced" reads="public" />
+
+Everything the policy reads is public: the visible board, the visible next
+disc, and (unused by the six features) the moves until the next rise. The
+learner sees a reward while training and nothing else.
+
+## The intuition
+
+Imagine a player who only asks one question per column: *what happens the
+instant my disc lands there?* Does it clear? Does it make its row or its
+column clear? Does the clear land next to gray discs and crack them? Is this
+the lowest column, so the board stays flat? Six such questions, each answered
+with a small count, each multiplied by a learned weight, and the column with
+the biggest total wins. Nothing about the position two moves from now, nothing
+about which numbers are buried where, nothing about the [rise clock](/learn/glossary).
+
+The report's six features, as the code computes them (the paper's prose
+differs in two places, noted in the technical record):
+
+1. **Lowest column**: 1 if the disc would land at the board's minimum height.
+2. **Row detonations**: how many discs already in the landing row would clear
+   once the disc joins their run, each counted 1 plus the number of gray
+   neighbours it touches (a cracked neighbour counts double).
+3. **Column detonations**: the same count for discs below the landing cell,
+   plus the landing cell's own gray-neighbour count whether or not anything
+   clears.
+4. **Tallest column**: the column-detonation count again, but only when the
+   disc lands at the maximum height and at most two columns share it.
+5. **A clearing 1**: 1 plus gray adjacency when the disc is a 1 that clears.
+6. **The disc clears**: 1 plus gray adjacency when the dropped disc clears by
+   its row run or its column height.
+
+The learning rule is textbook [Q-learning](/learn/glossary) with linear
+function approximation: after each drop, nudge the six weights so that the
+column's score moves toward "reward now plus the best score available next
+turn". The reward is one point per move survived. The report then tests the
+frozen weights with no exploration.
+
+## How it works, step by step
+
+1. **Read the position.** Visible board and visible next disc.
+2. **For every legal column, compute the six features** of dropping there.
+3. **Score each column** as the weighted sum. Ties go to the rightmost column
+   (a quirk of Python's tuple comparison in the original, kept deliberately).
+4. **Play the best column.** In the original simulator the agent may also pick
+   a full column and lose on the spot; the port restricts both the greedy
+   choice and exploration to legal columns.
+5. **While training, update the weights** from the observed reward and the
+   best successor score, with a step size of one over the number of moves
+   played so far, exploration probability of one over the fourth root of that
+   count, and a ridge penalty of 0.1.
+
+## What happened
+
+**The report reproduces from its own code.** Three independent training runs
+of 50,000 games in the authors' simulator test at 49.08, 49.05 and 49.02 moves
+over 10,000 games each; the report says 49.61. Uniform-random play scores
+31.66, 31.73 and 31.85; the report says 31.2. Both preregistered bands pass
+([RS-20260902T082726Z-75606ce7](/research/results/RS-20260902T082726Z-75606ce7)).
+
+**Almost all of that training is idle.** Because the step size is one over the
+number of *moves*, not games, the weights are effectively frozen after a few
+hundred games. A learner stopped after 300 games tests at 49.08 moves on the
+same 10,000 games as the 50,000-game learner, also 49.08. The report's
+explanation of its own stability, the ridge penalty, does not hold for the
+shipped configuration either: with the penalty removed the learner tests at
+48.97, not below random as the report's Figure 5 states. The step size has
+already shrunk to a hundred-thousandth by the time the penalty could matter.
+
+**On the repository's corrected Hardcore rules the six features are a
+survival heuristic, and a real one.** Re-learned with the same schedule in the
+Rust port, the policy lives 35.8 moves and scores 107,147 points on average
+over 256 previously evaluated development games, against 26.25 moves and
+73,263 points for uniform-random legal play on the same games: a paired gain
+of 9.5 moves with a one-sided 95% lower bound of 8.85. That is real but small
+next to the reference: fair depth-4 search averaged 308,296 points on its
+64-game development cohort, and on the first 32 of these same seeds the
+depth-4 search with seven chance samples scored 380,205 points and lived 110.4 moves, beating every six-feature arm on at least 30 of the 32 games.
+
+**The learned weights are an accident of the first hundred moves.** The
+weights the authors' own simulator learns, transplanted unchanged onto the
+Rust engine, live 40.5 moves and score 123,968 points, beating the weights
+learned *in* the Rust engine by 4.7 moves (lower bound 3.8). Same features,
+same algorithm, different opening experience: the authors' board starts empty,
+the real game starts with a gray row, and a step size that dies within a few
+hundred moves locks in whatever it saw first. Neither set of weights is the
+best six-weight policy; the temporal-difference fixed point is simply not it.
+
+**A direct search over the six weights beat both learned vectors in five
+seconds.** Since the policy is just an argmax over six weights, the weights
+can be searched directly against whole-game lifetime instead of learned by
+temporal difference. A cross-entropy search (population 64, 30 generations,
+256 paired training games per generation) converged by generation ten; its
+frozen optimum, re-selected on a fresh 1,024-game block and then read once on
+the pilot cohort, lives 44.8 moves and scores 138,973 points: 4.3 moves over
+the transplanted weights (lower bound 2.8) and 18.6 over random (lower bound
+17.2). The optimum puts its largest weight on "a 1 that clears" and almost
+none on the tallest-column feature; its direction is only 0.55 cosine from the
+engine-learned vector. So the temporal-difference plateau was the optimizer's,
+not the features'. The features' own ceiling, at least for this search, is
+about 45 moves and 140,000 points
+([RS-20260902T084356Z-784ebf14](/research/results/RS-20260902T084356Z-784ebf14)).
+
+**Slower step sizes did not raise the ceiling; two of them diverged.** A
+constant step of 0.001 gained 0.5 moves over the original schedule (lower
+bound 0.12), the same size as the gap between two identical-configuration
+seeds (0.48). A per-game step and a slowly decaying step both blew the weights
+up, to a billion and to NaN, which is the deadly-triad instability the report
+described and which its own 1/t schedule had hidden. Rewarding corrected score
+instead of survival changed nothing measurable.
+
+<TechnicalDetails title="The technical record">
+
+Theory
+[TH-20260902-kf-linear-q-transfer-68b41d66](/research/theories/TH-20260902-kf-linear-q-transfer-68b41d66);
+experiments
+[EX-20260902-kf-report-reproduction-b7f61bf1](/research/experiments/EX-20260902-kf-report-reproduction-b7f61bf1)
+(validation, CHECK) and
+[EX-20260902-kf-linear-q-rust-transfer-4328a730](/research/experiments/EX-20260902-kf-linear-q-rust-transfer-4328a730)
+(algorithmic, PILOT); results
+[RS-20260902T082726Z-75606ce7](/research/results/RS-20260902T082726Z-75606ce7) and
+[RS-20260902T084356Z-2488ecc7](/research/results/RS-20260902T084356Z-2488ecc7). The six-weight search is
+its own theory and experiment,
+[TH-20260902-kf-six-weight-policy-search-8a6e41a8](/research/theories/TH-20260902-kf-six-weight-policy-search-8a6e41a8)
+and
+[EX-20260902-kf-six-weight-cem-d018cc89](/research/experiments/EX-20260902-kf-six-weight-cem-d018cc89),
+with result [RS-20260902T084356Z-784ebf14](/research/results/RS-20260902T084356Z-784ebf14). Machine profile
+`MACH-20260902T080517Z-dec42aab` (Apple M3 Pro, 12 cores, 18 GiB).
+
+**Upstream.** `github.com/ekreate/cs221-final-project` at commit
+`8cc8a0edfa04f1a93088c951e217d3cd3d6013f0`; no license, so the code is fetched
+at run time by `reproduction/fetch-upstream.sh` and never vendored. The paper
+is at `ekreate.github.io/projects/drop7_q_learning.pdf`. It is a CS221 course
+project by two NVIDIA engineers, and `util.py` is the course's homework
+scaffold.
+
+**Where the code differs from the paper.** The paper lists `max_eq_elem` as an
+indicator; the code appends it with the column-detonation count as its value.
+The paper's `col_dets` counts detonations; the code also adds the landing
+cell's gray adjacency unconditionally. Both are ported as coded. The
+simulator's game also differs from Drop7 as shipped: the board starts empty
+(no gray row), score is one point per move, games are capped at 200 moves,
+dropping on a full column ends the game, and reveals inside a wave are applied
+sequentially rather than simultaneously.
+
+**Reproduction arms** (Python seeds 10, 11, 12; lambda 0.1; then seed 10 with
+lambda 0 and seed 10 stopped after 300 games; phases reseeded so all arms share
+their 10,000 test games): random 31.657 / 31.733 / 31.851 over 5,000 games;
+test means 49.080 / 49.053 / 49.015 (sd 11.75 / 11.68 / 11.74); lambda 0 test
+mean 48.967; 300-game arm 49.080 (13,796 weight updates against 2,406,211). An
+unregistered smoke run at seeds 0-2 preceded preregistration and is disclosed
+in the result record.
+
+**Port gates (CHECK).** Feature parity: 54,852 (state, action) pairs from
+7,242 upstream states, 0 mismatches after the gray-encoding swap (upstream 9 =
+untouched, 8 = cracked; engine 8 = untouched, 9 = cracked). Update parity: 250
+upstream weight updates replayed with worst relative difference 0. Legality and
+determinism: 64 probe games times three arms byte-identical across 1 and 8
+threads and a repeat, zero illegal decisions.
+
+**Pilot cohort.** Seeds `0xa5277000`-`0xa52770ff`, the first 256 of the Rust
+engine's benchmark sub-block of SEEDLEASE-A52-FAST, previously read by the
+centre policy; 2,000-move cap; no game censored. Training read the first
+50,000 seeds of the SEEDLEASE-A52 d2 training block (`0xa5200000`-), role
+unchanged. Zero new seeds were opened; the evidence tier is pilot and cannot
+be promoted. Paired one-sided 95% percentile-bootstrap lower bounds use 10,000
+resamples with RNG seed `0x6b660001`.
+
+| Arm (256 games) | Mean score | Mean moves | vs random, moves [LB95] | vs upstream schedule, moves [LB95] |
+| --- | ---: | ---: | ---: | ---: |
+| uniform-random legal | 73,263 | 26.25 | | −9.54 [−10.25] |
+| centre-first | 55,083 | 21.01 | −5.24 [−6.08] | |
+| upstream schedule, seed a | 107,147 | 35.79 | +9.54 [+8.85] | reference |
+| upstream schedule, seed b | 107,231 | 35.81 | +9.56 [+8.86] | +0.02 [−0.08] |
+| upstream schedule, seed c | 109,068 | 36.27 | +10.03 [+9.26] | +0.48 [+0.07] |
+| per-game step (weights ~1e9) | 95,918 | 32.47 | +6.23 [+5.44] | −3.32 [−4.13] |
+| harmonic step, tau 50,000 (NaN) | 54,565 | 20.90 | −5.35 [−6.20] | |
+| constant step 0.001 | 108,918 | 36.29 | +10.04 [+9.35] | +0.50 [+0.12] |
+| score reward, harmonic (NaN) | 54,565 | 20.90 | −5.35 [−6.20] | |
+| constant 0.01 (post hoc) | 110,032 | 36.49 | +10.25 [+9.48] | +0.70 [+0.18] |
+| constant 0.0001 (post hoc) | 108,694 | 36.19 | +9.94 [+9.23] | +0.40 [+0.02] |
+| score reward, constant 0.001 (post hoc) | 108,934 | 36.23 | +9.99 [+9.29] | +0.45 [+0.00] |
+| authors' weights transplanted (Python seed 10) | 123,968 | 40.53 | +14.29 [+13.25] | +4.74 [+3.77] |
+| cross-entropy optimum (separate experiment, read once) | 138,973 | 44.82 | +18.57 [+17.24] | +4.29 [+2.81] vs transplanted |
+| fair d4s7, first 32 seeds | 380,205 | 110.38 | | |
+
+The paired detection floor at 256 games is about 0.4 moves for arms this
+similar and about 0.8 moves against random. Divergent arms (NaN weights) play
+the rightmost legal column, which is why they tie the centre-first policy's
+neighbourhood. Training throughput was about 1.4 million moves per second on
+one core; each 50,000-game training run took 1.3 seconds.
+
+</TechnicalDetails>
+
+## What this taught us, and what is still open
+
+**Reproducibility is fine; the explanation was not.** The numbers reproduce
+to within a move, but the report's account of *why* the method worked, ridge
+regularisation taming divergence, is not what the shipped code does. The code
+is stable because its step size collapses, and it learns for the same reason
+only in its first few hundred games. Any future use of this report should
+cite its numbers and not its mechanism.
+
+**Six first-wave features are a survival prior worth about ten moves.** Under
+Hardcore scoring that is roughly 35,000 points over random, an order of
+magnitude short of the depth-4 reference. This agrees with the repository's
+recurring finding that lifetime is the learnable quantity and chain structure
+is not, and it puts a number on how much of lifetime purely local features
+capture.
+
+**When the policy is six numbers, search them; do not learn them.** Two
+temporal-difference weight vectors differed by 4.7 moves and a five-second
+direct search beat both. The general lesson for this repository is the one it
+keeps relearning from the other side: a value-prediction objective is not the
+control objective, and for tiny policy families whole-game search is cheaper
+and better. The ceiling of these six features is about 45 moves, an order of
+magnitude below depth-4 in points, so no SCREEN against depth-4 on fresh seeds
+is warranted by any arm here. What remains open is whether "a 1 that clears
+next to gray" or "lands on a lowest column" earns a place as a cheap correction
+term inside the depth-4 leaf, which is a different experiment.
+
+## Sources
+
+- `reproduction/fetch-upstream.sh`, `reproduction/reproduce_kf.py`,
+  `reproduction/export_parity.py`: fetch the pinned upstream code, run the
+  report's protocol, export feature and update transcripts for the gates.
+- `rust/`: the `drop7-kf-linear-q` crate on `drop7-rs`: `features.rs` (the
+  six features), `learn.rs` (the update and schedules), `policy.rs`,
+  `game.rs`, and the `parity_features`, `parity_update`, `train`, `evaluate`
+  and `search` (cross-entropy over the six weights) binaries.
+- `analysis/summarize_reproduction.py`, `analysis/summarize_evaluate.py`:
+  the gate checks and the paired bootstrap, standard library only.

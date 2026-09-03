@@ -1,0 +1,33 @@
+{
+  "$schema": "../schemas/theory-v1.schema.json",
+  "format": "drop7-theory-v1",
+  "theoryId": "TH-20260902-treestrap-linear-leaf-refit-4b984292",
+  "title": "One bootstrapped refit of the linear fair leaf to the depth-4 search value gains points inside fair D4",
+  "claim": "Refitting the eighteen-term linear fair leaf (with an intercept) by ridge regression to the exact fair-d4s7 root value on training-role roots that are not death-dominated (root value above -50,000), and deploying the refit leaf unchanged inside full-width fair d4s7, (a) explains materially more held-out variance of the depth-4 root value than an affine rescaling of the frozen leaf (held-out R^2 higher by at least 0.05), and (b) raises the mean corrected score on the 256-game pilot cohort relative to the frozen leaf, with a paired one-sided 95% bootstrap lower bound above zero. A variant that adds the best immediate six-feature Klein-Friedmann drop value as a nineteenth term is expected to add no held-out variance (gain below 0.01).",
+  "mechanism": "The depth-4 root value is the expected score over four plies plus the frozen leaf four plies ahead, so regressing the leaf onto it is one step of TreeStrap-style fitted value iteration: the part of the four-ply future that is linear in the leaf terms is folded into the leaf, and a depth-4 search over the refit leaf effectively sees further for that part. The intercept absorbs the expected four-ply score and rise bonuses, so only the reweighting matters to the argmax. The same evidence that closed other leaf refits cuts the other way here: finding-14 refit the leaf toward a short-horizon quantity the search already computes and lost monotonically, whereas this target is the search's own bootstrapped value; and the compact-evaluator closures concern reproducing D4's within-root ordering at the leaf, which this refit does not attempt. The program's prior therefore leans negative but is genuinely uncertain; the coordinator's stated prior before any fit: (a) passes, (b) is more likely inconclusive than positive.",
+  "falsificationCriteria": [
+    "(a) The refit leaf's held-out R^2 against the depth-4 root value exceeds the frozen-leaf affine baseline by less than 0.05. Then the refit is a rescaling and no gameplay arm is run.",
+    "(b) On the 256-game pilot cohort the refit leaf's paired score delta over the frozen leaf has a one-sided 95% upper bound below zero (a measurable loss) or a lower bound at or below zero with the point estimate inside the detection floor (recorded as inconclusive, not supported).",
+    "Variant clause: the nineteen-term refit's held-out R^2 exceeds the eighteen-term refit's by 0.01 or more, which would say the six drop features carry leaf-relevant information the fair terms lack; this is expected to fail."
+  ],
+  "informationClass": "public-policy",
+  "lifecycle": "assessed",
+  "assessment": "not-supported-as-tested",
+  "evidenceTier": "pilot",
+  "dependencies": [
+    "TH-20260902-oneply-linear-q-prune-prior-28faed27",
+    "TH-20260902-kf-six-weight-policy-search-8a6e41a8"
+  ],
+  "evidenceRefs": [
+    "research/experiments/EX-20260902-treestrap-leaf-refit-panel-and-pilot-4024f360.json",
+    "research/results/RS-20260903T013022Z-b0937bf9.json",
+    "approaches/value-policy-learning/oneply-q-prune/README.mdx"
+  ],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5-1",
+    "agentId": "claude-q-learning"
+  },
+  "createdAt": "2026-09-02T17:59:06Z",
+  "updatedAt": "2026-09-03T01:30:22Z"
+}
