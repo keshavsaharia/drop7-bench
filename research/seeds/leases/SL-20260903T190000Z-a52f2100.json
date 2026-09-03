@@ -1,0 +1,22 @@
+{
+  "$schema": "../schemas/seed-lease-v1.schema.json",
+  "format": "drop7-seed-lease-v1",
+  "experimentId": "EX-20260903-nnue-evolution-continuation2-d3-80eebad3",
+  "rngAlgorithm": "mulberry32 with mix32 domain separation (src/core/native/engine.hpp); headless disc stream kNextDiscDomain, reveal stream kRevealDomain; Rust bitboard engine bit-identical (RS-20260824T075451Z-e89ea128)",
+  "domain": "environment",
+  "cohortManifestSha256": null,
+  "reservedAt": "2026-09-03T19:04:13Z",
+  "openedAt": null,
+  "closedAt": null,
+  "protocolSha256": "d1a8f687327b382459096fd5db0bf45c201f7147b8b4b30a707ebd00cfa1889c",
+  "runIds": [],
+  "seedLeaseId": "SL-20260903T190000Z-a52f2100",
+  "role": "public-development",
+  "rangeStartHex": "0xa52f2100",
+  "rangeEndExclusiveHex": "0xa52f2140",
+  "state": "reserved",
+  "notes": [
+    "Conservative import 2026-09-03: every 8-hex-digit constant under docs/, approaches/, src/, research/, artifacts/ and web/content/ was enumerated (grep -rhoE '0x[0-9a-fA-F]{8}'); no constant falls inside 0xa52ea100-0xa52f2140. The block lies inside the ./do-research allocator pool (0xa52c0000-0xa5300000), above the second experiment's leases (0xa52e2000-0xa52ea040), and overlaps no existing lease record and no protected (0x7d) or final (0xd7) prefix.",
+    "64 never-read public-development seeds for the one-shot held-out screen of the second continuation's candidate (five arms on identical seeds: candidate, baseline-run2, init-d3s7, fair-d3s7, fair-d4s7). Opened exactly once by scripts/open-screen-lease.py after candidate-weights.sha256 is recorded; a second opening requires a new experiment record."
+  ]
+}

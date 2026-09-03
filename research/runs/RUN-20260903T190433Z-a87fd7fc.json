@@ -1,0 +1,49 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260903T190433Z-a87fd7fc",
+  "experimentId": "EX-20260903-nnue-evolution-continuation2-d3-80eebad3",
+  "lifecycle": "planned",
+  "runValidity": "pending",
+  "startedAt": null,
+  "endedAt": null,
+  "protocolSha256": "d1a8f687327b382459096fd5db0bf45c201f7147b8b4b30a707ebd00cfa1889c",
+  "machineProfileRef": "research/system-profiles/MACH-20260903T190714Z-20004b2f.json",
+  "sourceState": {
+    "gitCommit": "564c027b20e4761997f6154c548cf76418a85e8f",
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "approaches/lifetime-objective/nnue-evolution/build.sh (branch claude/evolution-continuation-2, includes the owner's 2026-09-03 fix e2b0d19: wall-budget.json pinning, progress/plateau recovery from committed generation artifacts) -- no flag or Config changes since the second experiment; verified by grep against evolve.rs before this run",
+    "cargo test --release (13 unit tests)",
+    "target/release/gate 0xa5277000 -> runs/RUN-20260903T190433Z-a87fd7fc/nnue-evolution/gates.log (11 CHECK gates, probe block only)",
+    "smoke test on the already-open probe block 0xa5277000-0xa5277107: evolve --resume-population <continuation-1 population-150.bin> --baseline <continuation-1 candidate> --sigma-decay-tau 1500 --sigma-floor 0.01 --plateau-window 3 --plateau-check-every 1 --plateau-min-generations 3 --population 32 --games 2 --generations 4 --move-cap 60 (recorded hashes match sha256sum); --select --select-games 2; screen --arm baseline-run2=... --games 2 --move-cap 40 (scratch directory, not retained)",
+    "RUN_ID=RUN-20260903T190433Z-a87fd7fc THREADS=32 EXPERIMENT_ID=EX-20260903-nnue-evolution-continuation2-d3-80eebad3 LEASE_START=0xa52ea100 SCREEN_START=0xa52f2100 SCREEN_LEASE=research/seeds/leases/SL-20260903T190000Z-a52f2100.json GENERATIONS=1000 EVOLVE_SEED=0x0e701e5a INIT=artifacts/results/EX-20260902-nnue-evolution-d3-v2-49c18bc2/RUN-20260902T035644Z-c1fd8987/pretrain/init.bin RESUME_POP=runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/evolve/population-150.bin BASELINE=artifacts/results/EX-20260903-nnue-evolution-continuation-d3-f8ce9181/RUN-20260903T032832Z-a76a6cf7/evolve/candidate-weights.bin SIGMA_REL=0.05 SIGMA_TAU=1500 SIGMA_FLOOR=0.01 PLATEAU_WINDOW=100 PLATEAU_EVERY=50 PLATEAU_MIN=100 EVOLVE_WALL=259200 scripts/pipeline.sh chain-evolve (evolve -> select -> screen -> compare -> analyze)"
+  ],
+  "seedLeaseRefs": [
+    "SL-20260903T190000Z-a52ea100"
+  ],
+  "resourceLimits": {
+    "wallSeconds": 275000,
+    "cpuThreads": 32,
+    "maxHostBytes": 17179869184,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": null,
+    "cpuSeconds": null,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "Planned. Per-stage kernel rusage is appended to rusage.jsonl by scripts/with-rusage.py; the second experiment measured about 304 s per generation for 35 rows of 32 depth-3 games at 32 threads with three controls, so this run (also 35 rows) should take about the same per generation, roughly 84.4 h for 1,000 generations if the plateau rule never fires; the 72 h evolve wall budget would end the run near generation 850 in that case."
+  },
+  "exitCode": null,
+  "stopReason": null,
+  "artifactRefs": [
+    "runs/RUN-20260903T190433Z-a87fd7fc/nnue-evolution/gates.log"
+  ],
+  "contributionIds": [
+    "CT-20260903T190244Z-ca639e15"
+  ]
+}
