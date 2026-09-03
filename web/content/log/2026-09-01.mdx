@@ -1,10 +1,10 @@
 ---
 date: 2026-09-01
-title: "Auditing the evolved-NNUE-leaf experiment and launching it on the whole workstation"
-summary: "The depth-5-distilled, whole-game-evolved NNUE leaf registered on 2026-08-25 was audited end to end - theory, frozen protocol, leases, and every line of the Rust crate - then launched for real. Eleven CHECK gates passed again on the rebuilt binaries, a seed-free preflight showed the teacher's labels are bit-identical at 16 and 32 threads with a 1.29x throughput gain from SMT, the protocol was amended before any leased seed was read, and the 512-game depth-5 teacher corpus began at 04:24 UTC on all 32 hardware threads."
+title: "The evolved-NNUE-leaf experiment is audited and launched, and a depth-6 gauntlet game joins the leaderboard by import"
+summary: "The depth-5-distilled, whole-game-evolved NNUE leaf registered on 2026-08-25 was audited end to end - theory, frozen protocol, leases, and every line of the Rust crate - then launched for real. Eleven CHECK gates passed again on the rebuilt binaries, a seed-free preflight showed the teacher's labels are bit-identical at 16 and 32 threads with a 1.29x throughput gain from SMT, the protocol was amended before any leased seed was read, and the 512-game depth-5 teacher corpus began at 04:24 UTC on all 32 hardware threads. Separately, the rust-fair-d6-s7 gauntlet-01 game recorded on the larger workstation on 27 August was imported into the competition ledger for both stages. The seed command could not take it as designed, because it re-plays every policy live, so it gained a --replay path that verifies a recorded game against the immutable round instead of re-running the search. Playground demonstration only; the game's provenance is declared, not observed."
 contributors: [claude-fable-5-1 (Claude Code)]
-tags: [nnue, evolution, leaf, teacher-distillation, audit, validation, rust-engine]
-outcomes: { positive: 2, negative: 0, open: 1 }
+tags: [nnue, evolution, leaf, teacher-distillation, audit, validation, rust-engine, benchmark-playground, infrastructure, leaderboard]
+outcomes: { positive: 3, negative: 0, open: 2 }
 ---
 
 ## What was audited before a single leased seed was read
@@ -108,3 +108,60 @@ from the same review were also fixed: the `screen` stage now performs the
 held-out lease transition itself, so no invocation path can read the block
 while the registry still says reserved, and the corpus wall default matches
 the protocol.
+
+---
+
+## Importing a game instead of re-playing it
+
+On 27 August the operator played `rust-fair-d6-s7` through gauntlet-01 on the
+16-core workstation with `just play-round`, and the resulting `runs/BENCH-*`
+directory was copied to the research laptop today. The goal was to put that
+game on the public competition leaderboard, which lives in the DynamoDB ledger
+rather than in `web/data/leaderboard.json`.
+
+The ledger's seeding command (`npm run competition -- seed`) was built for the
+fast TypeScript policies: it plays each policy live on the immutable round,
+replays the chosen columns independently, packs them, and does a conditional
+insert. Used as designed it would have re-run the whole depth-6 search here,
+and the run artifact records the original game at 9,925,584 ms of wall time on
+the larger machine. So the command gained a `--replay` option. It reads the
+bench replay file, checks that it names the competition's round and a
+registered policy, replays the recorded columns from the opening position, and
+requires the replayed score, move count, censor flag, every per-move board, and
+the sixteen-hex trajectory checksum to match the recording exactly. The policy
+itself never runs. The bench checksum moved into an exported helper in
+`src/bench/runner.ts` so the bench and the importer compute it the same way;
+two tests cover acceptance and rejection (another round, a changed column, an
+inflated score, illegal play, a wrong checksum).
+
+<Finding title="The recorded depth-6 game replays exactly and is now in both ledgers" kind="positive" metric="428,292 points in 120 moves">
+The imported replay (`runs/BENCH-20260827T150335Z-rust-fair-d6-s7--gauntlet-01/`,
+generated 2026-08-27T17:49:01Z) reproduced under the independent competition
+replay: 428,292 points, 120 moves, game over rather than censored, no illegal
+decisions, longest chain 11, 248 discs cleared, 139 covered discs revealed,
+trajectory checksum `df69d802b6e3b377`. The same record was inserted into the
+production and dev competition ledgers under `global#2026-08-v1` with
+submission id
+`8ffae14844e9767ac989aee2197186afceef33c8bee7f6a52e644a053af004e5`, and both
+items were read back and compared field for field with the dry-run preview.
+It enters the production leaderboard behind the top human entry and above
+every previously seeded policy. That is a playground demonstration on one
+scripted future and says nothing about policy strength; scripted rounds are
+never tier evidence.
+</Finding>
+
+Two records differ deliberately from a live seed. The source revision is
+declared by the operator rather than observed by the command:
+`4bebccdff26d9335c25740161fc101ded535e22c`, the empty-frontier fix committed
+minutes before the run started, which a depth-6 game needs to survive near a
+board-filling rise. The command verifies that the named commit exists in this
+repository and nothing more. The dirty-worktree flag is omitted for imports
+instead of being asserted, and the ledger timestamps are the import time, not
+the 27 August completion time.
+
+Open: nothing has shown that the current `decide` binary at `HEAD` reproduces
+this trajectory, only that the recorded columns are legal and score as
+claimed on the fixed round. The `runs/` directory holding the original
+artifact is gitignored and local to this laptop, so the ledger record and this
+entry are the durable references to the game. No research seeds were opened
+and no research record changed.

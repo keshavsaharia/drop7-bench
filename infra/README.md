@@ -170,6 +170,29 @@ columns, and uses a conditional DynamoDB insert. Re-running an identical seed is
 a changed result under the same policy id is rejected and must use a versioned id. These
 single scripted-game scores are playground demonstrations, never research-tier evidence.
 
+A slow policy whose game was already played elsewhere (for example a multi-hour Rust
+depth-6 game from a larger machine, saved by `just play-round` under `runs/BENCH-*/`) is
+imported rather than re-run:
+
+```sh
+npm run competition -- seed \
+  --stage production \
+  --profile personal-deploy \
+  --replay runs/<run-id>/replays/<policy>--<round>.json \
+  --source-revision <sha> \
+  --write
+```
+
+`--replay` reads the bench replay (the `drop7-leaderboard-v1` game record with its frames),
+checks that it names the competition's round and a registered policy, replays the recorded
+columns independently against the immutable round, and requires the replayed score, move
+count, censor flag, every per-move board, and the trajectory checksum to match the recording
+exactly. The policy itself never runs, so the import takes seconds. Because the game was not
+produced by this checkout, `--source-revision` must state the commit the producing machine had
+checked out (or the literal `unknown`), and the record omits the dirty-worktree flag rather
+than claiming one. The same conditional insert applies: an occupied policy slot is left alone
+when it already holds the identical result and rejected otherwise.
+
 The API rejects illegal, incomplete, or trailing choices. It conditionally inserts each
 validated run so the same user/game/move stream is idempotent. Client/server score
 mismatches remain valid submissions, but are flagged in DynamoDB and structured CloudWatch

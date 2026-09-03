@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { legalColumns } from "../../../src/core/typescript/engine.ts";
-import { playScriptedGame } from "../../../src/bench/runner.ts";
+import type { BenchPolicy } from "../../../src/bench/policies.ts";
+import {
+  playScriptedGame,
+  trajectoryChecksum,
+} from "../../../src/bench/runner.ts";
 import {
   COMPETITION_GAMES,
   COMPETITION_GAME_KEY,
@@ -10,6 +14,7 @@ import {
 import { getCompetitionGame } from "./registry.ts";
 import { packColumns, unpackColumns } from "./packing.ts";
 import { replayCompetitionColumns } from "./replay.ts";
+import { importBenchReplay } from "./bench-import.ts";
 
 test("3-bit column packing round-trips across byte boundaries", () => {
   const columns = [0, 6, 3, 1, 5, 2, 4, 0, 6, 6, 1];
@@ -167,4 +172,78 @@ test("competition replay rejects truncated, illegal, and trailing choices", () =
   ]);
   assert.equal(illegal.valid, false);
   assert.equal(illegal.failure, "illegal-column");
+});
+
+const IMPORT_POLICY: BenchPolicy = {
+  id: "test-import-first-legal",
+  name: "Test import first legal",
+  family: "test",
+  description: "test",
+  researchPath: "/approaches/heuristic-search/policy-comparison",
+  publicInformation: true,
+  slow: false,
+  chooseColumn: (state) => legalColumns(state.board)[0] ?? null,
+};
+
+/** The bench CLI writes each game result with its frames as one JSON document. */
+function recordedReplay(game: NonNullable<ReturnType<typeof getCompetitionGame>>) {
+  const played = playScriptedGame(IMPORT_POLICY, game.round);
+  return {
+    played,
+    recorded: JSON.parse(JSON.stringify({ ...played, frames: played.frames })),
+  };
+}
+
+test("bench replay import verifies a recorded game against the immutable round", () => {
+  const game = getCompetitionGame(COMPETITION_GAME_KEY);
+  assert.ok(game);
+  const { played, recorded } = recordedReplay(game);
+
+  const imported = importBenchReplay(game, recorded);
+  assert.equal(imported.policyId, IMPORT_POLICY.id);
+  assert.deepEqual(
+    imported.columns,
+    played.frames.map((frame) => frame.column),
+  );
+  assert.equal(imported.replay.score, played.score);
+  assert.equal(imported.replay.moves, played.moves);
+  assert.equal(imported.replay.censored, played.censored);
+  assert.equal(imported.clientScore, played.score);
+  assert.equal(imported.checksum, played.checksum);
+  assert.equal(trajectoryChecksum(imported.replay.frames), played.checksum);
+});
+
+test("bench replay import rejects another round, a changed choice, an inflated score, and illegal play", () => {
+  const game = getCompetitionGame(COMPETITION_GAME_KEY);
+  assert.ok(game);
+  const { recorded } = recordedReplay(game);
+
+  assert.throws(
+    () => importBenchReplay(game, { ...recorded, roundId: "gauntlet-02" }),
+    /gauntlet-02/,
+  );
+  assert.throws(
+    () => importBenchReplay(game, { ...recorded, score: recorded.score + 1 }),
+    /independent competition replay/,
+  );
+  assert.throws(
+    () => importBenchReplay(game, { ...recorded, illegalMoves: 1 }),
+    /illegal/,
+  );
+  const changedFirstMove = recorded.frames.map(
+    (frame: { column: number }, index: number) =>
+      index === 0 ? { ...frame, column: (frame.column + 1) % 7 } : frame,
+  );
+  assert.throws(
+    () => importBenchReplay(game, { ...recorded, frames: changedFirstMove }),
+    /diverges|independent competition replay/,
+  );
+  assert.throws(
+    () => importBenchReplay(game, { ...recorded, checksum: "0000000000000000" }),
+    /checksum/,
+  );
+  assert.throws(
+    () => importBenchReplay(game, { format: "drop7-leaderboard-v1" }),
+    /leaderboard replay/,
+  );
 });
