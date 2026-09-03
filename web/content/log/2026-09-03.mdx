@@ -116,3 +116,15 @@ the status document are updated. The frozen candidate (`candidate-weights.bin`,
 SHA-256 beginning edd0d2ef) and the warm start (`init.bin`) are committed with
 the promoted artifacts so continuation work has its baseline vectors in the
 repository.
+
+A code-review pass then found two interruption-only faults in the continuation
+driver: a completed generation could be stranded without its progress row or
+plateau marker, and restarting the evolve stage granted a fresh wall allowance.
+The repair makes generation artifacts atomic recovery records, reconstructs
+the compact progress and plateau indexes before reading another seed, and pins
+one durable evolve deadline across resumes. Focused regression tests exercise
+both interrupted-write windows and the non-resetting deadline; no gameplay data
+or protected/final cohort was opened for this maintenance work. The already
+launched run remains attributable to its recorded source commit; if that
+process is interrupted, its disposition must be recorded before changing the
+executable used for a resume.

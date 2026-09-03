@@ -29,7 +29,9 @@
 #   SCREEN_LEASE (lease record path), GENERATIONS (60), EVOLVE_SEED (0x0e701e58)
 #   INIT (pretrain/init.bin of this run), RESUME_POP (unset), BASELINE (unset),
 #   SIGMA_REL (0.05), SIGMA_TAU (0 = constant), SIGMA_FLOOR (0),
-#   PLATEAU_WINDOW (0 = off), PLATEAU_EVERY (50), PLATEAU_MIN (100)
+#   PLATEAU_WINDOW (0 = off), PLATEAU_EVERY (50), PLATEAU_MIN (100),
+#   EVOLVE_WALL (21,600; pinned on the first evolve invocation and cumulative
+#   across resumes through evolve/wall-budget.json)
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APPROACH="$(cd "$HERE/.." && pwd)"
@@ -55,6 +57,7 @@ SIGMA_FLOOR="${SIGMA_FLOOR:-0}"
 PLATEAU_WINDOW="${PLATEAU_WINDOW:-0}"
 PLATEAU_EVERY="${PLATEAU_EVERY:-50}"
 PLATEAU_MIN="${PLATEAU_MIN:-100}"
+EVOLVE_WALL="${EVOLVE_WALL:-21600}"
 
 log() { echo "[$(date -u +%FT%TZ)] $*" | tee -a "$OUT/pipeline.log"; }
 run() {
@@ -101,11 +104,14 @@ case "$stage" in
   evolve)
     # Stage C.  GA constants from the frozen protocol in force.  Resumable
     # (checkpoint contract in evolve.rs); a PLATEAU marker ends the loop.
+    # EVOLVE_WALL is the original total allowance on every invocation: evolve
+    # pins one absolute deadline and refuses a changed value, so rerunning this
+    # stage cannot reset or extend the budget.
     run evolve "$BIN/evolve" --init "$INIT" \
       --lease-start "$LEASE_START" --out "$OUT/evolve" \
       --population 32 --games 32 --generations "$GENERATIONS" --elites 4 --tournament 3 \
       --sigma-rel "$SIGMA_REL" --seed "$EVOLVE_SEED" --threads "$THREADS" \
-      --wall-seconds "${EVOLVE_WALL:-21600}" --move-cap 2000 \
+      --wall-seconds "$EVOLVE_WALL" --move-cap 2000 \
       --experiment-id "$EXPERIMENT_ID" "${evolve_extra[@]}" \
       >> "$OUT/evolve.log" 2>> "$OUT/evolve.err"
     ;;

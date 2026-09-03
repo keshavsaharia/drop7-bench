@@ -139,10 +139,15 @@ neighbourhood instead of thirty-two identical clones.
    belongs to, with a small floor so an all-zero tensor can still move.
 6. *Checkpoint, then mark complete.* The next population is written to disk
    before the generation's artifact (every game of every candidate and control,
-   one row per game) and its summary line. A crash between the two replays the
-   generation from identical inputs and produces identical output; a crash
-   after them resumes at the next generation. A `STOP` file or the wall budget
-   ends the loop at a generation boundary.
+   one row per game), which is committed atomically as the completion marker.
+   A crash before that marker replays the generation from identical inputs and
+   produces identical output. A crash after it rebuilds any missing summary or
+   plateau decision from the committed artifact before another seed can be
+   read. The plateau marker is likewise restored from committed progress if an
+   interruption landed between the decision and the marker write. A `STOP`
+   file or the wall budget ends the loop at a generation boundary; the first
+   evolve invocation pins the wall deadline in `wall-budget.json`, so a resume
+   cannot reset or extend the allowance.
 
 **After the last generation.** The eight fittest candidates of the final
 generation each replay a fresh 128-game block, and the one with the highest
@@ -399,7 +404,9 @@ The stages are driven by `scripts/pipeline.sh` (`RUN_ID=… THREADS=32
 scripts/pipeline.sh corpus|pretrain|evolve|select|screen|compare|chain`), which
 wraps every stage in `scripts/with-rusage.py` so wall, CPU and peak memory land
 in `rusage.jsonl`, opens the screen lease through `scripts/open-screen-lease.py`
-only when the candidate hash file exists, and refuses to run the screen twice.
+only when the candidate hash file exists, refuses to run the screen twice, and
+passes the original total evolve allowance on every resume while the binary's
+durable deadline prevents that allowance from starting over.
 `scripts/analyze.py --run <run>` summarises whatever artifacts exist into
 `analysis.json` and `analysis.md`.
 
