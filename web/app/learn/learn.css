@@ -1,0 +1,170 @@
+/* Learn hub, concept index and the learn/concept reading pages
+   (web/app/learn/**). Tokens only; no animation. */
+
+/* ---- hub sections ---- */
+.learn-section {
+  padding: 2.5rem 0;
+  border-top: 1px solid var(--color-rule);
+}
+.learn-hub > .learn-section:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+.learn-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  margin-bottom: 1.25rem;
+}
+.learn-section-head > div > .label {
+  display: block;
+}
+.learn-h2 {
+  margin: 0.4rem 0 0;
+  font-family: var(--font-display);
+  font-size: var(--text-h2);
+  line-height: 1.2;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  color: var(--color-ink);
+  text-wrap: balance;
+}
+.learn-section-lead {
+  max-width: var(--container-prose);
+  margin: 0.6rem 0 0;
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  color: var(--color-ink-2);
+}
+.learn-section-lead a,
+.learn-note a,
+.learn-closing a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+.learn-section-lead a:hover,
+.learn-note a:hover,
+.learn-closing a:hover {
+  text-decoration: underline;
+}
+.learn-more {
+  font-size: var(--text-small);
+  color: var(--color-accent);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.learn-more:hover {
+  text-decoration: underline;
+}
+.learn-card-wide {
+  max-width: var(--container-wide);
+}
+.learn-card-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 40rem) {
+  .learn-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 64rem) {
+  .learn-card-grid--4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.learn-note {
+  max-width: var(--container-prose);
+  margin: 1.25rem 0 0;
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+  color: var(--color-ink-3);
+}
+.learn-closing {
+  max-width: var(--container-prose);
+  margin: 2.5rem 0 0;
+  padding-top: 2rem;
+  border-top: 1px solid var(--color-rule);
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+  color: var(--color-ink-2);
+}
+.learn-empty {
+  max-width: var(--container-prose);
+  margin: 0;
+  font-size: var(--text-small);
+  color: var(--color-ink-3);
+}
+.learn-empty code {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+}
+
+/* ---- the numbered concept list (hub: two columns; index: one column) ---- */
+.concept-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 40rem) {
+  .concept-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.concept-list--index {
+  max-width: var(--container-wide);
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 40rem) {
+  .concept-list--index {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.concept-list .card-title {
+  font-size: 1.125rem;
+}
+
+/* ---- reading pages ---- */
+.learn-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 3rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--color-rule);
+}
+.learn-aside-list {
+  list-style: none;
+  margin: 0.4rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+  font-size: var(--text-small);
+}
+.learn-aside-list a {
+  color: var(--color-ink-1);
+  text-decoration: none;
+}
+.learn-aside-list a:hover {
+  color: var(--color-accent);
+}
+.learn-aside-note {
+  margin: 0.3rem 0 0;
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+  color: var(--color-ink-2);
+}
+/* In the collapsed mobile aside the <summary> already names the group list. */
+.article-toc-collapsed .toc-body > .aside-block > .label {
+  display: none;
+}

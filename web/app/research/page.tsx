@@ -1,97 +1,119 @@
+import "./research.css";
 import Link from "next/link";
+import { Card } from "@/components/Card";
+import { Markdown } from "@/components/Markdown";
+import { PageHeader } from "@/components/PageHeader";
+import { AgentMark } from "@/components/RecordAside";
+import { listDocs } from "@/lib/docs";
 import { listLogEntries } from "@/lib/log";
-import {
-  getExperiments,
-  getResults,
-  getTheories,
-  listApproaches,
-  listFamilies,
-} from "@/lib/repo";
+import { getExperiments, getResults, getTheories, listApproachesByKind, readRepoFile } from "@/lib/repo";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Research · Drop7",
+  title: "Research",
   description:
-    "Approaches, theories, experiments, and the daily research log for the Drop7 million-point program.",
+    "The working record of the Drop7 million-point program: theories, experiments, results, the daily log, diagnostics and documents.",
 };
 
+const STATUS_PATH = "docs/research/status.md";
+
+/** The document's own h1 is dropped; the section heading names it. */
+function withoutLeadingTitle(source: string): string {
+  return source.replace(/^\s*# [^\n]*\n+/, "");
+}
+
+/** "24 records", "1 record", or the empty-checkout sentence. Counts files only. */
+function countLabel(count: number, singular: string, plural: string): string {
+  if (count === 0) return "none in this checkout";
+  return `${count} ${count === 1 ? singular : plural}`;
+}
+
 export default function ResearchPage() {
-  const families = listFamilies();
-  const approachCount = families.reduce(
-    (sum, family) => sum + listApproaches(family).length,
-    0,
-  );
   const theories = getTheories();
   const experiments = getExperiments();
   const results = getResults();
-  const logEntries = listLogEntries();
-  const latestLog = logEntries[0] ?? null;
+  const latestLog = listLogEntries()[0] ?? null;
+  const diagnostics = listApproachesByKind("diagnostic");
+  const documents = listDocs();
+  const status = readRepoFile(STATUS_PATH);
 
-  const sections = [
-    {
-      href: "/approaches",
-      title: "Approaches",
-      text: "Every established strategy family, and the underlying approaches that are being investigated within each one.",
-      hint:
-        families.length === 0
-          ? "none in this checkout"
-          : `${approachCount} approaches · ${families.length} families`,
-    },
+  const cards = [
     {
       href: "/theories",
       title: "Theories",
-      text: "Registered falsifiable claims - each names a mechanism and the criteria that would refute it.",
-      hint:
-        theories.length === 0
-          ? "none in this checkout"
-          : `${theories.length} registered`,
+      summary: "Registered falsifiable claims, each with a mechanism and the criteria that would refute it.",
+      foot: countLabel(theories.length, "record", "records"),
     },
     {
       href: "/experiments",
       title: "Experiments",
-      text: "Preregistered protocols and their recorded results, with run validity and evidence tier carried through.",
-      hint:
-        experiments.length === 0
-          ? "none in this checkout"
-          : `${experiments.length} protocols · ${results.length} results`,
+      summary: "Preregistered protocols: candidate, comparator, cohort, metrics and gate, fixed before the data is read.",
+      foot: countLabel(experiments.length, "record", "records"),
+    },
+    {
+      href: "/results",
+      title: "Results",
+      summary: "Recorded outcomes, each carrying its run validity, scientific outcome and evidence tier.",
+      foot: countLabel(results.length, "record", "records"),
     },
     {
       href: "/log",
       title: "Log",
-      text: "A dated account of what was tried each day — including the things that did not work.",
-      hint: latestLog
-        ? `latest: ${latestLog.date}`
-        : "none in this checkout",
+      summary: "A dated account of what was tried each day, including what did not work.",
+      foot: latestLog ? `latest entry ${latestLog.date}` : "none in this checkout",
+    },
+    {
+      href: "/diagnostics",
+      title: "Diagnostics",
+      summary: "Measuring instruments, harnesses and model probes: the directories that measure rather than play.",
+      foot: countLabel(diagnostics.length, "page", "pages"),
+    },
+    {
+      href: "/docs",
+      title: "Documents",
+      summary: "The methodology, the benchmark contract, the ledger and the agent contracts the research is bound to.",
+      foot: countLabel(documents.length, "document", "documents"),
     },
   ];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-black text-zinc-50">Research</h1>
-        <p className="mt-1 max-w-3xl text-sm text-zinc-400">
-          The working record of the goal to build a strategy that scores an average of one million points per game. 
-          Approaches are the strategies that were implemented; theories are the claims those
-          strategies rest on; experiments are the tests that were preregistered;
-          the log has daily narratives.
+    <div>
+      <PageHeader
+        title="Research"
+        lead="The working record of the program: what is claimed, what was tested, what was measured, and the daily log. Agent-facing detail sits behind the bot-icon accordions."
+      />
+      <div className="research-note label">
+        <AgentMark />
+        <span>This section holds the machine-readable records: theories, experiments and results as registered.</span>
+      </div>
+
+      <section className="research-section research-status" aria-labelledby="research-status-heading">
+        <h2 id="research-status-heading" className="research-h2">
+          Where the research stands
+        </h2>
+        {status ? (
+          <Markdown source={withoutLeadingTitle(status)} fromPath={STATUS_PATH} />
+        ) : (
+          <p className="record-empty">The status document is not present in this checkout.</p>
+        )}
+        <p className="research-status-foot">
+          <Link href="/docs/research/status">Open the status document</Link>
         </p>
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        {sections.map((section) => (
-          <Link
-            key={section.href}
-            href={section.href}
-            className="group rounded-xl border border-zinc-800 bg-zinc-900/50 p-5 hover:border-sky-800"
-          >
-            <h2 className="font-bold text-zinc-100 group-hover:text-sky-300">
-              {section.title}
-            </h2>
-            <p className="mt-1 text-sm text-zinc-400">{section.text}</p>
-            <p className="mt-3 text-xs text-zinc-600">{section.hint}</p>
-          </Link>
-        ))}
-      </div>
+      </section>
+
+      <section className="research-section" aria-labelledby="research-records-heading">
+        <h2 id="research-records-heading" className="research-h2">
+          The record
+        </h2>
+        <ul className="research-cards">
+          {cards.map((card) => (
+            <li key={card.href}>
+              <Card href={card.href} heading="h3" title={card.title} summary={card.summary} foot={card.foot} />
+            </li>
+          ))}
+        </ul>
+      </section>
     </div>
   );
 }

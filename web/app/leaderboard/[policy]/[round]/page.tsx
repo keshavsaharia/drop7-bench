@@ -1,5 +1,6 @@
-import Link from "next/link";
+import "../../../app.css";
 import { notFound } from "next/navigation";
+import { PageHeader } from "@/components/PageHeader";
 import { ReplayPlayer } from "@/components/ReplayPlayer";
 import { loadLeaderboard, loadReplay } from "@/lib/leaderboard";
 
@@ -19,26 +20,19 @@ export default async function ReplayPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <Link
-          href="/leaderboard"
-          className="text-sm text-sky-400 hover:text-sky-300"
-        >
-          ← Leaderboard
-        </Link>
-        <h1 className="mt-1 text-2xl font-black text-zinc-50">
-          {policy?.name ?? policyId} on {round?.name ?? roundId}
-        </h1>
-        <p className="mt-1 text-sm text-zinc-400">
-          Final score{" "}
-          <strong className="text-zinc-100">{game.score.toLocaleString()}</strong>{" "}
-          over {game.moves} moves
-          {game.censored ? " (censored at the move cap)" : ""}. Every disc and
-          every gray-disc value is predetermined by the round script; replaying
-          the same policy always produces this exact game. Checksum{" "}
-          <code className="rounded bg-zinc-800 px-1 text-xs">{game.checksum}</code>
-        </p>
-      </div>
+      <PageHeader
+        crumbs={[{ href: "/leaderboard", label: "leaderboard" }]}
+        title={`${policy?.name ?? policyId} on ${round?.name ?? roundId}`}
+        lead={
+          <>
+            Final score <strong className="text-ink">{game.score.toLocaleString()}</strong> over{" "}
+            {game.moves} moves
+            {game.censored ? " (censored at the move cap)" : ""}. Every disc and every gray-disc
+            value is predetermined by the round script; replaying the same policy always produces
+            this exact game. Checksum <code className="app-code">{game.checksum}</code>
+          </>
+        }
+      />
       <ReplayPlayer game={game} />
     </div>
   );

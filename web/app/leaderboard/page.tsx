@@ -1,5 +1,9 @@
+import "../app.css";
 import Link from "next/link";
-import { ShimmerButton } from "@/components/ShimmerButton";
+import { Badge } from "@/components/Badge";
+import { Callout } from "@/components/Board";
+import { Button } from "@/components/Button";
+import { PageHeader } from "@/components/PageHeader";
 import {
   loadCompetitionLeaderboard,
   type CompetitionLeaderboardEntry,
@@ -51,17 +55,17 @@ export default async function LeaderboardPage({
     return (
       <div className="space-y-8">
         {competition}
-        <div className="max-w-2xl rounded-xl border border-amber-800 bg-amber-950/40 p-5 text-sm text-amber-100">
-          <p className="font-semibold">No benchmark data yet.</p>
-          <p className="mt-2">Run the scripted-round benchmark from the repository root:</p>
-          <pre className="mt-2 rounded-lg bg-zinc-950 p-3 text-zinc-200">
-            <code>npm run bench</code>
-          </pre>
-          <p className="mt-2">
-            Then refresh this page. Use{" "}
-            <code>npm run bench -- --all</code> to include the slow reference
-            policies (expectimax D3/D4).
-          </p>
+        <div className="max-w-prose">
+          <Callout title="No benchmark data yet" tone="warn">
+            <p>Run the scripted-round benchmark from the repository root:</p>
+            <pre className="mt-2 rounded-md bg-raised p-3 text-ink-1">
+              <code>npm run bench</code>
+            </pre>
+            <p className="mt-2">
+              Then refresh this page. Use <code>npm run bench -- --all</code> to include the slow
+              reference policies (expectimax D3/D4).
+            </p>
+          </Callout>
         </div>
       </div>
     );
@@ -86,88 +90,86 @@ export default async function LeaderboardPage({
     <div className="space-y-8">
       {competition}
       <section>
-        <h1 className="text-2xl font-black text-zinc-50">
+        <h2 className="text-h2 font-display font-semibold text-ink">
           Computer policy leaderboard
-        </h1>
-        <p className="mt-2 max-w-3xl text-sm text-zinc-400">
+        </h2>
+        <p className="mt-2 max-w-prose text-small text-ink-2">
           Every autonomous policy plays the exact same predetermined rounds. The visible
           disc sequence is fixed by move number, and every gray disc hides a
           fixed value that takes its place when revealed. Two policies therefore
           face identical randomness on every move.{" "}
-          <Link href="/learn/benchmarking" className="text-sky-400 hover:text-sky-300">
+          <Link href="/learn/benchmarking" className="text-accent hover:underline">
             How the benchmark works →
           </Link>
         </p>
-        <p className="mt-1 text-xs text-zinc-600">
+        <p className="mt-1 text-caption text-ink-3">
           Playground evidence only. These competitions do not support qualification claims as per the{" "}
-          <Link href="/docs/benchmarks" className="text-zinc-500 underline underline-offset-2 hover:text-zinc-300">
+          <Link href="/docs/benchmarks" className="underline underline-offset-2 hover:text-ink-1">
             benchmark guidelines
           </Link>.
         </p>
       </section>
 
-      <section className="overflow-x-auto rounded-xl border border-zinc-800">
-        <table className="w-full border-collapse text-sm">
+      <section className="overflow-x-auto rounded-lg border border-rule">
+        <table className="w-full border-collapse text-small">
           <thead>
-            <tr className="bg-zinc-900 text-left text-xs uppercase tracking-wide text-zinc-500">
-              <th className="px-3 py-2">#</th>
-              <th className="px-3 py-2">Policy</th>
-              <th className="px-3 py-2 text-right">Mean</th>
-              <th className="px-3 py-2 text-right">Median</th>
-              <th className="px-3 py-2 text-right">Min</th>
-              <th className="px-3 py-2 text-right">Max</th>
-              <th className="px-3 py-2 text-right">Moves</th>
+            <tr className="bg-raised text-left">
+              <th className="label px-3 py-2">#</th>
+              <th className="label px-3 py-2">Policy</th>
+              <th className="label px-3 py-2 text-right">Mean</th>
+              <th className="label px-3 py-2 text-right">Median</th>
+              <th className="label px-3 py-2 text-right">Min</th>
+              <th className="label px-3 py-2 text-right">Max</th>
+              <th className="label px-3 py-2 text-right">Moves</th>
               {data.rounds.map((round) => (
-                <th key={round.id} className="px-3 py-2 text-right" title={round.name}>
+                <th key={round.id} className="label px-3 py-2 text-right" title={round.name}>
                   {round.id.replace("gauntlet-", "G")}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody>
+          <tbody className="tabular">
             {rank.map((summary, index) => {
               const policy = data.policies.find((p) => p.id === summary.policyId);
               return (
                 <tr
                   key={summary.policyId}
-                  className="border-t border-zinc-800 hover:bg-zinc-900/60"
+                  className="border-t border-rule transition-colors hover:bg-hover"
                 >
-                  <td className="px-3 py-2 text-zinc-500">{index + 1}</td>
+                  <td className="px-3 py-2 text-ink-3">{index + 1}</td>
                   <td className="px-3 py-2">
-                    <div className="font-semibold text-zinc-100">
+                    <div className="flex flex-wrap items-center gap-2 font-semibold text-ink">
                       {policy?.name ?? summary.policyId}
                       {policy && !policy.publicInformation && (
-                        <span
-                          className="ml-2 rounded bg-amber-900/60 px-1.5 py-0.5 text-[10px] font-medium text-amber-200"
+                        <Badge
+                          label="extended state"
                           title="Reads level/move number in addition to the strict public state"
-                        >
-                          extended state
-                        </span>
+                        />
                       )}
                     </div>
-                    <div className="text-xs text-zinc-500">{policy?.family}</div>
+                    <div className="text-caption text-ink-3">{policy?.family}</div>
                     {policy?.researchPath && (
                       <Link
                         href={policy.researchPath}
-                        className="text-xs text-sky-500 hover:text-sky-300"
+                        className="text-caption text-accent hover:underline"
                       >
                         Research →
                       </Link>
                     )}
                   </td>
-                  <td className="px-3 py-2 text-right font-bold text-zinc-50">
+                  <td className="px-3 py-2 text-right font-semibold text-ink">
                     {fmt(summary.meanScore)}
                   </td>
-                  <td className="px-3 py-2 text-right text-zinc-300">
+                  <td className="px-3 py-2 text-right text-ink-1">
                     {fmt(summary.medianScore)}
                   </td>
-                  <td className="px-3 py-2 text-right text-zinc-400">
+                  <td className="px-3 py-2 text-right text-ink-2">
                     {fmt(summary.minimumScore)}
                   </td>
-                  <td className="px-3 py-2 text-right text-zinc-400">
+                  <td className="px-3 py-2 text-right text-ink-2">
                     {fmt(summary.maximumScore)}
                   </td>
-                  <td className="px-3 py-2 text-right text-zinc-400">
+                  <td className="px-3 py-2 text-right text-ink-2">
                     {summary.meanMoves === null ? "—" : summary.meanMoves.toFixed(1)}
                   </td>
                   {data.rounds.map((round) => {
@@ -176,7 +178,7 @@ export default async function LeaderboardPage({
                     );
                     if (!game) {
                       return (
-                        <td key={round.id} className="px-3 py-2 text-right text-zinc-700">
+                        <td key={round.id} className="px-3 py-2 text-right text-ink-4">
                           —
                         </td>
                       );
@@ -188,8 +190,8 @@ export default async function LeaderboardPage({
                           href={`/leaderboard/${summary.policyId}/${round.id}`}
                           className={`hover:underline ${
                             isBest
-                              ? "font-bold text-emerald-400"
-                              : "text-zinc-300"
+                              ? "font-semibold text-status-completed"
+                              : "text-ink-1"
                           }`}
                           title={`Replay ${policy?.name} on ${round.name} (${game.moves} moves)`}
                         >
@@ -206,38 +208,38 @@ export default async function LeaderboardPage({
       </section>
 
       <section>
-        <h2 className="mb-3 text-lg font-bold text-zinc-100">Flow diagnostics</h2>
-        <div className="overflow-x-auto rounded-xl border border-zinc-800">
-          <table className="w-full border-collapse text-sm">
+        <h2 className="mb-3 text-h3 font-display font-semibold text-ink">Flow diagnostics</h2>
+        <div className="overflow-x-auto rounded-lg border border-rule">
+          <table className="w-full border-collapse text-small">
             <thead>
-              <tr className="bg-zinc-900 text-left text-xs uppercase tracking-wide text-zinc-500">
-                <th className="px-3 py-2">Policy</th>
-                <th className="px-3 py-2 text-right">Clears / move</th>
-                <th className="px-3 py-2 text-right">Reveals / move</th>
-                <th className="px-3 py-2 text-right">Max chain</th>
-                <th className="px-3 py-2 text-right">Censored</th>
-                <th className="px-3 py-2 text-right">Illegal</th>
-                <th className="px-3 py-2 text-right">Compute</th>
+              <tr className="bg-raised text-left">
+                <th className="label px-3 py-2">Policy</th>
+                <th className="label px-3 py-2 text-right">Clears / move</th>
+                <th className="label px-3 py-2 text-right">Reveals / move</th>
+                <th className="label px-3 py-2 text-right">Max chain</th>
+                <th className="label px-3 py-2 text-right">Censored</th>
+                <th className="label px-3 py-2 text-right">Illegal</th>
+                <th className="label px-3 py-2 text-right">Compute</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="tabular">
               {rank.map((summary) => {
                 const policy = data.policies.find((p) => p.id === summary.policyId);
                 return (
-                  <tr key={summary.policyId} className="border-t border-zinc-800">
-                    <td className="px-3 py-2 text-zinc-200">{policy?.name ?? summary.policyId}</td>
-                    <td className="px-3 py-2 text-right text-zinc-300">
+                  <tr key={summary.policyId} className="border-t border-rule">
+                    <td className="px-3 py-2 text-ink">{policy?.name ?? summary.policyId}</td>
+                    <td className="px-3 py-2 text-right text-ink-1">
                       {summary.meanClearsPerMove.toFixed(2)}
-                      <span className="ml-1 text-xs text-zinc-600">/ 2.40 target</span>
+                      <span className="ml-1 text-caption text-ink-3">/ 2.40 target</span>
                     </td>
-                    <td className="px-3 py-2 text-right text-zinc-300">
+                    <td className="px-3 py-2 text-right text-ink-1">
                       {summary.meanRevealsPerMove.toFixed(2)}
-                      <span className="ml-1 text-xs text-zinc-600">/ 1.40 target</span>
+                      <span className="ml-1 text-caption text-ink-3">/ 1.40 target</span>
                     </td>
-                    <td className="px-3 py-2 text-right text-zinc-300">{summary.maxChain}</td>
-                    <td className="px-3 py-2 text-right text-zinc-400">{summary.censoredGames}</td>
-                    <td className="px-3 py-2 text-right text-zinc-400">{summary.illegalMoves}</td>
-                    <td className="px-3 py-2 text-right text-zinc-400">
+                    <td className="px-3 py-2 text-right text-ink-1">{summary.maxChain}</td>
+                    <td className="px-3 py-2 text-right text-ink-2">{summary.censoredGames}</td>
+                    <td className="px-3 py-2 text-right text-ink-2">{summary.illegalMoves}</td>
+                    <td className="px-3 py-2 text-right text-ink-2">
                       {(summary.elapsedMs / 1000).toFixed(1)}s
                     </td>
                   </tr>
@@ -246,7 +248,7 @@ export default async function LeaderboardPage({
             </tbody>
           </table>
         </div>
-        <p className="mt-2 text-xs text-zinc-600">
+        <p className="mt-2 max-w-prose text-caption text-ink-3">
           The 2.4 clears / 1.4 reveals per move figures are diagnostic targets
           from limited task-record runs, not proven thresholds. Click any score
           above to replay that game move by move.
@@ -339,32 +341,25 @@ function CompetitionLeaderboard({
 
   return (
     <section className="space-y-4">
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-400">
+      <PageHeader
+        title="Human + AI leaderboard"
+        lead={`Every entry is scored on ${selectedGame.manifest.roundId}. Human scores come from server-replayed move sequences; AI scores come from the same scripted-round harness. This is a reproducible playground, not research-tier evidence.`}
+      >
+        <span className="label">
           {selectedGame.manifest.name} · {selectedGame.manifest.gameVersion}
-        </p>
-        <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-black text-zinc-50">Human + AI leaderboard</h1>
-            <p className="mt-2 max-w-3xl text-sm text-zinc-400">
-              Every entry is scored on {selectedGame.manifest.roundId}. Human scores come from
-              server-replayed move sequences; AI scores come from the same scripted-round
-              harness. This is a reproducible playground, not research-tier evidence.
-            </p>
-          </div>
-          <ShimmerButton
-            href={
-              selectedGame.gameKey === COMPETITION_GAME_KEY
-                ? "/compete"
-                : "/leaderboard"
-            }
-          >
-            {selectedGame.gameKey === COMPETITION_GAME_KEY
-              ? "Play this game →"
-              : "Current competition →"}
-          </ShimmerButton>
-        </div>
-      </div>
+        </span>
+        <Button
+          href={
+            selectedGame.gameKey === COMPETITION_GAME_KEY
+              ? "/compete"
+              : "/leaderboard"
+          }
+        >
+          {selectedGame.gameKey === COMPETITION_GAME_KEY
+            ? "Play this game →"
+            : "Current competition →"}
+        </Button>
+      </PageHeader>
 
       {games.length > 1 && (
         <div className="flex flex-wrap gap-2" aria-label="Competition game">
@@ -373,12 +368,7 @@ function CompetitionLeaderboard({
               key={game.gameKey}
               href={leaderboardHref(filter, game.gameKey)}
               aria-current={game.gameKey === selectedGame.gameKey ? "page" : undefined}
-              className={
-                "rounded-md border px-3 py-2 text-xs " +
-                (game.gameKey === selectedGame.gameKey
-                  ? "border-sky-500/70 bg-sky-500/10 text-sky-200"
-                  : "border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300")
-              }
+              className="app-chip"
             >
               {game.manifest.name}
               {game.gameKey !== COMPETITION_GAME_KEY ? " · archived" : " · current"}
@@ -393,73 +383,64 @@ function CompetitionLeaderboard({
             key={option}
             href={leaderboardHref(option, selectedGame.gameKey)}
             aria-current={filter === option ? "page" : undefined}
-            className={
-              "rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide " +
-              (filter === option
-                ? "border-sky-400 bg-sky-500/15 text-sky-200"
-                : "border-zinc-700 text-zinc-500 hover:border-zinc-500 hover:text-zinc-300")
-            }
+            className="app-chip"
           >
             {option === "all" ? "Humans + AI" : option === "human" ? "Humans only" : "AI only"}
           </Link>
         ))}
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-zinc-800">
-        <table className="w-full border-collapse text-sm">
+      <div className="overflow-x-auto rounded-lg border border-rule">
+        <table className="w-full border-collapse text-small">
           <thead>
-            <tr className="bg-zinc-900 text-left text-xs uppercase tracking-wide text-zinc-500">
-              <th className="px-3 py-2">#</th>
-              <th className="px-3 py-2">Player</th>
-              <th className="px-3 py-2">Type</th>
-              <th className="px-3 py-2 text-right">Verified score</th>
-              <th className="px-3 py-2 text-right">Moves</th>
+            <tr className="bg-raised text-left">
+              <th className="label px-3 py-2">#</th>
+              <th className="label px-3 py-2">Player</th>
+              <th className="label px-3 py-2">Type</th>
+              <th className="label px-3 py-2 text-right">Verified score</th>
+              <th className="label px-3 py-2 text-right">Moves</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="tabular">
             {entries.map((entry, index) => (
-              <tr key={entry.id} className="border-t border-zinc-800 hover:bg-zinc-900/60">
-                <td className="px-3 py-2 text-zinc-500">{index + 1}</td>
+              <tr
+                key={entry.id}
+                className="border-t border-rule transition-colors hover:bg-hover"
+              >
+                <td className="px-3 py-2 text-ink-3">{index + 1}</td>
                 <td className="px-3 py-2">
-                  <Link href={entry.href} className="font-semibold text-zinc-100 hover:text-sky-300">
+                  <Link href={entry.href} className="font-semibold text-ink hover:text-accent">
                     {entry.name}
                   </Link>
-                  <div className="text-xs text-zinc-600">{entry.detail}</div>
+                  <div className="text-caption text-ink-3">{entry.detail}</div>
                   {entry.researchUrl && (
-                    <a
-                      href={entry.researchUrl}
-                      className="text-xs text-sky-500 hover:text-sky-300"
-                    >
+                    <a href={entry.researchUrl} className="text-caption text-accent hover:underline">
                       Research →
                     </a>
                   )}
                 </td>
                 <td className="px-3 py-2">
-                  <span
-                    className={
-                      "rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide " +
-                      (entry.kind === "human"
-                        ? "bg-blue-950 text-blue-300"
-                        : "bg-sky-950 text-sky-300")
-                    }
-                  >
+                  <span className="app-kind" data-kind={entry.kind}>
                     {entry.kind}
                   </span>
                   {entry.scoreMismatch && (
-                    <span className="ml-2 rounded bg-amber-950 px-1.5 py-0.5 text-[10px] text-amber-300">
-                      client mismatch
+                    <span className="ml-2">
+                      <Badge
+                        label="client mismatch"
+                        title="The client-reported score differed from the replayed score"
+                      />
                     </span>
                   )}
                 </td>
-                <td className="px-3 py-2 text-right font-bold text-zinc-50">
+                <td className="px-3 py-2 text-right font-semibold text-ink">
                   {entry.score.toLocaleString()}
                 </td>
-                <td className="px-3 py-2 text-right text-zinc-400">{entry.moves}</td>
+                <td className="px-3 py-2 text-right text-ink-2">{entry.moves}</td>
               </tr>
             ))}
             {entries.length === 0 && (
-              <tr className="border-t border-zinc-800">
-                <td colSpan={5} className="px-3 py-8 text-center text-zinc-500">
+              <tr className="border-t border-rule">
+                <td colSpan={5} className="px-3 py-8 text-center text-ink-3">
                   {!ledgerAvailable
                     ? "The competition ledger is unavailable in this local checkout."
                     : "No entries in this filter yet."}

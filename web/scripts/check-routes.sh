@@ -5,7 +5,10 @@
 set -u
 BASE="${1:-http://localhost:3000}"
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-routes=( / /play /compete /leaderboard /research /approaches /theories /experiments /log /learn /learn/concepts /src /docs /privacy /terms /docs/research/status /docs/methodology /docs/benchmarks /docs/strategies /docs/research/experiment-index )
+routes=( / /play /compete /leaderboard /research /approaches "/approaches?view=family" /theories /experiments /results /log /learn /learn/concepts /learn/techniques /engines /engines/typescript /engines/native /engines/fast /engines/scenario /engines/rust /diagnostics /src /docs /privacy /terms /docs/research/status /docs/methodology /docs/benchmarks /docs/strategies /docs/research/experiment-index )
+for t in expectimax heuristic-evaluation q-learning n-tuple nnue policy-gradient evolution mcts rollout-policy-iteration oracle-distillation risk-survival afterstate constructive-planning determinization; do routes+=("/approaches/technique/$t"); done
+for p in "$ROOT"/web/content/learn/techniques/*.mdx; do [ -f "$p" ] && routes+=("/learn/techniques/$(basename "$p" .mdx)"); done
+for r in "$ROOT"/research/results/RS-*.json; do [ -f "$r" ] && routes+=("/results/$(basename "$r" .json)"); done
 for f in "$ROOT"/approaches/*/; do fam=$(basename "$f"); routes+=("/approaches/$fam"); for a in "$f"*/; do [ -d "$a" ] && routes+=("/approaches/$fam/$(basename "$a")"); done; done
 for t in "$ROOT"/research/theories/TH-*.json; do routes+=("/theories/$(basename "$t" .json)"); done
 for e in "$ROOT"/research/experiments/EX-*.json; do routes+=("/experiments/$(basename "$e" .json)"); done

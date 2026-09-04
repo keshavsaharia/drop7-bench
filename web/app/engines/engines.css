@@ -1,0 +1,320 @@
+/*
+ * Engines section (web/app/engines/**) and the Diagnostics index
+ * (web/app/diagnostics). Tokens only. Imported by the pages themselves.
+ *
+ * The diagrams in web/components/Engines.tsx carry `data-anim` on every
+ * animated element; the SVG attributes describe the resting frame, so the
+ * reduced-motion rule at the bottom turns motion off and leaves a complete
+ * picture.
+ */
+
+/* ---- index sections ---- */
+.engine-section {
+  margin-top: 3.5rem;
+}
+.engine-section > .label {
+  display: block;
+  margin-bottom: 0.75rem;
+}
+.engine-section > h2,
+.diag-group > h2 {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-display);
+  font-size: var(--text-h2);
+  line-height: var(--text-h2--line-height);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+}
+.engine-section > .prose-drop7 {
+  margin-bottom: 1.5rem;
+}
+.engine-note,
+.diag-group > p {
+  max-width: var(--container-prose);
+  margin: 0 0 1.25rem;
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  color: var(--color-ink-1);
+  text-wrap: pretty;
+}
+.engine-note a,
+.diag-group > p a,
+.engine-caveat a {
+  color: var(--color-accent);
+}
+
+/* ---- card grids ---- */
+.engine-grid,
+.diag-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  gap: 1.25rem;
+}
+.engine-grid--compact {
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  margin-top: 1.25rem;
+}
+.engine-grid--small {
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+/* label / value pairs on an engine card */
+.engine-card dl {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  column-gap: 0.75rem;
+  row-gap: 0.3rem;
+  margin: 0.85rem 0 0;
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+}
+.engine-card dt {
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  line-height: var(--text-caption--line-height);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--color-ink-3);
+}
+.engine-card dd {
+  margin: 0;
+  color: var(--color-ink-1);
+}
+
+/* ---- side-by-side comparison ---- */
+.engine-compare {
+  margin-top: 1.25rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.engine-compare .data-table {
+  min-width: 84rem;
+  font-size: var(--text-caption);
+}
+.engine-compare th {
+  white-space: nowrap;
+}
+.engine-compare td {
+  min-width: 7rem;
+}
+.engine-compare td:last-child {
+  min-width: 17rem;
+}
+.engine-compare .engine-compare-quantity {
+  white-space: nowrap;
+  font-weight: 500;
+  color: var(--color-ink);
+}
+.engine-compare .muted {
+  color: var(--color-ink-3);
+}
+.engine-compare-src {
+  display: block;
+  margin-top: 0.2rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  line-height: 1.3;
+  color: var(--color-ink-3);
+}
+.engine-compare-sources {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  line-height: 1.3;
+}
+.engine-compare-sources a {
+  color: var(--color-accent);
+  text-decoration: none;
+  overflow-wrap: break-word;
+}
+.engine-compare-sources a:hover {
+  text-decoration: underline;
+}
+.engine-compare-sources code {
+  font-family: inherit;
+  color: var(--color-ink-2);
+  overflow-wrap: break-word;
+}
+.engine-caveat {
+  max-width: var(--container-prose);
+  margin: 1rem 0 0;
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+  color: var(--color-ink-2);
+}
+
+/* ---- engine page ---- */
+.engine-hero {
+  max-width: var(--container-prose);
+  aspect-ratio: 16 / 7;
+  margin: 0 0 2rem;
+  padding: 0;
+  overflow: hidden;
+  background: var(--color-cell);
+}
+.engine-hero > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.engine-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 3rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--color-rule);
+}
+.engine-aside-list {
+  list-style: none;
+  margin: 0.4rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+}
+.engine-aside-list a {
+  color: var(--color-ink-1);
+  text-decoration: none;
+}
+.engine-aside-list a:hover {
+  color: var(--color-accent);
+}
+.engine-aside-list code {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  color: var(--color-ink-2);
+  overflow-wrap: anywhere;
+}
+.engine-aside-empty {
+  margin: 0.3rem 0 0;
+  font-size: var(--text-small);
+  color: var(--color-ink-3);
+}
+.engine-source-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+/* ---- diagnostics index ---- */
+.diag-group {
+  margin-top: 3rem;
+}
+.diag-group:first-of-type {
+  margin-top: 0;
+}
+.diag-group .card-labels {
+  margin-top: 0.75rem;
+}
+
+/* ---- diagrams (web/components/Engines.tsx) ---- */
+.engine-diagram {
+  --engine-diagram-duration: calc(var(--duration-art) * 2);
+}
+.engine-diagram svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.engine-section > .engine-diagram {
+  max-width: var(--container-wide);
+}
+.engine-diagram [data-anim] {
+  animation-duration: var(--engine-diagram-duration);
+  animation-timing-function: var(--ease-standard);
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+.engine-diagram--parity {
+  --engine-diagram-duration: calc(var(--duration-art) * 4);
+}
+
+.engine-diagram [data-anim="lit"] { animation-name: engines-lit; }
+.engine-diagram [data-anim="fall"] { animation-name: engines-fall; }
+.engine-diagram [data-anim="fade-in"] { animation-name: engines-fade-in; }
+.engine-diagram [data-anim="hit"] { animation-name: engines-hit; }
+.engine-diagram [data-anim="cursor"] { animation-name: engines-cursor; animation-timing-function: steps(1, end); }
+
+.engine-diagram [data-anim="check-1"] { animation-name: engines-check-1; }
+.engine-diagram [data-anim="check-2"] { animation-name: engines-check-2; }
+.engine-diagram [data-anim="check-3"] { animation-name: engines-check-3; }
+.engine-diagram [data-anim="check-4"] { animation-name: engines-check-4; }
+.engine-diagram [data-anim="check-5"] { animation-name: engines-check-5; }
+.engine-diagram [data-anim="check-6"] { animation-name: engines-check-6; }
+.engine-diagram [data-anim="check-7"] { animation-name: engines-check-7; }
+.engine-diagram [data-anim="check-8"] { animation-name: engines-check-8; }
+
+.engine-diagram [data-anim="count-0"] { animation-name: engines-count-0; }
+.engine-diagram [data-anim="count-1"] { animation-name: engines-count-1; }
+.engine-diagram [data-anim="count-2"] { animation-name: engines-count-2; }
+.engine-diagram [data-anim="count-3"] { animation-name: engines-count-3; }
+.engine-diagram [data-anim="count-4"] { animation-name: engines-count-4; }
+.engine-diagram [data-anim="count-5"] { animation-name: engines-count-5; }
+.engine-diagram [data-anim="count-6"] { animation-name: engines-count-6; }
+.engine-diagram [data-anim="count-7"] { animation-name: engines-count-7; }
+.engine-diagram [data-anim="count-8"] { animation-name: engines-count-8; }
+
+@keyframes engines-lit {
+  0%, 15% { opacity: 0; }
+  35%, 85% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes engines-fall {
+  0%, 30% { transform: translate(0, -26px); }
+  55%, 100% { transform: translate(0, 0); }
+}
+@keyframes engines-fade-in {
+  0%, 40% { opacity: 0; }
+  60%, 100% { opacity: 1; }
+}
+@keyframes engines-hit {
+  0%, 55% { opacity: 0; }
+  70%, 100% { opacity: 1; }
+}
+/* the cursor rests over the last disc; the loop walks it there from the first */
+@keyframes engines-cursor {
+  0% { transform: translate(-238px, 0); }
+  11% { transform: translate(-204px, 0); }
+  22% { transform: translate(-170px, 0); }
+  33% { transform: translate(-136px, 0); }
+  44% { transform: translate(-102px, 0); }
+  55% { transform: translate(-68px, 0); }
+  66% { transform: translate(-34px, 0); }
+  77%, 100% { transform: translate(0, 0); }
+}
+@keyframes engines-check-1 { 0%, 7% { opacity: 0; } 11%, 100% { opacity: 1; } }
+@keyframes engines-check-2 { 0%, 18% { opacity: 0; } 22%, 100% { opacity: 1; } }
+@keyframes engines-check-3 { 0%, 29% { opacity: 0; } 33%, 100% { opacity: 1; } }
+@keyframes engines-check-4 { 0%, 40% { opacity: 0; } 44%, 100% { opacity: 1; } }
+@keyframes engines-check-5 { 0%, 51% { opacity: 0; } 55%, 100% { opacity: 1; } }
+@keyframes engines-check-6 { 0%, 62% { opacity: 0; } 66%, 100% { opacity: 1; } }
+@keyframes engines-check-7 { 0%, 73% { opacity: 0; } 77%, 100% { opacity: 1; } }
+@keyframes engines-check-8 { 0%, 84% { opacity: 0; } 88%, 100% { opacity: 1; } }
+
+@keyframes engines-count-0 { 0%, 10% { opacity: 1; } 11%, 100% { opacity: 0; } }
+@keyframes engines-count-1 { 0%, 10% { opacity: 0; } 11%, 21% { opacity: 1; } 22%, 100% { opacity: 0; } }
+@keyframes engines-count-2 { 0%, 21% { opacity: 0; } 22%, 32% { opacity: 1; } 33%, 100% { opacity: 0; } }
+@keyframes engines-count-3 { 0%, 32% { opacity: 0; } 33%, 43% { opacity: 1; } 44%, 100% { opacity: 0; } }
+@keyframes engines-count-4 { 0%, 43% { opacity: 0; } 44%, 54% { opacity: 1; } 55%, 100% { opacity: 0; } }
+@keyframes engines-count-5 { 0%, 54% { opacity: 0; } 55%, 65% { opacity: 1; } 66%, 100% { opacity: 0; } }
+@keyframes engines-count-6 { 0%, 65% { opacity: 0; } 66%, 76% { opacity: 1; } 77%, 100% { opacity: 0; } }
+@keyframes engines-count-7 { 0%, 76% { opacity: 0; } 77%, 87% { opacity: 1; } 88%, 100% { opacity: 0; } }
+@keyframes engines-count-8 { 0%, 87% { opacity: 0; } 88%, 100% { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .engine-diagram [data-anim] {
+    animation: none !important;
+  }
+}

@@ -1,0 +1,533 @@
+/*
+ * The Approaches section (web/app/approaches/**): the filter rows and card
+ * grid of the index, the technique group and family pages, and the approach
+ * page template. Scoped blocks only, tokens only. The card shell, badges,
+ * reveals and technique art keep their own blocks in globals.css and
+ * technique-art/art.css.
+ */
+
+/* ---- Filter rows (links, not state) ------------------------------------ */
+.approaches-filters {
+  display: grid;
+  gap: 0.6rem;
+  margin: -1rem 0 1.5rem;
+  padding: 1rem 0 1.1rem;
+  border-top: 1px solid var(--color-rule);
+  border-bottom: 1px solid var(--color-rule);
+}
+.approaches-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+.approaches-filter-row > .label {
+  flex: none;
+  min-width: 5.5rem;
+}
+.approaches-filters .chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.28rem 0.65rem;
+  border: 1px solid var(--color-rule);
+  border-radius: 9999px;
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-ink-2);
+  background: var(--color-surface);
+  text-decoration: none;
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard);
+}
+.approaches-filters .chip:hover {
+  border-color: var(--color-rule-strong);
+  color: var(--color-ink);
+}
+.approaches-filters .chip[aria-pressed="true"] {
+  border-color: transparent;
+  background: var(--color-accent-soft);
+  color: var(--color-ink);
+}
+.approaches-filter-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  margin-top: 0.25rem;
+}
+.approaches-caption {
+  margin: 0;
+  font-size: var(--text-caption);
+  color: var(--color-ink-3);
+}
+.approaches-search {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.approaches-search input {
+  width: min(18rem, 70vw);
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  background: var(--color-raised);
+  font-size: var(--text-small);
+  color: var(--color-ink);
+}
+.approaches-search input::placeholder {
+  color: var(--color-ink-3);
+}
+.approaches-search input:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+.approaches-search-count {
+  font-size: var(--text-caption);
+  color: var(--color-ink-3);
+  white-space: nowrap;
+}
+.approaches-empty {
+  max-width: var(--container-prose);
+  margin: 2rem 0;
+  font-size: var(--text-small);
+  color: var(--color-ink-2);
+}
+
+/* ---- Groups and the card grid ------------------------------------------ */
+.approach-group {
+  margin-top: 2.75rem;
+}
+.approach-group:first-child {
+  margin-top: 1.5rem;
+}
+.approach-group[hidden] {
+  display: none;
+}
+.approach-group-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.25rem 1.5rem;
+  align-items: baseline;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-rule);
+}
+.approach-group-title {
+  grid-column: 1;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-h3);
+  line-height: 1.25;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+}
+.approach-group-title a {
+  color: inherit;
+  text-decoration: none;
+}
+.approach-group-title a:hover {
+  color: var(--color-accent);
+}
+.approach-group-line {
+  grid-column: 1;
+  max-width: var(--container-prose);
+  margin: 0;
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+  color: var(--color-ink-2);
+}
+.approach-group-more {
+  grid-column: 2;
+  grid-row: 1;
+  color: var(--color-accent);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.approach-group-more:hover {
+  color: var(--color-ink);
+}
+@media (max-width: 40rem) {
+  .approach-group-head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .approach-group-more {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}
+.approach-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  gap: 1.25rem;
+}
+/* Eighty-six cards, each holding a detailed inline SVG, is a lot of DOM for one
+   page. Off-screen cards skip layout and paint until they are scrolled near;
+   `auto` remembers the height each one last had, so nothing jumps. */
+.card-wrap {
+  display: grid;
+  min-width: 0;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 26rem;
+}
+.card-wrap[hidden] {
+  display: none;
+}
+/* Seven starting points, coprime with the two-, three- and four-column
+   layouts, so no row or column of the grid animates in unison. Each is a
+   share of that card's own cycle, so the spread still covers a slow art as
+   well as a quick one and no two neighbours hold their last frame at the same
+   time. The value is read by the shared `.tart` contract in
+   technique-art/art.css. */
+.card-wrap:nth-child(7n + 1) { --tart-phase: 0; }
+.card-wrap:nth-child(7n + 2) { --tart-phase: -0.71; }
+.card-wrap:nth-child(7n + 3) { --tart-phase: -0.25; }
+.card-wrap:nth-child(7n + 4) { --tart-phase: -0.85; }
+.card-wrap:nth-child(7n + 5) { --tart-phase: -0.37; }
+.card-wrap:nth-child(7n + 6) { --tart-phase: -0.51; }
+.card-wrap:nth-child(7n + 7) { --tart-phase: -0.15; }
+.card-featured {
+  margin-left: 0.6rem;
+  color: var(--color-accent);
+}
+
+/* ---- Technique group page ---------------------------------------------- */
+.technique-hero {
+  max-width: var(--container-prose);
+  margin: -0.5rem 0 2rem;
+  padding: 0.75rem;
+  background: var(--color-cell);
+}
+.technique-hero .tart {
+  width: min(100%, 32rem);
+  margin-inline: auto;
+  aspect-ratio: 16 / 9;
+  height: auto;
+}
+.technique-about {
+  max-width: var(--container-prose);
+  margin: 0 0 2.5rem;
+}
+.technique-about > .label {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+.technique-about p {
+  margin: 0 0 1rem;
+  font-size: var(--text-prose);
+  line-height: var(--text-prose--line-height);
+  color: var(--color-ink-1);
+}
+
+/* ---- Approach page: the technique strip -------------------------------- */
+.technique-strip {
+  max-width: var(--container-prose);
+  margin: -1rem 0 2.5rem;
+}
+.technique-strip .fig-frame {
+  padding: 0.75rem;
+  background: var(--color-cell);
+}
+.technique-strip .fig-frame .tart {
+  width: min(100%, 32rem);
+  margin-inline: auto;
+  aspect-ratio: 16 / 9;
+  height: auto;
+}
+.technique-strip-text {
+  margin-top: 0.85rem;
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+  color: var(--color-ink-2);
+}
+.technique-strip-text > .label {
+  display: block;
+  margin-bottom: 0.3rem;
+}
+.technique-strip-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-body);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.technique-strip-title a {
+  color: inherit;
+  text-decoration: none;
+}
+.technique-strip-title a:hover {
+  color: var(--color-accent);
+}
+.technique-strip-text p {
+  margin: 0.35rem 0 0;
+}
+.technique-strip-text a.technique-strip-primer {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+.technique-strip-text a.technique-strip-primer:hover {
+  text-decoration: underline;
+}
+
+/* ---- Approach page: aside blocks, source files, prev/next -------------- */
+.card .approach-badges {
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.card .approach-badges::-webkit-scrollbar {
+  display: none;
+}
+.aside-block > .label {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+.aside-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.aside-list li {
+  margin: 0;
+  padding: 0.15rem 0;
+}
+.aside-list a,
+.aside-block .aside-mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  line-height: 1.5;
+  color: var(--color-accent);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.aside-list a:hover {
+  text-decoration: underline;
+}
+.aside-block .aside-text {
+  margin: 0;
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+  color: var(--color-ink-2);
+}
+.aside-block .aside-text a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+.aside-block .aside-text a:hover {
+  text-decoration: underline;
+}
+.approach-records {
+  max-width: var(--container-prose);
+  margin-top: 2.5rem;
+}
+.approach-records .reveal + .reveal {
+  margin-top: 1rem;
+}
+.approach-source-tree {
+  overflow: hidden;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  line-height: 1.4;
+}
+.approach-source-folder {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+  padding: 0.45rem 0.55rem;
+  border-bottom: 1px solid var(--color-rule);
+  color: var(--color-ink-2);
+}
+.approach-source-folder > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.approach-source-folder-icon,
+.approach-source-file-icon {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: 0.9rem;
+  height: 0.72rem;
+  border: 1px solid currentColor;
+  border-radius: 0.14rem;
+  color: var(--color-ink-3);
+}
+.approach-source-folder-icon {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+.approach-source-folder-icon::before {
+  position: absolute;
+  top: -0.25rem;
+  left: -1px;
+  width: 0.44rem;
+  height: 0.25rem;
+  border: 1px solid currentColor;
+  border-bottom: 0;
+  border-radius: 0.12rem 0.12rem 0 0;
+  background: var(--color-accent-soft);
+  content: "";
+}
+.approach-source-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.approach-source-list li {
+  position: relative;
+  margin: 0;
+  padding: 0;
+}
+.approach-source-list:not(.approach-source-list--single) li::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0.98rem;
+  width: 1px;
+  background: var(--color-rule);
+  content: "";
+}
+.approach-source-list:not(.approach-source-list--single) li:last-child::before {
+  bottom: 50%;
+}
+.approach-source-list a {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+  padding: 0.38rem 0.5rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  line-height: 1.4;
+  color: var(--color-ink-1);
+  text-decoration: none;
+}
+.approach-source-list:not(.approach-source-list--single) a {
+  padding-left: 1.7rem;
+}
+.approach-source-list a > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.approach-source-list a:hover {
+  background: var(--color-hover);
+  color: var(--color-accent);
+}
+.approach-source-file-icon {
+  width: 0.68rem;
+  height: 0.86rem;
+  border-radius: 0.1rem;
+  background: var(--color-raised);
+}
+.approach-source-list--single a {
+  padding-inline: 0;
+  color: var(--color-accent);
+}
+.approach-records .approach-source-tree {
+  max-width: 28rem;
+}
+.approach-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  max-width: var(--container-prose);
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--color-rule);
+}
+.approach-nav .button {
+  max-width: 100%;
+  text-align: left;
+}
+.approach-nav-next {
+  margin-left: auto;
+  text-align: right;
+}
+
+/* ---- Family page: instruments and other directories -------------------- */
+.approach-section {
+  margin: 0 0 2.75rem;
+}
+.approach-section-head {
+  margin-bottom: 1.25rem;
+}
+.approach-section-head h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-h3);
+  line-height: 1.25;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+}
+.approach-section-head p {
+  max-width: var(--container-prose);
+  margin: 0.35rem 0 0;
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+  color: var(--color-ink-2);
+}
+.approach-section-head p a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+.approach-section-head p a:hover {
+  text-decoration: underline;
+}
+.instruments {
+  max-width: var(--container-prose);
+}
+.instruments-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--color-rule);
+}
+.instruments-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.75rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--color-rule);
+}
+.instruments-list a {
+  color: var(--color-ink);
+  text-decoration: none;
+  font-weight: 500;
+}
+.instruments-list a:hover {
+  color: var(--color-accent);
+}
+.instruments-list .instruments-summary {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+  color: var(--color-ink-2);
+}
+.family-essay {
+  margin-top: 1rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid var(--color-rule);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .approaches-filters .chip {
+    transition: none;
+  }
+}

@@ -1,39 +1,52 @@
-import Link from "next/link";
-import { listConceptPages } from "@/lib/learn";
+import "../learn.css";
+import { Card } from "@/components/Card";
+import { PageHeader } from "@/components/PageHeader";
+import { listConceptPages, loadConceptPage, type LearnPageInfo } from "@/lib/learn";
 
 export const dynamic = "force-dynamic";
 
+export const metadata = {
+  title: "Concepts",
+  description:
+    "The ideas behind every Drop7 strategy on this site, in reading order, shown on positions the rules engine produced.",
+};
+
+/** Concept pages in reading order, leaving out any whose frontmatter says `hidden: true`. */
+function visibleConceptPages(): LearnPageInfo[] {
+  return listConceptPages().filter(
+    (page) => loadConceptPage(page.slug)?.data.hidden !== true,
+  );
+}
+
 export default function ConceptsIndexPage() {
-  const pages = listConceptPages();
+  const pages = visibleConceptPages();
   return (
-    <div className="space-y-6">
-      <div>
-        <Link href="/learn" className="text-sm text-sky-400 hover:text-sky-300">
-          ← Learn
-        </Link>
-        <h1 className="mt-1 text-2xl font-black text-zinc-50">Concepts</h1>
-        <p className="mt-1 max-w-3xl text-sm text-zinc-400">
-          The ideas behind every strategy in this repository, shown with
-          animations computed by the rules engine. Read these in order and the
-          research pages will make sense.
+    <div className="concepts-index">
+      <PageHeader
+        crumbs={[{ href: "/learn", label: "learn" }]}
+        title="Concepts"
+        lead="The ideas behind every strategy on this site, shown on positions the rules engine produced. Read them in order; each page leans on the ones before it."
+      />
+      {pages.length === 0 ? (
+        <p className="learn-empty">
+          No concept pages are present in this checkout. They live in{" "}
+          <code>web/content/learn/concepts/</code>.
         </p>
-      </div>
-      <ol className="grid gap-4 sm:grid-cols-2">
-        {pages.map((page, index) => (
-          <li key={page.slug}>
-            <Link
-              href={`/learn/concepts/${page.slug}`}
-              className="block h-full rounded-xl border border-zinc-800 bg-zinc-900/50 p-5 hover:border-sky-800"
-            >
-              <div className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                Concept {index + 1}
-              </div>
-              <h2 className="mt-1 font-bold text-zinc-100">{page.title}</h2>
-              <p className="mt-1 text-sm text-zinc-400">{page.summary}</p>
-            </Link>
-          </li>
-        ))}
-      </ol>
+      ) : (
+        <ol className="concept-list concept-list--index">
+          {pages.map((page, index) => (
+            <li key={page.slug}>
+              <Card
+                href={`/learn/concepts/${page.slug}`}
+                heading="h2"
+                eyebrow={`Concept ${String(index + 1).padStart(2, "0")}`}
+                title={page.title}
+                summary={page.summary}
+              />
+            </li>
+          ))}
+        </ol>
+      )}
     </div>
   );
 }

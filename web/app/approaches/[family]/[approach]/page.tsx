@@ -1,133 +1,211 @@
+import "../../approaches.css";
+import { readFileSync } from "node:fs";
+import { relative as relativePath } from "node:path";
+import matter from "gray-matter";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { readFileSync } from "node:fs";
-import matter from "gray-matter";
-import { Mdx } from "@/components/Mdx";
+import { sortApproaches } from "@/components/ApproachCard";
+import { ApproachBadges, hasApproachBadges } from "@/components/ApproachBadges";
+import { ApproachRecords } from "@/components/ApproachRecords";
+import { ApproachSourceList } from "@/components/ApproachSourceList";
+import { AsideRecords } from "@/components/AsideRecords";
+import { ArticleLayout } from "@/components/ArticleLayout";
+import { Button } from "@/components/Button";
 import { Markdown } from "@/components/Markdown";
-import { Badge } from "@/components/Badge";
-import { approachDocPath, approachOperationalNotes, listApproaches, listFamilies, REPO_ROOT } from "@/lib/repo";
-import { relative as relativePath } from "node:path";
+import { Mdx } from "@/components/Mdx";
+import { PageHeader, type Crumb } from "@/components/PageHeader";
+import { techniqueHref } from "@/components/TechniqueCard";
+import { getApproachArt } from "@/components/technique-art/approach/registry";
+import { TechniqueArt } from "@/components/technique-art/TechniqueArt";
+import { extractHeadings } from "@/lib/headings";
+import { techniquePageForTechnique } from "@/lib/learn";
+import { pageMetadata } from "@/lib/metadata";
+import { recordsForApproach } from "@/lib/records";
+import {
+  approachDocPath,
+  familyMeta,
+  listApproaches,
+  listApproachesByTechnique,
+  listFamilies,
+  readApproachFrontmatter,
+  REPO_ROOT,
+  type ApproachEntry,
+} from "@/lib/repo";
+import { getTechnique } from "@/lib/techniques";
 
 export const dynamic = "force-dynamic";
 
-export default async function ApproachPage({
-  params,
-}: {
-  params: Promise<{ family: string; approach: string }>;
-}) {
+type Props = { params: Promise<{ family: string; approach: string }> };
+
+const APPROACHES_CRUMB: Crumb = { href: "/approaches", label: "approaches" };
+
+export async function generateMetadata({ params }: Props) {
+  const { family, approach } = await params;
+  const front = readApproachFrontmatter(family, approach);
+  return pageMetadata({
+    title: typeof front?.title === "string" ? front.title : approach,
+    description: typeof front?.summary === "string" ? front.summary : undefined,
+    path: `/approaches/${family}/${approach}`,
+  });
+}
+
+/**
+ * The template for every approach directory. `kind` from the README decides
+ * the breadcrumb and eyebrow: a strategy sits under its technique group, an
+ * engine under Engines, a diagnostic under Diagnostics, and a directory with
+ * no kind (or no README) under its family. A directory without a README gets
+ * the same header and accordions with nothing in between.
+ */
+export default async function ApproachPage({ params }: Props) {
   const { family, approach } = await params;
   if (!listFamilies().includes(family)) notFound();
-  const entry = listApproaches(family).find((a) => a.slug === approach);
+  const siblings = listApproaches(family);
+  const entry = siblings.find((candidate) => candidate.slug === approach);
   if (!entry) notFound();
 
   const docPath = approachDocPath(family, approach);
-  const operationalNotes = approachOperationalNotes(family, approach);
-  if (!docPath) {
-    return (
-      <div className="space-y-4">
-        <Link
-          href={`/approaches/${family}`}
-          className="text-sm text-sky-400 hover:text-sky-300"
-        >
-          ← {family}
-        </Link>
-        <h1 className="text-2xl font-black text-zinc-50">{approach}</h1>
-        <p className="text-sm text-zinc-400">
-          This approach has no documentation yet. Add a{" "}
-          <code className="text-xs">README.mdx</code> to{" "}
-          <code className="text-xs">
-            approaches/{family}/{approach}/
-          </code>{" "}
-          and it will appear here.
-        </p>
-        <div className="rounded-xl border border-zinc-800 p-4">
-          <h2 className="text-sm font-semibold text-zinc-200">Source files</h2>
-          <ul className="mt-2 space-y-1 text-sm text-zinc-400">
-            {entry.sourceFiles.map((file) => (
-              <li key={file}>
-                <Link
-                  href={`/approaches/${family}/${approach}/${file}`}
-                  className="font-mono text-xs text-sky-400 hover:text-sky-300"
-                >
-                  {file}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    );
+  const raw = docPath ? readFileSync(docPath, "utf8") : null;
+  const isMdx = docPath?.endsWith(".mdx") ?? false;
+  const content = raw !== null && isMdx ? matter(raw).content : (raw ?? "");
+  const fromPath = docPath ? relativePath(REPO_ROOT, docPath).replaceAll("\\", "/") : undefined;
+
+  const technique = entry.technique ? getTechnique(entry.technique) : null;
+  const primer = technique ? techniquePageForTechnique(technique.slug) : null;
+  const family_ = familyMeta(family);
+  const records = recordsForApproach(family, approach);
+  const toc = docPath ? extractHeadings(content, { minDepth: 2, maxDepth: 2 }) : [];
+
+  let crumbs: Crumb[];
+  let eyebrow: string | null = null;
+  switch (entry.kind) {
+    case "strategy":
+      crumbs = technique
+        ? [APPROACHES_CRUMB, { href: techniqueHref(technique.slug), label: technique.title }]
+        : [APPROACHES_CRUMB, { href: `/approaches/${family}`, label: family_.title }];
+      break;
+    case "engine":
+      crumbs = [{ href: "/engines", label: "engines" }];
+      eyebrow = "Engine";
+      break;
+    case "diagnostic":
+      crumbs = [
+        { href: "/research", label: "research" },
+        { href: "/diagnostics", label: "diagnostics" },
+      ];
+      eyebrow = "Diagnostic";
+      break;
+    default:
+      crumbs = [APPROACHES_CRUMB, { href: `/approaches/${family}`, label: family_.title }];
   }
 
-  const raw = readFileSync(docPath, "utf8");
-  const isMdx = docPath.endsWith(".mdx");
-  const parsed = isMdx ? matter(raw) : null;
-  const frontmatter = parsed?.data ?? {};
+  // Previous and next: within the technique group for a strategy, within the family otherwise.
+  const inTechniqueGroup = entry.kind === "strategy" && technique !== null;
+  const sequence: ApproachEntry[] = inTechniqueGroup
+    ? sortApproaches(listApproachesByTechnique(technique.slug).filter((candidate) => candidate.kind === "strategy"))
+    : siblings;
+  const position = sequence.findIndex((candidate) => candidate.family === family && candidate.slug === approach);
+  const previous = position > 0 ? sequence[position - 1] : null;
+  const next = position >= 0 && position < sequence.length - 1 ? sequence[position + 1] : null;
+  const sequenceName = inTechniqueGroup ? technique.title : family_.title;
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <Link
-          href={`/approaches/${family}`}
-          className="text-sm text-sky-400 hover:text-sky-300"
-        >
-          ← {family}
-        </Link>
-        <div className="mt-1 flex flex-wrap items-center gap-2">
-          <h1 className="text-2xl font-black text-zinc-50">
-            {(frontmatter.title as string) ?? approach}
-          </h1>
-          {typeof frontmatter.status === "string" && (
-            <Badge label={frontmatter.status} className="bg-sky-900/60 text-sky-200" />
-          )}
-          {typeof frontmatter.evidence === "string" && (
-            <Badge label={`evidence: ${frontmatter.evidence}`} />
-          )}
-          {typeof frontmatter.reads === "string" && (
-            <Badge
-              label={frontmatter.reads === "public" ? "public information" : String(frontmatter.reads)}
-              className={frontmatter.reads === "public" ? "bg-emerald-900/60 text-emerald-200" : "bg-orange-900/60 text-orange-200"}
-            />
-          )}
-          {frontmatter.draft === true && (
-            <Badge label="draft — generated from records, not yet reviewed" className="bg-zinc-800 text-zinc-400" />
-          )}
-        </div>
-        {typeof frontmatter.summary === "string" && (
-          <p className="mt-2 max-w-3xl text-zinc-400">{frontmatter.summary}</p>
+  const hasLabels = Boolean(eyebrow || hasApproachBadges(entry));
+  // Directories with an art of their own show it even when no technique strip
+  // is drawn, which is how a diagnostic or an undocumented directory gets one.
+  const hasOwnArt = getApproachArt(family, approach) !== null;
+
+  const aside = (
+    <>
+      <AsideRecords records={records} />
+      <div className="aside-block">
+        <span className="label">Family</span>
+        <p className="aside-text">
+          <Link href={`/approaches/${family}`}>{family_.title}</Link>
+        </p>
+      </div>
+      <div className="aside-block">
+        <span className="label">Sources</span>
+        {entry.sourceFiles.length > 0 ? (
+          <ApproachSourceList family={family} slug={approach} files={entry.sourceFiles} />
+        ) : (
+          <p className="aside-text">No source files are listed.</p>
         )}
       </div>
+    </>
+  );
 
-      {isMdx ? (
-        <Mdx source={parsed!.content} fromPath={relativePath(REPO_ROOT, docPath).replaceAll("\\", "/")} />
-      ) : (
-        <Markdown source={raw} fromPath={relativePath(REPO_ROOT, docPath).replaceAll("\\", "/")} />
-      )}
+  return (
+    <div>
+      <PageHeader crumbs={crumbs} title={entry.title} lead={entry.summary || undefined}>
+        {hasLabels ? (
+          <>
+            {eyebrow && <span className="label">{eyebrow}</span>}
+            <ApproachBadges status={entry.status} evidence={entry.evidence} reads={entry.reads} />
+          </>
+        ) : undefined}
+      </PageHeader>
 
-      {operationalNotes && (
-        <section className="rounded-xl border border-zinc-800 bg-zinc-950/40 p-4 text-sm text-zinc-400">
-          This approach also keeps operational notes — build commands, gate
-          commands, and seed leases — in{" "}
-          <code className="text-xs">{operationalNotes}</code>, alongside the page
-          above.
+      {entry.kind === "strategy" && technique ? (
+        <section className="technique-strip" aria-label="Technique">
+          <div className="fig-frame">
+            <TechniqueArt name={technique.slug} approach={{ family, slug: approach }} mode="loop" />
+          </div>
+          <div className="technique-strip-text">
+            <span className="label">Technique</span>
+            <p className="technique-strip-title">
+              <Link href={techniqueHref(technique.slug)}>{technique.title}</Link>
+            </p>
+            {primer ? (
+              <>
+                <p>{primer.summary}</p>
+                <p>
+                  <Link className="technique-strip-primer" href={`/learn/techniques/${primer.slug}`}>
+                    Read the primer: {primer.title}
+                  </Link>
+                </p>
+              </>
+            ) : (
+              <p>{technique.oneLine}</p>
+            )}
+          </div>
         </section>
-      )}
+      ) : hasOwnArt ? (
+        <section className="technique-strip" aria-label={entry.title}>
+          <div className="fig-frame">
+            <TechniqueArt name="fallback" approach={{ family, slug: approach }} mode="loop" />
+          </div>
+        </section>
+      ) : null}
 
-      <section className="rounded-xl border border-zinc-800 p-4">
-        <h2 className="text-sm font-semibold text-zinc-200">Source files</h2>
-        <ul className="mt-2 flex flex-wrap gap-2 text-sm text-zinc-400">
-          {entry.sourceFiles.map((file) => (
-            <li key={file}>
-              <Link
-                href={`/approaches/${family}/${approach}/${file}`}
-                className="block rounded bg-zinc-900 px-2 py-0.5 font-mono text-xs hover:bg-sky-950 hover:text-sky-300"
-              >
-                {file}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
+      <ArticleLayout toc={toc} aside={aside}>
+        {docPath && raw !== null ? (
+          isMdx ? (
+            <Mdx source={content} fromPath={fromPath} />
+          ) : (
+            <Markdown source={raw} fromPath={fromPath} />
+          )
+        ) : (
+          <p className="approaches-empty">
+            This directory has no page of its own yet. Its source files, and any records that reference it,
+            are listed below.
+          </p>
+        )}
+        <ApproachRecords entry={entry} records={records} noDocs={!docPath} />
+      </ArticleLayout>
+
+      {(previous || next) && (
+        <nav className="approach-nav" aria-label={`Previous and next in ${sequenceName}`}>
+          {previous && (
+            <Button variant="ghost" href={`/approaches/${previous.family}/${previous.slug}`}>
+              ← {previous.title}
+            </Button>
+          )}
+          {next && (
+            <Button variant="ghost" href={`/approaches/${next.family}/${next.slug}`} className="approach-nav-next">
+              {next.title} →
+            </Button>
+          )}
+        </nav>
+      )}
     </div>
   );
 }

@@ -1,5 +1,6 @@
-import Link from "next/link";
+import "../../../app.css";
 import { notFound } from "next/navigation";
+import { PageHeader } from "@/components/PageHeader";
 import { ReplayPlayer } from "@/components/ReplayPlayer";
 import {
   columnsFromRecord,
@@ -58,34 +59,31 @@ export default async function HumanReplayPage({
   return (
     <div className="space-y-7">
       <section>
-        <Link href="/leaderboard" className="text-sm text-sky-400 hover:text-sky-300">
-          ← Leaderboard
-        </Link>
-        <p className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-sky-400">
-          {isPolicy ? "Research policy" : "Human submission"} ·{" "}
-          {competition.manifest.gameVersion}
-        </p>
-        <h1 className="mt-2 text-2xl font-black text-zinc-50">
-          {record.displayName} · {record.verifiedScore.toLocaleString()} points
-        </h1>
-        <p className="mt-2 text-sm text-zinc-500">
-          Verified by replaying {record.moveCount} packed column choices against{" "}
-          {record.roundId}. {isPolicy ? "Seeded" : "Submitted"}{" "}
-          {new Date(record.submittedAt).toLocaleString()} via{" "}
-          {record.sourceApplication === "drop7-mobile" ? "the mobile app" : record.provider}.
-        </p>
+        <PageHeader
+          crumbs={[{ href: "/leaderboard", label: "leaderboard" }]}
+          title={`${record.displayName} · ${record.verifiedScore.toLocaleString()} points`}
+          lead={
+            <>
+              Verified by replaying {record.moveCount} packed column choices against{" "}
+              {record.roundId}. {isPolicy ? "Seeded" : "Submitted"}{" "}
+              {new Date(record.submittedAt).toLocaleString()} via{" "}
+              {record.sourceApplication === "drop7-mobile" ? "the mobile app" : record.provider}.
+            </>
+          }
+        >
+          <span className="label">
+            {isPolicy ? "Research policy" : "Human submission"} · {competition.manifest.gameVersion}
+          </span>
+        </PageHeader>
         {isPolicy && record.researchUrl && (
-          <p className="mt-2 text-sm">
-            <a
-              href={record.researchUrl}
-              className="text-sky-400 hover:text-sky-300"
-            >
+          <p className="text-small">
+            <a href={record.researchUrl} className="text-accent hover:underline">
               Read the underlying research →
             </a>
           </p>
         )}
         {record.scoreMismatch && (
-          <p className="mt-2 text-sm text-amber-300">
+          <p className="mt-2 text-small text-status-paused">
             Client reported {record.clientScore.toLocaleString()}; the independently replayed{" "}
             {record.verifiedScore.toLocaleString()} score is the leaderboard value. The mismatch
             is retained in the ledger and CloudWatch logs.
