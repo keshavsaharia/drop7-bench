@@ -1,0 +1,200 @@
+/* Evolution card art: a population of twelve climbs a fitness landscape over
+   four generations; the top three are ringed after each generation settles.
+   Generated geometry (scratch script); only transform and opacity animate.
+   Play-state is owned by the shared art.css: nothing here sets it. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--evolution {
+  --tart-motion: calc(var(--duration-art, 2400ms) * 2);
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+:where(.tart--evolution) .tart-final {
+  opacity: 0;
+}
+
+.tart--evolution [data-anim] {
+  animation-duration: var(--tart-duration);
+  animation-timing-function: var(--ease-standard, cubic-bezier(0.2, 0, 0, 1));
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+.tart--evolution .dot-0 { animation-name: tart-evolution-dot-0; }
+.tart--evolution .dot-1 { animation-name: tart-evolution-dot-1; }
+.tart--evolution .dot-2 { animation-name: tart-evolution-dot-2; }
+.tart--evolution .dot-3 { animation-name: tart-evolution-dot-3; }
+.tart--evolution .dot-4 { animation-name: tart-evolution-dot-4; }
+.tart--evolution .dot-5 { animation-name: tart-evolution-dot-5; }
+.tart--evolution .dot-6 { animation-name: tart-evolution-dot-6; }
+.tart--evolution .dot-7 { animation-name: tart-evolution-dot-7; }
+.tart--evolution .dot-8 { animation-name: tart-evolution-dot-8; }
+.tart--evolution .dot-9 { animation-name: tart-evolution-dot-9; }
+.tart--evolution .dot-10 { animation-name: tart-evolution-dot-10; }
+.tart--evolution .dot-11 { animation-name: tart-evolution-dot-11; }
+.tart--evolution .ring-0 { animation-name: tart-evolution-ring-0; }
+.tart--evolution .ring-1 { animation-name: tart-evolution-ring-1; }
+.tart--evolution .ring-2 { animation-name: tart-evolution-ring-2; }
+.tart--evolution .gen-0 { animation-name: tart-evolution-gen-0; }
+.tart--evolution .gen-1 { animation-name: tart-evolution-gen-1; }
+.tart--evolution .gen-2 { animation-name: tart-evolution-gen-2; }
+.tart--evolution .gen-3 { animation-name: tart-evolution-gen-3; }
+.tart--evolution .gen-4 { animation-name: tart-evolution-gen-4; }
+
+@keyframes tart-evolution-dot-0 {
+  0%, 8.47% { transform: translate(-64.6px, 72.5px); }
+  14.12%, 22.59% { transform: translate(-41.1px, 46px); }
+  28.24%, 36.71% { transform: translate(-18.1px, 14.9px); }
+  42.35%, 50.82% { transform: translate(-7.4px, 3px); }
+  56.47%, 100% { transform: translate(0px, 0px); }
+}
+@keyframes tart-evolution-dot-1 {
+  0%, 8.47% { transform: translate(-85.2px, 76.8px); }
+  14.12%, 22.59% { transform: translate(-53.3px, 66.9px); }
+  28.24%, 36.71% { transform: translate(-23.7px, 30.6px); }
+  42.35%, 50.82% { transform: translate(-9.6px, 2.6px); }
+  56.47%, 100% { transform: translate(0px, 0px); }
+}
+@keyframes tart-evolution-dot-2 {
+  0%, 8.47% { transform: translate(-44.4px, 47.1px); }
+  14.12%, 22.59% { transform: translate(-28.9px, 39.3px); }
+  28.24%, 36.71% { transform: translate(-13px, 3.4px); }
+  42.35%, 50.82% { transform: translate(-5.6px, -1.4px); }
+  56.47%, 100% { transform: translate(0px, 0px); }
+}
+@keyframes tart-evolution-dot-3 {
+  0%, 8.47% { transform: translate(-166.2px, 78.3px); }
+  14.12%, 22.59% { transform: translate(-124.6px, 43.2px); }
+  28.24%, 36.71% { transform: translate(-58.3px, 65.4px); }
+  42.35%, 50.82% { transform: translate(-18.4px, 36.6px); }
+  56.47%, 100% { transform: translate(0px, 0px); }
+}
+@keyframes tart-evolution-dot-4 {
+  0%, 8.47% { transform: translate(3.2px, 5.4px); }
+  14.12%, 22.59% { transform: translate(-4.6px, -0.1px); }
+  28.24%, 36.71% { transform: translate(-1.5px, 1.9px); }
+  42.35%, 50.82% { transform: translate(3.4px, -1.9px); }
+  56.47%, 100% { transform: translate(0px, 0px); }
+}
+@keyframes tart-evolution-dot-5 {
+  0%, 8.47% { transform: translate(-151.3px, 79.2px); }
+  14.12%, 22.59% { transform: translate(-87.7px, 79.1px); }
+  28.24%, 36.71% { transform: translate(-46.8px, 59.9px); }
+  42.35%, 50.82% { transform: translate(-13.8px, 24.2px); }
+  56.47%, 100% { transform: translate(0px, 0px); }
+}
+@keyframes tart-evolution-dot-6 {
+  0%, 8.47% { transform: translate(17.4px, 31.3px); }
+  14.12%, 22.59% { transform: translate(25.2px, 50.5px); }
+  28.24%, 36.71% { transform: translate(16.8px, 34.1px); }
+  42.35%, 50.82% { transform: translate(2.8px, 1.9px); }
+  56.47%, 100% { transform: translate(0px, 0px); }
+}
+@keyframes tart-evolution-dot-7 {
+  0%, 8.47% { transform: translate(-106.3px, 60px); }
+  14.12%, 22.59% { transform: translate(-58.2px, 72.1px); }
+  28.24%, 36.71% { transform: translate(-31.2px, 51px); }
+  42.35%, 50.82% { transform: translate(-10.4px, 8px); }
+  56.47%, 100% { transform: translate(0px, 0px); }
+}
+@keyframes tart-evolution-dot-8 {
+  0%, 8.47% { transform: translate(-9.6px, 1.5px); }
+  14.12%, 22.59% { transform: translate(-22.8px, 14.9px); }
+  28.24%, 36.71% { transform: translate(-8.7px, -0.5px); }
+  42.35%, 50.82% { transform: translate(-4.3px, 0.6px); }
+  56.47%, 100% { transform: translate(0px, 0px); }
+}
+@keyframes tart-evolution-dot-9 {
+  0%, 8.47% { transform: translate(-178.4px, 88.4px); }
+  14.12%, 22.59% { transform: translate(-98.3px, 58.9px); }
+  28.24%, 36.71% { transform: translate(-51.9px, 70.1px); }
+  42.35%, 50.82% { transform: translate(-18.1px, 35.3px); }
+  56.47%, 100% { transform: translate(0px, 0px); }
+}
+@keyframes tart-evolution-dot-10 {
+  0%, 8.47% { transform: translate(-0.4px, 0.8px); }
+  14.12%, 22.59% { transform: translate(-9px, 2.7px); }
+  28.24%, 36.71% { transform: translate(3.7px, 2.7px); }
+  42.35%, 50.82% { transform: translate(-5.6px, 0.7px); }
+  56.47%, 100% { transform: translate(0px, 0px); }
+}
+@keyframes tart-evolution-dot-11 {
+  0%, 8.47% { transform: translate(-79.7px, 73.3px); }
+  14.12%, 22.59% { transform: translate(-54px, 69px); }
+  28.24%, 36.71% { transform: translate(-31.6px, 50.6px); }
+  42.35%, 50.82% { transform: translate(-13.6px, 21.9px); }
+  56.47%, 100% { transform: translate(0px, 0px); }
+}
+
+@keyframes tart-evolution-ring-0 {
+  0%, 7.76% { transform: translate(-64.6px, 72.5px); opacity: 1; }
+  9.18% { transform: translate(-64.6px, 72.5px); opacity: 0; }
+  14.12% { transform: translate(-41.1px, 46px); opacity: 0; }
+  16.24%, 21.88% { transform: translate(-41.1px, 46px); opacity: 1; }
+  23.29% { transform: translate(-41.1px, 46px); opacity: 0; }
+  28.24% { transform: translate(-18.1px, 14.9px); opacity: 0; }
+  30.35%, 36% { transform: translate(-18.1px, 14.9px); opacity: 1; }
+  37.41% { transform: translate(-18.1px, 14.9px); opacity: 0; }
+  42.35% { transform: translate(-7.4px, 3px); opacity: 0; }
+  44.47%, 50.12% { transform: translate(-7.4px, 3px); opacity: 1; }
+  51.53% { transform: translate(-7.4px, 3px); opacity: 0; }
+  56.47% { transform: translate(0px, 0px); opacity: 0; }
+  58.59%, 100% { transform: translate(0px, 0px); opacity: 1; }
+}
+@keyframes tart-evolution-ring-1 {
+  0%, 7.76% { transform: translate(-85.2px, 76.8px); opacity: 1; }
+  9.18% { transform: translate(-85.2px, 76.8px); opacity: 0; }
+  14.12% { transform: translate(-53.3px, 66.9px); opacity: 0; }
+  16.24%, 21.88% { transform: translate(-53.3px, 66.9px); opacity: 1; }
+  23.29% { transform: translate(-53.3px, 66.9px); opacity: 0; }
+  28.24% { transform: translate(-23.7px, 30.6px); opacity: 0; }
+  30.35%, 36% { transform: translate(-23.7px, 30.6px); opacity: 1; }
+  37.41% { transform: translate(-23.7px, 30.6px); opacity: 0; }
+  42.35% { transform: translate(-9.6px, 2.6px); opacity: 0; }
+  44.47%, 50.12% { transform: translate(-9.6px, 2.6px); opacity: 1; }
+  51.53% { transform: translate(-9.6px, 2.6px); opacity: 0; }
+  56.47% { transform: translate(0px, 0px); opacity: 0; }
+  58.59%, 100% { transform: translate(0px, 0px); opacity: 1; }
+}
+@keyframes tart-evolution-ring-2 {
+  0%, 7.76% { transform: translate(-44.4px, 47.1px); opacity: 1; }
+  9.18% { transform: translate(-44.4px, 47.1px); opacity: 0; }
+  14.12% { transform: translate(-28.9px, 39.3px); opacity: 0; }
+  16.24%, 21.88% { transform: translate(-28.9px, 39.3px); opacity: 1; }
+  23.29% { transform: translate(-28.9px, 39.3px); opacity: 0; }
+  28.24% { transform: translate(-13px, 3.4px); opacity: 0; }
+  30.35%, 36% { transform: translate(-13px, 3.4px); opacity: 1; }
+  37.41% { transform: translate(-13px, 3.4px); opacity: 0; }
+  42.35% { transform: translate(-5.6px, -1.4px); opacity: 0; }
+  44.47%, 50.12% { transform: translate(-5.6px, -1.4px); opacity: 1; }
+  51.53% { transform: translate(-5.6px, -1.4px); opacity: 0; }
+  56.47% { transform: translate(0px, 0px); opacity: 0; }
+  58.59%, 100% { transform: translate(0px, 0px); opacity: 1; }
+}
+
+/* Generation counter: five labels drawn once, shown one at a time. */
+@keyframes tart-evolution-gen-0 {
+  0%, 13.41% { opacity: 1; }
+  14.12%, 100% { opacity: 0; }
+}
+@keyframes tart-evolution-gen-1 {
+  0%, 13.41% { opacity: 0; }
+  14.12%, 27.53% { opacity: 1; }
+  28.24%, 100% { opacity: 0; }
+}
+@keyframes tart-evolution-gen-2 {
+  0%, 27.53% { opacity: 0; }
+  28.24%, 41.65% { opacity: 1; }
+  42.35%, 100% { opacity: 0; }
+}
+@keyframes tart-evolution-gen-3 {
+  0%, 41.65% { opacity: 0; }
+  42.35%, 55.76% { opacity: 1; }
+  56.47%, 100% { opacity: 0; }
+}
+@keyframes tart-evolution-gen-4 {
+  0%, 55.76% { opacity: 0; }
+  56.47%, 100% { opacity: 1; }
+}

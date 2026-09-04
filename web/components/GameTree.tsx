@@ -8,6 +8,7 @@ import { GameTreeExplorer } from "./GameTreeExplorer";
  * serialisable and adds the caption and the standing disclaimer. Seeds from
  * the `0x5eed****` playground domain are the convention for illustrations,
  * exactly as the scripted rounds use; no research seed is ever embedded.
+ * The figure breaks out to the wide measure where the page allows it.
  */
 export function GameTreeFigure({
   seed = 0x5eed1001,
@@ -27,7 +28,7 @@ export function GameTreeFigure({
   caption?: ReactNode;
 }) {
   return (
-    <figure className="tree-fig">
+    <figure className="fig fig--wide tree-fig">
       <GameTreeExplorer seed={seed} moves={moves} leafDepth={leafDepth} maxOutcomes={maxOutcomes} height={height} controls={controls} />
       {caption ? <figcaption>{caption}</figcaption> : null}
     </figure>

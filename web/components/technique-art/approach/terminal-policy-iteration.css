@@ -1,0 +1,55 @@
+/* terminal-policy-iteration card art. The three fans race out to the horizon
+   one after another, the intervals form across the zero line, and because
+   none of them clears zero on both axes the lock stays on. Play-state is
+   owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-terminal-policy-iteration {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-terminal-policy-iteration [data-anim] {
+  animation-duration: var(--tart-duration);
+  animation-timing-function: var(--tart-ease, var(--ease-standard, cubic-bezier(0.2, 0, 0, 1)));
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+/* The fans grow out of their stub, so the box origin is the left edge. */
+.tart--approach-terminal-policy-iteration .fan {
+  transform-box: fill-box;
+  transform-origin: left center;
+}
+.tart--approach-terminal-policy-iteration .whiskers {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.tart--approach-terminal-policy-iteration [data-anim="fan-0"] { animation-name: tart-approach-terminal-policy-iteration-fan-0; }
+.tart--approach-terminal-policy-iteration [data-anim="fan-1"] { animation-name: tart-approach-terminal-policy-iteration-fan-1; }
+.tart--approach-terminal-policy-iteration [data-anim="fan-2"] { animation-name: tart-approach-terminal-policy-iteration-fan-2; }
+.tart--approach-terminal-policy-iteration [data-anim="whiskers"] { animation-name: tart-approach-terminal-policy-iteration-whiskers; }
+.tart--approach-terminal-policy-iteration [data-anim="lock"] { animation-name: tart-approach-terminal-policy-iteration-lock; }
+
+@keyframes tart-approach-terminal-policy-iteration-fan-0 {
+  0% { transform: scaleX(0.04); opacity: 0.2; }
+  16.36%, 100% { transform: scaleX(1); opacity: 1; }
+}
+@keyframes tart-approach-terminal-policy-iteration-fan-1 {
+  0%, 4.36% { transform: scaleX(0.04); opacity: 0.2; }
+  20.73%, 100% { transform: scaleX(1); opacity: 1; }
+}
+@keyframes tart-approach-terminal-policy-iteration-fan-2 {
+  0%, 8.73% { transform: scaleX(0.04); opacity: 0.2; }
+  25.09%, 100% { transform: scaleX(1); opacity: 1; }
+}
+@keyframes tart-approach-terminal-policy-iteration-whiskers {
+  0%, 25.09% { transform: scaleX(0.02); opacity: 0; }
+  38.18%, 100% { transform: scaleX(1); opacity: 1; }
+}
+@keyframes tart-approach-terminal-policy-iteration-lock {
+  0%, 41.45% { opacity: 0; }
+  49.09%, 100% { opacity: 1; }
+}

@@ -1,0 +1,96 @@
+/* ntuple-rl/bellman-ntuple card art: the visible disc lands in all seven legal
+   columns at once, one shared set of imagined reveals is laid across the seven
+   readings, they grow together, and the best of them is carried back to the
+   board as the update target. Slower than the standard beat because the seven
+   readings have to be seen arriving together. Play-state, duration and easing
+   are owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-bellman-ntuple {
+  --tart-motion: calc(var(--duration-art, 2400ms) * 1.3);
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-bellman-ntuple [data-anim] {
+  animation-duration: var(--tart-duration);
+}
+
+/* The seven readings grow together off their common baseline. */
+.tart--approach-bellman-ntuple .bars {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+
+.tart--approach-bellman-ntuple [data-anim="tries"] {
+  animation-name: tart-approach-bellman-ntuple-tries;
+}
+.tart--approach-bellman-ntuple [data-anim="luck"] {
+  animation-name: tart-approach-bellman-ntuple-luck;
+}
+.tart--approach-bellman-ntuple [data-anim="bars"] {
+  animation-name: tart-approach-bellman-ntuple-bars;
+}
+.tart--approach-bellman-ntuple [data-anim="best"] {
+  animation-name: tart-approach-bellman-ntuple-best;
+}
+.tart--approach-bellman-ntuple [data-anim="target"] {
+  animation-name: tart-approach-bellman-ntuple-target;
+}
+
+/* All seven candidates fall the same distance, so they land in one beat. */
+@keyframes tart-approach-bellman-ntuple-tries {
+  0%,
+  3.66% {
+    transform: translateY(-40px);
+    opacity: 0;
+  }
+  17.06%,
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-bellman-ntuple-luck {
+  0%,
+  15.84% {
+    opacity: 0;
+  }
+  23.16%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-bellman-ntuple-bars {
+  0%,
+  23.16% {
+    transform: scaleY(0.02);
+    opacity: 0.3;
+  }
+  37.78%,
+  100% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-bellman-ntuple-best {
+  0%,
+  40.22% {
+    opacity: 0;
+  }
+  46.31%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-bellman-ntuple-target {
+  0%,
+  49.97% {
+    opacity: 0;
+  }
+  57.28%,
+  100% {
+    opacity: 1;
+  }
+}

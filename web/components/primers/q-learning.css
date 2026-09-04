@@ -1,0 +1,138 @@
+/* Motion for the Q-learning primer figures (web/components/primers/QLearning.tsx).
+   The corridor agent walks right three times; the value bars fill one cell
+   further from the goal each round; the lag bar in the Double DQN figure
+   fills and the copy fires. Only transform and opacity animate. */
+
+.primer-qlearning svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.primer-qlearning [data-anim] {
+  animation-duration: 5s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  transform-box: fill-box;
+}
+
+/* Figure 1: the corridor. */
+.primer-qlearning [data-anim="agent"] {
+  animation-name: primer-qlearning-agent;
+  animation-timing-function: linear;
+}
+
+.primer-qlearning [data-anim^="bar-"] {
+  transform-origin: 50% 100%;
+  transform: scaleY(0);
+}
+
+.primer-qlearning [data-anim="bar-3"] {
+  animation-name: primer-qlearning-bar-3;
+}
+
+.primer-qlearning [data-anim="bar-2"] {
+  animation-name: primer-qlearning-bar-2;
+}
+
+.primer-qlearning [data-anim="bar-1"] {
+  animation-name: primer-qlearning-bar-1;
+}
+
+.primer-qlearning [data-anim^="backup-"] {
+  opacity: 0;
+}
+
+.primer-qlearning [data-anim="backup-2"] {
+  animation-name: primer-qlearning-backup-2;
+}
+
+.primer-qlearning [data-anim="backup-1"] {
+  animation-name: primer-qlearning-backup-1;
+}
+
+/* Round 1: cell 3 to the goal. Round 2: cell 2 to the goal. Round 3: cell 1
+   to the goal. The agent is drawn at cell 3; cells are 108 units apart. */
+@keyframes primer-qlearning-agent {
+  0% { transform: translateX(0); opacity: 1; }
+  12% { transform: translateX(108px); opacity: 1; }
+  15% { transform: translateX(108px); opacity: 0; }
+  16% { transform: translateX(-108px); opacity: 0; }
+  19% { transform: translateX(-108px); opacity: 1; }
+  31% { transform: translateX(0); opacity: 1; }
+  43% { transform: translateX(108px); opacity: 1; }
+  46% { transform: translateX(108px); opacity: 0; }
+  47% { transform: translateX(-216px); opacity: 0; }
+  50% { transform: translateX(-216px); opacity: 1; }
+  62% { transform: translateX(-108px); opacity: 1; }
+  74% { transform: translateX(0); opacity: 1; }
+  86% { transform: translateX(108px); opacity: 1; }
+  97% { transform: translateX(108px); opacity: 1; }
+  100% { transform: translateX(108px); opacity: 0; }
+}
+
+@keyframes primer-qlearning-bar-3 {
+  0%, 12% { transform: scaleY(0); }
+  18%, 100% { transform: scaleY(1); }
+}
+
+@keyframes primer-qlearning-backup-2 {
+  0%, 31% { opacity: 0; }
+  35%, 45% { opacity: 1; }
+  49%, 100% { opacity: 0; }
+}
+
+@keyframes primer-qlearning-bar-2 {
+  0%, 40% { transform: scaleY(0); }
+  46%, 100% { transform: scaleY(1); }
+}
+
+@keyframes primer-qlearning-backup-1 {
+  0%, 62% { opacity: 0; }
+  66%, 78% { opacity: 1; }
+  82%, 100% { opacity: 0; }
+}
+
+@keyframes primer-qlearning-bar-1 {
+  0%, 72% { transform: scaleY(0); }
+  78%, 100% { transform: scaleY(1); }
+}
+
+/* Figure 3: the lag bar fills, then the copy fires. */
+.primer-qlearning [data-anim="lag"] {
+  transform-origin: 0 50%;
+  animation-name: primer-qlearning-lag;
+  animation-duration: 4s;
+  animation-timing-function: linear;
+}
+
+.primer-qlearning [data-anim="copy"] {
+  opacity: 0;
+  animation-name: primer-qlearning-copy;
+  animation-duration: 4s;
+}
+
+@keyframes primer-qlearning-lag {
+  0% { transform: scaleX(0); }
+  88% { transform: scaleX(1); }
+  100% { transform: scaleX(1); }
+}
+
+@keyframes primer-qlearning-copy {
+  0%, 86% { opacity: 0; }
+  90%, 100% { opacity: 1; }
+}
+
+/* Resting frames: the agent at the goal with the full staircase and both
+   backups drawn; the lag bar full with the copy arrow shown. */
+@media (prefers-reduced-motion: reduce) {
+  .primer-qlearning [data-anim] {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .primer-qlearning [data-anim="agent"] {
+    transform: translateX(108px);
+  }
+}

@@ -1,0 +1,135 @@
+/*
+ * Motion for the determinized-planning primer figures
+ * (components/primers/Determinization.tsx).
+ *
+ * Base styles describe the finished drawing; keyframes draw each plan line
+ * in turn (stroke-dashoffset), then reveal the merge, the average and the
+ * chosen road, and fade out at the end so the loop restarts cleanly. Under
+ * prefers-reduced-motion the animation is removed and the base styles show.
+ */
+.fig--dz [data-anim] {
+  animation-duration: 6s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  opacity: 1;
+  stroke-dashoffset: 0;
+}
+
+/* ---- Three futures --------------------------------------------------- */
+
+.fig--dz [data-anim="dz-plan-1"] { animation-name: dz-plan-1; }
+.fig--dz [data-anim="dz-plan-2"] { animation-name: dz-plan-2; }
+.fig--dz [data-anim="dz-plan-3"] { animation-name: dz-plan-3; }
+.fig--dz [data-anim="dz-merge"] { animation-name: dz-merge; }
+.fig--dz [data-anim="dz-avg"] { animation-name: dz-avg; }
+.fig--dz [data-anim="dz-pick"] {
+  animation-name: dz-pick;
+  transform: translateX(0);
+}
+
+@keyframes dz-plan-1 {
+  0% { stroke-dashoffset: 100; opacity: 0; }
+  5% { stroke-dashoffset: 100; opacity: 1; }
+  25%, 94% { stroke-dashoffset: 0; opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes dz-plan-2 {
+  0%, 11% { stroke-dashoffset: 100; opacity: 0; }
+  12% { stroke-dashoffset: 100; opacity: 1; }
+  32%, 94% { stroke-dashoffset: 0; opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes dz-plan-3 {
+  0%, 18% { stroke-dashoffset: 100; opacity: 0; }
+  19% { stroke-dashoffset: 100; opacity: 1; }
+  39%, 94% { stroke-dashoffset: 0; opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes dz-merge {
+  0%, 41% { stroke-dashoffset: 100; opacity: 0; }
+  42% { stroke-dashoffset: 100; opacity: 1; }
+  52%, 94% { stroke-dashoffset: 0; opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes dz-avg {
+  0%, 53% { stroke-dashoffset: 100; opacity: 0; }
+  54% { stroke-dashoffset: 100; opacity: 1; }
+  64%, 94% { stroke-dashoffset: 0; opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes dz-pick {
+  0%, 64% { opacity: 0; transform: translateX(-6px); }
+  70%, 94% { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0; transform: translateX(0); }
+}
+
+/* ---- Strategy fusion ------------------------------------------------- */
+
+.fig--dz [data-anim="dz-fuse-1"] { animation-name: dz-fuse-1; }
+.fig--dz [data-anim="dz-fuse-2"] { animation-name: dz-fuse-2; }
+.fig--dz [data-anim="dz-fuse-3"] { animation-name: dz-fuse-3; }
+.fig--dz [data-anim="dz-honest-1"] { animation-name: dz-honest-1; }
+.fig--dz [data-anim="dz-honest-2"] { animation-name: dz-honest-2; }
+.fig--dz [data-anim="dz-honest-3"] { animation-name: dz-honest-3; }
+.fig--dz [data-anim="dz-ghost"] {
+  animation-name: dz-ghost;
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(1);
+}
+.fig--dz [data-anim="dz-choice"] { animation-name: dz-choice; }
+
+@keyframes dz-fuse-1 {
+  0%, 3% { stroke-dashoffset: 100; opacity: 0; }
+  4% { stroke-dashoffset: 100; opacity: 1; }
+  22%, 94% { stroke-dashoffset: 0; opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes dz-fuse-2 {
+  0%, 7% { stroke-dashoffset: 100; opacity: 0; }
+  8% { stroke-dashoffset: 100; opacity: 1; }
+  26%, 94% { stroke-dashoffset: 0; opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes dz-fuse-3 {
+  0%, 11% { stroke-dashoffset: 100; opacity: 0; }
+  12% { stroke-dashoffset: 100; opacity: 1; }
+  30%, 94% { stroke-dashoffset: 0; opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes dz-ghost {
+  0%, 30% { opacity: 0; transform: scale(0.5); }
+  36% { opacity: 1; transform: scale(1); }
+  44% { opacity: 0.4; transform: scale(1); }
+  50%, 94% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1); }
+}
+@keyframes dz-honest-1 {
+  0%, 47% { stroke-dashoffset: 100; opacity: 0; }
+  48% { stroke-dashoffset: 100; opacity: 1; }
+  66%, 94% { stroke-dashoffset: 0; opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes dz-honest-2 {
+  0%, 51% { stroke-dashoffset: 100; opacity: 0; }
+  52% { stroke-dashoffset: 100; opacity: 1; }
+  70%, 94% { stroke-dashoffset: 0; opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes dz-honest-3 {
+  0%, 55% { stroke-dashoffset: 100; opacity: 0; }
+  56% { stroke-dashoffset: 100; opacity: 1; }
+  76%, 94% { stroke-dashoffset: 0; opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes dz-choice {
+  0%, 80% { opacity: 0; }
+  86%, 94% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fig--dz [data-anim] {
+    animation: none !important;
+  }
+}

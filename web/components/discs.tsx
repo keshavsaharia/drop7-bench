@@ -6,6 +6,11 @@
  * 9 a cracked gray disc. Two renderers draw the same disc: `DiscFace` for DOM
  * layouts (the board component, the game) and `CellGlyph` for the SVG figure
  * kits in Rules.tsx, Engine.tsx and Concepts*.tsx.
+ *
+ * Colours are the `--color-disc-*` tokens from globals.css. `DISC_STYLES`
+ * keeps the same values as literal hex for the one renderer that cannot
+ * resolve a CSS variable: the Satori social-image renderer in
+ * lib/social-image.tsx. Everything drawn in a browser uses `DISC_VARS`.
  */
 import type { CSSProperties } from "react";
 
@@ -13,6 +18,7 @@ export const EMPTY_CELL = 0;
 export const SOLID_CELL = 8;
 export const CRACKED_CELL = 9;
 
+/** Literal palette for Satori (next/og), which cannot read CSS variables. Mirrors --color-disc-* verbatim. */
 export const DISC_STYLES: Record<number, { bg: string; fg: string }> = {
   1: { bg: "#218a57", fg: "#ffffff" },
   2: { bg: "#d7b33f", fg: "#17130a" },
@@ -23,14 +29,23 @@ export const DISC_STYLES: Record<number, { bg: string; fg: string }> = {
   7: { bg: "#405db0", fg: "#ffffff" },
 };
 
-/** Background colour per numbered disc, for charts and legends. */
-export const DISC_COLORS: Record<number, string> = Object.fromEntries(
-  Object.entries(DISC_STYLES).map(([value, style]) => [value, style.bg]),
+/** Token references for browser rendering (DOM styles and SVG attributes). */
+export const DISC_VARS: Record<number, { bg: string; fg: string }> = Object.fromEntries(
+  [1, 2, 3, 4, 5, 6, 7].map((value) => [
+    value,
+    { bg: `var(--color-disc-${value})`, fg: `var(--color-disc-${value}-fg)` },
+  ]),
 );
 
-const GRAY_RING = "#aeb2af";
-const GRAY_CORE = "#111412";
-const EMPTY_FILL = "#111827";
+/** Background colour per numbered disc, for charts and legends (token references). */
+export const DISC_COLORS: Record<number, string> = Object.fromEntries(
+  Object.entries(DISC_VARS).map(([value, style]) => [value, style.bg]),
+);
+
+const FALLBACK_DISC = { bg: "var(--color-ink-4)", fg: "var(--color-accent-fg)" };
+const GRAY_RING = "var(--color-disc-gray)";
+const GRAY_CORE = "var(--color-disc-gray-core)";
+const EMPTY_FILL = "var(--color-cell)";
 
 /** Ten ring segments, 36° apart, starting at 18° so a gap sits at the top. */
 const CRACKED_SEGMENT_ROTATIONS = Array.from({ length: 10 }, (_, index) => 18 + index * 36);
@@ -100,10 +115,10 @@ export function DiscFace({
       </span>
     );
   }
-  const palette = DISC_STYLES[cell] ?? { bg: "#52525b", fg: "#ffffff" };
+  const palette = DISC_VARS[cell] ?? FALLBACK_DISC;
   return (
     <span
-      className={`flex shrink-0 items-center justify-center rounded-full border border-black/15 font-bold leading-none shadow-[inset_0_-0.14em_0_rgba(0,0,0,0.22)] ${className}`}
+      className={`flex shrink-0 items-center justify-center rounded-full border border-black/15 font-mono font-bold leading-none shadow-[inset_0_-0.14em_0_rgba(0,0,0,0.22)] ${className}`}
       style={{ backgroundColor: palette.bg, color: palette.fg, ...style }}
       aria-hidden="true"
     >
@@ -148,7 +163,7 @@ export function CellGlyph({ cell, x, y, s }: { cell: number; x: number; y: numbe
       </g>
     );
   }
-  const palette = DISC_STYLES[cell] ?? { bg: "#52525b", fg: "#ffffff" };
+  const palette = DISC_VARS[cell] ?? FALLBACK_DISC;
   return (
     <g transform={origin}>
       <circle cx="50" cy="50" r="48" fill={palette.bg} stroke="rgba(0,0,0,0.18)" strokeWidth="2" />
@@ -161,7 +176,7 @@ export function CellGlyph({ cell, x, y, s }: { cell: number; x: number; y: numbe
         fill={palette.fg}
         fontSize="52"
         fontWeight={700}
-        fontFamily="system-ui, -apple-system, 'Segoe UI', sans-serif"
+        fontFamily="var(--font-mono)"
       >
         {cell}
       </text>

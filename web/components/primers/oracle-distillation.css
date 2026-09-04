@@ -1,0 +1,70 @@
+/* Motion for the oracles, teachers and distillation primer figures
+   (web/components/primers/OracleDistillation.tsx).
+   The boundary figure rests with the hidden numbers faded against the line
+   and the column label already on the student's side; the animation replays
+   both journeys. The loop figure's dot walks the three-box cycle. Only
+   transform and opacity animate; no text animates. */
+
+.primer-oracle svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.primer-oracle [data-anim] {
+  animation-duration: 4.5s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.primer-oracle [data-anim="number"] {
+  opacity: 0.3;
+  animation-name: primer-oracle-number;
+}
+
+.primer-oracle [data-anim="pill"] {
+  animation-name: primer-oracle-pill;
+}
+
+.primer-oracle [data-anim="dot"] {
+  animation-name: primer-oracle-dot;
+  animation-timing-function: linear;
+}
+
+@keyframes primer-oracle-number {
+  0%, 5% { transform: translateX(0); opacity: 0.3; }
+  6% { transform: translateX(-80px); opacity: 1; }
+  55% { transform: translateX(0); opacity: 1; }
+  66%, 100% { transform: translateX(0); opacity: 0.3; }
+}
+
+@keyframes primer-oracle-pill {
+  0%, 5% { transform: translateX(0); }
+  6% { transform: translateX(-118px); }
+  70%, 100% { transform: translateX(0); }
+}
+
+@keyframes primer-oracle-dot {
+  0% { transform: translate(0, 0); }
+  33.3% { transform: translate(169px, 124px); }
+  66.6% { transform: translate(-161px, 124px); }
+  100% { transform: translate(0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primer-oracle [data-anim] {
+    animation: none !important;
+  }
+  /* Resting frames: numbers stopped at the line, the label across it, the dot
+     parked on the labels box. */
+  .primer-oracle [data-anim="number"] {
+    transform: translateX(0);
+    opacity: 0.3;
+  }
+  .primer-oracle [data-anim="pill"] {
+    transform: translateX(0);
+  }
+  .primer-oracle [data-anim="dot"] {
+    transform: translate(0, 0);
+  }
+}

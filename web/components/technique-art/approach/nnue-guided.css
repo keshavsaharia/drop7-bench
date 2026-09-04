@@ -1,0 +1,85 @@
+/* tree-search/nnue-guided card art. The tree to depth 2 is drawn from the
+   first frame; the network's ordering numbers then appear on the interior
+   branches, the branch it ranks last dims out of the search, and the budget
+   that frees carries the top-ranked branch to depth 3 and then to depth 4.
+   Play-state is owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-nnue-guided {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-nnue-guided [data-anim="ranks"] {
+  animation-name: tart-approach-nnue-guided-ranks;
+}
+.tart--approach-nnue-guided [data-anim="prune"] {
+  animation-name: tart-approach-nnue-guided-prune;
+}
+.tart--approach-nnue-guided [data-anim="deep-3"] {
+  animation-name: tart-approach-nnue-guided-deep-3;
+}
+.tart--approach-nnue-guided [data-anim="deep-4"] {
+  animation-name: tart-approach-nnue-guided-deep-4;
+}
+.tart--approach-nnue-guided [data-anim="caption"] {
+  animation-name: tart-approach-nnue-guided-caption;
+}
+
+@keyframes tart-approach-nnue-guided-ranks {
+  0%,
+  7.64% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  15.27%,
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes tart-approach-nnue-guided-prune {
+  0%,
+  16.36% {
+    opacity: 1;
+  }
+  24%,
+  100% {
+    opacity: 0.3;
+  }
+}
+@keyframes tart-approach-nnue-guided-deep-3 {
+  0%,
+  27.27% {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  38.18%,
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes tart-approach-nnue-guided-deep-4 {
+  0%,
+  38.18% {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  48%,
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes tart-approach-nnue-guided-caption {
+  0%,
+  45.82% {
+    opacity: 0;
+  }
+  52.36%,
+  100% {
+    opacity: 1;
+  }
+}

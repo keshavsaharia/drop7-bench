@@ -1,0 +1,53 @@
+/* Rollouts and policy iteration card art. Rollout lines draw left to right
+   (early terminations finish sooner and get a cross), the mean bars fill, and
+   the check appears last. Only stroke-dashoffset, transform and opacity
+   animate; play-state is owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--rollout-policy-iteration {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+:where(.tart--rollout-policy-iteration) .tart-final {
+  opacity: 0;
+}
+
+.tart--rollout-policy-iteration [data-anim] {
+  animation-duration: var(--tart-duration);
+  animation-timing-function: var(--ease-standard, cubic-bezier(0.2, 0, 0, 1));
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+.tart--rollout-policy-iteration .run-full { animation-name: tart-rollout-policy-iteration-run-full; }
+.tart--rollout-policy-iteration .run-early { animation-name: tart-rollout-policy-iteration-run-early; }
+.tart--rollout-policy-iteration .stop { animation-name: tart-rollout-policy-iteration-stop; }
+.tart--rollout-policy-iteration .bar-fill {
+  animation-name: tart-rollout-policy-iteration-bar;
+  transform-box: fill-box;
+  transform-origin: left center;
+}
+.tart--rollout-policy-iteration .check { animation-name: tart-rollout-policy-iteration-check; }
+
+@keyframes tart-rollout-policy-iteration-run-full {
+  0%, 3.27% { stroke-dashoffset: 1; }
+  32.73%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes tart-rollout-policy-iteration-run-early {
+  0%, 3.27% { stroke-dashoffset: 1; }
+  15.27%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes tart-rollout-policy-iteration-stop {
+  0%, 15.27% { opacity: 0; }
+  17.45%, 100% { opacity: 1; }
+}
+@keyframes tart-rollout-policy-iteration-bar {
+  0%, 33.82% { transform: scaleX(0); }
+  41.45%, 100% { transform: scaleX(1); }
+}
+@keyframes tart-rollout-policy-iteration-check {
+  0%, 43.64% { opacity: 0; }
+  45.82%, 100% { opacity: 1; }
+}

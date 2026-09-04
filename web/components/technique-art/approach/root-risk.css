@@ -1,0 +1,80 @@
+/* fair-expectimax/root-risk card art. The root fan arrives, the outcome bars
+   drop in worst-first, the worst 25% is bracketed, and then the weight bars
+   redistribute: the two tail bars grow while the five ordinary ones shrink,
+   so the resting frame is a value carried mostly by its bad tail. Only
+   transform and opacity animate; play-state, duration and easing are owned
+   by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-root-risk {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-root-risk [data-anim="fan"] {
+  animation-name: tart-approach-root-risk-fan;
+}
+.tart--approach-root-risk [data-anim="bars"] {
+  animation-name: tart-approach-root-risk-bars;
+}
+.tart--approach-root-risk [data-anim="mark"] {
+  animation-name: tart-approach-root-risk-mark;
+}
+.tart--approach-root-risk [data-anim="caption"] {
+  animation-name: tart-approach-root-risk-caption;
+}
+
+.tart--approach-root-risk [data-anim="w-worst"],
+.tart--approach-root-risk [data-anim="w-second"],
+.tart--approach-root-risk [data-anim="w-rest"] {
+  transform-box: fill-box;
+  transform-origin: top;
+}
+
+.tart--approach-root-risk [data-anim="w-worst"] {
+  animation-name: tart-approach-root-risk-w-worst;
+}
+.tart--approach-root-risk [data-anim="w-second"] {
+  animation-name: tart-approach-root-risk-w-second;
+}
+.tart--approach-root-risk [data-anim="w-rest"] {
+  animation-name: tart-approach-root-risk-w-rest;
+}
+
+@keyframes tart-approach-root-risk-fan {
+  0% { opacity: 0; }
+  7.64%, 100% { opacity: 1; }
+}
+
+@keyframes tart-approach-root-risk-bars {
+  0%, 5.45% { opacity: 0; transform: translateY(-10px); }
+  18.55%, 100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes tart-approach-root-risk-mark {
+  0%, 21.82% { opacity: 0; }
+  29.45%, 100% { opacity: 1; }
+}
+
+/* Equal weight is 25px of bar; the three keyframes below start every bar
+   there and end it at the weight the blend actually gives it. */
+@keyframes tart-approach-root-risk-w-worst {
+  0%, 30.55% { transform: scaleY(0.568); }
+  43.64%, 100% { transform: scaleY(1); }
+}
+
+@keyframes tart-approach-root-risk-w-second {
+  0%, 30.55% { transform: scaleY(0.658); }
+  43.64%, 100% { transform: scaleY(1); }
+}
+
+@keyframes tart-approach-root-risk-w-rest {
+  0%, 30.55% { transform: scaleY(1.316); }
+  43.64%, 100% { transform: scaleY(1); }
+}
+
+@keyframes tart-approach-root-risk-caption {
+  0%, 45.82% { opacity: 0; }
+  52.36%, 100% { opacity: 1; }
+}

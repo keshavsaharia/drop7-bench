@@ -1,0 +1,41 @@
+/* Native engine card art. The column mask lights, the row mask lights and its
+   run lengths are looked up, then the column's bits compact in one step
+   (before fades out, after drops in). Only opacity, transform and
+   stroke-dashoffset animate; play-state is owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--engine-native {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+:where(.tart--engine-native) .tart-final {
+  opacity: 0;
+}
+
+.tart--engine-native [data-anim] {
+  animation-duration: var(--tart-duration);
+  animation-timing-function: var(--ease-standard, cubic-bezier(0.2, 0, 0, 1));
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+.tart--engine-native .colmask { animation-name: tart-engine-native-colmask; }
+.tart--engine-native .rowmask { animation-name: tart-engine-native-rowmask; }
+.tart--engine-native .maskbits { animation-name: tart-engine-native-maskbits; }
+.tart--engine-native .arrow { animation-name: tart-engine-native-arrow; }
+.tart--engine-native .hit { animation-name: tart-engine-native-hit; }
+.tart--engine-native .before { animation-name: tart-engine-native-before; }
+.tart--engine-native .after { animation-name: tart-engine-native-after; }
+
+@keyframes tart-engine-native-colmask { 0%, 3.27% { opacity: 0; } 7.64%, 100% { opacity: 1; } }
+@keyframes tart-engine-native-rowmask { 0%, 12% { opacity: 0; } 16.36%, 100% { opacity: 1; } }
+@keyframes tart-engine-native-maskbits { 0%, 14.18% { opacity: 0; } 18.55%, 100% { opacity: 1; } }
+@keyframes tart-engine-native-arrow { 0%, 18.55% { stroke-dashoffset: 1; } 22.91%, 100% { stroke-dashoffset: 0; } }
+@keyframes tart-engine-native-hit { 0%, 24% { opacity: 0; } 27.27%, 100% { opacity: 1; } }
+@keyframes tart-engine-native-before { 0%, 30.55% { opacity: 1; } 36%, 100% { opacity: 0; } }
+@keyframes tart-engine-native-after {
+  0%, 30.55% { opacity: 0; transform: translate(0, -8px); }
+  36%, 100% { opacity: 1; transform: translate(0, 0); }
+}

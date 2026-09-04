@@ -1,0 +1,55 @@
+/* oracle-curriculum/hindsight-planner card art. The row on top never changes:
+   one visible disc and then covers, which is all a player ever gets. Below it
+   the planner's own tape appears, writes itself out disc by disc, and the plan
+   then runs the length of it in one stroke, because inside that tape nothing
+   is unknown. The plan bar grows from its left edge; play-state is owned by
+   the shared art.css and the SVG's own attributes are the resting frame. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-hindsight-planner {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-hindsight-planner [data-anim="plan"] {
+  transform-box: fill-box;
+  transform-origin: left center;
+}
+
+.tart--approach-hindsight-planner [data-anim="invent"] { animation-name: tart-approach-hindsight-planner-invent; }
+.tart--approach-hindsight-planner [data-anim="written-1"] { animation-name: tart-approach-hindsight-planner-written-1; }
+.tart--approach-hindsight-planner [data-anim="written-2"] { animation-name: tart-approach-hindsight-planner-written-2; }
+.tart--approach-hindsight-planner [data-anim="written-3"] { animation-name: tart-approach-hindsight-planner-written-3; }
+.tart--approach-hindsight-planner [data-anim="written-4"] { animation-name: tart-approach-hindsight-planner-written-4; }
+.tart--approach-hindsight-planner [data-anim="plan"] { animation-name: tart-approach-hindsight-planner-plan; }
+.tart--approach-hindsight-planner [data-anim="finish"] { animation-name: tart-approach-hindsight-planner-finish; }
+
+@keyframes tart-approach-hindsight-planner-invent {
+  0%, 2.18% { opacity: 0; transform: translateY(5px); }
+  8.73%, 100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes tart-approach-hindsight-planner-written-1 {
+  0%, 9.82% { opacity: 0; }
+  14.18%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-hindsight-planner-written-2 {
+  0%, 14.18% { opacity: 0; }
+  18.55%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-hindsight-planner-written-3 {
+  0%, 18.55% { opacity: 0; }
+  22.91%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-hindsight-planner-written-4 {
+  0%, 22.91% { opacity: 0; }
+  27.27%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-hindsight-planner-plan {
+  0%, 30.55% { transform: scaleX(0); }
+  43.64%, 100% { transform: scaleX(1); }
+}
+@keyframes tart-approach-hindsight-planner-finish {
+  0%, 44.73% { opacity: 0; }
+  50.18%, 100% { opacity: 1; }
+}

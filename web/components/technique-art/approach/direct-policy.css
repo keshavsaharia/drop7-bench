@@ -1,0 +1,136 @@
+/* value-policy-learning/direct-policy card art. The tree is crossed off first,
+   then the seven weighted sums grow under the columns they score, the best one
+   lights up, and the disc drops straight into that column and clears — one
+   decision with nothing consulted in between. The sums grow from the board's
+   edge; the cross over the tree grows out of the tree's own centre.
+   Play-state, duration and easing are owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-direct-policy {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-direct-policy [data-anim="strike"] {
+  transform-origin: 236px 78px;
+  animation-name: tart-approach-direct-policy-strike;
+}
+.tart--approach-direct-policy [data-anim="sums"] {
+  transform-origin: 79px 156px;
+  animation-name: tart-approach-direct-policy-sums;
+}
+.tart--approach-direct-policy [data-anim="best"] {
+  animation-name: tart-approach-direct-policy-best;
+}
+.tart--approach-direct-policy [data-anim="drop"] {
+  animation-name: tart-approach-direct-policy-drop;
+}
+.tart--approach-direct-policy [data-anim="clear"] {
+  animation-name: tart-approach-direct-policy-clear;
+}
+.tart--approach-direct-policy [data-anim="cover-out"] {
+  animation-name: tart-approach-direct-policy-cover-out;
+}
+.tart--approach-direct-policy [data-anim="cover-in"] {
+  animation-name: tart-approach-direct-policy-cover-in;
+}
+.tart--approach-direct-policy [data-anim="score"] {
+  animation-name: tart-approach-direct-policy-score;
+}
+
+/* The tree is crossed off before anything else happens. */
+@keyframes tart-approach-direct-policy-strike {
+  0%,
+  2.18% {
+    transform: scale(0.03);
+    opacity: 0;
+  }
+  5.45% {
+    opacity: 1;
+  }
+  16.36%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes tart-approach-direct-policy-sums {
+  0%,
+  5.45% {
+    transform: scaleY(0.02);
+  }
+  18.55%,
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes tart-approach-direct-policy-best {
+  0%,
+  19.64% {
+    opacity: 0;
+  }
+  26.18%,
+  100% {
+    opacity: 1;
+  }
+}
+
+/* The disc falls in from above the frame into the column that won. */
+@keyframes tart-approach-direct-policy-drop {
+  0%,
+  25.09% {
+    transform: translateY(-132px);
+  }
+  37.09%,
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* It lands in a run of exactly two and goes straight back out. */
+@keyframes tart-approach-direct-policy-clear {
+  0%,
+  40.36% {
+    opacity: 1;
+  }
+  45.82%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes tart-approach-direct-policy-cover-out {
+  0%,
+  42.55% {
+    opacity: 1;
+  }
+  48%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes tart-approach-direct-policy-cover-in {
+  0%,
+  42.55% {
+    opacity: 0;
+  }
+  48%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes tart-approach-direct-policy-score {
+  0%,
+  43.64% {
+    opacity: 0;
+  }
+  50.18%,
+  100% {
+    opacity: 1;
+  }
+}

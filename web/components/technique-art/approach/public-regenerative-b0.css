@@ -1,0 +1,71 @@
+/* terminal-policy-iteration/public-regenerative-b0 card art. All seven columns
+   draw out to the first gate, four are cut and fade, the three survivors run
+   to the second gate on a fresh panel, two are cut, and the last one runs the
+   full fifteen cycles beside the reference before the bracket pairs them off.
+   Play-state is owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-public-regenerative-b0 {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-public-regenerative-b0 [data-anim] {
+  animation-duration: var(--tart-duration);
+  animation-timing-function: var(--tart-ease, var(--ease-standard, cubic-bezier(0.2, 0, 0, 1)));
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+.tart--approach-public-regenerative-b0 [data-anim="draw-a"] { animation-name: tart-approach-public-regenerative-b0-draw-a; }
+.tart--approach-public-regenerative-b0 [data-anim="draw-b"] { animation-name: tart-approach-public-regenerative-b0-draw-b; }
+.tart--approach-public-regenerative-b0 [data-anim="draw-c"] { animation-name: tart-approach-public-regenerative-b0-draw-c; }
+.tart--approach-public-regenerative-b0 [data-anim="cut-1"] { animation-name: tart-approach-public-regenerative-b0-cut-1; }
+.tart--approach-public-regenerative-b0 [data-anim="dim-1"] { animation-name: tart-approach-public-regenerative-b0-dim-1; }
+.tart--approach-public-regenerative-b0 [data-anim="draw-2"] { animation-name: tart-approach-public-regenerative-b0-draw-2; }
+.tart--approach-public-regenerative-b0 [data-anim="cut-2"] { animation-name: tart-approach-public-regenerative-b0-cut-2; }
+.tart--approach-public-regenerative-b0 [data-anim="dim-2"] { animation-name: tart-approach-public-regenerative-b0-dim-2; }
+.tart--approach-public-regenerative-b0 [data-anim="draw-3"] { animation-name: tart-approach-public-regenerative-b0-draw-3; }
+.tart--approach-public-regenerative-b0 [data-anim="final"] { animation-name: tart-approach-public-regenerative-b0-final; }
+
+@keyframes tart-approach-public-regenerative-b0-draw-a {
+  0%, 1.09% { stroke-dashoffset: 1; }
+  10.91%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes tart-approach-public-regenerative-b0-draw-b {
+  0%, 3.27% { stroke-dashoffset: 1; }
+  13.09%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes tart-approach-public-regenerative-b0-draw-c {
+  0%, 5.45% { stroke-dashoffset: 1; }
+  15.27%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes tart-approach-public-regenerative-b0-cut-1 {
+  0%, 16.36% { opacity: 0; }
+  19.64%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-public-regenerative-b0-dim-1 {
+  0%, 17.45% { opacity: 1; }
+  21.82%, 100% { opacity: 0.35; }
+}
+@keyframes tart-approach-public-regenerative-b0-draw-2 {
+  0%, 20.73% { stroke-dashoffset: 1; }
+  30.55%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes tart-approach-public-regenerative-b0-cut-2 {
+  0%, 31.64% { opacity: 0; }
+  34.91%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-public-regenerative-b0-dim-2 {
+  0%, 32.73% { opacity: 1; }
+  37.09%, 100% { opacity: 0.35; }
+}
+@keyframes tart-approach-public-regenerative-b0-draw-3 {
+  0%, 34.91% { stroke-dashoffset: 1; }
+  45.82%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes tart-approach-public-regenerative-b0-final {
+  0%, 45.82% { opacity: 0; }
+  51.27%, 100% { opacity: 1; }
+}

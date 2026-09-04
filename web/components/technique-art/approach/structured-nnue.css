@@ -1,0 +1,118 @@
+/* value-policy-learning/structured-nnue card art. The flat row of hand-chosen
+   summaries fades out, the input takes the board's own shape and slides open
+   into a stack of planes, the tokens fill it in, one cell is followed through
+   the depth of the stack, and the three heads light. Play-state is owned by
+   the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-structured-nnue {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-structured-nnue [data-anim="flat"] {
+  animation-name: tart-approach-structured-nnue-flat;
+}
+.tart--approach-structured-nnue [data-anim="summary-caption"] {
+  animation-name: tart-approach-structured-nnue-summary-caption;
+}
+.tart--approach-structured-nnue [data-anim="planes"] {
+  animation-name: tart-approach-structured-nnue-planes;
+}
+.tart--approach-structured-nnue [data-anim="depth"] {
+  animation-name: tart-approach-structured-nnue-depth;
+}
+.tart--approach-structured-nnue [data-anim="tiles"] {
+  animation-name: tart-approach-structured-nnue-tiles;
+}
+.tart--approach-structured-nnue [data-anim="link"] {
+  animation-name: tart-approach-structured-nnue-link;
+}
+.tart--approach-structured-nnue [data-anim="heads"] {
+  animation-name: tart-approach-structured-nnue-heads;
+}
+.tart--approach-structured-nnue [data-anim="caption"] {
+  animation-name: tart-approach-structured-nnue-caption;
+}
+
+@keyframes tart-approach-structured-nnue-flat {
+  0%,
+  8.73% {
+    opacity: 1;
+  }
+  16.36%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes tart-approach-structured-nnue-summary-caption {
+  0%,
+  8.73% {
+    opacity: 1;
+  }
+  16.36%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes tart-approach-structured-nnue-planes {
+  0%,
+  13.09% {
+    opacity: 0;
+  }
+  21.82%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-structured-nnue-depth {
+  0%,
+  15.27% {
+    transform: translate(-9px, 9px);
+  }
+  29.45%,
+  100% {
+    transform: translate(0, 0);
+  }
+}
+@keyframes tart-approach-structured-nnue-tiles {
+  0%,
+  24% {
+    opacity: 0;
+  }
+  34.91%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-structured-nnue-link {
+  0%,
+  36% {
+    opacity: 0;
+  }
+  43.64%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-structured-nnue-heads {
+  0%,
+  43.64% {
+    opacity: 0;
+  }
+  51.27%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-structured-nnue-caption {
+  0%,
+  41.45% {
+    opacity: 0;
+  }
+  49.09%,
+  100% {
+    opacity: 1;
+  }
+}

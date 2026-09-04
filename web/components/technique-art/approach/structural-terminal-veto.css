@@ -1,0 +1,49 @@
+/* constructive-reservoir/structural-terminal-veto card art. The search's board
+   runs on to the end of its simulation and packs solid, the dead end is crossed
+   out and dimmed, and the choice crosses to the runner-up's still-open board.
+   Play-state is owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-structural-terminal-veto {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-structural-terminal-veto [data-anim="kept"] { animation-name: tart-approach-structural-terminal-veto-kept; }
+.tart--approach-structural-terminal-veto [data-anim="packs"] { animation-name: tart-approach-structural-terminal-veto-packs; }
+.tart--approach-structural-terminal-veto [data-anim="dead"] { animation-name: tart-approach-structural-terminal-veto-dead; }
+.tart--approach-structural-terminal-veto [data-anim="doomed"] { animation-name: tart-approach-structural-terminal-veto-doomed; }
+.tart--approach-structural-terminal-veto [data-anim="vetoed"] { animation-name: tart-approach-structural-terminal-veto-vetoed; }
+.tart--approach-structural-terminal-veto [data-anim="chosen"] { animation-name: tart-approach-structural-terminal-veto-chosen; }
+.tart--approach-structural-terminal-veto [data-anim="caption"] { animation-name: tart-approach-structural-terminal-veto-caption; }
+
+@keyframes tart-approach-structural-terminal-veto-kept {
+  0%, 2.18% { opacity: 0; }
+  6.55%, 33.82% { opacity: 1; }
+  39.27%, 100% { opacity: 0; }
+}
+@keyframes tart-approach-structural-terminal-veto-packs {
+  0%, 9.82% { opacity: 0; }
+  26.18%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-structural-terminal-veto-dead {
+  0%, 27.27% { opacity: 0; }
+  32.73%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-structural-terminal-veto-doomed {
+  0%, 28.36% { opacity: 1; }
+  34.91%, 100% { opacity: 0.4; }
+}
+@keyframes tart-approach-structural-terminal-veto-vetoed {
+  0%, 36% { opacity: 0; }
+  42.55%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-structural-terminal-veto-chosen {
+  0%, 38.18% { opacity: 0; }
+  44.73%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-structural-terminal-veto-caption {
+  0%, 48% { opacity: 0; }
+  53.45%, 100% { opacity: 1; }
+}

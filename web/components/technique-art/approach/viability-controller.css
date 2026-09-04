@@ -1,0 +1,60 @@
+/* constructive-reservoir/viability-controller card art. A 6 lands and the load
+   bar climbs past the dashed line into "too full", which is the boundary the
+   controller reads; the mode flips to release, the played 4 makes the column
+   four tall so both of its 4s clear, the 5 above falls, and the bar settles
+   back inside the viable band. The resting frame is the corrected board with
+   the wave score still floating. Play-state, duration and easing are owned by
+   art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-viability-controller {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-viability-controller [data-anim="arrive"] { animation-name: tart-approach-viability-controller-arrive; }
+.tart--approach-viability-controller [data-anim="played"] { animation-name: tart-approach-viability-controller-played; }
+.tart--approach-viability-controller [data-anim="spent"] { animation-name: tart-approach-viability-controller-spent; }
+.tart--approach-viability-controller [data-anim="settle"] { animation-name: tart-approach-viability-controller-settle; }
+.tart--approach-viability-controller [data-anim="wave"] { animation-name: tart-approach-viability-controller-wave; }
+.tart--approach-viability-controller [data-anim="load"] { animation-name: tart-approach-viability-controller-load; }
+.tart--approach-viability-controller [data-anim="alarm"] { animation-name: tart-approach-viability-controller-alarm; }
+.tart--approach-viability-controller [data-anim="rest"] { animation-name: tart-approach-viability-controller-rest; }
+
+@keyframes tart-approach-viability-controller-arrive {
+  0%, 3.27% { transform: translateY(-120px); opacity: 0; }
+  10.91%, 100% { transform: translateY(0); opacity: 1; }
+}
+@keyframes tart-approach-viability-controller-played {
+  0%, 17.45% { transform: translateY(-120px); opacity: 0; }
+  24%, 28.36% { transform: translateY(0); opacity: 1; }
+  32.73%, 100% { transform: translateY(0); opacity: 0; }
+}
+@keyframes tart-approach-viability-controller-spent {
+  0%, 28.36% { opacity: 1; }
+  32.73%, 100% { opacity: 0; }
+}
+/* One cell is 16px: the 5 falls the single row the cleared 4 vacated. */
+@keyframes tart-approach-viability-controller-settle {
+  0%, 31.64% { transform: translateY(-16px); }
+  38.18%, 100% { transform: translateY(0); }
+}
+@keyframes tart-approach-viability-controller-wave {
+  0%, 30.55% { transform: translateY(6px); opacity: 0; }
+  36%, 100% { transform: translateY(0); opacity: 1; }
+}
+@keyframes tart-approach-viability-controller-load {
+  0%, 5.45% { transform: translateY(-16px); }
+  16.36%, 29.45% { transform: translateY(-42px); }
+  40.36%, 100% { transform: translateY(0); }
+}
+@keyframes tart-approach-viability-controller-alarm {
+  0%, 14.18% { opacity: 0; }
+  19.64%, 29.45% { opacity: 1; }
+  38.18%, 100% { opacity: 0; }
+}
+@keyframes tart-approach-viability-controller-rest {
+  0%, 40.36% { opacity: 0; }
+  45.82%, 100% { opacity: 1; }
+}

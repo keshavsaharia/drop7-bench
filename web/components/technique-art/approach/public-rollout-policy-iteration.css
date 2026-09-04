@@ -1,0 +1,56 @@
+/* terminal-policy-iteration/public-rollout-policy-iteration card art. The comb
+   of shared futures arrives first, the seven column tracks run out across it,
+   the best average lights up and becomes the improved policy, and the return
+   arm hands it back to the base for the next step. Play-state is owned by the
+   shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-public-rollout-policy-iteration {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-public-rollout-policy-iteration [data-anim] {
+  animation-duration: var(--tart-duration);
+  animation-timing-function: var(--tart-ease, var(--ease-standard, cubic-bezier(0.2, 0, 0, 1)));
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+.tart--approach-public-rollout-policy-iteration [data-anim="comb"] { animation-name: tart-approach-public-rollout-policy-iteration-comb; }
+.tart--approach-public-rollout-policy-iteration [data-anim="track-a"] { animation-name: tart-approach-public-rollout-policy-iteration-track-a; }
+.tart--approach-public-rollout-policy-iteration [data-anim="track-b"] { animation-name: tart-approach-public-rollout-policy-iteration-track-b; }
+.tart--approach-public-rollout-policy-iteration [data-anim="track-c"] { animation-name: tart-approach-public-rollout-policy-iteration-track-c; }
+.tart--approach-public-rollout-policy-iteration [data-anim="best"] { animation-name: tart-approach-public-rollout-policy-iteration-best; }
+.tart--approach-public-rollout-policy-iteration [data-anim="improved"] { animation-name: tart-approach-public-rollout-policy-iteration-improved; }
+.tart--approach-public-rollout-policy-iteration [data-anim="loop"] { animation-name: tart-approach-public-rollout-policy-iteration-loop; }
+
+@keyframes tart-approach-public-rollout-policy-iteration-comb {
+  0% { opacity: 0; }
+  7.64%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-public-rollout-policy-iteration-track-a {
+  0%, 5.45% { stroke-dashoffset: 1; }
+  21.82%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes tart-approach-public-rollout-policy-iteration-track-b {
+  0%, 8.73% { stroke-dashoffset: 1; }
+  25.09%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes tart-approach-public-rollout-policy-iteration-track-c {
+  0%, 12% { stroke-dashoffset: 1; }
+  28.36%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes tart-approach-public-rollout-policy-iteration-best {
+  0%, 28.36% { opacity: 0; }
+  34.91%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-public-rollout-policy-iteration-improved {
+  0%, 34.91% { opacity: 0; }
+  40.36%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-public-rollout-policy-iteration-loop {
+  0%, 41.45% { opacity: 0; }
+  49.09%, 100% { opacity: 1; }
+}

@@ -1,0 +1,86 @@
+/* constructive-reservoir/vertical-reservoir card art. The fourth disc lands
+   and pays nothing; the board rises a row, which brings the fifth 5 in under
+   the stack; the run flashes and clears and the gray beside it cracks; then
+   the cycle rebuilds the stack, so the resting frame is the column the
+   approach sets out to build. Play-state is owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-vertical-reservoir {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-vertical-reservoir [data-anim] {
+  animation-duration: var(--tart-duration);
+  animation-timing-function: var(--tart-ease, var(--ease-standard, cubic-bezier(0.2, 0, 0, 1)));
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+.tart--approach-vertical-reservoir [data-anim="drop"] { animation-name: tart-approach-vertical-reservoir-drop; }
+.tart--approach-vertical-reservoir [data-anim="rise"] { animation-name: tart-approach-vertical-reservoir-rise; }
+.tart--approach-vertical-reservoir [data-anim="flash"] { animation-name: tart-approach-vertical-reservoir-flash; }
+.tart--approach-vertical-reservoir [data-anim="clear"] { animation-name: tart-approach-vertical-reservoir-clear; }
+.tart--approach-vertical-reservoir [data-anim="gray-solid"] { animation-name: tart-approach-vertical-reservoir-gray-solid; }
+.tart--approach-vertical-reservoir [data-anim="gray-cracked"] { animation-name: tart-approach-vertical-reservoir-gray-cracked; }
+.tart--approach-vertical-reservoir [data-anim="step-a"] { animation-name: tart-approach-vertical-reservoir-step-a; }
+.tart--approach-vertical-reservoir [data-anim="step-b"] { animation-name: tart-approach-vertical-reservoir-step-b; }
+.tart--approach-vertical-reservoir [data-anim="step-c"] { animation-name: tart-approach-vertical-reservoir-step-c; }
+.tart--approach-vertical-reservoir [data-anim="rest"] { animation-name: tart-approach-vertical-reservoir-rest; }
+
+/* Doubled class so the drop's easing beats art.css's own whichever way round
+   the two files are bundled. */
+.tart.tart--approach-vertical-reservoir [data-anim="drop"] {
+  animation-timing-function: var(--ease-drop, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+@keyframes tart-approach-vertical-reservoir-drop {
+  0% { transform: translate(0, -72px); }
+  9.82%, 100% { transform: translate(0, 0); }
+}
+@keyframes tart-approach-vertical-reservoir-rise {
+  0%, 21.82% { transform: translate(0, 0); }
+  28.36%, 50.18% { transform: translate(0, -20px); }
+  54.55%, 100% { transform: translate(0, 0); }
+}
+@keyframes tart-approach-vertical-reservoir-flash {
+  0%, 30.55% { opacity: 0; }
+  34.36% { opacity: 0.85; }
+  39.27%, 100% { opacity: 0; }
+}
+@keyframes tart-approach-vertical-reservoir-clear {
+  0%, 34.91% { opacity: 1; }
+  40.36%, 50.18% { opacity: 0; }
+  54.55%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-vertical-reservoir-gray-solid {
+  0%, 40.36% { opacity: 1; }
+  44.73%, 51.27% { opacity: 0; }
+  54.55%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-vertical-reservoir-gray-cracked {
+  0%, 40.36% { opacity: 0; }
+  44.73%, 51.27% { opacity: 1; }
+  54.55%, 100% { opacity: 0; }
+}
+@keyframes tart-approach-vertical-reservoir-step-a {
+  0%, 3.27% { opacity: 0; }
+  10.91%, 18.55% { opacity: 1; }
+  22.91%, 100% { opacity: 0; }
+}
+@keyframes tart-approach-vertical-reservoir-step-b {
+  0%, 20.73% { opacity: 0; }
+  25.09%, 32.73% { opacity: 1; }
+  38.18%, 100% { opacity: 0; }
+}
+@keyframes tart-approach-vertical-reservoir-step-c {
+  0%, 37.09% { opacity: 0; }
+  42.55%, 49.09% { opacity: 1; }
+  52.36%, 100% { opacity: 0; }
+}
+@keyframes tart-approach-vertical-reservoir-rest {
+  0%, 2.18% { opacity: 1; }
+  6.55%, 50.18% { opacity: 0; }
+  54.55%, 100% { opacity: 1; }
+}

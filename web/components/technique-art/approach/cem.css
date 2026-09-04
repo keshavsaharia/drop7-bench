@@ -1,0 +1,80 @@
+/* fair-expectimax/cem card art. One coefficient axis, one distribution over
+   it. The play opens on the wide bell and the population sampled from it: the
+   three elites light up, and the distribution is refitted onto them twice —
+   each new bell rising out of the axis under the elite marks, so the narrowing
+   is the whole play. The resting frame keeps all three curves, nested.
+   Play-state, duration and easing are owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-cem {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-cem [data-anim="elite"] {
+  transform-origin: 174px 148px;
+  animation-name: tart-approach-cem-elite;
+}
+.tart--approach-cem [data-anim="mid"] {
+  transform-origin: 164px 146px;
+  animation-name: tart-approach-cem-mid;
+}
+.tart--approach-cem [data-anim="narrow"] {
+  transform-origin: 178px 146px;
+  animation-name: tart-approach-cem-narrow;
+}
+.tart--approach-cem [data-anim="refit"] {
+  animation-name: tart-approach-cem-refit;
+}
+
+@keyframes tart-approach-cem-elite {
+  0%,
+  8.73% {
+    opacity: 0;
+    transform: scaleY(0.2);
+  }
+  17.45%,
+  100% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+/* Each refit grows out of the axis about its own mean. */
+@keyframes tart-approach-cem-mid {
+  0%,
+  19.64% {
+    opacity: 0;
+    transform: scaleY(0.05);
+  }
+  30.55%,
+  100% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes tart-approach-cem-narrow {
+  0%,
+  33.82% {
+    opacity: 0;
+    transform: scaleY(0.05);
+  }
+  46.91%,
+  100% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes tart-approach-cem-refit {
+  0%,
+  45.82% {
+    opacity: 0;
+  }
+  52.36%,
+  100% {
+    opacity: 1;
+  }
+}

@@ -1,0 +1,82 @@
+/* terminal-policy-iteration/terminal-rollout card art. The futures draw out
+   through the horizon line and stop at their own lengths, each one marked
+   where its game ended; the board fills bottom-up in three bands until the
+   top row is reached and the waiting disc is crossed out; the clock turns
+   once for the whole cycle. Play-state is owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-terminal-rollout {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-terminal-rollout [data-anim] {
+  animation-duration: var(--tart-duration);
+  animation-timing-function: var(--tart-ease, var(--ease-standard, cubic-bezier(0.2, 0, 0, 1)));
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+/* The hand pivots on the clock's centre, which is a view-box point. */
+.tart--approach-terminal-rollout .hand {
+  transform-box: view-box;
+  transform-origin: 18px 160px;
+}
+
+.tart--approach-terminal-rollout [data-anim="thread-a"] { animation-name: tart-approach-terminal-rollout-thread-a; }
+.tart--approach-terminal-rollout [data-anim="thread-b"] { animation-name: tart-approach-terminal-rollout-thread-b; }
+.tart--approach-terminal-rollout [data-anim="thread-c"] { animation-name: tart-approach-terminal-rollout-thread-c; }
+.tart--approach-terminal-rollout [data-anim="cross-a"] { animation-name: tart-approach-terminal-rollout-cross-a; }
+.tart--approach-terminal-rollout [data-anim="cross-b"] { animation-name: tart-approach-terminal-rollout-cross-b; }
+.tart--approach-terminal-rollout [data-anim="cross-c"] { animation-name: tart-approach-terminal-rollout-cross-c; }
+.tart--approach-terminal-rollout [data-anim="fill-a"] { animation-name: tart-approach-terminal-rollout-fill-a; }
+.tart--approach-terminal-rollout [data-anim="fill-b"] { animation-name: tart-approach-terminal-rollout-fill-b; }
+.tart--approach-terminal-rollout [data-anim="fill-c"] { animation-name: tart-approach-terminal-rollout-fill-c; }
+.tart--approach-terminal-rollout [data-anim="hand"] { animation-name: tart-approach-terminal-rollout-hand; }
+.tart--approach-terminal-rollout [data-anim="final"] { animation-name: tart-approach-terminal-rollout-final; }
+
+@keyframes tart-approach-terminal-rollout-thread-a {
+  0%, 2.18% { stroke-dashoffset: 1; }
+  18.55%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes tart-approach-terminal-rollout-thread-b {
+  0%, 5.45% { stroke-dashoffset: 1; }
+  22.91%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes tart-approach-terminal-rollout-thread-c {
+  0%, 8.73% { stroke-dashoffset: 1; }
+  27.27%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes tart-approach-terminal-rollout-cross-a {
+  0%, 18.55% { opacity: 0; }
+  21.82%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-terminal-rollout-cross-b {
+  0%, 22.91% { opacity: 0; }
+  26.18%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-terminal-rollout-cross-c {
+  0%, 27.27% { opacity: 0; }
+  30.55%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-terminal-rollout-fill-a {
+  0%, 4.36% { opacity: 0; transform: translateY(8px); }
+  15.27%, 100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes tart-approach-terminal-rollout-fill-b {
+  0%, 15.27% { opacity: 0; transform: translateY(8px); }
+  26.18%, 100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes tart-approach-terminal-rollout-fill-c {
+  0%, 26.18% { opacity: 0; transform: translateY(8px); }
+  37.09%, 100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes tart-approach-terminal-rollout-hand {
+  0% { transform: rotate(0deg); }
+  54.55%, 100% { transform: rotate(360deg); }
+}
+@keyframes tart-approach-terminal-rollout-final {
+  0%, 39.27% { opacity: 0; }
+  45.82%, 100% { opacity: 1; }
+}

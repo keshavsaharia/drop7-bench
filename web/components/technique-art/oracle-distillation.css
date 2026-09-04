@@ -1,0 +1,45 @@
+/* Oracle distillation card art. The label tag slides from the teacher's side
+   to the student's; the two hidden values set off after it and fade out at
+   the boundary. Only transform and opacity animate; play-state is owned by
+   the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--oracle-distillation {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+:where(.tart--oracle-distillation) .tart-final {
+  opacity: 0;
+}
+
+.tart--oracle-distillation [data-anim] {
+  animation-duration: var(--tart-duration);
+  animation-timing-function: var(--ease-standard, cubic-bezier(0.2, 0, 0, 1));
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+.tart--oracle-distillation .tag { animation-name: tart-oracle-distillation-tag; }
+.tart--oracle-distillation .mover-0 { animation-name: tart-oracle-distillation-mover-0; }
+.tart--oracle-distillation .mover-1 { animation-name: tart-oracle-distillation-mover-1; }
+
+@keyframes tart-oracle-distillation-tag {
+  0%, 5.45% { transform: translate(-78px, 0); }
+  27.27%, 100% { transform: translate(0, 0); }
+}
+
+/* Each hidden value travels from its cell to the boundary and dies there. */
+@keyframes tart-oracle-distillation-mover-0 {
+  0%, 9.82% { transform: translate(0, 0); opacity: 0; }
+  12% { transform: translate(0, 0); opacity: 1; }
+  26.18% { opacity: 1; }
+  31.64%, 100% { transform: translate(108px, 0); opacity: 0; }
+}
+@keyframes tart-oracle-distillation-mover-1 {
+  0%, 12% { transform: translate(0, 0); opacity: 0; }
+  14.18% { transform: translate(0, 0); opacity: 1; }
+  28.36% { opacity: 1; }
+  33.82%, 100% { transform: translate(92px, 0); opacity: 0; }
+}

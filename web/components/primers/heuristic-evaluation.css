@@ -1,0 +1,124 @@
+/* Motion for the heuristic-evaluation primer figures
+   (web/components/primers/HeuristicEvaluation.tsx). Three counters sweep
+   a board in turn, and a dial turns while the chosen move flips. Only
+   opacity and transform animate. */
+
+.primer-heuristic svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.primer-heuristic [data-anim] {
+  animation-duration: 5s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+/* Figure 1: the three counters and the rows of the sum, in sequence. */
+.primer-heuristic [data-anim="row-1"] {
+  animation-name: primer-heuristic-first;
+}
+
+.primer-heuristic [data-anim="ruler-height"] {
+  animation-name: primer-heuristic-ruler;
+}
+
+.primer-heuristic [data-anim="ruler-danger"],
+.primer-heuristic [data-anim="row-2"] {
+  animation-name: primer-heuristic-second;
+}
+
+.primer-heuristic [data-anim="ruler-pair"],
+.primer-heuristic [data-anim="row-3"] {
+  animation-name: primer-heuristic-third;
+}
+
+.primer-heuristic [data-anim="row-total"] {
+  animation-name: primer-heuristic-total;
+}
+
+@keyframes primer-heuristic-ruler {
+  0% { opacity: 0; transform: translateY(78px); }
+  4% { opacity: 1; transform: translateY(78px); }
+  20% { transform: translateY(0); }
+  28% { opacity: 1; transform: translateY(0); }
+  33% { opacity: 0; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(0); }
+}
+
+@keyframes primer-heuristic-first {
+  0% { opacity: 0; }
+  4% { opacity: 1; }
+  28% { opacity: 1; }
+  33% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+@keyframes primer-heuristic-second {
+  0%, 30% { opacity: 0; }
+  35% { opacity: 1; }
+  58% { opacity: 1; }
+  63% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+@keyframes primer-heuristic-third {
+  0%, 60% { opacity: 0; }
+  65% { opacity: 1; }
+  84% { opacity: 1; }
+  89% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+@keyframes primer-heuristic-total {
+  0%, 86% { opacity: 0; }
+  90% { opacity: 1; }
+  100% { opacity: 1; }
+}
+
+/* Figure 2: the knob slides from −1 to −10; the chosen ring flips at −2. */
+.primer-heuristic [data-anim="knob"] {
+  animation-name: primer-heuristic-knob;
+}
+
+.primer-heuristic [data-anim="pick-left"] {
+  animation-name: primer-heuristic-pick-left;
+}
+
+.primer-heuristic [data-anim="pick-right"] {
+  animation-name: primer-heuristic-pick-right;
+}
+
+@keyframes primer-heuristic-knob {
+  0%, 15% { transform: translateX(0); }
+  75%, 100% { transform: translateX(320px); }
+}
+
+@keyframes primer-heuristic-pick-left {
+  0%, 21% { opacity: 1; }
+  23%, 100% { opacity: 0; }
+}
+
+@keyframes primer-heuristic-pick-right {
+  0%, 21% { opacity: 0; }
+  23%, 100% { opacity: 1; }
+}
+
+/* Resting frames: every counter and the total shown; the dial at −10 with
+   the safer move chosen. */
+@media (prefers-reduced-motion: reduce) {
+  .primer-heuristic [data-anim] {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .primer-heuristic [data-anim="knob"] {
+    transform: translateX(320px);
+  }
+
+  .primer-heuristic [data-anim="pick-left"] {
+    opacity: 0;
+  }
+}

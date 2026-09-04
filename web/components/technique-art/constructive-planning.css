@@ -1,0 +1,69 @@
+/*
+ * Constructive planning card art (ConstructivePlanningArt.tsx).
+ *
+ * Sets animation-name only; duration, easing, iteration count and the
+ * paused/running play state come from art.css. The SVG attributes are the
+ * resting frame (four 6s stacked on the gray row). First keyframe: the
+ * fourth 6 hovers above the stack. Then it lands (nothing happens), the
+ * board rises one row, the four 6s flash and clear, the gray beneath cracks,
+ * and the stack fades back for the next loop.
+ */
+.tart--constructive-planning [data-anim="land"] {
+  animation-name: tart-constructive-planning-land;
+}
+.tart--constructive-planning [data-anim="shift"] {
+  animation-name: tart-constructive-planning-shift;
+}
+.tart--constructive-planning [data-anim="pop"] {
+  animation-name: tart-constructive-planning-pop;
+}
+.tart--constructive-planning [data-anim="newrow"] {
+  animation-name: tart-constructive-planning-newrow;
+}
+.tart--constructive-planning [data-anim="crack"] {
+  animation-name: tart-constructive-planning-crack;
+}
+.tart--constructive-planning [data-anim="flash"] {
+  animation-name: tart-constructive-planning-flash;
+}
+
+@keyframes tart-constructive-planning-land {
+  0%, 8% { transform: translateY(-36px); }
+  18%, 100% { transform: translateY(0); }
+}
+
+@keyframes tart-constructive-planning-shift {
+  0%, 32% { transform: translateY(0); opacity: 1; }
+  42%, 86% { transform: translateY(-16px); opacity: 1; }
+  90% { transform: translateY(-16px); opacity: 0; }
+  94% { transform: translateY(0); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes tart-constructive-planning-pop {
+  0%, 46% { opacity: 1; }
+  50% { opacity: 0.2; }
+  54% { opacity: 1; }
+  58% { opacity: 0.2; }
+  62% { opacity: 1; }
+  68%, 93% { opacity: 0; }
+  96%, 100% { opacity: 1; }
+}
+
+@keyframes tart-constructive-planning-newrow {
+  0%, 32% { opacity: 0; transform: translateY(16px); }
+  42%, 86% { opacity: 1; transform: translateY(0); }
+  90%, 100% { opacity: 0; transform: translateY(0); }
+}
+
+@keyframes tart-constructive-planning-crack {
+  0%, 66% { opacity: 0; }
+  72%, 86% { opacity: 1; }
+  90%, 100% { opacity: 0; }
+}
+
+@keyframes tart-constructive-planning-flash {
+  0%, 44% { opacity: 0; }
+  48%, 64% { opacity: 1; }
+  68%, 100% { opacity: 0; }
+}

@@ -22,15 +22,15 @@ import { ARM_LABELS, CONTRAST_LABELS, SNAPSHOT_FORMAT, type EvolutionSnapshot } 
 import { CorpusScores, EvolutionCurve, FitnessSwarm, PretrainCurve, ScreenPairs } from "./charts/EvolutionCharts";
 
 const RUN = /^RUN-[A-Za-z0-9-]+$/;
-const INK = "#fafafa";
-const INK_2 = "#a1a1aa";
-const INK_3 = "#71717a";
-const LINE = "#3f3f46";
-const BLUE = "#3987e5";
-const AMBER = "#f59e0b";
-const GREEN = "#22c55e";
-const PINK = "#e879f9";
-const FONT = "ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif";
+const INK = "var(--color-ink)";
+const INK_2 = "var(--color-ink-2)";
+const INK_3 = "var(--color-ink-3)";
+const LINE = "var(--color-rule-strong)";
+const BLUE = "var(--color-series-1)";
+const AMBER = "var(--color-series-4)";
+const GREEN = "var(--color-series-6)";
+const PINK = "var(--color-series-5)";
+const FONT = "var(--font-sans)";
 
 function loadSnapshot(run: string): EvolutionSnapshot | null {
   if (!RUN.test(run)) return null;
@@ -424,7 +424,7 @@ function Box({ x, y, w, h, title, lines, accent = LINE }: { x: number; y: number
   }
   return (
     <g>
-      <rect x={x} y={y} width={w} height={h} rx={8} fill="#141418" stroke={accent} strokeWidth={1.2} />
+      <rect x={x} y={y} width={w} height={h} rx={8} fill="var(--color-surface)" stroke={accent} strokeWidth={1.2} />
       {nodes}
     </g>
   );
@@ -562,7 +562,7 @@ export function NnueSketch({ caption }: { caption?: string }) {
         <g>
           {Array.from({ length: 7 }, (_, r) =>
             Array.from({ length: 7 }, (_, c) => (
-              <rect key={`${r}-${c}`} x={gx + c * cell} y={gy + r * cell} width={cell - 1} height={cell - 1} fill={r >= 4 && (c + r) % 3 !== 0 ? "#2b2b33" : "#141418"} stroke={LINE} strokeWidth={0.5} />
+              <rect key={`${r}-${c}`} x={gx + c * cell} y={gy + r * cell} width={cell - 1} height={cell - 1} fill={r >= 4 && (c + r) % 3 !== 0 ? "var(--color-rule)" : "var(--color-surface)"} stroke={LINE} strokeWidth={0.5} />
             )),
           )}
           <text x={gx + 3.5 * cell} y={gy + 7 * cell + 14} textAnchor="middle" fontSize={9.5} fill={INK_2}>
@@ -576,7 +576,7 @@ export function NnueSketch({ caption }: { caption?: string }) {
         {/* feature column */}
         <g>
           {Array.from({ length: 22 }, (_, i) => (
-            <rect key={i} x={158} y={22 + i * 6.4} width={26} height={5} fill={[2, 5, 9, 12, 16, 19].includes(i) ? BLUE : "#1f1f25"} />
+            <rect key={i} x={158} y={22 + i * 6.4} width={26} height={5} fill={[2, 5, 9, 12, 16, 19].includes(i) ? BLUE : "var(--color-hover)"} />
           ))}
           <text x={171} y={182} textAnchor="middle" fontSize={9.5} fill={INK_2}>
             8,902 features
@@ -645,8 +645,8 @@ export function PairedSeedsSketch({ caption }: { caption?: string }) {
             {Array.from({ length: seeds }, (_, i) => (
               <g key={i}>
                 {/* the same disc sequence icon in every row: identical luck */}
-                <circle cx={x0 + i * step - 9} cy={row.y} r={5} fill="#2b2b33" stroke={LINE} />
-                <circle cx={x0 + i * step + 1} cy={row.y} r={5} fill="#2b2b33" stroke={LINE} />
+                <circle cx={x0 + i * step - 9} cy={row.y} r={5} fill="var(--color-rule)" stroke={LINE} />
+                <circle cx={x0 + i * step + 1} cy={row.y} r={5} fill="var(--color-rule)" stroke={LINE} />
                 <circle cx={x0 + i * step + 11} cy={row.y} r={5} fill={row.color} stroke="none" />
               </g>
             ))}

@@ -1,31 +1,27 @@
-/** Shared look for every chart in the console (dark theme, matches globals.css). */
-export const PALETTE = [
-  "#3987e5", // blue
-  "#f59e0b", // amber
-  "#22c55e", // green
-  "#e879f9", // pink
-  "#f87171", // red
-  "#a3e635", // lime
-  "#22d3ee", // cyan
-  "#c084fc", // violet
-];
+/**
+ * Compatibility re-export of ./tokens for older imports. New code imports
+ * ./tokens directly; the legacy names below are removed once nothing under
+ * components/charts imports them.
+ */
+import { seriesToken } from "@/lib/charts/palette";
+import { FONT_MONO, INK_1, INK_2, INK_3, RAISED, RULE, RULE_STRONG } from "./tokens";
 
-export const INK = "#e4e4e7";
-export const MUTED = "#a1a1aa";
-export const FAINT = "#71717a";
-export const GRID = "#27272a";
-export const AXIS = "#3f3f46";
-export const ZERO = "#71717a";
-export const TOOLTIP_BG = "#18181b";
-export const TOOLTIP_BORDER = "#3f3f46";
+export * from "./tokens";
 
-export const FONT = "ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif";
-export const TICK_SIZE = 11;
-export const LABEL_SIZE = 12;
-
-/** Width used for server rendering and for the first client render (before measurement). */
-export const DEFAULT_WIDTH = 680;
-export const MIN_WIDTH = 320;
+/** Legacy names (old ResearchChart / primitives / EvolutionCharts). */
+export const PALETTE = Array.from({ length: 8 }, (_, index) => seriesToken(index));
+export const MUTED = INK_2;
+export const FAINT = INK_3;
+export const GRID = RULE;
+export const AXIS = RULE_STRONG;
+export const ZERO = INK_3;
+export const TOOLTIP_BG = RAISED;
+export const TOOLTIP_BORDER = RULE_STRONG;
+export const HIGHLIGHT = "var(--color-highlight)";
+export const DANGER = "var(--color-danger)";
+export const FONT = FONT_MONO;
+export const LEGACY_INK = INK_1;
+export const FALLBACK_MONO = 'ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace';
 
 export function seriesColor(index: number): string {
   return PALETTE[index % PALETTE.length];

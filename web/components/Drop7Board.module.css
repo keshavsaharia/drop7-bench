@@ -3,10 +3,10 @@
   top: 48%;
   left: 50%;
   z-index: 20;
-  color: #fef08a;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  color: var(--color-highlight);
+  font-family: var(--font-mono);
   font-size: clamp(0.7rem, 5cqw, 1.4rem);
-  font-weight: 900;
+  font-weight: 800;
   font-variant-numeric: tabular-nums;
   line-height: 1;
   letter-spacing: -0.04em;
@@ -14,7 +14,7 @@
   text-shadow:
     0 1px 1px rgb(0 0 0 / 95%),
     0 0 5px rgb(0 0 0 / 85%),
-    0 0 10px rgb(250 204 21 / 55%);
+    0 0 10px color-mix(in srgb, var(--color-highlight) 55%, transparent);
   white-space: nowrap;
   animation: drop7-explosion-point 900ms cubic-bezier(0.16, 0.72, 0.3, 1)
     both;

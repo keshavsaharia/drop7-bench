@@ -5,6 +5,9 @@
  * Board encoding follows the engine's serializeBoard format: one character per
  * cell, row-major from the top: "0" empty, "1"-"7" numbered, "8" solid gray,
  * "9" cracked gray.
+ *
+ * Styled by the `.fig*`, `.callout*`, `.stat*` and `.board-compare*` blocks in
+ * globals.css, which win inside .prose-drop7.
  */
 import { Drop7Board } from "./Drop7Board";
 import { CellGlyph, DISC_COLORS, DiscFace, cellLabel, parseBoard } from "./discs";
@@ -71,30 +74,26 @@ export function BoardCompare({
   caption?: string;
 }) {
   return (
-    <div className="my-4 flex flex-wrap items-center justify-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
-      <div className="flex flex-col items-center gap-1">
-        <Drop7Board cells={before} highlight={highlightBefore} size={size} />
-        <span className="max-w-52 text-center text-xs font-medium uppercase tracking-wide text-zinc-500">
-          {beforeLabel}
-        </span>
+    <figure className="fig fig-frame board-compare">
+      <div className="board-compare-row">
+        <div className="board-compare-item">
+          <Drop7Board cells={before} highlight={highlightBefore} size={size} />
+          <span className="label">{beforeLabel}</span>
+        </div>
+        <svg width="34" height="24" viewBox="0 0 34 24" className="board-compare-arrow" aria-hidden="true">
+          <path d="M2 12h26m0 0-8-8m8 8-8 8" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        <div className="board-compare-item">
+          <Drop7Board cells={after} highlight={highlightAfter} size={size} />
+          <span className="label">{afterLabel}</span>
+        </div>
       </div>
-      <svg width="34" height="24" viewBox="0 0 34 24" className="shrink-0 text-zinc-500" aria-hidden="true">
-        <path d="M2 12h26m0 0-8-8m8 8-8 8" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-      <div className="flex flex-col items-center gap-1">
-        <Drop7Board cells={after} highlight={highlightAfter} size={size} />
-        <span className="max-w-52 text-center text-xs font-medium uppercase tracking-wide text-zinc-500">
-          {afterLabel}
-        </span>
-      </div>
-      {caption && (
-        <p className="w-full text-center text-sm text-zinc-400">{caption}</p>
-      )}
-    </div>
+      {caption && <figcaption>{caption}</figcaption>}
+    </figure>
   );
 }
 
-/** A numbered stat card used on dashboards and in MDX callouts. */
+/** A number with its label and its provenance, for dashboards and MDX. */
 export function Stat({
   label,
   value,
@@ -105,32 +104,39 @@ export function Stat({
   hint?: string;
 }) {
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-3">
-      <div className="text-xs uppercase tracking-wide text-zinc-500">{label}</div>
-      <div className="text-xl font-bold text-zinc-100">{value}</div>
-      {hint && <div className="text-xs text-zinc-500">{hint}</div>}
+    <div className="stat">
+      <span className="label">{label}</span>
+      <span className="stat-value">{value}</span>
+      {hint && <span className="stat-hint">{hint}</span>}
     </div>
   );
 }
+
+export type CalloutTone = "info" | "key" | "warn" | "success" | "oracle" | "note";
+
+const CALLOUT_TONE_CLASS: Record<CalloutTone, string> = {
+  info: "callout--key",
+  key: "callout--key",
+  warn: "callout--warn",
+  success: "callout--success",
+  oracle: "callout--oracle",
+  note: "",
+};
 
 export function Callout({
   title,
   children,
   tone = "info",
 }: {
-  title: string;
+  title?: string;
   children: React.ReactNode;
-  tone?: "info" | "warn" | "success";
+  tone?: CalloutTone;
 }) {
-  const colors = {
-    info: "border-sky-800 bg-sky-950/40 text-sky-100",
-    warn: "border-amber-800 bg-amber-950/40 text-amber-100",
-    success: "border-emerald-800 bg-emerald-950/40 text-emerald-100",
-  }[tone];
+  const toneClass = CALLOUT_TONE_CLASS[tone] ?? CALLOUT_TONE_CLASS.info;
   return (
-    <aside className={`my-4 rounded-xl border px-4 py-3 ${colors}`}>
-      <div className="mb-1 text-sm font-semibold">{title}</div>
-      <div className="text-sm leading-relaxed [&_p]:my-1">{children}</div>
+    <aside className={toneClass ? `callout ${toneClass}` : "callout"}>
+      {title && <span className="label">{title}</span>}
+      <div className="callout-body">{children}</div>
     </aside>
   );
 }

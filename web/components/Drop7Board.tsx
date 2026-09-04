@@ -10,6 +10,7 @@
  *
  * Cell encoding: one digit per cell, row-major from the top — 0 empty, 1–7
  * numbered, 8 solid gray, 9 cracked gray (the engine's `serializeBoard`).
+ * Colours are the tokens from globals.css through their Tailwind utilities.
  */
 import type { CSSProperties, ReactNode } from "react";
 import { DiscFace, cellLabel, parseBoard } from "./discs";
@@ -64,7 +65,7 @@ export interface Drop7BoardProps {
   overlay?: ReactNode;
 }
 
-const LABEL = "text-[0.625rem] font-semibold uppercase tracking-[0.12em]";
+const LABEL = "font-mono text-label font-medium uppercase";
 
 function formatValue(value: number | string) {
   return typeof value === "number" ? Math.round(value).toLocaleString("en-US") : value;
@@ -120,9 +121,9 @@ export function Drop7Board({
         </div>
       )}
 
-      <div className="relative rounded-lg border border-zinc-800 bg-zinc-900 p-1.5 [container-type:inline-size]">
+      <div className="relative rounded-lg border border-rule bg-surface p-1.5 [container-type:inline-size]">
         <div
-          className="grid aspect-square grid-cols-7 grid-rows-7 gap-px overflow-hidden rounded-sm bg-zinc-800"
+          className="grid aspect-square grid-cols-7 grid-rows-7 gap-px overflow-hidden rounded-sm bg-rule"
           role="img"
           aria-label={label ?? `${occupied} occupied cells, ${covered} of them gray discs`}
         >
@@ -136,7 +137,7 @@ export function Drop7Board({
                 key={index}
                 title={cellLabel(cell)}
                 className={`relative flex items-center justify-center p-[9%] text-[6.4cqw] ${
-                  inDrop ? "bg-zinc-900" : "bg-zinc-950"
+                  inDrop ? "bg-raised" : "bg-cell"
                 } ${faded ? "opacity-30" : ""}`}
               >
                 <DiscFace cell={cell} className={`size-full ${cellClassName?.(index, cell) ?? ""}`} style={cellStyle?.(index, cell)} />
@@ -151,7 +152,7 @@ export function Drop7Board({
                 {ringed && (
                   <span
                     aria-hidden="true"
-                    className="pointer-events-none absolute inset-[3%] rounded-sm border-2 border-[#facc15]"
+                    className="pointer-events-none absolute inset-[3%] rounded-sm border-2 border-highlight"
                   />
                 )}
               </div>
@@ -165,23 +166,23 @@ export function Drop7Board({
         <div className="grid grid-cols-7 gap-1 px-1.5" aria-label="column readout">
           {Array.from({ length: 7 }, (_, column) => {
             const note = columns[column];
-            const tone = note?.best ? "text-sky-400" : note?.muted ? "text-zinc-700" : "text-zinc-500";
+            const tone = note?.best ? "text-accent" : note?.muted ? "text-ink-4" : "text-ink-3";
             const bar = widths.get(column);
             return (
               <div
                 key={column}
-                className={`min-w-0 border-t-2 pt-1 text-center ${note?.best ? "border-sky-400" : "border-zinc-800"}`}
+                className={`min-w-0 border-t-2 pt-1 text-center ${note?.best ? "border-accent" : "border-rule"}`}
               >
                 <span className={`${LABEL} block truncate ${tone}`}>{note?.label ?? `c${column + 1}`}</span>
                 {note?.value !== undefined && note?.value !== null && (
-                  <span className={`block truncate font-mono text-[0.65rem] tabular-nums ${note.best ? "text-sky-300" : "text-zinc-400"}`}>
+                  <span className={`block truncate font-mono text-[0.65rem] tabular-nums ${note.best ? "text-accent" : "text-ink-2"}`}>
                     {formatValue(note.value)}
                   </span>
                 )}
                 {bar !== undefined && (
-                  <span className="mt-1 block h-1 overflow-hidden rounded-full bg-zinc-800" role="presentation">
+                  <span className="mt-1 block h-1 overflow-hidden rounded-full bg-rule" role="presentation">
                     <span
-                      className={`block h-full transition-[width] duration-300 ${note?.best ? "bg-sky-400" : "bg-zinc-500"}`}
+                      className={`block h-full transition-[width] duration-300 motion-reduce:transition-none ${note?.best ? "bg-accent" : "bg-ink-3"}`}
                       style={{ width: `${bar * 100}%` }}
                     />
                   </span>
@@ -192,7 +193,7 @@ export function Drop7Board({
         </div>
       )}
 
-      {caption && <figcaption className="text-xs leading-relaxed text-zinc-400">{caption}</figcaption>}
+      {caption && <figcaption className="text-caption text-ink-2">{caption}</figcaption>}
     </figure>
   );
 }

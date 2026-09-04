@@ -1,0 +1,65 @@
+/* lifetime-objective/afterstate-net card art. The disc falls into the board,
+   the whole board is ringed (the network is given a position, never the
+   column that made it), and the survival horizon grows bar by bar: the game
+   is still alive one rise from now, two, and fewer and fewer after that.
+   Only transform and opacity move; play-state is owned by the shared art.css,
+   and the SVG's own attributes are the resting frame. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-afterstate-net {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-afterstate-net [data-anim^="bar-"] {
+  transform-box: fill-box;
+  transform-origin: bottom;
+}
+
+.tart--approach-afterstate-net [data-anim="drop"] { animation-name: tart-approach-afterstate-net-drop; }
+.tart--approach-afterstate-net [data-anim="ring"] { animation-name: tart-approach-afterstate-net-ring; }
+.tart--approach-afterstate-net [data-anim="bar-1"] { animation-name: tart-approach-afterstate-net-bar-1; }
+.tart--approach-afterstate-net [data-anim="bar-2"] { animation-name: tart-approach-afterstate-net-bar-2; }
+.tart--approach-afterstate-net [data-anim="bar-3"] { animation-name: tart-approach-afterstate-net-bar-3; }
+.tart--approach-afterstate-net [data-anim="bar-4"] { animation-name: tart-approach-afterstate-net-bar-4; }
+.tart--approach-afterstate-net [data-anim="bar-5"] { animation-name: tart-approach-afterstate-net-bar-5; }
+.tart--approach-afterstate-net [data-anim="bar-6"] { animation-name: tart-approach-afterstate-net-bar-6; }
+.tart--approach-afterstate-net [data-anim="caption"] { animation-name: tart-approach-afterstate-net-caption; }
+
+@keyframes tart-approach-afterstate-net-drop {
+  0%, 2.18% { transform: translateY(-90px); }
+  12%, 100% { transform: translateY(0); }
+}
+@keyframes tart-approach-afterstate-net-ring {
+  0%, 13.09% { opacity: 0; }
+  17.45%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-afterstate-net-bar-1 {
+  0%, 10.91% { transform: scaleY(0.04); }
+  16.36%, 100% { transform: scaleY(1); }
+}
+@keyframes tart-approach-afterstate-net-bar-2 {
+  0%, 15.27% { transform: scaleY(0.04); }
+  20.73%, 100% { transform: scaleY(1); }
+}
+@keyframes tart-approach-afterstate-net-bar-3 {
+  0%, 19.64% { transform: scaleY(0.04); }
+  25.09%, 100% { transform: scaleY(1); }
+}
+@keyframes tart-approach-afterstate-net-bar-4 {
+  0%, 24% { transform: scaleY(0.04); }
+  29.45%, 100% { transform: scaleY(1); }
+}
+@keyframes tart-approach-afterstate-net-bar-5 {
+  0%, 28.36% { transform: scaleY(0.04); }
+  33.82%, 100% { transform: scaleY(1); }
+}
+@keyframes tart-approach-afterstate-net-bar-6 {
+  0%, 32.73% { transform: scaleY(0.04); }
+  38.18%, 100% { transform: scaleY(1); }
+}
+@keyframes tart-approach-afterstate-net-caption {
+  0%, 41.45% { opacity: 0; }
+  46.91%, 100% { opacity: 1; }
+}

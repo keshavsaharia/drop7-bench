@@ -1,0 +1,142 @@
+/* oracle-curriculum/accessible-energy card art. A sweep runs down the board;
+   each band of still-reachable discs brightens out of the dim position as it
+   passes, the game's wave scores float off two of them, the meter fills with
+   what was reached, and the ring settles on the seven that is still live.
+   Play-state, duration and easing are owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-accessible-energy {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-accessible-energy [data-anim="sweep"] {
+  animation-name: tart-approach-accessible-energy-sweep;
+}
+.tart--approach-accessible-energy [data-anim="band-a"] {
+  animation-name: tart-approach-accessible-energy-band-a;
+}
+.tart--approach-accessible-energy [data-anim="band-b"] {
+  animation-name: tart-approach-accessible-energy-band-b;
+}
+.tart--approach-accessible-energy [data-anim="band-c"] {
+  animation-name: tart-approach-accessible-energy-band-c;
+}
+.tart--approach-accessible-energy [data-anim="score-a"] {
+  animation-name: tart-approach-accessible-energy-score-a;
+}
+.tart--approach-accessible-energy [data-anim="score-b"] {
+  animation-name: tart-approach-accessible-energy-score-b;
+}
+.tart--approach-accessible-energy [data-anim="meter"] {
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation-name: tart-approach-accessible-energy-meter;
+}
+.tart--approach-accessible-energy [data-anim="ring"] {
+  animation-name: tart-approach-accessible-energy-ring;
+}
+
+/* The board is seven 18px rows, so the sweep travels 126px. */
+@keyframes tart-approach-accessible-energy-sweep {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  33.82% {
+    transform: translateY(126px);
+    opacity: 1;
+  }
+  39.27%,
+  100% {
+    transform: translateY(126px);
+    opacity: 0;
+  }
+}
+
+@keyframes tart-approach-accessible-energy-band-a {
+  0%,
+  14.18% {
+    opacity: 0;
+  }
+  18.55%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-accessible-energy-band-b {
+  0%,
+  24% {
+    opacity: 0;
+  }
+  28.36%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-accessible-energy-band-c {
+  0%,
+  33.82% {
+    opacity: 0;
+  }
+  38.18%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes tart-approach-accessible-energy-score-a {
+  0%,
+  25.09% {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  32.73%,
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-accessible-energy-score-b {
+  0%,
+  32.73% {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  40.36%,
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes tart-approach-accessible-energy-meter {
+  0%,
+  10.91% {
+    transform: scaleX(0);
+  }
+  18.55%,
+  24% {
+    transform: scaleX(0.32);
+  }
+  28.36%,
+  33.82% {
+    transform: scaleX(0.66);
+  }
+  39.27%,
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes tart-approach-accessible-energy-ring {
+  0%,
+  34.91% {
+    opacity: 0;
+  }
+  41.45%,
+  100% {
+    opacity: 1;
+  }
+}

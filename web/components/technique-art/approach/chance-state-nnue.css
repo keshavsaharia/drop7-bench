@@ -1,0 +1,96 @@
+/* value-policy-learning/chance-state-nnue card art. The disc falls and lands,
+   the placement arrow draws, the node that is actually valued appears with the
+   rise clock feeding it, and only then do the seven discs the game could deal
+   fan out beyond it and settle back to faint: they are never an input.
+   Play-state is owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-chance-state-nnue {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-chance-state-nnue [data-anim="drop"] {
+  animation-name: tart-approach-chance-state-nnue-drop;
+}
+.tart--approach-chance-state-nnue [data-anim="arrow"] {
+  animation-name: tart-approach-chance-state-nnue-arrow;
+}
+.tart--approach-chance-state-nnue .node {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+.tart--approach-chance-state-nnue [data-anim="node"] {
+  animation-name: tart-approach-chance-state-nnue-node;
+}
+.tart--approach-chance-state-nnue [data-anim="clock"] {
+  animation-name: tart-approach-chance-state-nnue-clock;
+}
+.tart--approach-chance-state-nnue [data-anim="deal"] {
+  animation-name: tart-approach-chance-state-nnue-deal;
+}
+
+@keyframes tart-approach-chance-state-nnue-drop {
+  0%,
+  3.27% {
+    transform: translateY(-56px);
+    opacity: 0.65;
+  }
+  14.18%,
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-chance-state-nnue-arrow {
+  0%,
+  14.18% {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  21.82%,
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes tart-approach-chance-state-nnue-node {
+  0%,
+  20.73% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  28.36% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+  31.64%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes tart-approach-chance-state-nnue-clock {
+  0%,
+  27.27% {
+    opacity: 0;
+  }
+  34.91%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-chance-state-nnue-deal {
+  0%,
+  33.82% {
+    opacity: 0;
+  }
+  43.64% {
+    opacity: 1;
+  }
+  50.18%,
+  100% {
+    opacity: 0.55;
+  }
+}

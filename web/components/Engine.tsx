@@ -15,14 +15,14 @@
 import { CellGlyph, parseBoard } from "./Board";
 
 /* ---- chart tokens (dark console; validated with the dataviz palette tool) ---- */
-const INK = "#fafafa";
-const INK_2 = "#a1a1aa";
-const INK_3 = "#71717a";
-const GRID = "#27272a";
-const SERIES = ["#3987e5", "#d95926", "#199e70"] as const;
-const ACCENT = "#facc15";
+const INK = "var(--color-ink)";
+const INK_2 = "var(--color-ink-2)";
+const INK_3 = "var(--color-ink-3)";
+const GRID = "var(--color-rule)";
+const SERIES = ["var(--color-series-1)", "var(--color-series-2)", "var(--color-series-3)"] as const;
+const ACCENT = "var(--color-highlight)";
 
-const FONT = "system-ui, -apple-system, 'Segoe UI', sans-serif";
+const FONT = "var(--font-sans)";
 
 function fmt(n: number): string {
   return n.toLocaleString("en-US");
@@ -64,7 +64,7 @@ export function MiniBoard({
   const board = parseBoard(cells);
   return (
     <g transform={`translate(${x} ${y})`}>
-      <rect width={7 * s} height={7 * s} rx={s * 0.15} fill="#030712" />
+      <rect width={7 * s} height={7 * s} rx={s * 0.15} fill="var(--color-cell)" />
       {board.map((cell, index) => {
         const cx = (index % 7) * s;
         const cy = Math.floor(index / 7) * s;
@@ -115,7 +115,7 @@ function Bits({
             width={cell}
             height={cell}
             rx={3}
-            fill={bit ? on : "#1f1f23"}
+            fill={bit ? on : "var(--color-hover)"}
             stroke={GRID}
           />
           {labels && (
@@ -127,7 +127,7 @@ function Bits({
               fontSize={cell * 0.6}
               fontFamily={FONT}
               fontWeight={700}
-              fill={bit ? "#ffffff" : INK_3}
+              fill={bit ? "var(--color-ink)" : INK_3}
             >
               {bit}
             </text>
@@ -205,7 +205,7 @@ export function BitboardScan({
                 width={12}
                 height={7}
                 rx={2}
-                fill={bit ? SERIES[0] : "#1f1f23"}
+                fill={bit ? SERIES[0] : "var(--color-hover)"}
                 stroke={GRID}
               />
             ))}
@@ -225,7 +225,7 @@ export function BitboardScan({
               width={9}
               height={7}
               rx={2}
-              fill={bit ? SERIES[2] : "#1f1f23"}
+              fill={bit ? SERIES[2] : "var(--color-hover)"}
               stroke={GRID}
             />
           ))}
@@ -283,7 +283,7 @@ export function RunLengthLookup({
           one row of the board
         </text>
         <g transform="translate(0 24)">
-          <rect width={7 * s} height={s} rx={6} fill="#030712" />
+          <rect width={7 * s} height={s} rx={6} fill="var(--color-cell)" />
           {cells.map((cell, i) => (
             <g key={i}>
               <CellGlyph cell={cell} x={i * s} y={0} s={s} />
@@ -320,7 +320,7 @@ export function RunLengthLookup({
                 width={22}
                 height={22}
                 rx={3}
-                fill={poppers.includes(i) ? ACCENT : "#1f1f23"}
+                fill={poppers.includes(i) ? ACCENT : "var(--color-hover)"}
                 stroke={GRID}
               />
               <text
@@ -331,7 +331,7 @@ export function RunLengthLookup({
                 fontSize={13}
                 fontFamily={FONT}
                 fontWeight={700}
-                fill={poppers.includes(i) ? "#1c1917" : INK}
+                fill={poppers.includes(i) ? "var(--color-bg)" : INK}
               >
                 {len}
               </text>
@@ -351,7 +351,7 @@ export function RunLengthLookup({
                 width={82}
                 height={36}
                 rx={6}
-                fill={pops ? "rgba(250,204,21,0.12)" : "#18181b"}
+                fill={pops ? "rgba(250,204,21,0.12)" : "var(--color-raised)"}
                 stroke={pops ? ACCENT : GRID}
               />
               <text
@@ -546,7 +546,7 @@ export function MovePipeline({
           const endOfRow = col === perRow - 1;
           return (
             <g key={i} transform={`translate(${x} ${y})`}>
-              <rect width={boxW} height={boxH} rx={10} fill="#18181b" stroke={GRID} />
+              <rect width={boxW} height={boxH} rx={10} fill="var(--color-raised)" stroke={GRID} />
               <text x={12} y={22} fontSize={12.5} fontFamily={FONT} fontWeight={700} fill={INK}>
                 {i + 1}. {step.title}
               </text>
@@ -645,7 +645,7 @@ export function TreeShape({
                 width={w}
                 height={levelH - 8}
                 rx={6}
-                fill={isLeaf ? SERIES[0] : "#1f1f23"}
+                fill={isLeaf ? SERIES[0] : "var(--color-hover)"}
                 stroke={isLeaf ? SERIES[0] : GRID}
               />
               <text
@@ -729,7 +729,7 @@ export function AttributionBar({
                   fontSize={12}
                   fontFamily={FONT}
                   fontWeight={700}
-                  fill="#ffffff"
+                  fill="var(--color-ink)"
                 >
                   {seg.share}%
                 </text>
@@ -893,8 +893,8 @@ export function PackedKey({ caption }: { caption?: string }) {
     { from: 0, to: 24.5, label: "49 cells × 4 bits = 196 bits", color: SERIES[0] },
     { from: 24.5, to: 25.5, label: "next disc", color: SERIES[1] },
     { from: 25.5, to: 26.5, label: "moves left", color: SERIES[2] },
-    { from: 26.5, to: 27.5, label: "depth", color: "#9085e9" },
-    { from: 27.5, to: 32, label: "unused / zeroed", color: "#1f1f23" },
+    { from: 26.5, to: 27.5, label: "depth", color: "var(--color-series-7)" },
+    { from: 27.5, to: 32, label: "unused / zeroed", color: "var(--color-hover)" },
   ];
   return (
     <figure className="engine-fig">
@@ -962,7 +962,7 @@ export function GateLadder({ gates, caption }: { gates: GateCard[]; caption?: st
               border: `1px solid ${GRID}`,
               borderRadius: 10,
               padding: "10px 12px",
-              background: "#18181b",
+              background: "var(--color-raised)",
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -1022,7 +1022,7 @@ export function BatchLayout({ caption }: { caption?: string }) {
                 y={Math.floor(i / 7) * cell}
                 width={cell - 1}
                 height={cell - 1}
-                fill={b === 0 ? SERIES[0] : "#2a2a30"}
+                fill={b === 0 ? SERIES[0] : "var(--color-rule)"}
               />
             ))}
           </g>
@@ -1047,7 +1047,7 @@ export function BatchLayout({ caption }: { caption?: string }) {
                 y={0}
                 width={6}
                 height={6}
-                fill={lane === 0 ? SERIES[0] : "#2a2a30"}
+                fill={lane === 0 ? SERIES[0] : "var(--color-rule)"}
               />
             ))}
           </g>
@@ -1059,7 +1059,7 @@ export function BatchLayout({ caption }: { caption?: string }) {
         {["scan masks", "find poppers", "hit covers", "clear + reveal", "gravity"].map(
           (label, i) => (
             <g key={label} transform={`translate(${320 + i * 58} 150)`}>
-              <rect width={54} height={22} rx={5} fill="#18181b" stroke={GRID} />
+              <rect width={54} height={22} rx={5} fill="var(--color-raised)" stroke={GRID} />
               <text
                 x={27}
                 y={11.5}
@@ -1122,7 +1122,7 @@ export function LeverList({ levers }: { levers: Lever[] }) {
               width: 28,
               height: 28,
               borderRadius: 8,
-              background: "#18181b",
+              background: "var(--color-raised)",
               border: `1px solid ${GRID}`,
               display: "flex",
               alignItems: "center",
@@ -1142,7 +1142,7 @@ export function LeverList({ levers }: { levers: Lever[] }) {
                   fontSize: 10.5,
                   padding: "1px 6px",
                   borderRadius: 4,
-                  background: "#27272a",
+                  background: "var(--color-rule)",
                   color: INK_2,
                 }}
               >
@@ -1210,7 +1210,7 @@ export function PackedColumn({
         width={cellW}
         height={rowH}
         rx={5}
-        fill="#1f1f23"
+        fill="var(--color-hover)"
         stroke={GRID}
         strokeDasharray="3 3"
       />
@@ -1225,7 +1225,7 @@ export function PackedColumn({
               width={cellW}
               height={rowH}
               rx={5}
-              fill={v === 0 ? "#18181b" : "#24304a"}
+              fill={v === 0 ? "var(--color-raised)" : "var(--color-accent-soft)"}
               stroke={v === 0 ? GRID : SERIES[0]}
               strokeWidth={v === 0 ? 1 : 1.5}
             />

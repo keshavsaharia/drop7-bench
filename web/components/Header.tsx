@@ -3,15 +3,24 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/Button";
 import { DiscFace } from "@/components/discs";
-import { ShimmerButton } from "@/components/ShimmerButton";
+import { SiteSearch } from "@/components/SiteSearch";
 
+const REPO_URL = "https://github.com/keshavsaharia/drop7-bench";
+
+/** Primary navigation. `match` lists the route prefixes an item is current for. */
 const NAV = [
-  { href: "/compete", label: "Compete" },
-  { href: "/leaderboard", label: "Leaderboard" },
-  { href: "/research", label: "Research" },
-  { href: "/learn", label: "Learn" },
-];
+  { href: "/learn", label: "Learn", match: ["/learn"] },
+  { href: "/approaches", label: "Approaches", match: ["/approaches"] },
+  { href: "/engines", label: "Engines", match: ["/engines"] },
+  { href: "/research", label: "Research", match: ["/research", "/theories", "/experiments", "/results", "/log", "/docs", "/diagnostics"] },
+  { href: "/leaderboard", label: "Leaderboard", match: ["/leaderboard", "/compete"] },
+] as const;
+
+function isCurrent(pathname: string, prefixes: readonly string[]): boolean {
+  return prefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+}
 
 function GitHubMark() {
   return (
@@ -66,44 +75,41 @@ export function Header() {
   }, [menuOpen]);
 
   return (
-    <header className="sticky top-0 z-10 border-b border-zinc-800 bg-zinc-950/90 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
-        <Link href="/" className="flex shrink-0 items-center gap-2 font-bold text-zinc-50">
-          <span className="inline-flex size-6 text-[0.7rem]" aria-hidden="true">
+    <header className="site-header">
+      <div className="site-header-row mx-auto max-w-page px-4">
+        <Link href="/" className="site-brand">
+          <span className="site-brand-disc" aria-hidden="true">
             <DiscFace cell={7} />
           </span>
           Drop7 Research
         </Link>
-        <nav aria-label="Primary navigation" className="hidden items-center gap-1 text-sm md:flex">
+        <nav aria-label="Primary navigation" className="site-nav">
           {NAV.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="rounded-md px-2.5 py-1.5 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
+              aria-current={isCurrent(pathname, item.match) ? "page" : undefined}
             >
               {item.label}
             </Link>
           ))}
         </nav>
-        <div className="ml-auto hidden shrink-0 items-center gap-2 md:flex">
-          <a
-            href="https://github.com/keshavsaharia/drop7-bench"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
-          >
+        <SiteSearch />
+        <div className="site-actions">
+          <a href={REPO_URL} rel="noopener noreferrer" className="site-link">
             <GitHubMark />
             GitHub
           </a>
-          <ShimmerButton href="/play" icon={<DiscFace cell={7} />}>
+          <Button href="/play" icon={<DiscFace cell={7} />}>
             Play
-          </ShimmerButton>
+          </Button>
         </div>
         <button
           type="button"
           aria-expanded={menuOpen}
           aria-controls="mobile-navigation"
           aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
-          className="ml-auto inline-flex size-10 items-center justify-center rounded-md text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400 md:hidden"
+          className="site-menu-button"
           onClick={() => setOpenAtPathname(menuOpen ? null : pathname)}
         >
           <MenuIcon open={menuOpen} />
@@ -113,35 +119,31 @@ export function Header() {
         id="mobile-navigation"
         aria-label="Mobile navigation"
         hidden={!menuOpen}
-        className="border-t border-zinc-800 px-4 pb-4 pt-2 md:hidden"
+        className="site-mobile-nav"
       >
-        <div className="mx-auto flex max-w-6xl flex-col gap-1 text-sm">
+        <div className="site-mobile-nav-list mx-auto max-w-page">
           {NAV.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="rounded-md px-3 py-2.5 text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50"
+              aria-current={isCurrent(pathname, item.match) ? "page" : undefined}
               onClick={() => setOpenAtPathname(null)}
             >
               {item.label}
             </Link>
           ))}
-          <a
-            href="https://github.com/keshavsaharia/drop7-bench"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 rounded-md px-3 py-2.5 text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50"
-          >
+          <a href={REPO_URL} rel="noopener noreferrer">
             <GitHubMark />
             GitHub
           </a>
-          <ShimmerButton
+          <Button
             href="/play"
             icon={<DiscFace cell={7} />}
             className="mt-2 self-start"
             onClick={() => setOpenAtPathname(null)}
           >
             Play
-          </ShimmerButton>
+          </Button>
         </div>
       </nav>
     </header>
