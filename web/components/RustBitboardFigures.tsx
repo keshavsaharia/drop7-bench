@@ -302,9 +302,8 @@ export function RustPackedBoardFigure({ caption }: { caption?: ReactNode }) {
       caption={
         caption ?? (
           <>
-            The same recorded position appears as a board and as the seven <code>u32</code> words used by{" "}
-            <Link href={`${BOARD_SOURCE}#L133`}>Board</Link>. The leftmost slot in each word is unused; the top board
-            row comes next, and the bottom board row is the least-significant nibble at the right.
+            Shows how a board position is represented as seven <code>u32</code> words used by{" "}
+            <Link href={`${BOARD_SOURCE}#L133`}>Board</Link>, where each column uses 4 bits per cell.
           </>
         )
       }
@@ -347,18 +346,18 @@ export function RustPackedBoardFigure({ caption }: { caption?: ReactNode }) {
 /**
  * The first wave's exact 49-bit masks and the two observable gray-disc writes.
  * It follows board.rs's four-input parallel counter without simplifying away
- * the empty down plane or the twos plane that lands on a numbered popper.
+ * the empty down plane or the twos plane that lands on a numbered explosion.
  */
 export function RustExplosionBitplanesFigure({ caption }: { caption?: ReactNode }) {
   return (
     <FigureShell
       eyebrow="Explosion wave"
       title="Four shifts count every adjacent hit"
-      label="The three-popper mask shifted up, down, left, and right, summed into ones, twos, and fours bit planes, then intersected with the solid and cracked cover masks"
+      label="The three-explosion mask shifted up, down, left, and right, summed into ones, twos, and fours bit planes, then intersected with the solid and cracked cover masks"
       caption={
         caption ?? (
           <>
-            This is the first wave of the recorded move. The three bottom-row 3s form the popper mask. Four shifts
+            This is the first wave of the recorded move. The three bottom-row 3s form the explosion mask. Four shifts
             feed the bitwise counter in <Link href={`${BOARD_SOURCE}#L385`}>clear_wave</Link>; its one-hit plane
             cracks the solid 8, while any hit reveals the cracked 9 as the next recorded value, 1.
           </>
@@ -367,7 +366,7 @@ export function RustExplosionBitplanesFigure({ caption }: { caption?: ReactNode 
     >
       <div className={styles.explosionFlow}>
         <div className={styles.maskGroup}>
-          <span className={styles.groupLabel}>popper bitboard</span>
+          <span className={styles.groupLabel}>explosion bitboard</span>
           <MaskCard label="popping" hex="0x380000000000" set={POPPING} tone="pop" stage="one" />
         </div>
 

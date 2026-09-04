@@ -8,63 +8,44 @@ reads: public
 kind: engine
 ---
 
-<Callout title="Evidence boundary" tone="info">
-This is an **engineering result at the `CHECK` tier**: a faster, smaller
-implementation of the *same* game and the *same* fair search, proven
-bit-identical to the frozen references on every observable. It makes **no
-strength claim** and consumed no cohort data — the parity gates and benchmarks
-ran on sub-blocks of the already-opened `SEEDLEASE-A52-FAST` development lease
-(`0xa5276000`–`0xa5277fff`), opening zero new seeds. Every number below is
-copied from the retained artifacts `benchmark.json`, `bench.log` and
-`gates.log` under `runs/RUN-20260824T052018Z-b88c3e22/rust-engine/`, measured
-on the AMD Ryzen AI MAX+ 395 workstation (16 physical / 32 logical cores,
-machine profile `MACH-20260824T072426Z-fa409222`). The machine was shared
-during measurement
-(load average 1.1–1.7), so ratios between arms measured back-to-back are the
-trustworthy quantity; absolute nanoseconds are not.
-</Callout>
+## Building an efficient bitboard
 
-## Summary
+A Drop7 board is 49 cells with ten possible states (empty, number 1-7, or a 
+gray disc in two states), so each cell fits into four bits. Other engine implementations
+use one byte per cell, and walk them with loops. This engine packs them as seven 32-bit 
+words in a column-wise layout with the bottom row in the least-significant nibble.
 
-A Drop7 board is 49 cells, each holding nothing, a number 1–7, or a gray disc
-in two states — ten possibilities, which fit in four bits. The reference
-engines store those cells as 49 bytes and walk them with loops. This engine
-packs them as **seven 32-bit words, one per column, four bits per cell**, with
-the bottom row in the least-significant nibble. That one choice cascades:
-gravity in a column becomes a single bit-gather instruction, a row rise becomes
-one shift-and-or per column, and the whole board state is 28 bytes that fit in
-a handful of registers. On top of that packed core sits the fair expectimax
-search with a pluggable leaf evaluator and a transposition table that the
-measurements below drove to a specific, cheap shape. Everything is proven
-bit-identical to the C++ and TypeScript references before any number was
-trusted.
+This packed representation some key advantages:
+- Gravity in a column becomes a single bit-gather instruction
+- a row rise becomes a single shift-and-or per column
+- the whole board state is 28 bytes that fit in a handful of registers
+
+On top of that packed core sits the fair expectimax search with a pluggable leaf evaluator,
+and a depth-preferred direct-mapped transposition table.
 
 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 12, margin: "1rem 0" }}>
-  <Stat label="engine throughput, single core" value="12.8M moves/s" hint="2.0× the C++ fast engine, 19.8× TypeScript" />
-  <Stat label="board size" value="28 bytes" hint="vs 49 bytes row-major; 7 × u32" />
-  <Stat label="searcher memory" value="≈2.5 KB + table" hint="C++ fast search carries a 16.2 MB table" />
+  <Stat label="single core throughput" value="12.8M moves/s" hint="2x the C++ engine, 20x TypeScript" />
+  <Stat label="board size" value="28 bytes" hint="43% more compact" />
+  <Stat label="searcher memory" value="≈2.5 KB + table" hint="C++ engine uses a 16.2 MB table" />
 </div>
 
 <RustPackedBoardFigure />
 
 ## Packed columns
 
-Store a column as a 32-bit word of seven nibbles, with the **bottom row in the
-least-significant nibble**. Two invariants make everything cheap:
+Columns are stored as a 32-bit word of seven [nibbles](https://en.wikipedia.org/wiki/Nibble), with the bottom row in the least-significant nibble. Two invariants make everything cheap:
 
 - A column's height is the popcount of its non-zero nibbles, and a dropped
   disc lands in the first zero nibble — so a drop is `word |= disc << 4*h` and
   a legality check is one mask test against the top nibble.
-- Because columns stay bottom-packed, **gravity is a stable compaction of
-  non-zero nibbles toward the low end** — which is exactly what the BMI2 `PEXT`
-  instruction does: `pext(word, mask)` extracts the nibbles selected by `mask`
+- Because columns stay bottom-packed, gravity is a stable compaction of
+  non-zero nibbles toward the least significant nibble. This is exactly what the BMI2 `PEXT` instruction does: `pext(word, mask)` extracts the nibbles selected by `mask`
   and packs them, in order, at the bottom.
 
 <RustPextGravityFigure />
 
-The row rise is the other place the packing pays: shifting every cell up one
-row and laying a fresh gray row underneath is `(word << 4) | SOLID` per column
-— seven shift-ors replace the reference's 49-cell copy.
+A row rise is also simplified by this packing: shifting every cell up one
+row and laying a fresh gray row underneath is `(word << 4) | SOLID` per column, so seven shift-ors replace what is typically a 49 cell copy.
 
 <CodeSnippet
   path="approaches/fair-expectimax/rust-engine/src/board.rs"
@@ -76,40 +57,34 @@ row and laying a fresh gray row underneath is `(word << 4) | SOLID` per column
 
 ## Cascade bitboards
 
-Popper detection and cover hits want a different shape — row-major bitboards —
+Explosion detection and cover hits want a different shape — row-major bitboards —
 and the engine derives them from the column words on each wave with SWAR
 nibble tests and `PDEP` scatters (about 70 bit operations, versus the
 reference's ~1,300 board reads per wave):
 
-- **Poppers** come from the same 128-entry run-length table the proven C++ fast
-  engine uses: a disc pops when its value equals the contiguous occupied run
+- **Explosions** come from the same 128-entry run-length table the proven C++ fast
+  engine uses: a disc explodes when its value equals the contiguous occupied run
   through it in its row or its column, and the run length is a table lookup on
   the row/column occupancy mask.
-- **Cover hits** are counted for the whole board at once. The popper bitboard
-  is shifted in the four neighbour directions, and the four resulting bitboards
+- **Cover hits** are counted for the whole board at once. The explosion bitboard
+  is shifted in the four cardinal directions, and the four resulting bitboards
   are summed with a bitwise parallel counter (ones/twos/fours planes). A solid
-  gray reveals exactly when its two-or-more-hits plane is set; a cracked gray
-  when any plane is set. No per-cell loop, and the reveal draws are still
-  consumed in ascending row-major order — the order the reference consumes
-  randomness, which is what keeps the streams identical.
+  gray reveals exactly when its two-or-more-hits plane is set, while a cracked gray
+  reveals when any plane is set.
 
 <CodeSnippet
   path="approaches/fair-expectimax/rust-engine/src/board.rs"
   startLine={385}
   endLine={407}
   title="Parallel cover-hit counter"
-  caption="Four shifted popper masks become ones, twos and fours bitplanes. Those planes identify every crack and reveal across the board at once."
+  caption="Four shifted explosion masks become ones, twos and fours bitplanes. Those planes identify every crack and reveal across the board at once."
 />
 
 <RustExplosionBitplanesFigure />
 
 ## Static leaf dispatch
 
-The search is generic over a `Leaf` trait, so the fair leaf (ported
-character-for-character from the proven C++ `fastFairLeaf`, verified
-bit-identical on 150,854 real states) is one monomorphised instantiation and a
-different evaluator costs no branching in the hot path. Because the leaf reads
-cells many times in row-major order, it works on a byte view of the board that
+The search is generic over a `Leaf` trait, so the fair leaf is one monomorphised instantiation and a different evaluator costs no branching in the hot path. Because the leaf reads cells many times in row-major order, it works on a byte view of the board that
 costs seven `PDEP`s to produce — the engine keeps the packed words for the
 mechanics, the leaf pays array-load prices for the reads.
 
@@ -117,15 +92,11 @@ mechanics, the leaf pays array-load prices for the reads.
 
 The fair search carries a transposition table so a state reached two different
 ways is evaluated once. The C++ fast search uses a packed-key, open-addressed,
-strict-LRU table. This engine's table was not designed by instinct; two
-measurements settled its shape, and they are the most interesting numbers on
-this page.
+strict-LRU table.
 
-**The node hit rate is a lie.** On real decisions, the table's node hit rate
-is **1.3 %** at depth 4 and **1.36 %** at depth 5 — which reads as "the table
-is almost never useful." But a table hit does not save one node; it prunes the
-*entire subtree* under that node, about 49<sup>depth</sup> expansions. Measured
-work per decision (move + leaf evaluations):
+For the C++ reference engine, the transposition table's node hit rate
+is **1.3 %** at depth 4 and **1.36 %** at depth 5, which suggested that the table
+is almost never useful. However, after calculating the work it prunes, an effective TT strategy was found which attempts to eliminate the largest possible nested game trees (around 49<sup>depth</sup> expansions). Measured work per decision (move + leaf evaluations):
 
 <AttributionBar
   title="Work per decision eliminated by memoization (no-table = 100%)"
@@ -136,18 +107,15 @@ work per decision (move + leaf evaluations):
   caption="At depth 4 the table eliminates ~47 % of all work despite a 1.3 % node hit rate. At depth 5 it eliminates ~90 % (582.7M → 59.5M): the deeper the search, the more each rare hit prunes. A 1.3 % hit rate and a 47–90 % work reduction are the same measurement, seen from two directions."
 />
 
-**The expensive part of the table was never the hits — it was the bookkeeping.**
+**The expensive part of the original transposition table was the bookkeeping.**
 The C++ table pays for a hash, a probe, and LRU linked-list maintenance on
 *every* interior node to earn its hit rate. This engine replaces it with a
-**direct-mapped, depth-preferred table**: one slot per hash index, no probe
+direct-mapped, depth-preferred table: one slot per hash index, no probe
 chain, no LRU list, replace-on-collision when the new node is at least as deep.
-It finds nearly the same hits (27.5k vs the LRU's 29.9k per decision at d4s7)
-at a lower per-operation cost and a fifth of the memory.
+It finds nearly the same hits (27.5k vs the LRU's 29.9k per decision at d4s7),
+but with a much lower per-operation cost and a fifth of the memory.
 
-The depth gate exists and was measured: caching only depth ≥ 2 captures the
-rare deep hits but misses the numerous shallow ones and recovers only ~25 % of
-the work reduction, so the shipped configuration caches every depth
-(`gate ≥ 1`) with the cheap table. The table is a compile-time strategy
+Caching only depth ≥ 2 captures the rare deep hits but misses the numerous shallow ones and recovers only ~25 % of the work reduction, so the shipped configuration caches every depth (`gate ≥ 1`) with the cheap table. The table is a compile-time strategy
 parameter — the `NoTable` arm compiles to nothing — and the values gate proves
 the choice changes no per-column value, only speed and memory.
 
@@ -162,14 +130,14 @@ the choice changes no per-column value, only speed and memory.
 ## Parallel frontier
 
 The first parallel decision driver assigned one legal root column to one
-worker. That was exact, but a Drop7 root has at most seven legal columns, so an
+worker. Since a particular game usually has seven legal columns to evaluate, an
 individual deep decision could never use an eighth CPU. Uneven column trees
 also left a long idle tail after the shorter columns finished.
 
 The central-frontier scheduler expands a deterministic prefix of the same
 max/chance tree and interns equal public continuation states. Each remaining
-subtree is registered in one atomic work queue; workers claim tasks dynamically
-with private, bounded transposition tables and publish into fixed result slots.
+subtree is registered in one atomic work queue, workers claim tasks dynamically
+with private transposition tables, and publish their results into fixed slots.
 The coordinator then reduces those slots in the original column and chance
 sample order. This keeps floating-point accumulation and tie-breaking exact
 while exposing tens to thousands of tasks from one decision. The old root-only
@@ -185,19 +153,18 @@ scheduler remains available as `--scheduler root` for direct comparison.
 
 Granularity is adaptive. Cheap shallow continuations need a wider queue to
 amortize scheduling; expensive depth-5-and-deeper continuations use a smaller
-queueing cushion to preserve transposition-table reuse. That distinction was
-measured rather than assumed: an over-expanded D5/S7 prefix reached 99.63%
+queueing cushion to preserve transposition-table reuse. When measuring an 
+over-expanded D5/S7 prefix, it reached 99.63%
 task-phase occupancy but created about 41% more logical work and delivered only
 1.0102× speedup. The bounded prefix retained 88.23% occupancy and improved the
 three-repeat median from 22.034955 s to 19.410905 s (1.1352×) on the retained
-12-logical-CPU arm64 profile. This is mechanics-only evidence, not a strength
-or 192-core claim (`RS-20260825T052959Z-1b3ed9a5`).
+12-logical-CPU arm64 profile.
 
 ## Performance
 
 All speeds are fixed-work, complete-depth decisions on the **same 105 harvested
 root positions**, every arm computing bit-identical per-column values (proven
-by the gates below). Full data in `benchmark.json`.
+by the gates below).
 
 <SpeedupBars
   title="Engine move throughput, single core (whole games, best of 3)"
@@ -223,27 +190,31 @@ by the gates below). Full data in `benchmark.json`.
   caption="Speedup over the C++ reference storage. The Rust cheap-table arm is the fastest *and* uses a fifth of the C++ fast table's memory; the no-table arm is the fastest per unit of work (137 vs 177 ns) but does 1.9× the work, which is exactly the memoization payoff."
 />
 
-At **depth 5 / 7 strata** the same arms tell the depth story: the C++ fast
+At depth 5 / 7 strata, the C++ fast
 search takes 7,817 ms per decision, the Rust cheap table at 256k entries ties
 it (7,788 ms), and at 1M entries pulls ahead to 7,047 ms (1.11×) — while the
 no-table arm, doing all 582.7M work units, takes 63,325 ms. Depth 5 is where
 memoization stops being optional, and where the Rust engine's per-work cost
 (113 vs 134 ns/work) still wins once the tables are comparably sized.
 
-**Whole-game scaling** remains shared-nothing: an atomic game cursor, one game
+Whole-game scaling remains shared-nothing: an atomic game cursor, one game
 per worker, and no shared mutable state. That mode measured 12.6M → 129.5M
 moves/s from 1 to 16 physical cores. It is useful when many independent games
 are ready, but it does not solve one deep decision's seven-column ceiling.
 
-**Within-decision scaling** now uses the central frontier above. At D4/S7 on
-eight retained roots, 12 workers improved the three-repeat median from 4.076978
-s to 3.232507 s (1.2612×), with 99.51% task-phase occupancy and no value,
-action, or exactly-once task mismatches. The allocation-free D7/S7 plan for 192
+Within-decision scaling now uses the central frontier above. At D4/S7 on
+eight retained roots, 12 workers improved the three-repeat median from 4.077
+s to 3.232 s (1.26×), with 99.51% task-phase occupancy and no value,
+action, or exactly-once task mismatches. 
+
+<AgentContext summary="Allocation-free D7/S7 plan for 192 workers">
+The allocation-free D7/S7 plan for 192
 workers selects one internal split ply (at most 2,401 frontier tasks) and
 projects 2,418,377,728 bytes for 192 private 262,144-entry tables plus the plan,
 under an 8 GiB guard. The old 16,777,216-entry-per-worker setting is rejected
 before allocation at 154,618,822,656 bytes. That plan has not yet been executed
 on x86 (`RS-20260825T052959Z-57698687`).
+</AgentContext>
 
 ## Parity
 
@@ -292,8 +263,8 @@ from policy semantics.
 
 - **The representation is the win.** Packing the board column-wise into seven
   words turned gravity, drops, rises and legality into single bit operations,
-  and made the whole board small enough to live in registers. That — not any
-  search trick — is where the ~2× engine throughput comes from.
+  and made the whole board small enough to live in registers. Doubling the engine
+  throughput enables deeper and faster searches in the same amount of time.
 - **Measure a cache by the work it eliminates, not the hits it records.** A
   1.3 % node hit rate sounded like the table was overhead; it was actually
   eliminating most of the work, because hits prune subtrees. The repository's
