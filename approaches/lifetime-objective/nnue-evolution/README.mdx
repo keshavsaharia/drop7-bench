@@ -295,6 +295,25 @@ anything the faster one could not. It launched on 2026-09-03 as run
 `RUN-20260903T190433Z-a87fd7fc`, on fresh leases free of any constant in the
 repository.
 
+<Callout title="What the slower decay found" tone="warn">
+The plateau rule stopped this run at the **same generation as before, 149**,
+even with mutation sigma decaying 3.75x more slowly (it was still at 0.045
+here, against 0.034 last time). The improvement rate at the stopping point
+was over four times higher than before (164 points per generation against
+37), and the best candidate beat the fair control on 26 of 150 blocks against
+9 last time, but the fitted slope's lower bound still crossed zero at
+generation 149. On 64 fresh never-read games the candidate scored
+**249,757 against the fair leaf's 335,266**, paired −85,509 (bootstrap lower
+bound −128,482): the gate fails again. The key finding is the secondary
+contrast: this candidate beat the immediately prior one by only **+13,572**,
+with a lower bound of **−30,165** — not statistically distinguishable from
+zero, unlike the previous continuation's confirmed +36,278 over its own
+predecessor. Result `RS-20260904T090620Z-e5731bf0`. The most defensible reading: the annealing
+schedule was not the dominant cause of the earlier plateau, since slowing it
+substantially did not produce a confirmed further gain, though this is one
+alternative schedule, not a sweep.
+</Callout>
+
 <EvolutionStatus run="RUN-20260903T190433Z-a87fd7fc" continuation />
 
 <EvolutionFigure run="RUN-20260903T190433Z-a87fd7fc" caption="Second continuation, stage C. Generation 0 is the first continuation's generation-150 population. The violet dashed line is that run's frozen candidate playing the same seeds each generation." />
@@ -306,6 +325,21 @@ repository.
 <ScreenFigure run="RUN-20260903T190433Z-a87fd7fc" contrast="candidate-vs-baseline-run1" caption="The second continuation's own question, out of sample: this candidate minus the immediately prior candidate on the same 64 never-read games." />
 
 <ScreenGateTable run="RUN-20260903T190433Z-a87fd7fc" />
+
+**What the second continuation taught.** A schedule 3.75 times slower
+produced a visibly healthier curve — the population mean rose through all
+three fifty-generation blocks (235,353, 238,797, 244,800) instead of
+flattening in the last one — yet the statistical rule still stopped the run
+at exactly the same generation, and the gain over the immediately prior
+candidate came back too small to confirm. Two readings are both consistent
+with that: either the leaf class genuinely has little further to give at this
+population size and search depth, and the healthier-looking curve was itself
+mostly noise from starting closer to a good region; or a schedule three times
+slower is still not slow enough, and the real ceiling on mutation size sits
+further out than tested here. The design cannot separate these without a
+further comparison — a much slower schedule again, more games per candidate
+(to shrink the noise that the detection floor is fighting), or a larger
+population.
 
 ## How much can a leaf change a decision?
 
@@ -385,9 +419,11 @@ available for a successor experiment with its own record and leases.
   screen agrees: swapping the leaf moved the mean by more than 100,000 points
   in both directions.
 - **Open.** Whether a warm start trained on ordering rather than value closes
-  the gap, whether a larger teacher corpus changes that answer, and, after the
-  continuation below levelled off, whether the plateau belongs to the leaf
-  class or to the annealed step size. Each is a new experiment with its own
+  the gap, whether a larger teacher corpus changes that answer, and — after
+  two continuations plateaued at the same generation under different
+  annealing schedules — whether more games per candidate or a larger
+  population would let evolution see improvements the current design's
+  detection floor is currently hiding. Each is a new experiment with its own
   record and leases; the retained corpus, warm start and populations are the
   starting material.
 
