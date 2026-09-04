@@ -5,6 +5,7 @@ import { Drop7Board } from "./Drop7Board";
 import { Drop7Game } from "./Drop7Game";
 import { Drop7Intro } from "./Drop7Intro";
 import { Diagram } from "./Diagram";
+import { CodeSnippet } from "./CodeSnippet";
 import { Figure } from "./Figure";
 import { GameTreeFigure } from "./GameTree";
 import * as Engine from "./Engine";
@@ -26,6 +27,7 @@ const components = {
   Board,
   BoardCompare,
   Callout,
+  CodeSnippet,
   Diagram,
   Disc,
   Drop7Board,

@@ -23,7 +23,7 @@ const KNOWN = new Set([
   "LeafXray","LeafTerms","BoardLookalikes","GameTimeline","FlowBalance","ScoreSources","ScoreStrip","CohortScale",
   "OracleSplit","TeacherStudentFlow","NTupleWindows","ValueNetShape","PolicyNetShape","MctsTreeGrowth",
   "EvidenceLabel","ExperimentSummary","ResultSummary","TechnicalDetails","TheorySummary",
-  "GameTreeFigure","Drop7Board","Drop7Game","Diagram","Figure","ArmTable","DeadEnd","Direction","Finding","LogQuote","Timeline",
+  "GameTreeFigure","Drop7Board","Drop7Game","CodeSnippet","Diagram","Figure","ArmTable","DeadEnd","Direction","Finding","LogQuote","Timeline",
   "EvolutionStatus","CorpusFigure","PretrainFigure","EvolutionFigure","SwarmFigure","ScreenFigure","ScreenGateTable","EvolutionPipeline","GenerationLoop","NnueSketch","PairedSeedsSketch",
 ]);
 
