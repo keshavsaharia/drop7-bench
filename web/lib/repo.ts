@@ -296,6 +296,15 @@ export const getResults = () => listJsonRecords<ResultRecord>("results");
 
 /* ---- Approach directories ---- */
 
+/**
+ * What an approach directory is: a deployable player (`strategy`), a piece of
+ * infrastructure that plays no game of its own (`engine`), a measurement
+ * (`diagnostic`), or a README without a `kind` key (`unknown`).
+ */
+export type ApproachKind = "strategy" | "engine" | "diagnostic" | "unknown";
+
+export const APPROACH_KINDS: readonly ApproachKind[] = ["strategy", "engine", "diagnostic", "unknown"];
+
 export interface ApproachEntry {
   title: string;
   summary: string;
@@ -305,6 +314,50 @@ export interface ApproachEntry {
   slug: string;
   hasDocs: boolean;
   sourceFiles: string[];
+  kind: ApproachKind;
+  /** Catalogue slug from web/lib/techniques.ts; strategies only, null otherwise. */
+  technique: string | null;
+  /** The best-documented example of its technique, as chosen in the README. */
+  featured: boolean;
+  /** Evidence label as written: ledger-recorded, task-record only, repository-verified, reproduced, none. */
+  evidence: string;
+  /** Information class as written: public, oracle, teacher, diagnostic. */
+  reads: string;
+}
+
+function isApproachKind(value: unknown): value is Exclude<ApproachKind, "unknown"> {
+  return value === "strategy" || value === "engine" || value === "diagnostic";
+}
+
+/** The complete README.mdx frontmatter of one approach, or null without a README. */
+export function readApproachFrontmatter(family: string, slug: string): Record<string, unknown> | null {
+  const mdxPath = join(APPROACHES_DIR, family, slug, "README.mdx");
+  if (!existsSync(mdxPath)) return null;
+  return matter(readFileSync(mdxPath, "utf8")).data as Record<string, unknown>;
+}
+
+function describeApproach(family: string, slug: string): ApproachEntry {
+  const approachDir = join(APPROACHES_DIR, family, slug);
+  const sourceFiles = readdirSync(approachDir)
+    .filter((file) => /\.(ts|tsx|cpp|hpp|py|md|mdx|json)$/.test(file))
+    .sort();
+  const front = readApproachFrontmatter(family, slug) ?? {};
+  const kind: ApproachKind = isApproachKind(front.kind) ? front.kind : "unknown";
+  return {
+    family,
+    slug,
+    hasDocs: existsSync(join(approachDir, "README.mdx")) || existsSync(join(approachDir, "README.md")),
+    sourceFiles,
+    title: typeof front.title === "string" ? front.title : slug,
+    summary: typeof front.summary === "string" ? front.summary : "",
+    status: typeof front.status === "string" ? front.status : "",
+    draft: front.draft === true,
+    kind,
+    technique: typeof front.technique === "string" && front.technique.length > 0 ? front.technique : null,
+    featured: front.featured === true,
+    evidence: typeof front.evidence === "string" ? front.evidence : "",
+    reads: typeof front.reads === "string" ? front.reads : "",
+  };
 }
 
 export function listFamilies(): string[] {
@@ -320,26 +373,22 @@ export function listApproaches(family: string): ApproachEntry[] {
   return readdirSync(dir)
     .filter((entry) => statSync(join(dir, entry)).isDirectory())
     .sort()
-    .map((slug) => {
-      const approachDir = join(dir, slug);
-      const sourceFiles = readdirSync(approachDir)
-        .filter((file) => /\.(ts|tsx|cpp|hpp|py|md|mdx|json)$/.test(file))
-        .sort();
-      const mdxPath = join(approachDir, "README.mdx");
-      const front = existsSync(mdxPath) ? (matter(readFileSync(mdxPath, "utf8")).data as Record<string, unknown>) : {};
-      return {
-        family,
-        slug,
-        hasDocs:
-          existsSync(join(approachDir, "README.mdx")) ||
-          existsSync(join(approachDir, "README.md")),
-        sourceFiles,
-        title: typeof front.title === "string" ? front.title : slug,
-        summary: typeof front.summary === "string" ? front.summary : "",
-        status: typeof front.status === "string" ? front.status : "",
-        draft: front.draft === true,
-      };
-    });
+    .map((slug) => describeApproach(family, slug));
+}
+
+/** Every approach in every family, sorted by family then slug. Empty without approaches/. */
+export function listAllApproaches(): ApproachEntry[] {
+  return listFamilies().flatMap((family) => listApproaches(family));
+}
+
+/** Strategies carrying this technique slug, in family/slug order. */
+export function listApproachesByTechnique(technique: string): ApproachEntry[] {
+  return listAllApproaches().filter((entry) => entry.technique === technique);
+}
+
+/** Approaches of one kind, in family/slug order. */
+export function listApproachesByKind(kind: ApproachKind): ApproachEntry[] {
+  return listAllApproaches().filter((entry) => entry.kind === kind);
 }
 
 export function approachDocPath(family: string, slug: string): string | null {

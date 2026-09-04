@@ -65,6 +65,8 @@ function toRecordHref(repoPath: string, suffix: string): string | null {
   if (theory) return `/theories/${theory[1]}${suffix}`;
   const experiment = /^research\/experiments\/([^/]+)\.json$/i.exec(repoPath);
   if (experiment) return `/experiments/${experiment[1]}${suffix}`;
+  const result = /^research\/results\/([^/]+)\.json$/i.exec(repoPath);
+  if (result) return `/results/${result[1]}${suffix}`;
   return null;
 }
 

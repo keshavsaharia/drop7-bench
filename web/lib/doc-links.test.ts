@@ -87,14 +87,17 @@ test("rewrites approach directories and research records onto console routes", (
     ),
     "/experiments/EX-20260820-d4-toptwo-override-gate-0bdb39a1",
   );
+  assert.equal(
+    rewriteRepoDocHref(
+      "../../research/results/RS-20260820T094500Z-5c1e9a04.json",
+      "docs/research/experiment-index.md",
+    ),
+    "/results/RS-20260820T094500Z-5c1e9a04",
+  );
 });
 
 test("leaves non-docs repository and external hrefs untouched", () => {
   assert.equal(rewriteRepoDocHref("../../research/README.md", STATUS), "/research");
-  assert.equal(
-    rewriteRepoDocHref("../../research/results/RS-20260820T094500Z-5c1e9a04.json", "docs/research/experiment-index.md"),
-    "../../research/results/RS-20260820T094500Z-5c1e9a04.json",
-  );
   assert.equal(
     rewriteRepoDocHref(
       "../../approaches/lifetime-objective/learned-leaf/PREREGISTRATION.md",
