@@ -119,13 +119,17 @@ export default async function HomePage() {
             What is the best strategy in a game with chance?
           </h1>
           <p className="home-hero-lead">
-            Drop7 is a puzzle game played on a seven-by-seven grid
-            <sup className="home-reference">
-            <Link href="https://en.wikipedia.org/wiki/Drop7" target="_blank" rel="noopener noreferrer">
+            Drop7 is a puzzle game played on a seven-by-seven grid.<sup className="home-reference">
+              <Link
+                href="https://en.wikipedia.org/wiki/Drop7"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Drop7 on Wikipedia, reference 1"
+              >
                 [1]
-            </Link>
-            </sup>
-            . A disc clears when its number matches the length of its row or column, the
+              </Link>
+            </sup>{" "}
+            A disc clears when its number matches the length of its row or column, the
             board rises every five drops, and the numbers under the gray discs stay hidden
             until they are hit. Every drop is a choice; every disc the game deals is chance.
           </p>

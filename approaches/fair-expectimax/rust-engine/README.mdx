@@ -8,7 +8,7 @@ reads: public
 kind: engine
 ---
 
-<Callout title="What this page is, and is not" tone="info">
+<Callout title="Evidence boundary" tone="info">
 This is an **engineering result at the `CHECK` tier**: a faster, smaller
 implementation of the *same* game and the *same* fair search, proven
 bit-identical to the frozen references on every observable. It makes **no
@@ -45,7 +45,9 @@ trusted.
   <Stat label="searcher memory" value="≈2.5 KB + table" hint="C++ fast search carries a 16.2 MB table" />
 </div>
 
-## Strategy 1: the board is seven integers, and gravity is one instruction
+<RustPackedBoardFigure />
+
+## Packed columns
 
 Store a column as a 32-bit word of seven nibbles, with the **bottom row in the
 least-significant nibble**. Two invariants make everything cheap:
@@ -58,17 +60,21 @@ least-significant nibble**. Two invariants make everything cheap:
   instruction does: `pext(word, mask)` extracts the nibbles selected by `mask`
   and packs them, in order, at the bottom.
 
-<PackedColumn
-  before={[0, 3, 0, 0, 5, 0, 2]}
-  after={[0, 0, 0, 0, 3, 5, 2]}
-  caption="One column word, read left-to-right from the top row's nibble to the bottom row's. The dashed slot is the unused eighth nibble (28 bits hold seven cells). Clearing the 3 and the 5 leaves holes; PEXT with the non-zero-nibble mask gathers the survivors toward the bottom row in their original order. On Zen 5 this is one 3-cycle instruction; a portable nibble loop produces the identical word elsewhere."
-/>
+<RustPextGravityFigure />
 
 The row rise is the other place the packing pays: shifting every cell up one
 row and laying a fresh gray row underneath is `(word << 4) | SOLID` per column
 — seven shift-ors replace the reference's 49-cell copy.
 
-## Strategy 2: bitboards for the cascade, counted in parallel
+<CodeSnippet
+  path="approaches/fair-expectimax/rust-engine/src/board.rs"
+  startLine={112}
+  endLine={131}
+  title="Nibble flags and PEXT gravity"
+  caption="The live implementation turns each nonzero nibble into a four-bit mask, then gathers the surviving nibbles toward the bottom of the column."
+/>
+
+## Cascade bitboards
 
 Popper detection and cover hits want a different shape — row-major bitboards —
 and the engine derives them from the column words on each wave with SWAR
@@ -87,7 +93,17 @@ reference's ~1,300 board reads per wave):
   consumed in ascending row-major order — the order the reference consumes
   randomness, which is what keeps the streams identical.
 
-## Strategy 3: a pluggable leaf, statically dispatched
+<CodeSnippet
+  path="approaches/fair-expectimax/rust-engine/src/board.rs"
+  startLine={385}
+  endLine={407}
+  title="Parallel cover-hit counter"
+  caption="Four shifted popper masks become ones, twos and fours bitplanes. Those planes identify every crack and reveal across the board at once."
+/>
+
+<RustExplosionBitplanesFigure />
+
+## Static leaf dispatch
 
 The search is generic over a `Leaf` trait, so the fair leaf (ported
 character-for-character from the proven C++ `fastFairLeaf`, verified
@@ -97,7 +113,7 @@ cells many times in row-major order, it works on a byte view of the board that
 costs seven `PDEP`s to produce — the engine keeps the packed words for the
 mechanics, the leaf pays array-load prices for the reads.
 
-## Strategy 4: the transposition table, designed by measurement
+## Transposition table
 
 The fair search carries a transposition table so a state reached two different
 ways is evaluated once. The C++ fast search uses a packed-key, open-addressed,
@@ -135,7 +151,15 @@ the work reduction, so the shipped configuration caches every depth
 parameter — the `NoTable` arm compiles to nothing — and the values gate proves
 the choice changes no per-column value, only speed and memory.
 
-## Strategy 5: register continuation work, not root columns
+<CodeSnippet
+  path="approaches/fair-expectimax/rust-engine/src/search.rs"
+  startLine={224}
+  endLine={255}
+  title="Direct-mapped cache"
+  caption="Lookup is one masked index. On collision, the slot keeps the deeper entry because that hit can prune more future work."
+/>
+
+## Parallel frontier
 
 The first parallel decision driver assigned one legal root column to one
 worker. That was exact, but a Drop7 root has at most seven legal columns, so an
@@ -151,6 +175,14 @@ sample order. This keeps floating-point accumulation and tie-breaking exact
 while exposing tens to thousands of tasks from one decision. The old root-only
 scheduler remains available as `--scheduler root` for direct comparison.
 
+<CodeSnippet
+  path="approaches/fair-expectimax/rust-engine/src/parallel.rs"
+  startLine={651}
+  endLine={704}
+  title="Dynamic frontier queue"
+  caption="Workers claim deterministic task IDs atomically, evaluate with private bounded tables and publish into fixed result slots for ordered reduction."
+/>
+
 Granularity is adaptive. Cheap shallow continuations need a wider queue to
 amortize scheduling; expensive depth-5-and-deeper continuations use a smaller
 queueing cushion to preserve transposition-table reuse. That distinction was
@@ -161,7 +193,7 @@ three-repeat median from 22.034955 s to 19.410905 s (1.1352×) on the retained
 12-logical-CPU arm64 profile. This is mechanics-only evidence, not a strength
 or 192-core claim (`RS-20260825T052959Z-1b3ed9a5`).
 
-## What happened
+## Performance
 
 All speeds are fixed-work, complete-depth decisions on the **same 105 harvested
 root positions**, every arm computing bit-identical per-column values (proven
@@ -213,7 +245,7 @@ under an 8 GiB guard. The old 16,777,216-entry-per-worker setting is rejected
 before allocation at 154,618,822,656 bytes. That plan has not yet been executed
 on x86 (`RS-20260825T052959Z-57698687`).
 
-## How it was proven to be the same game
+## Parity
 
 Every gate replays identical inputs through the Rust engine and a reference and
 fails on any difference. The columns in the trajectory gates are chosen once
@@ -256,7 +288,7 @@ from policy semantics.
   caption="The TypeScript trajectory arm deserves a note: it drives the Rust engine with the TypeScript engine's exact draw pattern (one long-lived Mulberry32 stream) and reproduces engine.ts's board and score evolution move for move — three independent implementations of one game."
 />
 
-## What this taught us, and what is still open
+## Conclusion
 
 - **The representation is the win.** Packing the board column-wise into seven
   words turned gravity, drops, rises and legality into single bit operations,

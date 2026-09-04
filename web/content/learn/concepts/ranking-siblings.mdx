@@ -12,7 +12,7 @@ attempt to replace the hand-written one with something learned from data.
 Most of those attempts failed in the same way. Any proposal to "just train a
 bigger model" has to answer that failure.
 
-## The job is to rank, not to predict
+## Sibling ranking
 
 When a policy plays, it does not need to know *how many points* a board is
 worth. It needs to know which of up to seven **sibling** moves is best. The
@@ -20,7 +20,7 @@ siblings are the columns available right now. A perfect ranking with wrong absol
 numbers plays perfectly. A model with tiny average error that gets the *order*
 of two siblings wrong plays the wrong move.
 
-## How the data was collected, and what it missed
+## Data collection gaps
 
 The obvious way to get training data is to play games and write down what
 happened: this board, this move, this outcome. Do that for thousands of games
@@ -44,7 +44,7 @@ The repository's status summary names this directly:
 > several actions it had not observed equally well. Low value error on visited
 > states did not guarantee good root-action ranking.
 
-## How the failure was measured
+## Failure measurement
 
 An early diagnostic built a locked panel of 477 real positions and evaluated
 **every** legal sibling at each one. The best learned ranker in that study
@@ -65,7 +65,7 @@ regress. Neither justified a gameplay run.
 
 </details>
 
-## What would fix it
+## Repair path
 
 The fix is conceptually simple and practically expensive: **label every
 sibling**. For each training position, evaluate all legal columns under the
@@ -105,7 +105,7 @@ The supported conclusion is narrower than "bigger models will work": sibling
 coverage is necessary, but the tested compact board evaluators still could not
 represent D4's ordering.
 
-<Callout title="Played-move-only data fails at any scale" tone="warn">
+<Callout title="Played-move data limitation" tone="warn">
 Sibling labelling requires a search at every position, for every column, under
 shared random scenarios. That work parallelises across a large cluster. Two
 lessons carry forward. First,
@@ -119,7 +119,7 @@ still do not guarantee a compact student can rank them. The concept page on
 picks both up.
 </Callout>
 
-<Callout title="Where to read the technical version" tone="info">
+<Callout title="Technical sources" tone="info">
 The sibling-corpus work lives under
 [lifetime-objective / sibling-corpus](/approaches/lifetime-objective/sibling-corpus);
 the theory, its four pilot experiments and their results are on the

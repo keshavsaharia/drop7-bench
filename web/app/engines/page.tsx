@@ -164,7 +164,7 @@ export default function EnginesPage() {
       </section>
 
       <section className="engine-section" aria-labelledby="proven">
-        <h2 id="proven">How they are proven to be the same game</h2>
+        <h2 id="proven">Cross-engine parity</h2>
         <div className="prose-drop7">
           <p>
             Two implementations mean two chances to be wrong. If the fast engine dropped a chain wave one move

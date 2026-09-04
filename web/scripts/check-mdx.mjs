@@ -61,6 +61,7 @@ for (const name of exportedComponentNames([
   "components/EvidenceStrip.tsx",
   "components/FigureGrid.tsx",
   "components/Engines.tsx",
+  "components/RustBitboardFigures.tsx",
 ])) KNOWN.add(name);
 
 function* walk(path) {

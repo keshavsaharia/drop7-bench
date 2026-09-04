@@ -87,7 +87,7 @@ Because the tree explodes, two tricks are universal:
   per chance node. The repository calls these samples **strata**, usually five or seven.
   Fewer strata is faster and noisier.
 
-## A live tree you can search yourself
+## Live expectimax explorer
 
 Everything above was drawn from one recorded position. The explorer below
 builds the same kind of tree **live, in your browser**, for any seeded game:
@@ -101,7 +101,7 @@ the values move as the search looks further.
 
 <GameTreeFigure seed={0x5eed1001} moves={8} caption="A live expectimax tree on a seeded game, built by the browser solver. A fair search plays the column with the highest expected value. The chance branches carry exact probabilities: one in seven for each next disc, then one in seven for each gray disc the move cracks." />
 
-## Walk the tree yourself
+## Depth-2 tree explorer
 
 Pick a column, then a next disc, then see every reply ranked. This is exactly
 the tree a depth-2 search walks, and you can verify any of the numbers above by
@@ -136,7 +136,7 @@ ladder. The concept page on
 [whether more computation is the answer](/learn/concepts/does-more-compute-help)
 goes through the evidence.
 
-<Callout title="Where to read the technical version" tone="info">
+<Callout title="Technical sources" tone="info">
 The reference search is documented on the
 [fair expectimax family page](/approaches/fair-expectimax) and its
 [reference implementation page](/approaches/fair-expectimax/reference). The

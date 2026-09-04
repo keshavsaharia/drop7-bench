@@ -19,6 +19,11 @@ import { ArmTable, DeadEnd, Direction, Finding, LogQuote, Timeline } from "./Res
 import { RepoDocAnchor } from "./RepoDocAnchor";
 import * as Evolution from "./Evolution";
 import * as Primers from "./primers";
+import {
+  RustExplosionBitplanesFigure,
+  RustPackedBoardFigure,
+  RustPextGravityFigure,
+} from "./RustBitboardFigures";
 import { BitboardColumns, GravityWave, ParityReplay, TranspositionTable } from "./Engines";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
@@ -43,6 +48,9 @@ const components = {
   ...ConceptsC,
   ...Evolution,
   ...Primers,
+  RustExplosionBitplanesFigure,
+  RustPackedBoardFigure,
+  RustPextGravityFigure,
   BitboardColumns,
   GravityWave,
   ParityReplay,

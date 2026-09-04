@@ -3,9 +3,8 @@
  *
  * Visitor-facing approach labels deliberately show only final status
  * (completed or rejected) and retained evidence (reproduced or recorded).
- * Public-information access is the default and is therefore omitted. A
- * privileged information class remains visible because it changes how the
- * work may be interpreted.
+ * Information-access metadata stays in the records and prose, rather than in
+ * this compact label row.
  */
 import { Badge } from "./Badge";
 
@@ -19,16 +18,15 @@ export interface ApproachBadgesProps {
   className?: string;
 }
 
-export function hasApproachBadges({ status, evidence, reads }: ApproachBadgesProps): boolean {
+export function hasApproachBadges({ status, evidence }: ApproachBadgesProps): boolean {
   return Boolean(
     (status && VISIBLE_STATUSES.has(status)) ||
-      (evidence && VISIBLE_EVIDENCE.has(evidence)) ||
-      (reads && reads !== "public"),
+      (evidence && VISIBLE_EVIDENCE.has(evidence)),
   );
 }
 
-export function ApproachBadges({ status, evidence, reads, className }: ApproachBadgesProps) {
-  if (!hasApproachBadges({ status, evidence, reads })) return null;
+export function ApproachBadges({ status, evidence, className }: ApproachBadgesProps) {
+  if (!hasApproachBadges({ status, evidence })) return null;
 
   return (
     <span className={className ? `approach-badges ${className}` : "approach-badges"}>
@@ -40,7 +38,6 @@ export function ApproachBadges({ status, evidence, reads, className }: ApproachB
           label={evidence === "ledger-recorded" ? "recorded" : evidence}
         />
       )}
-      {reads && reads !== "public" && <Badge kind="reads" value={reads} />}
     </span>
   );
 }

@@ -39,14 +39,14 @@ export function ApproachSourceList({ family, slug, files }: ApproachSourceListPr
   }
 
   return (
-    <div className="approach-source-tree" role="tree" aria-label={`Source files in ${slug}`}>
-      <div className="approach-source-folder" role="treeitem" aria-expanded="true">
+    <div className="approach-source-tree">
+      <div className="approach-source-folder">
         <span className="approach-source-folder-icon" aria-hidden="true" />
         <span title={`approaches/${family}/${slug}`}>{slug}</span>
       </div>
-      <ul role="group" className="approach-source-list">
+      <ul className="approach-source-list" aria-label={`Source files in ${slug}`}>
         {files.map((file) => (
-          <li role="treeitem" key={file}>
+          <li key={file}>
             <SourceFile family={family} slug={slug} file={file} />
           </li>
         ))}

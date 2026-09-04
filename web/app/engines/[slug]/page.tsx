@@ -12,6 +12,7 @@ import { latentModeText } from "@/components/EngineCard";
 import { SourceRef, sourceHref } from "@/components/Engines";
 import { Mdx } from "@/components/Mdx";
 import { PageHeader } from "@/components/PageHeader";
+import { RustEngineHero } from "@/components/RustBitboardFigures";
 import { TechnicalRecord } from "@/components/Reveal";
 import { TechniqueArt } from "@/components/technique-art/TechniqueArt";
 import {
@@ -479,11 +480,16 @@ export default async function EnginePage({ params }: { params: Promise<{ slug: s
         <Badge label={`latent mode: ${latentModeText(entry.latentMode)}`} />
         <ApproachBadges status={status} evidence={evidence} reads={reads} />
       </PageHeader>
-      {entry.hero && (
-        <div className="engine-hero fig-frame" aria-hidden="true">
-          <TechniqueArt name={entry.art} mode="loop" title={entry.title} />
-        </div>
-      )}
+      {entry.hero &&
+        (entry.slug === "rust" ? (
+          <div className="engine-rust-hero">
+            <RustEngineHero />
+          </div>
+        ) : (
+          <div className="engine-hero fig-frame" aria-hidden="true">
+            <TechniqueArt name={entry.art} mode="loop" title={entry.title} />
+          </div>
+        ))}
       <ArticleLayout toc={toc} aside={aside}>
         {body}
         <nav className="engine-nav" aria-label="Other engines">
