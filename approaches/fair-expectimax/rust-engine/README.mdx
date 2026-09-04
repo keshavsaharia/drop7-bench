@@ -5,6 +5,7 @@ summary: A packed Rust Drop7 engine with a deterministic central-frontier schedu
 status: completed
 evidence: reproduced
 reads: public
+kind: engine
 ---
 
 <Callout title="What this page is, and is not" tone="info">
@@ -23,7 +24,7 @@ during measurement
 trustworthy quantity; absolute nanoseconds are not.
 </Callout>
 
-## The one-paragraph version
+## Summary
 
 A Drop7 board is 49 cells, each holding nothing, a number 1–7, or a gray disc
 in two states — ten possibilities, which fit in four bits. The reference
@@ -42,7 +43,6 @@ trusted.
   <Stat label="engine throughput, single core" value="12.8M moves/s" hint="2.0× the C++ fast engine, 19.8× TypeScript" />
   <Stat label="board size" value="28 bytes" hint="vs 49 bytes row-major; 7 × u32" />
   <Stat label="searcher memory" value="≈2.5 KB + table" hint="C++ fast search carries a 16.2 MB table" />
-  <Stat label="moves replayed, three engines" value="36,000+" hint="0 mismatches on every observable" />
 </div>
 
 ## Strategy 1: the board is seven integers, and gravity is one instruction

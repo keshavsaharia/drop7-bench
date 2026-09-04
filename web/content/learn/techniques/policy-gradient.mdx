@@ -1,0 +1,134 @@
+---
+title: Policy gradients
+slug: policy-gradient
+summary: "Skip the value; keep a probability for each action, play by sampling, and after a good outcome raise the probability of what you did (lower it after a bad one)."
+order: 6
+technique: policy-gradient
+approaches: [ntuple-rl/torch-ppo, ntuple-rl/native-ppo, ntuple-rl/primal-dual-actor-critic, ntuple-rl/curriculum-option-ppo, ntuple-rl/manifold-ppo]
+glossary: [policy, policy gradient, REINFORCE, critic, baseline, advantage, PPO, clipping]
+---
+
+## The idea
+
+A [policy](/learn/glossary) is a rule from what the player sees to a move. A
+policy gradient method stores that rule as a set of probabilities, one per
+action, and plays by drawing from them. After each outcome it adjusts the
+probabilities directly: whatever was done before a good outcome becomes a
+little more likely, whatever was done before a bad one a little less. Nothing
+has to be learned about how good a board is along the way.
+
+*Gradient* is the calculus in the middle. For each adjustable number
+in the rule, ask how much nudging it would raise the probability of the action
+that was taken. Multiply that by how well things went, and step in that
+direction. Do it for every step of every game, and the rule drifts toward the
+actions that preceded good outcomes.
+
+## A small example
+
+A machine with two levers. Lever A pays 1 with probability 0.3 and lever B
+with probability 0.6. You know neither number.
+
+1. Keep one parameter, call it θ. The probability of pulling B is the logistic
+   of θ, a curve that turns any number into a probability. Start at θ = 0, so
+   the levers are 50/50.
+2. Pull a lever by sampling. Say it was B and it paid 1: nudge θ up a little,
+   so B is likelier next time. Say it was A and it paid 0: leave θ where it is.
+3. Repeat thousands of times. θ drifts up and B becomes the usual choice. That
+   is REINFORCE, the basic rule: the outcome times "how much would this
+   parameter change the probability of what I did".
+
+<PolicyGradientBars />
+
+4. Add a critic, a running estimate of how much a pull is worth on average,
+   say 0.45. Reward only the surprise, the payout minus 0.45, so a routine win
+   pushes less hard than a rare one and a routine loss pushes down. That is
+   the actor-critic. The critic is a value estimate used as a baseline; it
+   never chooses a lever.
+
+<PolicyGradientBaseline />
+
+5. Add clipping: never let one batch of pulls move a probability by more than
+   a fixed ratio. That is the "proximal" in proximal policy optimisation
+   (PPO), and it keeps a lucky batch from swinging the policy wildly.
+
+<PolicyGradientClip />
+
+6. Count the cost. Each pull gives one number of feedback and the nudge is
+   tiny, so even two levers take thousands of pulls. In a long game there is
+   one score at the end, and it has to be shared among the hundred decisions
+   that led to it.
+
+## How it works
+
+The general method has three pieces. An actor: a function with adjustable
+parameters that maps what the player sees to a probability for each legal
+action. Experience: the actor plays, sampling its actions, and each game yields
+a sequence of situation, action and outcome. An update: for every step, the
+parameters move in the direction that raises the probability of the action
+taken, scaled by how much better than expected the outcome was.
+
+"Better than expected" is where the critic comes in. Without a baseline every
+outcome counts as good news and the updates are dominated by noise. A critic
+that predicts the expected outcome from the situation turns the raw outcome
+into an advantage, positive for better than usual and negative for worse.
+Modern versions, PPO among them, add the clip, gather experience in batches of
+many games, and run several passes of updates over each batch before
+discarding it.
+
+The method's appetite is volume. One game contributes one outcome to a network
+with hundreds of thousands of parameters, so games are counted in the tens of
+thousands before anything moves. A common shortcut is to start the actor by
+imitation: train it to copy a teacher's choices first, then let policy
+gradients improve on the copy. If the copy is poor, the improvement starts
+from a poor place.
+
+## In Drop7
+
+The policy network here reads the public position (the board, the next disc
+and the rise clock) and emits seven probabilities, one per column, with
+illegal columns masked out. The reward is the game's final score or the number
+of moves survived, depending on the experiment. The
+[concept page on learning from play](/learn/concepts/learning-from-play) sets
+these runs beside the value-learning families.
+
+Pages that trained a policy directly:
+
+- [A PyTorch policy network, cloned then trained by playing](/approaches/ntuple-rl/torch-ppo),
+  which copies a two-move search and then runs 32 rounds of 512 complete
+  games.
+- [Copying the one-move search, in C++](/approaches/ntuple-rl/native-ppo),
+  which never imitated well enough for its self-play stage to start.
+- [Learning a policy with explicit safety constraints](/approaches/ntuple-rl/primal-dual-actor-critic),
+  an actor-critic that learns a correction to a simple search under a hard
+  limit on the risk of ending the game.
+- [Nudging a one-move search, from easy and hard starting boards](/approaches/ntuple-rl/curriculum-option-ppo),
+  a learned correction trained on fresh games and on difficult mid-game
+  positions.
+- [Learning what a long-lived board looks like](/approaches/ntuple-rl/manifold-ppo),
+  which trains a classifier to recognise boards from very long games and uses
+  it to guide play.
+
+## What it cannot do
+
+The imitation shortcut failed at its gate. The PyTorch clone matched its
+two-move teacher on 47.2% of held-out decisions against a 55% requirement, and
+a single permitted correction left agreement very slightly worse
+([A PyTorch policy network, cloned then trained by playing](/approaches/ntuple-rl/torch-ppo)).
+
+The completed policy-gradient run then showed what the method's volume buys.
+Over 32 rounds and 16,384 games it improved its own clone by about 9%:
+142,677.781 points against the clone's 130,797.406 on the single 64-game
+development cohort, with a one-sided 95% lower bound on the paired difference
+of −141.054, so it did not clear "better than the thing it started from" with
+confidence. Its score was 0.590004 of the two-move teacher's on the same
+cohort, and below the fair one-move search's 180,713 (same page). Every
+performance gate failed except zero censoring.
+
+The constrained actor-critic never reached a screen. On its mandatory 512-game
+calibration its terminal-risk upper bound was 0.10496 against a fixed 0.02
+limit, so the checkpoint was sealed untrusted and no gameplay screen was
+opened
+([Learning a policy with explicit safety constraints](/approaches/ntuple-rl/primal-dual-actor-critic)).
+One score per game is a thin signal. In the recorded runs it was enough to
+move a policy a little and never enough to close the gap to the teacher, let
+alone to the reference.

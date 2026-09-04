@@ -1,0 +1,139 @@
+---
+title: Expectimax search
+slug: expectimax
+summary: "When some of what happens next is your choice and some is luck, look ahead by taking the best of your options and the average of luck's."
+order: 1
+technique: expectimax
+approaches: [fair-expectimax/reference, fair-expectimax/chance-strata, fair-expectimax/selective-depth, heuristic-search/sparse-expectimax, lifetime-objective/reveal-sampling]
+glossary: [choice node, chance node, expected value, expectimax, depth, strata, leaf evaluator, fair]
+---
+
+## The idea
+
+Imagine a game where every turn has two halves. In the first half you decide
+something. In the second half the game rolls a die, flips a coin, or deals a
+card, and you had no say in it. Plenty of games are built this way, and so is
+Drop7: you pick a column, then the game deals the next disc.
+
+Planning in a game like that means looking ahead through both halves. Your own
+decisions are the easy half. If you can see what each option leads to, take
+the best one. Luck is the awkward half. You cannot take the best outcome,
+because you do not get to pick it. What you can do is weigh each outcome by
+how likely it is and take the average. That average is the outcome's
+[expected value](/learn/glossary).
+
+Expectimax is the name for a look-ahead that alternates those two rules: the
+best at your decisions, the average at luck's. To watch it work we need a game
+small enough to draw in full.
+
+## A small example
+
+You stand in front of two doors. Door A always pays 6. Door B pays 0 or 10,
+decided by a fair coin flipped after you walk through. Which door is better?
+
+1. Draw the tree. A square for your decision, with a branch for each door.
+   Under door B, a circle for the coin, with two branches: heads pays 10,
+   tails pays 0. Under door A, a single leaf: 6.
+2. Write the values on the leaves. They are the known outcomes.
+3. At the circle, average. (0 + 10) ÷ 2 = 5. That is what door B is worth
+   before the coin is flipped.
+4. At the square, take the larger. Door A is worth 6 and door B is worth 5,
+   so choose A.
+
+<ExpectimaxTwoDoors />
+
+The averaging rule is a deliberate choice, and the alternatives pick
+differently. Someone hoping for heads would value door B at 10 and walk
+through it. Someone braced for tails would value it at 0. The averaging
+player values it at 5, which is what a long run of coin flips would actually
+pay out.
+
+<ExpectimaxThreeWays />
+
+Now suppose that whichever door you take, a second round waits behind it, with
+its own two doors and its own coin. The tree has sixteen leaves instead of
+three. The rules do not change: fill in the leaves, average at every circle,
+take the best at every square, working from the bottom up. Each extra round
+multiplies the number of leaves by the number of doors times the number of
+coin faces.
+
+## How it works
+
+The general method is the same for any game with decisions and luck. The tree
+is built from the current position downward. A point where you decide is a
+[choice node](/learn/glossary); the search takes the best branch. A point
+where the game decides is a [chance node](/learn/glossary); the search takes
+the average, weighting each branch by its probability. Values flow upward from
+the leaves. The root's value is the value of its best option, and that option
+is the move to play.
+
+Two things keep this from being a complete solution. First, the tree grows by
+a fixed factor with every round. With seven options and seven equally likely
+outcomes, the factor is 49, so a tree that looks four rounds ahead is 49 times
+larger than one that looks three. Real searches stop after a few rounds. The
+number of your own moves the search looks ahead is its
+[depth](/learn/glossary).
+
+<ExpectimaxBranching />
+
+Second, the game is still going where the tree stops, so the search needs an
+opinion about how good each bottom position is. That opinion comes from a
+[leaf evaluator](/learn/glossary), a separate function that scores a board;
+the [heuristic evaluation primer](/learn/techniques/heuristic-evaluation) is
+about that. And where averaging over every chance outcome is too expensive,
+the search can average over a fixed handful of representative outcomes
+instead. This site calls those samples [strata](/learn/glossary).
+
+## In Drop7
+
+A Drop7 turn is a square followed by a circle. The square has up to seven
+branches, one per column. The circle is the next disc, one of seven values
+with equal probability. When a move reveals a gray disc there is a second
+circle: the hidden number, again one of seven. Every one of those chance
+nodes is averaged.
+
+The reference policy on this site, called [fair D4](/learn/glossary), is this
+search stopped after four of the player's own moves, with a fixed sample of
+chance outcomes at every chance node (five strata in the frozen reference) and
+a hand-written leaf evaluator at the bottom. "Fair" means the average is taken
+without optimism or pessimism, using only what a player can see. The
+[concept page on choice and chance](/learn/concepts/chance-vs-choice) walks
+through a real position where the move that scores most right now loses to a
+quieter one once the next disc is averaged in.
+
+Pages that use the search:
+
+- [Fair expectimax reference (D3/D4)](/approaches/fair-expectimax/reference),
+  the reference itself.
+- [Seven chance samples instead of five](/approaches/fair-expectimax/chance-strata),
+  which tests exact coverage of the next disc.
+- [Looking five moves ahead](/approaches/fair-expectimax/selective-depth),
+  three attempts at a fifth move.
+- [Sparse expectimax](/approaches/heuristic-search/sparse-expectimax), an
+  earlier search that buys depth with fewer samples per chance node.
+- [One dial was controlling two different pieces of luck](/approaches/lifetime-objective/reveal-sampling),
+  which gives the next disc and the hidden value separate samples.
+
+## What it cannot do
+
+The average at a circle is only as fair as the sample behind it. The frozen
+reference draws five outcomes for a disc that has seven equally likely values,
+and an audit measured what that costs: on average 2.41 of the seven values
+receive zero weight at every chance node, and because the sample is
+deterministic the error never averages out
+([audit-02](/docs/exploratory/audit-02-fair-d4), quoted on the
+[concept page on more computation](/learn/concepts/does-more-compute-help)).
+Raising the sample to seven, so that the next-disc average is exact, was worth
++101,171 mean points on 64 previously unread paired development games, with a
+95% lower bound of +47,457
+([finding-05](/docs/exploratory/finding-05-chance-strata)).
+
+Looking further ahead did not pay in the same way. The depth-5 seven-sample
+arm of the same study was stopped at 32 of its planned 64 games, and its
+record says the fourth-to-fifth ply contrast was never measured: the estimate
+of +23,367 points carries a one-sided 95% lower bound of −83,046 against a
+detection floor of 107,988 on that cohort, and its sign flipped when the
+cohort grew from 16 games to 32
+([RS-20260821T205102Z-d89df4b5](/experiments/EX-20260821-depth5-chance-exactness-factorial-a6a604fd),
+public-development tier, partial run, inconclusive). A deeper tree averages
+more circles, and every one of them carries the sample's bias with it.

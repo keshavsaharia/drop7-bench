@@ -5,6 +5,9 @@ summary: The cheap version uses fifteen shared futures of fifty moves for one im
 status: rejected
 evidence: ledger-recorded
 reads: public
+kind: strategy
+technique: rollout-policy-iteration
+featured: true
 ---
 
 The cheap version of the idea: try every column, play each one forward fifty
@@ -19,8 +22,7 @@ One step of policy improvement is the simplest useful move in reinforcement
 learning. Take a policy you already trust, and at each position ask a better
 question than the policy asks: *if I force this column now and then let the
 trusted policy play on, how does it go?* If the answer is reliable, the
-resulting player is at least as good as the one you started with. The word
-"reliable" is doing all the work.
+resulting player is at least as good as the one you started with.
 
 This program tests that idea at its cheapest valid setting. The trusted policy is
 a one-move-ahead fair search. The horizon is fifty moves — ten row rises, long

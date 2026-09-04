@@ -1,0 +1,133 @@
+---
+title: Q-learning
+slug: q-learning
+summary: "Keep a number for 'how good is it to do this here', play, and after each step nudge that number toward what actually happened plus the best number available next."
+order: 3
+technique: q-learning
+approaches: [value-policy-learning/klein-friedmann-linear-q, value-policy-learning/dqn, ntuple-rl/rainbow-q, ntuple-rl/bellman-ntuple, value-policy-learning/monte-carlo-value, value-policy-learning/denoised-value, value-policy-learning/monte-carlo-return]
+glossary: [value, value function, policy, action value, replay buffer]
+---
+
+## The idea
+
+Suppose you could attach a number to every situation-and-action pair in a
+game: in this spot, doing this is worth about so much. With those numbers in
+hand, playing is easy. Look at where you are, read off the number for each
+action, and do the one with the largest.
+
+Nobody hands you the numbers. Q-learning is a way of finding them by playing.
+Start with every number at zero. Take an action, see what you got for it, and
+look at what the numbers say about the spot you landed in. Then move the
+number you started from a little way toward "what I got, plus the best I can
+expect from here". Play enough, and the numbers settle toward the truth. The
+letter Q is the traditional name for the table of numbers, and each entry is
+an action [value](/learn/glossary).
+
+## A small example
+
+Four cells in a row, numbered 1 to 4. You start in cell 1. Moving right costs
+nothing. Reaching cell 4 pays 10 and ends the round. Stepping left from cell 1
+goes off a cliff, pays −10, and ends the round too.
+
+1. Make a table with one row per cell and one column per action, left or
+   right. Eight numbers, all zero.
+2. Play a round. From cell 3 you move right, receive 10, and the round ends.
+   Nudge the entry for (cell 3, right) toward 10. With a step of one tenth it
+   becomes 1.
+3. Next round, from cell 2 you move right to cell 3 and receive nothing. But
+   the best entry available at cell 3 is now 1, so the entry for (cell 2,
+   right) is nudged toward 0 + 1 and becomes 0.1. Value creeps backward along
+   the corridor, one cell per round.
+4. Keep playing, mostly taking the best action, sometimes a random one, so
+   that the cliff and the reward are both discovered and neither is forgotten.
+   Most versions also shrink a reward a little for every step it is away (a
+   discount), so the entries settle into a staircase rising toward the goal.
+
+<QLearningCorridor />
+
+5. Replace the table with features. A table is fine for eight numbers. For a
+   board with more positions than anyone could list, describe each situation
+   with a few measurements (distance to the goal, distance to the cliff), give
+   each a weight, and let the value be the weighted sum. The same nudge now
+   moves the weights. This is linear Q-learning.
+6. Replace the features with a network. Let a neural network read the raw
+   situation and output one number per action. Two fixes are standard. A
+   replay buffer stores past steps and learns from a random spread of them
+   instead of only the latest. A lagged copy of the network, in the method
+   called Double DQN, chooses the best next action while the live copy is the
+   one being nudged, so a random overestimate cannot feed itself.
+
+## How it works
+
+<QLearningThreeShapes />
+
+Whatever holds the numbers, the loop is the same. Observe the situation. Pick
+an action, usually the best-valued one, occasionally a random one. Observe the
+reward and the next situation. Build the target: the reward plus the best
+value available next, discounted. Move the current value a step toward the
+target; the step size sets how fast the numbers move and how noisy they stay.
+Repeat.
+
+The target is built from the learner's own current numbers, which is what
+makes the method cheap: nobody has to play a game to the end before learning
+starts. It is also what makes it fragile. If the numbers that define the
+target are wrong, the learner chases its own errors, and with a function
+approximator and off-policy data the weights can grow without limit. The
+lagged copy in Double DQN is one guard against that, and the replay buffer is
+another.
+
+<QLearningDouble />
+
+## In Drop7
+
+A Drop7 action value is a number for "drop the visible disc in this column,
+from this board". The situation is the public state: the board, the next disc
+and the rise clock. The reward is whatever the experiment chose, points or
+moves survived.
+
+Pages that learn values from experience:
+
+- [Klein-Friedmann linear Q-learning](/approaches/value-policy-learning/klein-friedmann-linear-q),
+  six hand-made features and six learned weights, the only outside attempt at
+  the game this site knows of.
+- [Double-DQN and continuation](/approaches/value-policy-learning/dqn), the
+  deep version, rewarding survival: each surviving move is worth 1 and dying
+  costs 12.
+- [Rainbow-style Q-learning over patterns](/approaches/ntuple-rl/rainbow-q),
+  action values held in a pattern table.
+- [Learning from every column, not just the one played](/approaches/ntuple-rl/bellman-ntuple),
+  fitted value iteration over all seven columns under the same imagined luck.
+- [Monte Carlo state value](/approaches/value-policy-learning/monte-carlo-value),
+  [Denoised public value](/approaches/value-policy-learning/denoised-value)
+  and [Monte Carlo return](/approaches/value-policy-learning/monte-carlo-return),
+  which fit values from finished games instead of from the learner's own
+  targets.
+
+The reward that worked best here was survival. The DQN page explains why
+learning from raw score gives almost no signal in a game where one lucky chain
+outweighs fifty ordinary moves, and the blind-spot audit it cites groups the
+survival-reward models as the ones that predicted held-out games best.
+
+## What it cannot do
+
+The clearest record of the learning rule itself is the Klein-Friedmann
+reproduction. With a step size of one over the number of moves, the weights
+are effectively frozen after a few hundred games: in the authors' own
+simulator, a learner stopped after 300 games tests at 49.08 moves over 10,000
+games, and the 50,000-game learner tests at 49.08 as well. Two schedules that
+kept learning for longer blew the weights up, one to about a billion and one
+to NaN
+([the reproduction page](/approaches/value-policy-learning/klein-friedmann-linear-q)).
+A five-second cross-entropy search over the same six weights beat both learned
+vectors on the site's own rules: 44.8 moves and 138,973 points against 40.5
+moves and 123,968 points for the transplanted learned weights, on the same
+256 pilot games
+([RS-20260902T084356Z-784ebf14](/experiments/EX-20260902-kf-six-weight-cem-d018cc89),
+pilot tier). The plateau belonged to the optimiser, and the page puts the
+features' own ceiling under that search at about 45 moves.
+
+For the deep version no number survives at all. The DQN's verdicts are
+task-record only, with no per-game data, no mean score and no lifetime for
+the network, for its continuation wrapper, or for the baseline they were
+compared against
+([Double-DQN and continuation](/approaches/value-policy-learning/dqn)).

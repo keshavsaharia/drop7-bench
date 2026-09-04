@@ -1,0 +1,127 @@
+---
+title: Determinized planning
+slug: determinization
+summary: "Pretend the future is known by sampling a few concrete futures, plan against each as if it were certain, then combine the plans."
+order: 14
+technique: determinization
+approaches: [oracle-curriculum/hindsight-planner, heuristic-search/open-loop, lifetime-objective/flow-ceiling]
+glossary: [determinization, strategy fusion, common random numbers, open-loop planning]
+---
+
+## The idea
+
+Looking ahead in Drop7 is expensive because of luck: every disc dealt and
+every hidden number revealed multiplies the tree, so a fair search stops after
+a few moves. Determinized planning goes
+around the tree. Write down one specific future: the next twenty discs in
+order, and the number under every gray disc. With that future fixed there is
+no luck left, and a deep search can solve the rest of the game well. Do this
+for a handful of different invented futures, solve each one, and combine the
+answers, usually by averaging each first move's value across the futures.
+Each sampled future is a deterministic puzzle, hence the name.
+
+## A small example
+
+A two-day drive to a wedding. On day one you take the mountain road or the
+coast road, three hours either way. On day two, from the mountain, you choose
+at dawn between the pass and the detour, before you can see the sky. The pass
+takes two hours if it is open and eight if it is closed, because you drive up,
+find the gate shut and come back down. The detour takes five hours whatever
+the weather. From the coast, day two is three and a half hours regardless. You
+have three forecasts: two say the pass will be open, one says closed.
+
+<DeterminizationThreeFutures />
+
+A determinized planner solves each forecast as if it were certain. In the two
+open forecasts it goes mountain, then pass: five hours. In the closed forecast
+it goes mountain, then detour: eight hours. The average is six hours. The
+coast is six and a half in every forecast, so the planner picks the mountain.
+
+Now drive it. At dawn on day two you do not know which forecast came true. If
+you pick the pass every time, day two averages four hours and the trip seven.
+If you pick the detour every time, eight. The best a real driver can do on the
+mountain is seven hours, and the coast is six and a half. The planner's six
+hours credited you with one hour of knowledge you will not have, and that hour
+flipped the decision. That is strategy fusion: three plans that cannot all be
+followed by the same driver, fused into one number.
+
+<DeterminizationStrategyFusion />
+
+There are two honest ways out. Score one fixed plan across all three forecasts
+(mountain then pass, seven; mountain then detour, eight; coast, six and a
+half) and pick the coast. That is open-loop planning, and it cannot price
+reacting to information you really will get, such as a sign at the foot of
+the mountain. Or branch only on what you will be able to see, which is what a
+fair search does.
+
+## How it works
+
+The [hindsight planner](/approaches/oracle-curriculum/hindsight-planner) and
+the [open-loop lab](/approaches/heuristic-search/open-loop) share the recipe.
+
+1. From the public position, invent K complete futures from a solver-local
+   seed. The hindsight planner hashes the visible board and invents seven; the
+   open-loop lab draws sixteen scenarios by default.
+2. Give every candidate column the same futures. That is common random
+   numbers: columns are compared on identical luck.
+3. Inside each future, run a deep deterministic search. The hindsight planner
+   searches to depth 8 with a beam of 64, treating the disc order and every
+   hidden number as certain.
+4. Combine the values per column, by the mean or by a blend of the mean and
+   the lower quartile, so a column that is fatal in half the futures is not
+   rewarded for its average.
+5. Play the best column, throw the futures away, and invent fresh ones next
+   move.
+
+Where the futures come from decides whether the planner is legal. Invented
+from a hash of the public board, it reads nothing a player cannot see. Copied
+from the real hidden board and disc tape, it is an
+[oracle](/learn/glossary), and its scores can only be diagnostics.
+
+## In Drop7
+
+The legal version lost by a wide margin. On its four-game
+screen, under historical 7,000-point scoring, archival, ordinary depth-3
+search averaged 107,076 points and 72.5 moves while the hindsight planner
+averaged 51,500.5 points and 37.5 moves
+([hindsight planner](/approaches/oracle-curriculum/hindsight-planner),
+rejected, ledger-recorded). Four games is a screen; the confirmation seeds
+were never opened. The ledger's diagnosis is the road-trip trap in Drop7
+terms: "tape-specific later decisions make the
+per-tape root values incompatible and overoptimistic".
+
+Adding futures does not repair it. A later study on the
+[flow ceiling](/approaches/lifetime-objective/flow-ceiling) swept the number
+of futures for a clairvoyant planner, an oracle that reads the hidden board,
+from 1 up to 1,024. Quality rose up to 256 futures and then fell: paired on
+the same six tapes, mean lifetime was 182.00 moves with 256 futures and
+100.33 with 1,024
+([finding-12](/docs/exploratory/finding-12-fair-planner-ceiling-extended),
+oracle, 6 of 8 games, scenario-engine scoring). Sampling noise hid the bias
+at small counts; at large counts the planner converged on the wrong
+objective.
+
+The open-loop lab, which scores one fixed column sequence across its
+scenarios, is support-only and has no retained result.
+The [observable-state MCTS](/approaches/tree-search/observable-mcts) is the
+other way out: it keys every tree node by the visible position alone, so no
+later decision can depend on an unrevealed number.
+
+## What it cannot do
+
+It cannot price the ability to react. Strategy fusion overprices it, by
+letting each plan react to a future it will not know; open-loop planning
+underprices it, by forbidding reaction altogether. Neither error has been
+measured on its own in Drop7.
+
+More compute does not fix it: the 1,024-future arm above is the record's
+clearest case of a bigger budget making the same estimator worse.
+And the bias is largest on crowded boards, where the most is hidden and a
+favourable reveal is the only thing that saves the game.
+
+What survives is the pairing. Giving every column the same imagined futures
+is reused across the [long-outcome experiments](/approaches/d4-long-outcome).
+The open question is a determinized planner whose continuations are
+restricted to public information at every step, which the
+[lifetime objective](/approaches/lifetime-objective) family studies as the
+fair planner: legal by construction and expensive by construction.

@@ -1,10 +1,10 @@
 ---
 date: 2026-09-03
 title: "The evolved NNUE leaf loses its screen by 107,000 points, and evolution still moved it"
-summary: "The depth-5-distilled, whole-game-evolved NNUE leaf finished its preregistered run: 60 generations, a 128-game re-selection, and one look at 64 never-read games. It scored 106,964 paired points below the frozen fair leaf inside the same depth-3 search, so the gate fails and the claim is not supported as tested. The same screen shows evolution beat its own unevolved warm start by 35,375 points with a lower bound well above zero, the first time whole-game evolution has demonstrably moved a leaf in this program. The warm start, not the evolution, was the weak link: fitted to the teacher's values, it ranked columns about as well as no leaf at all."
-contributors: [claude-fable-5-1 (Claude Code)]
-tags: [nnue, evolution, leaf, teacher-distillation, held-out-screen, negative-result]
-outcomes: { positive: 1, negative: 2, open: 2 }
+summary: "The depth-5-distilled, whole-game-evolved NNUE leaf finished its preregistered run: 60 generations, a 128-game re-selection, and one look at 64 never-read games. It scored 106,964 paired points below the frozen fair leaf inside the same depth-3 search, so the gate fails and the claim is not supported as tested. The same screen shows evolution beat its own unevolved warm start by 35,375 points with a lower bound well above zero, the first time whole-game evolution has demonstrably moved a leaf in this program. The warm start, not the evolution, was the weak link: fitted to the teacher's values, it ranked columns about as well as no leaf at all. Separately, the research console was rebuilt around a technique taxonomy, and reading two approach pages against their own records showed both were carrying a status the records do not support."
+contributors: [claude-fable-5-1 (Claude Code), claude-opus-5 (Claude Code)]
+tags: [nnue, evolution, leaf, teacher-distillation, held-out-screen, negative-result, web-console, evidence-labels]
+outcomes: { positive: 1, negative: 3, open: 3 }
 ---
 
 ## Overnight: sixty generations, one re-selection, one screen
@@ -128,3 +128,121 @@ or protected/final cohort was opened for this maintenance work. The already
 launched run remains attributable to its recorded source commit; if that
 process is interrupted, its disposition must be recorded before changing the
 executable used for a resume.
+
+## The console, rebuilt around techniques rather than directories
+
+The site's own structure was the second piece of work today, and it turned up
+a correction to two of our own labels.
+
+Until now `/approaches` listed twelve repository directories, so a reader
+looking for Q-learning found it split across three families, and the engines,
+harnesses and measuring instruments sat in the same list as the strategies. The
+directories are unchanged, but each approach README now declares what it is
+(`kind: strategy`, `engine` or `diagnostic`) and, for a strategy, which of
+fourteen techniques it uses. The console reads those keys: 86 strategy pages
+group by technique behind filter chips, 12 engine directories gather under a
+new Engines section with a comparison table whose every cell is a recorded
+figure or "not recorded", and 16 diagnostics have their own index.
+Fourteen technique primers explain each idea with a worked example that is not
+Drop7 before the reader meets a Drop7 page that uses it. Every one of the 86
+strategy cards carries an animated drawing of its own mechanism, and the
+drawings run continuously in the index rather than waiting for a hover.
+
+The other half of the brief was that a research page should read as prose to a
+newcomer without losing anything an agent needs. Fifteen approach pages were
+rewritten to five plain sections, with record identifiers, seed leases, gate
+tables, full arm tables and scoring-mode caveats moved into click-to-open
+accordions marked with a bot icon. Nothing was deleted; it moved one click
+down. `scripts/check-approach-frontmatter.mjs` now refuses any status,
+evidence, reads, kind or technique value outside the closed vocabulary, and
+`.agents/skills/drop7-writing-style/SKILL.md` fixes the voice the pages are
+held to.
+
+<Finding title="Two approach pages were carrying a status their own records contradict" kind="negative" metric="two labels corrected, no gameplay data read">
+Normalising eleven off-vocabulary frontmatter values meant reading each page
+against the records it cites, and two disagreed with themselves.
+`chain-reveal-leaf` was labelled completed and repository-verified while its
+own technical record cites two results that are both valid and fail and a
+theory assessed not-supported-as-tested; it is now rejected and
+ledger-recorded. `leaf-reweight` was labelled Exploratory with evidence
+`development` while finding-14 records a clean negative; it is now rejected and
+reproduced, and its reads label is teacher, because its refit target is the
+clairvoyant label that finding-10 describes. The nine other corrections were
+vocabulary only, such as `evidence: machine-readable records` becoming
+ledger-recorded. No cohort was opened and no number changed anywhere; the
+labels now match the records that were already there. The body of
+`chain-reveal-leaf` still carries an evidence label of its own that disagrees
+with its frontmatter, which is the next thing to fix on that page.
+</Finding>
+
+<Direction title="The strategy pages not yet rewritten" status="proposed" owner="claude-opus-5">
+Fifteen approach pages now use the five plain sections and the accordions.
+Seventy-one others still carry their old prose and will move over as they are
+next touched. The card art is finished: all 86 strategy pages have a drawing
+of their own.
+</Direction>
+
+## A drawing for every approach, and a link preview for every page
+
+The card art started as one picture per technique, which meant the ten
+Q-learning pages, and the eleven heuristic-evaluation pages, each showed the
+same drawing as their nine or ten siblings. Seventy-five new arts close that:
+every strategy page now animates its own mechanism, and the ones about
+something that happens on the board draw the board. The evaluation pages get
+the most out of this. `transition-rewards` runs a real chain reaction, a clear
+paying `+7`, the gray beside it cracking, the survivors falling and the second
+wave paying `+39`; `accessible-energy` sweeps a position and lights only the
+discs still reachable, leaving the entombed ones dark; `survival-instinct`
+refuses a column where the disc could never match its own count and plays the
+one where it can.
+
+The scores in those drawings come from the engine's own `scoreForWave` through
+a new board kit (`web/components/technique-art/board.tsx`), so an art names a
+wave depth and never types a number. Two checks now hold the rest of the
+contract: `web/scripts/check-art.mjs` fails an art with no stylesheet, with
+fewer animations than animated elements, with a keyframe name that could
+collide with another art, or with an `animation` shorthand that would unpause
+everything; `web/scripts/check-tokens.mjs` fails a literal colour outside the
+token block. The authoring contract itself is
+`.agents/skills/drop7-web-console/references/card-art.md`.
+
+Separately, a shared link now shows the page it points at. Twenty-five routes
+render their own 1200x630 card from the page's own title, summary and labels
+beside a board the engine actually played, and the twelve dynamic ones also
+carry a canonical URL and their own Open Graph and Twitter text. A sitemap of
+344 URLs and a robots file went in with them, with `lastModified` set only
+where the record carries a date of its own. The reusable part is
+`.agents/skills/drop7-social-cards/SKILL.md`, which also covers generating a
+raster asset through the Codex CLI for the cases inline SVG cannot serve.
+
+The site builds, `npm test` passes at the repository root and inside `web/`,
+and a sweep of 289 routes returns 200 for every one. A fresh clone with no
+`web/data/`, no research results and no research log renders every page except
+`/compete`, which needs GitHub OAuth configuration and behaved that way before
+today. No research artifact, protocol or record was edited for this work, and
+no seed was read.
+
+## Time to read the last frame
+
+Watching the approach grid for a while showed a fault in those drawings. Most
+of them end by putting up a label: the number a gray disc was hiding, the
+column a search picked, the caption that says what just happened. The whole
+loop was 2400ms, so that label was on screen for a few hundred milliseconds
+before the card reset and drew itself again. It was there, and it could not be
+read.
+
+A cycle is now two parts. `--tart-motion` is the drawing and keeps the 2400ms
+it always had; `--tart-read` is a still frame after it, 2000ms by default, and
+an art claims it only when its last frame carries something its first frame
+did not. Ninety-two of the hundred and five arts qualify. Their keyframes were
+rewritten against the longer cycle, so every beat happens at the same moment
+on a clock as before and the extra two seconds are spent standing still rather
+than slowing the drawing down. The thirteen that end where they began, like
+the fallback drop and the Q-learning corridor, were left at the shorter loop.
+
+Two more rules went into `web/scripts/check-art.mjs`: an art whose resting
+frame carries text has to declare `--tart-read`, and an art that has declared
+it may not have a keyframe stop past its motion share, which is 54.55% of the
+cycle at the default settings. The grid's starting offsets became fractions of
+each card's own cycle rather than fixed times, so the spread still covers a
+slow art and no two neighbours hold their last frame together.

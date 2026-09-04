@@ -3,221 +3,220 @@ title: A learned survival estimate inside the reference search
 family: lifetime-objective
 summary: Blends a learned survival estimate into the reference board evaluator and tests it under sampled and exact chance handling.
 status: completed
-evidence: development-tier exploratory finding, with mechanics gates
+evidence: reproduced
 reads: public
+kind: strategy
+technique: nnue
+featured: true
 ---
 
-Train a small network to predict how many moves a game has left, mix its opinion
-half-and-half into the reference search's hand-written board scorer, and test the
-prediction (written down in advance) that it would help *more* once the search
-handles luck exactly.
-
-<EvidenceLabel status="completed" evidence="development-tier exploratory finding" reads="public" />
-
-## Why anyone expected this to work
+## The problem
 
 A look-ahead search ends at boards where the game is not over, and it needs an
-opinion about each one: how promising is this? That opinion is the
-[leaf evaluator](/learn/glossary), and in the reference policy it is nineteen
-hand-tuned structural terms about height, crowding and chain readiness. Almost
-every learning experiment in this repository has been an attempt to replace it —
-and almost all of them failed in the same way, which the
+opinion about each one. That opinion is the [leaf evaluator](/learn/glossary),
+and in the [reference policy](/approaches/fair-expectimax/reference) it is
+nineteen hand-tuned structural terms about height, crowding and chain readiness.
+Almost every learning experiment on this site has tried to replace it, and
+almost all of them failed the same way, which the
 [sibling trap](/learn/concepts/ranking-siblings) page explains.
 
-This attempt has an unusual advantage. Because a Drop7 Hardcore score is 94% the
-flat bonus for surviving another row rise, and runs at about 3,400 points per
-move, **a prediction of "how many moves are left" multiplied by 3,400 is already
-a score in real points**: the same unit the search's own immediate-score term
-carries. Mixing it with the hand-written score is mixing two estimates of one
-quantity, not a score with an arbitrary index. The design is also deliberately
-*blind to which move was played*: the same function scores every legal successor
-inside the existing search, so it cannot take the shortcut that sank earlier
-models.
+<GameTreeFigure seed={0x5eed1006} moves={18} caption="The search reaches these boards and stops. Whatever it cannot see beyond them has to be priced by the number on each board, and a learned leaf replaces that number with a prediction of remaining lifetime. The tree is engine output from a scripted round." />
 
-The catch is arity, and it turned out to be the whole story.
+## Proposed solution
+
+Train a small network to predict how many moves a game has left, and mix its
+opinion half-and-half into the hand-written scorer. This has an unusual
+advantage. A Drop7 Hardcore score is 94.29% the flat bonus for surviving another
+row rise, and a game runs at about 3,400 points per move
+([finding-01](/docs/exploratory/finding-01-score-is-survival), 64 games), so a
+prediction of remaining moves multiplied by 3,400 is already a score in real
+points, the same unit the search's own immediate-score term carries. Mixing the
+two is mixing two estimates of one quantity. The design is also blind to which
+move was played: the same function scores every legal successor inside the
+existing search, so it cannot take the shortcut that sank earlier models.
+
+The catch is how many times the leaf is called.
 
 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 12, margin: "1rem 0" }}>
-  <Stat label="board scorings per decision" value="615,090" hint="four-move search, five chance samples — measured, not estimated" />
+  <Stat label="board scorings per decision" value="615,090" hint="four-move search, five chance samples, counted over 30 real decisions" />
   <Stat label="at seven chance samples" value="2,271,280" hint="same measurement" />
   <Stat label="the trained network costs" value="4,122 µs" hint="per board, in the exported C++ path" />
   <Stat label="so one decision would take" value="2,535 s" hint="against a 0.887 s reference decision: a factor of 2,860" />
 </div>
 
-One 87-move game would take 6.7 hours of the entire machine and one 64-game arm
-would take 18 days. **The premise that a three-million-parameter convolutional
-network can be the leaf of this search is false by three orders of magnitude**,
-and that is the first result here.
+A three-million-parameter convolutional network cannot be the leaf of this
+search: one 87-move game would take 6.7 hours of the whole machine and one
+64-game arm 18 days
+([finding-08](/docs/exploratory/finding-08-learned-leaf)). So the network that
+plays is [NNUE](/learn/glossary)-shaped, an "efficiently updatable" network
+built from sparse binary features that are gathered and summed, and it runs in
+about a microsecond. The prediction written down before any game was played was
+that the learned leaf would help more once the search handles luck exactly, with
+seven chance samples instead of five.
 
-<GameTreeFigure seed={0x5eed1006} moves={18} caption="The leaf's job in one picture: the search reaches these boards and stops; whatever it cannot see beyond them has to be priced by the number on each. A learned leaf replaces that number with a prediction of remaining lifetime." />
+The policy reads only the visible board, the visible next disc and the moves
+until the next rise; at a blend weight of zero the code short-circuits to the
+frozen reference before the model is touched.
 
 ## How it works
 
-1. **Measure the budget first.** Nothing in the repository recorded how many
-   board evaluations a four-move decision actually performs, so a probe counted
-   them over 30 real decisions before anything was trained.
-2. **Train the network that was specified anyway**, export it to a versioned
-   binary that runs with no PyTorch, no BLAS and no allocation on the hot path,
-   and gate it: 4,096 real boards, a tolerance declared before the comparison,
-   and (after a nasty surprise) a proof that the PyTorch reference repeats
-   bit-for-bit before anything is compared against it.
-3. **Then train the model that can afford to play.** A leaf has roughly one
-   microsecond. That is an [NNUE](/learn/glossary)-shaped budget, so the student
-   is NNUE-shaped: 8,902 binary features of which exactly 135 are active per
-   board, gathered and summed rather than multiplied through a dense matrix. The
-   features include 84 *adjacent-pair* features, because a disc clears when its
-   number matches the length of the run it lands in, and a per-cell bag of
-   features cannot see a run at all.
-4. **Blend, do not replace.** The leaf becomes
-   `(1 − w) × hand_written + w × 3400 × predicted_lifetime`. At `w = 0` the code
-   short-circuits to the hand-written leaf *before the model is touched*, so the
-   comparison arm is the frozen reference bit-for-bit and costs exactly what the
-   reference costs.
-5. **Choose `w` on a separate 32-game cohort**, then freeze it and run the real
-   comparison as a two-by-two: hand-written versus learned leaf, at five and at
-   seven chance samples, 64 paired games each, on a cohort that tuning never
-   touched.
+1. Measure the budget first. Nothing on record said how many board evaluations
+   a four-move decision performs, so a probe counted them over 30 real
+   decisions before anything was trained.
+2. Train the network that was specified anyway, export it to a versioned binary
+   that runs with no PyTorch, no BLAS and no allocation on the hot path, and
+   gate it on 4,096 real boards at a tolerance declared before the comparison.
+   After a surprise (under validity, below) the gate also proves that the
+   PyTorch reference repeats bit-for-bit before anything is compared against it.
+3. Train the model that can afford to play: 8,902 binary features of which
+   exactly 135 are active per board. They include 84 adjacent-pair features,
+   because a disc clears when its number matches the length of the run it lands
+   in, and a per-cell bag of features cannot see a run at all.
+4. Blend. The leaf becomes `(1 − w) × hand_written + w × 3400 × predicted_lifetime`.
+   At `w = 0` the comparison arm is the frozen reference bit-for-bit and costs
+   exactly what the reference costs.
+5. Choose `w` on a separate 32-game cohort, freeze it, and run the comparison as
+   a two-by-two: hand-written versus learned leaf, at five and at seven chance
+   samples, 64 paired games each, on a cohort that tuning never touched. The
+   output of every arm is a column per position, as in the reference.
 
 ## What happened
 
-**The learned leaf helps: modestly, and where it was predicted not to.** With
-the reference's five chance samples it is worth **+39,105 points and +11.13
-moves**, winning 37 of 64 paired games, with a one-sided 95% bootstrap lower
-bound of **+1,138**: above zero, but only just. With the exact seven-sample
-chance estimator it is worth +17,281 points with a lower bound of −55,892 —
-unresolved.
+The learned leaf helped modestly, and it helped most where the prediction said
+it would help least. With the reference's five chance samples it added +39,105
+points per game on 64 paired development games, with a one-sided bootstrap lower
+bound of +1,138, so above zero by very little
+([finding-08](/docs/exploratory/finding-08-learned-leaf), run valid, development
+tier). With the exact seven-sample chance estimator its gain did not clear its
+bound and is unresolved. The preregistered prediction was that the gain would be
+materially larger at seven samples; the measured difference between the two
+gains was −21,824, the wrong sign, and by the rule fixed in advance that is a
+fail. The finding reports it as one.
 
-**The preregistered prediction is refuted, on its own stated rule.** The
-prediction, written before any game was played, was that the learned leaf would
-help *materially more* at seven chance samples than at five, and the pass/fail
-rule was written with it. The measured difference between the two gains is
-**−21,824 with a lower bound of −105,254**: the effect is smaller where the
-prediction said it would be larger. By the rule fixed in advance this is a
-**FAIL**, and the finding reports it without reframing it.
+## What we learned
 
-**The mechanism explains the refutation.** Both an exact chance estimator and a
-learned leaf are ways of knowing more about what happens *after* the current
-move, and having bought that knowledge once, buying it again returns less. Seen
-from the other axis: making the chance estimator exact is worth +101,171 points
-with the hand-written leaf and only +79,347 with the learned one: the same
-substitution, 22% smaller. Extra look-ahead is processed *through* the chance
-average, so a biased average corrupts it; a leaf value is terminal, so it
-inherits the bias of the path that reached it but does not compound it.
+The refutation has a mechanism. An exact chance estimator and a learned leaf are
+both ways of knowing more about what happens after the current move, and having
+bought that knowledge once, buying it again returns less. Seen from the other
+axis: making the chance estimator exact is worth +101,171 points with the
+hand-written leaf and +79,347 with the learned one, the same substitution, 22%
+smaller (64 paired games per arm, finding-08). Extra look-ahead is processed
+through the chance average, so a biased average corrupts it; a leaf value is
+terminal, so it inherits the bias of the path that reached it but does not
+compound it.
 
-**The flow rates back the five-sample result and not the seven-sample one.** At
-five chance samples the learned leaf raises numbered clears by 0.0342 and
-reveals by 0.0212 per move, which is what its +11.13 moves of extra lifetime
-predicts, and every reported quantile of the score improves. At seven samples
-the *paired per-game* flow changes are slightly negative. That is an independent
-reason (beyond its own confidence bound) to treat the seven-sample gain as
-unresolved rather than as a smaller real effect.
+The binding constraint is arity. 615,090 board evaluations per decision is a
+hard budget, and the 0.008 of held-out correlation between the deployed student
+and the network five times its size says a bigger survival model has little
+accuracy to offer anyway (finding-08). At equal compute, fixing the chance
+estimator is the better purchase: the seven-sample arm costs 3.42× the
+reference's CPU per decision and buys +101,171 points, while the learned leaf
+roughly doubles the cost of a decision for a gain that clears zero by 1,138.
 
-**The most useful result is the one that points the wrong way.** Every learned
-arm pushed the board *away* from the 19–20 occupied cells where the
-[flow ceiling](/approaches/lifetime-objective/flow-ceiling) measurement says the
-achievable clear rate crosses the survival requirement: 24.29 → 24.68 cells at
-five samples, 23.15 → 23.87 at seven, and 25.53 for the pure learned leaf with
-the hand-written one switched off entirely. **A model that predicts remaining
-lifetime accurately still does not steer the policy to the operating point where
-lifetime becomes cheap**, because remaining lifetime *under the current policy*
-is not the same target as remaining lifetime under a policy that holds flow
-balance.
+The move-blind, state-only design is a positive result on its own terms: this
+evaluator never sees a move identity and it cleared a paired 64-game lower
+bound, which the family's earlier models did not. But every learned arm also
+pushed the board away from the 19 to 20 occupied cells where the
+[flow ceiling](/approaches/lifetime-objective/flow-ceiling) measurement puts the
+crossing between achievable clear rate and survival requirement (24.29 to 24.68
+cells at five samples, finding-08). A model that predicts remaining lifetime
+under the current policy does not steer toward the operating point where
+lifetime becomes cheap. Whether aiming the leaf directly at occupancy or at the
+clear rate would do so is the open question, and it has not been tested.
 
-**And as a purchase it is poor.** Calling the model at every one of 660,481
-leaves roughly doubles the cost of a decision. Spending the same compute on the
-chance estimator instead: the seven-sample arm, at 3.42× the reference's CPU
-per decision — buys +101,171 points. At equal compute, fixing the chance
-estimator is the better buy, and it is not close.
+<AgentContext summary="Records and provenance">
 
-<TechnicalDetails title="The record: the two-by-two, the gates, and the host defect">
-
-Source: [`finding-08-learned-leaf`](/docs/exploratory/finding-08-learned-leaf), a
-retained exploratory finding measured in this checkout on 2026-08-20; evidence
+Source: [`finding-08-learned-leaf`](/docs/exploratory/finding-08-learned-leaf),
+a retained exploratory finding measured in this checkout on 2026-08-20; evidence
 tier `development` for the gameplay arms and `CHECK` for the export, parity and
-feasibility gates. The prediction and pass/fail rule are in
-`PREREGISTRATION.md`, written before any cohort was run. There is no row in the
+feasibility gates. The prediction and pass/fail rule are in `PREREGISTRATION.md`
+in this directory, written before any cohort was run. There is no row in the
 [experiment index](/docs/research/experiment-index) and no entry in the
 [ledger](/docs/research/history).
 
-**Verdict as recorded.** Validity **valid**; preregistered prediction **fail —
-refuted**; learned leaf at five chance samples **pass**; at seven chance samples
-**inconclusive**; evidence tier `development`.
+Verdict as recorded: run validity valid; preregistered prediction fail
+(refuted); learned leaf at five chance samples pass; at seven chance samples
+inconclusive; evidence tier `development`.
 
-**The two-by-two.** 64 paired whole games per arm, seeds
-`0xa51d1000`–`0xa51d103f`, four-move search, 2,000-move cap; learned arms at
-`w = 0.50` with the lifetime head, frozen on a separate 32-game tuning cohort.
+The two-by-two: 64 paired whole games per arm, seeds `0xa51d1000`–`0xa51d103f`,
+four-move search, 2,000-move cap; learned arms at `w = 0.50` with the lifetime
+head, frozen on a separate 32-game tuning cohort.
+
+</AgentContext>
+
+<AgentContext summary="Full results table">
 
 | arm | mean | median | Q25 | max | moves | games ≥ 1M |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | 5 samples, hand-written leaf | 297,327 | 260,415 | 192,352 | 836,427 | 87.16 | 0 |
-| 5 samples, learned leaf | **336,432** | 313,730 | 209,914 | 948,586 | **98.28** | 0 |
+| 5 samples, learned leaf | 336,432 | 313,730 | 209,914 | 948,586 | 98.28 | 0 |
 | 7 samples, hand-written leaf | 398,498 | 344,630 | 212,864 | 1,341,287 | 114.66 | 2 |
-| 7 samples, learned leaf | **415,779** | 349,034 | 194,040 | 1,344,732 | **120.75** | 3 |
+| 7 samples, learned leaf | 415,779 | 349,034 | 194,040 | 1,344,732 | 120.75 | 3 |
 
-Paired deltas, one-sided 95% lower bounds, 20,000 percentile-bootstrap resamples
-over whole games: learned − hand-written at 5 samples **+39,105 [+1,138]**,
-37–0–27; at 7 samples +17,281 [−55,892], 34–0–30; the difference between those
-two **−21,824 [−105,254]**; 7 samples − 5 samples with the hand-written leaf
-+101,171 [+46,730]; with the learned leaf +79,347 [+17,053].
+Paired deltas, one-sided 95% lower bounds, 20,000 percentile-bootstrap
+resamples over whole games: learned − hand-written at 5 samples +39,105
+[+1,138] points and +11.13 moves, wins–ties–losses 37–0–27; at 7 samples
++17,281 [−55,892], 34–0–30; the difference between those two gains −21,824
+[−105,254]; 7 samples − 5 samples with the hand-written leaf +101,171
+[+46,730]; with the learned leaf +79,347 [+17,053].
 
-**The two models.** The convolutional teacher has 3,006,543 parameters, held-out
+Flow: at five chance samples the learned leaf raises numbered clears by 0.0342
+and reveals by 0.0212 per move, consistent with its +11.13 moves of extra
+lifetime, and every reported quantile of the score improves. At seven samples
+the paired per-game flow changes are slightly negative, an independent reason to
+treat the seven-sample gain as unresolved rather than as a smaller real effect.
+
+Occupancy: mean occupied cells moved 24.29 → 24.68 at five samples, 23.15 →
+23.87 at seven, and 25.53 for the pure learned leaf with the hand-written one
+switched off entirely.
+
+Cost: calling the model at every one of 660,481 leaves roughly doubles the cost
+of a decision (2.11× for the learned leaf on top of the exact estimator); the
+seven-sample arm costs 3.42× the reference's CPU per decision.
+
+The two models: the convolutional teacher has 3,006,543 parameters, held-out
 lifetime correlation 0.8646 and costs 4,122 µs per board. The deployed
-NNUE-shaped student has 572,367 parameters, held-out correlation **0.8564** and
-costs **1.33 µs** — 0.008 of correlation given up for a 3,109× speed-up. Both
-were exported and both passed a stated-tolerance parity gate; only the student
-ever played a move.
+NNUE-shaped student has 572,367 parameters, held-out correlation 0.8564 and
+costs 1.33 µs: 0.008 of correlation given up for a 3,109× speed-up. Both were
+exported and both passed a stated-tolerance parity gate; only the student ever
+played a move.
 
-**Validity gates.** Both hand-written-leaf arms reproduce the earlier
-chance-sampling study's published 64-game cohort **to every digit**, which is
-what makes the comparison sound; the `w = 0` short-circuit matched the frozen
-reference on 50 of 50 compared moves; 0 score-identity violations in 26,934
-decisions; 0 censored games in 256; and the seven-sample arms ran with a raised
-work bound whose measured 4,956,614 work per move confirms a completed four-move
-search rather than a silent degradation to three.
+</AgentContext>
 
-**A host defect found here, not audited generally.** The parity gate passed, then
-the identical command failed on every output. `torch.nn.Conv2d` on this host's
-CPU is **nondeterministic**: two identical forward passes in eval mode,
+<AgentContext summary="Validity, gates and limitations">
+
+Validity gates: both hand-written-leaf arms reproduce the earlier
+chance-sampling study's published 64-game cohort to every digit; the `w = 0`
+short-circuit matched the frozen reference on 50 of 50 compared moves; 0
+score-identity violations in 26,934 decisions; 0 censored games in 256; the
+seven-sample arms ran with a raised work bound whose measured 4,956,614 work per
+move confirms a completed four-move search rather than a silent degradation to
+three.
+
+A host defect found here and not audited generally: the parity gate passed,
+then the identical command failed on every output. `torch.nn.Conv2d` on this
+host's CPU is nondeterministic: two identical forward passes in eval mode,
 single-threaded, differ in 6.25% of output elements, and through the
 normalisation layer's group statistics one perturbed activation moves 100% of
-the model's outputs. Written up separately as
-[`gpu-03`](/docs/exploratory/gpu-03-onednn-conv-nondeterminism). Any gate in this
-repository that compared against a CPU PyTorch convolution may be affected; that
-has not been checked.
+the model's outputs. Written up as
+[`gpu-03`](/docs/exploratory/gpu-03-onednn-conv-nondeterminism). Any gate in
+the repository that compared against a CPU PyTorch convolution may be affected;
+that has not been checked.
 
-**Limitations the finding states about itself:** 64 paired games per arm with a
+Limitations the finding states about itself: 64 paired games per arm with a
 score standard deviation of 51–67% of the mean, so the +1,138 lower bound clears
 zero by very little and wants replication on fresh seeds; the
 difference-in-differences interval is wide, so the data refute the predicted
-*positive* interaction but do not establish a negative one; the evaluation cohort
-is previously-read development data and is now doubly read; the model that was
+positive interaction but do not establish a negative one; the evaluation cohort
+is previously read development data and is now doubly read; the model that was
 specified never played a move; the blend weight was tuned only at five chance
-samples and the seven-sample tuning confirmation was preregistered and **not
-run**; no timing here is timing-grade; and the mean of 415,779 is far below the
-1,050,000 the frozen qualification protocol requires. **No protected or final
-seed was opened.**
+samples and the seven-sample tuning confirmation was preregistered and not run;
+no timing here is timing-grade; and the mean of 415,779 is far below the
+1,050,000 the frozen qualification protocol requires. No protected or final
+seed was opened.
 
-</TechnicalDetails>
+Open follow-ups named by the finding: a fresh-cohort replication of the
++39,105, and a blend weight re-tuned at seven chance samples, which would say
+whether the seven-sample number is an underestimate.
 
-## What this taught us, and what is still open
-
-- **The binding constraint is arity, not capacity.** 615,090 board evaluations
-  per decision is a hard budget. A model five times more accurate that costs five
-  times more is unplayable, and the 0.008 of correlation between the small
-  student and the network five times its size says the accuracy is not there to
-  be had anyway. "Train a bigger survival model" is not the next experiment.
-- **Do not buy both axes.** The cheapest strong configuration on this evidence is
-  the hand-written leaf with an exact chance estimator; adding the learned leaf
-  on top costs 2.11× for a gain that does not clear its bound.
-- **This is a positive result for the state-only, move-blind design.** The
-  repository's repeated failure mode is a model that learns the outcome of the
-  move that was played and is then asked to rank moves it never saw. This
-  evaluator never sees a move identity at all, and it cleared a paired 64-game
-  lower bound. The design is worth keeping even though its magnitude is modest.
-- **Still open, and the finding names it as the more actionable question:**
-  predicting lifetime under the *current* policy is the wrong target. Aiming
-  directly at occupancy or at the clear rate: the quantity the
-  [flow ceiling](/approaches/lifetime-objective/flow-ceiling) work identified —
-  is a different and untested objective.
-- **Still open:** a fresh-cohort replication of the +39,105, and a blend weight
-  re-tuned at seven chance samples, which would say whether the seven-sample
-  number is an underestimate.
+</AgentContext>

@@ -1,0 +1,135 @@
+---
+title: Evolutionary optimisation
+slug: evolution
+summary: "Try many slightly different versions, keep the ones that did best, make the next generation from them, and repeat; no gradient needed."
+order: 7
+technique: evolution
+approaches: [lifetime-objective/nnue-evolution, heuristic-search/evolution, fair-expectimax/cem, constructive-reservoir/tail-survival-cem, heuristic-search/evolved-public-policy, value-policy-learning/direct-policy, lifetime-objective/leaf-evolution, value-policy-learning/klein-friedmann-linear-q]
+glossary: [cross-entropy method, elites, evolution strategies, CMA-ES, neuro-evolution, common random numbers, selection noise, paired]
+---
+
+## The idea
+
+Suppose you have a player with some adjustable numbers inside it, a way to
+measure how well any setting of those numbers plays, and nothing else: no
+formula for how the score depends on the numbers, no gradient to follow. You
+can still improve it. Make many copies with slightly different settings, play
+them all, keep the ones that did best, and build the next batch of copies
+around those. Repeat. Over generations the settings drift toward whatever the
+measurement rewards.
+
+The appeal is that the measurement can be anything you can run, including the
+thing you care about: a whole game's final score, with all its jumps and
+cliffs. The cost is that every candidate has to be played, so one generation
+means many games.
+
+## A small example
+
+A hidden bumpy function of one number, with a small hill and a big one. You
+can only evaluate it at points you choose, and each reading carries some
+noise. Find the top.
+
+1. Start with a wide bell curve over the range and draw 12 points from it.
+2. Evaluate all 12. Keep the best 3, the elites.
+3. Refit the bell curve to the elites: its new mean is their average, its new
+   spread is their spread. This is the cross-entropy method (CEM).
+4. Draw 12 again from the tighter curve and repeat. The cloud climbs the hill
+   and shrinks.
+
+<EvolutionCloud />
+
+5. Variants. Evolution strategies move the mean along the average direction of
+   the good samples instead of refitting from scratch, and adapt the spread as
+   they go; covariance matrix adaptation (CMA-ES) is the standard version.
+   Neuro-evolution does the same to every weight of a neural network, so a
+   "point" is a vector of thousands of numbers.
+6. The trap. If each reading is noisy and every generation draws fresh noise,
+   the three elites may be the three readings that got lucky, and the refit
+   follows the luck. The fix is to evaluate every candidate on the same noise
+   (the same dice, the same games) and select by rank within that shared
+   draw. That is called common random numbers.
+
+<EvolutionCommonRandomNumbers />
+
+## How it works
+
+Every method in the family runs one loop: sample candidates from a
+distribution over settings, measure each, select, update the distribution,
+repeat. They differ in the distribution (one bell curve per parameter, a full
+covariance, or a population of individuals), in how selection works (keep the
+top few, run tournaments between random triples, or weight by rank), and in
+how new candidates are made (resample, or copy a winner and add mutation
+noise). None of them needs a gradient, so the thing being tuned can be a
+search, a hand-written evaluator or a network, and the fitness can be a
+whole-game score.
+
+Two costs govern the design. Evaluation is expensive: each candidate plays a
+batch of games. And selection is noisy: Drop7 scores are heavy-tailed, so two
+identical candidates on different games can differ by hundreds of thousands
+of points, for reasons the [concept page on heavy tails](/learn/concepts/heavy-tails)
+explains. Common random numbers turn a comparison between two candidates into
+a [paired](/learn/glossary) difference on the same games, which removes the
+game-to-game spread from the comparison and leaves the candidates' own
+difference.
+
+<EvolutionSelectionNoise />
+
+## In Drop7
+
+Evolution here tunes either the weights of a hand-written board evaluator or
+the weights of an NNUE (an efficiently updatable neural network; see the
+[NNUE primer](/learn/techniques/nnue)), with fitness equal to whole-game score
+on paired seeds. The most fully recorded run,
+[An evolved NNUE leaf, distilled from a depth-5 teacher](/approaches/lifetime-objective/nnue-evolution),
+used a population of 32 candidates that all played the same fresh block of 32
+games each generation, as the leaf of the real depth-3 search. The four
+fittest were copied into the next generation unchanged; the other 28 slots
+were filled by tournaments of three, the winner copied and every weight
+perturbed by Gaussian noise at 5% of the standard deviation of the tensor it
+belongs to.
+
+Pages that evolve something:
+
+- [Evolution](/approaches/heuristic-search/evolution), the linear, nonlinear
+  and phase-weight versions of tuning a search's feature weights.
+- [Machine-tuning the board evaluator](/approaches/fair-expectimax/cem), eight
+  coefficients of the reference leaf tuned by CEM on complete games.
+- [Tail-survival CEM](/approaches/constructive-reservoir/tail-survival-cem),
+  which retunes an existing policy for survival milestones.
+- [Evolved public policy](/approaches/heuristic-search/evolved-public-policy),
+  a larger phase-aware evaluator optimised on complete games.
+- [Direct public policy](/approaches/value-policy-learning/direct-policy), 25
+  weighted features per column, tuned against whole games.
+- [Evolving the leaf weights at the depth they are used](/approaches/lifetime-objective/leaf-evolution),
+  the reference leaf under CMA-ES.
+- [Klein-Friedmann linear Q-learning](/approaches/value-policy-learning/klein-friedmann-linear-q),
+  where a cross-entropy search over six weights (population 64, 30
+  generations) is compared with the weights that temporal-difference learning
+  found.
+
+## What it cannot do
+
+Whole-game evolution with common random numbers does move a large network. On
+the NNUE evolution page, the evolved leaf, with about 572,000 weights, beat
+its own unevolved warm start by 35,375 points per game on 64 never-read
+held-out games, with a bootstrap 95% lower bound of +16,899. In the same
+screen it lost to the frozen hand-written leaf inside the same depth-3 search
+by 106,964 points per game (lower bound −146,580, 14 wins to 50), so the
+preregistered gate failed
+([An evolved NNUE leaf, distilled from a depth-5 teacher](/approaches/lifetime-objective/nnue-evolution),
+[RS-20260903T025751Z-6577b33e](/experiments/EX-20260902-nnue-evolution-d3-v2-49c18bc2)).
+Sixty generations closed part of the distance to a leaf a person wrote by
+hand and stopped short of it.
+
+The older record is worse. Each evolved hand-written evaluator on the first
+evolution page "learned its training games and gave the gain back on fresh
+ones" ([Evolution](/approaches/heuristic-search/evolution)); a fitness
+measured on a fixed set of games is something an optimiser can learn to fit.
+And the first CMA-ES leaf evolution drew fresh seeds every generation and, in
+the NNUE page's post-mortem, "followed selection noise into a worse
+evaluator": with 32 games per candidate and a paired standard deviation near
+200,000 points, fresh seeds each generation left selection noise alone to
+steer
+([An evolved NNUE leaf, distilled from a depth-5 teacher](/approaches/lifetime-objective/nnue-evolution)).
+Common random numbers were the correction, and they are why the later run
+could measure its own progress at all.

@@ -5,6 +5,8 @@ summary: Keeps the four-move search in charge unless a long simulation favors it
 status: rejected
 evidence: task-record only
 reads: public
+kind: strategy
+technique: rollout-policy-iteration
 ---
 
 A safety-first way to use the family's structural planner: never let it choose
@@ -28,7 +30,7 @@ generated from independent random streams. A conclusion that appears on one
 panel and not the other is exactly the kind of noise that made earlier
 overrides unstable, and the two-panel rule is designed to catch it.
 
-The word "terminal" here means the simulation runs to the end of the game (or a
+*Terminal* here means the simulation runs to the end of the game (or a
 long horizon) and cares about *when the game ends*, rather than about points
 collected in the next few moves.
 

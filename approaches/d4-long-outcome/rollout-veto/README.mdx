@@ -5,109 +5,146 @@ summary: Keep the depth-4 search's move unless replaying every column forward fo
 status: runtime-paused
 evidence: ledger-recorded
 reads: public
+kind: strategy
+technique: rollout-policy-iteration
+featured: true
 ---
 
-Play the depth-4 search's move — unless replaying every legal column forward for
-twenty-five moves says, consistently across all seven imagined futures, that a
-different column is better.
+## The problem
 
-<EvidenceLabel status="runtime-paused" evidence="ledger-recorded" reads="public" />
+The [reference search](/approaches/fair-expectimax/reference) is tactically
+strong and structurally short-sighted. It looks four of the player's moves
+ahead, so it cannot see the second row rise, and it cannot see that a column it
+likes will be unplayable two rise cycles from now. A twenty-five-move replay can
+see that. But a long replay is noisy: play the same position forward under
+different luck and the outcomes differ widely, so a long look used carelessly
+will override a good move on the strength of one lucky imagined future.
 
-This is the family's most direct idea and its most eventful record: one
-extraordinary game, a runtime rejection, three attempts to make it affordable,
-and finally a properly powered retest that rejected the mechanism.
+## Proposed solution
 
-## The intuition
+Let the long look object, never choose. The depth-4 search picks its column as
+usual. Only on dangerous boards does the policy replay every legal column
+forward for twenty-five moves, and it gives every column the same seven
+imagined futures so that the comparison between columns is paired: no column
+gets luckier tapes than another. An alternative may displace the search's
+choice only when it survives at least as often, clears at least as much, beats
+the default by a fixed confidence bound, and is not far below the search's own
+valuation. Otherwise the depth-4 move plays.
 
-The reference search is tactically strong and structurally short-sighted. It
-cannot see the second row rise, so it cannot see that a column it likes will be
-unplayable two cycles from now. A twenty-five-move replay can. But a long replay
-is also *noisy*: play the same position forward under different luck and you get
-very different outcomes, so a long look used carelessly will happily override a
-good move on the strength of one lucky imagined future.
+The policy reads the visible board, the visible next disc and the moves until
+the next rise; the imagined futures are generated from a hash of that public
+board, and the continuation that plays them is typed so that it cannot receive
+the real tape, the game's seed, the score, the level or the move number.
 
-The veto design answers both at once: the long look never *chooses*, it can only
-**object**, and it may only object when the objection holds up statistically.
+## How it works
 
-## How it works, step by step
-
-1. Run unmodified fair depth-4 search. Keep its column as the default. If
-   anything below fails, this is what gets played.
-2. **Route or skip.** The expensive part runs only when the board is dangerous —
-   defined as a maximum column height of at least four. On safe boards the policy
-   *is* plain depth 4, bit for bit.
-3. At a routed position, give **every legal column the same seven imagined
-   futures**. Each future is generated from a hash of the public board, so the
-   comparison between columns is paired and no column gets luckier tapes than
-   another.
-4. In each future, force the candidate column, then play **twenty-five more
-   moves** with a fresh, complete depth-2 search at every step. That continuation
-   is typed so that it structurally cannot receive the tape, the scenario
-   identity, the score, the level or the move number: it sees a board, a disc, a
-   rise phase and whether the game is over.
-5. Score each line by the points it actually earns, minus a large penalty if it
-   dies, plus one leaf evaluation if it is still alive at move 25.
-6. **Four conditions, all required**, before an alternative may displace depth 4:
-   it must survive in at least as many of the seven futures; it must not clear
-   fewer numbered discs on average; its paired advantage must be positive at a
-   fixed one-sided confidence bound; and it must not be too far below depth 4's
-   own valuation of the position. Among alternatives that pass, the one with the
-   largest confidence bound wins. Otherwise depth 4 plays.
+1. Run the unmodified fair depth-4 search and keep its column as the default.
+   If anything below fails, this is what gets played.
+2. Route or skip. The expensive part runs only when the board is dangerous,
+   defined as a maximum column height of at least four. On safe boards the
+   policy is plain depth 4, bit for bit.
+3. At a routed position, give every legal column the same seven imagined
+   futures, each generated from a hash of the public board.
+4. In each future, force the candidate column, then play twenty-five more moves
+   with a fresh, complete depth-2 search at every step. That continuation sees
+   a board, a disc, a rise phase and whether the game is over.
+5. Score each line by the points it earns, minus a large penalty if it dies,
+   plus one leaf evaluation if it is still alive at move 25.
+6. Apply four conditions, all required, before an alternative may displace
+   depth 4: it must survive in at least as many of the seven futures; it must
+   not clear fewer numbered discs on average; its paired advantage must be
+   positive at a fixed one-sided confidence bound; and it must not be too far
+   below depth 4's own valuation. Among alternatives that pass, the one with the
+   largest confidence bound wins. The output is one column.
 
 ## What happened
 
-**One astonishing game.** The single registered pilot lasted 250 moves and
-scored 404,047 where plain depth 4 lasted 105 moves and scored 159,616. It made
-only twelve overrides in the whole game. Its projected cost was also more than five times its own preregistered runtime ceiling, so the run was paused before the
-second game rather than being allowed to become a strength claim on a sample of
-one. The record was explicit at the time: "only one pair, not statistical
-evidence".
+The single registered pilot game scored 404,047 points where plain depth 4
+scored 159,616 on the same seed, with a handful of overrides in the whole game
+(one game, ledger-recorded). Its projected cost was far above its preregistered
+runtime ceiling, so the run was paused before the second game rather than
+allowed to become a strength claim on a sample of one; the record at the time
+says "only one pair, not statistical evidence". Two follow-ups applied only
+changes that provably cannot alter a decision and saved immaterial wall time. A
+four-game quality extension kept a higher mean mostly because the original long
+game was still in it, and failed its frozen gate. Six cheaper teachers replayed
+against the original's decisions reproduced almost none of its beneficial
+overrides.
 
-**Making it cheaper did not make it fast.** Two follow-ups applied only changes
-that provably cannot alter a single decision — skip alternatives that depth 4
-already values too poorly, evaluate the baseline once, reuse identical
-continuations, drop a cache. Every value, action and selected move stayed
-bit-identical to the original, and the wall-clock savings were immaterial.
+The mechanism was then ported to corrected 17,000-point scoring, verified
+byte-identical against the frozen source, and run on 32 paired development
+games ([finding-03](/docs/exploratory/finding-03-rollout-veto-17k), run valid,
+outcome fail, development tier). The veto lost to fair depth 4 by 46,510.5
+points per game, and the two flow rates that would have had to rise for the
+idea to work both fell.
 
-**A wider look at quality did not rescue it either.** Adding three more games
-left the mean higher, but mostly because the original long game was still in it;
-only one of the three new games was a joint win on both score and lifetime, and
-the frozen quality gate failed.
+<Callout title="Two statuses" tone="info">
+The sources in this directory keep their retained status of runtime-paused:
+they were shelved for cost and the index still records them that way. The
+mechanism they implement was separately rejected on a 32-game paired cohort
+under corrected scoring, in a different namespace, without modifying these
+files. Both statements are true.
+</Callout>
 
-**And the cheaper teachers could not imitate it.** Six approximations — shallower
-continuations, fewer futures, shorter horizons, mixed schemes — were replayed
-against the original's own decisions. The best of them reproduced **2 of the 12
-beneficial overrides** against a preregistered requirement of 8. The high overall
-agreement in that table is an illusion created by the 167 positions where the
-teacher did nothing; agreement on doing nothing is easy.
+## What we learned
 
-**Then it was retested properly, and it does not reproduce.** The whole mechanism
-was ported to corrected 17,000-point scoring, verified byte-identical against the
-frozen source, and run on 32 paired games. Fair depth 4 averaged 339,290 points
-and 98.66 moves; the veto averaged 292,780 and 86.34. It lost 19 of 32 games and
-won 9. Most tellingly, the two flow rates that would have had to *rise* for the
-idea to work both **fell**: the accepted overrides produced a policy that clears
-and reveals less per move than the search it was supposed to improve.
+The estimator was measuring the wrong game. A column selected because it looks
+good under 25 moves of depth-2 play is then executed in a game played by depth
+4. That mismatch is the most concrete finding here, and it is why the accepted
+overrides made realised flow worse even though "must not clear fewer discs" was
+one of the four conditions: the retest's 68 overrides cost an average of
+−21,887 points each (32 games, finding-03).
 
-<TechnicalDetails>
+A one-game pilot cannot be informative in either direction for a policy whose
+per-override effect has a standard deviation of roughly 160,000 points
+(finding-03). The 404,047-point game is an anecdote, and the record treated it
+as one from the start.
 
-**Original pilot** (runtime-paused; ledger-recorded). Seed `0x3ded0000`, one
-game: stock depth 4 159,616 points / 105 moves, 1.97143 clears and 1.09524
-reveals per move; the veto 404,047 / 250, with 2.276 clears and 1.316 reveals per
-move. 12 switches out of 179 routed decisions (4.8% of 250 moves); 15
-alternatives passed every gate. Runtime: 852.255 seconds for the pair against a
-2,700-second ceiling, projected to 15,340.599 seconds for the full protocol; the
-runner paused before `0x3ded0001`.
+What is ruled out is exact: horizon 25, seven futures, danger height 4, a
+depth-2 continuation, all legal columns as challengers, at both value bands, on
+32 fresh paired games. The engineering survives the negative result: paired
+imagined futures shared across columns, a continuation whose type cannot carry
+privileged data, an exact fallback, and a compression pass proven
+decision-identical. The retest names the cheapest next test, and it is neither
+a longer horizon nor a wider band: more imagined futures, since the return test
+appears under-sampled by roughly two to seven times at seven. Whether more
+futures would change the verdict is the open question.
 
-**Exact compression** (runtime-paused; ledger-recorded). Replay asserted the
+<AgentContext summary="Records and provenance">
+
+Records: [experiment index](/docs/research/experiment-index) "D4 and
+long-outcome research"; [ledger](/docs/research/history) sections "Fair-D4
+25-move exact-D2 rollout veto", "Exact 25-move rollout-veto compression", "D2
+rollout teacher-compression replay" and "Original D4 + D2/s7/h25 quality
+extension". Retest:
+[`finding-03`](/docs/exploratory/finding-03-rollout-veto-17k), run validity
+valid, scientific outcome fail, evidence tier development, reproduced in this
+checkout, separate namespace and seed lease, frozen source untouched.
+
+Pilot seed `0x3ded0000`; quality-extension games `0x3ded0001`–`0x3ded0003`; the
+runner paused before `0x3ded0001` in the original run.
+
+</AgentContext>
+
+<AgentContext summary="Full results table">
+
+Original pilot (runtime-paused; ledger-recorded), seed `0x3ded0000`, one game:
+stock depth 4 159,616 points / 105 moves, 1.97143 clears and 1.09524 reveals
+per move; the veto 404,047 / 250, with 2.276 clears and 1.316 reveals per move.
+12 switches out of 179 routed decisions (4.8% of 250 moves); 15 alternatives
+passed every gate. Runtime 852.255 seconds for the pair against a 2,700-second
+ceiling, projected to 15,340.599 seconds for the full protocol.
+
+Exact compression (runtime-paused; ledger-recorded). Replay asserted the
 original 404,047 points, 250 moves, 179 routes and 12 switches before writing.
 The depth-4 value prefilter skipped 120 of 1,242 action roots (9.66%); exact
 continuation reuse removed a further 26,303 transitions; depth-2 calls fell from
-192,983 to 152,884. Whole-game wall time moved 641.689 to 639.321 seconds — the
+192,983 to 152,884. Whole-game wall time moved 641.689 to 639.321 seconds, the
 rollout phase from 333.585 to 295.902, which is not the order of magnitude the
-gate required.
+gate required. Every value, action and selected move stayed bit-identical to
+the original.
 
-**Quality extension** (rejected; ledger-recorded). Four games: candidate mean
+Quality extension (rejected; ledger-recorded). Four games: candidate mean
 174,659.5 points / 113.75 moves against 107,007.75 / 72.5. Clears per move rose
 1.84483 to 2.05055, reveals 0.98966 to 1.12967, and all four leave-one-out
 subsets were positive, but only one of the three new pairs was a joint
@@ -116,16 +153,15 @@ requirement. Individual games: `0x3ded0001` 109,264/70 became 153,925/100;
 `0x3ded0002` was identical at 59,004/45 with zero switches; `0x3ded0003`
 100,147/70 became 81,662/60.
 
-**Teacher compression** (rejected; ledger-recorded). Replay-only over the 179
-exported routed states. Best configuration (depth 2 at rise phases 1 or 5,
-otherwise depth 1) reproduced 166 of 179 exact actions and **2 of 12** switches,
-against an eligibility floor of 8 of 12; the five other configurations recovered
-none.
+Teacher compression (rejected; ledger-recorded). Replay-only over the 179
+exported routed states, six approximations (shallower continuations, fewer
+futures, shorter horizons, mixed schemes). Best configuration (depth 2 at rise
+phases 1 or 5, otherwise depth 1) reproduced 166 of 179 exact actions and 2 of
+12 beneficial switches, against an eligibility floor of 8 of 12; the five other
+configurations recovered none. The high overall agreement comes from the 167
+positions where the teacher did nothing.
 
-**Corrected-scoring retest**, [`finding-03`](/docs/exploratory/finding-03-rollout-veto-17k)
-(run validity `valid`, scientific outcome `fail`, evidence tier `development`,
-reproduced in this checkout; separate namespace and seed lease, frozen source
-untouched):
+Corrected-scoring retest, finding-03, 32 paired development games:
 
 | Arm | mean score | mean moves | clears/move | reveals/move |
 | --- | ---: | ---: | ---: | ---: |
@@ -136,45 +172,37 @@ Paired mean delta −46,510.5 points and −12.31 moves; one-sided 95% bootstrap
 lower bound −91,924.6; wins–ties–losses 9–4–19; sign test p = 0.0436 on the 28
 non-tied games; 0 censored games, 0 illegal moves. Of 12,314 alternatives
 scored, 103 passed all four conditions and 68 overrides were taken: an average
-of −21,887 points per override taken. Three games drew zero overrides and were
-*exactly identical* to the comparator, which doubles as a fallback check. The
-value-band correction that an earlier audit had asked for (7,000 to 17,000) was
-run as a full second arm and changed the number of overrides taken by one, from
-67 to 68; 29 of 32 games were identical between the two bands.
+of −21,887 points per override taken.
 
-Records: [experiment index](/docs/research/experiment-index) "D4 and long-outcome
-research"; [ledger](/docs/research/history) sections "Fair-D4 25-move exact-D2
-rollout veto", "Exact 25-move rollout-veto compression", "D2 rollout
-teacher-compression replay" and "Original D4 + D2/s7/h25 quality extension".
-Sources: `d4-d2-rollout-veto.cpp`, `d4-d2-rollout-veto-exact-compressed.cpp`,
-`d4-d2-rollout-veto-cache-free.cpp`, `d4-d2-rollout-veto-quality-extension.cpp`,
-`d2-rollout-teacher-compression.cpp`.
+</AgentContext>
 
-</TechnicalDetails>
+<AgentContext summary="Validity, gates and limitations">
 
-<Callout title="Two statuses, on purpose" tone="info">
-The retained status of the sources in this directory is **runtime-paused** —
-they were shelved for cost, not disproved, and the index still records them that
-way. The mechanism they implement was separately rejected on a 32-game paired
-cohort under corrected scoring, in a different namespace, without modifying these
-files. Both statements are true and neither replaces the other.
-</Callout>
+The pilot's runtime ceiling was 2,700 seconds for the pair; the projected full
+protocol was 15,340.599 seconds, more than five times that, and the runner
+paused before the second game. The compression gate required an
+order-of-magnitude saving and the exact compression delivered 641.689 → 639.321
+seconds. The quality extension's frozen gate required 90% lower-half score
+retention and joint score-and-move wins on the new pairs. The
+teacher-compression eligibility floor was 8 of 12 beneficial switches
+reproduced.
 
-## What this taught us, and what is still open
+In the retest, three games drew zero overrides and were exactly identical to
+the comparator, which doubles as a fallback check. The value-band correction
+that an earlier audit had asked for (7,000 to 17,000 in the fourth condition)
+was run as a full second arm and changed the number of overrides taken by one,
+from 67 to 68; 29 of 32 games were identical between the two bands. The retest
+notes that the return test appears under-sampled by roughly two to seven times
+at seven futures and names more futures as the cheapest next test.
 
-- **The estimator was measuring the wrong game.** A column selected because it
-  looks good under 25 moves of depth-2 play is executed in a game that will be
-  played by depth 4. That mismatch, not merely noise — is the most concrete
-  finding here, and it is why the accepted overrides made realized flow *worse*
-  even though "must not clear fewer discs" was one of the four conditions.
-- **A one-game pilot cannot be informative in either direction** for a policy
-  whose per-override effect has a standard deviation of roughly 160,000 points.
-- **What is ruled out, exactly:** horizon 25, seven futures, danger height 4, a
-  depth-2 continuation, all legal columns as challengers, at both value bands, on
-  32 fresh paired games. **What is not:** the family. The retest names the
-  cheapest next test, not a longer horizon and not a wider band, but **more
-  imagined futures**, since the return test appears under-sampled by roughly two
-  to seven times at seven.
-- The good engineering here survives the negative result: paired imagined futures
-  shared across columns, a continuation whose *type* cannot carry privileged
-  data, an exact fallback, and a compression pass proven decision-identical.
+</AgentContext>
+
+<AgentContext summary="Scoring mode">
+
+Finding-03 ported the mechanism to corrected 17,000-point scoring and reports
+its 32-game retest under it. The four ledger entries above (pilot, exact
+compression, quality extension, teacher compression) predate that port; their
+point totals are kept in separate tables here and are not compared with the
+retest's.
+
+</AgentContext>

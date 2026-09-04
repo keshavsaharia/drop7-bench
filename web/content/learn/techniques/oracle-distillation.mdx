@@ -1,0 +1,131 @@
+---
+title: Oracles, teachers and distillation
+slug: oracle-distillation
+summary: "Let a program that can see hidden information make labels, then train a program that cannot see it to copy the labels, and only ever measure the copy."
+order: 10
+technique: oracle-distillation
+approaches: [oracle-curriculum/perfect-information-oracle, oracle-curriculum/oracle-distillation, oracle-curriculum/oracle-dagger, oracle-curriculum/topology, oracle-curriculum/state-curriculum, oracle-curriculum/hpool-d0, d4-long-outcome/d4-distillation, value-policy-learning/d4-q-clone, value-policy-learning/phase-distillation, lifetime-objective/planner-distill]
+glossary: [oracle, teacher, student, distillation, behaviour cloning, DAgger, information boundary, held-out label test]
+---
+
+## The idea
+
+Some of what decides a game is on the screen and some is hidden. A program
+that is allowed to read the hidden part can play far better than one that
+cannot, which makes it useless as a player and useful as a teacher. Let it
+play, and at every position write down two things: what a legal player would
+have seen, and what the teacher did. Those pairs are labels. Then train a
+second program, one that reads only the visible part, to reproduce the
+teacher's choices from the visible part alone. The teacher is an
+[oracle](/learn/glossary); the copy is a [student](/learn/glossary); the
+copying is distillation, also called behaviour cloning.
+
+The rule that keeps this honest is about measurement. The teacher's score is
+never reported as the student's. Only the student plays for the record, through
+the same interface as any other legal player.
+
+## A small example
+
+A student walks a maze blindfolded to everything past the walls it can touch. A
+teacher has the map.
+
+1. The teacher walks many mazes and, at each junction, records what the student
+   would see there (the local corridor) and the turn the teacher took. Those
+   pairs are the labels.
+2. Train a small classifier from "what the student sees" to "which turn". That
+   is distillation.
+
+<OracleBoundary />
+
+3. Test it on mazes the teacher never walked. If two junctions look identical
+   from inside the corridor, and the map says turn left at one and right at the
+   other, no classifier can get both right. The label depends on something the
+   student cannot see.
+
+<OracleTwoJunctions />
+
+4. DAgger, short for dataset aggregation, fixes a different problem. A student
+   trained only on the teacher's own paths wanders into junctions the teacher
+   never visited and has no labels for them. So let the student walk, ask the
+   teacher at every junction the student reaches what it would have done, add
+   those labels, and retrain.
+
+<OracleDaggerLoop />
+
+5. DAgger does not fix step 3. If the teacher's reason is invisible to the
+   student, more labels of the same kind do not help.
+6. Whatever happens, only the blindfolded walk is scored.
+
+## How it works
+
+The method has three parts. The teacher is any program with access to
+privileged information: the hidden values, the future, or both. It plays, and
+its choices are logged next to the public view of each position. The student is
+a function from public view to choice, usually a small network, fitted to those
+logs. Between them sits the [information boundary](/learn/glossary), and
+nothing crosses it except the label. A useful check before any game is played
+is the held-out label test: hold back whole games, fit on the rest, and measure
+how often the student picks the teacher's move on positions it has not seen. A
+student that cannot reproduce the labels has nothing to show in play.
+
+The mechanism has a limit that no amount of data or capacity moves. The
+student can only learn a function of what it sees. Whenever the teacher's
+choice depends on hidden information, two positions that look the same to the
+student carry different labels, and the student's best answer is a guess
+weighted by how often each label appeared. DAgger changes which positions get
+labelled. It does not change what the labels depend on.
+
+## In Drop7
+
+The hidden information in Drop7 is the number under every gray disc and the
+sequence of discs still to come. The oracle on this site is a beam search over
+the game's actual future tape: it reads the hidden values and the discs to be
+dealt, plans against them, and plays. Its students are sparse networks over the
+public board: the cells, the next disc and the rise clock. A second kind of
+teacher is legal but expensive: the fair depth-4 search itself, distilled into a
+network so that its choices can be made without running the search.
+
+Pages that use the method:
+
+- [Perfect-information oracle](/approaches/oracle-curriculum/perfect-information-oracle),
+  the teacher.
+- [Oracle distillation](/approaches/oracle-curriculum/oracle-distillation), the
+  direct copy.
+- [Oracle DAgger](/approaches/oracle-curriculum/oracle-dagger), the copy
+  retrained on the positions the student reached.
+- [Board topology](/approaches/oracle-curriculum/topology),
+  [State curriculum](/approaches/oracle-curriculum/state-curriculum) and
+  [Stage D0: the fair value of oracle-visited boards](/approaches/oracle-curriculum/hpool-d0),
+  which use the oracle's positions rather than its moves.
+- [Depth-4 distillation](/approaches/d4-long-outcome/d4-distillation),
+  [D4 root-Q clone](/approaches/value-policy-learning/d4-q-clone),
+  [Phase distillation](/approaches/value-policy-learning/phase-distillation) and
+  [Compressing a legal planner into a network](/approaches/lifetime-objective/planner-distill),
+  where the teacher is a legal search rather than an oracle.
+
+The [concept page on oracles and teachers](/learn/concepts/oracles-and-teachers)
+walks through the same boundary on a real position.
+
+## What it cannot do
+
+The oracle showed that long games exist. On twelve training-only games it
+reached the 500-move cap in every one, with a mean of 1,058,931.5 points under
+historical 7,000-point scoring, archival. That is an oracle number, produced
+with the future visible, and it says what the game allows
+([Perfect-information oracle](/approaches/oracle-curriculum/perfect-information-oracle)).
+
+The student could not copy it. On 1,629 held-out labels the direct copy picked
+the teacher's column 0.218 of the time against a gate of 0.30 fixed in advance,
+and it did equally badly on positions from ordinary play, so unfamiliar boards
+were never the problem. The page's own conclusion is that the
+information needed to reproduce the teacher's choice is not on the screen
+([Oracle distillation](/approaches/oracle-curriculum/oracle-distillation)). The
+hybrid that let the student override an exact search then passed its
+eight-game screen by 21,978.75 points and failed its sixteen-game confirmation
+by 62,274.25 points and 18.125 moves per game, both under historical
+7,000-point scoring, archival; eight games cannot separate policies whose scores
+are heavy-tailed, and that reversal is the reason this site runs confirmation
+cohorts at all. An audit of the whole curriculum asked where the oracle's
+advantage comes from and found most of it in knowing the tape, the one thing no
+legal player can have
+([audit-05](/docs/exploratory/audit-05-optimistic-curriculum)).

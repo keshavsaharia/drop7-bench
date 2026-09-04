@@ -2,83 +2,171 @@
 title: Fair expectimax reference (D3/D4)
 family: fair-expectimax
 summary: The reference search looks four moves ahead, averages the sampled chance outcomes, and uses a hand-tuned board evaluator at the bottom.
-status: Completed
+status: completed
 evidence: ledger-recorded
+reads: public
+kind: strategy
+technique: expectimax
+featured: true
 ---
 
-The strongest dependable public-information policy in this repository. It is
-the comparator every new candidate must beat, and the teacher behind most
-label-generation experiments.
+## The problem
 
-## The idea
+Drop7 hides two things from the player at every move. The disc after the
+visible next one is unknown, and the number under every gray disc stays hidden
+until a clear beside it cracks it and a second clear reveals it. A player
+weighing one column against another has to allow for both, and how that
+allowance is made decides the move. Hope for the reveal you want and the
+search builds boards that pay off one time in seven. Assume the reveal you
+fear and it never builds anything.
 
-At each move, fair expectimax builds a tree that alternates between **player
-choices** (take the best) and **chance events** (take the average):
+Before any learned or novel policy can be judged, the program needs one
+dependable player that handles that uncertainty honestly, reads only what a
+person at the screen could read, and produces the same games every time it is
+run on a cohort. Every other page on this site measures its candidate against
+this one.
 
-<svg viewBox="0 0 640 210" className="my-4 w-full max-w-2xl rounded-xl border border-zinc-800 bg-zinc-900/40" role="img" aria-label="Expectimax tree">
-  <g fontSize="11" fill="#e4e4e7">
-    <rect x="270" y="12" width="100" height="30" rx="6" fill="#1e3a8a" />
-    <text x="320" y="31" textAnchor="middle" fontWeight="700">MAX: column</text>
-    <rect x="60" y="72" width="130" height="30" rx="6" fill="#78350f" />
-    <text x="125" y="91" textAnchor="middle">CHANCE: reveal/next disc</text>
-    <rect x="250" y="72" width="130" height="30" rx="6" fill="#78350f" />
-    <text x="315" y="91" textAnchor="middle">CHANCE: reveal/next disc</text>
-    <rect x="440" y="72" width="130" height="30" rx="6" fill="#78350f" />
-    <text x="505" y="91" textAnchor="middle">CHANCE: …</text>
-    <rect x="40" y="142" width="80" height="26" rx="6" fill="#1e3a8a" />
-    <text x="80" y="159" textAnchor="middle">MAX</text>
-    <rect x="150" y="142" width="80" height="26" rx="6" fill="#1e3a8a" />
-    <text x="190" y="159" textAnchor="middle">MAX</text>
-    <rect x="280" y="142" width="80" height="26" rx="6" fill="#14532d" />
-    <text x="320" y="159" textAnchor="middle">leaf value</text>
-    <rect x="460" y="142" width="80" height="26" rx="6" fill="#14532d" />
-    <text x="500" y="159" textAnchor="middle">leaf value</text>
-    <g stroke="#3f3f46" strokeWidth="1.5">
-      <line x1="300" y1="42" x2="135" y2="72" />
-      <line x1="320" y1="42" x2="315" y2="72" />
-      <line x1="340" y1="42" x2="495" y2="72" />
-      <line x1="110" y1="102" x2="80" y2="142" />
-      <line x1="140" y1="102" x2="190" y2="142" />
-      <line x1="310" y1="102" x2="320" y2="142" />
-      <line x1="500" y1="102" x2="500" y2="142" />
-    </g>
-  </g>
-</svg>
+## Proposed solution
 
-<GameTreeFigure seed={0x5eed1002} moves={10} leafDepth={1} caption="The same tree, live: the browser analogue of this search on a seeded game, with one further ply below each outcome. It is a playground demonstration of the mechanics, not the native reference whose cohort numbers this page quotes." />
+At each move the reference builds a look-ahead tree that alternates between
+two kinds of node. At a choice node the player picks a column, and the search
+keeps the best option. At a [chance node](/learn/concepts/chance-vs-choice)
+the game deals a disc or reveals a hidden number, and the search takes the
+average over what could happen. "Fair" means the average runs over every legal
+next disc and every possible reveal. It doesn't hope for the best reveal or
+plan for the worst.
 
-"Fair" means the chance nodes **average over what can actually happen** —
-every legal next disc, and the possible gray-disc reveals. Instead of hoping
-for the best reveal or fearing the worst. Depth 4 (D4) completes four full
-max/chance layers; the leaf is a hand-tuned public evaluator.
+The search imagines four of the player's own moves (its depth, written D4
+below; the three-move version is D3) and then hands every board at the bottom
+to a hand-written [leaf evaluator](/learn/glossary), described on
+[the fair leaf evaluator page](/approaches/fair-expectimax/fair-policy). The
+policy reads only the visible board, the visible next disc, the moves until
+the next rise, and whether the game is over.
 
-## Why averaging matters
+<GameTreeFigure seed={0x5eed1002} moves={10} leafDepth={1} caption="The browser analogue of the reference search on a seeded game, with one further ply below each outcome. It is a playground demonstration of the mechanics; the cohort numbers on this page come from the native reference." />
 
-A hidden gray disc can become anything from a 1 to a 7. An optimistic search
-assumes the reveal you want; a pessimistic one assumes the reveal you fear.
-Both mis-rank moves, and the ledger confirms it: fair chance handling beats
-optimistic, worst-case, and tiny reused reveal samples. The price is work —
-the tree grows by roughly an order of magnitude per ply.
+## How it works
 
-## What the evidence showed
+1. Read the position: the visible board, the visible next disc, the moves
+   until the next rise, and whether the game is over.
+2. For each legal column, drop the disc and let the rules engine resolve every
+   clear, chain and reveal it causes. This is a choice node, and each column is
+   one branch.
+3. Below each branch the following disc and any reveals are unknown, so the
+   search samples a fixed handful of representative outcomes, its
+   [strata](/learn/glossary) (five in the reference), and gives each the same
+   weight.
+4. Repeat steps 2 and 3 until four of the player's moves have been imagined.
+   Points scored along the way are counted exactly; the leaf evaluator scores
+   the board at the end of each line.
+5. Average at every chance node, take the best at every choice node, carry
+   the values back up to the root, and play the column with the highest value.
 
-| Configuration | Games | Mean score | Mean moves | Note |
-| --- | ---: | ---: | ---: | --- |
-| Fair D3 | 8 | 235,071 | 71.0 | comparison policy |
-| **Fair D4** | 8 | **400,675** | 116.4 | won 7 of 8 paired games |
-| Fair D4 (broad cohort) | 64 | 308,296 | 90.0 | the reference mean |
+## What happened
 
-- Deeper is **not** automatically better: selective D5, full D5, and
-  cycle-boundary variants all failed their gates (see the sibling approaches).
-- One D4 game scored 1,246,684 points: an anecdote, not an average. The
-  million-point target requires the **mean** to exceed one million.
-- D4 is a strong tactical fallback and teacher, but its average is far below
-  the target. Every serious candidate keeps an exact D4 fallback.
+On the eight-game confirmation cohort, replayed under corrected scoring, the
+depth-4 search averaged 400,675 points against the depth-3 search's 235,071
+([ledger](/docs/research/history), "Corrected Hardcore scoring replay";
+ledger-recorded). On the broader 64-game development cohort the depth-4
+reference averages 308,296 points ([status](/docs/research/status)). Eight
+paired games is a confirmation replay on already-used seeds, so the 64-game
+mean is the number the rest of this site treats as the reference.
 
-## Sources
+A fifth move did not help. Selective depth 5, full depth 5 and the
+cycle-boundary variants all failed their gates; the sibling pages in
+[this group](/approaches/fair-expectimax) record each attempt. The reference
+is the teacher behind most label-generation experiments and the fallback
+inside most candidates, and its mean is far below the one-million-point mean
+the program is after.
 
-- `fair-only-horizon.cpp`: the fair-only depth-3 evaluator.
-- `fair-only-depth4.cpp`: the depth-4 reference build (`make native` produces
-  `build/fair-depth4`).
-- The TypeScript counterpart used by the benchmark registry is
-  `evaluateMoves` in `src/core/typescript/solver.ts` with the combined leaf.
+## What we learned
+
+With this leaf, the fourth move of look-ahead is worth a lot and the fifth is
+worth nothing anyone could measure. The later
+[reveal-sampling work](/approaches/lifetime-objective/reveal-sampling) put
+that in a wider frame: a three-move search with a better chance model matched
+the four-move reference at less work, so depth and the quality of the chance
+average are two ways of buying the same thing. The reference's value is that
+it is frozen, public, and reproducible game for game, which is what lets a
+negative result on any other page mean something.
+
+The open question is what, if anything, beats it on games it has never seen
+at the same work per move.
+
+<AgentContext summary="Records and provenance">
+
+- The eight-game numbers are from the ledger section "Corrected Hardcore
+  scoring replay" in [`docs/research/history.md`](/docs/research/history):
+  after the mode audit restored the five-drop Hardcore award to 17,000, the
+  qualified full-width fair-D4 policy was rebuilt and deterministically
+  replayed on its already-consumed screen and confirmation seeds; no new
+  gameplay seed was opened. Four-game screen: D3 318,528.75 points / 93 moves,
+  D4 399,951.75 / 115, paired gain 81,423 points and 22 moves. Eight-game
+  confirmation: D3 235,071.25 / 71, D4 400,675.25 / 116.375, D4 winning seven
+  of eight pairs, paired gains 165,604 points and 45.375 moves; 1,000-move cap,
+  neither arm censored. D4 used 1,351,112.595 logical work units per move,
+  retained at most 36,105 cache entries, peaked at 30,441,472 RSS bytes, and
+  ran at 0.744 moves per aggregate game-second. Replay artifact
+  `/tmp/drop7-fair-only-depth4-hardcore17-replay.json`. The same table is in
+  [`docs/strategies.md`](/docs/strategies), which adds that D4 changed about
+  34% of the decisions D3 would have made.
+- The 64-game figure is the current-status number in
+  [`docs/research/status.md`](/docs/research/status) ("308,296 points" over 64
+  games); the ledger's corrected-D4 bootstrap entry records it as 308,295.578
+  points and 90.031 moves, and
+  [finding-03](/docs/exploratory/finding-03-rollout-veto-17k) cites the same
+  figure as 308,296 / 90.03.
+- Builds: `fair-only-horizon.cpp` is the fair-only depth-3 evaluator;
+  `fair-only-depth4.cpp` is the depth-4 reference build (`make native`
+  produces `build/fair-depth4`). The TypeScript counterpart used by the
+  benchmark registry and by the browser figure above is `evaluateMoves` in
+  `src/core/typescript/solver.ts` with the combined leaf.
+
+</AgentContext>
+
+<AgentContext summary="Full results table">
+
+| Configuration | Games | Mean score | Mean moves | Paired wins | Source |
+| --- | ---: | ---: | ---: | ---: | --- |
+| Fair D3 | 8 | 235,071 | 71.000 | 1 of 8 | ledger, corrected replay of the confirmation cohort |
+| Fair D4 | 8 | 400,675 | 116.375 | 7 of 8 | ledger, corrected replay of the confirmation cohort |
+| Fair D4, broad development cohort | 64 | 308,296 | 90.031 | | status.md; ledger corrected-D4 bootstrap entry |
+
+All rows are corrected 17,000-point Hardcore scoring and ledger-recorded. The
+eight-game rows are a deterministic replay on already-consumed seeds, so they
+are the corrected-score baseline and cannot serve as confirmation evidence
+again.
+
+</AgentContext>
+
+<AgentContext summary="Validity, gates and limitations">
+
+- The ledger's own reading of the replay: it establishes the corrected-score
+  baseline, and its confirmation mean is still about 40% of one million.
+- A fifth move did not pass its gates in any form tried: selective D5, full
+  D5, and the cycle-boundary variants all failed (see the sibling approaches
+  in this family). The
+  [chance-strata study](/approaches/fair-expectimax/chance-strata) found the
+  fifth ply unmeasurable by its design.
+- One D4 game is reported at 1,246,684 points. That figure is task-record only:
+  [audit-03](/docs/exploratory/audit-03-claim-arithmetic) records that no move
+  count, seed, cohort, scoring mode or artifact exists for it anywhere, so it
+  cannot be classified and must not be cited as evidence of anything. The
+  million-point target requires the mean over a cohort to exceed one million;
+  a single game is an anecdote.
+- Every serious candidate in this program keeps an exact D4 fallback; D4 is a
+  strong tactical fallback and teacher, and its average is far below the
+  target.
+
+</AgentContext>
+
+<AgentContext summary="Scoring mode">
+
+Corrected 17,000-point Hardcore award throughout. The replay followed the
+mode audit; the TypeScript suite and a 256-seed native/TypeScript parity
+sweep passed exactly across 6,852 transitions before the rebuild, and the
+production score constant is regression-tested as 17,000. Ledger experiments
+marked `levelBonus: 7000` are historical 7,000-point scoring, archival, and
+none of their numbers appears on this page.
+
+</AgentContext>

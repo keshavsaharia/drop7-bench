@@ -5,124 +5,150 @@ summary: Imagine seven complete futures, play each as if it were certain, and av
 status: rejected
 evidence: ledger-recorded
 reads: public
+kind: strategy
+technique: determinization
+featured: true
 ---
 
-Imagine seven complete futures for the current board, plan each one perfectly as
-though it were already known, average the results, and play the column that
-comes out best.
+## The problem
 
-<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
+Uncertainty is what makes this game hard, and averaging over it honestly is
+expensive: the tree multiplies at every gray-disc reveal and every new disc.
+[Fair expectimax](/approaches/fair-expectimax/reference) pays that cost in full.
+The alternative every planning textbook offers is
+[determinization](/learn/glossary): replace the uncertainty with a handful of
+specific, fully specified futures, solve each of those easy deterministic
+problems well, and average the answers. It parallelises perfectly, and it lets
+each individual plan look far ahead. Whether a legal, public version of that
+trade is worth making in Drop7 had not been measured.
 
-<Callout title="This one is legal, and it still fails like an oracle" tone="info">
-Unlike the rest of this family, the hindsight planner reads **no hidden
-information**. Its seven futures are invented from a hash of the public board
-itself; the real game seed and the real future never enter it. It sits here
-because it fails for exactly the reason the
-[perfect-information oracle](/approaches/oracle-curriculum/perfect-information-oracle)
-cannot be copied, and because it produced the worst measured result in the
-repository, which makes it the most instructive failure in it.
-</Callout>
+## Proposed solution
 
-## Why it looks like a good idea
+Invent seven complete futures for the current board, plan each one as though it
+were already known, average the results, and play the column that comes out
+best. The futures are invented from a hash of the visible board itself, and every
+legal column at that position gets the same seven, so the comparison between
+columns is paired.
 
-Uncertainty is what makes this game hard. Averaging over it without optimism, as
-[fair expectimax](/approaches/fair-expectimax/reference) does, is expensive: the
-tree multiplies at every gray reveal and every new disc. The alternative that
-every planning textbook offers is **determinization**: replace the uncertainty
-with a handful of specific, fully specified futures, solve each of those easy
-deterministic problems well, and average the answers. It parallelises perfectly
-and it lets each individual plan look far ahead.
+The policy reads only the public position: the visible board, the visible next
+disc and the moves until the next rise. The real game seed and the real future
+never enter it, and the clairvoyance lives entirely inside the invented tapes,
+where the planner is allowed to make later moves that depend on knowing the tape
+it is planning in. That last freedom is the known risk in this design, and the
+experiment was registered to find out what it costs.
 
-## How it works, step by step
+## How it works
 
 1. Hash the current public board to a seed. Every legal column at this position
-   gets the *same* seven invented futures, so the comparison between columns is
-   paired.
-2. For each column and each invented future, run a deep search — depth 8 with a
-   beam of 64: that treats that invented future as certain: the discs arrive in
+   gets the same seven invented futures.
+2. For each column and each invented future, run a deep search, depth 8 with a
+   beam of 64, that treats the invented future as certain: the discs arrive in
    the order the tape says, and the gray discs reveal the numbers the tape says.
 3. Summarise the seven values for each column with a blend of the mean and the
    lower quartile, so a column that is excellent in three futures and fatal in
    four is not rewarded for its average.
-4. Play the best column, and throw all seven futures away. Next move, hash the
-   new board and invent seven fresh futures.
-
-## The flaw, in one sentence
-
-Inside each invented future, the planner is allowed to make *later* moves that
-depend on knowing that future, so the value it reports for a column is not "how
-good is this column", it is "how good is this column **if I am also allowed to
-respond to information I will not have**".
-
-That is called **strategy fusion**, and it is the same defect that makes the
-perfect-information oracle unbeatable and useless. Each individual plan is
-coherent; the plans are incompatible with one another, and averaging
-incompatible plans produces a systematically over-optimistic number. Worst of
-all, the bias is not uniform: it is largest exactly on cluttered boards where a
-favourable reveal is the only thing that saves you: the boards where
-over-confidence is fatal.
+4. Play the best column, which is the output at every position, and throw all
+   seven futures away. Next move, hash the new board and invent seven fresh
+   futures.
 
 ## What happened
 
-It lost half the game. On its fresh four-game screen, ordinary depth-3 search
-averaged about 107,000 points and 72.5 moves; the hindsight planner averaged
-about 51,500 points and 37.5 moves — less than half the score and roughly half
-the lifetime. Under the protocol the confirmation seeds were never opened. The
-ledger's diagnosis is explicit: "tape-specific later decisions make the per-tape
-root values incompatible and overoptimistic: the familiar strategy fusion
-failure of determinization."
+On its fresh four-game screen the hindsight planner averaged 51,500.5 points and
+37.5 moves, where an ordinary depth-3 search averaged 107,076 and 72.5 on the
+same games (rejected, ledger-recorded, [ledger](/docs/research/history) section
+"Synthetic-tape hindsight optimization"; historical 7,000-point scoring,
+archival). Four games is a screen, and under the protocol the confirmation seeds
+stayed closed once it failed, so there is no larger cohort to quote.
 
-There is a striking follow-up elsewhere in the repository. A later study swept
-the number of imagined futures from 1 up to 1,024 and found quality *rising*
-until 256 and then **falling**: with few futures, sampling noise accidentally
-masks the planner's bias, and with many futures the noise disappears and the
-planner converges faithfully on the wrong objective. That is written up in
-[is more computation the answer?](/learn/concepts/does-more-compute-help), and
-it means this is not a result you can fix by buying more machines.
+The ledger's diagnosis is explicit: "tape-specific later decisions make the
+per-tape root values incompatible and overoptimistic: the familiar strategy
+fusion failure of determinization."
 
-<TechnicalDetails>
+## What we learned
 
-Screen on fresh historical 7,000-point Sequence-scored seeds `0x3e8b0000...03`
-(four games): exact depth 3 averaged **107,076 points and 72.5 moves**; the
-hindsight planner averaged **51,500.5 and 37.5**. Confirmation seeds were not
-read. The implementation passed determinism, metadata-blindness, reflection,
-chance-stratification and legality self-tests, and a 153,713-transition decision
-bound.
+Strategy fusion is the name for what went wrong, and it is worth stating in the
+game's terms. Each of the seven plans is coherent on its own. The plans are
+incompatible with one another, because each responds to information the player
+will never have, and averaging incompatible plans produces a number that is
+systematically too high. The bias is largest on cluttered boards, where a
+favourable reveal is the only thing that saves you, which is where
+over-confidence kills.
 
-Configuration: seven synthetic tapes per root, built from a canonical
-public-state hash; an independent depth-8 / beam-64 clairvoyant continuation per
-tape; a mean / lower-quartile blend to select the root action. The real game seed
-and realized future are not inputs.
+Optimism does not require privileged information. This policy reads nothing it
+should not, and it still smuggles the answer key in through its own internal
+model. The rules here cover fair chance handling for that reason, as well as what
+a policy is allowed to read. A separate oracle diagnostic swept the number of
+imagined futures from one up to 1,024 and found quality rising to 256 and then
+falling, so more machines make the same estimator converge more faithfully on the
+wrong objective; those are oracle measurements, from a planner that reads hidden
+values, and they are not policy evidence
+([finding-12](/docs/exploratory/finding-12-fair-planner-ceiling-extended) §3, and
+[what more compute buys](/learn/concepts/does-more-compute-help)).
 
-[`audit-05`](/docs/exploratory/audit-05-optimistic-curriculum) §4 lists this as
-failure 3 of 17, primary mode "objective mismatch", and calls it "exactly the
-owner's 'best possible outcome' generator, made public and fair, and it is the
-single worst result in the corpus". §5.4 uses it as one of four independent
-measurements showing that the privileged oracle's advantage is the *tape*, not
-its judgement: take the tape away from the oracle's own algorithm and it falls
-far below the public baseline it was supposed to beat.
+What survives is the paired-futures machinery. Giving every column the same
+imagined futures is good practice and is reused throughout the
+[long-outcome experiments](/approaches/d4-long-outcome); it was the clairvoyant
+continuation inside each tape that broke this one. The open question is whether a
+determinized planner whose continuations are restricted to public information at
+every step behaves any better, which is the design of the fair planner studied
+later under [lifetime objectives](/approaches/lifetime-objective), legal by
+construction and expensive by construction.
+
+<AgentContext summary="Records and provenance">
 
 Records: [experiment index](/docs/research/experiment-index) "Oracle and
-curriculum research"; [ledger](/docs/research/history) section "Synthetic-tape
-hindsight optimization". Source: `hindsight-planner.cpp`.
+curriculum research", rejected, ledger-recorded, "strategy fusion made the public
+root ranking worse"; [ledger](/docs/research/history) section "Synthetic-tape
+hindsight optimization".
 
-</TechnicalDetails>
+Configuration: seven synthetic tapes per root, built from a canonical
+public-state hash; an independent depth-8, beam-64 clairvoyant continuation per
+tape; a mean and lower-quartile blend to select the root action. The real game
+seed and the realized future are not inputs. Screen cohort `0x3e8b0000...03`,
+four games; confirmation seeds not read.
 
-## What this taught us, and what is still open
+[`audit-05`](/docs/exploratory/audit-05-optimistic-curriculum) §4 lists this as
+failure 3 of 17, primary mode "objective mismatch" with "representation /
+information gap" secondary, and calls it "exactly the owner's 'best possible
+outcome' generator, made public and fair, and it is the single worst result in
+the corpus". §5.4 uses it as one of four independent measurements showing that
+the privileged oracle's advantage is its tape rather than its judgement: take the
+tape away from the oracle's own algorithm and it falls far below the public
+baseline it was supposed to beat.
 
-- **Optimism does not require privileged information.** A perfectly legal policy
-  can smuggle it in through its own internal model. This is why the repository's
-  rules talk about *fair chance handling*, not only about what the policy is
-  allowed to read.
-- **The estimator, not the budget, was wrong.** The K-sweep above turns that from
-  an opinion into a measurement: more compute made the same estimator converge
-  more faithfully to a worse answer.
-- **What survives.** Common random numbers across siblings — giving every column
-  the same imagined futures — is genuinely good practice and is reused
-  throughout the [long-outcome experiments](/approaches/d4-long-outcome). It was
-  the clairvoyant *continuation*, not the shared tape, that broke this.
-- **Still open:** a determinized planner whose continuations are themselves
-  restricted to public information at every step. That is precisely the design of
-  the fair planner studied later under
-  [lifetime objectives](/approaches/lifetime-objective), which is legal by
-  construction and expensive by construction.
+</AgentContext>
+
+<AgentContext summary="Full results table">
+
+Screen on fresh seeds `0x3e8b0000...03`, four games, historical 7,000-point
+Sequence scoring, archival:
+
+| Arm | Mean score | Mean moves |
+| --- | ---: | ---: |
+| Exact depth 3 | 107,076 | 72.5 |
+| Hindsight planner | 51,500.5 | 37.5 |
+
+Confirmation seeds were not read.
+
+</AgentContext>
+
+<AgentContext summary="Validity, gates and limitations">
+
+The implementation passed determinism, metadata-blindness, reflection,
+chance-stratification and legality self-tests under an optimised `-Werror` build
+and under ASan/UBSan, and stayed inside a 153,713-transition decision bound.
+
+Four games is a screen. It is enough to reject a policy that loses about half the
+score and about half the lifetime, and it certifies nothing about the size of the
+gap. Under the protocol the confirmation seeds stay closed once a screen fails.
+
+</AgentContext>
+
+<AgentContext summary="Scoring mode">
+
+The screen ran under historical 7,000-point Sequence scoring, archival. The
+absolute point totals are not corrected 17,000-point Hardcore evidence and are
+not compared with corrected figures elsewhere on this site; the paired direction
+on the same four games is what the rejection rests on.
+
+</AgentContext>
