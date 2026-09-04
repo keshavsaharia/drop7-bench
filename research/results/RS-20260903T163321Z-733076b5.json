@@ -1,0 +1,691 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260903T163321Z-733076b5",
+  "theoryIds": [
+    "TH-20260825-evolved-nnue-leaf-d3-0f47e46c"
+  ],
+  "experimentId": "EX-20260903-nnue-evolution-continuation-d3-f8ce9181",
+  "runIds": [
+    "RUN-20260903T032832Z-a76a6cf7"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "fail",
+  "assessment": "not-supported-as-tested",
+  "evidenceTier": "public-development",
+  "summary": "Valid run of the frozen protocol EX-20260903-nnue-evolution-continuation-d3-f8ce9181 (successor to RS-20260903T025751Z-6577b33e), every stage completed, every artifact with zero illegal and zero incomplete decisions. Stage C resumed from the first run's checkpointed generation-60 population (SHA-256 3da5021531898f08254d35cad5486fbbc12092770216bcdaea988d3724422cb8) with the first run's frozen candidate (SHA-256 edd0d2efd181de43f35d62c4df784cb2c789db3ae296be93a1c6c59082034a9f) as a third paired control and an annealed mutation size (sigma_rel from 0.05, time constant 400 generations, floor 0.01; it reached 0.0345 at the last generation). The preregistered plateau rule stopped the run after generation 149: the first check after generation 99 found the paired margin over the fair control rising at +238.6 points per generation (standard error 127.1, one-sided 95% lower bound +29.6) and continued; the second, after generation 149, found +37.3 per generation (standard error 119.3, lower bound -158.9), no detectable improvement over generations 50-149, and stopped. Fifty-generation averages of the population mean: 204,748, 228,706, 237,946; paired margin over the first run's candidate +8,982, +36,076, +45,613; over the fair control -116,503, -99,833, -88,948. The best candidate beat the fair control on 9 of 150 blocks (generations 59, 66, 73, 97, 100, 109, 115, 125, 137); the population mean beat it on none, so the theory's training-signal falsifier fails again (mean above fair in 0 of the last 10, margin -98,026). Elite re-selection on 128 fresh games (0xa52e32c0) froze candidate-12 at 264,466 (finalists 228,212 to 264,466). Stage D, 64 never-read games (0xa52ea000, opened once at 2026-09-03T16:21:00Z after the candidate's SHA-256 was recorded), five arms: the continued candidate averaged 251,667 against the frozen fair leaf's 320,108 at the identical depth-3 configuration, paired -68,441 (bootstrap 95% bounds -112,090 to -26,694, Student-t lower bound -112,274, floor 43,193), W-T-L 25-0-39, halves -112,383 / -24,500, lower quartile 171,440 against 189,414: every screen criterion fails, scientific outcome fail for this configuration. The preregistered secondary contrast answers the continuation's own question: the continued candidate beat the first run's frozen candidate on the same seeds by +36,278 (bootstrap lower bound +9,085, Student-t lower bound +8,543, floor 27,330, W-T-L 41-0-23, halves -7,140 / +79,697), so 150 further generations improved the leaf out of sample, by about a third of the remaining distance. The first run's candidate reproduced its earlier result on fresh seeds: -104,719 against the fair leaf here (lower bound -143,479) against -106,964 on the first screen. Over the warm start the continued candidate is +107,994 (lower bound +82,769, W-T-L 54-0-10). The reference arm gave fair depth 4 over fair depth 3 +71,799 (lower bound +25,857). Read: whole-game evolution keeps improving the leaf until roughly generation 100 of the continuation and then levels off about 70,000 paired points short of the frozen fair leaf on held-out games; the claim is not supported at this budget, and the plateau is the new fact. Whether the levelling is a property of the leaf class or of the annealed step size cannot be separated in this design.",
+  "metrics": {
+    "cohort": {
+      "seedsStartHex": "0xa52ea000",
+      "games": 64,
+      "moveCap": 2000,
+      "role": "public-development, never read before this screen (lease SL-20260903T033000Z-a52ea000, opened once)"
+    },
+    "arms": {
+      "candidate": {
+        "games": 64,
+        "mean": 251667.390625,
+        "median": 224340.5,
+        "q25": 171439.75,
+        "max": 571367,
+        "movesMean": 75.359375,
+        "clearsPerMove": 1.8867924528301887,
+        "revealsPerMove": 1.0404312668463611,
+        "censored": 0,
+        "illegal": 0,
+        "incomplete": 0,
+        "wallSeconds": 576.484533499
+      },
+      "baseline-run1": {
+        "games": 64,
+        "mean": 215389.015625,
+        "median": 185101.5,
+        "q25": 138371.75,
+        "max": 505061,
+        "movesMean": 65.328125,
+        "clearsPerMove": 1.7897632145419755,
+        "revealsPerMove": 0.9588615163836403,
+        "censored": 0,
+        "illegal": 0,
+        "incomplete": 0,
+        "wallSeconds": 502.000741912
+      },
+      "init-d3s7": {
+        "games": 64,
+        "mean": 143673.703125,
+        "median": 123543.0,
+        "q25": 106999.5,
+        "max": 341054,
+        "movesMean": 45.3125,
+        "clearsPerMove": 1.5124137931034483,
+        "revealsPerMove": 0.7313793103448276,
+        "censored": 0,
+        "illegal": 0,
+        "incomplete": 0,
+        "wallSeconds": 331.64520681
+      },
+      "fair-d3s7": {
+        "games": 64,
+        "mean": 320108.484375,
+        "median": 276826.5,
+        "q25": 189414.0,
+        "max": 940703,
+        "movesMean": 94.171875,
+        "clearsPerMove": 1.9935291189646591,
+        "revealsPerMove": 1.1119960179193629,
+        "censored": 0,
+        "illegal": 0,
+        "incomplete": 0,
+        "wallSeconds": 272.614155994
+      },
+      "fair-d4s7": {
+        "games": 64,
+        "mean": 391907.171875,
+        "median": 351132.0,
+        "q25": 215822.75,
+        "max": 962024,
+        "movesMean": 113.28125,
+        "clearsPerMove": 2.052551724137931,
+        "revealsPerMove": 1.1506206896551725,
+        "censored": 0,
+        "illegal": 0,
+        "incomplete": 0,
+        "wallSeconds": 11087.703759332
+      }
+    },
+    "paired": {
+      "candidate-vs-fair-d3s7": {
+        "meanDelta": -68441.09375,
+        "bootstrapLower95": -112089.909375,
+        "bootstrapUpper95": -26693.8359375,
+        "studentTLower95": -112274.36149603938,
+        "pairedSd": 210054.91513696464,
+        "detectionFloor": 43192.54192503836,
+        "wtl": [
+          25,
+          0,
+          39
+        ],
+        "halves": [
+          -112382.5625,
+          -24499.625
+        ],
+        "q25Delta": -17974.25,
+        "movesDelta": -18.8125
+      },
+      "init-vs-fair-d3s7": {
+        "meanDelta": -176434.78125,
+        "bootstrapLower95": -213633.3296875,
+        "bootstrapUpper95": -140506.4984375,
+        "studentTLower95": -214034.18226195336,
+        "pairedSd": 180181.38721770744,
+        "detectionFloor": 37049.797746641096,
+        "wtl": [
+          8,
+          0,
+          56
+        ],
+        "halves": [
+          -178178.625,
+          -174690.9375
+        ],
+        "q25Delta": -82414.5,
+        "movesDelta": -48.859375
+      },
+      "candidate-vs-init": {
+        "meanDelta": 107993.6875,
+        "bootstrapLower95": 82769.303125,
+        "bootstrapUpper95": 133701.09296875,
+        "studentTLower95": 82118.81890930198,
+        "pairedSd": 123995.85076543348,
+        "detectionFloor": 25496.64681364226,
+        "wtl": [
+          54,
+          0,
+          10
+        ],
+        "halves": [
+          65796.0625,
+          150191.3125
+        ],
+        "q25Delta": 64440.25,
+        "movesDelta": 30.046875
+      },
+      "fair-d4s7-vs-fair-d3s7": {
+        "meanDelta": 71798.6875,
+        "bootstrapLower95": 25857.3078125,
+        "bootstrapUpper95": 119451.21406249999,
+        "studentTLower95": 23285.79388623117,
+        "pairedSd": 232480.31176068488,
+        "detectionFloor": 47803.76410579083,
+        "wtl": [
+          39,
+          0,
+          25
+        ],
+        "halves": [
+          31746.15625,
+          111851.21875
+        ],
+        "q25Delta": 26408.75,
+        "movesDelta": 19.109375
+      },
+      "candidate-vs-baseline-run1": {
+        "meanDelta": 36278.375,
+        "bootstrapLower95": 9085.15703125,
+        "bootstrapUpper95": 63768.1234375,
+        "studentTLower95": 8543.266632243209,
+        "pairedSd": 132910.37000156302,
+        "detectionFloor": 27329.694831571396,
+        "wtl": [
+          41,
+          0,
+          23
+        ],
+        "halves": [
+          -7139.9375,
+          79696.6875
+        ],
+        "q25Delta": 33068.0,
+        "movesDelta": 10.03125
+      },
+      "baseline-run1-vs-fair-d3s7": {
+        "meanDelta": -104719.46875,
+        "bootstrapLower95": -143478.771875,
+        "bootstrapUpper95": -67444.38515625,
+        "studentTLower95": -143894.50370997036,
+        "pairedSd": 187732.03703818627,
+        "detectionFloor": 38602.400115977056,
+        "wtl": [
+          20,
+          0,
+          44
+        ],
+        "halves": [
+          -105242.625,
+          -104196.3125
+        ],
+        "q25Delta": -51042.25,
+        "movesDelta": -28.84375
+      }
+    },
+    "training": {
+      "generationsCompleted": 150,
+      "stoppedOnPlateau": true,
+      "plateauChecks": [
+        {
+          "generation": 99,
+          "window": 100,
+          "slopePerGeneration": 238.6248757805468,
+          "standardError": 127.07882135207605,
+          "lowerBound95": 29.598815570926348,
+          "windowMeanFirstHalf": -116503.04705078126,
+          "windowMeanSecondHalf": -99833.01900390624,
+          "stop": false
+        },
+        {
+          "generation": 149,
+          "window": 100,
+          "slopePerGeneration": 37.31426352010201,
+          "standardError": 119.2761115724853,
+          "lowerBound95": -158.8774812085126,
+          "windowMeanFirstHalf": -99833.01900390624,
+          "windowMeanSecondHalf": -88948.38708984375,
+          "stop": true
+        }
+      ],
+      "fiftyGenerationBlockAverages": [
+        {
+          "generations": "0-49",
+          "populationMean": 204747.86232421876,
+          "best": 242098.4525,
+          "meanMinusFair": -116503.04705078126,
+          "bestMinusFair": -79152.456875,
+          "meanMinusBaseline": 8982.35294921875,
+          "bestMinusBaseline": 46332.943125,
+          "sigmaAtEnd": 0.044235297
+        },
+        {
+          "generations": "50-99",
+          "populationMean": 228705.83724609375,
+          "best": 275125.120625,
+          "meanMinusFair": -99833.01900390624,
+          "bestMinusFair": -53413.735625,
+          "meanMinusBaseline": 36076.19412109375,
+          "bestMinusBaseline": 82495.4775,
+          "sigmaAtEnd": 0.03903751
+        },
+        {
+          "generations": "100-149",
+          "populationMean": 237945.84103515625,
+          "best": 285994.426875,
+          "meanMinusFair": -88948.38708984375,
+          "bestMinusFair": -40899.80125,
+          "meanMinusBaseline": 45613.42103515625,
+          "bestMinusBaseline": 93662.006875,
+          "sigmaAtEnd": 0.034450483
+        }
+      ],
+      "tenGenerationBlocks": [
+        {
+          "generations": "0-9",
+          "populationMean": 198114.08837890625,
+          "top4Mean": 221970.075,
+          "best": 229839.325,
+          "meanMinusFair": -123398.63662109376,
+          "bestMinusFair": -91673.4,
+          "meanMinusInit": 49351.06962890625,
+          "meanMinusBaseline": -3548.53037109375
+        },
+        {
+          "generations": "10-19",
+          "populationMean": 202549.92822265625,
+          "top4Mean": 231257.96015625,
+          "best": 242869.1125,
+          "meanMinusFair": -138529.63427734375,
+          "bestMinusFair": -98210.45,
+          "meanMinusInit": 52363.49384765625,
+          "meanMinusBaseline": 16067.61884765625
+        },
+        {
+          "generations": "20-29",
+          "populationMean": 203141.26923828124,
+          "top4Mean": 228807.52890625,
+          "best": 237100.171875,
+          "meanMinusFair": -92208.58076171875,
+          "bestMinusFair": -58249.678125,
+          "meanMinusInit": 49689.41611328125,
+          "meanMinusBaseline": 5352.83798828125
+        },
+        {
+          "generations": "30-39",
+          "populationMean": 206259.37060546875,
+          "top4Mean": 236366.9515625,
+          "best": 244948.41875,
+          "meanMinusFair": -118918.70126953124,
+          "bestMinusFair": -80229.653125,
+          "meanMinusInit": 52443.91123046875,
+          "meanMinusBaseline": 12523.59873046875
+        },
+        {
+          "generations": "40-49",
+          "populationMean": 213674.65517578126,
+          "top4Mean": 243235.721875,
+          "best": 255735.234375,
+          "meanMinusFair": -109459.68232421875,
+          "bestMinusFair": -67399.103125,
+          "meanMinusInit": 58796.86455078125,
+          "meanMinusBaseline": 14516.23955078125
+        },
+        {
+          "generations": "50-59",
+          "populationMean": 225622.1755859375,
+          "top4Mean": 258711.7734375,
+          "best": 269100.25,
+          "meanMinusFair": -86547.8275390625,
+          "bestMinusFair": -43069.753125,
+          "meanMinusInit": 73783.6818359375,
+          "meanMinusBaseline": 24289.6630859375
+        },
+        {
+          "generations": "60-69",
+          "populationMean": 219346.440625,
+          "top4Mean": 252135.9828125,
+          "best": 263647.734375,
+          "meanMinusFair": -106459.865625,
+          "bestMinusFair": -62158.571875,
+          "meanMinusInit": 73687.921875,
+          "meanMinusBaseline": 33851.771875
+        },
+        {
+          "generations": "70-79",
+          "populationMean": 231187.53662109375,
+          "top4Mean": 265508.5671875,
+          "best": 274636.95625,
+          "meanMinusFair": -85917.98837890624,
+          "bestMinusFair": -42468.56875,
+          "meanMinusInit": 80509.01474609374,
+          "meanMinusBaseline": 31926.89912109375
+        },
+        {
+          "generations": "80-89",
+          "populationMean": 233843.30859375,
+          "top4Mean": 268375.5171875,
+          "best": 281134.51875,
+          "meanMinusFair": -101265.86015625,
+          "bestMinusFair": -53974.65,
+          "meanMinusInit": 79471.42734375,
+          "meanMinusBaseline": 45444.16171875
+        },
+        {
+          "generations": "90-99",
+          "populationMean": 233529.7248046875,
+          "top4Mean": 272108.85859375,
+          "best": 287106.14375,
+          "meanMinusFair": -118973.5533203125,
+          "bestMinusFair": -65397.134375,
+          "meanMinusInit": 77933.4779296875,
+          "meanMinusBaseline": 44868.4748046875
+        },
+        {
+          "generations": "100-109",
+          "populationMean": 240531.00654296874,
+          "top4Mean": 275976.72890625,
+          "best": 288242.715625,
+          "meanMinusFair": -78512.18095703125,
+          "bestMinusFair": -30800.471875,
+          "meanMinusInit": 88217.01904296875,
+          "meanMinusBaseline": 45300.61279296875
+        },
+        {
+          "generations": "110-119",
+          "populationMean": 237897.35205078125,
+          "top4Mean": 273658.6984375,
+          "best": 286345.5625,
+          "meanMinusFair": -83419.35107421875,
+          "bestMinusFair": -34971.140625,
+          "meanMinusInit": 82886.67392578124,
+          "meanMinusBaseline": 45329.87705078125
+        },
+        {
+          "generations": "120-129",
+          "populationMean": 238849.40751953126,
+          "top4Mean": 274787.25234375,
+          "best": 288351.28125,
+          "meanMinusFair": -93764.61435546874,
+          "bestMinusFair": -44262.740625,
+          "meanMinusInit": 83077.85126953125,
+          "meanMinusBaseline": 44751.71064453125
+        },
+        {
+          "generations": "130-139",
+          "populationMean": 240464.98544921874,
+          "top4Mean": 275556.89765625,
+          "best": 286090.153125,
+          "meanMinusFair": -91019.86455078125,
+          "bestMinusFair": -45394.696875,
+          "meanMinusInit": 91141.38857421876,
+          "meanMinusBaseline": 54606.05107421875
+        },
+        {
+          "generations": "140-149",
+          "populationMean": 231986.45361328125,
+          "top4Mean": 267803.50859375,
+          "best": 280942.421875,
+          "meanMinusFair": -98025.92451171875,
+          "bestMinusFair": -49069.95625,
+          "meanMinusInit": 76973.65048828124,
+          "meanMinusBaseline": 38078.85361328125
+        }
+      ],
+      "bestAboveFairGenerations": [
+        59,
+        66,
+        73,
+        97,
+        100,
+        109,
+        115,
+        125,
+        137
+      ],
+      "trainingSignalCheck": {
+        "rule": "population mean fitness > paired fair-d3s7 control in the majority of the final 10 completed generations (theory falsifier 2)",
+        "window": [
+          140,
+          141,
+          142,
+          143,
+          144,
+          145,
+          146,
+          147,
+          148,
+          149
+        ],
+        "generationsMeanAboveFair": 0,
+        "generationsTop4AboveFair": 0,
+        "generationsBestAboveFair": 0,
+        "generationsInitAboveFair": 0,
+        "meanMarginLast10": -98025.92451171875,
+        "top4MarginLast10": -62208.86953125,
+        "passed": false
+      },
+      "artifactIntegrity": {
+        "generationArtifacts": 150,
+        "illegalDecisions": 0,
+        "incompleteDecisions": 0,
+        "censoredGames": 0
+      },
+      "config": {
+        "experiment": "EX-20260903-nnue-evolution-continuation-d3-f8ce9181",
+        "population": 32,
+        "games": 32,
+        "generations": 1000,
+        "elites": 4,
+        "tournament": 3,
+        "sigmaRel": 0.05,
+        "sigmaDecayTau": 400,
+        "sigmaFloor": 0.01,
+        "seed": "0x0e701e59",
+        "leaseStart": "0xa52e2000",
+        "moveCap": 2000,
+        "wallSeconds": 259200,
+        "resumePopulation": "/home/keshav/Developer/drop7-bench/runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/evolve/population-060.bin",
+        "resumePopulationSha256": "3da5021531898f08254d35cad5486fbbc12092770216bcdaea988d3724422cb8",
+        "baseline": "/home/keshav/Developer/drop7-bench/artifacts/results/EX-20260902-nnue-evolution-d3-v2-49c18bc2/RUN-20260902T035644Z-c1fd8987/evolve/candidate-weights.bin",
+        "baselineSha256": "edd0d2efd181de43f35d62c4df784cb2c789db3ae296be93a1c6c59082034a9f",
+        "plateauWindow": 100,
+        "plateauCheckEvery": 50,
+        "plateauMinGenerations": 100
+      }
+    },
+    "selection": {
+      "finalGeneration": 149,
+      "finalists": [
+        25,
+        6,
+        5,
+        29,
+        0,
+        16,
+        12,
+        9
+      ],
+      "blockStart": "0xa52e32c0",
+      "selectGames": 128,
+      "winner": "candidate-12",
+      "winnerMean": 264466.46875
+    },
+    "resources": [
+      {
+        "label": "evolve",
+        "command": [
+          "/home/keshav/Developer/drop7-bench/approaches/lifetime-objective/nnue-evolution/target/release/evolve",
+          "--init",
+          "/home/keshav/Developer/drop7-bench/artifacts/results/EX-20260902-nnue-evolution-d3-v2-49c18bc2/RUN-20260902T035644Z-c1fd8987/pretrain/init.bin",
+          "--lease-start",
+          "0xa52e2000",
+          "--out",
+          "/home/keshav/Developer/drop7-bench/runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/evolve",
+          "--population",
+          "32",
+          "--games",
+          "32",
+          "--generations",
+          "1000",
+          "--elites",
+          "4",
+          "--tournament",
+          "3",
+          "--sigma-rel",
+          "0.05",
+          "--seed",
+          "0x0e701e59",
+          "--threads",
+          "32",
+          "--wall-seconds",
+          "259200",
+          "--move-cap",
+          "2000",
+          "--experiment-id",
+          "EX-20260903-nnue-evolution-continuation-d3-f8ce9181",
+          "--resume-population",
+          "/home/keshav/Developer/drop7-bench/runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/evolve/population-060.bin",
+          "--baseline",
+          "/home/keshav/Developer/drop7-bench/artifacts/results/EX-20260902-nnue-evolution-d3-v2-49c18bc2/RUN-20260902T035644Z-c1fd8987/evolve/candidate-weights.bin",
+          "--sigma-decay-tau",
+          "400",
+          "--sigma-floor",
+          "0.01",
+          "--plateau-window",
+          "100",
+          "--plateau-check-every",
+          "50",
+          "--plateau-min-generations",
+          "100"
+        ],
+        "startedAt": "2026-09-03T03:34:50Z",
+        "endedAt": "2026-09-03T16:15:39Z",
+        "wallSeconds": 45649.203,
+        "userSeconds": 1431451.905,
+        "systemSeconds": 580.687,
+        "peakRssBytes": 479240192,
+        "exitCode": 0
+      },
+      {
+        "label": "select",
+        "command": [
+          "/home/keshav/Developer/drop7-bench/approaches/lifetime-objective/nnue-evolution/target/release/evolve",
+          "--select",
+          "--lease-start",
+          "0xa52e2000",
+          "--out",
+          "/home/keshav/Developer/drop7-bench/runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/evolve",
+          "--generations",
+          "1000",
+          "--games",
+          "32",
+          "--select-games",
+          "128",
+          "--threads",
+          "32",
+          "--move-cap",
+          "2000"
+        ],
+        "startedAt": "2026-09-03T16:15:39Z",
+        "endedAt": "2026-09-03T16:21:00Z",
+        "wallSeconds": 320.766,
+        "userSeconds": 9947.137,
+        "systemSeconds": 7.376,
+        "peakRssBytes": 251973632,
+        "exitCode": 0
+      },
+      {
+        "label": "screen",
+        "command": [
+          "/home/keshav/Developer/drop7-bench/approaches/lifetime-objective/nnue-evolution/target/release/screen",
+          "--candidate",
+          "/home/keshav/Developer/drop7-bench/runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/evolve/candidate-weights.bin",
+          "--init",
+          "/home/keshav/Developer/drop7-bench/artifacts/results/EX-20260902-nnue-evolution-d3-v2-49c18bc2/RUN-20260902T035644Z-c1fd8987/pretrain/init.bin",
+          "--seeds-start",
+          "0xa52ea000",
+          "--games",
+          "64",
+          "--threads",
+          "32",
+          "--move-cap",
+          "2000",
+          "--out",
+          "/home/keshav/Developer/drop7-bench/runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/screen/heldout.json",
+          "--experiment-id",
+          "EX-20260903-nnue-evolution-continuation-d3-f8ce9181",
+          "--arm",
+          "baseline-run1=/home/keshav/Developer/drop7-bench/artifacts/results/EX-20260902-nnue-evolution-d3-v2-49c18bc2/RUN-20260902T035644Z-c1fd8987/evolve/candidate-weights.bin"
+        ],
+        "startedAt": "2026-09-03T16:21:00Z",
+        "endedAt": "2026-09-03T16:30:44Z",
+        "wallSeconds": 584.053,
+        "userSeconds": 12716.168,
+        "systemSeconds": 7.132,
+        "peakRssBytes": 1793974272,
+        "exitCode": 0
+      }
+    ],
+    "firstRun": {
+      "resultId": "RS-20260903T025751Z-6577b33e",
+      "runId": "RUN-20260902T035644Z-c1fd8987",
+      "screenCandidateVsFair": -106964
+    }
+  },
+  "gateChecks": [
+    {
+      "criterion": "All 11 CHECK gates passed on the rebuilt binaries before the first leased seed was read",
+      "passed": true,
+      "observed": "ALL GATES PASSED (gates.log), 13/13 unit tests, smoke test of every new flag on the already-open probe block"
+    },
+    {
+      "criterion": "Every generation artifact and the screen artifact: illegalDecisions 0, incompleteDecisions 0, censored games reported",
+      "passed": true,
+      "observed": "150 generation artifacts: 0 illegal, 0 incomplete, 0 censored; screen: 0 illegal, 0 incomplete, 0 censored in all five arms"
+    },
+    {
+      "criterion": "Held-out screen, candidate vs fair-d3s7: bootstrap 95% lower bound of the paired score delta > 0 AND Student-t 95% lower bound > 0",
+      "passed": false,
+      "observed": "delta -68,441; bootstrap LB -112,090, UB -26,694; t LB -112,274; paired sd 210,055; floor 43,193; W-T-L 25-0-39"
+    },
+    {
+      "criterion": "Held-out screen: paired mean score delta > 0 in both halves",
+      "passed": false,
+      "observed": "first half -112,383, second half -24,500"
+    },
+    {
+      "criterion": "Held-out screen: candidate lower-quartile score >= fair-d3s7 lower-quartile score",
+      "passed": false,
+      "observed": "candidate Q25 171,440 vs fair-d3s7 Q25 189,414 (delta -17,974)"
+    },
+    {
+      "criterion": "The screened candidate is the exact frozen winner of the elite re-selection; SHA-256 recorded before the screen lease opened",
+      "passed": true,
+      "observed": "candidate-12 of generation 149, mean 264,466 over 128 fresh games at 0xa52e32c0; sha256 759084fab97599818d01a5da6d18b9cc77172249f09a68d5104361bca385e09b; lease opened 2026-09-03T16:21:00Z by the screen stage"
+    },
+    {
+      "criterion": "Reported alongside the gate: candidate vs baseline-run1 bootstrap 95% lower bound > 0 (the continuation improved the leaf out of sample)",
+      "passed": true,
+      "observed": "delta +36,278; bootstrap LB +9,085, UB +63,768; t LB +8,543; floor 27,330; W-T-L 41-0-23; halves -7,140 / +79,697 (the first half alone is negative)"
+    },
+    {
+      "criterion": "Reported alongside the gate: the generation of the stop and the plateau statistics",
+      "passed": null,
+      "observed": "stopped by the plateau rule after generation 149 (150 completed): check after generation 99 slope +238.6/gen, se 127.1, LB +29.6 (continue); after generation 149 slope +37.3/gen, se 119.3, LB -158.9 (stop); window means -99,833 then -88,948"
+    },
+    {
+      "criterion": "Theory falsifier (training signal): population mean fitness > paired fair-d3s7 control in the majority of the final 10 generations",
+      "passed": false,
+      "observed": "mean above fair in 0/10, best in 0/10; mean margin -98,026; best candidate above fair on 9 of 150 blocks"
+    }
+  ],
+  "perGameArtifact": {
+    "path": "artifacts/results/EX-20260903-nnue-evolution-continuation-d3-f8ce9181/RUN-20260903T032832Z-a76a6cf7/screen/heldout.json",
+    "sha256": "ffc73a1cf78d74818fb58b3ef9e72bd62eea436176cce02209b634f6ba4434a7",
+    "recordCount": 320
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260903T032430Z-4e906a6e.json"
+  ],
+  "artifactManifestRef": "artifacts/results/EX-20260903-nnue-evolution-continuation-d3-f8ce9181/RUN-20260903T032832Z-a76a6cf7/manifest.json",
+  "limitations": [
+    "Single 64-game held-out screen: paired detection floors of about 43,000 points for the primary contrast and 27,000 for the continuation contrast; the primary result sits far outside its floor, the continuation contrast just outside its own, and its first-half estimate is negative, so 'improved out of sample' is established at the whole-block level only.",
+    "The plateau rule and the annealed mutation size are confounded: the step size had fallen from 0.050 to 0.034 when the rule fired, so the design cannot say whether the leaf class ran out of improvement or the search did. A constant-sigma continuation from the same population would separate them.",
+    "The plateau rule tests a fitted slope over 100 generations with a one-sided 95% lower bound; at the observed scatter it can miss real improvements below about 220 points per generation. The observed point estimate over generations 50-149 was +37 per generation.",
+    "The per-game artifact holds five arms x 64 games (320 rows); each contrast pairs two arms by seed.",
+    "The starting population, the warm-start control and the baseline control are products of the first run's training data; nothing in this run re-read that lease.",
+    "The owner's commit e2b0d19 (wall-budget pinning and progress recovery on resume) landed on the branch mid-run; the run never resumed, the driver shells held the original script by an unlinked inode, and every stage ran the binaries built from commit e4fd018 as the run record states.",
+    "The fair-d4s7 arm is diagnostic only. The first run's candidate reproduced its earlier screen result on these fresh seeds (-104,719 against -106,964), which is the closest thing to a replication the program has for that number."
+  ],
+  "contributionIds": [
+    "CT-20260902T042620Z-3b4bf7a8"
+  ],
+  "recordedAt": "2026-09-03T16:33:21Z"
+}

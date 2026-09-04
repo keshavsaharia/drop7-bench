@@ -1,10 +1,10 @@
 ---
 date: 2026-09-03
-title: "The evolved NNUE leaf loses its screen by 107,000 points, and evolution still moved it"
-summary: "The depth-5-distilled, whole-game-evolved NNUE leaf finished its preregistered run: 60 generations, a 128-game re-selection, and one look at 64 never-read games. It scored 106,964 paired points below the frozen fair leaf inside the same depth-3 search, so the gate fails and the claim is not supported as tested. The same screen shows evolution beat its own unevolved warm start by 35,375 points with a lower bound well above zero, the first time whole-game evolution has demonstrably moved a leaf in this program. The warm start, not the evolution, was the weak link: fitted to the teacher's values, it ranked columns about as well as no leaf at all. Separately, the research console was rebuilt around a technique taxonomy, and reading two approach pages against their own records showed both were carrying a status the records do not support."
+title: "The evolved NNUE leaf loses its screen, evolution still moves it, and 150 more generations find the plateau"
+summary: "The depth-5-distilled, whole-game-evolved NNUE leaf finished its preregistered run: 60 generations, a 128-game re-selection, and one look at 64 never-read games. It scored 106,964 paired points below the frozen fair leaf inside the same depth-3 search, so the gate fails and the claim is not supported as tested. The same screen shows evolution beat its own unevolved warm start by 35,375 points with a lower bound well above zero, the first time whole-game evolution has demonstrably moved a leaf in this program. The warm start, not the evolution, was the weak link: fitted to the teacher's values, it ranked columns about as well as no leaf at all. A continuation from generation 60 stopped itself at generation 149: the continued leaf still lost to the fair leaf on a fresh screen and beat the first run's candidate by 36,278 points. Separately, the research console was rebuilt around a technique taxonomy, and reading two approach pages against their own records showed both were carrying a status the records do not support."
 contributors: [claude-fable-5-1 (Claude Code), claude-opus-5 (Claude Code)]
 tags: [nnue, evolution, leaf, teacher-distillation, held-out-screen, negative-result, web-console, evidence-labels]
-outcomes: { positive: 1, negative: 3, open: 3 }
+outcomes: { positive: 2, negative: 5, open: 3 }
 ---
 
 ## Overnight: sixty generations, one re-selection, one screen
@@ -76,7 +76,7 @@ cover. It says the distance was set by a warm start that held the teacher's
 numbers and not its ordering, and that no plausible number of generations at
 this rate would have covered it.
 
-<Direction title="Continue evolving from the generation-60 population" status="running" owner="claude-fable-5-1">
+<Direction title="Continue evolving from the generation-60 population" status="closed" owner="claude-fable-5-1">
 The owner asked overnight whether the run could go to 100 generations to see
 whether the curve flattens, then asked for a long run: keep evolving, up to
 about 1,000 generations with a decaying mutation size, and stop only when the
@@ -105,6 +105,65 @@ The corpus is sibling-complete, so a ranking loss over each root's seven
 column values is available at no extra cost, and the deployment-faithful probe
 already exists to score it. Whether such a warm start starts closer to the
 fair leaf is the cheapest question this result leaves open.
+</Direction>
+
+## Afternoon: the continuation ran, plateaued, and was screened
+
+The continuation launched at 03:34 UTC ran 150 generations at about 304
+seconds each and stopped itself at 16:15 UTC on the preregistered plateau
+rule; re-selection, the one-shot screen on the new held-out block and the
+analysis finished by 16:31. Every one of the 150 generation artifacts and the
+screen artifact records zero illegal and zero incomplete decisions. Result
+`RS-20260903T163321Z-733076b5`; compact evidence, including the frozen candidate, the plateau
+log and the launch script, is promoted with a manifest under
+`artifacts/results/EX-20260903-nnue-evolution-continuation-d3-f8ce9181/RUN-20260903T032832Z-a76a6cf7/`.
+
+<Finding title="The curve rose for about a hundred more generations, then levelled" kind="negative" metric="plateau rule stopped the run after generation 149">
+At the first check, after generation 99, the fitted slope of the paired
+margin over the fair leaf across generations 0 to 99 was +239 points per
+generation with a one-sided 95% lower bound of +30, so the run continued. At
+the second, across generations 50 to 149, it was +37 per generation with a
+lower bound of −159, no detectable improvement, and the run stopped. The
+fifty-generation averages of the population mean read 204,748, 228,706 and
+237,946, and the last five ten-generation blocks sat between 232,000 and
+240,500 with no trend. The margin over the first run's frozen candidate on the
+same seeds rose from +8,982 to +36,076 to +45,613 across the three
+fifty-generation blocks; the margin over the fair leaf narrowed from −116,503
+to −88,948. The best candidate beat the fair control on 9 of 150 blocks, the
+population mean on none. Sigma had annealed from 0.050 to 0.034 when the rule
+fired, so the design cannot say whether the leaf class or the step size
+levelled the curve.
+</Finding>
+
+<Finding title="Out of sample, 150 more generations were worth about 36,000 points" kind="positive" metric="continued candidate minus the first run's candidate +36,278, lower bound +9,085">
+Re-selection on 128 fresh games froze candidate-12 at 264,466 (finalists
+228,212 to 264,466). On the 64 never-read screen games it averaged 251,667
+against the first run's frozen candidate's 215,389 on the same seeds: paired
++36,278, bootstrap lower bound +9,085, Student-t lower bound +8,543,
+detection floor 27,330, 41 wins to 23, though the first half of the block
+alone was −7,140. The first run's candidate reproduced its earlier result on
+the fresh seeds, −104,719 against the fair leaf where the first screen had
+read −106,964, which is the nearest thing to a replication of that number the
+program has. Over the warm start the continued candidate is +107,994.
+</Finding>
+
+<Finding title="The gate fails again: 68,441 paired points behind the fair leaf" kind="negative" metric="bootstrap lower bound −112,090, W-T-L 25-0-39">
+Against the frozen fair leaf at the identical depth-3 configuration the
+continued candidate scored 251,667 to 320,108: paired −68,441, bootstrap
+bounds −112,090 to −26,694, both halves negative (−112,383 and −24,500),
+lower quartile 171,440 against 189,414. Every screen criterion fails.
+Scientific outcome fail, run valid, evidence tier public-development. The
+reference arm gave fair depth 4 over fair depth 3 by +71,799 (lower bound
++25,857). The theory record now carries both results.
+</Finding>
+
+<Direction title="Separate the plateau from the annealing" status="proposed" owner="claude-fable-5-1">
+A constant-sigma continuation from the generation-150 population (or from
+the generation-100 one) on a fresh lease would show whether the curve
+flattened because the leaf class ran out of improvement or because the step
+size shrank; doubling the games per candidate as sigma shrinks would show
+whether selection was steered by noise once candidates became similar. Both
+are new experiments with their own records and leases; neither is registered.
 </Direction>
 
 ## Housekeeping

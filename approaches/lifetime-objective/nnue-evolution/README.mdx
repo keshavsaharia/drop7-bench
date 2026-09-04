@@ -182,8 +182,14 @@ line fitted to the paired margin over the fair leaf across the last hundred
 generations no longer has a positive lower bound on its slope, checked every
 fifty generations from the hundredth, or at 1,000 generations or 72 hours. It
 plays fresh training and screen leases and ends with the same one-shot
-64-game screen. The figures below are the continuation's own artifacts and
-refresh as the run progresses.
+64-game screen.
+
+The plateau rule stopped evolution after generation 149. On a fresh 64-game
+screen the continued leaf still lost to the fair leaf, and beat the first
+run's frozen candidate
+([RS-20260903T163321Z-733076b5](/results/RS-20260903T163321Z-733076b5), run
+valid, outcome fail, ledger-recorded). The figures below are the
+continuation's own artifacts.
 
 <EvolutionStatus run="RUN-20260903T032832Z-a76a6cf7" continuation />
 
@@ -220,10 +226,18 @@ start that holds the ordering is untested. The leaf decides: the screen agrees
 with the leaf-swing diagnostic above, since swapping the leaf moved the mean
 by more than 100,000 points in both directions.
 
-The continuation is asking where the still-rising curve plateaus. The open
-question it cannot answer is whether a warm start trained on the teacher's
-ordering, instead of its values, would start close enough to the fair leaf for
-evolution to finish the job.
+The continuation kept working for roughly a hundred more generations and then
+levelled. That plateau sits about 45,000 paired points above where the
+continuation started and about 90,000 below the fair leaf on the training
+blocks, and the screen agrees
+([RS-20260903T163321Z-733076b5](/results/RS-20260903T163321Z-733076b5)). The
+design cannot separate whether the leaf class ran out of improvement or the
+annealed step size, which had fallen from 0.050 to 0.034, starved the search;
+doubling the games per candidate would ask a second question, whether
+selection could still see the small differences that remain once sigma is
+small. The other open question is whether a warm start trained on the
+teacher's ordering, instead of its values, would start close enough to the
+fair leaf for evolution to finish the job.
 
 <AgentContext summary="Records and provenance">
 
@@ -296,7 +310,14 @@ evolution to finish the job.
   `analysis.json` and `analysis.md`.
 - Continuation:
   [EX-20260903-nnue-evolution-continuation-d3-f8ce9181](/experiments/EX-20260903-nnue-evolution-continuation-d3-f8ce9181),
-  run `RUN-20260903T032832Z-a76a6cf7`, started 2026-09-03T03:34:49Z. Leases:
+  run `RUN-20260903T032832Z-a76a6cf7`, started 2026-09-03T03:34:49Z. Result
+  [RS-20260903T163321Z-733076b5](/results/RS-20260903T163321Z-733076b5)
+  (valid run, scientific outcome fail, assessment not-supported-as-tested,
+  evidence tier public-development); compact evidence promoted with a manifest
+  under
+  `artifacts/results/EX-20260903-nnue-evolution-continuation-d3-f8ce9181/RUN-20260903T032832Z-a76a6cf7/`,
+  including the frozen candidate, the plateau log and the launch script.
+  The plateau rule stopped the run after generation 149. Leases:
   training `SL-20260903T033000Z-a52e2000` (fitness blocks from `0xa52e2000`,
   generation `g` playing `[0xa52e2000 + 32·g, +32)`; the re-selection block
   follows the last fitness block played) and screen
@@ -378,6 +399,40 @@ spanned 187,352 to 202,237).
 
 </TechnicalRecord>
 
+<TechnicalRecord summary="Continuation screen" meta="RS-20260903T163321Z-733076b5">
+
+Continuation screen (stage D), 64 never-read games from `0xa52ea000`,
+2,000-move cap, corrected 17,000-point Hardcore scoring, zero censored,
+illegal or incomplete decisions in every arm:
+
+| Arm (depth-3 search unless stated) | Mean | Median | Lower quartile | Mean moves | Clears/move | Reveals/move |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| continued candidate | 251,667 | 224,341 | 171,440 | 75.36 | 1.8868 | 1.0404 |
+| first-run candidate | 215,389 | 185,102 | 138,372 | 65.33 | 1.7898 | 0.9589 |
+| unevolved warm start | 143,674 | 123,543 | 107,000 | 45.31 | 1.5124 | 0.7314 |
+| frozen fair leaf (comparator) | 320,108 | 276,827 | 189,414 | 94.17 | 1.9935 | 1.1120 |
+| frozen fair leaf, depth 4 (reference arm) | 391,907 | 351,132 | 215,823 | 113.28 | 2.0526 | 1.1506 |
+
+Paired contrasts, 20,000 bootstrap resamples:
+
+| Contrast | Mean delta | Bootstrap 95% bounds | Student-t lower 95% | Detection floor | W-T-L | Halves |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| continued − fair leaf | −68,441 | −112,090 to −26,694 | −112,274 | 43,193 | 25-0-39 | −112,383 / −24,500 |
+| continued − first-run candidate | +36,278 | lower +9,085 | +8,543 | 27,330 | 41-0-23 | −7,140 / +79,697 |
+| continued − warm start | +107,994 | lower +82,769 | +82,119 | 25,497 | 54-0-10 | both positive |
+| first-run candidate − fair leaf | −104,719 | lower −143,479 | −143,895 | 38,602 | 20-0-44 | both negative |
+| fair depth 4 − fair depth 3 | +71,799 | lower +25,857 | +23,286 | 47,804 | 39-0-25 | +31,746 / +111,851 |
+
+The plateau rule stopped the run after generation 149: slope +239 per
+generation (lower bound +30) at the generation-99 check, then +37 (lower
+bound −159) across generations 50 to 149. Fifty-generation averages of the
+population mean: 204,748, 228,706, 237,946. Elite re-selection on 128 fresh
+games froze candidate-12 at 264,466 (finalists spanned 228,212 to 264,466).
+The continued candidate's lower quartile (171,440) fell below the fair
+leaf's (189,414).
+
+</TechnicalRecord>
+
 <AgentContext summary="Validity, gates and limitations">
 
 - The preregistered gate, fixed before any leased seed was read: on the 64
@@ -389,7 +444,9 @@ spanned 187,352 to 202,237).
   generation artifact and the screen artifact must record zero illegal and
   zero incomplete decisions, and the screened weights must hash to the value
   recorded before the screen lease opened. Outcome: every pass criterion
-  except artifact integrity and candidate identity fails.
+  except artifact integrity and candidate identity fails. The continuation
+  screen (`RS-20260903T163321Z-733076b5`) fails the same gate on a fresh
+  64-game block.
 - What the rejection covers: this exact configuration, this model class, this
   teacher depth, this optimiser and budget, this deployment depth. It does not
   reject the idea of a learned leaf. Had the candidate passed while the
