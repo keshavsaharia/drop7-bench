@@ -5,7 +5,7 @@
   "actor": {
     "kind": "model",
     "platform": "Codex",
-    "model": "gpt-6",
+    "model": "unknown",
     "agentId": "cache_implementation"
   },
   "level": "L2",
@@ -41,7 +41,8 @@
   "limitations": [
     "Self-reported contribution; not yet independently reviewed.",
     "Shared table memory is a conservative projection including 128 bytes per stripe for runtime lock allocation; allocator metadata and thread stacks are excluded.",
-    "Final striped mutex implementation, restored cumulative-hit API, and added tests await coordinator validation; no performance claim is made by this contribution."
+    "Final striped mutex implementation, restored cumulative-hit API, and added tests await coordinator validation; no performance claim is made by this contribution.",
+    "Attribution correction during PR #26 review: no exact runtime model identifier was retained for this contribution. The original gpt-6 family label is replaced with unknown as required by AGENTS.md; platform, agent identity, scope, and validation remain as recorded."
   ],
   "selfReported": true,
   "reviewedBy": null,

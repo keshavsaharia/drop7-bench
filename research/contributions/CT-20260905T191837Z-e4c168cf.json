@@ -5,7 +5,7 @@
   "actor": {
     "kind": "model",
     "platform": "Codex",
-    "model": "gpt-6",
+    "model": "unknown",
     "agentId": "leaf_inspection"
   },
   "level": "L2",
@@ -35,7 +35,8 @@
   "limitations": [
     "Self-reported contribution; not yet independently reviewed.",
     "No performance benchmark or complete-game strength evaluation was performed by this contributor; coordinator owns timing, integration, and final retention decisions.",
-    "Differential tests used constructed states on the local default Rust target. Cross-target BMI2 execution was not performed; its production unpack branch remains unchanged."
+    "Differential tests used constructed states on the local default Rust target. Cross-target BMI2 execution was not performed; its production unpack branch remains unchanged.",
+    "Attribution correction during PR #26 review: no exact runtime model identifier was retained for this contribution. The original gpt-6 family label is replaced with unknown as required by AGENTS.md; platform, agent identity, scope, and validation remain as recorded."
   ],
   "selfReported": true,
   "reviewedBy": null,

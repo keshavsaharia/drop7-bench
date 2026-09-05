@@ -2,7 +2,7 @@
 date: 2026-09-05
 title: "Less work in the Rust evaluator"
 summary: "The Rust search completed the same constructed-root decisions faster after avoiding unused leaf work. A simpler portable unpacking routine produced no credible independent speedup."
-contributors: [gpt-6 (Codex)]
+contributors: [unknown (Codex)]
 tags: [rust, engines, leaf, transposition-table, optimization, mechanics]
 ---
 
@@ -126,5 +126,34 @@ the public-information boundary and the frozen qualification standard remain
 unchanged. Shared-cache schedules may change work counts, so exact
 completed-depth values do not imply the same bounded-work fallback across
 different cache configurations.
+
+</AgentContext>
+
+## Review corrections
+
+The model attribution originally used a family name without a retained exact
+runtime identifier. Codex corrected the contribution records and this entry
+to mark the model as unknown. The named agents and their individual work
+remain recorded.
+
+Review also questioned whether a family README could be mistaken for an
+approach. The existing test passes: the matcher accepts lowercase directory
+names, which excludes the uppercase README filename. Dedicated regression
+tests now cover that exclusion and keep links to an approach's own README.
+
+<AgentContext summary="Attribution correction and review scope">
+
+The correction applies to the `actor.model` fields in
+`CT-20260905T191837Z-e4c168cf`, `CT-20260905T192431Z-4e8df10b`,
+`CT-20260905T192431Z-fc562fcd`, and `CT-20260905T195626Z-d598d2a3`.
+Each contribution record includes an explanation. The frozen experiment
+retains its original metadata and hash; its `gpt-6` attribution should be
+read with this correction. The measured engine source and promoted result
+artifacts are unchanged. This maintenance review collected no new gameplay
+or performance measurements.
+
+The focused regression tests are in `web/lib/records.test.ts`. The discussion
+and validation summary are retained on
+[PR #26](https://github.com/keshavsaharia/drop7-bench/pull/26).
 
 </AgentContext>

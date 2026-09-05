@@ -27,3 +27,21 @@ test("canonical URLs and repository paths identify the same approach once", () =
     ],
   );
 });
+
+test("family README paths do not produce approach references", () => {
+  for (const path of [
+    "approaches/fair-expectimax/README.mdx",
+    "/approach/fair-expectimax/README.mdx",
+    "/checkout/approaches/fair-expectimax/README.mdx",
+  ]) {
+    assert.deepEqual(approachRefsInText(path), [], path);
+    assert.deepEqual(approachRefsInRecord({ evidenceRefs: [path] }), [], path);
+  }
+});
+
+test("an approach README still links its containing approach", () => {
+  assert.deepEqual(
+    approachRefsInText("approaches/fair-expectimax/rust-engine/README.mdx"),
+    [{ family: "fair-expectimax", slug: "rust-engine" }],
+  );
+});

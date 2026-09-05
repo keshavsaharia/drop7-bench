@@ -5,7 +5,7 @@
   "actor": {
     "kind": "model",
     "platform": "Codex",
-    "model": "gpt-6",
+    "model": "unknown",
     "agentId": "review"
   },
   "level": "L1",
@@ -55,7 +55,8 @@
   "limitations": [
     "Self-reported contribution; not yet independently reviewed.",
     "Independent reviewer did not repair candidate source or collect new gameplay, benchmark, test, or timing data.",
-    "Review covers the uncommitted measured source snapshots and the stated final result/artifact hashes. This is an independent audit of first-party measurements, not independent performance replication or evidence of playing strength. Whole-project missing historical artifacts and unrelated web validation failures remain explicitly disclosed in the result."
+    "Review covers the uncommitted measured source snapshots and the stated final result/artifact hashes. This is an independent audit of first-party measurements, not independent performance replication or evidence of playing strength. Whole-project missing historical artifacts and unrelated web validation failures remain explicitly disclosed in the result.",
+    "Attribution correction during PR #26 review: no exact runtime model identifier was retained for this contribution. The original gpt-6 family label is replaced with unknown as required by AGENTS.md; platform, agent identity, scope, and validation remain as recorded."
   ],
   "selfReported": true,
   "reviewedBy": null,
