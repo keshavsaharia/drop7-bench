@@ -1,0 +1,130 @@
+---
+date: 2026-09-05
+title: "Less work in the Rust evaluator"
+summary: "The Rust search completed the same constructed-root decisions faster after avoiding unused leaf work. A simpler portable unpacking routine produced no credible independent speedup."
+contributors: [gpt-6 (Codex)]
+tags: [rust, engines, leaf, transposition-table, optimization, mechanics]
+---
+
+## Leaf computation
+
+The Rust engine already packs the board into columns for drops and gravity.
+Its fair leaf, the function that scores a board when look-ahead stops, converts
+those columns into row-major bytes because it reads cells and neighbours
+repeatedly. Today's check kept the evaluator's answers unchanged and looked
+for calculations it could avoid.
+
+The leaf was gathering possible support from other numbered discs even when
+the occupied run was already short enough for the target disc. That release
+term must then be zero. It now checks the run length first. Solid covered
+discs also select only their two strongest neighbouring supports, while
+cracked discs preserve the sorted multiplication order required for identical
+floating-point values.
+
+<Finding title="The completed search uses fewer instructions" kind="positive" metric="1.07× search speedup">
+
+On six constructed root positions over five alternating repeats, the
+depth-4 search with seven chance samples fell from 12.052394167 to
+11.257799041 median seconds. It kept the same completed-search values,
+selected actions, and logical work, while retiring 4.4384% fewer instructions.
+The leaf batch, with 1.2M calls per repeat over the same five repeats, ran
+1.16989× faster and retired 10.6541% fewer instructions. These are local
+mechanics measurements on an interactive Apple M3 Pro workstation. The
+[optimization result](/results/RS-20260905T193830Z-9733627a) records their scope;
+they do not measure stronger play.
+
+</Finding>
+
+## Portable unpacking
+
+<DeadEnd title="Direct nibble extraction did not show an independent speed gain" verdict="configuration-rejected">
+
+The portable byte conversion used a general-purpose bit-scatter helper with a
+constant mask. Replacing it with direct nibble shifts made the source shorter,
+but the unpack batch retired almost the same number of instructions:
+109,784,960 before and 109,720,197 after, across 1.2M conversions per repeat
+and five repeats. It also showed no credible latency improvement. This
+suggests the compiler already simplified the old constant-mask operation.
+The clearer expression is retained without a standalone speed claim. This
+negative result is recorded alongside the useful leaf changes in the
+[same result](/results/RS-20260905T193830Z-9733627a).
+
+</DeadEnd>
+
+## Cache controls
+
+The search now checks whether a position is deep enough to cache before
+packing or hashing its key. Its minimum cache depth and entry count can be
+adjusted separately. Raising the depth threshold avoids shallow bookkeeping;
+reducing capacity changes allocated memory. Each adjustment can also lose
+useful hits, so the measurements track completed-search time and work together.
+
+An optional shared cache lets workers reuse one another's completed results
+within a decision. A bounded set of stripe locks protects full keys and
+values. Workers try the lock once and keep searching on contention, so they
+can still duplicate work before either has published its answer. Storage is
+fresh for each decision, keeping evaluator and parameter changes separate.
+Private worker tables remain the default.
+
+The capacity sweep found useful shallow hits: at gate 1, the 16,384-entry
+private table used 786,432 bytes and completed the six roots in 11.305829207
+median seconds. The 262,144-entry table used 12,582,912 bytes and took
+10.844751666 seconds. Larger capacity removed relatively little additional
+work, while deeper-only caching lost shallow hits and did more computation.
+The result retains every setting, including the cache-free comparison.
+
+At four workers with the same aggregate entry budget, shared storage reduced
+median work by 5.2% and instructions by 3.9%, with a 1.03× ratio of latency
+medians. It was slightly slower with one worker. These modest gains keep it
+optional. All 210 timed processes completed inside the registered budget;
+the new charts show the full repeat ranges alongside their medians.
+
+The [Rust engine page](/engine/rust) and its
+[approach page](/approach/fair-expectimax/rust-engine) now explain these paths
+with live source excerpts and a diagram. The historical measurements remain
+available with their original machines, workloads, and limitations.
+
+## Verification
+
+Codex implemented and checked the leaf changes, cache controls, and shared
+storage, then updated the explanatory pages. The check compares raw value
+bits and complete decisions, with native floating-point contraction disabled
+where necessary. It preserves the established canonical search behavior;
+it does not establish a new raw-board reflection guarantee.
+
+<AgentContext summary="Records and verification">
+
+The theory is
+[TH-20260905-rust-bitboard-improvements-1c56b072](/theories/TH-20260905-rust-bitboard-improvements-1c56b072),
+the experiment is
+[EX-20260905-rust-bitboard-improvements-check-c68c07b7](/experiments/EX-20260905-rust-bitboard-improvements-check-c68c07b7),
+and the result is
+[RS-20260905T193830Z-9733627a](/results/RS-20260905T193830Z-9733627a).
+The comparison summary is retained at
+`artifacts/results/EX-20260905-rust-bitboard-improvements-check-c68c07b7/RUN-20260905T191558Z-f9e6cb1d/summary.json` and the profile at
+`research/system-profiles/MACH-20260905T191558Z-4a61bc91.json`.
+
+The before/after depth-4 arm uses cache gate 1 and 16,384 entries. Both arms
+retain 39,288,466 logical work units on the six constructed roots. The host
+had Chrome, WindowServer, and Codex active, with no exclusive CPU allocation
+or affinity control; the check paused its own builds and tests while timing.
+
+All 40 Rust release tests passed. The native gates compared six leaf values
+and six depth-4/seven-stratum root decisions with `-ffp-contract=off`.
+The C++ trajectory arm compared 575 moves across 32 fixtures; the TypeScript
+arm compared 660 moves across 32 fixtures. Both reported zero mismatches.
+The root npm suite passed 144 tests with two skips. `make -k test` passed its
+native and TypeScript gates but failed on 96 pre-existing missing historical
+artifact errors. Those missing files were not reconstructed or relabelled. The web build, typecheck, lint and
+70 web tests pass; the separate chart library retains one pre-existing stale
+snapshot assertion (63/64 pass). The route sweep passes 727/728, with only
+`/compete` blocked by absent local authentication configuration. Both Rust
+pages and cards pass, as do all eight missing-data render checks.
+
+No new gameplay cohort was opened. This is a CHECK engineering contribution;
+the public-information boundary and the frozen qualification standard remain
+unchanged. Shared-cache schedules may change work counts, so exact
+completed-depth values do not imply the same bounded-work fallback across
+different cache configurations.
+
+</AgentContext>

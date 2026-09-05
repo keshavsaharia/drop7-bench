@@ -1,0 +1,120 @@
+{
+  "title": "Private and shared search caches",
+  "kind": "bar",
+  "x": {
+    "label": "Workers and minimum cached depth"
+  },
+  "y": {
+    "label": "Median seconds per six-root batch",
+    "unit": "s"
+  },
+  "notes": "Six constructed public roots per repeat, five alternating-order repeats on an interactive Apple M3 Pro. Depth 4, seven chance strata, completed searches with exact value checks. Whiskers show the minimum and maximum repeat times, not confidence intervals. CHECK mechanics evidence; these roots and elapsed times do not measure playing strength. The table view lists the plotted values and their sources. Both scopes have 65,536 total entries. Shared storage includes an additional bounded stripe-lock allowance. The frontier split is fixed at zero internal plies.",
+  "series": [
+    {
+      "name": "Private",
+      "points": [
+        {
+          "x": "1 worker, gate 1",
+          "y": 10.696571666,
+          "lo": 10.679717751,
+          "hi": 10.749042124999999,
+          "sourceRecord": "RS-20260905T193830Z-9733627a",
+          "sourceField": "metrics.parallelSweep[0].searchSeconds.median"
+        },
+        {
+          "x": "1 worker, gate 2",
+          "y": 14.065021667,
+          "lo": 14.021036125,
+          "hi": 14.355967873,
+          "sourceRecord": "RS-20260905T193830Z-9733627a",
+          "sourceField": "metrics.parallelSweep[2].searchSeconds.median"
+        },
+        {
+          "x": "2 workers, gate 1",
+          "y": 5.655911085,
+          "lo": 5.635821458,
+          "hi": 5.708403541,
+          "sourceRecord": "RS-20260905T193830Z-9733627a",
+          "sourceField": "metrics.parallelSweep[4].searchSeconds.median"
+        },
+        {
+          "x": "2 workers, gate 2",
+          "y": 7.443337125,
+          "lo": 7.3110293340000005,
+          "hi": 7.644868874999999,
+          "sourceRecord": "RS-20260905T193830Z-9733627a",
+          "sourceField": "metrics.parallelSweep[6].searchSeconds.median"
+        },
+        {
+          "x": "4 workers, gate 1",
+          "y": 3.108119542,
+          "lo": 3.0800594169999997,
+          "hi": 3.122287833,
+          "sourceRecord": "RS-20260905T193830Z-9733627a",
+          "sourceField": "metrics.parallelSweep[8].searchSeconds.median"
+        },
+        {
+          "x": "4 workers, gate 2",
+          "y": 3.9693108329999998,
+          "lo": 3.920692167,
+          "hi": 4.05398675,
+          "sourceRecord": "RS-20260905T193830Z-9733627a",
+          "sourceField": "metrics.parallelSweep[10].searchSeconds.median"
+        }
+      ]
+    },
+    {
+      "name": "Shared",
+      "points": [
+        {
+          "x": "1 worker, gate 1",
+          "y": 10.765254581,
+          "lo": 10.690454625,
+          "hi": 10.836154793,
+          "sourceRecord": "RS-20260905T193830Z-9733627a",
+          "sourceField": "metrics.parallelSweep[1].searchSeconds.median"
+        },
+        {
+          "x": "1 worker, gate 2",
+          "y": 14.150282749999999,
+          "lo": 14.075311874,
+          "hi": 14.404607248,
+          "sourceRecord": "RS-20260905T193830Z-9733627a",
+          "sourceField": "metrics.parallelSweep[3].searchSeconds.median"
+        },
+        {
+          "x": "2 workers, gate 1",
+          "y": 5.489913958,
+          "lo": 5.4776246660000005,
+          "hi": 5.675756291,
+          "sourceRecord": "RS-20260905T193830Z-9733627a",
+          "sourceField": "metrics.parallelSweep[5].searchSeconds.median"
+        },
+        {
+          "x": "2 workers, gate 2",
+          "y": 7.3697251249999995,
+          "lo": 7.271057416,
+          "hi": 7.49253425,
+          "sourceRecord": "RS-20260905T193830Z-9733627a",
+          "sourceField": "metrics.parallelSweep[7].searchSeconds.median"
+        },
+        {
+          "x": "4 workers, gate 1",
+          "y": 3.017273043,
+          "lo": 2.992334875,
+          "hi": 3.052450832,
+          "sourceRecord": "RS-20260905T193830Z-9733627a",
+          "sourceField": "metrics.parallelSweep[9].searchSeconds.median"
+        },
+        {
+          "x": "4 workers, gate 2",
+          "y": 3.956130708,
+          "lo": 3.822677582,
+          "hi": 3.983289749,
+          "sourceRecord": "RS-20260905T193830Z-9733627a",
+          "sourceField": "metrics.parallelSweep[11].searchSeconds.median"
+        }
+      ]
+    }
+  ]
+}

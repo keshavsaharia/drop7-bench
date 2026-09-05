@@ -17,8 +17,8 @@
 // monomorphisations let the benchmark measure both arms with zero runtime
 // branching cost.  Cached values equal recomputed values exactly (the cached
 // quantity is a deterministic function of the state), so the table choice
-// changes no per-column value, no chosen action and no completed depth --
-// only node counts and per-node cost.  The parity gates therefore compare
+// changes no completed-depth per-column value or chosen action. With a
+// binding work budget it may change which depth completes and its fallback.  The parity gates therefore compare
 // per-column values and chosen actions bit-for-bit.
 
 use crate::board::{BOARD_SIZE, EMPTY};
@@ -81,7 +81,7 @@ impl Leaf for WeightedLeaf {
 /// Injective packed key: the seven column words verbatim (28 bytes) plus
 /// next disc, moves remaining and depth -- exactly the information the C++
 /// PackedKey carries.
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq)]
 pub struct PackedKey {
     words: [u64; 4],
 }
@@ -130,6 +130,12 @@ pub fn hash_key(key: &PackedKey) -> u64 {
 /// zero-sized no-op to a depth-gated table; the search is generic over the
 /// choice, so an unused table compiles to nothing.
 pub trait TranspositionTable {
+    /// Checked before constructing or hashing a key. Existing external tables
+    /// default to accepting every depth and retain their previous behavior.
+    #[inline]
+    fn accepts_depth(&self, _depth: i32) -> bool {
+        true
+    }
     fn lookup(&mut self, key: &PackedKey, hash: u64, depth: i32) -> Option<f64>;
     fn store(&mut self, key: &PackedKey, hash: u64, depth: i32, value: f64);
     /// O(1) reset between decisions.
@@ -143,6 +149,10 @@ pub trait TranspositionTable {
 pub struct NoTable;
 
 impl TranspositionTable for NoTable {
+    #[inline(always)]
+    fn accepts_depth(&self, _depth: i32) -> bool {
+        false
+    }
     #[inline(always)]
     fn lookup(&mut self, _key: &PackedKey, _hash: u64, _depth: i32) -> Option<f64> {
         None
@@ -222,6 +232,10 @@ impl DepthTable {
 }
 
 impl TranspositionTable for DepthTable {
+    #[inline]
+    fn accepts_depth(&self, depth: i32) -> bool {
+        depth >= self.from_depth
+    }
     #[inline]
     fn lookup(&mut self, key: &PackedKey, hash: u64, depth: i32) -> Option<f64> {
         if depth < self.from_depth {
@@ -411,11 +425,17 @@ impl<L: Leaf, T: TranspositionTable> Searcher<L, T> {
         if depth == 0 {
             return self.evaluate_leaf(state);
         }
-        let key = PackedKey::new(state, depth);
-        let hash = hash_key(&key);
-        if let Some(cached) = self.table.lookup(&key, hash, depth) {
-            return Ok(cached);
-        }
+        // The shallow majority never packs a key or executes its three mixes.
+        let cache_key = if self.table.accepts_depth(depth) {
+            let key = PackedKey::new(state, depth);
+            let hash = hash_key(&key);
+            if let Some(cached) = self.table.lookup(&key, hash, depth) {
+                return Ok(cached);
+            }
+            Some((key, hash))
+        } else {
+            None
+        };
         let mut best = f64::NEG_INFINITY;
         for &column in COLUMN_ORDER.iter() {
             if state.board.get(0, column) != EMPTY {
@@ -429,7 +449,9 @@ impl<L: Leaf, T: TranspositionTable> Searcher<L, T> {
         if !best.is_finite() {
             best = self.params.terminal_utility;
         }
-        self.table.store(&key, hash, depth, best);
+        if let Some((key, hash)) = cache_key {
+            self.table.store(&key, hash, depth, best);
+        }
         Ok(best)
     }
 
@@ -483,18 +505,18 @@ impl<L: Leaf, T: TranspositionTable> Searcher<L, T> {
         &self.last
     }
 
-    /// Central-frontier support: clear this worker's private table once at
-    /// the beginning of a decision.  It then remains live while that worker
-    /// claims multiple independent frontier tasks, retaining useful
-    /// transpositions without sharing mutable table state across CPUs.
+    /// Central-frontier support: begin a worker's decision. Private tables
+    /// advance their epoch; decision-scoped shared handles reset only local
+    /// counters because their scheduler has already provided fresh storage.
+    /// The cache then remains live across all tasks in this decision.
     pub fn begin_parallel_decision(&mut self) {
         self.table.clear();
         self.last = SearchMetrics::default();
     }
 
     /// Evaluate one public-state continuation at a fixed remaining depth.
-    /// Metrics cover this task only; the worker's private table intentionally
-    /// persists across calls made during the same parallel decision.
+    /// Metrics cover this task only; cache entries intentionally persist
+    /// across calls made during the same parallel decision.
     pub fn evaluate_state_value(&mut self, state: &State, depth: i32) -> SearchResult<f64> {
         self.nodes = 0;
         self.work = 0;
@@ -726,5 +748,99 @@ mod tests {
                 weighted.value(&state).to_bits()
             );
         }
+    }
+
+    #[test]
+    fn depth_gate_bypasses_table_operations() {
+        struct RejectTable;
+        impl TranspositionTable for RejectTable {
+            fn accepts_depth(&self, _: i32) -> bool {
+                false
+            }
+            fn lookup(&mut self, _: &PackedKey, _: u64, _: i32) -> Option<f64> {
+                panic!("a rejected depth must not probe the table")
+            }
+            fn store(&mut self, _: &PackedKey, _: u64, _: i32, _: f64) {
+                panic!("a rejected depth must not store")
+            }
+            fn clear(&mut self) {}
+            fn bytes(&self) -> usize {
+                0
+            }
+            fn hits(&self) -> u64 {
+                0
+            }
+        }
+        let state = State {
+            board: crate::Board::empty(),
+            next_disc: 2,
+            moves_remaining: 4,
+            score: 0,
+            level: 1,
+            moves_played: 0,
+            game_over: false,
+        };
+        let params = SearchParams {
+            depth: 3,
+            chance_samples: 1,
+            maximum_work: u64::MAX,
+            ..SearchParams::default()
+        };
+        let mut plain = Searcher::new(params, ZeroLeaf, NoTable);
+        let mut gated = Searcher::new(params, ZeroLeaf, RejectTable);
+        assert_eq!(
+            plain.column_values(&state, 3),
+            gated.column_values(&state, 3)
+        );
+    }
+
+    #[test]
+    fn table_epoch_wrap_cannot_revive_old_keys() {
+        let state = State {
+            board: crate::Board::empty(),
+            next_disc: 2,
+            moves_remaining: 4,
+            score: 0,
+            level: 1,
+            moves_played: 0,
+            game_over: false,
+        };
+        let key = PackedKey::new(&state, 2);
+        let mut table = DepthTable::new(1, 1);
+        table.store(&key, 0, 2, 17.0);
+        assert_eq!(table.lookup(&key, 0, 2), Some(17.0));
+        table.clear();
+        assert_eq!(table.lookup(&key, 0, 2), None);
+        table.epoch = u32::MAX;
+        table.clear();
+        assert_eq!(table.epoch, 1);
+        assert_eq!(table.lookup(&key, 0, 2), None);
+        assert_eq!(table.hits(), 0);
+    }
+
+    #[test]
+    fn root_column_hit_metrics_preserve_cumulative_table_api() {
+        let state = State {
+            board: crate::Board::empty(),
+            next_disc: 2,
+            moves_remaining: 4,
+            score: 0,
+            level: 1,
+            moves_played: 0,
+            game_over: false,
+        };
+        let params = SearchParams {
+            depth: 3,
+            chance_samples: 1,
+            maximum_work: u64::MAX,
+            ..SearchParams::default()
+        };
+        let mut searcher = Searcher::new(params, ZeroLeaf, DepthTable::new(1024, 1));
+        searcher.begin_parallel_decision();
+        searcher.evaluate_root_column(&state, 3, 3).unwrap();
+        let before = searcher.table.hits();
+        searcher.evaluate_root_column(&state, 3, 3).unwrap();
+        assert_eq!(searcher.last_metrics().cache_hits, searcher.table.hits());
+        assert_eq!(searcher.last_metrics().cache_hits - before, 1);
     }
 }

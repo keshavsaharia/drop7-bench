@@ -1,0 +1,63 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260905T192431Z-fc562fcd",
+  "actor": {
+    "kind": "model",
+    "platform": "Codex",
+    "model": "gpt-6",
+    "agentId": "review"
+  },
+  "level": "L1",
+  "roles": [
+    {
+      "role": "review",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Independent source, measurement, and promotion audit of Rust bitboard leaf/depth-gate/shared-cache optimizations. Identified timeout process-group handling, hit-metric API compatibility, microbenchmark call-count metadata, and compiler-provenance gaps; verified the separately implemented corrections without repairing candidate source or running benchmarks.",
+  "theoryIds": [
+    "TH-20260905-rust-bitboard-improvements-1c56b072"
+  ],
+  "experimentIds": [
+    "EX-20260905-rust-bitboard-improvements-check-c68c07b7"
+  ],
+  "runIds": [
+    "RUN-20260905T191558Z-f9e6cb1d"
+  ],
+  "artifactPaths": [
+    "approaches/fair-expectimax/rust-engine/src/leaf.rs",
+    "approaches/fair-expectimax/rust-engine/src/board.rs",
+    "approaches/fair-expectimax/rust-engine/src/search.rs",
+    "approaches/fair-expectimax/rust-engine/src/shared_table.rs",
+    "approaches/fair-expectimax/rust-engine/src/parallel.rs",
+    "approaches/fair-expectimax/rust-engine/experiments/optimization-check/measure.py",
+    "approaches/fair-expectimax/rust-engine/src/bin/optimization_check.rs",
+    "research/results/RS-20260905T193830Z-9733627a.json",
+    "research/runs/RUN-20260905T191558Z-f9e6cb1d.json",
+    "artifacts/results/EX-20260905-rust-bitboard-improvements-check-c68c07b7/RUN-20260905T191558Z-f9e6cb1d/manifest.json"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "Read-only diff inspection: exact release zero guard, solid top-two selection, full-key memoization, completed-value publication, lifetime scope, early key/hash depth rejection, CLI entry-budget semantics, and timeout/accounting behavior.",
+    "Read-only byte comparison: all 15 existing baseline src/**/*.rs files match commit 7adb6b36412b4bbef25623183dac1a905570cd1a; shared driver SHA256 88025bdaf84efe9f0c2fca7fbb39668fcfaa32327d993471b48a3e55321c28b1 matches candidate driver.",
+    "Final striped-cache source inspection: power-of-two index partition, full-key and completed-value locking, decision-scoped OnceLock lifetime, per-worker hit counters, and entry/stripe/runtime-lock memory projection. Installed Rust std pthread source independently confirms the boxed lazy mutex allocation addressed by preinitialization.",
+    "Inspected coordinator repairs: process-group timeout kill and retained partial streams; restored cumulative evaluate_root_column API with per-worker root scheduler delta accounting.",
+    "Independently recomputed both completed 50-process comparison phases from raw stdout/stderr: exact value/action bits, checksums, repeat counts, work and latency totals, CPU/RSS/instruction/cycle parsing, group median/min/max, and paired speed ratios all agree.",
+    "Verified baseline/leaf-only/candidate source snapshots against their trees; candidate source and binaries match retained hashes; older leaf measurement runner matches its archived hash; protocol SHA256 matches canonical content.",
+    "Inspected README numerical claims and snippet ranges, both engine/approach page routing, and retained correctness logs: 40 Rust tests, 6 exact leaf roots, 6 exact D4/S7 root comparisons, 575 C++ and 660 TypeScript trajectory moves, zero reported mismatches.",
+    "Independently checked all remaining 110 cache-sweep and parallel processes against raw stdout/stderr, all derived summary fields, all paired ratios and instruction/work reductions, and measurement-source hashes. All 210 processes completed successfully within the 1800-second budget at 1762.7245474932715 summed elapsed seconds.",
+    "Verified every one of 360 parallel root decisions across worker counts, cache gates, scopes, and repeats against unchanged sequential-baseline f64 bits and selected action after source-coordinate mapping. Confirmed per-worker work/hit/task aggregation and actual 65536-entry capacity in every parallel decision; projected private 3145728 bytes and shared 3186688 bytes include the shared stripe/runtime-lock allowance.",
+    "Final promotion audit verified 23 direct files and 564 archive members against SHA256, byte counts, and source copies; result metrics match audited summary and run CPU/peak RSS/source archive hash agree. Final manifest SHA256 ef5ccc0c6946cb4f2aa6a1495d070143c7dc7d1b37e5772ad0064ec78c0c4ae3; result SHA256 8968b1d405cc6b3e9b5c6723aaa3d0db5531cbde7f990577b4b60249b337da8f.",
+    "Verified derived metadata correction: microbenchmark leafCalls equals its 1200000 raw calls; unmeasured micro/unpack initialization time is null. All three archived Cargo compiler-info records agree on rustc 1.96.0 ac68faa20 / LLVM 22.1.2. Raw timing records and measured Rust sources remain unchanged.",
+    "Inspected final gate, limitations, and attribution wording; checked 21 generated figure point values against result fields and retained validation counts. Verdict: valid / pass with mixed optimization assessment, mechanics-only CHECK evidence; no unresolved promotion blocker."
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed.",
+    "Independent reviewer did not repair candidate source or collect new gameplay, benchmark, test, or timing data.",
+    "Review covers the uncommitted measured source snapshots and the stated final result/artifact hashes. This is an independent audit of first-party measurements, not independent performance replication or evidence of playing strength. Whole-project missing historical artifacts and unrelated web validation failures remain explicitly disclosed in the result."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-09-05T19:24:31Z"
+}

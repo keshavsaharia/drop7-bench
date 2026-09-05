@@ -10,7 +10,8 @@ use drop7_rs::engine::State;
 use drop7_rs::leaf::LeafWeights;
 use drop7_rs::parallel::{
     choose_action_frontier_parallel_with_leaf, choose_action_root_parallel_with_leaf,
-    ParallelConfig, ParallelDecision, DEFAULT_MAX_FRONTIER_TASKS, DEFAULT_MAX_HOST_BYTES,
+    ParallelConfig, ParallelDecision, TableScope, DEFAULT_MAX_FRONTIER_TASKS,
+    DEFAULT_MAX_HOST_BYTES,
 };
 use drop7_rs::search::{canonical_state, work_bound_for, SearchParams, WeightedLeaf, COLUMN_ORDER};
 
@@ -156,12 +157,15 @@ fn write_manifest(
 ) -> io::Result<()> {
     write!(
         out,
-        "{{\"format\":\"drop7-search-matrix-v1\",\"recordType\":\"manifest\",\"rootsPath\":{},\"roots\":{},\"scheduler\":{},\"threads\":{},\"cacheEntriesPerWorker\":{},\"maxFrontierTasks\":{},\"maxHostBytes\":{},\"splitPlies\":",
+        "{{\"format\":\"drop7-search-matrix-v1\",\"recordType\":\"manifest\",\"rootsPath\":{},\"roots\":{},\"scheduler\":{},\"threads\":{},\"ttScope\":\"{}\",\"ttFromDepth\":{},\"cacheEntries\":{},\"cacheEntriesPerWorker\":{},\"maxFrontierTasks\":{},\"maxHostBytes\":{},\"splitPlies\":",
         json_string(roots_path),
         roots,
         json_string(scheduler),
         config.threads,
+        config.table_scope.as_str(),
+        config.table_from_depth,
         config.table_capacity_per_worker,
+        if config.table_scope == TableScope::Private { config.table_capacity_per_worker } else { 0 },
         config.max_frontier_tasks,
         config.max_host_bytes,
     )?;
@@ -270,7 +274,7 @@ fn write_decision(
     }
     write!(
         out,
-        "],\"metrics\":{{\"workerThreads\":{},\"splitPlies\":{},\"registeredTasks\":{},\"completedTasks\":{},\"plannerNodes\":{},\"plannerWork\":{},\"plannerCacheHits\":{},\"work\":{},\"nodes\":{},\"leafCalls\":{},\"moveCalls\":{},\"cacheHits\":{},\"tableBytesPerWorker\":{},\"projectedTableBytes\":{},\"projectedPlanBytes\":{},\"initializationSeconds\":{:.9},\"planningSeconds\":{:.9},\"executionSeconds\":{:.9},\"reductionSeconds\":{:.9},\"wallSeconds\":{:.9},\"workerBusyFraction\":{:.9},\"tailIdleCoreSeconds\":{:.9}}},\"workers\":[",
+        "],\"metrics\":{{\"workerThreads\":{},\"splitPlies\":{},\"registeredTasks\":{},\"completedTasks\":{},\"plannerNodes\":{},\"plannerWork\":{},\"plannerCacheHits\":{},\"work\":{},\"nodes\":{},\"leafCalls\":{},\"moveCalls\":{},\"cacheHits\":{},\"ttScope\":\"{}\",\"ttFromDepth\":{},\"tableBytesPerWorker\":{},\"tableEntryBytes\":{},\"projectedTableBytes\":{},\"projectedPlanBytes\":{},\"initializationSeconds\":{:.9},\"planningSeconds\":{:.9},\"executionSeconds\":{:.9},\"reductionSeconds\":{:.9},\"wallSeconds\":{:.9},\"workerBusyFraction\":{:.9},\"tailIdleCoreSeconds\":{:.9}}},\"workers\":[",
         metrics.worker_threads,
         metrics.split_plies,
         metrics.frontier_tasks,
@@ -283,7 +287,10 @@ fn write_decision(
         metrics.leaf_calls,
         metrics.move_calls,
         metrics.cache_hits,
+        metrics.table_scope.as_str(),
+        metrics.table_from_depth,
         metrics.table_bytes_per_worker,
+        metrics.table_entry_bytes,
         metrics.projected_table_bytes,
         metrics.projected_plan_bytes,
         metrics.initialization_seconds,
@@ -353,7 +360,10 @@ mod tests {
                 leaf_calls: 0,
                 move_calls: 0,
                 cache_hits: 0,
+                table_scope: TableScope::Private,
+                table_from_depth: 1,
                 table_bytes_per_worker: 0,
+                table_entry_bytes: 0,
                 projected_table_bytes: 0,
                 projected_plan_bytes: 0,
                 initialization_seconds: 0.0,
@@ -381,8 +391,9 @@ mod tests {
 
 fn usage() {
     eprintln!(
-        "usage: analyze --roots FILE --output FILE|- --depths 4,5 --strata 5,7 [--leaf fair|NAME=WEIGHTS_FILE] [--scheduler frontier|root] [--threads N] [--cache N] [--split-plies auto|N] [--root-limit N] [--max-frontier-tasks N] [--max-host-bytes N]"
+        "usage: analyze --roots FILE --output FILE|- --depths 4,5 --strata 5,7 [--leaf fair|NAME=WEIGHTS_FILE] [--scheduler frontier|root] [--threads N] [--cache N] [--tt-scope private|shared] [--tt-from-depth N] [--split-plies auto|N] [--root-limit N] [--max-frontier-tasks N] [--max-host-bytes N]"
     );
+    eprintln!("--cache is entries per worker in private scope, total entries in shared scope (rounded up to a power of two).");
 }
 
 fn run() -> Result<(), String> {
@@ -395,6 +406,8 @@ fn run() -> Result<(), String> {
     let mut scheduler = String::from("frontier");
     let mut threads = std::thread::available_parallelism().map_or(1, |n| n.get());
     let mut cache = 262_144usize;
+    let mut table_scope = TableScope::Private;
+    let mut table_from_depth = 1i32;
     let mut split_plies = None;
     let mut root_limit = usize::MAX;
     let mut max_frontier_tasks = DEFAULT_MAX_FRONTIER_TASKS;
@@ -418,6 +431,10 @@ fn run() -> Result<(), String> {
             "--scheduler" => scheduler = value.clone(),
             "--threads" => threads = value.parse().map_err(|_| "invalid --threads")?,
             "--cache" => cache = value.parse().map_err(|_| "invalid --cache")?,
+            "--tt-scope" => table_scope = value.parse()?,
+            "--tt-from-depth" => {
+                table_from_depth = value.parse().map_err(|_| "invalid --tt-from-depth")?
+            }
             "--split-plies" => {
                 split_plies = if value == "auto" {
                     None
@@ -453,6 +470,8 @@ fn run() -> Result<(), String> {
     let config = ParallelConfig {
         threads,
         table_capacity_per_worker: cache,
+        table_scope,
+        table_from_depth,
         split_plies,
         max_frontier_tasks,
         max_host_bytes,

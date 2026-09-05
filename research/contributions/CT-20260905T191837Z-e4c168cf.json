@@ -1,0 +1,43 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260905T191837Z-e4c168cf",
+  "actor": {
+    "kind": "model",
+    "platform": "Codex",
+    "model": "gpt-6",
+    "agentId": "leaf_inspection"
+  },
+  "level": "L2",
+  "roles": [
+    {
+      "role": "software",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Inspected packed-board leaf costs and implemented exact release-support work avoidance, portable nibble unpacking, and solid-cover top-two selection, with synthetic differential regression tests.",
+  "theoryIds": [
+    "TH-20260905-rust-bitboard-improvements-1c56b072"
+  ],
+  "experimentIds": [
+    "EX-20260905-rust-bitboard-improvements-check-c68c07b7"
+  ],
+  "runIds": [],
+  "artifactPaths": [
+    "approaches/fair-expectimax/rust-engine/src/leaf.rs",
+    "approaches/fair-expectimax/rust-engine/src/board.rs"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "CARGO_TARGET_DIR=build/rust-bitboard-improvements/leaf-tests CARGO_BUILD_JOBS=2 cargo test --manifest-path approaches/fair-expectimax/rust-engine/Cargo.toml --release --lib optimized_terms_match_baseline_on_constructed_boards -- --nocapture: passed 33740 constructed public states, all 18 feature f64 bit patterns.",
+    "CARGO_TARGET_DIR=build/rust-bitboard-improvements/leaf-tests CARGO_BUILD_JOBS=2 cargo test --manifest-path approaches/fair-expectimax/rust-engine/Cargo.toml --release --lib unpack_matches_cells_and_original_pdep_expansion -- --nocapture: passed 1296 board representation cases against original PDEP and independent scalar extraction."
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed.",
+    "No performance benchmark or complete-game strength evaluation was performed by this contributor; coordinator owns timing, integration, and final retention decisions.",
+    "Differential tests used constructed states on the local default Rust target. Cross-target BMI2 execution was not performed; its production unpack branch remains unchanged."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-09-05T19:18:37Z"
+}
