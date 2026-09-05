@@ -80,14 +80,20 @@
     "runs/<run-id>/ntuple-scale/{pipeline.log,rusage.jsonl,analysis.json,analysis.md}",
     "artifacts emitted by train and screen carry this experiment id in their config field; table files are too large for the repository and are retained on the workstation with their SHA-256 in the result record"
   ],
-  "lifecycle": "preregistered",
-  "protocolSha256": "ee8eabb0512f459bb0acbb717e335d5e6953d2ac7ec57400f2a35b9f1c76b65d",
-  "amendments": [],
+  "lifecycle": "completed",
+  "protocolSha256": "4a867db795eec7e5e0858e58d6f59b14a13ed8ec03629cd155ce37a4b174b718",
+  "amendments": [
+    {
+      "timestamp": "2026-09-05T21:55:18Z",
+      "beforeControlledData": false,
+      "reason": "lifecycle advanced running -> completed after run RUN-20260905T193006Z-4fbeb4e5 and result RS-20260905T215332Z-95d18a5a were written; protocol content otherwise unchanged (frozen hash ee8eabb0512f459bb0acbb717e335d5e6953d2ac7ec57400f2a35b9f1c76b65d retained in the run and lease records). Operational note: the pipeline's select-arm stage aborted on an empty output file between the pilot and the main run (fixed in commit bd87dba); the relaunch changed no block, gate, stage order or artifact."
+    }
+  ],
   "createdBy": {
     "platform": "Claude Code",
     "model": "claude-fable-5-1",
     "agentId": "claude-code-ntuple-scale-experiment"
   },
   "createdAt": "2026-09-05T19:13:17Z",
-  "updatedAt": "2026-09-05T19:28:57Z"
+  "updatedAt": "2026-09-05T21:55:18Z"
 }

@@ -3,10 +3,10 @@
   "format": "drop7-run-v1",
   "runId": "RUN-20260905T193006Z-4fbeb4e5",
   "experimentId": "EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620",
-  "lifecycle": "running",
-  "runValidity": "pending",
+  "lifecycle": "completed",
+  "runValidity": "valid",
   "startedAt": "2026-09-05T19:30:06Z",
-  "endedAt": null,
+  "endedAt": "2026-09-05T21:52:47Z",
   "protocolSha256": "ee8eabb0512f459bb0acbb717e335d5e6953d2ac7ec57400f2a35b9f1c76b65d",
   "machineProfileRef": "research/system-profiles/MACH-20260905T192901Z-83559f62.json",
   "sourceState": {
@@ -18,7 +18,8 @@
   "command": [
     "approaches/ntuple-rl/ntuple-scale/build.sh (branch claude/n-tuple-scale-experiment, commit 146abdb)",
     "cargo test --release (10 unit tests)",
-    "RUN_ID=RUN-20260905T193006Z-4fbeb4e5 THREADS=32 approaches/ntuple-rl/ntuple-scale/scripts/pipeline.sh chain (gates -> pilot A..F -> select-arm -> main -> freeze -> screen -> compare -> analyze), launched with nohup; stdout/stderr in runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/chain.nohup"
+    "RUN_ID=RUN-20260905T193006Z-4fbeb4e5 THREADS=32 approaches/ntuple-rl/ntuple-scale/scripts/pipeline.sh chain (gates -> pilot A..F -> select-arm -> main -> freeze -> screen -> compare -> analyze), launched with nohup; stdout/stderr in runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/chain.nohup",
+    "RUN_ID=RUN-20260905T193006Z-4fbeb4e5 THREADS=32 approaches/ntuple-rl/ntuple-scale/scripts/pipeline.sh chain relaunched at 2026-09-05T20:41:03Z from commit bd87dba (the select-arm redirection fix) after the first chain aborted at select-arm at 19:48:21Z; the relaunch re-ran the idempotent gates (identical output), skipped the six finished pilot arms, wrote the selection, and ran main -> freeze -> screen -> compare -> analyze"
   ],
   "seedLeaseRefs": [
     "SL-20260905T191317Z-09895ea2",
@@ -32,17 +33,27 @@
     "maxGpuBytes": null
   },
   "resourceObserved": {
-    "wallSeconds": null,
-    "cpuSeconds": null,
-    "peakHostBytes": null,
+    "wallSeconds": 8561,
+    "cpuSeconds": 149820.4,
+    "peakHostBytes": 10050740224,
     "peakGpuBytes": null,
-    "measurementNotes": "Launched 2026-09-05T19:30:06Z from commit 146abdb12170e85228189f3c2f7ebf71a072d291 (clean tree) with scripts/pipeline.sh chain. Planned. Per-stage kernel rusage is appended to rusage.jsonl by scripts/with-rusage.py. The smoke run measured 1.4e6 training moves/s on 32 threads (arm-A layout), so the pilot (6 x 2e8 moves plus validation) should take about 20 minutes and the main run (4e9 moves plus 20 validation points and checkpoints) about an hour; the 256-game screen with the fair-d4s7 arm about 20 minutes."
+    "measurementNotes": "Launched 2026-09-05T19:30:06Z from commit 146abdb (clean tree); gates 19:30:07-19:30:11; pilot arms A-F 19:30:11-19:48:21 (109-224 s wall each, 32 threads); the first chain then aborted because the select-arm stage's shell redirection created an empty selection.json before analyze.py read it (fixed in commit bd87dba, no artifact rewritten, no seed re-read); relaunched 20:41:03 with the same RUN_ID; main run 20:41:03-21:22:41 (2,497 s wall, 70,945 CPU-s, peak RSS 10.05 GB, 1,956,636 moves/s mean over 4,000,004,271 moves); freeze 21:22:41; screen 21:22:43-21:52:46 (1,803 s wall, 48,774 CPU-s, four arms x 256 games); compare and analysis 21:52:47. Wall 8,561 s from launch to analysis including the 3,162 s stall. CPU seconds and peak RSS are the sums and maximum of the per-stage kernel rusage rows in rusage.jsonl (gates counted twice, once per launch). The web console was built concurrently at nice 15 for about a minute of the main run; timings are not timing-grade, ratios between arms on identical seeds are the trustworthy quantity."
   },
-  "exitCode": null,
-  "stopReason": null,
+  "exitCode": 0,
+  "stopReason": "completed: main run spent its 4e9-move budget (20 validation points), candidate frozen at the best validation point (1,400,240,319 moves), held-out screen played once, compare and analysis written",
   "artifactRefs": [
+    "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/gates.log",
+    "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/selection.json",
+    "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/<A..F>/{config.json,progress.jsonl,val-*.json,best.json}",
+    "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/{config.json,progress.jsonl,val-*.json,best.json,candidate-weights.sha256,best-weights.bin,latest-weights.bin,checkpoint.bin,DONE}",
+    "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/screen/heldout.json",
+    "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/screen/compare-*.json",
+    "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/analysis.json",
+    "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/analysis.md",
+    "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/rusage.jsonl",
     "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pipeline.log",
-    "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/rusage.jsonl"
+    "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/chain.nohup",
+    "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/manifest.json"
   ],
   "contributionIds": [
     "CT-20260905T192505Z-c487efca"

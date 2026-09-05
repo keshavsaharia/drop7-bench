@@ -2,8 +2,8 @@
 title: Row and column lookup tables, learned from a billion moves
 family: ntuple-rl
 summary: A lookup-table evaluator that reads every full row and full column of the board as one pattern, learns its numbers by temporal-difference play on the Rust engine, and replaces the hand-written leaf inside the depth-3 fair search.
-status: preregistered
-evidence: none
+status: completed
+evidence: repository-verified
 reads: public
 kind: strategy
 technique: n-tuple
@@ -83,13 +83,38 @@ learned number serves every column that leads to the same board.
 
 <NTupleStatus run="RUN-20260905T193006Z-4fbeb4e5" />
 
-The run is in progress. The figures below are cut from the run's own
-artifacts and update as new snapshots are taken; the numbers on them are
-training-role validation numbers until the screen section says otherwise.
+On 256 never-read paired games, the tables as the leaf of the depth-3 search
+averaged 484,577 points and 140 moves. The same search with the frozen fair
+leaf averaged 314,438 points and 93 moves on the identical games. The paired
+difference is 170,139 points with a bootstrap 95% lower bound of 130,499,
+both halves of the block positive, 167 wins to 89, and a higher lower
+quartile, so every criterion of the preregistered gate passes
+([RS-20260905T215332Z-95d18a5a](/results/RS-20260905T215332Z-95d18a5a), run
+valid, outcome pass, screen tier on public development seeds). This is the
+first learned evaluator on this site to beat the hand-written leaf inside the
+same search.
 
-<NTuplePilotFigure run="RUN-20260905T193006Z-4fbeb4e5" caption="Stage A. Each bar is one configuration's paired margin over the fair leaf on the 64-game training-role validation block after two hundred million training moves, with its bootstrap bounds and detection floor. These games chose the configuration, so they cannot confirm it." />
+The screen also carried two arms that were never part of the gate. The fair
+leaf at depth 4, the program's standing reference, averaged 377,803 on the
+same games, and the tables at depth 3 beat it by 106,775 paired with a lower
+bound of 62,574. The tables played directly one ply averaged 281,441 and lost
+to the fair leaf at depth 3 by 32,997, so the search over the tables is worth
+about 200,000 points on these games.
 
-<NTupleTrainingFigure run="RUN-20260905T193006Z-4fbeb4e5" caption="Stage B. The selected configuration trained from scratch. The solid line is the tables as the leaf of the depth-3 search on the 64 validation games; the dashed line is the frozen fair leaf in the same search on the same games; the thin lines are the tables played directly and the training games themselves. The point marked as frozen is the candidate the screen plays." />
+<NTuplePilotFigure run="RUN-20260905T193006Z-4fbeb4e5" caption="Stage A. Each bar is one configuration's paired margin over the fair leaf on the 64-game training-role validation block after two hundred million training moves, with its bootstrap bounds and detection floor. Arm E, windows only, is the mechanism ablation: without the full-line tuples the tables lose to the fair leaf. These games chose the configuration, so they cannot confirm it." />
+
+The pilot picked arm C, every table family conditioned on the rise clock, at
+a final validation margin of 123,950. The two arms without rise-phase column
+tables, and the windows-only arm, all lost to the fair leaf on the validation
+block; the arms with full rows and columns all beat it.
+
+<NTupleTrainingFigure run="RUN-20260905T193006Z-4fbeb4e5" caption="Stage B. Arm C trained from scratch for four billion moves. The solid line is the tables as the leaf of the depth-3 search on the 64 validation games; the dashed line is the frozen fair leaf in the same search on the same games; the thin lines are the tables played directly and the training games themselves. Every one of the twenty validation points is above the fair leaf; the point at 1.4 billion moves, the largest margin, was frozen as the candidate." />
+
+The main run trained for four billion moves in 42 minutes, about 46 million
+one-ply games, and all twenty validation points beat the fair leaf. The
+margin on the 64-game block was noisy from point to point, between 116,000
+and 270,000, and the largest, at 1.4 billion moves, became the candidate.
+About 99 million of the billion table entries had been updated at that point.
 
 <NTupleScreenFigure run="RUN-20260905T193006Z-4fbeb4e5" caption="Stage D, the primary contrast. One bar per held-out game: the candidate as the depth-3 leaf minus the frozen fair leaf in the same search on the same seed, in seed order. The dashed line is the recorded paired mean and the divider separates the two halves the gate checks separately." />
 
@@ -99,7 +124,22 @@ training-role validation numbers until the screen section says otherwise.
 
 ## What we learned
 
-This section is written when the screen has been played.
+The evaluator was the bottleneck, and a lookup table can be a better one than
+eighteen hand-written terms once it can see whole lines. Each part of the
+recipe was needed: the windows-only arm lost, the arms without rise-phase
+column tables lost, and the tables played without any search lost too. What
+worked was full rows and columns, conditioned on the rise clock, learned from
+the engine's own returns at a scale of billions of moves, and then placed
+inside the fair chance-averaging search, which turned a one-ply policy that
+trails the fair leaf into a leaf that beats the depth-4 reference.
+
+The result is a screen-tier finding on 256 public development games. It is
+not a qualification, and a mean near 485,000 is still less than half the
+million-point target. The candidate also won on the training-role block by
+more than it won on the screen, which is the selection bias the screen
+exists to measure. The open question is how far the same tables carry when
+the search around them goes one ply deeper, and whether a fresh block played
+by a different runner reproduces the margin.
 
 <AgentContext summary="Records and provenance">
 
@@ -134,6 +174,48 @@ approaches/ntuple-rl/ntuple-scale/build.sh
 cd approaches/ntuple-rl/ntuple-scale && cargo test --release
 RUN_ID=RUN-... THREADS=32 scripts/pipeline.sh chain
 ```
+
+</AgentContext>
+
+<AgentContext summary="Full results table">
+
+Held-out screen, 256 paired games on `0xa52f2140`, 2,000-move cap, from
+`screen/heldout.json` and the compare.py reports
+([RS-20260905T215332Z-95d18a5a](/results/RS-20260905T215332Z-95d18a5a)):
+
+| arm | mean | median | Q25 | max | moves | clears/move | reveals/move |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| candidate-d3s7 | 484,577 | 407,474 | 212,820 | 2,295,869 | 140.21 | 2.1074 | 1.1899 |
+| candidate-1ply | 281,441 | 230,850 | 157,750 | 815,564 | 84.30 | 1.9217 | 1.0608 |
+| fair-d3s7 | 314,438 | 250,821 | 175,832 | 1,221,000 | 92.58 | 1.9848 | 1.1026 |
+| fair-d4s7 | 377,803 | 282,076 | 192,562 | 1,794,652 | 109.34 | 2.0492 | 1.1499 |
+
+| contrast | paired delta | bootstrap LB95 | t LB95 | UB95 | W-T-L | halves | floor |
+| --- | ---: | ---: | ---: | ---: | --- | --- | ---: |
+| candidate-d3s7 minus fair-d3s7 (gate) | +170,139 | +130,499 | +130,560 | +209,881 | 167-0-89 | +198,575 / +141,704 | 39,440 |
+| candidate-d3s7 minus fair-d4s7 | +106,775 | +62,574 | +61,891 | +151,706 | 160-0-96 | +109,211 / +104,338 | 44,724 |
+| candidate-1ply minus fair-d3s7 | -32,997 | -58,536 | -58,451 | -7,597 | 114-0-142 | -11,749 / -54,246 | 25,363 |
+| fair-d4s7 minus fair-d3s7 | +63,365 | +31,538 | +31,238 | +95,449 | 138-0-118 | +89,363 / +37,366 | 32,013 |
+| candidate-d3s7 minus candidate-1ply | +203,137 | +167,199 | +166,028 | +240,598 | 185-0-71 | +210,323 / +195,950 | 36,977 |
+
+Pilot arms, 2 x 10^8 training moves each, paired margin of the tables in
+d3s7 over fair-d3s7 on the 64-game training-role validation block
+(`pilot/<arm>/val-*.json`; the block's fair-d3s7 mean is 337,611):
+
+| arm | layout | alpha | entries | final margin | best margin |
+| --- | --- | ---: | ---: | ---: | ---: |
+| A | rows,cols,win23,win32,phase=cols | 1.0 | 480,000,000 | +95,051 | +170,874 |
+| B | rows,cols,win23,win32,phase=none | 1.0 | 200,000,000 | -70,587 | -35,091 |
+| C (selected) | rows,cols,win23,win32,phase=all | 1.0 | 1,000,000,000 | +123,950 | +123,950 |
+| D | rows,cols,phase=cols | 1.0 | 420,000,000 | +26,951 | +94,015 |
+| E (ablation) | win23,win32,phase=none | 1.0 | 60,000,000 | -83,261 | -80,696 |
+| F | rows,cols,win23,win32,phase=cols | 0.25 | 480,000,000 | +73,116 | +112,886 |
+
+Main run (arm C layout): 4,000,004,271 moves, 45,852,198 games, 2,497 s wall
+at a mean 1,956,636 moves per second, 20 validation points every 2 x 10^8
+moves, all with a positive paired margin (116,000 to 270,023); the candidate
+is the point at 1,400,240,319 moves (607,633 vs 337,611 on the block, 47-17),
+SHA-256 `0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b`.
 
 </AgentContext>
 

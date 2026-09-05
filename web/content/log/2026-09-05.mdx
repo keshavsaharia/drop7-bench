@@ -1,10 +1,10 @@
 ---
 date: 2026-09-05
 title: "Full-row and full-column lookup tables"
-summary: "A morning of reading settled that Drop7 is Markov in the public state, so a POMDP solver has nothing to add here. The afternoon built a lookup-table leaf that reads whole rows and columns, trained it by temporal-difference play on the Rust engine at 1.4 million moves per second, and started the preregistered pilot."
+summary: "A morning of reading settled that Drop7 is Markov in the public state, so a POMDP solver has nothing to add here. The afternoon built a lookup-table leaf that reads whole rows and columns, trained it by temporal-difference play on the Rust engine for four billion moves, and screened it: 484,577 points against 314,438 for the fair leaf in the same depth-3 search on 256 held-out games, the first learned evaluator to pass its gate."
 contributors: [claude-fable-5-1 (Claude Code)]
 tags: [n-tuple, temporal-difference, leaf, rust, pomdp, pilot]
-outcomes: { positive: 0, negative: 0, open: 2 }
+outcomes: { positive: 4, negative: 2, open: 2 }
 ---
 
 ## Is it a POMDP?
@@ -71,10 +71,97 @@ mean score rose from 117,500 to 162,186 over the four chunks of that run
 (one-ply play, no search).
 </Finding>
 
-<Direction title="The pipeline is running" status="running" owner="claude-fable-5-1 (Claude Code)">
-The CHECK gates passed at 19:30 UTC and the six pilot arms started. The
-[approach page](/approach/ntuple-rl/ntuple-scale) shows the run's status
-strip, the pilot arms, the main run's validation curve and, once played, the
-one-shot 256-game screen; each figure is cut from the run's artifacts by the
-snapshot script and refreshed as the run advances.
+## The pilot
+
+Six configurations each trained for two hundred million moves on the same
+seed order and were placed as the leaf of the depth-3 search on the 64-game
+training-role validation block. Run `RUN-20260905T193006Z-4fbeb4e5`, pilot
+artifacts under `pilot/<arm>/`.
+
+<ArmTable
+  caption="Pilot arms after two hundred million training moves: paired margin of the tables inside the depth-3 search over the frozen fair leaf in the same search, 64 training-role games. From analysis.json of the run."
+  columns={[
+    { key: "arm", label: "arm" },
+    { key: "layout", label: "layout" },
+    { key: "alpha", label: "step size", numeric: true },
+    { key: "entries", label: "table entries", numeric: true },
+    { key: "final", label: "final margin", numeric: true, delta: true },
+    { key: "best", label: "best margin", numeric: true, delta: true },
+  ]}
+  rows={[
+    { arm: "A", layout: "rows, columns, windows; phase on columns", alpha: "1.0", entries: "480,000,000", final: "+95,051", best: "+170,874" },
+    { arm: "B", layout: "rows, columns, windows; no phase", alpha: "1.0", entries: "200,000,000", final: "-70,587", best: "-35,091" },
+    { arm: "C", layout: "rows, columns, windows; phase on all", alpha: "1.0", entries: "1,000,000,000", final: "+123,950", best: "+123,950", highlight: true },
+    { arm: "D", layout: "rows and columns only; phase on columns", alpha: "1.0", entries: "420,000,000", final: "+26,951", best: "+94,015" },
+    { arm: "E", layout: "windows only; no phase", alpha: "1.0", entries: "60,000,000", final: "-83,261", best: "-80,696" },
+    { arm: "F", layout: "rows, columns, windows; phase on columns", alpha: "0.25", entries: "480,000,000", final: "+73,116", best: "+112,886" },
+  ]}
+/>
+
+<Finding title="Full rows and columns are what matters, and the rise clock has to be in the tables" kind="positive" metric="windows only -83,261; no phase -70,587; full layout with phase +95,051 to +123,950">
+The windows-only arm, the mechanism ablation, lost to the fair leaf on the
+validation block, and so did the arm whose column tables ignored the rise
+clock. Every arm with full rows and columns and phase-conditioned column
+tables beat the fair leaf. The preregistered rule picked arm C, every family
+conditioned on the rise clock, at a final margin of 123,950.
+</Finding>
+
+<DeadEnd title="The chain stalled for 52 minutes on an empty file" cost="52 min of wall time, no seed" verdict="closed">
+The stage that picks the arm redirected its output to selection.json, which
+created the file empty before the analysis script read it, and the script
+crashed parsing it. Nothing was re-read and no artifact was rewritten; the
+stage now writes through a temporary file and the chain was relaunched from
+the selection.
+</DeadEnd>
+
+## The main run and the screen
+
+Arm C trained from scratch for four billion moves in 42 minutes at about
+two million moves per second, about 46 million one-ply games, with a
+validation point every two hundred million moves.
+
+<Finding title="All twenty validation points beat the fair leaf" kind="positive" metric="margins from +115,925 to +270,023; candidate at 1.4 billion moves">
+Every validation point of the main run had the tables ahead of the fair leaf
+inside the same depth-3 search on the 64 training-role games. The margins
+were noisy from point to point and did not settle; the largest, 270,023 at
+1.4 billion moves (607,633 against 337,611, 47 wins to 17), was frozen as the
+candidate, SHA-256 recorded before the screen lease opened. About 99 million
+of the billion table entries had been updated by then.
+</Finding>
+
+<Finding title="The screen passes: 484,577 against 314,438 on 256 held-out games" kind="positive" metric="+170,139 paired, bootstrap lower bound +130,499, 167-0-89">
+On the 256 never-read public-development games (`0xa52f2140`), the tables as
+the depth-3 leaf averaged 484,577 points and 140.21 moves; the identical
+search with the frozen fair leaf averaged 314,438 and 92.58. The paired
+difference is 170,139 with a bootstrap 95% lower bound of 130,499 and a
+Student-t lower bound of 130,560, both halves positive (198,575 and
+141,704), lower quartile 212,820 against 175,832, and no illegal or
+incomplete decision in any arm. Every preregistered criterion passes
+(`RS-20260905T215332Z-95d18a5a`, run valid, outcome pass, screen tier).
+</Finding>
+
+<Finding title="It also beats the depth-4 reference on the same games" kind="positive" metric="+106,775 paired against fair-d4s7, lower bound +62,574">
+The fair leaf at depth 4, the program's standing reference, averaged 377,803
+on the same seeds, and the tables at depth 3 beat it by 106,775 (bootstrap
+lower bound 62,574, 160 wins to 96). This arm was diagnostic and never part
+of the gate. On these seeds fair-d4s7 itself beat fair-d3s7 by 63,365.
+</Finding>
+
+<Finding title="The tables need the search: played directly they lose" kind="negative" metric="281,441 one ply, -32,997 against fair-d3s7">
+The same tables played directly one ply averaged 281,441 and lost to the fair
+leaf's depth-3 search by 32,997. The search over the tables is worth 203,137
+paired on these games. This is the opposite of the optimistic-phase result
+of an earlier n-tuple, where search made the network worse; the difference is
+that this search averages over chance instead of following one guessed
+outcome.
+</Finding>
+
+<Direction title="What the record supports next" status="proposed" owner="claude-fable-5-1 (Claude Code)">
+A fresh-block replication by a different runner; the same frozen tables
+inside the depth-4 search on a fresh development block, which the leaf cost
+makes affordable and which was never run; and a longer or wider training run,
+since the validation margins were still noisy rather than plateaued. None of
+these opens a protected or final seed. The
+[approach page](/approach/ntuple-rl/ntuple-scale) carries the run's figures
+and the full results table.
 </Direction>

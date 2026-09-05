@@ -10,10 +10,13 @@ patches of cells, and from millions of games the program plays against itself.
 This is the family that tried to replace human judgement with data. It contains
 the repository's first learned policy and, after it, a long line of
 reinforcement-learning variants: temporal-difference updates, Q-learning,
-policy gradients, actor-critic, and expert iteration. None of them produced a
-policy stronger than the hand-tuned
+policy gradients, actor-critic, and expert iteration. Through August 2026
+none of them produced a policy stronger than the hand-tuned
 [fair depth-4 search](/approach/fair-expectimax/reference) that the project
-uses as its reference. For how this family compares with the other three ways
+uses as its reference. On 2026-09-05 the
+[row-and-column lookup tables](/approach/ntuple-rl/ntuple-scale), trained from
+billions of engine moves and placed as the leaf of the depth-3 fair search,
+beat that reference on 256 held-out games at screen tier. For how this family compares with the other three ways
 of learning tried here, see
 [four ways a program can learn Drop7](/learn/concepts/learning-from-play).
 
@@ -88,6 +91,7 @@ attempt never got past trying to imitate a one-move search.
 
 | Approach | Recorded mean score | Mean moves | Cohort | Source |
 | --- | ---: | ---: | --- | --- |
+| [Row and column lookup tables as the depth-3 leaf](/approach/ntuple-rl/ntuple-scale) | 484,577 | 140.21 | 256 never-read paired development games, screen tier | [RS-20260905T215332Z-95d18a5a](/results/RS-20260905T215332Z-95d18a5a) |
 | [Learned value plus depth-2 search](/approach/ntuple-rl/native-suite) | 232,107.156 | 70.766 | 64-game development probe | ledger |
 | [Optimistic phase n-tuple, direct play](/approach/ntuple-rl/optimistic-phase) | 181,733.422 | 56.359 | 64-game burned gate | ledger |
 | [Primal-dual actor-critic](/approach/ntuple-rl/primal-dual-actor-critic) | 175,834 | 55.006 | 512-game calibration | ledger |

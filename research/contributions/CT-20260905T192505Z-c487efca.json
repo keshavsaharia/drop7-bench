@@ -13,6 +13,34 @@
     {
       "role": "conceptualization",
       "degree": "lead"
+    },
+    {
+      "role": "methodology",
+      "degree": "lead"
+    },
+    {
+      "role": "software",
+      "degree": "lead"
+    },
+    {
+      "role": "investigation",
+      "degree": "lead"
+    },
+    {
+      "role": "formal-analysis",
+      "degree": "lead"
+    },
+    {
+      "role": "visualization",
+      "degree": "lead"
+    },
+    {
+      "role": "writing",
+      "degree": "lead"
+    },
+    {
+      "role": "compute",
+      "degree": "lead"
     }
   ],
   "summary": "Designed and implemented the ntuple-scale approach (approaches/ntuple-rl/ntuple-scale): pattern indexing straight from the Rust engine's packed column words, the lookup-table model with temporal-coherence TD updates, the one-ply chance-state training policy, the game harness, and the train/gate/screen binaries; registered the theory, experiment and seed leases; ran the CHECK gates, the pilot configuration arms, the main training run and the one-shot screen; wrote the result record, the approach page, the web progress figures and the research-log entry.",
@@ -22,14 +50,48 @@
   "experimentIds": [
     "EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620"
   ],
-  "runIds": [],
-  "artifactPaths": [],
-  "commitShas": [],
-  "validationPerformed": [],
+  "runIds": [
+    "RUN-20260905T193006Z-4fbeb4e5"
+  ],
+  "artifactPaths": [
+    "approaches/ntuple-rl/ntuple-scale/",
+    "research/theories/TH-20260905-ntuple-line-tuples-tc-td-leaf-bcb25133.json",
+    "research/experiments/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620.json",
+    "research/seeds/leases/SL-20260905T191317Z-09895ea2.json",
+    "research/seeds/leases/SL-20260905T191317Z-549265de.json",
+    "research/seeds/leases/SL-20260905T191317Z-c25f58cd.json",
+    "research/runs/RUN-20260905T193006Z-4fbeb4e5.json",
+    "research/results/RS-20260905T215332Z-95d18a5a.json",
+    "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/manifest.json",
+    "web/components/NTupleScale.tsx",
+    "web/components/charts/NTupleCharts.tsx",
+    "web/scripts/extract-ntuple-scale.ts",
+    "web/lib/charts/ntuple-scale.ts",
+    "web/content/figures/ntuple-scale/RUN-20260905T193006Z-4fbeb4e5.json",
+    "web/content/log/2026-09-05.mdx"
+  ],
+  "commitShas": [
+    "146abdb12170e85228189f3c2f7ebf71a072d291",
+    "db9a23449cd76a02bcaaa1ae6b78be6b2a2df0ec",
+    "d53a5af7c82c6c6c0b53fe3b9d986e1557a88c9d",
+    "bd87dba01f26a98299fadd8f0372cd1f1364c9d6",
+    "658f0c7335c1197909ec80f283b98450330fc84e",
+    "33240869c8a7320448dd67cb719209437233aca1",
+    "dfa62b4e57bebc47c04a8660dbd3b472aafde00a",
+    "41009f2a86df14eae086a7f83627c7de700eae2d"
+  ],
+  "validationPerformed": [
+    "cargo test --release (10 unit tests)",
+    "gate binary: 15 CHECK gates on the probe block, all PASS (gates.log)",
+    "make research-validate (no errors on this experiment's records; 23 pre-existing errors concern other contributors' missing runs/ artifacts)",
+    "node web/scripts/check-mdx.mjs, node scripts/check-approach-frontmatter.mjs, node web/scripts/check-figures.mjs, npx tsc --noEmit, npm run lint, npm run build under web/",
+    "analyze.py evaluated the preregistered gate from the screen artifact; compare.py reports written for five contrasts"
+  ],
   "limitations": [
-    "Self-reported contribution; not yet independently reviewed."
+    "Self-reported contribution; not yet independently reviewed.",
+    "The direction was chosen by the repository owner from a ranked list the model produced earlier the same day; the owner set the branch, the Rust and column-packing requirements and the reporting cadence."
   ],
   "selfReported": true,
   "reviewedBy": null,
-  "recordedAt": "2026-09-05T19:25:05Z"
+  "recordedAt": "2026-09-05T21:55:18Z"
 }
