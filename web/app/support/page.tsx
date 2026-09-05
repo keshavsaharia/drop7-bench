@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { AppSupportContent } from "@/components/AppSupportContent";
 
 export const metadata: Metadata = {
-  title: "App support | Drop7 Research",
+  title: "App support",
   description: "Get help with Drop7 Research, report a problem, or find answers about games, replays, competitions, and privacy.",
   alternates: { canonical: "https://drop7.dev/support" },
   openGraph: {
