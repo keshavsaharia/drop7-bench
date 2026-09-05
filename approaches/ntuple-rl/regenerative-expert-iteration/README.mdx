@@ -5,6 +5,8 @@ summary: Learn from the strongest search, play with the result, and repeat. Afte
 status: rejected
 evidence: ledger-recorded
 reads: public
+kind: strategy
+technique: oracle-distillation
 ---
 
 Start from the strongest known search, learn from its games, play with what you
@@ -20,7 +22,7 @@ search better, and the cycle repeats. It is called **expert iteration**, and
 each turn of the loop is supposed to lift both parts.
 
 Here the expert is the repository's
-[fair depth-4 search](/approaches/fair-expectimax/reference) and the student is
+[fair depth-4 search](/approach/fair-expectimax/reference) and the student is
 a recurrent evaluator of public positions. Two design choices distinguish it
 from the rest of the family.
 

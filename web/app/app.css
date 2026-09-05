@@ -1,0 +1,170 @@
+/*
+ * Scoped blocks shared by the leaderboard, competition, play and source
+ * routes and by the interactive game components. Everything that is only a
+ * colour or a spacing choice stays on the Tailwind token utilities generated
+ * from the `@theme static` block in globals.css; a rule lands here when it
+ * needs a state selector, a tint, or a shape that a utility cannot express.
+ *
+ * Tokens only. Every transition below stops under prefers-reduced-motion.
+ */
+
+/* An inline mono chip for a checksum or a path inside a page lead. */
+.app-code {
+  border-radius: var(--radius-sm);
+  background: var(--color-raised);
+  padding: 0.1em 0.4em;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  color: var(--color-ink-1);
+}
+
+/* Filter chips: the leaderboard's game row and its player row. The current
+   chip carries the accent; the rest stay quiet until hovered. */
+.app-chip {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--color-rule);
+  border-radius: 9999px;
+  padding: 0.3rem 0.75rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--color-ink-3);
+  text-decoration: none;
+  transition:
+    color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard);
+}
+.app-chip:hover {
+  border-color: var(--color-rule-strong);
+  color: var(--color-ink-1);
+}
+.app-chip[aria-current="page"] {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+/* Whether a leaderboard row was played by a person or by a policy. The
+   accent marks the computer entries; people stay neutral. */
+.app-kind {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-xs);
+  padding: 0.15rem 0.4rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--color-ink-2);
+  background: var(--color-hover);
+}
+.app-kind[data-kind="ai"] {
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+/* Result and error notices. `invalid` and a failed request are the only
+   places the danger colour is allowed; a completed submission uses the
+   status colour the badges already use for `completed`. */
+.app-notice {
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  padding: 0.9rem 1rem;
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+  color: var(--color-ink-1);
+}
+.app-notice--error {
+  border-color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+  color: var(--color-danger);
+}
+.app-notice--success {
+  border-color: var(--color-status-completed);
+  background: var(--color-status-completed-bg);
+}
+.app-notice-mark {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: var(--color-status-completed);
+  color: var(--color-bg);
+  font-weight: 700;
+}
+
+/* The one move in a replay that crossed a level rise. */
+.app-level-rise {
+  margin-top: 0.625rem;
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  background: var(--color-accent-soft);
+  padding: 0.5rem 0.75rem;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
+/* The two replay toggles (animations, running total). */
+.app-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid var(--color-rule-strong);
+  border-radius: 9999px;
+  padding: 0.35rem 0.65rem;
+  font-size: var(--text-label);
+  font-weight: 600;
+  color: var(--color-ink-1);
+  background: transparent;
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease-standard);
+}
+.app-switch:hover {
+  border-color: var(--color-ink-4);
+}
+.app-switch-track {
+  position: relative;
+  display: inline-block;
+  width: 1.75rem;
+  height: 1rem;
+  border-radius: 9999px;
+  background: var(--color-rule-strong);
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+.app-switch[aria-checked="true"] .app-switch-track {
+  background: var(--color-accent-strong);
+}
+.app-switch-knob {
+  position: absolute;
+  top: 0.125rem;
+  left: 0.125rem;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  background: var(--color-ink);
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+.app-switch[aria-checked="true"] .app-switch-knob {
+  transform: translateX(0.75rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-chip,
+  .app-switch,
+  .app-switch-track,
+  .app-switch-knob {
+    transition: none !important;
+  }
+}

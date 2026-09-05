@@ -1,0 +1,158 @@
+/* fair-expectimax/phase-fair-combination card art: the five drops before the
+   next rise go out one at a time and the phase residual stacked on the fixed
+   base grows with each one; on the last the board rises, the new row of covers
+   arrives, the clock resets and the residual returns to its resting height.
+   Play-state is owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-phase-fair-combination {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-phase-fair-combination [data-anim="pip-1"] {
+  animation-name: tart-approach-phase-fair-combination-pip-1;
+}
+.tart--approach-phase-fair-combination [data-anim="pip-2"] {
+  animation-name: tart-approach-phase-fair-combination-pip-2;
+}
+.tart--approach-phase-fair-combination [data-anim="pip-3"] {
+  animation-name: tart-approach-phase-fair-combination-pip-3;
+}
+.tart--approach-phase-fair-combination [data-anim="pip-4"] {
+  animation-name: tart-approach-phase-fair-combination-pip-4;
+}
+.tart--approach-phase-fair-combination [data-anim="pip-5"] {
+  animation-name: tart-approach-phase-fair-combination-pip-5;
+}
+.tart--approach-phase-fair-combination [data-anim="residual"] {
+  animation-name: tart-approach-phase-fair-combination-residual;
+  transform-box: fill-box;
+  transform-origin: center bottom;
+}
+.tart--approach-phase-fair-combination [data-anim="rise"] {
+  animation-name: tart-approach-phase-fair-combination-rise;
+}
+.tart--approach-phase-fair-combination [data-anim="rise-row"] {
+  animation-name: tart-approach-phase-fair-combination-rise-row;
+}
+
+@keyframes tart-approach-phase-fair-combination-pip-5 {
+  0%,
+  3.27% {
+    opacity: 1;
+  }
+  6.55%,
+  39.27% {
+    opacity: 0.12;
+  }
+  44.73%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-phase-fair-combination-pip-4 {
+  0%,
+  10.91% {
+    opacity: 1;
+  }
+  14.18%,
+  39.27% {
+    opacity: 0.12;
+  }
+  44.73%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-phase-fair-combination-pip-3 {
+  0%,
+  18.55% {
+    opacity: 1;
+  }
+  21.82%,
+  39.27% {
+    opacity: 0.12;
+  }
+  44.73%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-phase-fair-combination-pip-2 {
+  0%,
+  26.18% {
+    opacity: 1;
+  }
+  29.45%,
+  39.27% {
+    opacity: 0.12;
+  }
+  44.73%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-phase-fair-combination-pip-1 {
+  0%,
+  32.73% {
+    opacity: 1;
+  }
+  36%,
+  39.27% {
+    opacity: 0.12;
+  }
+  44.73%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-phase-fair-combination-residual {
+  0%,
+  4.36% {
+    transform: scaleY(1);
+  }
+  10.91%,
+  13.09% {
+    transform: scaleY(1.5);
+  }
+  19.64%,
+  21.82% {
+    transform: scaleY(2);
+  }
+  27.27%,
+  29.45% {
+    transform: scaleY(2.5);
+  }
+  34.91%,
+  39.27% {
+    transform: scaleY(3.2);
+  }
+  45.82%,
+  100% {
+    transform: scaleY(1);
+  }
+}
+@keyframes tart-approach-phase-fair-combination-rise {
+  0%,
+  38.18% {
+    transform: translateY(18px);
+  }
+  43.64%,
+  100% {
+    transform: translateY(0);
+  }
+}
+@keyframes tart-approach-phase-fair-combination-rise-row {
+  0%,
+  38.18% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  44.73%,
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -170,6 +170,29 @@ columns, and uses a conditional DynamoDB insert. Re-running an identical seed is
 a changed result under the same policy id is rejected and must use a versioned id. These
 single scripted-game scores are playground demonstrations, never research-tier evidence.
 
+A slow policy whose game was already played elsewhere (for example a multi-hour Rust
+depth-6 game from a larger machine, saved by `just play-round` under `runs/BENCH-*/`) is
+imported rather than re-run:
+
+```sh
+npm run competition -- seed \
+  --stage production \
+  --profile personal-deploy \
+  --replay runs/<run-id>/replays/<policy>--<round>.json \
+  --source-revision <sha> \
+  --write
+```
+
+`--replay` reads the bench replay (the `drop7-leaderboard-v1` game record with its frames),
+checks that it names the competition's round and a registered policy, replays the recorded
+columns independently against the immutable round, and requires the replayed score, move
+count, censor flag, every per-move board, and the trajectory checksum to match the recording
+exactly. The policy itself never runs, so the import takes seconds. Because the game was not
+produced by this checkout, `--source-revision` must state the commit the producing machine had
+checked out (or the literal `unknown`), and the record omits the dirty-worktree flag rather
+than claiming one. The same conditional insert applies: an occupied policy slot is left alone
+when it already holds the identical result and rejected otherwise.
+
 The API rejects illegal, incomplete, or trailing choices. It conditionally inserts each
 validated run so the same user/game/move stream is idempotent. Client/server score
 mismatches remain valid submissions, but are flagged in DynamoDB and structured CloudWatch
@@ -224,14 +247,20 @@ same-named zone in another account.
 
 ## Analytics
 
-The site collects first-party page-view analytics. There is no analytics cookie, third-party
-analytics endpoint, or action tracking. Next.js `proxy.ts` records initial document requests
-and excludes prefetches, API calls, static assets, and the admin analytics route. A minimal
-first-party pathname hook reports client-side navigations that Next.js can otherwise serve
-entirely from its prefetch cache. In both cases, the server derives visitor fields from request
-headers and submits the compact JSON event directly to Amazon Data Firehose. Analytics
-delivery is best-effort: a Firehose or Secrets Manager failure is logged but never fails the
-page request.
+Drop7 uses a first-party analytics path for website page views and anonymous mobile-app
+interactions. There is no analytics cookie or third-party analytics endpoint. Next.js `proxy.ts`
+records initial document requests and excludes prefetches, API calls, static assets, and the
+admin analytics route. A minimal first-party pathname hook reports client-side navigations that
+Next.js can otherwise serve entirely from its prefetch cache. The mobile app keeps a durable,
+bounded local queue and sends at most 50 events per request. It flushes once per minute, when
+the queue fills, and when the app changes foreground state, so normal play does not invoke a
+Lambda for every interaction.
+
+The server submits page views with Firehose `PutRecord` and each app request with one
+`PutRecordBatch`, retrying only records Firehose rejects. Page-view delivery remains best-effort:
+a Firehose or Secrets Manager failure is logged but never fails the page request. The app event
+endpoint returns a retryable error when a batch cannot be delivered, and the app retains that
+batch locally for a later attempt.
 
 Each stage owns the complete analytics path:
 
@@ -250,13 +279,15 @@ AWS Glue managed optimizers compact the five-minute files and run snapshot reten
 orphan-file cleanup daily. They retain at least 10 snapshots and seven days of snapshot
 history; cleanup does not expire page-view rows that remain in the current table snapshot.
 
-The event schema records time, normalized page path, host, referrer hostname and channel,
-truncated user agent and accepted language, CloudFront country/region/city when present,
-coarse device/browser/OS families, bot classification, stage, and a pseudonymous visitor
-ID. It deliberately omits URL query strings, referrer paths and query strings, raw IP
-addresses, cookies, GitHub identity, and session identity. The visitor ID is an HMAC of the
-request address and user agent using the existing Auth.js secret; the source address is
-discarded before the event is sent.
+The shared event schema records event and receipt time, stage, source application/platform and
+version, a normalized screen, and a bounded JSON object of primitive event properties. Website
+rows also record normalized page path, referrer hostname and channel, truncated user agent and
+accepted language, CloudFront country/region/city when present, coarse device/browser/OS
+families, bot classification, and a pseudonymous visitor ID. It deliberately omits URL query
+strings, referrer paths and query strings, raw IP addresses, cookies, GitHub identity, account
+identity, device identity, replay/game IDs, and competition display names. Website visitor IDs
+are an HMAC of request address and user agent using the existing Auth.js secret; the source
+address is discarded before the event is sent. Mobile interaction rows do not have a visitor ID.
 
 `/analytics` and `/api/analytics/query` both require a GitHub Auth.js session whose handle
 matches `ADMIN_GITHUB_USERNAME`. Other signed-in users receive a 404. The page offers

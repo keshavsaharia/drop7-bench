@@ -1,0 +1,142 @@
+/* value-policy-learning/monte-carlo-value card art. Four replays leave the
+   same board and stop at four different lengths; their ends are drawn onto
+   one mean and the value bar grows to it. The subject is the average over
+   repeats, not any one game. Play-state is owned by the shared art.css. */
+
+.tart.tart--approach-monte-carlo-value {
+  --tart-motion: calc(var(--duration-art, 2400ms) * 1.4);
+}
+
+/* Four staggered replays and then the average, so a longer cycle. */
+.tart--approach-monte-carlo-value [data-anim] {
+  animation-duration: var(--tart-duration);
+}
+
+/* The value bar grows out of the state, and the mean line drops from the top. */
+.tart--approach-monte-carlo-value .value {
+  transform-box: fill-box;
+  transform-origin: left;
+}
+.tart--approach-monte-carlo-value .mean {
+  transform-box: fill-box;
+  transform-origin: top;
+}
+
+.tart--approach-monte-carlo-value [data-anim="fan"] {
+  animation-name: tart-approach-monte-carlo-value-fan;
+}
+.tart--approach-monte-carlo-value [data-anim="track-1"] {
+  animation-name: tart-approach-monte-carlo-value-track-1;
+}
+.tart--approach-monte-carlo-value [data-anim="track-2"] {
+  animation-name: tart-approach-monte-carlo-value-track-2;
+}
+.tart--approach-monte-carlo-value [data-anim="track-3"] {
+  animation-name: tart-approach-monte-carlo-value-track-3;
+}
+.tart--approach-monte-carlo-value [data-anim="track-4"] {
+  animation-name: tart-approach-monte-carlo-value-track-4;
+}
+.tart--approach-monte-carlo-value [data-anim="converge"] {
+  animation-name: tart-approach-monte-carlo-value-converge;
+}
+.tart--approach-monte-carlo-value [data-anim="mean"] {
+  animation-name: tart-approach-monte-carlo-value-mean;
+}
+.tart--approach-monte-carlo-value [data-anim="value"] {
+  animation-name: tart-approach-monte-carlo-value-value;
+}
+
+@keyframes tart-approach-monte-carlo-value-fan {
+  0%,
+  4% {
+    opacity: 0;
+  }
+  14%,
+  100% {
+    opacity: 1;
+  }
+}
+/* Each replay slides out of the same state and stops where its game ended. */
+@keyframes tart-approach-monte-carlo-value-track-1 {
+  0%,
+  10% {
+    opacity: 0;
+    transform: translateX(-14px);
+  }
+  20%,
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes tart-approach-monte-carlo-value-track-2 {
+  0%,
+  20% {
+    opacity: 0;
+    transform: translateX(-14px);
+  }
+  30%,
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes tart-approach-monte-carlo-value-track-3 {
+  0%,
+  30% {
+    opacity: 0;
+    transform: translateX(-14px);
+  }
+  40%,
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes tart-approach-monte-carlo-value-track-4 {
+  0%,
+  40% {
+    opacity: 0;
+    transform: translateX(-14px);
+  }
+  50%,
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes tart-approach-monte-carlo-value-converge {
+  0%,
+  54% {
+    opacity: 0;
+  }
+  68%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-monte-carlo-value-mean {
+  0%,
+  58% {
+    opacity: 0;
+    transform: scaleY(0.08);
+  }
+  72%,
+  100% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+@keyframes tart-approach-monte-carlo-value-value {
+  0%,
+  72% {
+    transform: scaleX(0.02);
+    opacity: 0;
+  }
+  90%,
+  100% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}

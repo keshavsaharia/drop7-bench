@@ -5,6 +5,8 @@ summary: The full-strength version uses 255 shared futures of 200 moves and chan
 status: rejected
 evidence: task-record only
 reads: public
+kind: strategy
+technique: rollout-policy-iteration
 ---
 
 The full-strength version of the family's idea: 255 shared imagined futures,
@@ -16,7 +18,7 @@ The full-strength version of the family's idea: 255 shared imagined futures,
 ## The intuition
 
 Its cheaper sibling,
-[public rollout policy iteration](/approaches/terminal-policy-iteration/public-rollout-policy-iteration),
+[public rollout policy iteration](/approach/terminal-policy-iteration/public-rollout-policy-iteration),
 compared columns with fifteen imagined futures over fifty moves and could not
 tell the good ones apart reliably enough to act. The obvious diagnosis is
 sampling noise, and the obvious remedy is more samples and a longer look: 255

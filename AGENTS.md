@@ -37,7 +37,18 @@ To prepare, configure, launch, or scale a large training or simulation run
 stages that start on one workstation; a cluster never skips those stages.
 
 To add to or change the Next.js research console under `web/`, read
-`.agents/skills/drop7-web-console/SKILL.md`.
+`.agents/skills/drop7-web-console/SKILL.md`. Its
+`references/card-art.md` is the contract for the animated card art.
+
+To change a page's link preview, its OpenGraph or Twitter metadata, the
+sitemap, or any raster image asset under `web/public/`, read
+`.agents/skills/drop7-social-cards/SKILL.md`.
+
+Before writing or editing any prose a visitor will read (approach and family
+`README.mdx` pages, `web/content/**`, the research log, site copy in
+`web/app`), read `.agents/skills/drop7-writing-style/SKILL.md`. It fixes one
+voice for the site, the closed label vocabulary, the plain section titles, and
+the rule that agent-facing detail lives inside `<AgentContext>` accordions.
 
 At the end of any session that produced or consumed evidence, append to the
 daily research log at `web/content/log/YYYY-MM-DD.mdx` (one file per calendar

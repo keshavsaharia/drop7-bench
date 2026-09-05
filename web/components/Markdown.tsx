@@ -1,6 +1,7 @@
 import type { ComponentProps, ReactElement } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeSlug from "rehype-slug";
 import { Diagram } from "./Diagram";
 import { Figure } from "./Figure";
 import { RepoDocAnchor } from "./RepoDocAnchor";
@@ -85,12 +86,13 @@ function Pre({ node, children, ...props }: PreProps) {
   return <pre {...props}>{children as ReactElement}</pre>;
 }
 
-/** Renders a plain Markdown document (existing repo docs) with GFM tables. */
+/** Renders a plain Markdown document (existing repo docs) with GFM tables and heading ids. */
 export function Markdown({ source, fromPath }: { source: string; fromPath?: string }) {
   return (
     <div className="prose-drop7">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeSlug]}
         components={{
           a: ({ href, children, ...props }) => (
             <RepoDocAnchor href={href} fromPath={fromPath} {...props}>

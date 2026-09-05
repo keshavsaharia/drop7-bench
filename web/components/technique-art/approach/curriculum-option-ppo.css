@@ -1,0 +1,80 @@
+/* ntuple-rl/curriculum-option-ppo card art. Each starting position lights in
+   turn and sends one episode into the round below it: the opening board fills
+   the round's first half, the restart position fills the second, so the bar
+   ends up half from each. Play-state is owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-curriculum-option-ppo {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-curriculum-option-ppo .half {
+  transform-box: fill-box;
+  transform-origin: 0% 50%;
+}
+.tart--approach-curriculum-option-ppo .half--right {
+  transform-origin: 100% 50%;
+}
+
+.tart--approach-curriculum-option-ppo [data-anim="flash-opening"] {
+  animation-name: tart-approach-curriculum-option-ppo-flash-opening;
+}
+.tart--approach-curriculum-option-ppo [data-anim="episode-opening"] {
+  animation-name: tart-approach-curriculum-option-ppo-episode-opening;
+}
+.tart--approach-curriculum-option-ppo [data-anim="fill-opening"] {
+  animation-name: tart-approach-curriculum-option-ppo-fill-opening;
+}
+.tart--approach-curriculum-option-ppo [data-anim="flash-restart"] {
+  animation-name: tart-approach-curriculum-option-ppo-flash-restart;
+}
+.tart--approach-curriculum-option-ppo [data-anim="episode-restart"] {
+  animation-name: tart-approach-curriculum-option-ppo-episode-restart;
+}
+.tart--approach-curriculum-option-ppo [data-anim="fill-restart"] {
+  animation-name: tart-approach-curriculum-option-ppo-fill-restart;
+}
+.tart--approach-curriculum-option-ppo [data-anim="caption"] {
+  animation-name: tart-approach-curriculum-option-ppo-caption;
+}
+
+/* The opening board is chosen, and its episode drops into the first half. */
+@keyframes tart-approach-curriculum-option-ppo-flash-opening {
+  0% { opacity: 0; }
+  4.36%, 10.91% { opacity: 1; }
+  16.36%, 100% { opacity: 0; }
+}
+@keyframes tart-approach-curriculum-option-ppo-episode-opening {
+  0%, 6.55% { transform: translate(-43.5px, -22px); opacity: 0; }
+  9.82% { transform: translate(-43.5px, -22px); opacity: 1; }
+  18.55% { transform: translate(0, 0); opacity: 1; }
+  21.82%, 100% { transform: translate(0, 0); opacity: 0; }
+}
+@keyframes tart-approach-curriculum-option-ppo-fill-opening {
+  0%, 16.36% { transform: scaleX(0); }
+  24%, 100% { transform: scaleX(1); }
+}
+
+/* Then the restart position is chosen, and its episode fills the second half. */
+@keyframes tart-approach-curriculum-option-ppo-flash-restart {
+  0%, 24% { opacity: 0; }
+  28.36%, 33.82% { opacity: 1; }
+  38.18%, 100% { opacity: 0; }
+}
+@keyframes tart-approach-curriculum-option-ppo-episode-restart {
+  0%, 27.27% { transform: translate(43.5px, -22px); opacity: 0; }
+  30.55% { transform: translate(43.5px, -22px); opacity: 1; }
+  39.27% { transform: translate(0, 0); opacity: 1; }
+  42.55%, 100% { transform: translate(0, 0); opacity: 0; }
+}
+@keyframes tart-approach-curriculum-option-ppo-fill-restart {
+  0%, 37.09% { transform: scaleX(0); }
+  44.73%, 100% { transform: scaleX(1); }
+}
+
+@keyframes tart-approach-curriculum-option-ppo-caption {
+  0%, 46.91% { opacity: 0; }
+  52.36%, 100% { opacity: 1; }
+}

@@ -1,0 +1,67 @@
+/* d4-long-outcome/d4-distillation card art. The tree dims one ply at a time,
+   deepest first, and each ply travels out of the search and lands as one
+   layer of the folded model; the folded model then names a column without
+   expanding anything. Play-state is owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-d4-distillation {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-d4-distillation [data-anim="ply-1"] { animation-name: tart-approach-d4-distillation-ply-1; }
+.tart--approach-d4-distillation [data-anim="ply-2"] { animation-name: tart-approach-d4-distillation-ply-2; }
+.tart--approach-d4-distillation [data-anim="ply-3"] { animation-name: tart-approach-d4-distillation-ply-3; }
+.tart--approach-d4-distillation [data-anim="ply-4"] { animation-name: tart-approach-d4-distillation-ply-4; }
+.tart--approach-d4-distillation [data-anim="plate-1"] { animation-name: tart-approach-d4-distillation-plate-1; }
+.tart--approach-d4-distillation [data-anim="plate-2"] { animation-name: tart-approach-d4-distillation-plate-2; }
+.tart--approach-d4-distillation [data-anim="plate-3"] { animation-name: tart-approach-d4-distillation-plate-3; }
+.tart--approach-d4-distillation [data-anim="plate-4"] { animation-name: tart-approach-d4-distillation-plate-4; }
+.tart--approach-d4-distillation [data-anim="pick"] { animation-name: tart-approach-d4-distillation-pick; }
+.tart--approach-d4-distillation [data-anim="caption"] { animation-name: tart-approach-d4-distillation-caption; }
+
+/* The plies fade to the ghost the resting frame keeps, deepest first. */
+@keyframes tart-approach-d4-distillation-ply-4 {
+  0%, 9.82% { opacity: 1; }
+  17.45%, 100% { opacity: 0.3; }
+}
+@keyframes tart-approach-d4-distillation-ply-3 {
+  0%, 14.18% { opacity: 1; }
+  21.82%, 100% { opacity: 0.3; }
+}
+@keyframes tart-approach-d4-distillation-ply-2 {
+  0%, 18.55% { opacity: 1; }
+  26.18%, 100% { opacity: 0.3; }
+}
+@keyframes tart-approach-d4-distillation-ply-1 {
+  0%, 22.91% { opacity: 1; }
+  30.55%, 100% { opacity: 0.3; }
+}
+
+/* Each layer leaves its own ply of the tree and lands in the stack. */
+@keyframes tart-approach-d4-distillation-plate-4 {
+  0%, 13.09% { transform: translate(-99px, 21px); opacity: 0; }
+  21.82%, 100% { transform: translate(0, 0); opacity: 1; }
+}
+@keyframes tart-approach-d4-distillation-plate-3 {
+  0%, 17.45% { transform: translate(-99px, 8px); opacity: 0; }
+  26.18%, 100% { transform: translate(0, 0); opacity: 1; }
+}
+@keyframes tart-approach-d4-distillation-plate-2 {
+  0%, 21.82% { transform: translate(-99px, -5px); opacity: 0; }
+  30.55%, 100% { transform: translate(0, 0); opacity: 1; }
+}
+@keyframes tart-approach-d4-distillation-plate-1 {
+  0%, 26.18% { transform: translate(-99px, -18px); opacity: 0; }
+  34.91%, 100% { transform: translate(0, 0); opacity: 1; }
+}
+
+@keyframes tart-approach-d4-distillation-pick {
+  0%, 34.91% { opacity: 0; }
+  42.55%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-d4-distillation-caption {
+  0%, 42.55% { opacity: 0; }
+  49.09%, 100% { opacity: 1; }
+}

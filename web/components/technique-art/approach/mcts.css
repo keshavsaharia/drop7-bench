@@ -1,0 +1,80 @@
+/* tree-search/mcts card art. One iteration in four phases: the accent path
+   draws itself down to the frontier, a node drops in below it, a token runs
+   the greedy playout to the evaluated leaf, and the path fills from the new
+   node up to the root. Each phase name lights as its phase runs and stays
+   lit, so the resting frame is the whole iteration. Only stroke-dashoffset,
+   transform, opacity and fill animate; play-state is owned by art.css. */
+
+.tart--approach-mcts [data-anim="select"] { animation-name: tart-approach-mcts-select; }
+.tart--approach-mcts [data-anim="expand"] { animation-name: tart-approach-mcts-expand; }
+.tart--approach-mcts [data-anim="playout"] { animation-name: tart-approach-mcts-playout; }
+.tart--approach-mcts [data-anim="token"] { animation-name: tart-approach-mcts-token; }
+.tart--approach-mcts [data-anim="fill-added"] { animation-name: tart-approach-mcts-fill-added; }
+.tart--approach-mcts [data-anim="fill-inner"] { animation-name: tart-approach-mcts-fill-inner; }
+.tart--approach-mcts [data-anim="fill-outer"] { animation-name: tart-approach-mcts-fill-outer; }
+.tart--approach-mcts [data-anim="fill-root"] { animation-name: tart-approach-mcts-fill-root; }
+.tart--approach-mcts [data-anim="phase-select"] { animation-name: tart-approach-mcts-phase-select; }
+.tart--approach-mcts [data-anim="phase-expand"] { animation-name: tart-approach-mcts-phase-expand; }
+.tart--approach-mcts [data-anim="phase-simulate"] { animation-name: tart-approach-mcts-phase-simulate; }
+.tart--approach-mcts [data-anim="phase-back-up"] { animation-name: tart-approach-mcts-phase-back-up; }
+
+/* Select: the walk descends to the deepest stored node. 106 is the path length. */
+@keyframes tart-approach-mcts-select {
+  0%, 4% { stroke-dashoffset: 106; }
+  24%, 100% { stroke-dashoffset: 0; }
+}
+
+/* Expand: one new position is added where the walk left the tree. */
+@keyframes tart-approach-mcts-expand {
+  0%, 28% { opacity: 0; transform: translateY(-7px); }
+  40%, 100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Simulate: the greedy playout and the token that runs it to the leaf. */
+@keyframes tart-approach-mcts-playout {
+  0%, 44% { opacity: 0; }
+  56%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-mcts-token {
+  0%, 46% { transform: translate(-60px, -34px); opacity: 0; }
+  50% { transform: translate(-60px, -34px); opacity: 1; }
+  55% { transform: translate(-40px, -18px); opacity: 1; }
+  60% { transform: translate(-20px, -10px); opacity: 1; }
+  64%, 100% { transform: translate(0, 0); opacity: 1; }
+}
+
+/* Back up: the value fills the path from the new node to the root. */
+@keyframes tart-approach-mcts-fill-added {
+  0%, 64% { fill: var(--color-surface); }
+  68%, 100% { fill: var(--color-accent-strong); }
+}
+@keyframes tart-approach-mcts-fill-inner {
+  0%, 72% { fill: var(--color-surface); }
+  76%, 100% { fill: var(--color-accent-strong); }
+}
+@keyframes tart-approach-mcts-fill-outer {
+  0%, 80% { fill: var(--color-surface); }
+  84%, 100% { fill: var(--color-accent-strong); }
+}
+@keyframes tart-approach-mcts-fill-root {
+  0%, 88% { fill: var(--color-raised); }
+  92%, 100% { fill: var(--color-accent-strong); }
+}
+
+/* The phase list: each name lights on its own beat and stays lit. */
+@keyframes tart-approach-mcts-phase-select {
+  0%, 2% { fill: var(--color-ink-4); }
+  6%, 100% { fill: var(--color-accent); }
+}
+@keyframes tart-approach-mcts-phase-expand {
+  0%, 26% { fill: var(--color-ink-4); }
+  30%, 100% { fill: var(--color-accent); }
+}
+@keyframes tart-approach-mcts-phase-simulate {
+  0%, 42% { fill: var(--color-ink-4); }
+  46%, 100% { fill: var(--color-accent); }
+}
+@keyframes tart-approach-mcts-phase-back-up {
+  0%, 62% { fill: var(--color-ink-4); }
+  66%, 100% { fill: var(--color-accent); }
+}

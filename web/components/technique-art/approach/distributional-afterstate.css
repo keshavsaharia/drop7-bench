@@ -1,0 +1,54 @@
+/* afterstate-learning/distributional-afterstate card art. Every spread grows
+   from a single tick to its quantile bar, and then the seven columns slide
+   into the order those spreads imply. Each slot carries its own travel in
+   --dx, so one keyframe moves them all. Play-state is owned by art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-distributional-afterstate {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-distributional-afterstate [data-anim] {
+  animation-duration: var(--tart-duration);
+  animation-timing-function: var(--tart-ease, var(--ease-standard, cubic-bezier(0.2, 0, 0, 1)));
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+.tart--approach-distributional-afterstate .spread {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* Ordered by spread: 2, 5, 0, 4, 1, 6, 3. One slot is 44 units wide. */
+.tart--approach-distributional-afterstate .slot-0 { --dx: 88px; }
+.tart--approach-distributional-afterstate .slot-1 { --dx: 132px; }
+.tart--approach-distributional-afterstate .slot-2 { --dx: -88px; }
+.tart--approach-distributional-afterstate .slot-3 { --dx: 132px; }
+.tart--approach-distributional-afterstate .slot-4 { --dx: -44px; }
+.tart--approach-distributional-afterstate .slot-5 { --dx: -176px; }
+.tart--approach-distributional-afterstate .slot-6 { --dx: -44px; }
+
+.tart--approach-distributional-afterstate [data-anim="slot"] { animation-name: tart-approach-distributional-afterstate-slot; }
+.tart--approach-distributional-afterstate [data-anim="spread"] { animation-name: tart-approach-distributional-afterstate-spread; }
+.tart--approach-distributional-afterstate [data-anim="caption-a"] { animation-name: tart-approach-distributional-afterstate-caption-a; }
+.tart--approach-distributional-afterstate [data-anim="caption-b"] { animation-name: tart-approach-distributional-afterstate-caption-b; }
+
+@keyframes tart-approach-distributional-afterstate-spread {
+  0%, 5.45% { transform: scaleY(0.08); }
+  25.09%, 100% { transform: scaleY(1); }
+}
+@keyframes tart-approach-distributional-afterstate-slot {
+  0%, 32.73% { transform: translate(0, 0); }
+  45.82%, 100% { transform: translate(var(--dx, 0), 0); }
+}
+@keyframes tart-approach-distributional-afterstate-caption-a {
+  0%, 4.36% { opacity: 1; }
+  16.36%, 100% { opacity: 0; }
+}
+@keyframes tart-approach-distributional-afterstate-caption-b {
+  0%, 36% { opacity: 0; }
+  45.82%, 100% { opacity: 1; }
+}

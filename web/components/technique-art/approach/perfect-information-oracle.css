@@ -1,0 +1,51 @@
+/* oracle-curriculum/perfect-information-oracle card art. The plan is drawn
+   along the tape and down into the columns, then the board clears in two
+   waves and the cycle sets it up again, so the resting frame keeps the board
+   and the plan. Only stroke-dashoffset and opacity animate; play-state is
+   owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-perfect-information-oracle {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-perfect-information-oracle [data-anim] {
+  animation-duration: var(--tart-duration);
+  animation-timing-function: var(--tart-ease, var(--ease-standard, cubic-bezier(0.2, 0, 0, 1)));
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+.tart--approach-perfect-information-oracle [data-anim="plan"] {
+  animation-name: tart-approach-perfect-information-oracle-plan;
+}
+.tart--approach-perfect-information-oracle [data-anim="wave-1"] {
+  animation-name: tart-approach-perfect-information-oracle-wave-1;
+}
+.tart--approach-perfect-information-oracle [data-anim="wave-2"] {
+  animation-name: tart-approach-perfect-information-oracle-wave-2;
+}
+.tart--approach-perfect-information-oracle [data-anim="caption"] {
+  animation-name: tart-approach-perfect-information-oracle-caption;
+}
+
+@keyframes tart-approach-perfect-information-oracle-plan {
+  0% { stroke-dashoffset: 340; }
+  25.09%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes tart-approach-perfect-information-oracle-wave-1 {
+  0%, 28.36% { opacity: 1; }
+  33.82%, 48% { opacity: 0; }
+  53.45%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-perfect-information-oracle-wave-2 {
+  0%, 36% { opacity: 1; }
+  41.45%, 48% { opacity: 0; }
+  53.45%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-perfect-information-oracle-caption {
+  0%, 38.18% { opacity: 0; }
+  44.73%, 100% { opacity: 1; }
+}

@@ -1,0 +1,99 @@
+/* ntuple-rl/rainbow-q card art. The pattern window and its table are the base;
+   `double`, `5-step` and `replay` slide in from alternating sides and land on
+   the stack, the seven column values step up once per landing, and a ring
+   settles on the column the maximum picks. Four beats, so the loop runs a
+   little longer than the shared default. Play-state is owned by art.css; the
+   rules below set animation-name only. */
+
+.tart.tart--approach-rainbow-q {
+  --tart-motion: calc(var(--duration-art, 2400ms) * 1.4);
+}
+
+/* Every bar grows on its own base, so one keyframe serves all seven. */
+.tart--approach-rainbow-q .bar {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+
+.tart--approach-rainbow-q [data-anim="bar"] {
+  animation-name: tart-approach-rainbow-q-bar;
+}
+.tart--approach-rainbow-q [data-anim="layer-double"] {
+  animation-name: tart-approach-rainbow-q-layer-double;
+}
+.tart--approach-rainbow-q [data-anim="layer-steps"] {
+  animation-name: tart-approach-rainbow-q-layer-steps;
+}
+.tart--approach-rainbow-q [data-anim="layer-replay"] {
+  animation-name: tart-approach-rainbow-q-layer-replay;
+}
+.tart--approach-rainbow-q [data-anim="pick"] {
+  animation-name: tart-approach-rainbow-q-pick;
+}
+
+/* One step per ingredient: the table alone, then double, then five-step
+   returns, then prioritised replay. */
+@keyframes tart-approach-rainbow-q-bar {
+  0%,
+  10% {
+    transform: scaleY(0.16);
+  }
+  28%,
+  32% {
+    transform: scaleY(0.46);
+  }
+  50%,
+  54% {
+    transform: scaleY(0.73);
+  }
+  72%,
+  100% {
+    transform: scaleY(1);
+  }
+}
+@keyframes tart-approach-rainbow-q-layer-double {
+  0%,
+  8% {
+    transform: translateX(-240px);
+    opacity: 0;
+  }
+  28%,
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-rainbow-q-layer-steps {
+  0%,
+  30% {
+    transform: translateX(240px);
+    opacity: 0;
+  }
+  50%,
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-rainbow-q-layer-replay {
+  0%,
+  52% {
+    transform: translateX(-240px);
+    opacity: 0;
+  }
+  72%,
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-rainbow-q-pick {
+  0%,
+  76% {
+    opacity: 0;
+  }
+  86%,
+  100% {
+    opacity: 1;
+  }
+}

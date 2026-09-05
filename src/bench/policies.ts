@@ -37,7 +37,7 @@ export interface BenchPolicy {
   family: string;
   description: string;
   /** Repository-backed page explaining the exact strategy family/configuration. */
-  researchPath: `/approaches/${string}`;
+  researchPath: `/approach/${string}`;
   /**
    * True when the decision depends only on the legal public state. Policies
    * that additionally read level or move number (which the research contract
@@ -87,7 +87,7 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
     family: "heuristic-search",
     description:
       "Exact chance average over the immediate move, scored by the combined hand evaluator. The fast baseline.",
-    researchPath: "/approaches/fair-expectimax/fair-policy",
+    researchPath: "/approach/fair-expectimax/fair-policy",
     publicInformation: true,
     chooseColumn: (state) =>
       evaluateMoves(publicOnly(state), { maxDepth: 1, maxWork: 100_000 })
@@ -99,7 +99,7 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
     family: "fair-expectimax",
     description:
       "Full-width expectimax, two completed plies, combined leaf, fixed work bound.",
-    researchPath: "/approaches/fair-expectimax/reference",
+    researchPath: "/approach/fair-expectimax/reference",
     publicInformation: true,
     chooseColumn: (state) =>
       evaluateMoves(publicOnly(state), { maxDepth: 2, maxWork: 100_000 })
@@ -111,7 +111,7 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
     family: "fair-expectimax",
     description:
       "Full-width expectimax, three completed plies. The affordable end of the reference line.",
-    researchPath: "/approaches/fair-expectimax/reference",
+    researchPath: "/approach/fair-expectimax/reference",
     publicInformation: true,
     slow: true,
     chooseColumn: (state) =>
@@ -124,7 +124,7 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
     family: "fair-expectimax",
     description:
       "Completed full-width TypeScript depth 4 with exact engine outcomes and the combined leaf. A playground analogue of the native research reference, not a source-identical port.",
-    researchPath: "/approaches/fair-expectimax/reference",
+    researchPath: "/approach/fair-expectimax/reference",
     publicInformation: true,
     slow: true,
     chooseColumn: (state) =>
@@ -137,7 +137,7 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
     family: "heuristic-search",
     description:
       "Rule policy prioritizing cracks, reveals, cover altitude, and occupancy flow.",
-    researchPath: "/approaches/heuristic-search/gray-throughput",
+    researchPath: "/approach/heuristic-search/gray-throughput",
     publicInformation: false,
     chooseColumn: (state) => evaluateGrayThroughputMoves(state).bestColumn,
   }),
@@ -147,7 +147,7 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
     family: "heuristic-search",
     description:
       "Eight paired rollouts per root column over an eight-move horizon with a greedy continuation.",
-    researchPath: "/approaches/heuristic-search/rollout",
+    researchPath: "/approach/heuristic-search/rollout",
     publicInformation: true,
     chooseColumn: (state) =>
       evaluateRolloutMoves(publicOnly(state), {
@@ -162,7 +162,7 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
     family: "tree-search",
     description:
       "Chance-sampled Monte Carlo tree search, 400 simulations, 16-move horizon, heuristic leaf.",
-    researchPath: "/approaches/tree-search/mcts",
+    researchPath: "/approach/tree-search/mcts",
     publicInformation: true,
     chooseColumn: (state) =>
       evaluateMctsMoves(publicOnly(state), {
@@ -177,7 +177,7 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
     family: "heuristic-search",
     description:
       "Iterative-deepening expectimax with five stratified chance samples per branch, two plies.",
-    researchPath: "/approaches/heuristic-search/sparse-expectimax",
+    researchPath: "/approach/heuristic-search/sparse-expectimax",
     publicInformation: true,
     chooseColumn: (state) =>
       evaluateSparseExpectimaxMoves(publicOnly(state), {
@@ -192,7 +192,7 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
     family: "heuristic-search",
     description:
       "CVaR-weighted root over a two-ply expectimax continuation; trades mean for a safer lower tail.",
-    researchPath: "/approaches/heuristic-search/risk-sensitive",
+    researchPath: "/approach/heuristic-search/risk-sensitive",
     publicInformation: true,
     chooseColumn: (state) =>
       evaluateRiskSensitiveMoves(publicOnly(state), {
@@ -210,7 +210,7 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
     family: "heuristic-search",
     description:
       "Replanning open-loop prefix beam over twelve shared scenarios, bounded by logical work (the wall-clock cap is a loose safety net).",
-    researchPath: "/approaches/heuristic-search/open-loop",
+    researchPath: "/approach/heuristic-search/open-loop",
     publicInformation: true,
     chooseColumn: (state) =>
       evaluateRobustOpenLoopBeam(publicOnly(state), {
@@ -228,7 +228,7 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
     family: "lifetime-objective",
     description:
       "The research search itself: the bit-exact fast engine's completed full-width depth 4 with seven chance strata and the frozen fair leaf, through a one-shot native binary (build it with approaches/lifetime-objective/leaf-evolution/build.sh decide).",
-    researchPath: "/approaches/lifetime-objective/leaf-evolution",
+    researchPath: "/approach/lifetime-objective/leaf-evolution",
     publicInformation: true,
     slow: true,
     chooseColumn: (state) => nativeDecide(publicOnly(state), { chanceSamples: 7 }),
@@ -239,7 +239,7 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
     family: "fair-expectimax",
     description:
       "The Rust bitboard engine's completed full-width depth 6 with seven chance strata and the frozen fair leaf, evaluated by the value-identical central-frontier scheduler under one shared cache budget, through the one-shot decide binary (cargo build --release --manifest-path approaches/fair-expectimax/rust-engine/Cargo.toml).",
-    researchPath: "/approaches/fair-expectimax/rust-engine",
+    researchPath: "/approach/fair-expectimax/rust-engine",
     publicInformation: true,
     slow: true,
     chooseColumn: (state) =>
@@ -258,7 +258,7 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
     family: "fair-expectimax",
     description:
       "The Rust bitboard engine's completed full-width depth 7 with seven chance strata and the frozen fair leaf, evaluated by the value-identical central-frontier scheduler under one shared cache budget, through the one-shot decide binary (cargo build --release --manifest-path approaches/fair-expectimax/rust-engine/Cargo.toml).",
-    researchPath: "/approaches/fair-expectimax/rust-engine",
+    researchPath: "/approach/fair-expectimax/rust-engine",
     publicInformation: true,
     slow: true,
     chooseColumn: (state) =>

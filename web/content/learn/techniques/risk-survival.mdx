@@ -1,0 +1,135 @@
+---
+title: Risk and survival objectives
+slug: risk-survival
+summary: "When the game ends the first time you go broke, the average payout is the wrong thing to maximise; you also have to care about the bad tail."
+order: 11
+technique: risk-survival
+approaches: [lifetime-objective/score-decomposition, lifetime-objective/flow-ceiling, lifetime-objective/learned-leaf, lifetime-objective/survival-instinct, fair-expectimax/root-risk, heuristic-search/risk-sensitive, heuristic-search/critical-risk, constructive-reservoir/tail-survival-cem, constructive-reservoir/viability-controller, ntuple-rl/primal-dual-actor-critic]
+glossary: [objective, tail, conditional value at risk, blend, survival objective, lifetime]
+---
+
+## The idea
+
+Most planning advice says: work out what each option pays on average, and take
+the best average. That advice assumes you will still be around to collect the
+average. In a game that ends the first time you run out of room, or money, or
+moves, it fails, because a run of bad luck early stops you from ever seeing the
+good luck that would have balanced it. Two options with the same average can
+differ enormously in how often they end the game.
+
+A risk-sensitive objective puts a number on that difference. Alongside the
+mean, or instead of it, it looks at the bad tail of the outcomes: how often you
+go broke, how bad the worst tenth of outcomes is, or some blend of mean and
+worst case. A survival objective goes further and asks only how long you last.
+Which of these is right depends on how the game pays, and Drop7 pays in a way
+that makes the answer unusually clear.
+
+## A small example
+
+Two slot machines and a bankroll. Machine A pays 3 coins every pull. Machine B
+pays 0 or 6, decided by a coin flip. You start with 3 coins, every pull costs 1,
+and when you hit 0 you are out.
+
+1. Both machines pay 3 per pull on average. A player who cares only about the
+   mean cannot tell them apart.
+2. Play a hundred rounds on each. Machine A never goes broke: every pull returns
+   more than it costs. Machine B goes broke often, because three zeros in a row
+   empty the bankroll before the sixes arrive.
+
+<RiskSameMeanDifferentTails />
+
+3. Measure something other than the mean: the chance of surviving twenty pulls,
+   or the average of the worst tenth of outcomes (the conditional value at risk,
+   CVaR), or a blend such as 0.7 times the mean plus 0.3 times the worst case.
+4. Rank the machines again under that objective. Machine A wins.
+
+<RiskBlendDial />
+
+5. Now change how the game pays. Suppose you receive 17 coins for every five
+   pulls you survive and tiny amounts for anything else. Then "score" and
+   "pulls survived" are almost the same number, and the objective is survival
+   outright.
+
+<RiskStaircase />
+
+6. The catch. An objective that fears the tail refuses to build anything risky,
+   and in some games building is how you survive.
+
+## How it works
+
+A planner needs one number per candidate move, and the objective is the rule
+that turns a spread of possible outcomes into that number. The mean is one
+rule. The others in common use are the probability of surviving to a horizon; a
+quantile, the outcome that is beaten nine times in ten; the conditional value at
+risk, which is the mean of the outcomes below a quantile; and a blend, a
+weighted sum of the mean and one of the tail measures. Any of these can be
+applied at the root of a search, to the values of the moves being compared, or
+at the leaves, to the estimate of how a position will go.
+
+A survival objective replaces the outcome itself. Instead of points, the planner
+predicts or measures how many moves the game will last from here, and prefers
+the move with the longest expected life. It is a change of target, and it can be
+combined with any of the risk rules above.
+
+None of these rules can see further than the search or the evaluator behind
+them. A tail measure over five sampled futures is a rough guess at a tail. And a
+rule that penalises variance will, by construction, prefer the move that does
+the least, so if the game requires you to take on structure in order to survive
+later, caution costs lives instead of saving them.
+
+## In Drop7
+
+Drop7 in five-move Hardcore mode pays 17,000 points every fifth move for the
+rise, whatever the board looks like, and a few tens or hundreds of points for
+the discs cleared in between. Across 64 games of the reference policy, 94.29% of
+all points came from the rise bonus, and a game's score and its moves survived
+were correlated at r = 0.9995
+([finding-01](/docs/exploratory/finding-01-score-is-survival), quoted on the
+[concept page on score and survival](/learn/concepts/survival-vs-score)). Score
+is a staircase with one step every five moves, and the objective is lifetime.
+
+Pages that change the objective:
+
+- [Where the points actually come from](/approach/lifetime-objective/score-decomposition),
+  the measurement above.
+- [Is the required clearing rate reachable at all?](/approach/lifetime-objective/flow-ceiling),
+  which asks what clear rate survival needs and whether any player reaches it.
+- [A learned survival estimate inside the reference search](/approach/lifetime-objective/learned-leaf),
+  a leaf that predicts remaining lifetime.
+- [Weighting the bad outcomes at the root](/approach/fair-expectimax/root-risk),
+  a root value that is part average and part worst case.
+- [Risk sensitive](/approach/heuristic-search/risk-sensitive) and
+  [Critical risk](/approach/heuristic-search/critical-risk), earlier risk
+  rules in the heuristic family.
+- [Tail-survival CEM](/approach/constructive-reservoir/tail-survival-cem) and
+  [Viability controller](/approach/constructive-reservoir/viability-controller),
+  which optimise the tail of the lifetime directly.
+- [Learning a policy with explicit safety constraints](/approach/ntuple-rl/primal-dual-actor-critic),
+  which treats the risk of dying as a constraint to be held under a limit.
+
+## What it cannot do
+
+Weighting the downside at the root was rejected. On its eight-game screen the
+cautious search scored 87,112 points and lasted 61.5 moves against 176,819.75
+points and 114.125 moves for the unchanged search, losing seven of eight games
+on both measures, under historical 7,000-point scoring, archival; its clear and
+reveal rates fell too
+([Weighting the bad outcomes at the root](/approach/fair-expectimax/root-risk)).
+The page's reading is that the cautious player stopped assembling anything.
+
+Predicting lifetime well did not steer play to where lifetime is cheap. Every
+learned lifetime arm in the learned-leaf study pushed the board away from the 19
+to 20 occupied cells where the flow-ceiling measurement says the achievable
+clear rate crosses what survival requires: to 24.68 mean occupied cells at five
+chance samples and 23.87 at seven, on 64 paired games per arm
+([A learned survival estimate inside the reference search](/approach/lifetime-objective/learned-leaf)).
+Remaining lifetime under the current policy is a different target from
+remaining lifetime under a policy that holds the board at the right size.
+
+And a cheating planner, an oracle that reads the future, told to maximise
+points instead of survival earned 1.75 times the points per move and died in
+less than half the time, on eight games played over the same imagined futures
+([finding-06](/docs/exploratory/finding-06-flow-ceiling), quoted on the
+[lifetime objective family page](/approach/lifetime-objective)). Those are
+oracle numbers, and what they say is that the chains a player can build are
+real and that chasing them shortens the game.

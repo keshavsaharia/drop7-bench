@@ -5,6 +5,7 @@ summary: When two columns are worth the same, their order chooses between them. 
 status: support-only
 evidence: repository-verified
 reads: public
+kind: diagnostic
 ---
 
 Every policy in this repository ends up with two columns it likes exactly
@@ -112,7 +113,7 @@ Source: `main.ts`.
   unanswered questions in the repository: seven complete-game arms on a
   documented seed range, no training, no model.
 - The result that would matter most is not on the weak policy above but on the
-  [depth-4 reference](/approaches/fair-expectimax/reference): if changing only
+  [depth-4 reference](/approach/fair-expectimax/reference): if changing only
   its tie order moves its mean by an amount comparable to the differences
   experiments are gated on, then some past gate decisions were partly measuring
   column order.

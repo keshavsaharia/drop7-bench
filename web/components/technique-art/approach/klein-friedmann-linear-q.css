@@ -1,0 +1,116 @@
+/* value-policy-learning/klein-friedmann-linear-q card art. The six dials
+   twitch under the gradient while the step arrow shrinks away, then the
+   search cursor walks the row and sets each dial outright, and the moves bar
+   rises. Longer than the standard art beat because the two halves have to be
+   told apart. Play-state is owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-klein-friedmann-linear-q {
+  --tart-motion: calc(var(--duration-art, 2400ms) * 1.6);
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-klein-friedmann-linear-q [data-anim] {
+  animation-duration: var(--tart-duration);
+  animation-timing-function: var(--tart-ease, var(--ease-standard, cubic-bezier(0.2, 0, 0, 1)));
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+/* Each dial turns about its own centre; the circle fixes the box. */
+.tart--approach-klein-friedmann-linear-q .dial {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+/* The step arrow shrinks onto its own base. */
+.tart--approach-klein-friedmann-linear-q .step {
+  transform-box: fill-box;
+  transform-origin: bottom;
+}
+
+.tart--approach-klein-friedmann-linear-q [data-anim="dial-0"] { animation-name: tart-approach-klein-friedmann-linear-q-dial-0; }
+.tart--approach-klein-friedmann-linear-q [data-anim="dial-1"] { animation-name: tart-approach-klein-friedmann-linear-q-dial-1; }
+.tart--approach-klein-friedmann-linear-q [data-anim="dial-2"] { animation-name: tart-approach-klein-friedmann-linear-q-dial-2; }
+.tart--approach-klein-friedmann-linear-q [data-anim="dial-3"] { animation-name: tart-approach-klein-friedmann-linear-q-dial-3; }
+.tart--approach-klein-friedmann-linear-q [data-anim="dial-4"] { animation-name: tart-approach-klein-friedmann-linear-q-dial-4; }
+.tart--approach-klein-friedmann-linear-q [data-anim="dial-5"] { animation-name: tart-approach-klein-friedmann-linear-q-dial-5; }
+.tart--approach-klein-friedmann-linear-q [data-anim="step"] { animation-name: tart-approach-klein-friedmann-linear-q-step; }
+.tart--approach-klein-friedmann-linear-q [data-anim="cursor"] { animation-name: tart-approach-klein-friedmann-linear-q-cursor; }
+.tart--approach-klein-friedmann-linear-q [data-anim="moves"] { animation-name: tart-approach-klein-friedmann-linear-q-moves; }
+.tart--approach-klein-friedmann-linear-q [data-anim="caption-a"] { animation-name: tart-approach-klein-friedmann-linear-q-caption-a; }
+.tart--approach-klein-friedmann-linear-q [data-anim="caption-b"] { animation-name: tart-approach-klein-friedmann-linear-q-caption-b; }
+
+/* Twitch under a step that is already shrinking, then jump when the search
+   reaches the dial: 55% for the first pair, 66% and 78% for the rest. */
+@keyframes tart-approach-klein-friedmann-linear-q-dial-0 {
+  0% { transform: rotate(0deg); }
+  5.26% { transform: rotate(16deg); }
+  10.52% { transform: rotate(-9deg); }
+  15.78% { transform: rotate(6deg); }
+  21.04%, 34.19% { transform: rotate(-2deg); }
+  38.14%, 100% { transform: rotate(-58deg); }
+}
+@keyframes tart-approach-klein-friedmann-linear-q-dial-1 {
+  0% { transform: rotate(0deg); }
+  5.26% { transform: rotate(-13deg); }
+  10.52% { transform: rotate(10deg); }
+  15.78% { transform: rotate(-5deg); }
+  21.04%, 34.19% { transform: rotate(3deg); }
+  38.14%, 100% { transform: rotate(74deg); }
+}
+@keyframes tart-approach-klein-friedmann-linear-q-dial-2 {
+  0% { transform: rotate(0deg); }
+  5.26% { transform: rotate(11deg); }
+  10.52% { transform: rotate(-14deg); }
+  15.78% { transform: rotate(4deg); }
+  21.04%, 40.77% { transform: rotate(-1deg); }
+  44.71%, 100% { transform: rotate(-104deg); }
+}
+@keyframes tart-approach-klein-friedmann-linear-q-dial-3 {
+  0% { transform: rotate(0deg); }
+  5.26% { transform: rotate(-8deg); }
+  10.52% { transform: rotate(13deg); }
+  15.78% { transform: rotate(-6deg); }
+  21.04%, 40.77% { transform: rotate(2deg); }
+  44.71%, 100% { transform: rotate(38deg); }
+}
+@keyframes tart-approach-klein-friedmann-linear-q-dial-4 {
+  0% { transform: rotate(0deg); }
+  5.26% { transform: rotate(14deg); }
+  10.52% { transform: rotate(-6deg); }
+  15.78% { transform: rotate(9deg); }
+  21.04%, 48.66% { transform: rotate(-3deg); }
+  52.6%, 100% { transform: rotate(126deg); }
+}
+@keyframes tart-approach-klein-friedmann-linear-q-dial-5 {
+  0% { transform: rotate(0deg); }
+  5.26% { transform: rotate(-15deg); }
+  10.52% { transform: rotate(7deg); }
+  15.78% { transform: rotate(-10deg); }
+  21.04%, 48.66% { transform: rotate(1deg); }
+  52.6%, 100% { transform: rotate(-82deg); }
+}
+@keyframes tart-approach-klein-friedmann-linear-q-step {
+  0% { transform: scaleY(1); opacity: 1; }
+  22.36%, 100% { transform: scaleY(0.04); opacity: 0.35; }
+}
+@keyframes tart-approach-klein-friedmann-linear-q-cursor {
+  0%, 28.93% { opacity: 0; transform: translate(0, 0); }
+  34.19%, 39.45% { opacity: 1; transform: translate(0, 0); }
+  43.4%, 47.34% { opacity: 1; transform: translate(76px, 0); }
+  51.29%, 100% { opacity: 1; transform: translate(152px, 0); }
+}
+@keyframes tart-approach-klein-friedmann-linear-q-moves {
+  0%, 36.82% { stroke-dashoffset: 92; }
+  60.49%, 100% { stroke-dashoffset: 26; }
+}
+@keyframes tart-approach-klein-friedmann-linear-q-caption-a {
+  0%, 19.73% { opacity: 1; }
+  28.93%, 100% { opacity: 0; }
+}
+@keyframes tart-approach-klein-friedmann-linear-q-caption-b {
+  0%, 31.56% { opacity: 0; }
+  40.77%, 100% { opacity: 1; }
+}

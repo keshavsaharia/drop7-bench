@@ -1,0 +1,139 @@
+---
+title: Rollouts and policy iteration
+slug: rollout-policy-iteration
+summary: "Judge a move by playing it out with some ordinary policy many times and averaging; then use that judgement to improve the policy, and repeat."
+order: 9
+technique: rollout-policy-iteration
+approaches: [terminal-policy-iteration/terminal-policy-iteration, terminal-policy-iteration/public-rollout-policy-iteration, terminal-policy-iteration/public-survival-rollout, terminal-policy-iteration/public-regenerative-b0, terminal-policy-iteration/terminal-rollout, d4-long-outcome/rollout-veto, lifetime-objective/rollout-veto-17k, d4-long-outcome/long-outcome, heuristic-search/rollout, fair-expectimax/rollout-improvement, ntuple-rl/regenerative-expert-iteration, value-policy-learning/conservative-fitted-policy-iteration]
+glossary: [rollout, policy evaluation, policy improvement, policy iteration, common random numbers, confidence bound, horizon]
+---
+
+## The idea
+
+One honest way to find out how good a move is: make it, keep playing to the
+end, and see how it went. Do it many times, with the luck falling differently
+each time, and average, and you have a measurement of the move: its
+[rollout](/learn/glossary) value. The
+policy that plays out the rest of the game does not have to be good. It has to
+be quick, and it has to be the same for every move you compare.
+
+Once every move at a position has a rollout value, the improvement step is
+short: play the move with the best value. That is a new policy, built out of
+the old one plus a little measurement. Evaluating and improving in turn is
+[policy iteration](/learn/glossary), and in the ideal case each lap produces a
+policy at least as good as the last.
+
+## A small example
+
+Three cells in a row, a cliff on the left, a goal one step past the right-hand
+cell. Each turn you can step right, step left, or wait. A gust sometimes blows,
+and when it does it shoves you two cells to the left unless you spent the turn
+bracing, which is what waiting is. Your current habit is always step right.
+
+1. Evaluate the habit by rollouts. From each cell, follow the habit until you
+   reach the goal or fall, twenty times, and count what happened. Every cell
+   now has a number: the share of walks that reached the goal.
+2. Improve. In each cell, try each of the three actions once, then follow the
+   habit for the rest of the walk, and keep the action whose walks came out
+   best. If the gust is strong from the middle cell, waiting beats stepping
+   right.
+
+<RolloutFanOfFutures />
+
+3. That one-step look-ahead over rollouts of the old habit is the new policy.
+   Evaluate it, improve it, and repeat.
+4. Keep the comparison fair. Give every candidate action the same run of gusts,
+   a device called common random numbers. Otherwise the difference between two
+   actions is mostly the difference between two weathers.
+
+<RolloutSharedGusts />
+
+5. Be conservative. Switch away from the habit only when the rollout advantage
+   clears a confidence bound. A switch made on noise is worse than no switch.
+
+<RolloutConfidenceGate />
+
+6. Notice the cost. Rollouts long enough to see what matters take a long time.
+   Rollouts cheap enough to run in quantity are noisy.
+
+## How it works
+
+At a position, list the candidate moves. For each one, play it, then hand the
+game to the rollout policy and let it play forward, either to the end or to a
+fixed [horizon](/learn/glossary), recording the outcome you care about: points,
+moves survived, or both. Do this over a fixed set of imagined futures, and
+reuse the same set for every candidate, so that the only difference between
+candidates is what they did. Average each candidate's outcomes. Then compare
+the best candidate with what the current policy would have played, and switch
+only if a confidence bound on the paired difference clears a threshold fixed in
+advance.
+
+Each part of that recipe trades one thing for another. More futures shrink the
+noise and multiply the cost. A longer horizon shows more of what a move set in
+motion and again multiplies the cost. A stronger rollout policy gives truer
+values and is slower per move. And the improvement step sees one move ahead:
+everything after the first move is played by the old policy, so every rollout
+inherits the old policy's mistakes.
+
+## In Drop7
+
+A Drop7 position has up to seven candidate moves. A rollout here means forcing
+each column, then replaying the same imagined tape of next discs and hidden
+values through a quick continuation policy for a fixed number of moves, and
+recording how the game went. The experiments on this site used a one-move or
+two-move fair search as the continuation, horizons of 25 to 200 moves, and the
+fair depth-4 search (fair D4, the reference policy) as the policy to be
+improved. In most of them the rollout is a veto: it may override the search's
+choice only when a confidence bound says so.
+
+Pages that use the method:
+
+- [Terminal policy iteration](/approach/terminal-policy-iteration/terminal-policy-iteration),
+  the family's most faithful design, which plays candidate moves to the end of
+  the game.
+- [Public rollout policy iteration](/approach/terminal-policy-iteration/public-rollout-policy-iteration),
+  the cheapest version, with fifteen tapes and fifty-move continuations.
+- [Public survival rollout](/approach/terminal-policy-iteration/public-survival-rollout),
+  [Public regenerative B0](/approach/terminal-policy-iteration/public-regenerative-b0)
+  and [Terminal rollout](/approach/terminal-policy-iteration/terminal-rollout),
+  the rest of that family.
+- [Rollout veto](/approach/d4-long-outcome/rollout-veto) and
+  [Letting a long look-ahead overrule the search](/approach/lifetime-objective/rollout-veto-17k),
+  a 25-move veto over fair D4 and its retest under corrected scoring.
+- [Long outcomes](/approach/d4-long-outcome/long-outcome), which learns the
+  rollout labels instead of recomputing them.
+- [Rollout](/approach/heuristic-search/rollout) and
+  [Judging a move by playing the game out](/approach/fair-expectimax/rollout-improvement),
+  two earlier attempts with weak continuation policies.
+- [Expert iteration from the depth-4 search](/approach/ntuple-rl/regenerative-expert-iteration)
+  and [Conservative fitted policy iteration](/approach/value-policy-learning/conservative-fitted-policy-iteration),
+  where the improvement step trains a network instead of running at play time.
+
+## What it cannot do
+
+The family that pursued this hardest summed up its own record this way: "When
+the measurement is cheap enough to run, it is too noisy to beat the reference;
+when it is faithful enough to trust, it is far too slow to play a game"
+([Terminal policy iteration](/approach/terminal-policy-iteration)).
+
+Both halves have a record. The 25-move veto produced one game worth 404,047
+points against 159,616 for the unchanged search on the same seed, and one game
+is an anecdote ([Rollout veto](/approach/d4-long-outcome/rollout-veto)). On
+32 paired games under corrected scoring the veto was worse by 46,510.5 points
+per game, with 9 wins, 4 ties and 19 losses
+([finding-03](/docs/exploratory/finding-03-rollout-veto-17k), development
+tier). The cheapest policy-iteration variant improved every one of its four
+paired fitting games and still failed its frozen gate, which asked for 1.20
+times the score and lifetime of the one-move fair search: it reached 1.0697
+times the score and 1.0256 times the moves, and four games is a fitting screen
+([Public rollout policy iteration](/approach/terminal-policy-iteration/public-rollout-policy-iteration)).
+The most faithful design, playing every candidate to the end of the game, took
+hundreds of seconds per move and was paused before it produced a policy result.
+
+Two smaller lessons sit in the older pages. A rollout is only as good as the
+policy that plays it out: the earliest version lost to the very one-move
+policy it used as its continuation
+([Judging a move by playing the game out](/approach/fair-expectimax/rollout-improvement)).
+And learning the labels instead of recomputing them did not escape the noise:
+the learned rankers' top-move accuracy fell below that of an exact two-move
+search ([Long outcomes](/approach/d4-long-outcome/long-outcome)).

@@ -1,6 +1,7 @@
 ---
 title: Oracle and curriculum research
 summary: Let a planner cheat (show it the hidden numbers and the discs still to come) then try to teach a player who cannot cheat.
+kind: family
 ---
 
 Let a planner cheat — show it the hidden gray-disc numbers and the discs that
@@ -60,21 +61,21 @@ move is visible in the narrow slice of information that crosses to the student.
 
 1. Play games with a privileged planner. In this repository that is a
    receding-horizon beam search over the game's realized future — see
-   [the perfect-information oracle](/approaches/oracle-curriculum/perfect-information-oracle).
+   [the perfect-information oracle](/approach/oracle-curriculum/perfect-information-oracle).
 2. Record, at each position, the *public* view only, plus the teacher's choice
    or some summary of what the teacher's positions looked like.
 3. Train something on that: an action classifier
-   ([distillation](/approaches/oracle-curriculum/oracle-distillation),
-   [DAgger](/approaches/oracle-curriculum/oracle-dagger)), a board-shape
-   classifier ([topology](/approaches/oracle-curriculum/topology)), a hand-built
-   feature family ([accessible energy](/approaches/oracle-curriculum/accessible-energy)),
+   ([distillation](/approach/oracle-curriculum/oracle-distillation),
+   [DAgger](/approach/oracle-curriculum/oracle-dagger)), a board-shape
+   classifier ([topology](/approach/oracle-curriculum/topology)), a hand-built
+   feature family ([accessible energy](/approach/oracle-curriculum/accessible-energy)),
    or a set of restart positions to practise from
-   ([state curriculum](/approaches/oracle-curriculum/state-curriculum)).
+   ([state curriculum](/approach/oracle-curriculum/state-curriculum)).
 4. Freeze it, and make it play complete games through the public interface,
    against unchanged fair search, on games it has never seen.
 
 One page here is the odd one out.
-[The hindsight planner](/approaches/oracle-curriculum/hindsight-planner) reads
+[The hindsight planner](/approach/oracle-curriculum/hindsight-planner) reads
 no hidden information at all. It *invents* futures from a hash of the public
 board and plans as if each invented future were certain. It sits in this family
 because it fails for the same reason the oracle cannot be copied.

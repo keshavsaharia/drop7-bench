@@ -1,0 +1,81 @@
+/* constructive-reservoir/panel-value card art. The panel of siblings arrives,
+   every column's measured outcome grows to its own ragged length, the
+   successor states settle into the reservoir, and the value learned from that
+   pool comes back on one straight mark for all seven columns.
+   Play-state is owned by the shared art.css; only names belong here. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-panel-value {
+  --tart-motion: calc(var(--duration-art, 2400ms) * 1.25);
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-panel-value [data-anim] {
+  animation-duration: var(--tart-duration);
+}
+
+/* Every bar starts at the same x, so scaling the group about its left edge
+   grows each bar from its own base. */
+.tart--approach-panel-value .bars {
+  transform-box: fill-box;
+  transform-origin: left center;
+}
+
+.tart--approach-panel-value [data-anim="panel"] {
+  animation-name: tart-approach-panel-value-panel;
+}
+.tart--approach-panel-value [data-anim="bars"] {
+  animation-name: tart-approach-panel-value-bars;
+}
+.tart--approach-panel-value [data-anim="pool"] {
+  animation-name: tart-approach-panel-value-pool;
+}
+.tart--approach-panel-value [data-anim="learned"] {
+  animation-name: tart-approach-panel-value-learned;
+}
+
+@keyframes tart-approach-panel-value-panel {
+  0% {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  9.6%,
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes tart-approach-panel-value-bars {
+  0%,
+  8.4% {
+    transform: scaleX(0.02);
+  }
+  27.6%,
+  100% {
+    transform: scaleX(1);
+  }
+}
+@keyframes tart-approach-panel-value-pool {
+  0%,
+  26.4% {
+    opacity: 0;
+    transform: translateY(-9px);
+  }
+  42%,
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes tart-approach-panel-value-learned {
+  0%,
+  44.4% {
+    opacity: 0;
+  }
+  54%,
+  100% {
+    opacity: 1;
+  }
+}

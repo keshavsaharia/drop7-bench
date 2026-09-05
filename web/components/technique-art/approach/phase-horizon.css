@@ -1,0 +1,62 @@
+/* heuristic-search/phase-horizon card art. The clock between the two boards
+   fills one drop at a time; when it is full the board on the right is
+   projected forward to the rise, shifting up a row as the seven covered discs
+   waiting underneath arrive, and the tallest column reaches the ceiling. The
+   risen group carries its shift as an SVG attribute so the resting frame is
+   the projected board. Play-state is owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-phase-horizon {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-phase-horizon [data-anim] {
+  animation-duration: var(--tart-duration);
+  animation-timing-function: var(--tart-ease, var(--ease-standard, cubic-bezier(0.2, 0, 0, 1)));
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+.tart--approach-phase-horizon [data-anim="pip-1"] { animation-name: tart-approach-phase-horizon-pip-1; }
+.tart--approach-phase-horizon [data-anim="pip-2"] { animation-name: tart-approach-phase-horizon-pip-2; }
+.tart--approach-phase-horizon [data-anim="pip-3"] { animation-name: tart-approach-phase-horizon-pip-3; }
+.tart--approach-phase-horizon [data-anim="pip-4"] { animation-name: tart-approach-phase-horizon-pip-4; }
+.tart--approach-phase-horizon [data-anim="pip-5"] { animation-name: tart-approach-phase-horizon-pip-5; }
+.tart--approach-phase-horizon [data-anim="rise"] { animation-name: tart-approach-phase-horizon-rise; }
+.tart--approach-phase-horizon [data-anim="arrive"] { animation-name: tart-approach-phase-horizon-arrive; }
+.tart--approach-phase-horizon [data-anim="ceiling"] { animation-name: tart-approach-phase-horizon-ceiling; }
+
+@keyframes tart-approach-phase-horizon-pip-1 {
+  0%, 4.36% { opacity: 0; }
+  7.64%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-phase-horizon-pip-2 {
+  0%, 9.82% { opacity: 0; }
+  13.09%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-phase-horizon-pip-3 {
+  0%, 15.27% { opacity: 0; }
+  18.55%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-phase-horizon-pip-4 {
+  0%, 20.73% { opacity: 0; }
+  24%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-phase-horizon-pip-5 {
+  0%, 26.18% { opacity: 0; }
+  29.45%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-phase-horizon-rise {
+  0%, 30.55% { transform: translateY(0); }
+  38.18%, 100% { transform: translateY(-18px); }
+}
+@keyframes tart-approach-phase-horizon-arrive {
+  0%, 30.55% { opacity: 0.4; }
+  38.18%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-phase-horizon-ceiling {
+  0%, 39.27% { opacity: 0; }
+  45.82%, 100% { opacity: 1; }
+}

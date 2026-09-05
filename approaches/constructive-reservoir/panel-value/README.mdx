@@ -5,6 +5,8 @@ summary: Builds complete training data by playing every legal column through the
 status: rejected
 evidence: task-record only
 reads: public
+kind: strategy
+technique: q-learning
 ---
 
 Two attempts to learn what a position is worth from data that, for once, covers
@@ -42,7 +44,7 @@ states in general, when what is needed is a comparison inside one position.
 
 1. Play 1,024 complete games with two different behaviour policies — half with
    the one-move-ahead fair search, half with the
-   [constructive planner](/approaches/constructive-reservoir/constructive-spectrum),
+   [constructive planner](/approach/constructive-reservoir/constructive-spectrum),
    so the positions come from two different styles of play.
 2. Take up to eight positions from each game, at fixed move numbers (5, 10, 15,
    20, 25, 30, 40, 50).
@@ -79,7 +81,7 @@ successor-closed corpus, the numbers were retained and the pattern looks
 similar: the model beat its one-move teacher (top-1 0.424 against 0.319) and
 still trailed the four-move reference (0.424 against 0.499, regret 0.241
 against 0.178). See the
-[afterstate learning family](/approaches/afterstate-learning).
+[afterstate learning family](/approach/afterstate-learning).
 
 <TechnicalDetails title="The technical record">
 

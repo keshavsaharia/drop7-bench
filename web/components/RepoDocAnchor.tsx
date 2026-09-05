@@ -8,7 +8,10 @@ type Props = ComponentPropsWithoutRef<"a"> & {
 };
 
 /** Anchor that maps repository `docs/*.md` hrefs onto `/docs/<slug>`. */
-export function RepoDocAnchor({ href, fromPath, children, node: _node, ...props }: Props) {
+export function RepoDocAnchor({ href, fromPath, children, ...rest }: Props) {
+  // react-markdown passes the hast node on every element; it is not a DOM prop.
+  const { node, ...props } = rest as typeof rest & { node?: unknown };
+  void node;
   const next = rewriteRepoDocHref(href ?? "", fromPath);
   if (next.startsWith("/") && !next.startsWith("//")) {
     return (

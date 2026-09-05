@@ -85,7 +85,14 @@ export default function NotFound() {
             That&apos;s not a legal move.
           </h1>
           <p className={styles.intro}>
-            You can <Link className="text-sky-400 hover:text-sky-300 underline" href="https://github.com/keshavsaharia/drop7-bench/issues">create an issue</Link> on GitHub if you expected something else.
+            You can{" "}
+            <Link
+              className="text-accent underline underline-offset-2 hover:text-ink"
+              href="https://github.com/keshavsaharia/drop7-bench/issues"
+            >
+              create an issue
+            </Link>{" "}
+            on GitHub if you expected something else.
           </p>
 
           <div className={styles.actions}>

@@ -1,0 +1,132 @@
+/* Motion for the afterstates primer figures
+   (web/components/primers/Afterstate.tsx).
+   Every figure is drawn complete at its first frame: the disc rests above its
+   column, the resolved boards are shown, the future lines are traced. The
+   animation replays the drop (a transform, with the distance set per element
+   through --drop), flashes the ring as the board resolves (opacity), dims the
+   unknown disc while the move is in flight (opacity), steps a highlight across
+   the seven boards (transform), redraws the futures (stroke-dashoffset) and
+   lets the two halves take turns standing out (opacity). No text animates. */
+
+.primer-afterstate svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.primer-afterstate [data-anim] {
+  animation-duration: 4.5s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.primer-afterstate [data-anim="hover"] {
+  animation-name: primer-afterstate-hover;
+}
+
+.primer-afterstate [data-anim="flash"] {
+  opacity: 0;
+  animation-name: primer-afterstate-flash;
+}
+
+.primer-afterstate [data-anim="deal"] {
+  animation-name: primer-afterstate-deal;
+}
+
+.primer-afterstate [data-anim="scan"] {
+  animation-name: primer-afterstate-scan;
+  animation-duration: 4.2s;
+  animation-timing-function: steps(7, end);
+}
+
+.primer-afterstate [data-anim="future"] {
+  animation-name: primer-afterstate-future;
+  animation-duration: 4s;
+  animation-timing-function: linear;
+}
+
+.primer-afterstate [data-anim="half-1"] {
+  animation-name: primer-afterstate-half-1;
+  animation-duration: 4s;
+}
+
+.primer-afterstate [data-anim="half-2"] {
+  animation-name: primer-afterstate-half-2;
+  animation-duration: 4s;
+}
+
+@keyframes primer-afterstate-hover {
+  0% { transform: translateY(0); opacity: 1; }
+  10% { transform: translateY(-4px); opacity: 1; }
+  20% { transform: translateY(0); opacity: 1; }
+  30% { transform: translateY(-4px); opacity: 1; }
+  38% { transform: translateY(0); opacity: 1; }
+  46% { transform: translateY(var(--drop, 60px)); opacity: 1; }
+  52% { transform: translateY(var(--drop, 60px)); opacity: 0; }
+  90% { transform: translateY(0); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes primer-afterstate-flash {
+  0%, 44% { opacity: 0; }
+  49% { opacity: 0.22; }
+  62%, 100% { opacity: 0; }
+}
+
+@keyframes primer-afterstate-deal {
+  0%, 40% { opacity: 1; }
+  46%, 58% { opacity: 0.2; }
+  68%, 100% { opacity: 1; }
+}
+
+@keyframes primer-afterstate-scan {
+  from { transform: translateX(0); }
+  to { transform: translateX(462px); }
+}
+
+@keyframes primer-afterstate-future {
+  0%, 10% { stroke-dashoffset: 0; }
+  12% { stroke-dashoffset: 1; }
+  52%, 100% { stroke-dashoffset: 0; }
+}
+
+@keyframes primer-afterstate-half-1 {
+  0%, 58% { opacity: 1; }
+  62%, 72% { opacity: 0.2; }
+  76%, 100% { opacity: 1; }
+}
+
+@keyframes primer-afterstate-half-2 {
+  0%, 78% { opacity: 1; }
+  82%, 92% { opacity: 0.2; }
+  96%, 100% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primer-afterstate [data-anim] {
+    animation: none !important;
+  }
+  /* Resting frames: the disc above its column, the ring quiet, the unknown
+     disc shown, the highlight on the first board, every future traced and
+     both halves at full strength. */
+  .primer-afterstate [data-anim="hover"] {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  .primer-afterstate [data-anim="flash"] {
+    opacity: 0;
+  }
+  .primer-afterstate [data-anim="deal"] {
+    opacity: 1;
+  }
+  .primer-afterstate [data-anim="scan"] {
+    transform: translateX(0);
+  }
+  .primer-afterstate [data-anim="future"] {
+    stroke-dashoffset: 0;
+  }
+  .primer-afterstate [data-anim="half-1"],
+  .primer-afterstate [data-anim="half-2"] {
+    opacity: 1;
+  }
+}

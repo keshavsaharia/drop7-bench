@@ -3,7 +3,7 @@
 ## August 2026
 
 The best dependable policy found so far is [fair depth-4
-expectimax](/approaches/fair-expectimax) — a four-move look-ahead that treats
+expectimax](/approach/fair-expectimax) — a four-move look-ahead that treats
 the game's luck honestly. Even with its best chance model, its measured
 means sit under half of that target. This page shows where the gap is, what has
 been measured, and which directions the evidence has closed.
@@ -24,7 +24,7 @@ caption: Paired contrasts from the same factorial: seven strata minus five strat
 
 The simulator and reference searches are mature enough to support reproducible
 research, but the strategy problem is unsolved. Corrected-score [fair depth-4
-expectimax](/approaches/fair-expectimax) is the strongest dependable reference found so far. 
+expectimax](/approach/fair-expectimax) is the strongest dependable reference found so far.
 Its average score across 64 games is **308,296 points**, far below the goal of a
 one-million-point average.
 

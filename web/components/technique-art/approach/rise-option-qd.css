@@ -1,0 +1,69 @@
+/* constructive-reservoir/rise-option-qd card art. The option's target heights
+   mutate, the mutated option travels along its trail into the one archive cell
+   its behaviour belongs to, and three further rounds of insertions fill the
+   archive around it; last, a better plan of a kind already held replaces the
+   occupant of its cell. The resting frame is the filled shelf with the mutated
+   option beside it. Play-state, duration and easing are owned by art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-rise-option-qd {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-rise-option-qd [data-anim="before"] { animation-name: tart-approach-rise-option-qd-before; }
+.tart--approach-rise-option-qd [data-anim="after"] { animation-name: tart-approach-rise-option-qd-after; }
+.tart--approach-rise-option-qd [data-anim="marker"] { animation-name: tart-approach-rise-option-qd-marker; }
+.tart--approach-rise-option-qd [data-anim="trail"] { animation-name: tart-approach-rise-option-qd-trail; }
+.tart--approach-rise-option-qd [data-anim="insert"] { animation-name: tart-approach-rise-option-qd-insert; }
+.tart--approach-rise-option-qd [data-anim="round-b"] { animation-name: tart-approach-rise-option-qd-round-b; }
+.tart--approach-rise-option-qd [data-anim="round-c"] { animation-name: tart-approach-rise-option-qd-round-c; }
+.tart--approach-rise-option-qd [data-anim="round-d"] { animation-name: tart-approach-rise-option-qd-round-d; }
+.tart--approach-rise-option-qd [data-anim="replace"] { animation-name: tart-approach-rise-option-qd-replace; }
+.tart--approach-rise-option-qd [data-anim="rest"] { animation-name: tart-approach-rise-option-qd-rest; }
+
+@keyframes tart-approach-rise-option-qd-before {
+  0%, 7.64% { opacity: 1; }
+  14.18%, 100% { opacity: 0; }
+}
+@keyframes tart-approach-rise-option-qd-after {
+  0%, 9.82% { opacity: 0; }
+  16.36%, 100% { opacity: 1; }
+}
+/* The offset is the gap between the option and the cell its behaviour picks. */
+@keyframes tart-approach-rise-option-qd-marker {
+  0%, 13.09% { transform: translate(0, 0); opacity: 0; }
+  16.36% { transform: translate(0, 0); opacity: 1; }
+  24% { transform: translate(153.5px, 6.5px); opacity: 1; }
+  27.27%, 100% { transform: translate(153.5px, 6.5px); opacity: 0; }
+}
+@keyframes tart-approach-rise-option-qd-trail {
+  0%, 15.27% { opacity: 0; }
+  19.64%, 25.09% { opacity: 1; }
+  29.45%, 100% { opacity: 0; }
+}
+@keyframes tart-approach-rise-option-qd-insert {
+  0%, 24% { opacity: 0; }
+  28.36%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-rise-option-qd-round-b {
+  0%, 28.36% { opacity: 0; }
+  32.73%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-rise-option-qd-round-c {
+  0%, 32.73% { opacity: 0; }
+  38.18%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-rise-option-qd-round-d {
+  0%, 37.09% { opacity: 0; }
+  43.64%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-rise-option-qd-replace {
+  0%, 44.73% { opacity: 0; }
+  50.18%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-rise-option-qd-rest {
+  0%, 45.82% { opacity: 0; }
+  50.18%, 100% { opacity: 1; }
+}

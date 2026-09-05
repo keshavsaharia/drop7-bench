@@ -245,14 +245,7 @@ export function playScriptedGame(
     );
   }
 
-  const checksum = createHash("sha256")
-    .update(
-      frames
-        .map((frame) => `${frame.column}:${frame.scoreDelta}:${frame.board}`)
-        .join("|"),
-    )
-    .digest("hex")
-    .slice(0, 16);
+  const checksum = trajectoryChecksum(frames);
 
   return {
     policyId: policy.id,
@@ -268,4 +261,23 @@ export function playScriptedGame(
     checksum,
     frames,
   };
+}
+
+/**
+ * Sixteen hex digits of SHA-256 over every move's chosen column, score delta,
+ * and resolved board. Equal checksums mean identical trajectories, so a game
+ * recorded on another machine can be checked against an independent replay of
+ * its column choices here.
+ */
+export function trajectoryChecksum(
+  frames: readonly Pick<BenchFrame, "column" | "scoreDelta" | "board">[],
+): string {
+  return createHash("sha256")
+    .update(
+      frames
+        .map((frame) => `${frame.column}:${frame.scoreDelta}:${frame.board}`)
+        .join("|"),
+    )
+    .digest("hex")
+    .slice(0, 16);
 }

@@ -1,0 +1,90 @@
+/* ntuple-rl/phase-blend card art: both evaluators are fed the same board, the
+   coefficient steps through its four settings, and the learned share of the
+   value bar grows with it until it fills the bar and the winning setting is
+   ringed on the learned source. Play-state, duration and easing are owned by
+   the shared art.css. */
+
+.tart.tart--approach-phase-blend {
+  --tart-motion: calc(var(--duration-art, 2400ms) * 1.4);
+}
+
+.tart--approach-phase-blend [data-anim] {
+  animation-duration: var(--tart-duration);
+}
+
+/* The learned share is measured from the right, against the hand-written base. */
+.tart--approach-phase-blend .mix {
+  transform-box: fill-box;
+  transform-origin: 100% 50%;
+}
+
+.tart--approach-phase-blend [data-anim="feed"] {
+  animation-name: tart-approach-phase-blend-feed;
+}
+.tart--approach-phase-blend [data-anim="knob"] {
+  animation-name: tart-approach-phase-blend-knob;
+}
+.tart--approach-phase-blend [data-anim="mix"] {
+  animation-name: tart-approach-phase-blend-mix;
+}
+.tart--approach-phase-blend [data-anim="frozen"] {
+  animation-name: tart-approach-phase-blend-frozen;
+}
+
+@keyframes tart-approach-phase-blend-feed {
+  0%,
+  4% {
+    stroke-dashoffset: 132;
+  }
+  22%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+/* Four settings, from the hand-written end to the learned one. */
+@keyframes tart-approach-phase-blend-knob {
+  0%,
+  18% {
+    transform: translateX(-84px);
+  }
+  26%,
+  34% {
+    transform: translateX(-56px);
+  }
+  42%,
+  50% {
+    transform: translateX(-28px);
+  }
+  60%,
+  100% {
+    transform: translateX(0);
+  }
+}
+@keyframes tart-approach-phase-blend-mix {
+  0%,
+  18% {
+    transform: scaleX(0);
+  }
+  26%,
+  34% {
+    transform: scaleX(0.25);
+  }
+  42%,
+  50% {
+    transform: scaleX(0.5);
+  }
+  60%,
+  100% {
+    transform: scaleX(1);
+  }
+}
+@keyframes tart-approach-phase-blend-frozen {
+  0%,
+  74% {
+    opacity: 0;
+  }
+  86%,
+  100% {
+    opacity: 1;
+  }
+}

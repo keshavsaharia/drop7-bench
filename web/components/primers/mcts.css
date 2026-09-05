@@ -1,0 +1,191 @@
+/* Figures for the Monte Carlo tree search primer (components/primers/Mcts.tsx).
+   Nodes brighten by opacity in growth order, the playout line marches by
+   stroke-dashoffset, backup marks fade in, bonus bars scale by transform and
+   the selection arrow slides by transform. With animation off, the whole
+   lopsided tree, the playout and the backup marks are visible, and the bar
+   figure rests on its later state. */
+
+.primer-mcts {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Lopsided growth: eleven nodes, one every five percent of a five-second loop. */
+.primer-mcts [data-anim="mcts-node"] {
+  animation: 5s linear infinite;
+}
+.primer-mcts [data-anim="mcts-node"][data-step="1"] {
+  animation-name: mcts-node-1;
+}
+.primer-mcts [data-anim="mcts-node"][data-step="2"] {
+  animation-name: mcts-node-2;
+}
+.primer-mcts [data-anim="mcts-node"][data-step="3"] {
+  animation-name: mcts-node-3;
+}
+.primer-mcts [data-anim="mcts-node"][data-step="4"] {
+  animation-name: mcts-node-4;
+}
+.primer-mcts [data-anim="mcts-node"][data-step="5"] {
+  animation-name: mcts-node-5;
+}
+.primer-mcts [data-anim="mcts-node"][data-step="6"] {
+  animation-name: mcts-node-6;
+}
+.primer-mcts [data-anim="mcts-node"][data-step="7"] {
+  animation-name: mcts-node-7;
+}
+.primer-mcts [data-anim="mcts-node"][data-step="8"] {
+  animation-name: mcts-node-8;
+}
+.primer-mcts [data-anim="mcts-node"][data-step="9"] {
+  animation-name: mcts-node-9;
+}
+.primer-mcts [data-anim="mcts-node"][data-step="10"] {
+  animation-name: mcts-node-10;
+}
+.primer-mcts [data-anim="mcts-node"][data-step="11"] {
+  animation-name: mcts-node-11;
+}
+@keyframes mcts-node-1 {
+  0%, 8% { opacity: 0.22; }
+  10%, 100% { opacity: 1; }
+}
+@keyframes mcts-node-2 {
+  0%, 13% { opacity: 0.22; }
+  15%, 100% { opacity: 1; }
+}
+@keyframes mcts-node-3 {
+  0%, 18% { opacity: 0.22; }
+  20%, 100% { opacity: 1; }
+}
+@keyframes mcts-node-4 {
+  0%, 23% { opacity: 0.22; }
+  25%, 100% { opacity: 1; }
+}
+@keyframes mcts-node-5 {
+  0%, 28% { opacity: 0.22; }
+  30%, 100% { opacity: 1; }
+}
+@keyframes mcts-node-6 {
+  0%, 33% { opacity: 0.22; }
+  35%, 100% { opacity: 1; }
+}
+@keyframes mcts-node-7 {
+  0%, 38% { opacity: 0.22; }
+  40%, 100% { opacity: 1; }
+}
+@keyframes mcts-node-8 {
+  0%, 43% { opacity: 0.22; }
+  45%, 100% { opacity: 1; }
+}
+@keyframes mcts-node-9 {
+  0%, 48% { opacity: 0.22; }
+  50%, 100% { opacity: 1; }
+}
+@keyframes mcts-node-10 {
+  0%, 53% { opacity: 0.22; }
+  55%, 100% { opacity: 1; }
+}
+@keyframes mcts-node-11 {
+  0%, 58% { opacity: 0.22; }
+  60%, 100% { opacity: 1; }
+}
+
+.primer-mcts [data-anim="mcts-playout"] {
+  animation: mcts-playout 5s linear infinite;
+}
+@keyframes mcts-playout {
+  0%, 61% { opacity: 0; stroke-dashoffset: 42; }
+  63% { opacity: 1; stroke-dashoffset: 42; }
+  70%, 100% { opacity: 1; stroke-dashoffset: 0; }
+}
+
+.primer-mcts [data-anim="mcts-badge"] {
+  animation: mcts-badge 5s linear infinite;
+}
+@keyframes mcts-badge {
+  0%, 69% { opacity: 0; }
+  71%, 100% { opacity: 1; }
+}
+
+.primer-mcts [data-anim^="mcts-mark-"] {
+  animation: 5s linear infinite;
+}
+.primer-mcts [data-anim="mcts-mark-1"] { animation-name: mcts-mark-1; }
+.primer-mcts [data-anim="mcts-mark-2"] { animation-name: mcts-mark-2; }
+.primer-mcts [data-anim="mcts-mark-3"] { animation-name: mcts-mark-3; }
+.primer-mcts [data-anim="mcts-mark-4"] { animation-name: mcts-mark-4; }
+.primer-mcts [data-anim="mcts-mark-5"] { animation-name: mcts-mark-5; }
+@keyframes mcts-mark-1 {
+  0%, 73% { opacity: 0; }
+  75%, 100% { opacity: 1; }
+}
+@keyframes mcts-mark-2 {
+  0%, 77% { opacity: 0; }
+  79%, 100% { opacity: 1; }
+}
+@keyframes mcts-mark-3 {
+  0%, 81% { opacity: 0; }
+  83%, 100% { opacity: 1; }
+}
+@keyframes mcts-mark-4 {
+  0%, 85% { opacity: 0; }
+  87%, 100% { opacity: 1; }
+}
+@keyframes mcts-mark-5 {
+  0%, 89% { opacity: 0; }
+  91%, 100% { opacity: 1; }
+}
+
+/* The UCB bars: exploration bonuses scale from the early state to the later
+   one; the selection arrow slides from child C to child A; the two visit-count
+   labels for C swap by opacity. Base is the later state. */
+.primer-mcts [data-anim^="mcts-bonus-"] {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: 4s ease-in-out infinite;
+}
+.primer-mcts [data-anim="mcts-bonus-a"] { animation-name: mcts-bonus-a; }
+.primer-mcts [data-anim="mcts-bonus-b"] { animation-name: mcts-bonus-b; }
+.primer-mcts [data-anim="mcts-bonus-c"] { animation-name: mcts-bonus-c; }
+@keyframes mcts-bonus-a {
+  0%, 25% { transform: scaleY(0.917); }
+  65%, 100% { transform: scaleY(1); }
+}
+@keyframes mcts-bonus-b {
+  0%, 25% { transform: scaleY(0.921); }
+  65%, 100% { transform: scaleY(1); }
+}
+@keyframes mcts-bonus-c {
+  0%, 25% { transform: scaleY(1.838); }
+  65%, 100% { transform: scaleY(1); }
+}
+.primer-mcts [data-anim="mcts-arrow"] {
+  animation: mcts-arrow 4s ease-in-out infinite;
+}
+@keyframes mcts-arrow {
+  0%, 25% { transform: translateX(280px); }
+  65%, 100% { transform: translateX(0); }
+}
+.primer-mcts [data-anim="mcts-label-early"] {
+  animation: mcts-label-early 4s ease-in-out infinite;
+}
+.primer-mcts [data-anim="mcts-label-late"] {
+  animation: mcts-label-late 4s ease-in-out infinite;
+}
+@keyframes mcts-label-early {
+  0%, 40% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+@keyframes mcts-label-late {
+  0%, 40% { opacity: 0; }
+  50%, 100% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primer-mcts [data-anim] {
+    animation: none;
+  }
+}

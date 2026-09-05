@@ -5,6 +5,8 @@ summary: Adds a small rise-cycle term to board evaluation and preserves the fitt
 status: completed
 evidence: ledger-recorded
 reads: public
+kind: strategy
+technique: heuristic-evaluation
 ---
 
 Bolt a small extra term onto the board evaluator: one that cares about where
@@ -24,7 +26,7 @@ Four drops before a rise, a tall board is survivable and a slow-building plan is
 affordable. One drop before a rise, the same board is an emergency and the same
 plan is worthless.
 
-The evaluator described on the [fair leaf page](/approaches/fair-expectimax/fair-policy)
+The evaluator described on the [fair leaf page](/approach/fair-expectimax/fair-policy)
 has no such clock inside it. This bench adds a **residual**: a separate
 phase-aware score, added on top of the fixed fair evaluator rather than replacing
 it, so the base behaviour is preserved and only the correction is being tested.
@@ -115,7 +117,7 @@ plausible reason is that the searches on these pages already *see* the rise: the
 look-ahead simulates the rise happening, so its consequences are already priced
 into the boards at the bottom of the tree, and an extra phase bonus double-counts
 them in the same way the
-[restored placement rewards](/approaches/fair-expectimax/full-action-terms) did.
+[restored placement rewards](/approach/fair-expectimax/full-action-terms) did.
 That is a hypothesis this repository has not tested directly.
 
 The positive half is a caution about provenance rather than a scientific result.
@@ -127,7 +129,7 @@ Still open: whether phase information helps as an **input feature** the
 evaluator can weigh, rather than as a residual added to a finished score, and
 whether it matters more for a search too shallow to see the next rise than for
 one that can. The related rise-boundary depth experiment on the
-[looking-five-moves-ahead page](/approaches/fair-expectimax/selective-depth)
+[looking-five-moves-ahead page](/approach/fair-expectimax/selective-depth)
 attacked the same intuition from the search side and was also stopped.
 
 ## Sources

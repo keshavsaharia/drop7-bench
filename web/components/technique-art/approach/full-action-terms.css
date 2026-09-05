@@ -1,0 +1,149 @@
+/* fair-expectimax/full-action-terms card art: the disc lands and clears two
+   waves, the cover cracks, the state rows fill, and the restored action rows
+   slide in underneath before the dashed tie marks the term paid twice.
+   Play-state is owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-full-action-terms {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-full-action-terms [data-anim="drop"] {
+  animation-name: tart-approach-full-action-terms-drop;
+}
+.tart--approach-full-action-terms [data-anim="ring"] {
+  animation-name: tart-approach-full-action-terms-ring;
+}
+.tart--approach-full-action-terms [data-anim="wave-1"] {
+  animation-name: tart-approach-full-action-terms-wave-1;
+}
+.tart--approach-full-action-terms [data-anim="wave-2"] {
+  animation-name: tart-approach-full-action-terms-wave-2;
+}
+.tart--approach-full-action-terms [data-anim="cover-solid"] {
+  animation-name: tart-approach-full-action-terms-cover-solid;
+}
+.tart--approach-full-action-terms [data-anim="cover-cracked"] {
+  animation-name: tart-approach-full-action-terms-cover-cracked;
+}
+.tart--approach-full-action-terms [data-anim="state"] {
+  animation-name: tart-approach-full-action-terms-state;
+}
+.tart--approach-full-action-terms [data-anim="action"] {
+  animation-name: tart-approach-full-action-terms-action;
+}
+.tart--approach-full-action-terms [data-anim="tie"] {
+  animation-name: tart-approach-full-action-terms-tie;
+}
+.tart--approach-full-action-terms [data-anim="caption"] {
+  animation-name: tart-approach-full-action-terms-caption;
+}
+
+@keyframes tart-approach-full-action-terms-drop {
+  0%,
+  1.09% {
+    transform: translateY(-104px);
+  }
+  7.64%,
+  100% {
+    transform: translateY(0);
+  }
+}
+@keyframes tart-approach-full-action-terms-ring {
+  0%,
+  6.55% {
+    opacity: 0;
+  }
+  10.91%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-full-action-terms-wave-1 {
+  0%,
+  7.64% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  13.09%,
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes tart-approach-full-action-terms-wave-2 {
+  0%,
+  14.18% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  19.64%,
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes tart-approach-full-action-terms-cover-solid {
+  0%,
+  15.27% {
+    opacity: 1;
+  }
+  19.64%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes tart-approach-full-action-terms-cover-cracked {
+  0%,
+  16.36% {
+    opacity: 0;
+  }
+  20.73%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-full-action-terms-state {
+  0%,
+  21.82% {
+    opacity: 0;
+  }
+  27.27%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-full-action-terms-action {
+  0%,
+  30.55% {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  38.18%,
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes tart-approach-full-action-terms-tie {
+  0%,
+  40.36% {
+    opacity: 0;
+  }
+  45.82%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-full-action-terms-caption {
+  0%,
+  46.91% {
+    opacity: 0;
+  }
+  52.36%,
+  100% {
+    opacity: 1;
+  }
+}

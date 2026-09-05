@@ -1,0 +1,34 @@
+/* Figures for the NNUE primer (components/primers/Nnue.tsx).
+   Only opacity animates. The resting state, with animation switched off, is
+   the flipped-on board with the extra row already in the sum, so the figure
+   explains the incremental update without motion. */
+
+.primer-nnue {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.primer-nnue [data-anim="nnue-flip"] {
+  animation: nnue-flip 4s ease-in-out infinite;
+}
+
+@keyframes nnue-flip {
+  0%,
+  42% {
+    opacity: 0;
+  }
+  50%,
+  92% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primer-nnue [data-anim] {
+    animation: none;
+  }
+}

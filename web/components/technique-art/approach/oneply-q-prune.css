@@ -1,0 +1,114 @@
+/* value-policy-learning/oneply-q-prune card art. The cheap prior fills a
+   gauge under every column, four branches are struck out and go dim, and the
+   deep search fans out only under the three that survived. Three beats, so a
+   longer cycle. Play-state is owned by the shared art.css. */
+
+.tart.tart--approach-oneply-q-prune {
+  --tart-motion: calc(var(--duration-art, 2400ms) * 1.5);
+}
+
+.tart--approach-oneply-q-prune [data-anim] {
+  animation-duration: var(--tart-duration);
+}
+
+/* Every gauge shares one floor, so the group scales from its own bottom. */
+.tart--approach-oneply-q-prune .fills {
+  transform-box: fill-box;
+  transform-origin: bottom;
+}
+/* The wedges share one top edge and grow downward out of the columns kept. */
+.tart--approach-oneply-q-prune .wedges {
+  transform-box: fill-box;
+  transform-origin: top;
+}
+
+.tart--approach-oneply-q-prune [data-anim="fills-keep"] {
+  animation-name: tart-approach-oneply-q-prune-fills-keep;
+}
+.tart--approach-oneply-q-prune [data-anim="fills-cut"] {
+  animation-name: tart-approach-oneply-q-prune-fills-cut;
+}
+.tart--approach-oneply-q-prune [data-anim="strikes"] {
+  animation-name: tart-approach-oneply-q-prune-strikes;
+}
+.tart--approach-oneply-q-prune [data-anim="cut"] {
+  animation-name: tart-approach-oneply-q-prune-cut;
+}
+.tart--approach-oneply-q-prune [data-anim="wedges"] {
+  animation-name: tart-approach-oneply-q-prune-wedges;
+}
+.tart--approach-oneply-q-prune [data-anim="leaves"] {
+  animation-name: tart-approach-oneply-q-prune-leaves;
+}
+
+/* The prior answers for all seven columns at once and costs almost nothing. */
+@keyframes tart-approach-oneply-q-prune-fills-keep {
+  0%,
+  8% {
+    transform: scaleY(0.04);
+  }
+  28%,
+  100% {
+    transform: scaleY(1);
+  }
+}
+@keyframes tart-approach-oneply-q-prune-fills-cut {
+  0%,
+  8% {
+    transform: scaleY(0.04);
+    opacity: 1;
+  }
+  28%,
+  46% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+  58%,
+  100% {
+    transform: scaleY(1);
+    opacity: 0.3;
+  }
+}
+@keyframes tart-approach-oneply-q-prune-strikes {
+  0%,
+  44% {
+    opacity: 0;
+  }
+  56%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-oneply-q-prune-cut {
+  0%,
+  46% {
+    opacity: 1;
+  }
+  58%,
+  100% {
+    opacity: 0.32;
+  }
+}
+/* Only now does the expensive part run, and only under the three left. */
+@keyframes tart-approach-oneply-q-prune-wedges {
+  0%,
+  58% {
+    opacity: 0;
+    transform: scaleY(0.03);
+  }
+  82%,
+  100% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+@keyframes tart-approach-oneply-q-prune-leaves {
+  0%,
+  80% {
+    opacity: 0;
+  }
+  92%,
+  100% {
+    opacity: 1;
+  }
+}

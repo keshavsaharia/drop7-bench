@@ -5,6 +5,8 @@ summary: Start a network as an exact copy of the reference search, train it on a
 status: rejected
 evidence: task-record only
 reads: public
+kind: strategy
+technique: q-learning
 ---
 
 Start a network in a state where it *is* the reference search, exactly, then let
@@ -98,7 +100,7 @@ here.
   (completed; task-record only diagnostic), and a hindsight-based ranker charged
   for its information advantage scored **28.93% top-1 against fair depth 4's
   38.16%**, with pairwise 59.85% against 66.82% (ledger-recorded). Both live in
-  [terminal policy iteration](/approaches/terminal-policy-iteration).
+  [terminal policy iteration](/approach/terminal-policy-iteration).
 - **A caveat on the panel itself.** The research roadmap records that this
   477-root panel is "reusable diagnosis, not fresh model-selection evidence"
   (quoted in [`audit-05`](/docs/exploratory/audit-05-optimistic-curriculum)

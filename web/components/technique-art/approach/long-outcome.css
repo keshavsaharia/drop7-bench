@@ -1,0 +1,97 @@
+/* d4-long-outcome/long-outcome card art. The shared future arrives across the
+   top, then every column's line is drawn forward through it at once; one line
+   ends in a cross where it died, and the survivors arrive at the horizon
+   twenty-five moves on with their outcomes fanned apart.
+   Play-state is owned by the shared art.css; only names belong here. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-long-outcome {
+  --tart-motion: calc(var(--duration-art, 2400ms) * 1.35);
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-long-outcome [data-anim] {
+  animation-duration: var(--tart-duration);
+}
+
+/* The cross pops about its own centre. */
+.tart--approach-long-outcome .death {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.tart--approach-long-outcome [data-anim="tape"] {
+  animation-name: tart-approach-long-outcome-tape;
+}
+.tart--approach-long-outcome [data-anim="track"] {
+  animation-name: tart-approach-long-outcome-track;
+}
+.tart--approach-long-outcome [data-anim="death"] {
+  animation-name: tart-approach-long-outcome-death;
+}
+.tart--approach-long-outcome [data-anim="ends"] {
+  animation-name: tart-approach-long-outcome-ends;
+}
+.tart--approach-long-outcome [data-anim="caption"] {
+  animation-name: tart-approach-long-outcome-caption;
+}
+
+@keyframes tart-approach-long-outcome-tape {
+  0% {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  12.37%,
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+/* 360 is longer than any one line, so they all run forward together and the
+   short one — the line that died — finishes first. */
+@keyframes tart-approach-long-outcome-track {
+  0%,
+  9.89% {
+    stroke-dashoffset: 360;
+  }
+  48.23%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes tart-approach-long-outcome-death {
+  0%,
+  33.39% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  39.57%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes tart-approach-long-outcome-ends {
+  0%,
+  45.76% {
+    opacity: 0;
+    transform: translateX(-7px);
+  }
+  54.41%,
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes tart-approach-long-outcome-caption {
+  0%,
+  51.94% {
+    opacity: 0;
+  }
+  58.12%,
+  100% {
+    opacity: 1;
+  }
+}

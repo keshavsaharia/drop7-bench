@@ -1,0 +1,40 @@
+/* constructive-reservoir/constructive-spectrum card art. The needle travels
+   from "score now" to "target shape"; the flat wall fades out and the target
+   picture fades in under it; the bracket then names the pair of stored 6s that
+   share one trigger. The resting frame is the target board with the needle at
+   the far end. Play-state, duration and easing are owned by art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-constructive-spectrum {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-constructive-spectrum [data-anim="needle"] { animation-name: tart-approach-constructive-spectrum-needle; }
+.tart--approach-constructive-spectrum [data-anim="flat"] { animation-name: tart-approach-constructive-spectrum-flat; }
+.tart--approach-constructive-spectrum [data-anim="target"] { animation-name: tart-approach-constructive-spectrum-target; }
+.tart--approach-constructive-spectrum [data-anim="trigger"] { animation-name: tart-approach-constructive-spectrum-trigger; }
+.tart--approach-constructive-spectrum [data-anim="rest"] { animation-name: tart-approach-constructive-spectrum-rest; }
+
+/* 232 is the track's length, so the needle starts on the "score now" tick. */
+@keyframes tart-approach-constructive-spectrum-needle {
+  0%, 5.45% { transform: translateX(-232px); }
+  33.82%, 100% { transform: translateX(0); }
+}
+@keyframes tart-approach-constructive-spectrum-flat {
+  0%, 10.91% { transform: translateY(0); opacity: 1; }
+  18.55%, 100% { transform: translateY(8px); opacity: 0; }
+}
+@keyframes tart-approach-constructive-spectrum-target {
+  0%, 14.18% { transform: translateY(-10px); opacity: 0; }
+  24%, 100% { transform: translateY(0); opacity: 1; }
+}
+@keyframes tart-approach-constructive-spectrum-trigger {
+  0%, 34.91% { opacity: 0; }
+  41.45%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-constructive-spectrum-rest {
+  0%, 42.55% { opacity: 0; }
+  48%, 100% { opacity: 1; }
+}

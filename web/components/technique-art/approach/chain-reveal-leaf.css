@@ -1,0 +1,228 @@
+/* lifetime-objective/chain-reveal-leaf card art: a four lands and clears a run
+   of four for +7, cracking one cover and opening another; the four that cover
+   gives up clears as the second wave for +39 and opens the cover beside it.
+   Two waves need a longer cycle, so the duration is a multiple of the shared
+   one; play-state and easing stay with art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-chain-reveal-leaf {
+  --tart-motion: calc(var(--duration-art, 2400ms) * 1.4);
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-chain-reveal-leaf [data-anim] {
+  animation-duration: var(--tart-duration);
+}
+
+.tart--approach-chain-reveal-leaf [data-anim="drop"] {
+  animation-name: tart-approach-chain-reveal-leaf-drop;
+}
+.tart--approach-chain-reveal-leaf [data-anim="wave-1"] {
+  animation-name: tart-approach-chain-reveal-leaf-wave-1;
+}
+.tart--approach-chain-reveal-leaf [data-anim="wave-2"] {
+  animation-name: tart-approach-chain-reveal-leaf-wave-2;
+}
+.tart--approach-chain-reveal-leaf [data-anim="flash-1"] {
+  animation-name: tart-approach-chain-reveal-leaf-flash-1;
+}
+.tart--approach-chain-reveal-leaf [data-anim="flash-2"] {
+  animation-name: tart-approach-chain-reveal-leaf-flash-2;
+}
+.tart--approach-chain-reveal-leaf [data-anim="score-1"] {
+  animation-name: tart-approach-chain-reveal-leaf-score-1;
+}
+.tart--approach-chain-reveal-leaf [data-anim="score-2"] {
+  animation-name: tart-approach-chain-reveal-leaf-score-2;
+}
+.tart--approach-chain-reveal-leaf [data-anim="cover-1-out"] {
+  animation-name: tart-approach-chain-reveal-leaf-cover-1-out;
+}
+.tart--approach-chain-reveal-leaf [data-anim="cover-2-solid"] {
+  animation-name: tart-approach-chain-reveal-leaf-cover-2-solid;
+}
+.tart--approach-chain-reveal-leaf [data-anim="cover-2-cracked"] {
+  animation-name: tart-approach-chain-reveal-leaf-cover-2-cracked;
+}
+.tart--approach-chain-reveal-leaf [data-anim="cover-2-open"] {
+  animation-name: tart-approach-chain-reveal-leaf-cover-2-open;
+}
+.tart--approach-chain-reveal-leaf [data-anim="step-a"] {
+  animation-name: tart-approach-chain-reveal-leaf-step-a;
+}
+.tart--approach-chain-reveal-leaf [data-anim="step-b"] {
+  animation-name: tart-approach-chain-reveal-leaf-step-b;
+}
+.tart--approach-chain-reveal-leaf [data-anim="rest"] {
+  animation-name: tart-approach-chain-reveal-leaf-rest;
+}
+
+/* Doubled class so the falling disc keeps its own easing whichever way round
+   the two stylesheets are bundled. */
+.tart.tart--approach-chain-reveal-leaf [data-anim="drop"] {
+  animation-timing-function: var(--ease-drop, cubic-bezier(0.22, 0.78, 0.28, 1));
+}
+
+@keyframes tart-approach-chain-reveal-leaf-drop {
+  0% {
+    transform: translateY(-96px);
+  }
+  10.03%,
+  100% {
+    transform: translateY(0);
+  }
+}
+@keyframes tart-approach-chain-reveal-leaf-wave-1 {
+  0%,
+  13.79% {
+    opacity: 1;
+  }
+  18.81%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes tart-approach-chain-reveal-leaf-flash-1 {
+  0%,
+  10.66% {
+    opacity: 0;
+  }
+  15.04% {
+    opacity: 0.8;
+  }
+  21.31%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes tart-approach-chain-reveal-leaf-score-1 {
+  0%,
+  15.04% {
+    opacity: 0;
+  }
+  20.06%,
+  31.34% {
+    opacity: 1;
+  }
+  36.36%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes tart-approach-chain-reveal-leaf-cover-1-out {
+  0%,
+  16.3% {
+    opacity: 1;
+  }
+  21.31%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes tart-approach-chain-reveal-leaf-wave-2 {
+  0%,
+  20.06% {
+    opacity: 0;
+  }
+  25.07%,
+  35.1% {
+    opacity: 1;
+  }
+  40.12%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes tart-approach-chain-reveal-leaf-cover-2-solid {
+  0%,
+  17.55% {
+    opacity: 1;
+  }
+  22.57%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes tart-approach-chain-reveal-leaf-cover-2-cracked {
+  0%,
+  21.31% {
+    opacity: 0;
+  }
+  26.33%,
+  37.61% {
+    opacity: 1;
+  }
+  42.63%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes tart-approach-chain-reveal-leaf-flash-2 {
+  0%,
+  31.97% {
+    opacity: 0;
+  }
+  35.73% {
+    opacity: 0.8;
+  }
+  41.37%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes tart-approach-chain-reveal-leaf-cover-2-open {
+  0%,
+  40.12% {
+    opacity: 0;
+  }
+  45.13%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-chain-reveal-leaf-score-2 {
+  0%,
+  36.36% {
+    opacity: 0;
+  }
+  42.63%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-chain-reveal-leaf-step-a {
+  0%,
+  12.54% {
+    opacity: 1;
+  }
+  17.55%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes tart-approach-chain-reveal-leaf-step-b {
+  0%,
+  20.06% {
+    opacity: 0;
+  }
+  26.33%,
+  36.36% {
+    opacity: 1;
+  }
+  41.37%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes tart-approach-chain-reveal-leaf-rest {
+  0%,
+  41.37% {
+    opacity: 0;
+  }
+  48.9%,
+  100% {
+    opacity: 1;
+  }
+}

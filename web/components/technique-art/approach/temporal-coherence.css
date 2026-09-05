@@ -1,0 +1,126 @@
+/* ntuple-rl/temporal-coherence card art: three placements light over the one
+   cell they share, their lines run into a single weight in the bank the rise
+   clock selects, the naive step runs far past the amount that was asked for,
+   and the corrected step lands exactly on it. Play-state, duration and easing
+   are owned by the shared art.css. */
+
+.tart.tart--approach-temporal-coherence {
+  --tart-motion: calc(var(--duration-art, 2400ms) * 1.4);
+}
+
+.tart--approach-temporal-coherence [data-anim] {
+  animation-duration: var(--tart-duration);
+}
+
+/* Both gauge bars grow rightwards off the same origin. */
+.tart--approach-temporal-coherence .gauge-bar {
+  transform-box: fill-box;
+  transform-origin: 0% 50%;
+}
+
+.tart--approach-temporal-coherence [data-anim="windows"] {
+  animation-name: tart-approach-temporal-coherence-windows;
+}
+.tart--approach-temporal-coherence [data-anim="shared"] {
+  animation-name: tart-approach-temporal-coherence-shared;
+}
+.tart--approach-temporal-coherence [data-anim="links"] {
+  animation-name: tart-approach-temporal-coherence-links;
+}
+.tart--approach-temporal-coherence [data-anim="bank"] {
+  animation-name: tart-approach-temporal-coherence-bank;
+}
+.tart--approach-temporal-coherence [data-anim="overshoot"] {
+  animation-name: tart-approach-temporal-coherence-overshoot;
+}
+.tart--approach-temporal-coherence [data-anim="corrected"] {
+  animation-name: tart-approach-temporal-coherence-corrected;
+}
+.tart--approach-temporal-coherence [data-anim="lands"] {
+  animation-name: tart-approach-temporal-coherence-lands;
+}
+
+@keyframes tart-approach-temporal-coherence-windows {
+  0% {
+    opacity: 0;
+  }
+  14%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-temporal-coherence-shared {
+  0%,
+  14% {
+    opacity: 0;
+  }
+  24%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-temporal-coherence-links {
+  0%,
+  20% {
+    stroke-dashoffset: 60;
+  }
+  36%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes tart-approach-temporal-coherence-bank {
+  0%,
+  30% {
+    opacity: 0;
+  }
+  40%,
+  100% {
+    opacity: 1;
+  }
+}
+/* One unit was asked for; dividing by every placement moved it far further. */
+@keyframes tart-approach-temporal-coherence-overshoot {
+  0%,
+  38% {
+    transform: scaleX(0.02);
+    opacity: 1;
+  }
+  54%,
+  62% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  72%,
+  100% {
+    transform: scaleX(1);
+    opacity: 0;
+  }
+}
+/* Counting each weight once, the step stops on the line it was asked for. */
+@keyframes tart-approach-temporal-coherence-corrected {
+  0%,
+  64% {
+    transform: scaleX(0.02);
+    opacity: 0;
+  }
+  70% {
+    transform: scaleX(0.2);
+    opacity: 1;
+  }
+  86%,
+  100% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-temporal-coherence-lands {
+  0%,
+  88% {
+    opacity: 0;
+  }
+  96%,
+  100% {
+    opacity: 1;
+  }
+}

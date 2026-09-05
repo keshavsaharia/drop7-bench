@@ -1,0 +1,158 @@
+/* value-policy-learning/dqn card art. The online net lights and hands its
+   chosen column across to the lagging copy; the copy lights and returns a
+   number to the bar, which starts at the height the online net's own estimate
+   stood at and settles under the dashed outline it leaves behind. Four beats,
+   so the loop runs a little longer than the shared default. Play-state is
+   owned by art.css; the rules below set animation-name only. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-dqn {
+  --tart-motion: calc(var(--duration-art, 2400ms) * 1.4);
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+/* The bar deflates onto its own base: 54 units is the dashed outline, 32 the
+   value that is kept, so the optimistic frame is scaleY(1.6875). */
+.tart--approach-dqn .bar {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+
+.tart--approach-dqn [data-anim="online"] {
+  animation-name: tart-approach-dqn-online;
+}
+.tart--approach-dqn [data-anim="target"] {
+  animation-name: tart-approach-dqn-target;
+}
+.tart--approach-dqn [data-anim="across"] {
+  animation-name: tart-approach-dqn-across;
+}
+.tart--approach-dqn [data-anim="chip"] {
+  animation-name: tart-approach-dqn-chip;
+}
+.tart--approach-dqn [data-anim="back"] {
+  animation-name: tart-approach-dqn-back;
+}
+.tart--approach-dqn [data-anim="ghost"] {
+  animation-name: tart-approach-dqn-ghost;
+}
+.tart--approach-dqn [data-anim="bar"] {
+  animation-name: tart-approach-dqn-bar;
+}
+.tart--approach-dqn [data-anim="caption-a"] {
+  animation-name: tart-approach-dqn-caption-a;
+}
+.tart--approach-dqn [data-anim="caption-b"] {
+  animation-name: tart-approach-dqn-caption-b;
+}
+
+/* The live net chooses first and stays lit; the copy only wakes when the
+   question reaches it. */
+@keyframes tart-approach-dqn-online {
+  0% {
+    opacity: 0.3;
+  }
+  5.01%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-dqn-target {
+  0%,
+  22.57% {
+    opacity: 0.3;
+  }
+  30.09%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-dqn-across {
+  0%,
+  5.01% {
+    opacity: 0;
+  }
+  10.03%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-dqn-chip {
+  0%,
+  8.78% {
+    transform: translateX(-84px);
+    opacity: 0;
+  }
+  12.54% {
+    transform: translateX(-84px);
+    opacity: 1;
+  }
+  25.07%,
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-dqn-back {
+  0%,
+  30.09% {
+    opacity: 0;
+  }
+  36.36%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-dqn-ghost {
+  0%,
+  33.85% {
+    opacity: 0;
+  }
+  38.87%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-dqn-bar {
+  0%,
+  33.85% {
+    transform: scaleY(1.6875);
+    opacity: 0;
+  }
+  38.87%,
+  43.88% {
+    transform: scaleY(1.6875);
+    opacity: 1;
+  }
+  53.91%,
+  100% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-dqn-caption-a {
+  0%,
+  3.76% {
+    opacity: 0;
+  }
+  8.78%,
+  25.07% {
+    opacity: 1;
+  }
+  33.85%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes tart-approach-dqn-caption-b {
+  0%,
+  47.64% {
+    opacity: 0;
+  }
+  55.16%,
+  100% {
+    opacity: 1;
+  }
+}

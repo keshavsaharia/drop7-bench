@@ -3,8 +3,11 @@ title: Compressing a legal planner into a network
 family: lifetime-objective
 summary: Labels every legal move with an expensive public-information planner, then trains a small network to imitate it.
 status: rejected
-evidence: development-tier exploratory finding
+evidence: reproduced
 reads: public
+kind: strategy
+technique: oracle-distillation
+featured: true
 ---
 
 Take the one expensive planner in this repository whose advantage is built only
@@ -29,7 +32,7 @@ teacher was an [oracle](/learn/glossary) that read hidden numbers or the future,
 so a large part of what it knew was **a function of information the student can
 never have**. No amount of training data fixes that.
 
-The [flow ceiling](/approaches/lifetime-objective/flow-ceiling) work produced a
+The [flow ceiling](/approach/lifetime-objective/flow-ceiling) work produced a
 teacher with neither defect. Its legal planner samples complete guesses of the
 hidden board, solves a short window exactly against each guess, and plays the
 best column on average. It never reads a hidden value or a future disc, and a
@@ -66,7 +69,7 @@ representable by a public student.
    search scoring exactly the same positions, split by whole origin game — and
    write the pass/fail rule down first.
 
-## The thing nobody had measured
+## Teacher ranking stability
 
 Here is a concrete example of the problem this approach uncovered, on the
 held-out positions.
@@ -244,5 +247,5 @@ averages of 44–54 with three other jobs running.
   sufficient.
 - **Still open:** the stronger teacher. The seven-move, 256-guess planner was
   budgeted at about 17 seconds per decision and never run — though the
-  [flow ceiling](/approaches/lifetime-objective/flow-ceiling) page's later
+  [flow ceiling](/approach/lifetime-objective/flow-ceiling) page's later
   re-baselining suggests its headroom above the reference search is also small.

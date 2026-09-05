@@ -30,15 +30,15 @@ import { join } from "node:path";
 import { CellGlyph } from "./Board";
 import { MiniBoard } from "./Engine";
 
-const INK = "#fafafa";
-const INK_2 = "#a1a1aa";
-const INK_3 = "#71717a";
-const GRID = "#27272a";
-const BLUE = "#3987e5";
-const ORANGE = "#d95926";
-const AQUA = "#199e70";
-const ACCENT = "#facc15";
-const FONT = "system-ui, -apple-system, 'Segoe UI', sans-serif";
+const INK = "var(--color-ink)";
+const INK_2 = "var(--color-ink-2)";
+const INK_3 = "var(--color-ink-3)";
+const GRID = "var(--color-rule)";
+const BLUE = "var(--color-series-1)";
+const ORANGE = "var(--color-series-2)";
+const AQUA = "var(--color-series-3)";
+const ACCENT = "var(--color-highlight)";
+const FONT = "var(--font-sans)";
 
 /** Displays a recorded figure without inflating it: integers stay exact, and a
  * fractional value keeps two decimals rather than being rounded to a whole. */
@@ -288,7 +288,7 @@ export function LeafXray({ caption }: { caption?: string }) {
           {/* height bars under the board */}
           {x.heights.map((height, column) => (
             <g key={`h${column}`} transform={`translate(${column * s} ${7 * s + 8})`}>
-              <rect x={s * 0.2} y={0} width={s * 0.6} height={12} rx={3} fill="#1f1f23" />
+              <rect x={s * 0.2} y={0} width={s * 0.6} height={12} rx={3} fill="var(--color-hover)" />
               <rect x={s * 0.2} y={0} width={(s * 0.6 * height) / 7} height={12} rx={3} fill={BLUE} />
               <text x={s / 2} y={26} textAnchor="middle" fontSize={10} fontFamily={FONT} fill={INK_2}>
                 {height}
@@ -525,7 +525,7 @@ export function BoardLookalikes({ caption }: { caption?: string }) {
                 <text x={0} y={12} fontSize={11} fontFamily={FONT} fill={INK_2}>
                   {`board ${panel.key}`}
                 </text>
-                <rect x={60} y={2} width={barW} height={14} rx={4} fill="#1f1f23" />
+                <rect x={60} y={2} width={barW} height={14} rx={4} fill="var(--color-hover)" />
                 <rect x={60} y={2} width={w} height={14} rx={4} fill={panel.tone} />
                 <text x={60 + barW + 10} y={13} fontSize={11.5} fontFamily={FONT} fontWeight={700} fill={INK}>
                   {`${fmt1(f.meanMoves)} moves on average`}
@@ -767,7 +767,7 @@ export function FlowBalance({
                   <text x={left - 8} y={11} textAnchor="end" fontSize={10.5} fontFamily={FONT} fill={INK_2}>
                     {row.label}
                   </text>
-                  <rect x={left} y={2} width={barW} height={14} rx={4} fill="#1f1f23" />
+                  <rect x={left} y={2} width={barW} height={14} rx={4} fill="var(--color-hover)" />
                   <rect x={left} y={2} width={w} height={14} rx={4} fill={row.tone} />
                   <text x={left + w + 8} y={13} fontSize={11} fontFamily={FONT} fontWeight={700} fill={INK}>
                     {row.value.toFixed(2)}
@@ -843,11 +843,11 @@ export function ScoreSources({ caption }: { caption?: string }) {
               <text x={left - 10} y={28} textAnchor="end" fontSize={10} fontFamily={FONT} fill={INK_3}>
                 {bar.sub}
               </text>
-              <rect x={left} y={2} width={barW} height={20} rx={4} fill="#1f1f23" />
+              <rect x={left} y={2} width={barW} height={20} rx={4} fill="var(--color-hover)" />
               <rect x={left} y={2} width={levelW} height={20} rx={4} fill={AQUA} />
               <rect x={left + levelW} y={2} width={Math.max(chainW, 1)} height={20} fill={ORANGE} />
               {clearW > 0 && <rect x={left + levelW + chainW} y={2} width={clearW} height={20} fill={BLUE} />}
-              <text x={left + 8} y={16} fontSize={10.5} fontFamily={FONT} fontWeight={700} fill="#052e1c">
+              <text x={left + 8} y={16} fontSize={10.5} fontFamily={FONT} fontWeight={700} fill="var(--color-bg)">
                 {`row rises ${pct(bar.level)}`}
               </text>
               <text x={left + barW} y={38} textAnchor="end" fontSize={10.5} fontFamily={FONT} fill={ORANGE}>
@@ -1029,7 +1029,7 @@ export function CohortScale({
                   {line}
                 </text>
               ))}
-              <rect x={left} y={2} width={plotW} height={16} rx={4} fill="#141418" />
+              <rect x={left} y={2} width={plotW} height={16} rx={4} fill="var(--color-surface)" />
               <rect x={left} y={2} width={xOf(point.value) - left} height={16} rx={4} fill={color} />
               <text x={xOf(point.value) + 8} y={14} fontSize={11} fontFamily={FONT} fontWeight={700} fill={INK}>
                 {point.display ?? fmt(point.value)}

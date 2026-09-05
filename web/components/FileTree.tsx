@@ -51,7 +51,7 @@ export function FileTree({
   return (
     <div
       className={classes(
-        "rounded-xl border border-zinc-800 bg-zinc-950/70 font-mono text-sm shadow-2xl shadow-black/10",
+        "rounded-lg border border-rule bg-bg font-mono text-small",
         className,
       )}
       role="tree"
@@ -97,8 +97,8 @@ function TreeEntry({
   const rowClass = classes(
     "group flex w-full items-center gap-2 rounded-md px-1.5 py-1.5 text-left text-[13px] leading-tight transition-colors",
     isHighlighted
-      ? "bg-sky-500/10 font-medium text-sky-300 ring-1 ring-inset ring-sky-500/20"
-      : "text-zinc-400 hover:bg-zinc-800/70 hover:text-zinc-100",
+      ? "bg-accent-soft font-medium text-accent ring-1 ring-inset ring-accent/30"
+      : "text-ink-2 hover:bg-hover hover:text-ink",
   );
   const rowStyle = { paddingLeft: `${depth * 18 + 6}px` };
 
@@ -172,7 +172,7 @@ function ChevronIcon({ open }: { open: boolean }) {
       viewBox="0 0 14 14"
       fill="none"
       className={classes(
-        "shrink-0 text-zinc-600 transition-transform duration-150",
+        "shrink-0 text-ink-4 transition-transform duration-150 motion-reduce:transition-none",
         open && "rotate-90",
       )}
       aria-hidden="true"
@@ -195,7 +195,7 @@ function FolderIcon({
   open: boolean;
   iconStyle: "minimal" | "colored";
 }) {
-  const color = iconStyle === "colored" ? "#54aeff" : "currentColor";
+  const color = iconStyle === "colored" ? "var(--color-accent)" : "currentColor";
   return (
     <svg
       width="16"
@@ -286,7 +286,7 @@ function FileIcon({
       height="16"
       viewBox="0 0 16 16"
       fill="none"
-      className="shrink-0 text-zinc-600"
+      className="shrink-0 text-ink-4"
       aria-hidden="true"
     >
       <path

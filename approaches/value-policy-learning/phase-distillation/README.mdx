@@ -5,6 +5,8 @@ summary: Train a fast network to copy a slow but reliable search, using both its
 status: rejected
 evidence: task-record only
 reads: public
+kind: strategy
+technique: oracle-distillation
 ---
 
 Take the exact depth-3 phase policy, which is trustworthy but expensive, and
@@ -63,7 +65,7 @@ Two ways to copy a teacher, and this directory tries both.
 
 The second design deserves a note: giving the model *common-random one-ply
 successors* is an early, cheap version of the idea that eventually became the
-[afterstate corpus](/approaches/afterstate-learning/distributional-afterstate)
+[afterstate corpus](/approach/afterstate-learning/distributional-afterstate)
 — judge a move by the position it leaves behind, under futures shared across all
 the candidates so the comparison between them is fair.
 
@@ -99,7 +101,7 @@ feature counts and seed partitions is read from the sources themselves and is
 
 For a distillation attempt against the same teacher family that *does* carry
 ledger numbers, see the
-[D4 root-Q clone](/approaches/value-policy-learning/d4-q-clone).
+[D4 root-Q clone](/approach/value-policy-learning/d4-q-clone).
 
 </TechnicalDetails>
 

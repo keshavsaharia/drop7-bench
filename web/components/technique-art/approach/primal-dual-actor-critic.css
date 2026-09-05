@@ -1,0 +1,75 @@
+/* ntuple-rl/primal-dual-actor-critic card art. One five-drop cycle at a time:
+   the drift stands up above the constraint line, and the price answers with
+   another step below it. Neither side ever gives way, which is the result the
+   run recorded. Play-state is owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-primal-dual-actor-critic {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-primal-dual-actor-critic .bar {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+.tart--approach-primal-dual-actor-critic .step {
+  transform-box: fill-box;
+  transform-origin: 50% 0%;
+}
+
+.tart--approach-primal-dual-actor-critic [data-anim="drift-1"] { animation-name: tart-approach-primal-dual-actor-critic-drift-1; }
+.tart--approach-primal-dual-actor-critic [data-anim="drift-2"] { animation-name: tart-approach-primal-dual-actor-critic-drift-2; }
+.tart--approach-primal-dual-actor-critic [data-anim="drift-3"] { animation-name: tart-approach-primal-dual-actor-critic-drift-3; }
+.tart--approach-primal-dual-actor-critic [data-anim="drift-4"] { animation-name: tart-approach-primal-dual-actor-critic-drift-4; }
+.tart--approach-primal-dual-actor-critic [data-anim="price-1"] { animation-name: tart-approach-primal-dual-actor-critic-price-1; }
+.tart--approach-primal-dual-actor-critic [data-anim="price-2"] { animation-name: tart-approach-primal-dual-actor-critic-price-2; }
+.tart--approach-primal-dual-actor-critic [data-anim="price-3"] { animation-name: tart-approach-primal-dual-actor-critic-price-3; }
+.tart--approach-primal-dual-actor-critic [data-anim="price-4"] { animation-name: tart-approach-primal-dual-actor-critic-price-4; }
+.tart--approach-primal-dual-actor-critic [data-anim="link"] { animation-name: tart-approach-primal-dual-actor-critic-link; }
+.tart--approach-primal-dual-actor-critic [data-anim="caption"] { animation-name: tart-approach-primal-dual-actor-critic-caption; }
+
+/* Cycle by cycle: the drift stands up first, the price follows it. */
+@keyframes tart-approach-primal-dual-actor-critic-drift-1 {
+  0%, 2.18% { transform: scaleY(0); }
+  8.73%, 100% { transform: scaleY(1); }
+}
+@keyframes tart-approach-primal-dual-actor-critic-price-1 {
+  0%, 8.73% { transform: scaleY(0); }
+  15.27%, 100% { transform: scaleY(1); }
+}
+@keyframes tart-approach-primal-dual-actor-critic-drift-2 {
+  0%, 13.09% { transform: scaleY(0); }
+  19.64%, 100% { transform: scaleY(1); }
+}
+@keyframes tart-approach-primal-dual-actor-critic-price-2 {
+  0%, 19.64% { transform: scaleY(0); }
+  26.18%, 100% { transform: scaleY(1); }
+}
+@keyframes tart-approach-primal-dual-actor-critic-drift-3 {
+  0%, 24% { transform: scaleY(0); }
+  30.55%, 100% { transform: scaleY(1); }
+}
+@keyframes tart-approach-primal-dual-actor-critic-price-3 {
+  0%, 30.55% { transform: scaleY(0); }
+  37.09%, 100% { transform: scaleY(1); }
+}
+@keyframes tart-approach-primal-dual-actor-critic-drift-4 {
+  0%, 33.82% { transform: scaleY(0); }
+  40.36%, 100% { transform: scaleY(1); }
+}
+@keyframes tart-approach-primal-dual-actor-critic-price-4 {
+  0%, 40.36% { transform: scaleY(0); }
+  45.82%, 100% { transform: scaleY(1); }
+}
+
+/* The rule itself: this drift, that price. */
+@keyframes tart-approach-primal-dual-actor-critic-link {
+  0%, 8.73% { opacity: 0; }
+  15.27%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-primal-dual-actor-critic-caption {
+  0%, 48% { opacity: 0; }
+  52.36%, 100% { opacity: 1; }
+}

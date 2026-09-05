@@ -1,0 +1,98 @@
+/* fair-expectimax/selective-depth card art. Seven cones grow from the root to
+   the fourth ply together, two of them are ringed, and only those two carry on
+   to the fifth. Each cone is scaled about its own apex, so a deepened cone at
+   0.747 is exactly the shape of a shallow one: the two are indistinguishable
+   until the moment the extra move is spent. Play-state, duration and easing
+   are owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-selective-depth {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-selective-depth .cone {
+  transform-box: fill-box;
+  transform-origin: center top;
+}
+
+.tart--approach-selective-depth [data-anim="grow"] {
+  animation-name: tart-approach-selective-depth-grow;
+}
+.tart--approach-selective-depth [data-anim="deepen"] {
+  animation-name: tart-approach-selective-depth-deepen;
+}
+.tart--approach-selective-depth [data-anim="chosen"] {
+  animation-name: tart-approach-selective-depth-chosen;
+}
+.tart--approach-selective-depth [data-anim="fifth"] {
+  animation-name: tart-approach-selective-depth-fifth;
+}
+.tart--approach-selective-depth [data-anim="caption"] {
+  animation-name: tart-approach-selective-depth-caption;
+}
+
+@keyframes tart-approach-selective-depth-grow {
+  0% {
+    transform: scale(0.08);
+    opacity: 0.25;
+  }
+  14.18%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 0.747 is 71/95: the shallow cone's height over the deepened one's. */
+@keyframes tart-approach-selective-depth-deepen {
+  0% {
+    transform: scale(0.06);
+    opacity: 0.25;
+  }
+  14.18% {
+    transform: scale(0.747);
+    opacity: 1;
+  }
+  20.73% {
+    transform: scale(0.747);
+  }
+  33.82%,
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes tart-approach-selective-depth-chosen {
+  0%,
+  15.27% {
+    opacity: 0;
+  }
+  21.82%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes tart-approach-selective-depth-fifth {
+  0%,
+  30.55% {
+    opacity: 0;
+  }
+  38.18%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes tart-approach-selective-depth-caption {
+  0%,
+  40.36% {
+    opacity: 0;
+  }
+  48%,
+  100% {
+    opacity: 1;
+  }
+}

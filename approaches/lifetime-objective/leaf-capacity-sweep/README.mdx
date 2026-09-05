@@ -5,6 +5,7 @@ summary: Retrains the small board evaluator at several sizes and settings to tes
 status: completed
 evidence: repository-verified
 reads: teacher
+kind: diagnostic
 ---
 
 Retrain the tiny board-scoring network that already fits inside the search at
@@ -47,7 +48,7 @@ Pearson matches each row within 0.0004. The recorded finding-08 baseline was
 This is an offline diagnostic. Its labels come from the futures of already
 played training games (a teacher signal), and its metric is how well a network
 predicts those futures on games it never saw. It says nothing about playing
-strength: the [learned-leaf experiment](/approaches/lifetime-objective/learned-leaf)
+strength: the [learned-leaf experiment](/approach/lifetime-objective/learned-leaf)
 already found that a 0.008 gap in this metric did not separate two models in
 play. What it can settle is narrower, whether the network's accuracy is
 limited by its size and training, or by what it is shown.
@@ -55,7 +56,7 @@ limited by its size and training, or by what it is shown.
 
 ## The intuition
 
-The [learned leaf](/approaches/lifetime-objective/learned-leaf) is the one
+The [learned leaf](/approach/lifetime-objective/learned-leaf) is the one
 learned evaluator in this repository that helped inside the search, and its
 page ends with a claim: "train a bigger survival model is not the next
 experiment", because a network five times its size was only 0.008 more

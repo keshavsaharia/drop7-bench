@@ -1,0 +1,212 @@
+---
+title: Determinized planning
+slug: determinization
+summary: "Sample several concrete futures, search each one deeply, then combine their advice without letting the search spend information the player will not have."
+order: 14
+technique: determinization
+approaches: [oracle-curriculum/hindsight-planner, heuristic-search/open-loop, lifetime-objective/flow-ceiling]
+glossary: [determinization, strategy fusion, common random numbers, open-loop planning]
+---
+
+## The idea
+
+A Drop7 search alternates between two kinds of event. The player chooses a
+column. Chance supplies a later disc, reveals the value under a gray disc, or
+adds a covered row. A fair search has to keep all of those possible chance
+events alive until they become visible, so its tree grows quickly.
+
+Determinized planning makes that tree cheaper by writing a private script for
+the future. One script might say which discs will arrive, which numbers sit
+under the gray covers, and what the next covered row contains. Once those
+unknowns have been filled in, the search sees a deterministic puzzle. It can
+look much farther ahead because every chance node has become one known path.
+
+The planner repeats this with several sampled scripts. For every legal root
+column, it searches each script and averages the values. This is attractive:
+the samples can come entirely from the public position, every root column can
+face the same luck, and a deep deterministic search is easier to run than a
+wide chance tree.
+
+The hard part is the continuation. If each sampled script chooses later
+columns with its own private future in view, the average credits the root move
+with several different plans. The real player will get only the observations
+the game has revealed by then. A sampler can respect the public-information
+boundary while the search built on top of it still values an impossible plan.
+
+## A small example
+
+Consider a two-day drive. The mountain road and the coast road both take three
+hours on the first day. The coast then takes three and a half hours on the
+second day.
+
+<DeterminizationRoadMap />
+
+From the mountain, the driver must choose at dawn between a
+two-hour pass and a five-hour detour. The pass takes eight hours when it is
+closed because the driver reaches the gate and has to turn back. At dawn the
+driver cannot yet see whether the pass is open.
+
+There are three forecasts. Two say open and one says closed. Advance the
+example below one step at a time, or let it play.
+
+<DeterminizationRoadTrip />
+
+The determinized planner first solves each forecast as though that forecast
+were certain. In the two open futures it chooses the mountain and then the
+pass, for five hours. In the closed future it chooses the mountain and then
+the detour, for eight hours. Those three private plans average to six hours,
+so the planner prefers the mountain to the coast at six and a half.
+
+The six-hour mountain plan cannot be followed by one driver. A driver who
+commits to the pass gets totals of five, five and eleven hours, which average
+to seven. A driver who commits to the detour takes eight hours in every
+future. The coast takes six and a half in every future, so it is the best
+executable plan.
+
+The order of two operations changed the answer. The determinized planner took
+the best continuation inside each future and averaged afterward. The driver
+had to average each available plan first and then choose one. The first order
+allows tomorrow's action to depend on tomorrow's private forecast. This error
+is called [strategy fusion](/learn/glossary).
+
+There are two clean reference points. An [open-loop plan](/learn/glossary)
+chooses one fixed sequence before seeing anything else, like committing to the
+pass for every forecast. That avoids strategy fusion, but it also forbids a
+reaction to information the driver really will receive. A fair observation
+tree keeps the three futures together while the driver sees the same thing,
+then branches when a sign, a forecast update, or the weather itself becomes
+visible.
+
+## How it works
+
+The [hindsight planner](/approach/oracle-curriculum/hindsight-planner) and the
+[open-loop lab](/approach/heuristic-search/open-loop) use different
+continuation rules, but they begin with the same sampling pattern.
+
+1. Copy the public position: the visible board, visible next disc, moves until
+   the next rise, and terminal state.
+2. Draw a complete future from a solver-local random source. A future can
+   contain later discs, values for covered cells, and covered rows that may
+   rise into the board.
+3. Reuse that future for every legal root column. This is called common random
+   numbers. It makes two columns face the same sampled luck, which removes one
+   source of comparison noise.
+4. Search each root column inside that fixed future. A hindsight search may
+   pick a different later column in every future. An open-loop search must
+   keep the same later column sequence across all futures.
+5. Combine the values for each root column. A mean estimates average value. A
+   lower-tail term can penalize a column that fails in some futures.
+6. Play the root column with the largest combined value. Throw away the sample
+   set and start again from the next public position.
+
+The estimator hidden in step 4 determines what the result means. A hindsight
+search computes the value of acting with the sampled future already known. An
+open-loop search computes the value of refusing to react at all. A public
+policy needs the value of reacting only after an event becomes observable.
+Those are three different planning problems.
+
+Where the samples come from decides whether the planner is legal. Futures
+invented from the public state reveal nothing about the game being played.
+Futures copied from the real hidden board or the real disc tape make an
+[oracle](/learn/glossary), whose output can be used only as a diagnostic or a
+teacher. Legality settles what the planner reads. It does not settle whether
+the continuation it values can be executed.
+
+## In Drop7
+
+The road-trip forecast has three direct counterparts in Drop7. A gray disc has
+a hidden number that may be exposed by a nearby clear. The next visible disc
+is known, while later discs are not. Every fifth move adds a covered row whose
+values are also hidden. Any of these events can change which column should be
+played next.
+
+The figure below follows one engine-generated public position through the
+sampling and search boundary. Its private tapes are teaching marks, so the
+figure explains the mechanism without presenting them as policy output.
+
+<DeterminizationDrop7 />
+
+Strategy fusion enters when two sampled worlds still look identical to the
+player but choose different continuation columns. One world may reserve a
+column for a disc on its private tape. Another may prepare a chain around a
+gray value in its private answer key. The root value keeps the best later move
+from each world even though the player has no observation that tells those
+moves apart.
+
+Replanning on every turn does not erase that credit. The planner does get a
+fresh public state after the first disc lands, but the first column was already
+chosen using the fused continuation value. A later search can change the next
+move. It cannot take the first disc back.
+
+More samples address variance. They make the average steadier and can make the
+ranking between root columns more repeatable. They do not change which
+continuations each sample was allowed to use, so the strategy-fusion bias can
+remain as the sample count grows. Common random numbers help for the same
+reason: they improve the comparison between columns while leaving the meaning
+of each column value unchanged.
+
+<DeterminizationPitfalls />
+
+The open-loop repair moves in the other direction. It scores one fixed column
+sequence across every sample, so it cannot consult a private future later. It
+also cannot respond when a numbered disc is actually dealt or a gray disc is
+actually revealed. This can undervalue a move whose strength comes from a
+good response to public information.
+
+An observable-state search keeps histories together whenever they produce the
+same public board, next disc and rise countdown. It permits separate actions
+only after those public observations differ. That is the planning object a
+deployable Drop7 policy needs, although keeping and merging those branches is
+more expensive.
+
+<DeterminizationContinuationRules />
+
+The recorded hindsight experiment shows that this distinction affected play.
+On its four-game screen under historical 7,000-point scoring, archival,
+ordinary depth-3 search averaged 107,076 points and 72.5 moves while the
+hindsight planner averaged 51,500.5 points and 37.5 moves
+([hindsight planner](/approach/oracle-curriculum/hindsight-planner), rejected,
+ledger-recorded). Four games is a screen, and the confirmation seeds were
+never opened. The recorded diagnosis says that tape-specific later decisions
+made the per-tape root values incompatible and overoptimistic.
+
+A later [flow-ceiling study](/approach/lifetime-objective/flow-ceiling) swept
+the number of futures for a clairvoyant planner, an oracle that reads the
+hidden board. Quality rose through 256 futures and then fell: paired on the
+same six tapes, mean lifetime was 182.00 moves with 256 futures and 100.33 with
+1,024 ([finding-12](/docs/exploratory/finding-12-fair-planner-ceiling-extended),
+oracle, 6 of 8 games, scenario-engine scoring). Sampling noise had obscured
+part of the bias at smaller counts. The larger sample set converged more
+closely on the same mismatched objective.
+
+The open-loop lab is support-only and has no retained result. The
+[observable-state Monte Carlo tree search](/approach/tree-search/observable-mcts)
+keys its tree by the visible position, so two histories with the same public
+state share a continuation. That prevents a later action from depending on an
+unrevealed number.
+
+## What it cannot do
+
+Plain determinization cannot value a contingent public policy when its inner
+search is allowed to spend future knowledge. It can give a fast estimate, and
+the estimate may still rank some positions well, but increasing depth or
+sample count does not supply the missing information constraint.
+
+It works without this problem when later actions really will know the sampled
+fact before they act, or when the best continuation is the same across all
+sampled futures that share an observation. It is also useful as an oracle,
+where the purpose is to ask what perfect information could achieve. Those
+uses need labels that keep them separate from public-policy evidence.
+
+Open-loop planning removes the private adaptation and introduces a different
+limit: it cannot value legal adaptation after a deal, reveal or rise. A fair
+planner has to sit between those two estimates. It branches on observations,
+merges paths that look the same, and pays the cost of carrying uncertainty
+through the tree.
+
+Paired sampling survives this limitation. Giving every candidate column the
+same imagined futures is reused in the
+[long-outcome experiments](/approach/d4-long-outcome). The open question is
+how to keep that low-noise comparison while forcing every continuation to be
+a function of public state. The [lifetime objective](/approach/lifetime-objective)
+family studies that fair planner.
