@@ -119,7 +119,7 @@ export default async function HomePage() {
             What is the best strategy in a game with chance?
           </h1>
           <p className="home-hero-lead">
-            Drop7 is a puzzle game played on a seven-by-seven grid.<sup className="home-reference">
+            Drop7 is widely considered the greatest puzzle game of all time<sup className="home-reference">
               <Link
                 href="https://en.wikipedia.org/wiki/Drop7"
                 target="_blank"
@@ -128,18 +128,11 @@ export default async function HomePage() {
               >
                 [1]
               </Link>
-            </sup>{" "}
-            A disc clears when its number matches the length of its row or column, the
-            board rises every five drops, and the numbers under the gray discs stay hidden
-            until they are hit. Every drop is a choice; every disc the game deals is chance.
+            </sup>.{" "}
+            The goal of this research is to find an autonomous strategy for playing the game as well as a human can.
           </p>
           <p className="home-hero-lead">
-            This site is a research program looking for a playing policy that reads only what
-            a player can see and averages more than one million points a game in five-move
-            Hardcore mode. The strongest reference so far,{" "}
-            <Link href="/approach/fair-expectimax/reference">fair depth-4 expectimax</Link>,
-            averages about 309k points on its 64-game development cohort, so most of the
-            distance is still to cover.
+            An experienced human player can score a million points in this game with the right long-term strategic thinking. The strongest research reference so far (<Link href="/approach/fair-expectimax/reference">depth-4 expectimax</Link>) averages about 300k points, so the research problem is very much still open.
           </p>
           <div className="home-hero-actions">
             <Button href="/play">Play the game</Button>
