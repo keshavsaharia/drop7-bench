@@ -504,7 +504,8 @@ body:has(.source-workspace) > main {
   color: var(--color-ink);
   background: var(--color-accent-soft);
 }
-@media (min-width: 48rem) {
+/* Keep the compact menu until the complete navigation fits. */
+@media (min-width: 56rem) {
   .site-nav,
   .site-actions {
     display: flex;
