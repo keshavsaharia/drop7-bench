@@ -16,7 +16,7 @@ import {
 import { firstSentence } from "@/components/RecordTable";
 import { AgentContext, TechnicalRecord } from "@/components/Reveal";
 import { extractHeadings } from "@/lib/headings";
-import { pageMetadata } from "@/lib/metadata";
+import { contentDescription, pageMetadata } from "@/lib/metadata";
 import { loadRecordOverlay } from "@/lib/research";
 import { getExperiments, getResults, getTheories } from "@/lib/repo";
 
@@ -29,6 +29,7 @@ export async function generateMetadata({ params }: { params: Params }) {
   const theory = getTheories().find((t) => t.theoryId === id);
   return pageMetadata({
     title: theory ? theory.title : "Theory",
+    description: contentDescription(theory?.claim),
     path: `/theories/${id}`,
   });
 }

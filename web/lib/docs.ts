@@ -66,6 +66,8 @@ export interface DocEntry {
   path: string;
   /** The first `# ` heading, or the file stem when there is none. */
   title: string;
+  /** The first prose paragraph, flattened for metadata and link previews. */
+  summary: string;
   group: DocGroupId;
 }
 
@@ -176,6 +178,42 @@ function firstHeading(source: string): string | null {
   return null;
 }
 
+/** The first prose paragraph after the title, with Markdown marks removed. */
+function firstParagraph(source: string): string {
+  const lines = source.split(/\r?\n/);
+  const paragraph: string[] = [];
+  let pastTitle = false;
+  let inFence = false;
+  for (const line of lines) {
+    if (/^ {0,3}(`{3,}|~{3,})/.test(line)) {
+      inFence = !inFence;
+      continue;
+    }
+    if (inFence) continue;
+    if (!pastTitle && /^ {0,3}#\s+/.test(line)) {
+      pastTitle = true;
+      continue;
+    }
+    if (!pastTitle) continue;
+    const trimmed = line.trim();
+    const isProse =
+      trimmed.length > 0 &&
+      !/^(#|\||[-*]\s|\d+\.\s|<|>|!\[)/.test(trimmed) &&
+      !/^\*\*[^*]+:\*\*/.test(trimmed);
+    if (isProse) {
+      paragraph.push(trimmed);
+    } else if (paragraph.length > 0) {
+      break;
+    }
+  }
+  return paragraph
+    .join(" ")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/[*_`]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function compareEntries(a: DocEntry, b: DocEntry): number {
   if (a.group === "reader" && b.group === "reader") {
     return READER_ORDER.indexOf(a.slug) - READER_ORDER.indexOf(b.slug);
@@ -198,6 +236,7 @@ export function listDocs(): DocEntry[] {
       href: `/docs/${slug}`,
       path: `docs/${file}`,
       title: firstHeading(source) ?? stem,
+      summary: firstParagraph(source),
       group: groupFor(slug),
     };
   });

@@ -8,8 +8,16 @@ import {
   COMPETITION_GAME,
   COMPETITION_ROUND,
 } from "@/lib/competition/game";
+import { pageMetadata } from "@/lib/metadata";
 
 export const dynamic = "force-dynamic";
+
+export const metadata = pageMetadata({
+  title: "Compete on the global game",
+  description:
+    "Play the same visible discs and hidden gray-disc values as every human and computer policy, then submit your column choices for server replay.",
+  path: "/compete",
+});
 
 export default function CompetePage() {
   return (

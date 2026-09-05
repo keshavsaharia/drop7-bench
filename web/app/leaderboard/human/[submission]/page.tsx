@@ -11,13 +11,28 @@ import {
 } from "@/lib/competition/registry";
 import { replayCompetitionColumns } from "@/lib/competition/replay";
 import type { ReplayData } from "@/lib/leaderboard";
+import { pageMetadata } from "@/lib/metadata";
 
 export const dynamic = "force-dynamic";
+
+type Params = Promise<{ submission: string }>;
+
+export async function generateMetadata({ params }: { params: Params }) {
+  const { submission } = await params;
+  const record = await getSubmissionRecord(submission);
+  return pageMetadata({
+    title: record ? `${record.displayName} on the global game` : "Leaderboard replay",
+    description: record
+      ? `A server-verified ${record.recordType === "policy-score" ? "research policy" : "human"} replay from ${record.roundId}.`
+      : undefined,
+    path: `/leaderboard/human/${submission}`,
+  });
+}
 
 export default async function HumanReplayPage({
   params,
 }: {
-  params: Promise<{ submission: string }>;
+  params: Params;
 }) {
   const { submission } = await params;
   const record = await getSubmissionRecord(submission);

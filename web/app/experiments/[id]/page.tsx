@@ -22,7 +22,7 @@ import { firstSentence } from "@/components/RecordTable";
 import { ResultNarrative } from "@/components/Research";
 import { AgentContext, TechnicalRecord } from "@/components/Reveal";
 import { extractHeadings } from "@/lib/headings";
-import { pageMetadata } from "@/lib/metadata";
+import { contentDescription, pageMetadata } from "@/lib/metadata";
 import { approachRefsInText } from "@/lib/records";
 import { loadRecordOverlay } from "@/lib/research";
 import { getExperiments, getResults, getTheories, type ExperimentRecord } from "@/lib/repo";
@@ -36,6 +36,7 @@ export async function generateMetadata({ params }: { params: Params }) {
   const experiment = getExperiments().find((e) => e.experimentId === id);
   return pageMetadata({
     title: experiment ? experiment.title : "Experiment",
+    description: contentDescription(experiment?.hypothesis),
     path: `/experiments/${id}`,
   });
 }
@@ -68,7 +69,7 @@ function EntryPoint({ entryPoint }: { entryPoint: string | null }) {
   const [ref] = approachRefsInText(entryPoint);
   if (!ref) return <code>{entryPoint}</code>;
   return (
-    <Link href={`/approaches/${ref.family}/${ref.slug}`}>
+    <Link href={`/approach/${ref.family}/${ref.slug}`}>
       <code>{entryPoint}</code>
     </Link>
   );

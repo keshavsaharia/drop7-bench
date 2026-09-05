@@ -11,7 +11,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/api/", "/src/"],
+      disallow: ["/api/", "/share/", "/src/"],
     },
     sitemap: new URL("/sitemap.xml", SITE_URL).toString(),
   };

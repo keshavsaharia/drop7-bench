@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev --webpack --port 7777",
-    "prebuild": "node scripts/stage-repo-content.mjs",
+    "prebuild": "node scripts/stage-repo-content.mjs && node scripts/check-route-metadata.mjs",
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
@@ -20,10 +20,11 @@
     "figures:heuristic": "node --experimental-strip-types scripts/generate-heuristic-figures.ts",
     "check:mdx": "node scripts/check-mdx.mjs ../approaches ./content",
     "check:figures": "node scripts/check-figures.mjs",
-    "check": "npm run check:mdx && npm run check:figures && npm run check:tokens && npm run check:art",
+    "check": "npm run check:mdx && npm run check:figures && npm run check:tokens && npm run check:art && npm run check:routes",
     "test": "node --experimental-strip-types --test lib/play/*.test.ts lib/competition/*.test.ts lib/analytics/*.test.ts lib/submissions/*.test.ts lib/*.test.ts",
     "check:tokens": "node scripts/check-tokens.mjs",
-    "check:art": "node scripts/check-art.mjs"
+    "check:art": "node scripts/check-art.mjs",
+    "check:routes": "node scripts/check-route-metadata.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-athena": "^3.1116.0",

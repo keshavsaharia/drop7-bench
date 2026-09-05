@@ -5,14 +5,16 @@ import { Figure } from "@/components/Figure";
 import { PageHeader } from "@/components/PageHeader";
 import { ContributorChips, OutcomeCounts, TagChips } from "@/components/ResearchLog";
 import { formatLogDate, listLogEntries } from "@/lib/log";
+import { pageMetadata } from "@/lib/metadata";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = {
+export const metadata = pageMetadata({
   title: "Research log",
   description:
     "A dated account of what was tried each day in the Drop7 million-point research program, including the things that did not work.",
-};
+  path: "/log",
+});
 
 export default function LogIndexPage() {
   const entries = listLogEntries();

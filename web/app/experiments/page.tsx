@@ -1,14 +1,16 @@
 import "../research/research.css";
 import { PageHeader } from "@/components/PageHeader";
 import { RecordTable } from "@/components/RecordTable";
+import { pageMetadata } from "@/lib/metadata";
 import { getExperiments } from "@/lib/repo";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = {
+export const metadata = pageMetadata({
   title: "Experiments",
   description: "Preregistered experiment protocols of the Drop7 million-point program, with lifecycle and benchmark tier.",
-};
+  path: "/experiments",
+});
 
 export default function ExperimentsPage() {
   const experiments = getExperiments();

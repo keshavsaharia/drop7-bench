@@ -6,7 +6,7 @@ import { ArticleLayout } from "@/components/ArticleLayout";
 import { Badge } from "@/components/Badge";
 import { Markdown } from "@/components/Markdown";
 import { PageHeader } from "@/components/PageHeader";
-import { RESEARCH_DOCS } from "@/lib/docs";
+import { listDocs, RESEARCH_DOCS } from "@/lib/docs";
 import { extractHeadings } from "@/lib/headings";
 import { pageMetadata } from "@/lib/metadata";
 import { DOCS_DIR } from "@/lib/repo";
@@ -23,12 +23,16 @@ function splitTitle(source: string, fallback: string): { title: string; body: st
 export async function generateMetadata({ params }: { params: Promise<{ slug: string[] }> }) {
   const { slug } = await params;
   const parts = slug.map((part, index) => (index === slug.length - 1 ? part.replace(/\.mdx?$/i, "") : part));
+  const docSlug = parts.join("/");
+  const doc = listDocs().find((entry) => entry.slug === docSlug) ?? null;
   return pageMetadata({
-    title: parts.at(-1) ?? "Documents",
-    path: `/docs/${parts.join("/")}`,
-    // A catch-all segment cannot hold an `opengraph-image` file, so these
-    // pages share the documents card instead of losing their preview.
-    image: "/docs/opengraph-image",
+    title: doc?.title ?? parts.at(-1) ?? "Documents",
+    description: doc?.summary || undefined,
+    path: `/docs/${docSlug}`,
+    // A catch-all segment cannot hold an `opengraph-image` file, so an
+    // explicit content-backed image route gives each document its own card.
+    image: `/share/docs/${docSlug}`,
+    imageAlt: doc ? `Document: ${doc.title}, on Drop7 Research` : "Document on Drop7 Research",
   });
 }
 

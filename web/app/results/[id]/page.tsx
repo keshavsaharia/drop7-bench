@@ -20,7 +20,7 @@ import { firstSentence } from "@/components/RecordTable";
 import { ResultNarrative } from "@/components/Research";
 import { AgentContext, TechnicalRecord } from "@/components/Reveal";
 import { extractHeadings } from "@/lib/headings";
-import { pageMetadata } from "@/lib/metadata";
+import { contentDescription, pageMetadata } from "@/lib/metadata";
 import { loadRecordOverlay } from "@/lib/research";
 import { getExperiments, getResults } from "@/lib/repo";
 
@@ -36,6 +36,7 @@ export async function generateMetadata({ params }: { params: Params }) {
   const experiment = getExperiments().find((e) => e.experimentId === result.experimentId);
   return pageMetadata({
     title: `Result of ${experiment ? experiment.title : result.experimentId}`,
+    description: contentDescription(result.summary),
     path,
   });
 }

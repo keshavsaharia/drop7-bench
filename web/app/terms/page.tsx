@@ -1,16 +1,17 @@
 import "../app.css";
-import type { Metadata } from "next";
 import Link from "next/link";
 import { ArticleLayout } from "@/components/ArticleLayout";
 import { PageHeader } from "@/components/PageHeader";
+import { pageMetadata } from "@/lib/metadata";
 
 const GITHUB_REPO = "https://github.com/keshavsaharia/drop7-bench";
 
-export const metadata: Metadata = {
-  title: "Terms of Service | Drop7 Research",
+export const metadata = pageMetadata({
+  title: "Terms of service",
   description:
     "Terms for using the Drop7 Research site, browser game, research records, and human competition.",
-};
+  path: "/terms",
+});
 
 export default function TermsPage() {
   return (

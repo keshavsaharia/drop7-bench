@@ -1,16 +1,17 @@
 import "../app.css";
-import type { Metadata } from "next";
 import { ArticleLayout } from "@/components/ArticleLayout";
 import { Callout } from "@/components/Board";
 import { PageHeader } from "@/components/PageHeader";
+import { pageMetadata } from "@/lib/metadata";
 
 const GITHUB_REPO = "https://github.com/keshavsaharia/drop7-bench";
 
-export const metadata: Metadata = {
-  title: "Privacy Policy | Drop7 Research",
+export const metadata = pageMetadata({
+  title: "Privacy policy",
   description:
     "How Drop7 Research handles anonymous server metrics, local game data, GitHub sign-in, and competition submissions.",
-};
+  path: "/privacy",
+});
 
 export default function PrivacyPage() {
   return (

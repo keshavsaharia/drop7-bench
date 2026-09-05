@@ -6,15 +6,17 @@ import { PageHeader } from "@/components/PageHeader";
 import { AgentMark } from "@/components/RecordAside";
 import { listDocs } from "@/lib/docs";
 import { listLogEntries } from "@/lib/log";
+import { pageMetadata } from "@/lib/metadata";
 import { getExperiments, getResults, getTheories, listApproachesByKind, readRepoFile } from "@/lib/repo";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = {
+export const metadata = pageMetadata({
   title: "Research",
   description:
     "The working record of the Drop7 million-point program: theories, experiments, results, the daily log, diagnostics and documents.",
-};
+  path: "/research",
+});
 
 const STATUS_PATH = "docs/research/status.md";
 

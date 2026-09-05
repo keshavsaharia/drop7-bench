@@ -3,13 +3,29 @@ import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/PageHeader";
 import { ReplayPlayer } from "@/components/ReplayPlayer";
 import { loadLeaderboard, loadReplay } from "@/lib/leaderboard";
+import { contentDescription, pageMetadata } from "@/lib/metadata";
 
 export const dynamic = "force-dynamic";
+
+type Params = Promise<{ policy: string; round: string }>;
+
+export async function generateMetadata({ params }: { params: Params }) {
+  const { policy: policyId, round: roundId } = await params;
+  const game = loadReplay(policyId, roundId);
+  const leaderboard = loadLeaderboard();
+  const policy = leaderboard?.policies.find((entry) => entry.id === policyId);
+  const round = leaderboard?.rounds.find((entry) => entry.id === roundId);
+  return pageMetadata({
+    title: `${policy?.name ?? policyId} on ${round?.name ?? roundId}`,
+    description: contentDescription(policy?.description ?? (game ? `A scripted-round replay over ${game.moves} moves.` : undefined)),
+    path: `/leaderboard/${policyId}/${roundId}`,
+  });
+}
 
 export default async function ReplayPage({
   params,
 }: {
-  params: Promise<{ policy: string; round: string }>;
+  params: Params;
 }) {
   const { policy: policyId, round: roundId } = await params;
   const game = loadReplay(policyId, roundId);

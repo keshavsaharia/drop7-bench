@@ -3,14 +3,16 @@ import Link from "next/link";
 import { PageHeader } from "@/components/PageHeader";
 import { AgentMark } from "@/components/RecordAside";
 import { listDocCatalogue } from "@/lib/docs";
+import { pageMetadata } from "@/lib/metadata";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = {
+export const metadata = pageMetadata({
   title: "Documents",
   description:
     "The documents the Drop7 research is bound to: methodology, benchmark contract, ledger, findings, hardware profiles and agent contracts.",
-};
+  path: "/docs",
+});
 
 export default function DocsIndexPage() {
   const groups = listDocCatalogue();

@@ -16,9 +16,10 @@
  * it is describing. Nothing is computed, counted or inferred.
  */
 import { ImageResponse } from "next/og";
-import type { ReactElement } from "react";
+import type { ReactElement, ReactNode } from "react";
 import { createGame, playMove, seededRandom } from "../../src/core/typescript/engine.ts";
 import { CRACKED_CELL, DISC_STYLES, EMPTY_CELL, SOLID_CELL } from "@/components/discs";
+import { socialArtDataUrl } from "@/lib/social-art";
 
 export const SOCIAL_SIZE = { width: 1200, height: 630 };
 export const SOCIAL_CONTENT_TYPE = "image/png";
@@ -218,6 +219,8 @@ export interface PageCardProps {
   labels?: readonly string[];
   /** The path shown in the foot, and the seed for the board motif. */
   path?: string;
+  /** The registered card animation. Its checked-in resting frame is used. */
+  art?: ReactNode;
 }
 
 /** Longest title that still sets at the large size. */
@@ -248,8 +251,9 @@ function trim(text: string, limit: number): string {
   return `${cut.slice(0, stop > limit * 0.6 ? stop : limit).trimEnd()}…`;
 }
 
-export function renderPageCard({ eyebrow, title, summary, labels = [], path = "" }: PageCardProps) {
+export function renderPageCard({ eyebrow, title, summary, labels = [], path = "", art }: PageCardProps) {
   const seed = seedFromPath(path || title);
+  const artSource = art ? socialArtDataUrl(art) : null;
   return new ImageResponse(
     (
       <div
@@ -367,7 +371,27 @@ export function renderPageCard({ eyebrow, title, summary, labels = [], path = ""
         </div>
 
         <div style={{ display: "flex", alignItems: "center" }}>
-          <CardBoard seed={seed} />
+          {artSource ? (
+            <div
+              style={{
+                width: 400,
+                height: 250,
+                border: `1px solid ${INK.rule}`,
+                borderRadius: 20,
+                background: INK.surface,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                overflow: "hidden",
+              }}
+            >
+              {/* The source is an inline SVG final frame; next/image cannot optimize data URLs in next/og. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={artSource} alt="" width={400} height={225} style={{ objectFit: "contain" }} />
+            </div>
+          ) : (
+            <CardBoard seed={seed} />
+          )}
         </div>
       </div>
     ),

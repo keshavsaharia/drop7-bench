@@ -11,11 +11,15 @@
  * entry's own day. Nothing here stamps today's date on a page to make it look
  * fresh, and prose pages carry no date at all.
  */
+import { VOCABULARY_TOPICS } from "@/lib/vocabulary";
 import type { MetadataRoute } from "next";
+import { COMPETITION_GAME_KEY } from "@/lib/competition/game";
+import { loadCompetitionLeaderboard } from "@/lib/competition/ledger";
 import { listDocs } from "@/lib/docs";
 import { ENGINES } from "@/lib/engines";
 import { listConceptPages, listLearnPages, listTechniquePages } from "@/lib/learn";
 import { listLogEntries } from "@/lib/log";
+import { loadLeaderboard } from "@/lib/leaderboard";
 import { SITE_URL } from "@/lib/metadata";
 import {
   getExperiments,
@@ -38,11 +42,12 @@ const FIXED_PATHS: readonly string[] = [
   "/play",
   "/leaderboard",
   "/compete",
-  "/approaches",
-  "/engines",
+  "/approach",
+  "/engine",
   "/diagnostics",
   "/learn",
   "/learn/concepts",
+  "/learn/vocabulary",
   "/learn/techniques",
   "/research",
   "/theories",
@@ -51,6 +56,7 @@ const FIXED_PATHS: readonly string[] = [
   "/log",
   "/docs",
   "/privacy",
+  "/support",
   "/terms",
 ];
 
@@ -68,19 +74,28 @@ function entry(path: string, lastModified?: string): MetadataRoute.Sitemap[numbe
   return lastModified === undefined ? { url: url(path) } : { url: url(path), lastModified };
 }
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const leaderboard = loadLeaderboard();
+  const competition = await loadCompetitionLeaderboard(COMPETITION_GAME_KEY, 250);
   return [
     ...FIXED_PATHS.map((path) => entry(path)),
 
     // Approaches: the technique groups, the family directories, the approaches.
-    ...listTechniques().map((technique) => entry(`/approaches/technique/${technique.slug}`)),
-    ...listFamilies().map((family) => entry(`/approaches/${family}`)),
-    ...listAllApproaches().map((approach) => entry(`/approaches/${approach.family}/${approach.slug}`)),
+    ...listTechniques().map((technique) => entry(`/approach/technique/${technique.slug}`)),
+    ...listFamilies().map((family) => entry(`/approach/${family}`)),
+    ...listAllApproaches().map((approach) => entry(`/approach/${approach.family}/${approach.slug}`)),
 
     // Engines.
-    ...ENGINES.map((engine) => entry(`/engines/${engine.slug}`)),
+    ...ENGINES.map((engine) => entry(`/engine/${engine.slug}`)),
+
+    // Replays present in the generated playground data and public competition ledger.
+    ...(leaderboard?.games ?? []).map((game) => entry(`/leaderboard/${game.policyId}/${game.roundId}`)),
+    ...competition.entries.map((submission) =>
+      entry(`/leaderboard/human/${submission.submissionId}`, recorded(submission.submittedAt)),
+    ),
 
     // Learn: the pages, the concepts in reading order, the technique primers.
+    ...VOCABULARY_TOPICS.map((topic) => entry(`/learn/vocabulary/${topic.slug}`)),
     ...listLearnPages().map((page) => entry(`/learn/${page.slug}`)),
     ...listConceptPages().map((page) => entry(`/learn/concepts/${page.slug}`)),
     ...listTechniquePages().map((page) => entry(`/learn/techniques/${page.slug}`)),

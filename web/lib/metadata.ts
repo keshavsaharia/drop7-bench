@@ -21,7 +21,7 @@ export interface PageMetadataInput {
   title: string;
   /** The page's own description, when it has one; absent is left absent. */
   description?: string;
-  /** The page's route path, e.g. "/approaches/fair-expectimax/reference". */
+  /** The page's route path, e.g. "/approach/fair-expectimax/reference". */
   path: string;
   /**
    * The social card to name explicitly. Only for a segment that cannot carry
@@ -31,6 +31,22 @@ export interface PageMetadataInput {
    * the `opengraph-image` file beside it.
    */
   image?: string;
+  /** Alt text for an explicitly named image route. */
+  imageAlt?: string;
+}
+
+/** Flatten content text and trim it on a word boundary for metadata fields. */
+export function contentDescription(value: string | null | undefined, limit = 220): string | undefined {
+  if (!value) return undefined;
+  const plain = value
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/[*_`]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (plain.length <= limit) return plain || undefined;
+  const cut = plain.slice(0, limit);
+  const stop = cut.lastIndexOf(" ");
+  return `${cut.slice(0, stop > limit * 0.6 ? stop : limit).trimEnd()}…`;
 }
 
 /**
@@ -38,7 +54,8 @@ export interface PageMetadataInput {
  * unchanged, plus the canonical URL and the Open Graph and Twitter blocks
  * carrying the same words. Paths are resolved against `metadataBase`.
  */
-export function pageMetadata({ title, description, path, image }: PageMetadataInput): Metadata {
+export function pageMetadata({ title, description, path, image, imageAlt }: PageMetadataInput): Metadata {
+  const explicitImage = image === undefined ? undefined : { url: image, ...(imageAlt ? { alt: imageAlt } : {}) };
   return {
     title,
     description,
@@ -48,7 +65,7 @@ export function pageMetadata({ title, description, path, image }: PageMetadataIn
       description,
       type: "article",
       url: path,
-      ...(image === undefined ? {} : { images: [image] }),
+      ...(explicitImage === undefined ? {} : { images: [explicitImage] }),
     },
     // The root layout sets a site-wide twitter title; without this the card
     // on X would carry the site's name where the page's belongs.
@@ -56,6 +73,7 @@ export function pageMetadata({ title, description, path, image }: PageMetadataIn
       card: "summary_large_image",
       title,
       description,
+      ...(explicitImage === undefined ? {} : { images: [explicitImage] }),
     },
   };
 }

@@ -17,8 +17,16 @@ import {
   listCompetitionGames,
 } from "@/lib/competition/registry";
 import { loadLeaderboard, type LeaderboardData } from "@/lib/leaderboard";
+import { pageMetadata } from "@/lib/metadata";
 
 export const dynamic = "force-dynamic";
+
+export const metadata = pageMetadata({
+  title: "Human and AI leaderboard",
+  description:
+    "Human scores come from server-replayed move sequences. Computer scores come from the same scripted-round harness, which is a reproducible playground rather than research-tier evidence.",
+  path: "/leaderboard",
+});
 
 const fmt = (value: number | null) =>
   value === null ? "—" : Math.round(value).toLocaleString();

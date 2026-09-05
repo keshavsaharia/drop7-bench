@@ -30,6 +30,7 @@ export async function generateMetadata({ params }: { params: Params }) {
   const info = getLogEntryInfo(date);
   return pageMetadata({
     title: info ? `${info.title} (${info.date})` : "Research log",
+    description: info?.summary ?? undefined,
     path: `/log/${date}`,
   });
 }
