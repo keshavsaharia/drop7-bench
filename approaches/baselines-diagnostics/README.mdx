@@ -71,7 +71,7 @@ all from board clears, with score and moves-survived correlated at r = 0.9995.
 Nothing on these pages is evidence that a policy is strong. A flow audit tells
 you what a policy did; it does not tell you it did well. Where an instrument
 was pointed at a *candidate* and that candidate was retired — the
-[cover-throughput probe](/approaches/baselines-diagnostics/throughput-probe) —
+[cover-throughput probe](/approach/baselines-diagnostics/throughput-probe) —
 the page says so and labels the evidence.
 </Callout>
 
@@ -81,13 +81,13 @@ the page says so and labels the evidence.
 
 | Instrument | What it produces | Status and evidence |
 | --- | --- | --- |
-| [Native parity](/approaches/baselines-diagnostics/native-parity) | Byte-for-byte comparison of native and TypeScript traces | **Completed; reproduced;** 256 seeds and 6,852 transitions matched in this checkout |
-| [Heuristic benchmark](/approaches/baselines-diagnostics/heuristic-benchmark) | Paired complete-game comparisons among named TypeScript profiles | **Support-only; repository-verified** |
-| [Phase benchmark](/approaches/baselines-diagnostics/phase-benchmark) | Score, survival, flow, height, work, censoring for the shared phase policy | **Support-only; repository-verified;** no durable standalone result was located |
-| [D4 flow audit](/approaches/baselines-diagnostics/d4-flow) | Per-move geometry, flow and root-value traces for the depth-4 reference | **Support-only; repository-verified** |
-| [Trajectory throughput](/approaches/baselines-diagnostics/trajectory-throughput) | Matched windows from public policies and a privileged ceiling | **Completed; task-record only;** motivated the ~2.4-clear / ~1.4-reveal targets |
-| [Tie-breaking](/approaches/baselines-diagnostics/tie-breaking) | Sensitivity to the fixed legal-column ordering | **Support-only; repository-verified** |
-| [Cover-throughput probe](/approaches/baselines-diagnostics/throughput-probe) | Five crack/reveal weight profiles over 256 historical games | **Rejected; task-record only;** the strongest profile was nearly flat |
+| [Native parity](/approach/baselines-diagnostics/native-parity) | Byte-for-byte comparison of native and TypeScript traces | **Completed; reproduced;** 256 seeds and 6,852 transitions matched in this checkout |
+| [Heuristic benchmark](/approach/baselines-diagnostics/heuristic-benchmark) | Paired complete-game comparisons among named TypeScript profiles | **Support-only; repository-verified** |
+| [Phase benchmark](/approach/baselines-diagnostics/phase-benchmark) | Score, survival, flow, height, work, censoring for the shared phase policy | **Support-only; repository-verified;** no durable standalone result was located |
+| [D4 flow audit](/approach/baselines-diagnostics/d4-flow) | Per-move geometry, flow and root-value traces for the depth-4 reference | **Support-only; repository-verified** |
+| [Trajectory throughput](/approach/baselines-diagnostics/trajectory-throughput) | Matched windows from public policies and a privileged ceiling | **Completed; task-record only;** motivated the ~2.4-clear / ~1.4-reveal targets |
+| [Tie-breaking](/approach/baselines-diagnostics/tie-breaking) | Sensitivity to the fixed legal-column ordering | **Support-only; repository-verified** |
+| [Cover-throughput probe](/approach/baselines-diagnostics/throughput-probe) | Five crack/reveal weight profiles over 256 historical games | **Rejected; task-record only;** the strongest profile was nearly flat |
 
 Sources: [experiment index](/docs/research/experiment-index) §"Baselines and
 diagnostics"; [reproducibility guide](/docs/reproducibility);

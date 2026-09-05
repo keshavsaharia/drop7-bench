@@ -5,15 +5,17 @@ import { FilterSearch } from "@/components/FilterSearch";
 import { PageHeader } from "@/components/PageHeader";
 import { approachCountLabel, techniqueHref } from "@/components/TechniqueCard";
 import { listTechniquePages } from "@/lib/learn";
+import { pageMetadata } from "@/lib/metadata";
 import { familyMeta, listAllApproaches, listFamilies, type ApproachEntry } from "@/lib/repo";
 import { getTechnique, listTechniques } from "@/lib/techniques";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = {
+export const metadata = pageMetadata({
   title: "Approaches",
   description: "Every theory of how to choose a column, grouped by the technique it uses.",
-};
+  path: "/approach",
+});
 
 /*
  * Filters are links, not state. Each chip is an anchor to this page with one
@@ -62,7 +64,7 @@ function chipHref(filters: Filters, key: FilterKey, value: string): string {
     params.set(k, v);
   }
   const query = params.toString();
-  return query ? `/approaches?${query}` : "/approaches";
+  return query ? `/approach?${query}` : "/approach";
 }
 
 function matchesFilters(entry: ApproachEntry, filters: Filters): boolean {
@@ -111,7 +113,7 @@ function techniqueGroups(strategies: ApproachEntry[]): Group[] {
     groups.push({
       key: "other",
       title: "Other",
-      href: "/approaches",
+      href: "/approach",
       line: "Strategy pages whose README names no technique from the catalogue.",
       primerHref: null,
       eyebrow: "Other",
@@ -128,7 +130,7 @@ function familyGroups(strategies: ApproachEntry[]): Group[] {
       return {
         key: family,
         title: meta.title,
-        href: `/approaches/${family}`,
+        href: `/approach/${family}`,
         line: meta.summary,
         primerHref: null,
         eyebrow: meta.title,

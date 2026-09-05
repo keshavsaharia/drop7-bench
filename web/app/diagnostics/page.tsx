@@ -1,16 +1,18 @@
-import "../engines/engines.css";
+import "../engine/engines.css";
 import { Badge } from "@/components/Badge";
 import { Card } from "@/components/Card";
 import { PageHeader } from "@/components/PageHeader";
+import { pageMetadata } from "@/lib/metadata";
 import { listApproachesByKind, type ApproachEntry } from "@/lib/repo";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = {
+export const metadata = pageMetadata({
   title: "Diagnostics",
   description:
     "The measuring instruments, harnesses and model probes of the Drop7 research program. None of these is a way to play.",
-};
+  path: "/diagnostics",
+});
 
 type GroupKey = "instruments" | "harnesses" | "probes" | "other";
 
@@ -66,7 +68,7 @@ const GROUP_OF: Record<string, GroupKey> = {
 function DiagnosticCard({ entry }: { entry: ApproachEntry }) {
   return (
     <Card
-      href={`/approaches/${entry.family}/${entry.slug}`}
+      href={`/approach/${entry.family}/${entry.slug}`}
       eyebrow={entry.family}
       title={entry.title}
       summary={entry.summary || undefined}

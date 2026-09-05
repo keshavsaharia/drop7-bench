@@ -76,7 +76,7 @@ export function ApproachRecords({ entry, records, noDocs = false }: ApproachReco
         {operationalNotes && (
           <p>
             Operational notes (build commands, gate commands, seed leases) are kept in{" "}
-            <Link href={`/approaches/${family}/${slug}/README.md`}>
+            <Link href={`/approach/${family}/${slug}/README.md`}>
               <code>{operationalNotes}</code>
             </Link>
             , alongside the page above.

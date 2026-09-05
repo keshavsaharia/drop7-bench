@@ -37,7 +37,7 @@ export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ family: string; approach: string }> };
 
-const APPROACHES_CRUMB: Crumb = { href: "/approaches", label: "approaches" };
+const APPROACHES_CRUMB: Crumb = { href: "/approach", label: "approaches" };
 
 export async function generateMetadata({ params }: Props) {
   const { family, approach } = await params;
@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: Props) {
   return pageMetadata({
     title: typeof front?.title === "string" ? front.title : approach,
     description: typeof front?.summary === "string" ? front.summary : undefined,
-    path: `/approaches/${family}/${approach}`,
+    path: `/approach/${family}/${approach}`,
   });
 }
 
@@ -81,10 +81,10 @@ export default async function ApproachPage({ params }: Props) {
     case "strategy":
       crumbs = technique
         ? [APPROACHES_CRUMB, { href: techniqueHref(technique.slug), label: technique.title }]
-        : [APPROACHES_CRUMB, { href: `/approaches/${family}`, label: family_.title }];
+        : [APPROACHES_CRUMB, { href: `/approach/${family}`, label: family_.title }];
       break;
     case "engine":
-      crumbs = [{ href: "/engines", label: "engines" }];
+      crumbs = [{ href: "/engine", label: "engines" }];
       eyebrow = "Engine";
       break;
     case "diagnostic":
@@ -95,7 +95,7 @@ export default async function ApproachPage({ params }: Props) {
       eyebrow = "Diagnostic";
       break;
     default:
-      crumbs = [APPROACHES_CRUMB, { href: `/approaches/${family}`, label: family_.title }];
+      crumbs = [APPROACHES_CRUMB, { href: `/approach/${family}`, label: family_.title }];
   }
 
   // Previous and next: within the technique group for a strategy, within the family otherwise.
@@ -119,7 +119,7 @@ export default async function ApproachPage({ params }: Props) {
       <div className="aside-block">
         <span className="label">Family</span>
         <p className="aside-text">
-          <Link href={`/approaches/${family}`}>{family_.title}</Link>
+          <Link href={`/approach/${family}`}>{family_.title}</Link>
         </p>
       </div>
       <div className="aside-block">
@@ -195,12 +195,12 @@ export default async function ApproachPage({ params }: Props) {
       {(previous || next) && (
         <nav className="approach-nav" aria-label={`Previous and next in ${sequenceName}`}>
           {previous && (
-            <Button variant="ghost" href={`/approaches/${previous.family}/${previous.slug}`}>
+            <Button variant="ghost" href={`/approach/${previous.family}/${previous.slug}`}>
               ← {previous.title}
             </Button>
           )}
           {next && (
-            <Button variant="ghost" href={`/approaches/${next.family}/${next.slug}`} className="approach-nav-next">
+            <Button variant="ghost" href={`/approach/${next.family}/${next.slug}`} className="approach-nav-next">
               {next.title} →
             </Button>
           )}

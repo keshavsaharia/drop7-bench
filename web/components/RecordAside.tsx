@@ -86,7 +86,7 @@ export function RepoRef({ path }: { path: string }) {
 export function approachLink(ref: ApproachRef): { href: string; label: string } {
   const entry = listAllApproaches().find((e) => e.family === ref.family && e.slug === ref.slug);
   return {
-    href: `/approaches/${ref.family}/${ref.slug}`,
+    href: `/approach/${ref.family}/${ref.slug}`,
     label: entry?.title ?? `${ref.family}/${ref.slug}`,
   };
 }

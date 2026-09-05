@@ -53,7 +53,7 @@ test("rewrites approach source files onto their nested viewer route", () => {
       "../../approaches/d4-long-outcome/rollout-veto/d4-d2-rollout-veto.cpp",
       "docs/research/experiment-index.md",
     ),
-    "/approaches/d4-long-outcome/rollout-veto/d4-d2-rollout-veto.cpp",
+    "/approach/d4-long-outcome/rollout-veto/d4-d2-rollout-veto.cpp",
   );
   assert.equal(
     rewriteRepoDocHref(
@@ -67,11 +67,11 @@ test("rewrites approach source files onto their nested viewer route", () => {
 test("rewrites approach directories and research records onto console routes", () => {
   assert.equal(
     rewriteRepoDocHref("../approaches/fair-expectimax", "docs/strategies.md"),
-    "/approaches/fair-expectimax",
+    "/approach/fair-expectimax",
   );
   assert.equal(
     rewriteRepoDocHref("../approaches/ntuple-rl/torch-ppo", "docs/strategies.md"),
-    "/approaches/ntuple-rl/torch-ppo",
+    "/approach/ntuple-rl/torch-ppo",
   );
   assert.equal(
     rewriteRepoDocHref(
@@ -103,7 +103,7 @@ test("leaves non-docs repository and external hrefs untouched", () => {
       "../../approaches/lifetime-objective/learned-leaf/PREREGISTRATION.md",
       "docs/exploratory/finding-08-learned-leaf.md",
     ),
-    "/approaches/lifetime-objective/learned-leaf/PREREGISTRATION.md",
+    "/approach/lifetime-objective/learned-leaf/PREREGISTRATION.md",
   );
   assert.equal(rewriteRepoDocHref("https://example.com/docs/foo.md"), "https://example.com/docs/foo.md");
   assert.equal(rewriteRepoDocHref("#bottom-line"), "#bottom-line");

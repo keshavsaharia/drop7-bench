@@ -87,20 +87,20 @@ network so that its choices can be made without running the search.
 
 Pages that use the method:
 
-- [Perfect-information oracle](/approaches/oracle-curriculum/perfect-information-oracle),
+- [Perfect-information oracle](/approach/oracle-curriculum/perfect-information-oracle),
   the teacher.
-- [Oracle distillation](/approaches/oracle-curriculum/oracle-distillation), the
+- [Oracle distillation](/approach/oracle-curriculum/oracle-distillation), the
   direct copy.
-- [Oracle DAgger](/approaches/oracle-curriculum/oracle-dagger), the copy
+- [Oracle DAgger](/approach/oracle-curriculum/oracle-dagger), the copy
   retrained on the positions the student reached.
-- [Board topology](/approaches/oracle-curriculum/topology),
-  [State curriculum](/approaches/oracle-curriculum/state-curriculum) and
-  [Stage D0: the fair value of oracle-visited boards](/approaches/oracle-curriculum/hpool-d0),
+- [Board topology](/approach/oracle-curriculum/topology),
+  [State curriculum](/approach/oracle-curriculum/state-curriculum) and
+  [Stage D0: the fair value of oracle-visited boards](/approach/oracle-curriculum/hpool-d0),
   which use the oracle's positions rather than its moves.
-- [Depth-4 distillation](/approaches/d4-long-outcome/d4-distillation),
-  [D4 root-Q clone](/approaches/value-policy-learning/d4-q-clone),
-  [Phase distillation](/approaches/value-policy-learning/phase-distillation) and
-  [Compressing a legal planner into a network](/approaches/lifetime-objective/planner-distill),
+- [Depth-4 distillation](/approach/d4-long-outcome/d4-distillation),
+  [D4 root-Q clone](/approach/value-policy-learning/d4-q-clone),
+  [Phase distillation](/approach/value-policy-learning/phase-distillation) and
+  [Compressing a legal planner into a network](/approach/lifetime-objective/planner-distill),
   where the teacher is a legal search rather than an oracle.
 
 The [concept page on oracles and teachers](/learn/concepts/oracles-and-teachers)
@@ -112,14 +112,14 @@ The oracle showed that long games exist. On twelve training-only games it
 reached the 500-move cap in every one, with a mean of 1,058,931.5 points under
 historical 7,000-point scoring, archival. That is an oracle number, produced
 with the future visible, and it says what the game allows
-([Perfect-information oracle](/approaches/oracle-curriculum/perfect-information-oracle)).
+([Perfect-information oracle](/approach/oracle-curriculum/perfect-information-oracle)).
 
 The student could not copy it. On 1,629 held-out labels the direct copy picked
 the teacher's column 0.218 of the time against a gate of 0.30 fixed in advance,
 and it did equally badly on positions from ordinary play, so unfamiliar boards
 were never the problem. The page's own conclusion is that the
 information needed to reproduce the teacher's choice is not on the screen
-([Oracle distillation](/approaches/oracle-curriculum/oracle-distillation)). The
+([Oracle distillation](/approach/oracle-curriculum/oracle-distillation)). The
 hybrid that let the student override an exact search then passed its
 eight-game screen by 21,978.75 points and failed its sixteen-game confirmation
 by 62,274.25 points and 18.125 moves per game, both under historical

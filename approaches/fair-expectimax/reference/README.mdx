@@ -39,7 +39,7 @@ plan for the worst.
 The search imagines four of the player's own moves (its depth, written D4
 below; the three-move version is D3) and then hands every board at the bottom
 to a hand-written [leaf evaluator](/learn/glossary), described on
-[the fair leaf evaluator page](/approaches/fair-expectimax/fair-policy). The
+[the fair leaf evaluator page](/approach/fair-expectimax/fair-policy). The
 policy reads only the visible board, the visible next disc, the moves until
 the next rise, and whether the game is over.
 
@@ -74,7 +74,7 @@ mean is the number the rest of this site treats as the reference.
 
 A fifth move did not help. Selective depth 5, full depth 5 and the
 cycle-boundary variants all failed their gates; the sibling pages in
-[this group](/approaches/fair-expectimax) record each attempt. The reference
+[this group](/approach/fair-expectimax) record each attempt. The reference
 is the teacher behind most label-generation experiments and the fallback
 inside most candidates, and its mean is far below the one-million-point mean
 the program is after.
@@ -83,7 +83,7 @@ the program is after.
 
 With this leaf, the fourth move of look-ahead is worth a lot and the fifth is
 worth nothing anyone could measure. The later
-[reveal-sampling work](/approaches/lifetime-objective/reveal-sampling) put
+[reveal-sampling work](/approach/lifetime-objective/reveal-sampling) put
 that in a wider frame: a three-move search with a better chance model matched
 the four-move reference at less work, so depth and the quality of the chance
 average are two ways of buying the same thing. The reference's value is that
@@ -146,7 +146,7 @@ again.
 - A fifth move did not pass its gates in any form tried: selective D5, full
   D5, and the cycle-boundary variants all failed (see the sibling approaches
   in this family). The
-  [chance-strata study](/approaches/fair-expectimax/chance-strata) found the
+  [chance-strata study](/approach/fair-expectimax/chance-strata) found the
   fifth ply unmeasurable by its design.
 - One D4 game is reported at 1,246,684 points. That figure is task-record only:
   [audit-03](/docs/exploratory/audit-03-claim-arithmetic) records that no move

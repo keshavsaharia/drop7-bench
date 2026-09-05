@@ -15,7 +15,7 @@ surviving another row rise**, 5.7% was chain reactions, and 0.0% was the
 score and moves survived correlated at **r = 0.9995**
 ([`finding-01`](/docs/exploratory/finding-01-score-is-survival), a development-tier
 exploratory finding; the same run is written up on the
-[score decomposition page](/approaches/lifetime-objective/score-decomposition)).
+[score decomposition page](/approach/lifetime-objective/score-decomposition)).
 
 So a Drop7 Hardcore score is survival time wearing a different unit, and the
 million-point target is really a survival target. Points arrive at a measured
@@ -81,7 +81,7 @@ reads the hidden numbers under the gray discs and plans exactly against a fixed
 future — holds the required clear rate for 6,000 consecutive moves and never
 dies. That settles a real question: Drop7 Hardcore is a control problem with a
 solution, not an arithmetic impossibility. It is also, emphatically, not a
-policy; see the [flow ceiling](/approaches/lifetime-objective/flow-ceiling)
+policy; see the [flow ceiling](/approach/lifetime-objective/flow-ceiling)
 page, where the cheating is labelled on every number.
 
 **No legal policy tried here got near it.** A planner with the same objective
@@ -93,9 +93,9 @@ those games ended.
 **Small, bounded corrections to the reference search worked better than
 replacing it.** The two positive results in this family are both of that
 shape: a better handling of the game's randomness
-([reveal sampling](/approaches/lifetime-objective/reveal-sampling)) and a
+([reveal sampling](/approach/lifetime-objective/reveal-sampling)) and a
 learned survival estimate mixed into the reference search's board-scoring
-function at half weight ([learned leaf](/approaches/lifetime-objective/learned-leaf)).
+function at half weight ([learned leaf](/approach/lifetime-objective/learned-leaf)).
 Both are worth tens of thousands of points on 64 paired games. Neither is worth
 hundreds of thousands, and the target needs hundreds of thousands.
 
@@ -113,53 +113,53 @@ any of it. Read the numbers as "what to try next", not as confirmation.
 
 **The measurements that started it**
 
-- [**Score decomposition**](/approaches/lifetime-objective/score-decomposition) —
+- [**Score decomposition**](/approach/lifetime-objective/score-decomposition) —
   counts where each point came from, and finds that a score is a stopwatch.
-- [**Flow ceiling**](/approaches/lifetime-objective/flow-ceiling) — asks whether
+- [**Flow ceiling**](/approach/lifetime-objective/flow-ceiling) — asks whether
   *any* line of play can sustain the required clear rate, using a clairvoyant
   planner that reads the hidden board. Answer: yes, but only that planner did.
-- [**Suite validation**](/approaches/lifetime-objective/suite-validation) — tests
+- [**Suite validation**](/approach/lifetime-objective/suite-validation) — tests
   whether a cheap 128-position benchmark predicts whole-game strength, and finds
   that at the horizon it was minted with, it does not.
 
 **Bounded changes to the reference search**
 
-- [**Reveal sampling**](/approaches/lifetime-objective/reveal-sampling) — the
+- [**Reveal sampling**](/approach/lifetime-objective/reveal-sampling) — the
   search had one dial governing two different coin flips; separating them is
   worth about as much as a whole extra move of look-ahead.
-- [**Risk calibration**](/approaches/lifetime-objective/risk-calibration) — turns
+- [**Risk calibration**](/approach/lifetime-objective/risk-calibration) — turns
   the reference search's baked-in constants into dials that can be swept.
-- [**Leaf reweight**](/approaches/lifetime-objective/leaf-reweight) — makes the
+- [**Leaf reweight**](/approach/lifetime-objective/leaf-reweight) — makes the
   nineteen weights in the hand-written board-scoring function runtime data, so
   refitted weight vectors can be tested.
-- [**Rollout veto**](/approaches/lifetime-objective/rollout-veto-17k) — looks
+- [**Rollout veto**](/approach/lifetime-objective/rollout-veto-17k) — looks
   twenty-five moves ahead with a weak player and overrules the search only on a
   clear disagreement.
 
 **Learning something**
 
-- [**Sibling corpus**](/approaches/lifetime-objective/sibling-corpus) — the
+- [**Sibling corpus**](/approach/lifetime-objective/sibling-corpus) — the
   training-data generator: every public position a game visited, labelled with
   how many moves that game still had left.
-- [**Afterstate net**](/approaches/lifetime-objective/afterstate-net) — the
+- [**Afterstate net**](/approach/lifetime-objective/afterstate-net) — the
   survival network trained on that corpus.
-- [**Learned leaf**](/approaches/lifetime-objective/learned-leaf) — blends a
+- [**Learned leaf**](/approach/lifetime-objective/learned-leaf) — blends a
   learned survival estimate into the reference search's board scorer, and
   measures what a network at that position is actually allowed to cost.
-- [**Planner distillation**](/approaches/lifetime-objective/planner-distill) —
+- [**Planner distillation**](/approach/lifetime-objective/planner-distill) —
   tries to compress the expensive legal planner into a small network, with every
   legal move at every position labelled.
 
 **Machinery the rest of the family runs on**
 
-- [**Scenario engine**](/approaches/lifetime-objective/scenario): a rules
+- [**Scenario engine**](/approach/lifetime-objective/scenario): a rules
   simulator in which every hidden number and every future disc is fixed in
   advance, which is what makes a clairvoyant optimum well posed at all.
-- [**Fast engine**](/approaches/lifetime-objective/fast-engine): the same rules
+- [**Fast engine**](/approach/lifetime-objective/fast-engine): the same rules
   about three times faster, proven to make byte-identical decisions.
-- [**Common**](/approaches/lifetime-objective/common): the shared harness that
+- [**Common**](/approach/lifetime-objective/common): the shared harness that
   runs a cohort, enforces seed leases and writes the result artifacts.
-- [**GPU**](/approaches/lifetime-objective/gpu): the environment and benchmarks
+- [**GPU**](/approach/lifetime-objective/gpu): the environment and benchmarks
   for the machine's integrated GPU, including two host defects that had to be
   worked around.
 

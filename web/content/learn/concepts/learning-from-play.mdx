@@ -1,6 +1,6 @@
 ---
 title: "Learning from play"
-summary: "How n-tuple networks, neural evaluators, policy-gradient learning and Monte Carlo tree search learn from played games, shown on real boards with retained results. Each of the four also has its own primer under Techniques."
+summary: "How played games become examples that help a program choose its next move."
 order: 8
 ---
 
@@ -35,7 +35,7 @@ transitions and was then opened on its mandatory burned 64-game gate. The direct
 n-tuple policy averaged 181,733.422 points and 56.359 moves. The two-boundary
 rollout fell further, to 113,643.969 points and 37.375 moves. That is well below
 the reference search and decisively rejects that configuration.
-The full record is on the [n-tuple and Q-learning family page](/approaches/ntuple-rl).
+The full record is on the [n-tuple and Q-learning family page](/approach/ntuple-rl).
 
 ## 2. Value and policy neural networks
 
@@ -57,7 +57,7 @@ absolute lifetimes well (rank correlation 0.839 on 242 held-out successors) yet
 picked the right sibling only 15.4% of the time, and as a search leaf lost its
 screen by 63,196 points a game. The pattern is the same every time and it has its
 own page: the [sibling trap](/learn/concepts/ranking-siblings). The family record
-is at [learned values and policies](/approaches/value-policy-learning).
+is at [learned values and policies](/approach/value-policy-learning).
 
 ## 3. Policy-gradient reinforcement learning
 
@@ -83,7 +83,7 @@ behaviour clone meant to warm-start PPO agreed with its depth-2 teacher on only
 32-game development cohort it averaged 141,986.938 points and 45.125 moves
 against fair depth 2's 191,189.344 and 58.688, so PPO did not run. The
 experiments live alongside the n-tuple work under
-[n-tuple and reinforcement learning](/approaches/ntuple-rl).
+[n-tuple and reinforcement learning](/approach/ntuple-rl).
 
 ## 4. Monte Carlo tree search
 
@@ -109,7 +109,7 @@ outcome got worse. The audit's conclusion is the useful one: "the public D1
 rollout and bounded replay reservoir optimize the wrong continuation
 distribution", so more simulations would buy a better imitation of a
 short-horizon search rather than a better player. The record is on the
-[tree-search family page](/approaches/tree-search).
+[tree-search family page](/approach/tree-search).
 
 <TechnicalDetails title="The technical record">
 

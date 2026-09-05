@@ -87,19 +87,19 @@ moves survived.
 
 Pages that learn values from experience:
 
-- [Klein-Friedmann linear Q-learning](/approaches/value-policy-learning/klein-friedmann-linear-q),
+- [Klein-Friedmann linear Q-learning](/approach/value-policy-learning/klein-friedmann-linear-q),
   six hand-made features and six learned weights, the only outside attempt at
   the game this site knows of.
-- [Double-DQN and continuation](/approaches/value-policy-learning/dqn), the
+- [Double-DQN and continuation](/approach/value-policy-learning/dqn), the
   deep version, rewarding survival: each surviving move is worth 1 and dying
   costs 12.
-- [Rainbow-style Q-learning over patterns](/approaches/ntuple-rl/rainbow-q),
+- [Rainbow-style Q-learning over patterns](/approach/ntuple-rl/rainbow-q),
   action values held in a pattern table.
-- [Learning from every column, not just the one played](/approaches/ntuple-rl/bellman-ntuple),
+- [Learning from every column, not just the one played](/approach/ntuple-rl/bellman-ntuple),
   fitted value iteration over all seven columns under the same imagined luck.
-- [Monte Carlo state value](/approaches/value-policy-learning/monte-carlo-value),
-  [Denoised public value](/approaches/value-policy-learning/denoised-value)
-  and [Monte Carlo return](/approaches/value-policy-learning/monte-carlo-return),
+- [Monte Carlo state value](/approach/value-policy-learning/monte-carlo-value),
+  [Denoised public value](/approach/value-policy-learning/denoised-value)
+  and [Monte Carlo return](/approach/value-policy-learning/monte-carlo-return),
   which fit values from finished games instead of from the learner's own
   targets.
 
@@ -117,7 +117,7 @@ simulator, a learner stopped after 300 games tests at 49.08 moves over 10,000
 games, and the 50,000-game learner tests at 49.08 as well. Two schedules that
 kept learning for longer blew the weights up, one to about a billion and one
 to NaN
-([the reproduction page](/approaches/value-policy-learning/klein-friedmann-linear-q)).
+([the reproduction page](/approach/value-policy-learning/klein-friedmann-linear-q)).
 A five-second cross-entropy search over the same six weights beat both learned
 vectors on the site's own rules: 44.8 moves and 138,973 points against 40.5
 moves and 123,968 points for the transplanted learned weights, on the same
@@ -130,4 +130,4 @@ For the deep version no number survives at all. The DQN's verdicts are
 task-record only, with no per-game data, no mean score and no lifetime for
 the network, for its continuation wrapper, or for the baseline they were
 compared against
-([Double-DQN and continuation](/approaches/value-policy-learning/dqn)).
+([Double-DQN and continuation](/approach/value-policy-learning/dqn)).

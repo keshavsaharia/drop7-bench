@@ -16,7 +16,7 @@ policy model from that source.
 <EvidenceLabel status="rejected" evidence="task-record only" reads="teacher" />
 
 The label above is about the *training* side. One of the four selectable
-teachers is the [perfect-information oracle](/approaches/oracle-curriculum),
+teachers is the [perfect-information oracle](/approach/oracle-curriculum),
 which reads the future disc and reveal streams and is therefore never a legal
 player. What comes out of the trainer is a model over the public board, the
 visible next disc and the rise clock, and it is only that frozen student — not
@@ -103,7 +103,7 @@ can beat.** A leaf that improves one-ply play tells you almost nothing about a
 leaf inside a deep search, because the search may already be recovering the
 information the leaf supplies. That principle is visible in every later gate in
 this repository, which compare against
-[fair depth-4 expectimax](/approaches/fair-expectimax/reference) rather than
+[fair depth-4 expectimax](/approach/fair-expectimax/reference) rather than
 against a convenient weaker policy.
 
 What is still open here is most of the workbench. Three of the four teachers

@@ -92,20 +92,20 @@ one step further away, how reachable the buried gray discs are, and, against
 those, penalties for height, for covered discs sitting high, for low numbers
 clogging the board, and for danger with a rise imminent. It has nineteen
 weights, set by hand, and a modelled game over scores a flat −1,000,000. The
-[fair leaf page](/approaches/fair-expectimax/fair-policy) walks through the
+[fair leaf page](/approach/fair-expectimax/fair-policy) walks through the
 terms and the laboratory that fitted them, and the
 [concept page on what makes a board good](/learn/concepts/evaluating-a-board)
 marks the features on a real position.
 
 Pages that use hand-written evaluation:
 
-- [The fair leaf and the laboratory that produced it](/approaches/fair-expectimax/fair-policy),
+- [The fair leaf and the laboratory that produced it](/approach/fair-expectimax/fair-policy),
   the evaluator at the bottom of every search in the reference family.
-- [Hand-built heuristics and shallow search](/approaches/heuristic-search),
+- [Hand-built heuristics and shallow search](/approach/heuristic-search),
   the family of earlier one-move and shallow-search policies.
-- [Machine-tuning the board evaluator](/approaches/fair-expectimax/cem),
+- [Machine-tuning the board evaluator](/approach/fair-expectimax/cem),
   which let an optimiser adjust eight of the coefficients.
-- [Leaf Reweight](/approaches/lifetime-objective/leaf-reweight), which turns
+- [Leaf Reweight](/approach/lifetime-objective/leaf-reweight), which turns
   the nineteen weights into run-time data so refitted vectors can be tested.
 
 ## What it cannot do
@@ -122,12 +122,12 @@ never been refitted under corrected scoring, or at the depth they are used
 at. One conventional tidiness term, the roughness penalty, was set to exactly
 zero so that the policy would build anything at all. Every later attempt to
 adjust the vector, through
-[machine tuning](/approaches/fair-expectimax/cem),
-[transition rewards](/approaches/fair-expectimax/transition-rewards) and
-[vertical-ladder energy](/approaches/fair-expectimax/vertical-ladder), fitted
+[machine tuning](/approach/fair-expectimax/cem),
+[transition rewards](/approach/fair-expectimax/transition-rewards) and
+[vertical-ladder energy](/approach/fair-expectimax/vertical-ladder), fitted
 well on the games used to select it and regressed on fresh ones. Both
 statements are recorded on the
-[fair leaf page](/approaches/fair-expectimax/fair-policy) and the
-[fair expectimax family page](/approaches/fair-expectimax), which read the
+[fair leaf page](/approach/fair-expectimax/fair-policy) and the
+[fair expectimax family page](/approach/fair-expectimax), which read the
 pattern as a sign that the vector sits in a decent local optimum and nothing
 more.

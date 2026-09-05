@@ -46,10 +46,10 @@ left before it is one of the four things a policy is allowed to see.
 ## How it works
 
 The planners on this site differ in detail but share a shape, which the
-[family page](/approaches/constructive-reservoir) gives in four steps.
+[family page](/approach/constructive-reservoir) gives in four steps.
 
 1. Name a target. Write down what a good board looks like a cycle from now.
-   The [constructive spectrum](/approaches/constructive-reservoir/constructive-spectrum)
+   The [constructive spectrum](/approach/constructive-reservoir/constructive-spectrum)
    planner's target has four parts: a spread of column heights, covered discs
    still reachable at the edges, safe caps on top of each column, and stored
    high discs whose trigger conditions overlap.
@@ -64,13 +64,13 @@ The planners on this site differ in detail but share a shape, which the
    the board is close to dying.
 
 The same instinct has been tried without simulation: the
-[vertical reservoir](/approaches/constructive-reservoir/vertical-reservoir)
+[vertical reservoir](/approach/constructive-reservoir/vertical-reservoir)
 policy names the shape of a good stack in hand-written features, and the
-[vertical ladder](/approaches/fair-expectimax/vertical-ladder) term adds a
+[vertical ladder](/approach/fair-expectimax/vertical-ladder) term adds a
 stored-energy bonus to the reference search's leaf. Two labs make the plan
-itself the unit of choice: [cycle abstraction](/approaches/heuristic-search/cycle-abstraction)
+itself the unit of choice: [cycle abstraction](/approach/heuristic-search/cycle-abstraction)
 picks one of five intentions for a whole cycle, and
-[rise-option QD](/approaches/constructive-reservoir/rise-option-qd) builds the
+[rise-option QD](/approach/constructive-reservoir/rise-option-qd) builds the
 machinery for an option, a plan held across a cycle instead of re-decided
 every move.
 
@@ -85,25 +85,25 @@ six, and all four clear at once.
 <ConstructiveRiseTrigger />
 
 The engine records 28 chain points for that clear, on top of the 17,000-point
-rise bonus ([family page](/approaches/constructive-reservoir)).
+rise bonus ([family page](/approach/constructive-reservoir)).
 
 Planning the cycle forward worked against a weak comparator. On 32 paired
 games, the constructive spectrum planner averaged 266,695.5 points against
 157,198.1 for the one-move-ahead fair search, and won 25 of the 32
-([constructive spectrum](/approaches/constructive-reservoir/constructive-spectrum),
+([constructive spectrum](/approach/constructive-reservoir/constructive-spectrum),
 ledger-recorded). Reading the structure off a still board did not. On its
 128-game tournament the vertical reservoir policy averaged 160,498.1 points
 against the same comparator's 178,554.4
-([vertical reservoir](/approaches/constructive-reservoir/vertical-reservoir),
+([vertical reservoir](/approach/constructive-reservoir/vertical-reservoir),
 ledger-recorded); the
-[viability controller](/approaches/constructive-reservoir/viability-controller)
+[viability controller](/approach/constructive-reservoir/viability-controller)
 lost its 32-game screen too.
 
 Attaching the planner to the four-move reference search made things worse.
 Used only as a tie-break between that search's top two near-equal columns, it
 averaged 283,286 points against exact depth-4's 372,870.5 on four fitting
 games, a quartet and not a cohort
-([constructive spectrum](/approaches/constructive-reservoir/constructive-spectrum)).
+([constructive spectrum](/approach/constructive-reservoir/constructive-spectrum)).
 On 32 fitting games a twelve-move continuation beat a seven-move one, and
 seventeen was much worse than both. Cycle abstraction is task-record only, and
 rise-option QD has never played a game.

@@ -3,6 +3,7 @@
  * `lib/techniques.ts`. An unknown slug keeps the slug as the title.
  */
 import { cardAlt, renderPageCard, SOCIAL_CONTENT_TYPE, SOCIAL_SIZE } from "@/lib/social-card";
+import { TechniqueArt } from "@/components/technique-art/TechniqueArt";
 import { getTechnique } from "@/lib/techniques";
 
 export const dynamic = "force-dynamic";
@@ -20,6 +21,7 @@ export default async function Image({ params }: Props) {
     eyebrow: "Technique",
     title: technique ? technique.title : slug,
     summary: technique?.oneLine,
-    path: `/approaches/technique/${slug}`,
+    path: `/approach/technique/${slug}`,
+    art: <TechniqueArt name={technique?.slug ?? "fallback"} mode="static" />,
   });
 }

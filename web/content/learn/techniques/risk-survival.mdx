@@ -90,21 +90,21 @@ is a staircase with one step every five moves, and the objective is lifetime.
 
 Pages that change the objective:
 
-- [Where the points actually come from](/approaches/lifetime-objective/score-decomposition),
+- [Where the points actually come from](/approach/lifetime-objective/score-decomposition),
   the measurement above.
-- [Is the required clearing rate reachable at all?](/approaches/lifetime-objective/flow-ceiling),
+- [Is the required clearing rate reachable at all?](/approach/lifetime-objective/flow-ceiling),
   which asks what clear rate survival needs and whether any player reaches it.
-- [A learned survival estimate inside the reference search](/approaches/lifetime-objective/learned-leaf),
+- [A learned survival estimate inside the reference search](/approach/lifetime-objective/learned-leaf),
   a leaf that predicts remaining lifetime.
-- [Weighting the bad outcomes at the root](/approaches/fair-expectimax/root-risk),
+- [Weighting the bad outcomes at the root](/approach/fair-expectimax/root-risk),
   a root value that is part average and part worst case.
-- [Risk sensitive](/approaches/heuristic-search/risk-sensitive) and
-  [Critical risk](/approaches/heuristic-search/critical-risk), earlier risk
+- [Risk sensitive](/approach/heuristic-search/risk-sensitive) and
+  [Critical risk](/approach/heuristic-search/critical-risk), earlier risk
   rules in the heuristic family.
-- [Tail-survival CEM](/approaches/constructive-reservoir/tail-survival-cem) and
-  [Viability controller](/approaches/constructive-reservoir/viability-controller),
+- [Tail-survival CEM](/approach/constructive-reservoir/tail-survival-cem) and
+  [Viability controller](/approach/constructive-reservoir/viability-controller),
   which optimise the tail of the lifetime directly.
-- [Learning a policy with explicit safety constraints](/approaches/ntuple-rl/primal-dual-actor-critic),
+- [Learning a policy with explicit safety constraints](/approach/ntuple-rl/primal-dual-actor-critic),
   which treats the risk of dying as a constraint to be held under a limit.
 
 ## What it cannot do
@@ -114,7 +114,7 @@ cautious search scored 87,112 points and lasted 61.5 moves against 176,819.75
 points and 114.125 moves for the unchanged search, losing seven of eight games
 on both measures, under historical 7,000-point scoring, archival; its clear and
 reveal rates fell too
-([Weighting the bad outcomes at the root](/approaches/fair-expectimax/root-risk)).
+([Weighting the bad outcomes at the root](/approach/fair-expectimax/root-risk)).
 The page's reading is that the cautious player stopped assembling anything.
 
 Predicting lifetime well did not steer play to where lifetime is cheap. Every
@@ -122,7 +122,7 @@ learned lifetime arm in the learned-leaf study pushed the board away from the 19
 to 20 occupied cells where the flow-ceiling measurement says the achievable
 clear rate crosses what survival requires: to 24.68 mean occupied cells at five
 chance samples and 23.87 at seven, on 64 paired games per arm
-([A learned survival estimate inside the reference search](/approaches/lifetime-objective/learned-leaf)).
+([A learned survival estimate inside the reference search](/approach/lifetime-objective/learned-leaf)).
 Remaining lifetime under the current policy is a different target from
 remaining lifetime under a policy that holds the board at the right size.
 
@@ -130,6 +130,6 @@ And a cheating planner, an oracle that reads the future, told to maximise
 points instead of survival earned 1.75 times the points per move and died in
 less than half the time, on eight games played over the same imagined futures
 ([finding-06](/docs/exploratory/finding-06-flow-ceiling), quoted on the
-[lifetime objective family page](/approaches/lifetime-objective)). Those are
+[lifetime objective family page](/approach/lifetime-objective)). Those are
 oracle numbers, and what they say is that the chains a player can build are
 real and that chasing them shortens the game.

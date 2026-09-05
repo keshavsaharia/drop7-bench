@@ -53,7 +53,7 @@ function toApproachHref(repoPath: string, suffix: string): string | null {
   const family = match[1];
   const approach = match[2];
   if (approach?.includes(".")) return null;
-  return approach ? `/approaches/${family}/${approach}${suffix}` : `/approaches/${family}${suffix}`;
+  return approach ? `/approach/${family}/${approach}${suffix}` : `/approach/${family}${suffix}`;
 }
 
 function toRecordHref(repoPath: string, suffix: string): string | null {
@@ -80,7 +80,7 @@ function toSourceHref(repoPath: string, suffix: string): string | null {
     return `/${repoPath}${suffix}`;
   }
   if (/^approaches\/[^/]+\/[^/]+\/.+/.test(repoPath)) {
-    return `/${repoPath}${suffix}`;
+    return `/approach/${repoPath.slice("approaches/".length)}${suffix}`;
   }
   return null;
 }
@@ -91,8 +91,8 @@ function toConsoleHref(repoPath: string, suffix: string): string | null {
 
 /**
  * Map a repository Markdown href onto a console route when one exists:
- * `docs/*.md` → `/docs/<slug>`, approach directories → `/approaches/…`,
- * source files → their repository path, and theory/experiment JSON →
+ * `docs/*.md` → `/docs/<slug>`, approach directories → `/approach/…`,
+ * source files → their singular console route, and theory/experiment JSON →
  * `/theories/<id>` or `/experiments/<id>`.
  */
 export function rewriteRepoDocHref(href: string, fromRepoPath?: string): string {

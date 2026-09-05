@@ -14,7 +14,7 @@ featured: true
 
 A look-ahead search ends at boards where the game is not over, and it needs an
 opinion about each one. That opinion is the [leaf evaluator](/learn/glossary),
-and in the [reference policy](/approaches/fair-expectimax/reference) it is
+and in the [reference policy](/approach/fair-expectimax/reference) it is
 nineteen hand-tuned structural terms about height, crowding and chain readiness.
 Almost every learning experiment on this site has tried to replace it, and
 almost all of them failed the same way, which the
@@ -117,7 +117,7 @@ The move-blind, state-only design is a positive result on its own terms: this
 evaluator never sees a move identity and it cleared a paired 64-game lower
 bound, which the family's earlier models did not. But every learned arm also
 pushed the board away from the 19 to 20 occupied cells where the
-[flow ceiling](/approaches/lifetime-objective/flow-ceiling) measurement puts the
+[flow ceiling](/approach/lifetime-objective/flow-ceiling) measurement puts the
 crossing between achievable clear rate and survival requirement (24.29 to 24.68
 cells at five samples, finding-08). A model that predicts remaining lifetime
 under the current policy does not steer toward the operating point where

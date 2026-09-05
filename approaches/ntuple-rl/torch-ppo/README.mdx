@@ -23,7 +23,7 @@ The attraction is that this learns the decision directly, so it never has to
 build a value that generalises across positions it will not visit. The
 difficulty is sample efficiency: policy-gradient methods need an enormous
 number of games, and Drop7 games are short until a policy is good. An earlier
-[native C++ attempt](/approaches/ntuple-rl/native-ppo) copied a teacher first
+[native C++ attempt](/approach/ntuple-rl/native-ppo) copied a teacher first
 and then tried to improve by playing, and failed its imitation gate. The
 question here was whether a much faster environment, a bigger network and a
 stronger teacher would change that.
@@ -48,7 +48,7 @@ crosses the boundary.
 1. Run the fast environment. Finished games are not silently reset: a terminal
    transition is reported unambiguously before a slot is reused.
 2. Generate teacher data. The same environment runs exact one- and two-move
-   [fair searches](/approaches/fair-expectimax/reference) in parallel, with
+   [fair searches](/approach/fair-expectimax/reference) in parallel, with
    five [reveal strata](/learn/glossary).
 3. Clone. Train the network on the two-move teacher's chosen action, mixed
    with a softer target that also matches the teacher's relative scores for

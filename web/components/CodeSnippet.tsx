@@ -6,7 +6,7 @@ import { readRepoFile, sourceLanguage, sourceLanguageLabel } from "@/lib/repo";
 import styles from "./CodeSnippet.module.css";
 
 export interface CodeSnippetProps {
-  /** Repository-relative path under `src/` or `approaches/`. */
+  /** Repository-relative path under `src/`, `approaches/` or `web/`. */
   path: string;
   /** First source line to render, inclusive and one-based. Defaults to 1. */
   startLine?: number;
@@ -25,16 +25,19 @@ interface SourceExcerpt {
   start: number;
 }
 
-function isPublishedSourcePath(path: string): boolean {
+function isSnippetSourcePath(path: string): boolean {
   if (!path || path.startsWith("/") || path.includes("\\")) return false;
   const parts = path.split("/");
   return (
-    (parts[0] === "src" || parts[0] === "approaches") &&
+    (parts[0] === "src" || parts[0] === "approaches" || parts[0] === "web") &&
     parts.every((part) => part.length > 0 && part !== "." && part !== "..")
   );
 }
 
-function sourceViewerHref(path: string, line: number): string {
+function sourceViewerHref(path: string, line: number): string | null {
+  // The source browser publishes src/ and approaches/. Web excerpts still come
+  // from the live checkout, but stay unlinked until that tree has its own route.
+  if (path.startsWith("web/")) return null;
   const pathname = path
     .split("/")
     .map((part) => encodeURIComponent(part))
@@ -47,7 +50,7 @@ function excerptFor(
   startLine: number | undefined,
   endLine: number | undefined,
 ): SourceExcerpt | null {
-  if (!isPublishedSourcePath(path)) return null;
+  if (!isSnippetSourcePath(path)) return null;
 
   let raw: string | null;
   try {
@@ -96,6 +99,7 @@ function Header({
   title?: ReactNode;
 }) {
   const name = basename(path) || "source";
+  const href = excerpt ? sourceViewerHref(path, excerpt.start) : null;
   const lineLabel = excerpt
     ? excerpt.start === excerpt.end
       ? `line ${excerpt.start}`
@@ -105,9 +109,9 @@ function Header({
   return (
     <header className={styles.header}>
       <div className={styles.identity}>
-        {excerpt ? (
+        {excerpt && href ? (
           <Link
-            href={sourceViewerHref(path, excerpt.start)}
+            href={href}
             className={styles.fileLink}
             title={`${path} — open at line ${excerpt.start}`}
             aria-label={`Open ${path} at line ${excerpt.start}`}

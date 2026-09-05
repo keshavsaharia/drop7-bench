@@ -55,7 +55,7 @@ could not rank the six sibling moves it never played (the
 tuned by evolution on whole-game score directly, the eighteen hand-written
 weights of the fair leaf under CMA-ES, the optimiser followed selection noise
 into a worse evaluator
-([the first leaf evolution](/approaches/lifetime-objective/leaf-evolution)).
+([the first leaf evolution](/approach/lifetime-objective/leaf-evolution)).
 Its post-mortem found that with 32 games per candidate and a paired standard
 deviation near 200,000 points, fresh seeds every generation left selection
 noise alone to steer.
@@ -89,7 +89,7 @@ and the depth-5 teacher reads the same public state.
 <EvolutionPipeline caption="Four stages. The teacher, the corpus, the warm start, the evolution and the elite re-selection all read seeds from the training lease, which may be read again. The screen reads a separate block of seeds that nothing has ever opened, exactly once, after the candidate's weights are frozen and hashed." />
 
 1. Teacher corpus (stage A). The frozen fair evaluator, driven by the
-   [fast Rust bitboard engine](/approaches/fair-expectimax/rust-engine), plays
+   [fast Rust bitboard engine](/approach/fair-expectimax/rust-engine), plays
    training games at depth 5 with seven chance strata. Five moves is one full
    row-rise cycle, so every rise consequence of a root move is inside the
    teacher's horizon. At every position the corpus records the board, the

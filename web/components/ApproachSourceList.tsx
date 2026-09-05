@@ -8,7 +8,7 @@ export interface ApproachSourceListProps {
 }
 
 function fileHref(family: string, slug: string, file: string): string {
-  return `/approaches/${encodeURIComponent(family)}/${encodeURIComponent(slug)}/${file
+  return `/approach/${encodeURIComponent(family)}/${encodeURIComponent(slug)}/${file
     .split("/")
     .map(encodeURIComponent)
     .join("/")}`;

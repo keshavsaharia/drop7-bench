@@ -88,25 +88,25 @@ choice only when a confidence bound says so.
 
 Pages that use the method:
 
-- [Terminal policy iteration](/approaches/terminal-policy-iteration/terminal-policy-iteration),
+- [Terminal policy iteration](/approach/terminal-policy-iteration/terminal-policy-iteration),
   the family's most faithful design, which plays candidate moves to the end of
   the game.
-- [Public rollout policy iteration](/approaches/terminal-policy-iteration/public-rollout-policy-iteration),
+- [Public rollout policy iteration](/approach/terminal-policy-iteration/public-rollout-policy-iteration),
   the cheapest version, with fifteen tapes and fifty-move continuations.
-- [Public survival rollout](/approaches/terminal-policy-iteration/public-survival-rollout),
-  [Public regenerative B0](/approaches/terminal-policy-iteration/public-regenerative-b0)
-  and [Terminal rollout](/approaches/terminal-policy-iteration/terminal-rollout),
+- [Public survival rollout](/approach/terminal-policy-iteration/public-survival-rollout),
+  [Public regenerative B0](/approach/terminal-policy-iteration/public-regenerative-b0)
+  and [Terminal rollout](/approach/terminal-policy-iteration/terminal-rollout),
   the rest of that family.
-- [Rollout veto](/approaches/d4-long-outcome/rollout-veto) and
-  [Letting a long look-ahead overrule the search](/approaches/lifetime-objective/rollout-veto-17k),
+- [Rollout veto](/approach/d4-long-outcome/rollout-veto) and
+  [Letting a long look-ahead overrule the search](/approach/lifetime-objective/rollout-veto-17k),
   a 25-move veto over fair D4 and its retest under corrected scoring.
-- [Long outcomes](/approaches/d4-long-outcome/long-outcome), which learns the
+- [Long outcomes](/approach/d4-long-outcome/long-outcome), which learns the
   rollout labels instead of recomputing them.
-- [Rollout](/approaches/heuristic-search/rollout) and
-  [Judging a move by playing the game out](/approaches/fair-expectimax/rollout-improvement),
+- [Rollout](/approach/heuristic-search/rollout) and
+  [Judging a move by playing the game out](/approach/fair-expectimax/rollout-improvement),
   two earlier attempts with weak continuation policies.
-- [Expert iteration from the depth-4 search](/approaches/ntuple-rl/regenerative-expert-iteration)
-  and [Conservative fitted policy iteration](/approaches/value-policy-learning/conservative-fitted-policy-iteration),
+- [Expert iteration from the depth-4 search](/approach/ntuple-rl/regenerative-expert-iteration)
+  and [Conservative fitted policy iteration](/approach/value-policy-learning/conservative-fitted-policy-iteration),
   where the improvement step trains a network instead of running at play time.
 
 ## What it cannot do
@@ -114,11 +114,11 @@ Pages that use the method:
 The family that pursued this hardest summed up its own record this way: "When
 the measurement is cheap enough to run, it is too noisy to beat the reference;
 when it is faithful enough to trust, it is far too slow to play a game"
-([Terminal policy iteration](/approaches/terminal-policy-iteration)).
+([Terminal policy iteration](/approach/terminal-policy-iteration)).
 
 Both halves have a record. The 25-move veto produced one game worth 404,047
 points against 159,616 for the unchanged search on the same seed, and one game
-is an anecdote ([Rollout veto](/approaches/d4-long-outcome/rollout-veto)). On
+is an anecdote ([Rollout veto](/approach/d4-long-outcome/rollout-veto)). On
 32 paired games under corrected scoring the veto was worse by 46,510.5 points
 per game, with 9 wins, 4 ties and 19 losses
 ([finding-03](/docs/exploratory/finding-03-rollout-veto-17k), development
@@ -126,14 +126,14 @@ tier). The cheapest policy-iteration variant improved every one of its four
 paired fitting games and still failed its frozen gate, which asked for 1.20
 times the score and lifetime of the one-move fair search: it reached 1.0697
 times the score and 1.0256 times the moves, and four games is a fitting screen
-([Public rollout policy iteration](/approaches/terminal-policy-iteration/public-rollout-policy-iteration)).
+([Public rollout policy iteration](/approach/terminal-policy-iteration/public-rollout-policy-iteration)).
 The most faithful design, playing every candidate to the end of the game, took
 hundreds of seconds per move and was paused before it produced a policy result.
 
 Two smaller lessons sit in the older pages. A rollout is only as good as the
 policy that plays it out: the earliest version lost to the very one-move
 policy it used as its continuation
-([Judging a move by playing the game out](/approaches/fair-expectimax/rollout-improvement)).
+([Judging a move by playing the game out](/approach/fair-expectimax/rollout-improvement)).
 And learning the labels instead of recomputing them did not escape the noise:
 the learned rankers' top-move accuracy fell below that of an exact two-move
-search ([Long outcomes](/approaches/d4-long-outcome/long-outcome)).
+search ([Long outcomes](/approach/d4-long-outcome/long-outcome)).

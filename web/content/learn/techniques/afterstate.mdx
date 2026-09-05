@@ -83,7 +83,7 @@ often fewer distinct ones, because two columns can leave the same board.
 
 Almost every learned evaluator on this site chooses a column this way, by
 simulating each drop and scoring the board it leaves; the
-[n-tuple family page](/approaches/ntuple-rl) describes that step. What the
+[n-tuple family page](/approach/ntuple-rl) describes that step. What the
 afterstate-learning pages add is the training side: labelling every sibling
 under pinned futures, and testing the labels before trusting them. The
 [concept page on ranking siblings](/learn/concepts/ranking-siblings) explains
@@ -92,18 +92,18 @@ that were played, asked to rank the ones that were not.
 
 Pages that use afterstates:
 
-- [Distributional afterstate ranker](/approaches/afterstate-learning/distributional-afterstate),
+- [Distributional afterstate ranker](/approach/afterstate-learning/distributional-afterstate),
   which labels every sibling with 16 quantiles of its outcome under pinned
   futures and trains one network with a ranking loss.
-- [A network that predicts how long you will live](/approaches/lifetime-objective/afterstate-net),
+- [A network that predicts how long you will live](/approach/lifetime-objective/afterstate-net),
   a proposal for an afterstate evaluator whose target is remaining lifetime; it
   has never been trained.
-- [The data factory, and the switch that was left off](/approaches/lifetime-objective/sibling-corpus),
+- [The data factory, and the switch that was left off](/approach/lifetime-objective/sibling-corpus),
   which builds the labelled positions for that family.
-- [Sibling advantage](/approaches/value-policy-learning/sibling-advantage), which
+- [Sibling advantage](/approach/value-policy-learning/sibling-advantage), which
   learns only which of the seven siblings came out ahead under an aligned
   future.
-- [Chance-state NNUE](/approaches/value-policy-learning/chance-state-nnue), which
+- [Chance-state NNUE](/approach/value-policy-learning/chance-state-nnue), which
   judges the board just before the next disc is dealt, so the value is never
   split seven ways by the deal.
 
@@ -117,7 +117,7 @@ With eight pinned futures per column the labels were noise. Agreement between
 the two half-rankings was 0.2457 against a floor of 0.50 fixed in advance, on
 2,470 held-out positions, and the spread of outcomes within one column, 20,922
 points, was about three times the typical gap between columns, 7,096 points
-([Distributional afterstate ranker](/approaches/afterstate-learning/distributional-afterstate)).
+([Distributional afterstate ranker](/approach/afterstate-learning/distributional-afterstate)).
 With 256 futures per column the labels held still, and the verdict was a clean
 negative: on 2,523 held-out positions the model ranked columns better than the
 one-move policy that had generated its labels and worse than the fair depth-4

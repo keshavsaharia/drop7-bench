@@ -30,7 +30,7 @@ Two ideas that recur across this family, combined.
 **Learn a correction, not a policy.** Starting a policy network from nothing
 means spending most of the budget rediscovering that filling a column to the
 ceiling is bad. Instead, take an exact one-move
-[fair search](/approaches/fair-expectimax/reference), normalise its opinion of
+[fair search](/approach/fair-expectimax/reference), normalise its opinion of
 each column into scores, and let a small network add a correction on top. Set
 that correction to zero and the policy is bit-for-bit identical to the search.
 Every point of difference is therefore attributable to what was learned, and

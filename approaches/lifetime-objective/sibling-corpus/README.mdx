@@ -98,8 +98,8 @@ recorded is what it produced and who consumed it.
 four, with deliberately-random move fractions of 8%, 15%, 5% and 3% respectively
 ([`lease-map`](/docs/exploratory/lease-map)). The resulting state files are the
 training data behind the
-[learned leaf](/approaches/lifetime-objective/learned-leaf), whose result *is*
-retained, and behind the [afterstate net](/approaches/lifetime-objective/afterstate-net),
+[learned leaf](/approach/lifetime-objective/learned-leaf), whose result *is*
+retained, and behind the [afterstate net](/approach/lifetime-objective/afterstate-net),
 whose outcome is not recorded anywhere.
 
 **The all-sibling panel was built and left switched off.** An independent
@@ -167,7 +167,7 @@ comparison, and no bound of any kind.
   written rather than what the writer supports.
 - **Behaviour mixing is not successor closure.** Both give a model variety; only
   one gives it the alternatives at a position it will actually be asked about.
-  The [planner distillation](/approaches/lifetime-objective/planner-distill) work
+  The [planner distillation](/approach/lifetime-objective/planner-distill) work
   later built a corpus that does have full sibling coverage — 108,462 labelled
   columns with zero gaps, and found that closing this gap, on its own, was not
   enough to beat the reference search.

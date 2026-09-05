@@ -10,7 +10,7 @@ where it looks promising, guided by quick simulated playouts.
 ## Why anyone would want this
 
 The reference policy in this repository is
-[fair expectimax at depth 4](/approaches/fair-expectimax/reference): at every
+[fair expectimax at depth 4](/approach/fair-expectimax/reference): at every
 turn it considers **all seven columns**, then all seven again after the game
 deals the next disc, and so on for four of the player's own moves. Nothing is
 skipped. That completeness is what makes it trustworthy, and it is also what
@@ -125,12 +125,12 @@ bigger budget.
 
 | Approach | Status and evidence | Recorded outcome |
 | --- | --- | --- |
-| [Observable-state UCT](/approaches/tree-search/observable-mcts) | Rejected; ledger-recorded | Missed a frozen top-action gate by one root out of 32 |
-| [Confidence-gated override](/approaches/tree-search/observable-mcts) | Rejected; ledger-recorded | Held-out pairwise accuracy and regret both worsened |
-| [Scaled observable MCTS](/approaches/tree-search/observable-mcts) | Rejected; ledger-recorded | Larger search ranked 25-move outcomes worse |
-| [Learned-guidance search](/approaches/tree-search/nnue-guided) | Rejected; ledger-recorded | Screens were worse than the plain depth-3 comparator |
-| [TypeScript MCTS lab](/approaches/tree-search/mcts) | Rejected; task-record only | "Ordinary MCTS did not establish a whole-game improvement" |
-| [PUCT](/approaches/tree-search/puct) | Unknown; repository-verified | Complete lab, preregistered gates, never run |
+| [Observable-state UCT](/approach/tree-search/observable-mcts) | Rejected; ledger-recorded | Missed a frozen top-action gate by one root out of 32 |
+| [Confidence-gated override](/approach/tree-search/observable-mcts) | Rejected; ledger-recorded | Held-out pairwise accuracy and regret both worsened |
+| [Scaled observable MCTS](/approach/tree-search/observable-mcts) | Rejected; ledger-recorded | Larger search ranked 25-move outcomes worse |
+| [Learned-guidance search](/approach/tree-search/nnue-guided) | Rejected; ledger-recorded | Screens were worse than the plain depth-3 comparator |
+| [TypeScript MCTS lab](/approach/tree-search/mcts) | Rejected; task-record only | "Ordinary MCTS did not establish a whole-game improvement" |
+| [PUCT](/approach/tree-search/puct) | Unknown; repository-verified | Complete lab, preregistered gates, never run |
 
 Sources: the [experiment index](/docs/research/experiment-index) tree-search
 table and the ledger entries "Observable-state stochastic UCT", "Confidence-gated

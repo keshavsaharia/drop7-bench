@@ -40,8 +40,8 @@ const TEST_GRAVITY = {
   raised: [0, 0, 0, 3, 5, 1, 8],
 } as const;
 
-const BOARD_SOURCE = "/approaches/fair-expectimax/rust-engine/src/board.rs";
-const CASCADE_SOURCE = "/approaches/fair-expectimax/rust-engine/src/engine.rs";
+const BOARD_SOURCE = "/approach/fair-expectimax/rust-engine/src/board.rs";
+const CASCADE_SOURCE = "/approach/fair-expectimax/rust-engine/src/engine.rs";
 
 function columnWords(cells: string): number[] {
   const board = parseBoard(cells);

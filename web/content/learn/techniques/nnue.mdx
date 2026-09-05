@@ -85,7 +85,7 @@ describes the feature set: 8,902 binary features, of which exactly 135 are
 active for any board, including 84 adjacent-pair features, because a disc
 clears when its number matches the length of the run it lands in and a bag of
 single-cell features cannot see a run
-([A learned survival estimate inside the reference search](/approaches/lifetime-objective/learned-leaf)).
+([A learned survival estimate inside the reference search](/approach/lifetime-objective/learned-leaf)).
 The output is in units of a row rise, 17,000 points, so the search can add it
 to points it has already counted.
 
@@ -99,19 +99,19 @@ it costs 1.33 (the same page).
 
 Pages that use one:
 
-- [A learned survival estimate inside the reference search](/approaches/lifetime-objective/learned-leaf),
+- [A learned survival estimate inside the reference search](/approach/lifetime-objective/learned-leaf),
   the budget measurement and the first NNUE-shaped leaf, blended into the
   hand-written one.
-- [An evolved NNUE leaf, distilled from a depth-5 teacher](/approaches/lifetime-objective/nnue-evolution),
+- [An evolved NNUE leaf, distilled from a depth-5 teacher](/approach/lifetime-objective/nnue-evolution),
   a warm start by imitation followed by evolution on whole-game score.
-- [Can a leaf-sized network hold the four-ply search's ordering?](/approaches/lifetime-objective/nnue-d4q-probe),
+- [Can a leaf-sized network hold the four-ply search's ordering?](/approach/lifetime-objective/nnue-d4q-probe),
   the smallest network that could run in a leaf, trained on the four-move
   search's exact values for every sibling.
-- [Structured NNUE](/approaches/value-policy-learning/structured-nnue) and
-  [Chance-state NNUE](/approaches/value-policy-learning/chance-state-nnue),
+- [Structured NNUE](/approach/value-policy-learning/structured-nnue) and
+  [Chance-state NNUE](/approach/value-policy-learning/chance-state-nnue),
   two earlier designs: one predicts remaining lifetime, the other judges the
   board just before the next disc is dealt.
-- [Sibling network on the 200-move panel](/approaches/d4-long-outcome/h200-sibling-nnue),
+- [Sibling network on the 200-move panel](/approach/d4-long-outcome/h200-sibling-nnue),
   started as an exact copy of the reference search and trained on a panel
   where every legal column was measured.
 
@@ -121,7 +121,7 @@ The first limit is arithmetic. The three-million-parameter convolutional
 network originally specified as the leaf would have taken 2,535 seconds per
 decision at 4,122 microseconds a board, a factor of 2,860 over the reference's
 0.887-second decision
-([A learned survival estimate inside the reference search](/approaches/lifetime-objective/learned-leaf)).
+([A learned survival estimate inside the reference search](/approach/lifetime-objective/learned-leaf)).
 The NNUE-shaped student gave up 0.008 of held-out lifetime correlation (0.8564
 against the convolutional network's 0.8646) to run in 1.33 microseconds.
 
@@ -131,7 +131,7 @@ start on the evolution page matched a depth-5 teacher's values to a validation
 Pearson correlation of 0.95 and then, placed inside the real depth-3 search,
 picked the teacher's column only 44% of the time, about what a leaf that
 returns zero manages
-([An evolved NNUE leaf, distilled from a depth-5 teacher](/approaches/lifetime-objective/nnue-evolution)).
+([An evolved NNUE leaf, distilled from a depth-5 teacher](/approach/lifetime-objective/nnue-evolution)).
 A leaf is judged by the order it puts sibling moves in, and a small error
 in value can swap two of them; the
 [concept page on the sibling trap](/learn/concepts/ranking-siblings) is about

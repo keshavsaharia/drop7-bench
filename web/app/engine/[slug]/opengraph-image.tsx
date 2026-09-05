@@ -4,6 +4,7 @@
  */
 import { getEngine } from "@/lib/engines";
 import { cardAlt, renderPageCard, SOCIAL_CONTENT_TYPE, SOCIAL_SIZE } from "@/lib/social-card";
+import { TechniqueArt } from "@/components/technique-art/TechniqueArt";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +21,7 @@ export default async function Image({ params }: Props) {
     eyebrow: "Engine",
     title: entry ? entry.title : slug,
     summary: entry?.role,
-    path: `/engines/${slug}`,
+    path: `/engine/${slug}`,
+    art: entry?.hero ? <TechniqueArt name={entry.art} mode="static" /> : undefined,
   });
 }

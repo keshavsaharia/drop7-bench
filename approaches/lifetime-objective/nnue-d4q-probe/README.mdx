@@ -35,7 +35,7 @@ agreed with the search on the best column only 37.5% of the time
 
 The one model class that *is* cheap enough for a leaf is the
 [NNUE](/learn/glossary)-shaped network from
-[learned-leaf](/approaches/lifetime-objective/learned-leaf): 8,902 binary
+[learned-leaf](/approach/lifetime-objective/learned-leaf): 8,902 binary
 features looked up and summed, then two small dense layers. It had only ever
 been trained to predict how long a game would last, never on the search's own
 sibling values. The probe asks whether feature-space saturation on one target
@@ -60,7 +60,7 @@ a pass.
    student's value of the resulting board.
 4. **Loss, within each root.** A listwise softmax cross-entropy against the
    search's values (softened at 0.18 times the root's value spread, the
-   [d4-q-clone](/approaches/value-policy-learning/d4-q-clone) convention), a
+   [d4-q-clone](/approach/value-policy-learning/d4-q-clone) convention), a
    gap-weighted pairwise margin, and a 0.1-weight mean-squared anchor on the
    standardised value. Adam at 1e-3, 256 roots per batch, 30 epochs.
 5. **Selection and reading.** Five initialisation seeds (0xA52E01 to 0xA52E05).

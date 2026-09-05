@@ -80,7 +80,7 @@ Evolution here tunes either the weights of a hand-written board evaluator or
 the weights of an NNUE (an efficiently updatable neural network; see the
 [NNUE primer](/learn/techniques/nnue)), with fitness equal to whole-game score
 on paired seeds. The most fully recorded run,
-[An evolved NNUE leaf, distilled from a depth-5 teacher](/approaches/lifetime-objective/nnue-evolution),
+[An evolved NNUE leaf, distilled from a depth-5 teacher](/approach/lifetime-objective/nnue-evolution),
 used a population of 32 candidates that all played the same fresh block of 32
 games each generation, as the leaf of the real depth-3 search. The four
 fittest were copied into the next generation unchanged; the other 28 slots
@@ -90,19 +90,19 @@ belongs to.
 
 Pages that evolve something:
 
-- [Evolution](/approaches/heuristic-search/evolution), the linear, nonlinear
+- [Evolution](/approach/heuristic-search/evolution), the linear, nonlinear
   and phase-weight versions of tuning a search's feature weights.
-- [Machine-tuning the board evaluator](/approaches/fair-expectimax/cem), eight
+- [Machine-tuning the board evaluator](/approach/fair-expectimax/cem), eight
   coefficients of the reference leaf tuned by CEM on complete games.
-- [Tail-survival CEM](/approaches/constructive-reservoir/tail-survival-cem),
+- [Tail-survival CEM](/approach/constructive-reservoir/tail-survival-cem),
   which retunes an existing policy for survival milestones.
-- [Evolved public policy](/approaches/heuristic-search/evolved-public-policy),
+- [Evolved public policy](/approach/heuristic-search/evolved-public-policy),
   a larger phase-aware evaluator optimised on complete games.
-- [Direct public policy](/approaches/value-policy-learning/direct-policy), 25
+- [Direct public policy](/approach/value-policy-learning/direct-policy), 25
   weighted features per column, tuned against whole games.
-- [Evolving the leaf weights at the depth they are used](/approaches/lifetime-objective/leaf-evolution),
+- [Evolving the leaf weights at the depth they are used](/approach/lifetime-objective/leaf-evolution),
   the reference leaf under CMA-ES.
-- [Klein-Friedmann linear Q-learning](/approaches/value-policy-learning/klein-friedmann-linear-q),
+- [Klein-Friedmann linear Q-learning](/approach/value-policy-learning/klein-friedmann-linear-q),
   where a cross-entropy search over six weights (population 64, 30
   generations) is compared with the weights that temporal-difference learning
   found.
@@ -116,20 +116,20 @@ held-out games, with a bootstrap 95% lower bound of +16,899. In the same
 screen it lost to the frozen hand-written leaf inside the same depth-3 search
 by 106,964 points per game (lower bound −146,580, 14 wins to 50), so the
 preregistered gate failed
-([An evolved NNUE leaf, distilled from a depth-5 teacher](/approaches/lifetime-objective/nnue-evolution),
+([An evolved NNUE leaf, distilled from a depth-5 teacher](/approach/lifetime-objective/nnue-evolution),
 [RS-20260903T025751Z-6577b33e](/experiments/EX-20260902-nnue-evolution-d3-v2-49c18bc2)).
 Sixty generations closed part of the distance to a leaf a person wrote by
 hand and stopped short of it.
 
 The older record is worse. Each evolved hand-written evaluator on the first
 evolution page "learned its training games and gave the gain back on fresh
-ones" ([Evolution](/approaches/heuristic-search/evolution)); a fitness
+ones" ([Evolution](/approach/heuristic-search/evolution)); a fitness
 measured on a fixed set of games is something an optimiser can learn to fit.
 And the first CMA-ES leaf evolution drew fresh seeds every generation and, in
 the NNUE page's post-mortem, "followed selection noise into a worse
 evaluator": with 32 games per candidate and a paired standard deviation near
 200,000 points, fresh seeds each generation left selection noise alone to
 steer
-([An evolved NNUE leaf, distilled from a depth-5 teacher](/approaches/lifetime-objective/nnue-evolution)).
+([An evolved NNUE leaf, distilled from a depth-5 teacher](/approach/lifetime-objective/nnue-evolution)).
 Common random numbers were the correction, and they are why the later run
 could measure its own progress at all.

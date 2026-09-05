@@ -79,7 +79,7 @@ the resulting weight vector into the native depth-3 evaluator and the gameplay
 results of the searches that used it; it keeps no result record for the tuning
 runs themselves, no cohort, no objective value, and no before-and-after
 comparison. How strong the weights are is answered by the reference search's
-numbers on the [reference page](/approaches/fair-expectimax/reference).
+numbers on the [reference page](/approach/fair-expectimax/reference).
 
 The one direct piece of evidence about the leaf's own behaviour is a two-game
 pilot on two already-used training seeds. The games ran 155 and 160 moves and
@@ -101,9 +101,9 @@ output of these runs, but the runs' own protocol and cohort never reached the
 ledger, so anyone re-deriving them faces a fresh fitting problem. They have
 also never been refitted under corrected scoring or at the depth they are
 used at, and every later attempt to adjust them
-([machine tuning](/approaches/fair-expectimax/cem),
-[transition rewards](/approaches/fair-expectimax/transition-rewards),
-[vertical-ladder energy](/approaches/fair-expectimax/vertical-ladder)) failed
+([machine tuning](/approach/fair-expectimax/cem),
+[transition rewards](/approach/fair-expectimax/transition-rewards),
+[vertical-ladder energy](/approach/fair-expectimax/vertical-ladder)) failed
 on fresh games. That says the vector is hard to improve by small adjustments.
 It says nothing about how far it sits from the best possible leaf.
 
@@ -120,7 +120,7 @@ fresh whole-origin data, would keep these coefficients or replace them.
   (`approaches/fair-expectimax/reference/fair-only-horizon.cpp`) recovers the
   fair-only leaf from `tune.ts` together with five frozen overrides exported
   as `FAIR_PHASE_BASELINE_WEIGHTS` from
-  [`phase-fair-combination/main.ts`](/approaches/fair-expectimax/phase-fair-combination):
+  [`phase-fair-combination/main.ts`](/approach/fair-expectimax/phase-fair-combination):
   direct potential 1,600, latent chain potential 700, height load −20,
   roughness 0, revealed-cover value 300. The 300-point revealed-cover term is
   a transition feature and is inert when the model is used only as a leaf.

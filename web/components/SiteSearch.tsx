@@ -45,7 +45,7 @@ const KIND_LABEL: Record<string, string> = {
   engine: "Engines",
   concept: "Concepts",
   guide: "Guides",
-  glossary: "Glossary",
+  glossary: "Vocabulary",
   doc: "Documents",
   theory: "Theories",
   experiment: "Experiments",
@@ -228,7 +228,7 @@ export function SiteSearch() {
               : loading && entries === null
                 ? "Loading the index."
                 : query.trim() === ""
-                  ? "Type to search every page, record and glossary term."
+                  ? "Type to search every page, record and vocabulary term."
                   : flat.length === 0
                     ? "Nothing matches that."
                     : `${flat.length} ${flat.length === 1 ? "match" : "matches"}`}

@@ -4,6 +4,7 @@
  * checkout still renders — the slug becomes the title.
  */
 import { cardAlt, renderPageCard, SOCIAL_CONTENT_TYPE, SOCIAL_SIZE } from "@/lib/social-card";
+import { TechniqueArt } from "@/components/technique-art/TechniqueArt";
 import { listApproaches } from "@/lib/repo";
 import { getTechnique } from "@/lib/techniques";
 
@@ -28,6 +29,13 @@ export default async function Image({ params }: Props) {
     title: entry?.title || approach,
     summary: entry?.summary || undefined,
     labels,
-    path: `/approaches/${family}/${approach}`,
+    path: `/approach/${family}/${approach}`,
+    art: (
+      <TechniqueArt
+        name={entry?.technique ?? "fallback"}
+        approach={{ family, slug: approach }}
+        mode="static"
+      />
+    ),
   });
 }

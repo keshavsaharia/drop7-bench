@@ -12,8 +12,8 @@ const REPO_URL = "https://github.com/keshavsaharia/drop7-bench";
 /** Primary navigation. `match` lists the route prefixes an item is current for. */
 const NAV = [
   { href: "/learn", label: "Learn", match: ["/learn"] },
-  { href: "/approaches", label: "Approaches", match: ["/approaches"] },
-  { href: "/engines", label: "Engines", match: ["/engines"] },
+  { href: "/approach", label: "Approaches", match: ["/approach"] },
+  { href: "/engine", label: "Engines", match: ["/engine"] },
   { href: "/research", label: "Research", match: ["/research", "/theories", "/experiments", "/results", "/log", "/docs", "/diagnostics"] },
   { href: "/leaderboard", label: "Leaderboard", match: ["/leaderboard", "/compete"] },
 ] as const;

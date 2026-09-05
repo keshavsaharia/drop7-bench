@@ -12,7 +12,7 @@ featured: true
 
 ## The problem
 
-A [one-move-ahead search](/approaches/fair-expectimax/reference) asks which
+A [one-move-ahead search](/approach/fair-expectimax/reference) asks which
 column scores most right now. But a chain that clears a dozen discs is assembled
 several moves before it fires: the high-numbered discs have to be stored in
 columns whose heights will still be right when the chain is triggered. A covered
@@ -34,7 +34,7 @@ discs whose trigger conditions coincide.
 A trigger key is the pair (which disc arrives, which column it goes in). Two
 stored discs that share a key are worth much more than two that do not, because
 the player only ever gets one disc at a time. The
-[family page](/approaches/constructive-reservoir) shows the underlying shape on a
+[family page](/approach/constructive-reservoir) shows the underlying shape on a
 real board: a stack that is inert until the rise makes its run the right length.
 
 The target is deliberately asymmetric. Carrying less load than the reference

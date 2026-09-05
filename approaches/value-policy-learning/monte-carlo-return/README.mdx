@@ -17,7 +17,7 @@ the column the network likes best.
 
 The badge above describes the *training* pipeline, which is allowed to collect
 demonstration games from the repository's
-[perfect-information oracle](/approaches/oracle-curriculum): a planner that
+[perfect-information oracle](/approach/oracle-curriculum): a planner that
 reads the future disc and reveal streams. The frozen artifact that actually
 plays reads only the board, the visible next disc and the rise clock, which is
 the rule this repository requires of any policy: a
@@ -111,7 +111,7 @@ The played-action design is the whole lesson. Realized returns are a valid,
 unbiased target, but they are only available for the move that was played, so
 the resulting values are strongest exactly where the policy already agreed with
 itself and weakest among the alternatives it must rank. That diagnosis is what
-the [afterstate-learning](/approaches/afterstate-learning) family was built to
+the [afterstate-learning](/approach/afterstate-learning) family was built to
 attack, by labelling every legal sibling instead of only the played one.
 
 What this run did *not* rule out: Monte Carlo returns as a *label family*. The

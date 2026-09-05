@@ -60,52 +60,52 @@ Grouped by what the model is asked to produce.
 
 **Learn how long the game will last, from a board.**
 
-- [Denoised public value](/approaches/value-policy-learning/denoised-value) —
+- [Denoised public value](/approach/value-policy-learning/denoised-value) —
   the one that worked best. Instead of labelling a board with the single
   future that happened to follow it, label it with the average of 32
   independently simulated futures. Includes two follow-ups that tried to put
   the model to work and did not succeed.
-- [Chance-state NNUE](/approaches/value-policy-learning/chance-state-nnue) —
+- [Chance-state NNUE](/approach/value-policy-learning/chance-state-nnue) —
   values the board *before* the next disc is dealt, so the value never has to
   be split seven ways by which disc arrives.
-- [Structured NNUE](/approaches/value-policy-learning/structured-nnue) —
+- [Structured NNUE](/approach/value-policy-learning/structured-nnue) —
   gives each of the 49 cells its own learned embedding, and a variant that
   labels every legal sibling rather than only the played one.
-- [Monte Carlo state value](/approaches/value-policy-learning/monte-carlo-value)
+- [Monte Carlo state value](/approach/value-policy-learning/monte-carlo-value)
   — label each board with the actual remaining lifetime of the game it came
   from, plus survival checks at 25 and 50 moves.
-- [Conservative fitted policy iteration](/approaches/value-policy-learning/conservative-fitted-policy-iteration)
+- [Conservative fitted policy iteration](/approach/value-policy-learning/conservative-fitted-policy-iteration)
   — learns a whole *distribution* over remaining lifetime and only departs
   from its safe fallback when the improvement is statistically supported.
 
 **Learn the value of a move, then take the best one.**
 
-- [Double-DQN](/approaches/value-policy-learning/dqn): the textbook
+- [Double-DQN](/approach/value-policy-learning/dqn): the textbook
   reinforcement-learning method, plus a follow-up with longer credit
   assignment and optional privileged demonstrations.
-- [Monte Carlo return](/approaches/value-policy-learning/monte-carlo-return) —
+- [Monte Carlo return](/approach/value-policy-learning/monte-carlo-return) —
   the same idea without any bootstrapping: score each move by the full
   realized score of the game that followed it.
-- [Sibling advantage](/approaches/value-policy-learning/sibling-advantage) —
+- [Sibling advantage](/approach/value-policy-learning/sibling-advantage) —
   drops the absolute value entirely and learns only how much better one column
   is than its siblings, with every sibling continued under the same random
   future.
 
 **Copy a stronger player.**
 
-- [D4 root-Q clone](/approaches/value-policy-learning/d4-q-clone) — compress
-  the expensive [fair depth-4 search](/approaches/fair-expectimax/reference)
+- [D4 root-Q clone](/approach/value-policy-learning/d4-q-clone) — compress
+  the expensive [fair depth-4 search](/approach/fair-expectimax/reference)
   into a small fast network that reproduces its ordering of columns.
-- [Phase distillation](/approaches/value-policy-learning/phase-distillation) —
+- [Phase distillation](/approach/value-policy-learning/phase-distillation) —
   the same idea against the exact depth-3 phase policy, once as a direct
   action copy and once as a numeric-score copy.
 
 **Skip the value function.**
 
-- [Direct public policy](/approaches/value-policy-learning/direct-policy) —
+- [Direct public policy](/approach/value-policy-learning/direct-policy) —
   evolve the policy's own parameters against complete games; nothing is ever
   regressed on a label.
-- [General value model](/approaches/value-policy-learning/value-model) — a
+- [General value model](/approach/value-policy-learning/value-model) — a
   TypeScript workbench for fitting board and policy models from several kinds
   of teacher on separate seed lanes.
 
@@ -154,7 +154,7 @@ line. If the problem is that training data only ever measures the move that
 was played, the fix is to measure *every* legal move at each position, under
 the same random futures, so the comparison is fair — **successor-closed** data.
 That is exactly what the
-[afterstate-learning](/approaches/afterstate-learning) family builds, and its
+[afterstate-learning](/approach/afterstate-learning) family builds, and its
 records show the difference: with a stable enough ranking target, a learned
 model finally beat its own teacher, while still trailing fair depth-4 search.
 

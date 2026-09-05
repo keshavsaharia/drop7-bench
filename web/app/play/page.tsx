@@ -1,15 +1,16 @@
 import "../app.css";
-import type { Metadata } from "next";
 import Link from "next/link";
 import { Card } from "@/components/Card";
 import { Drop7Game } from "@/components/Drop7Game";
 import { PageHeader } from "@/components/PageHeader";
+import { pageMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Play Drop7",
   description:
     "Play five-move Hardcore Drop7 in the browser with the repository's rules engine, or watch the depth-4 expectimax play it.",
-};
+  path: "/play",
+});
 
 /** `?seed=0x1234abcd` or `?seed=305419896` replays a specific game. */
 function parseSeed(raw: string | undefined): number | undefined {
@@ -82,7 +83,7 @@ export default async function PlayPage({
             <>
               The research target is a policy whose <strong className="text-ink">mean</strong> score
               exceeds one million. The strongest dependable reference, the C++{" "}
-              <Link href="/approaches/fair-expectimax/reference" className="text-accent hover:underline">
+              <Link href="/approach/fair-expectimax/reference" className="text-accent hover:underline">
                 fair depth-4 expectimax
               </Link>
               , averaged 308,296 points over a 64-game cohort and 400,675 over its eight-game

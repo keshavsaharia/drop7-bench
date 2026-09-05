@@ -136,7 +136,9 @@ export function sourceLanguageLabel(language: string): string {
 }
 
 function sourceHref(path: string): string {
-  return `/${path.split("/").map(encodeURIComponent).join("/")}`;
+  const parts = path.split("/");
+  const routeParts = parts[0] === "approaches" ? ["approach", ...parts.slice(1)] : parts;
+  return `/${routeParts.map(encodeURIComponent).join("/")}`;
 }
 
 function sourceAbsolutePath(repoPath: string): string | null {

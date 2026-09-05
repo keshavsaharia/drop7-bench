@@ -1,6 +1,6 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { SourceBrowser } from "@/components/SourceBrowser";
+import { pageMetadata } from "@/lib/metadata";
 import { getRepoSource } from "@/lib/repo";
 
 export const dynamic = "force-dynamic";
@@ -16,12 +16,16 @@ function paths({ family, approach, path }: Awaited<Props["params"]>) {
   };
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: Props) {
   const resolved = paths(await params);
   const entry = getRepoSource(resolved.repoPath);
-  return {
-    title: entry ? `${entry.name} · Source · Drop7 Research` : "Source · Drop7 Research",
-  };
+  return pageMetadata({
+    title: entry ? `${entry.name} · Source` : "Source",
+    description: entry?.path,
+    path: entry?.href ?? `/approach/${resolved.repoPath.slice("approaches/".length)}`,
+    image: `/share/source/${resolved.repoPath}`,
+    imageAlt: entry ? `${entry.name}, source on Drop7 Research` : "Source on Drop7 Research",
+  });
 }
 
 export default async function ApproachSourcePage({ params }: Props) {

@@ -20,7 +20,7 @@ Learning a Drop7 policy from scratch by trial and error is very slow: a random
 player dies in about 27 moves, so almost every game ends before anything
 interesting happens. The standard remedy is a **warm start**. First train the
 network to copy a policy that already works — here, an exact one-move
-[fair search](/approaches/fair-expectimax/reference), and only then let
+[fair search](/approach/fair-expectimax/reference), and only then let
 reinforcement learning improve on it.
 
 That ordering also protects the experiment from a measurement trap. If you let
@@ -134,5 +134,5 @@ reason.
 
 **Still open.** Nothing here tests whether policy-gradient learning *would* help
 from a good clone, because a good clone was never produced. The
-[PyTorch line](/approaches/ntuple-rl/torch-ppo) took that question further with
+[PyTorch line](/approach/ntuple-rl/torch-ppo) took that question further with
 a larger network and a stronger teacher.

@@ -16,8 +16,8 @@ const FOOTER_GROUPS = [
     title: "Research",
     links: [
       { href: "/research", label: "Research overview" },
-      { href: "/approaches", label: "Approaches" },
-      { href: "/engines", label: "Engines" },
+      { href: "/approach", label: "Approaches" },
+      { href: "/engine", label: "Engines" },
       { href: "/learn/techniques", label: "Techniques" },
       { href: "/theories", label: "Theories" },
       { href: "/experiments", label: "Experiments" },
@@ -30,6 +30,7 @@ const FOOTER_GROUPS = [
   {
     title: "Project",
     links: [
+      { href: "/support", label: "App support" },
       { href: "/src", label: "Browse the source" },
       { href: "/docs", label: "Documentation" },
       {

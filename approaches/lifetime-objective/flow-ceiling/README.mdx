@@ -25,7 +25,7 @@ same design and the cheating removed; every number below says which one it is.
 
 ## Why the question is worth asking
 
-The [family page](/approaches/lifetime-objective) has the arithmetic: twelve
+The [family page](/approach/lifetime-objective) has the arithmetic: twelve
 discs enter a 49-cell board every five moves, so surviving forever needs
 **2.400 numbered clears and 1.400 gray-disc reveals per move**. The reference
 policy manages 1.973 and 1.090. Two completely different research programmes
@@ -69,7 +69,7 @@ board and whether anything can sit on it.
    will ever rise. Every policy in a comparison plays the same tapes, so nothing
    is redrawn when one of them deviates. This needs a simulator with a
    persistent hidden board, which is why the work runs inside the
-   [scenario engine](/approaches/lifetime-objective/scenario) rather than the
+   [scenario engine](/approach/lifetime-objective/scenario) rather than the
    base one.
 2. **Plan exactly over a short window.** At every move, cut a window of `H`
    moves out of that fixed future, solve it exactly: every legal move, every
@@ -249,7 +249,7 @@ the machine carried load averages of 36–60 throughout.
   planner measured here is not the best possible legal planner; and what the
   nine-move legal planner would do, which was never affordable.
 
-Related: the [distillation attempt](/approaches/lifetime-objective/planner-distill)
+Related: the [distillation attempt](/approach/lifetime-objective/planner-distill)
 that tried to compress this page's legal planner into a network, and the
-[benchmark validation](/approaches/lifetime-objective/suite-validation) that used
+[benchmark validation](/approach/lifetime-objective/suite-validation) that used
 the same exact-window machinery to grade positions.

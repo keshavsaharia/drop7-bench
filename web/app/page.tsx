@@ -137,7 +137,7 @@ export default async function HomePage() {
             This site is a research program looking for a playing policy that reads only what
             a player can see and averages more than one million points a game in five-move
             Hardcore mode. The strongest reference so far,{" "}
-            <Link href="/approaches/fair-expectimax/reference">fair depth-4 expectimax</Link>,
+            <Link href="/approach/fair-expectimax/reference">fair depth-4 expectimax</Link>,
             averages about 309k points on its 64-game development cohort, so most of the
             distance is still to cover.
           </p>
@@ -150,7 +150,7 @@ export default async function HomePage() {
           <p className="home-hero-steps">
             New here? <Link href="/learn/rules">Learn the game</Link>, then{" "}
             <Link href="/learn/concepts">the ideas behind the strategies</Link>, then see{" "}
-            <Link href="/approaches">what has been tried</Link> and{" "}
+            <Link href="/approach">what has been tried</Link> and{" "}
             <Link href="/theories">what is still open</Link>.
           </p>
         </div>
@@ -178,7 +178,7 @@ export default async function HomePage() {
               each links to the strategies that tried it.
             </p>
           </div>
-          <Link href="/approaches" className="home-more">
+          <Link href="/approach" className="home-more">
             all approaches →
           </Link>
         </div>
@@ -188,7 +188,7 @@ export default async function HomePage() {
             return (
               <li key={technique.slug}>
                 <Card
-                  href={`/approaches/technique/${technique.slug}`}
+                  href={`/approach/technique/${technique.slug}`}
                   art={<TechniqueArt name={technique.slug} title={technique.title} />}
                   title={technique.title}
                   summary={technique.oneLine}

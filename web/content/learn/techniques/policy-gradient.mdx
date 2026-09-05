@@ -93,18 +93,18 @@ these runs beside the value-learning families.
 
 Pages that trained a policy directly:
 
-- [A PyTorch policy network, cloned then trained by playing](/approaches/ntuple-rl/torch-ppo),
+- [A PyTorch policy network, cloned then trained by playing](/approach/ntuple-rl/torch-ppo),
   which copies a two-move search and then runs 32 rounds of 512 complete
   games.
-- [Copying the one-move search, in C++](/approaches/ntuple-rl/native-ppo),
+- [Copying the one-move search, in C++](/approach/ntuple-rl/native-ppo),
   which never imitated well enough for its self-play stage to start.
-- [Learning a policy with explicit safety constraints](/approaches/ntuple-rl/primal-dual-actor-critic),
+- [Learning a policy with explicit safety constraints](/approach/ntuple-rl/primal-dual-actor-critic),
   an actor-critic that learns a correction to a simple search under a hard
   limit on the risk of ending the game.
-- [Nudging a one-move search, from easy and hard starting boards](/approaches/ntuple-rl/curriculum-option-ppo),
+- [Nudging a one-move search, from easy and hard starting boards](/approach/ntuple-rl/curriculum-option-ppo),
   a learned correction trained on fresh games and on difficult mid-game
   positions.
-- [Learning what a long-lived board looks like](/approaches/ntuple-rl/manifold-ppo),
+- [Learning what a long-lived board looks like](/approach/ntuple-rl/manifold-ppo),
   which trains a classifier to recognise boards from very long games and uses
   it to guide play.
 
@@ -113,7 +113,7 @@ Pages that trained a policy directly:
 The imitation shortcut failed at its gate. The PyTorch clone matched its
 two-move teacher on 47.2% of held-out decisions against a 55% requirement, and
 a single permitted correction left agreement very slightly worse
-([A PyTorch policy network, cloned then trained by playing](/approaches/ntuple-rl/torch-ppo)).
+([A PyTorch policy network, cloned then trained by playing](/approach/ntuple-rl/torch-ppo)).
 
 The completed policy-gradient run then showed what the method's volume buys.
 Over 32 rounds and 16,384 games it improved its own clone by about 9%:
@@ -128,7 +128,7 @@ The constrained actor-critic never reached a screen. On its mandatory 512-game
 calibration its terminal-risk upper bound was 0.10496 against a fixed 0.02
 limit, so the checkpoint was sealed untrusted and no gameplay screen was
 opened
-([Learning a policy with explicit safety constraints](/approaches/ntuple-rl/primal-dual-actor-critic)).
+([Learning a policy with explicit safety constraints](/approach/ntuple-rl/primal-dual-actor-critic)).
 One score per game is a thin signal. In the recorded runs it was enough to
 move a policy a little and never enough to close the gap to the teacher, let
 alone to the reference.

@@ -23,7 +23,7 @@ export interface ApproachCardProps {
 }
 
 export function approachHref(entry: Pick<ApproachEntry, "family" | "slug">): string {
-  return `/approaches/${entry.family}/${entry.slug}`;
+  return `/approach/${entry.family}/${entry.slug}`;
 }
 
 /** Featured pages first, then alphabetical by title. */

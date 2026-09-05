@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props) {
   return pageMetadata({
     title: technique ? technique.title : "Technique",
     description: technique?.oneLine,
-    path: `/approaches/technique/${slug}`,
+    path: `/approach/technique/${slug}`,
   });
 }
 
@@ -50,7 +50,7 @@ export default async function TechniquePage({ params }: Props) {
   return (
     <div>
       <PageHeader
-        crumbs={[{ href: "/approaches", label: "approaches" }]}
+        crumbs={[{ href: "/approach", label: "approaches" }]}
         title={technique.title}
         lead={technique.oneLine}
       />
@@ -103,7 +103,7 @@ export default async function TechniquePage({ params }: Props) {
                 <ul className="aside-list">
                   {entries.map((entry) => (
                     <li key={entry.slug}>
-                      <Link href={`/approaches/${entry.family}/${entry.slug}`}>
+                      <Link href={`/approach/${entry.family}/${entry.slug}`}>
                         approaches/{entry.family}/{entry.slug}
                       </Link>
                     </li>

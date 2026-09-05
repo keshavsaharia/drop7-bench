@@ -90,18 +90,18 @@ move with a plan that could only have been made by someone who already knew
 the hidden number. The ledger calls that failure
 [strategy fusion](/learn/glossary). The main implementation here samples each
 chance event only when the walk crosses it and keys every node by the visible
-position alone ([the tree-search family page](/approaches/tree-search)). The
+position alone ([the tree-search family page](/approach/tree-search)). The
 playout is usually a one-move fair search out to a fixed horizon.
 
 Pages that build the tree by walks:
 
-- [Observable-state MCTS](/approaches/tree-search/observable-mcts), the main
+- [Observable-state MCTS](/approach/tree-search/observable-mcts), the main
   implementation, which lets the search know only what a player could see.
-- [TypeScript MCTS lab](/approaches/tree-search/mcts), a small search you can
+- [TypeScript MCTS lab](/approach/tree-search/mcts), a small search you can
   run in a terminal and watch one decision at a time.
-- [PUCT](/approaches/tree-search/puct), a complete search that starts from a
+- [PUCT](/approach/tree-search/puct), a complete search that starts from a
   prior over columns; it carries frozen gates and has never been run.
-- [Learned-guidance search](/approaches/tree-search/nnue-guided), which lets a
+- [Learned-guidance search](/approach/tree-search/nnue-guided), which lets a
   small learned evaluator decide where a deeper search spends its time, with
   the exact search kept as a safety net.
 
@@ -111,7 +111,7 @@ The observable-state search missed its frozen gate by one root. Frozen at
 16,384 simulations and horizon 32, its top choice matched the held-out label
 on 11 of 32 roots, 0.34375 against a 0.35 gate, while it beat exact depth-3
 on pairwise accuracy (0.6498 against 0.6418) and on mean regret over the same
-panel ([Observable-state MCTS](/approaches/tree-search/observable-mcts)).
+panel ([Observable-state MCTS](/approach/tree-search/observable-mcts)).
 
 Then the budget went up and the result went the wrong way. A scaled version
 at 65,536 simulations and horizon 64, audited on 12 disjoint held-out roots,
@@ -123,7 +123,7 @@ the page says. The family page draws the lesson that budget was not the
 bottleneck: every playout finished with a one-move-ahead policy, and a search
 cannot rank futures better than the player it imagines playing them. The open
 direction it names is the continuation policy
-([the tree-search family page](/approaches/tree-search)).
+([the tree-search family page](/approach/tree-search)).
 
 PUCT has no result at all. The lab is complete and carries its own frozen
 gates, and until it runs, whether a prior helps here is something this site

@@ -24,15 +24,17 @@ import {
   shortSource,
   type ComparisonCell,
 } from "@/lib/engines";
+import { pageMetadata } from "@/lib/metadata";
 import { listApproachesByKind } from "@/lib/repo";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = {
+export const metadata = pageMetadata({
   title: "Engines",
   description:
     "Several implementations of the Drop7 rules, each proven to play the same game as the C++ reference, with every recorded number and its source.",
-};
+  path: "/engine",
+});
 
 function CompareCell({ cell, multi }: { cell: ComparisonCell; multi: boolean }) {
   if (cell.value === null) return <span className="muted">not recorded</span>;
@@ -205,7 +207,7 @@ export default function EnginesPage() {
             {efficiency.map((entry) => (
               <li key={`${entry.family}/${entry.slug}`}>
                 <Card
-                  href={`/approaches/${entry.family}/${entry.slug}`}
+                  href={`/approach/${entry.family}/${entry.slug}`}
                   eyebrow={entry.family}
                   title={entry.title}
                   summary={entry.summary || undefined}
@@ -228,7 +230,7 @@ export default function EnginesPage() {
         <ul>
           {ENGINES.map((entry) => (
             <li key={entry.slug}>
-              <Link href={`/engines/${entry.slug}`}>{entry.title}</Link>: <SourceRef source={entry.path} />
+              <Link href={`/engine/${entry.slug}`}>{entry.title}</Link>: <SourceRef source={entry.path} />
               {entry.readme && (
                 <>
                   {" "}

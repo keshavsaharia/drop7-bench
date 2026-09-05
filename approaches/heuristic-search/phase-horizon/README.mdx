@@ -47,7 +47,7 @@ close.
    the largest are −900 for peak height risk and +600 for the best quiet
    building move available.
 4. **Use the result as the leaf** of a bounded
-   [sparse expectimax](/approaches/heuristic-search/sparse-expectimax) search.
+   [sparse expectimax](/approach/heuristic-search/sparse-expectimax) search.
 5. **Play the winning column.**
 
 ## What happened
@@ -81,7 +81,7 @@ Repository-verified from the source. `src/core/typescript/phase-horizon-evaluato
 defines `REQUIRED_CLEAR_RATE = 1 + BOARD_SIZE / MOVES_PER_LEVEL` and
 `REQUIRED_REVEAL_RATE = BOARD_SIZE / MOVES_PER_LEVEL`: the same 2.4 and 1.4
 conservation arithmetic used by
-[gray throughput](/approaches/heuristic-search/gray-throughput): an operating
+[gray throughput](/approach/heuristic-search/gray-throughput): an operating
 band of two discs per column and three rows of height, and twelve weighted
 features from −900 (peak height risk) to +600 (quiet direct gain). The lab
 sweeps them on the `0x1d70…` training range with 2 pilot and 16 confirmation
@@ -91,7 +91,7 @@ frozen, and the `0x7d70…` validation and `0xd700…` final ranges are hard
 rejected by the program.
 
 The evaluator is also the baseline comparator inside the
-[risk-sensitive lab](/approaches/heuristic-search/risk-sensitive), and the
+[risk-sensitive lab](/approach/heuristic-search/risk-sensitive), and the
 ledger's "hand-crafted blend" experiment calibrated a learned value function's
 scale against it
 ([experiment history](/docs/research/history)).

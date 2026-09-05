@@ -1,7 +1,7 @@
 /**
- * Diagrams for the Engines section (web/app/engines). Server components:
+ * Diagrams for the Engines section (web/app/engine). Server components:
  * plain SVG drawn from tokens, with CSS motion declared in
- * web/app/engines/engines.css. Every animated element carries `data-anim`,
+ * web/app/engine/engines.css. Every animated element carries `data-anim`,
  * and the SVG attributes describe the resting frame, so the picture is
  * complete when motion is off (prefers-reduced-motion).
  *
@@ -278,7 +278,7 @@ export function GravityWave({ caption }: { caption?: ReactNode }) {
         caption ?? (
           <>
             Frames 3 and 4 of the recorded cascade on the{" "}
-            <Link href="/engines/fast">fast-engine page</Link>. After wave 1 cleared the three 3s, only columns 3
+            <Link href="/engine/fast">fast-engine page</Link>. After wave 1 cleared the three 3s, only columns 3
             and 4 lost a disc, so the fast engine compacts those two columns in place and in one step; the other five
             are provably unchanged and are never read (fast-engine.hpp, gravity on popped columns only). The
             reference engine rebuilds all seven columns into a new array every time.
@@ -574,6 +574,7 @@ export function sourceHref(source: string): string | null {
   }
   if (/^docs\/.+\.md$/.test(source)) return `/${source.replace(/\.md$/, "")}`;
   if (/^src\/[^\s]+$/.test(source)) return `/${source}`;
+  if (/^approaches\/[a-z0-9-]+\/[a-z0-9-]+\/[^\s]+$/.test(source)) return `/${source}`;
   return null;
 }
 

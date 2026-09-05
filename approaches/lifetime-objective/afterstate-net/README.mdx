@@ -29,7 +29,7 @@ the code does, from the code.
 
 ## The intuition
 
-The [score decomposition](/approaches/lifetime-objective/score-decomposition)
+The [score decomposition](/approach/lifetime-objective/score-decomposition)
 measured that 94% of a Hardcore score is the flat bonus for surviving a row
 rise, and that a game's score tracks its length with a correlation of 0.9995.
 Predicting score is therefore predicting survival, but through a bad lens: score
@@ -73,7 +73,7 @@ The model is also normalised per group rather than per batch, so that it behaves
 identically when it is later called on the seven legal successors of a single
 position instead of on a large training batch — and, separately, because the GPU
 software stack on this machine cannot compile the batch-normalisation training
-kernel at all (see the [GPU package](/approaches/lifetime-objective/gpu)).
+kernel at all (see the [GPU package](/approach/lifetime-objective/gpu)).
 
 ## The gap that has to be closed before this is worth running
 

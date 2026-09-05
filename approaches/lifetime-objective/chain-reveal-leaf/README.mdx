@@ -52,7 +52,7 @@ what keeps the rule mirror-invariant.
 `corpus-dump.cpp` and `corpus-gate.py` compute the 18 frozen features and the
 seven terms for every position of the already-opened training corpus and,
 on the depth-4 subset with the whole-origin split of
-[entombed discs](/approaches/lifetime-objective/entombed-discs), report each
+[entombed discs](/approach/lifetime-objective/entombed-discs), report each
 term's held-out partial correlation with remaining lifetime beyond the frozen
 features, its incremental held-out R², its prevalence, and — for the
 double-hit terms — the uncollected-setup rate: how often a live setup (joint
@@ -71,7 +71,7 @@ gates the screen.
    so a read of score, level, move counter or next disc is unrepresentable,
    not merely forbidden by comment. Terms must be mirror-invariant.
 2. **Augmented leaf** (`augmented-leaf.hpp`): the one-entry board memo of
-   [Remembering the last board](/approaches/lifetime-objective/fast-engine-memo),
+   [Remembering the last board](/approach/lifetime-objective/fast-engine-memo),
    keyed on (board, moves until rise), now also holding the extra features.
    `augmentedFairLeaf` reproduces the memo leaf's frozen dot product in the
    frozen order, then adds `w[i] * v[i]` for each term whose weight is not

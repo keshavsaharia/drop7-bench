@@ -3,7 +3,7 @@
  * title, and a label/value list (role, board, latent mode, parity) in place
  * of a summary. `compact` drops the art and keeps a shorter list, for the
  * entries that are not engines in their own right. Styled by `.card*` in
- * globals.css and `.engine-card dl` in web/app/engines/engines.css.
+ * globals.css and `.engine-card dl` in web/app/engine/engines.css.
  */
 import { Card } from "@/components/Card";
 import { TechniqueArt } from "@/components/technique-art/TechniqueArt";
@@ -17,7 +17,7 @@ export function latentModeText(mode: EngineEntry["latentMode"]): string {
 export function EngineCard({ entry, compact = false }: { entry: EngineEntry; compact?: boolean }) {
   return (
     <Card
-      href={`/engines/${entry.slug}`}
+      href={`/engine/${entry.slug}`}
       art={compact ? undefined : <TechniqueArt name={entry.art} title={entry.title} />}
       eyebrow={entry.language}
       title={entry.title}

@@ -2,7 +2,7 @@
  * One technique as a card, for the home page and the technique index: the
  * technique's art, its title, its one-line description, and how many approach
  * pages carry it. The count is a count of pages, never a research number.
- * The card links to the technique group under /approaches/technique/<slug>.
+ * The card links to the technique group under /approach/technique/<slug>.
  */
 import { Card } from "./Card";
 import { TechniqueArt } from "./technique-art/TechniqueArt";
@@ -19,7 +19,7 @@ export interface TechniqueCardProps {
 }
 
 export function techniqueHref(slug: string): string {
-  return `/approaches/technique/${slug}`;
+  return `/approach/technique/${slug}`;
 }
 
 export function approachCountLabel(count: number): string {

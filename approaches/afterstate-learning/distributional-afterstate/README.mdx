@@ -101,7 +101,7 @@ construction.
    with a 16-quantile loss and a within-position ranking loss; mixed precision
    was rejected in the source because it could flip near-tied orderings.
 5. Grade. `label-d4.cpp` computes the exact
-   [fair depth-4](/approaches/fair-expectimax/reference) ordering of the same
+   [fair depth-4](/approach/fair-expectimax/reference) ordering of the same
    held-out positions, and model and search are scored against one target, the
    ordering implied by the averaged 40-move outcomes: how often the first choice
    is right, how often a pair is ordered correctly, and normalized regret, the

@@ -20,7 +20,7 @@ type Props = { params: Promise<{ family: string }> };
 
 export async function generateMetadata({ params }: Props) {
   const { family } = await params;
-  const path = `/approaches/${family}`;
+  const path = `/approach/${family}`;
   if (!listFamilies().includes(family)) return pageMetadata({ title: "Approaches", path });
   const meta = familyMeta(family);
   return pageMetadata({ title: meta.title, description: meta.summary || undefined, path });
@@ -49,7 +49,7 @@ export default async function FamilyPage({ params }: Props) {
   return (
     <div>
       <PageHeader
-        crumbs={[{ href: "/approaches", label: "approaches" }]}
+        crumbs={[{ href: "/approach", label: "approaches" }]}
         title={meta.title}
         lead={meta.summary || undefined}
       />
@@ -60,7 +60,7 @@ export default async function FamilyPage({ params }: Props) {
           <p>
             {approachCountLabel(strategies.length)}, featured pages first. The label above each title is the
             technique the approach uses; the same pages appear under that technique on the{" "}
-            <Link href="/approaches">approaches index</Link>.
+            <Link href="/approach">approaches index</Link>.
           </p>
         </div>
         {strategies.length === 0 ? (
@@ -81,13 +81,13 @@ export default async function FamilyPage({ params }: Props) {
             <p>
               These play no game of their own: engines run the games and diagnostics measure them. They are
               listed here because they live alongside the approaches above; the full sets are under{" "}
-              <Link href="/engines">Engines</Link> and <Link href="/diagnostics">Diagnostics</Link>.
+              <Link href="/engine">Engines</Link> and <Link href="/diagnostics">Diagnostics</Link>.
             </p>
           </div>
           <ul className="instruments-list">
             {instruments.map((entry) => (
               <li key={entry.slug}>
-                <Link href={`/approaches/${family}/${entry.slug}`}>{entry.title}</Link>
+                <Link href={`/approach/${family}/${entry.slug}`}>{entry.title}</Link>
                 <Badge label={entry.kind} />
                 {entry.summary && <p className="instruments-summary">{entry.summary}</p>}
               </li>
@@ -105,7 +105,7 @@ export default async function FamilyPage({ params }: Props) {
           <ul className="instruments-list">
             {others.map((entry) => (
               <li key={entry.slug}>
-                <Link href={`/approaches/${family}/${entry.slug}`}>{entry.title}</Link>
+                <Link href={`/approach/${family}/${entry.slug}`}>{entry.title}</Link>
                 <Badge label="no page yet" />
               </li>
             ))}

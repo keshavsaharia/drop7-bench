@@ -130,14 +130,14 @@ value for an unplayed move. It only ever measures whole games. What it buys
 with that immunity is a brutally weak learning signal: one number per complete
 game, for a policy with 25 knobs, on 64 games per generation. The related
 evolutionary work elsewhere in the repository (see the
-[heuristic-search](/approaches/heuristic-search) family and the constructive
+[heuristic-search](/approach/heuristic-search) family and the constructive
 policies) repeatedly reached the same ceiling, well below fair depth-4 search.
 
 The open question this leaves is not "would more generations help" but whether
 a whole-game objective belongs at the top of a stack rather than at the bottom:
 tuning a handful of coefficients *inside* a strong search, rather than tuning a
 standalone policy that has to do everything by itself. The
-[leaf-reweighting work](/approaches/lifetime-objective/leaf-reweight) is the
+[leaf-reweighting work](/approach/lifetime-objective/leaf-reweight) is the
 current expression of that idea.
 
 ## Sources

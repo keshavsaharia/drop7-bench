@@ -89,7 +89,7 @@ board, next disc, rise clock, so it reads no hidden value and no real future
 disc, but it does plan inside a future it has fixed in advance.
 
 **The properly recorded version of this idea, in the
-[D4 long-outcome](/approaches/d4-long-outcome) family.** A 25-move,
+[D4 long-outcome](/approach/d4-long-outcome) family.** A 25-move,
 seven-scenario continuation driven by a completed depth-2 search, used to veto
 the reference search's move, produced a single pilot game of **404,047 points
 in 250 moves against 159,616 in 105** for the reference. That is
@@ -119,7 +119,7 @@ powered retest that went the other way.
 ## What this taught us, and what is still open
 
 - **A rollout is only as good as the player inside it.** This is the same
-  diagnosis the [MCTS work](/approaches/tree-search/observable-mcts) reached
+  diagnosis the [MCTS work](/approach/tree-search/observable-mcts) reached
   independently: the bottleneck was the weak continuation policy and the
   reused chance samples, not the number of simulations. Increasing the budget
   buys more of the wrong future.

@@ -73,13 +73,13 @@ risk-neutral continuation and three chance samples per continuation node, over
 for the risk planner against 1,000,000 for the baseline and a `REQUIRED_MEAN`
 constant of 300,000. Pilot games come from `0x3d70…` and the probe range is
 `0x4d70…`; `0x5d70…` is explicitly forbidden. The comparator is the
-[phase-horizon](/approaches/heuristic-search/phase-horizon) evaluator inside a
+[phase-horizon](/approach/heuristic-search/phase-horizon) evaluator inside a
 sparse search. `src/core/typescript/risk-sensitive-planner.ts` documents the
 boundary directly: *"Solver-local seed; no game seed or future chance tape is
 accepted."*
 
 **The properly recorded sibling experiment.** `fair-root-risk.cpp` in the
-[fair expectimax](/approaches/fair-expectimax) family applied the same
+[fair expectimax](/approach/fair-expectimax) family applied the same
 mechanism to the reference search with a preregistered root utility of
 `0.75 × mean + 0.25 × CVaR25` over seven scenarios per action. It is
 **rejected, ledger-recorded**. On its eight-game screen the unchanged

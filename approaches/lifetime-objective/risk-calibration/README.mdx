@@ -34,7 +34,7 @@ So the death penalty is about a hundred times larger than the entire spread of
 everything else. The decision rule is effectively: **first avoid dying within
 four moves; only then prefer the nicer-looking board**. Given that surviving is
 where 94% of the points come from
-([score decomposition](/approaches/lifetime-objective/score-decomposition)),
+([score decomposition](/approach/lifetime-objective/score-decomposition)),
 that constant is the single number pointed most directly at the objective — and
 it had never been swept. Perhaps the search was too timid, or not timid enough.
 
@@ -62,7 +62,7 @@ search makes.
    the reference, so scores can be compared game by game rather than as two
    separate averages.
 5. **Output.** A column, and per-game records through the family's
-   [shared harness](/approaches/lifetime-objective/common), including the
+   [shared harness](/approach/lifetime-objective/common), including the
    survival-flow rates that the whole family watches.
 
 ## What happened: the death penalty
@@ -100,7 +100,7 @@ The identical-game result at magnitudes at or beyond 1,000,000 is exact and
 needs no statistics. The −300,000 and −100,000 deltas are single-cohort
 estimates. Only the terminal utility was varied; the leaf weights are frozen, and
 a jointly re-tuned leaf could in principle move the saturation point, which is
-what the [leaf reweight](/approaches/lifetime-objective/leaf-reweight) work went
+what the [leaf reweight](/approach/lifetime-objective/leaf-reweight) work went
 on to test, using this same parameterised search as its base.
 
 </TechnicalDetails>
@@ -171,7 +171,7 @@ replicated, and every other row of the interaction table rests on a single
 cohort. Seven samples makes the *next-disc* expectation exact, but gray-disc
 reveals are still sampled, so the reveal expectation is not exact — whether
 reveal sampling is now the binding bias was tested separately in the
-[reveal sampling](/approaches/lifetime-objective/reveal-sampling) work. No
+[reveal sampling](/approach/lifetime-objective/reveal-sampling) work. No
 fixed-time comparison is reported. And the headline mean of 398,498 is far below
 the 1,050,000 the frozen protocol requires before a candidate may even be
 frozen: **no protected or final seed was opened or is justified by this
@@ -196,6 +196,6 @@ for risk.
 
 Still open, and cautionary: whether the depth gradient keeps climbing once the
 estimator is exact. A later, still in-progress test in the
-[fast engine](/approaches/lifetime-objective/fast-engine) approach reports the
+[fast engine](/approach/lifetime-objective/fast-engine) approach reports the
 fifth move of look-ahead *reversing* rather than continuing the gain, on interim
 partial cohorts. Read that record's own caveats before quoting it.
