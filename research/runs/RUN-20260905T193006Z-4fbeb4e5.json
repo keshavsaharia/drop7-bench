@@ -1,0 +1,50 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260905T193006Z-4fbeb4e5",
+  "experimentId": "EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620",
+  "lifecycle": "running",
+  "runValidity": "pending",
+  "startedAt": "2026-09-05T19:30:06Z",
+  "endedAt": null,
+  "protocolSha256": "ee8eabb0512f459bb0acbb717e335d5e6953d2ac7ec57400f2a35b9f1c76b65d",
+  "machineProfileRef": "research/system-profiles/MACH-20260905T192901Z-83559f62.json",
+  "sourceState": {
+    "gitCommit": "146abdb12170e85228189f3c2f7ebf71a072d291",
+    "dirty": false,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "approaches/ntuple-rl/ntuple-scale/build.sh (branch claude/n-tuple-scale-experiment, commit 146abdb)",
+    "cargo test --release (10 unit tests)",
+    "RUN_ID=RUN-20260905T193006Z-4fbeb4e5 THREADS=32 approaches/ntuple-rl/ntuple-scale/scripts/pipeline.sh chain (gates -> pilot A..F -> select-arm -> main -> freeze -> screen -> compare -> analyze), launched with nohup; stdout/stderr in runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/chain.nohup"
+  ],
+  "seedLeaseRefs": [
+    "SL-20260905T191317Z-09895ea2",
+    "SL-20260905T191317Z-549265de",
+    "SL-20260905T191317Z-c25f58cd"
+  ],
+  "resourceLimits": {
+    "wallSeconds": 43200,
+    "cpuThreads": 32,
+    "maxHostBytes": 34359738368,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": null,
+    "cpuSeconds": null,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "Launched 2026-09-05T19:30:06Z from commit 146abdb12170e85228189f3c2f7ebf71a072d291 (clean tree) with scripts/pipeline.sh chain. Planned. Per-stage kernel rusage is appended to rusage.jsonl by scripts/with-rusage.py. The smoke run measured 1.4e6 training moves/s on 32 threads (arm-A layout), so the pilot (6 x 2e8 moves plus validation) should take about 20 minutes and the main run (4e9 moves plus 20 validation points and checkpoints) about an hour; the 256-game screen with the fair-d4s7 arm about 20 minutes."
+  },
+  "exitCode": null,
+  "stopReason": null,
+  "artifactRefs": [
+    "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pipeline.log",
+    "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/rusage.jsonl"
+  ],
+  "contributionIds": [
+    "CT-20260905T192505Z-c487efca"
+  ]
+}
