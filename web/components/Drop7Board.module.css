@@ -1,3 +1,85 @@
+.root {
+  --d7-grid-gap: 1px;
+  --d7-frame-padding: 6px;
+  --d7-frame-border: 1px;
+  --d7-incoming-gap: 4px;
+  /* The incoming row also crosses the frame's chrome before entering row 1. */
+  --d7-entry-offset: calc(var(--d7-incoming-gap) + var(--d7-frame-padding) + var(--d7-frame-border) - var(--d7-grid-gap));
+}
+
+.geometry {
+  display: flex;
+  flex-direction: column;
+  gap: var(--d7-incoming-gap);
+  width: 100%;
+  min-width: 0;
+}
+
+.incoming {
+  /* Its content box is exactly the grid's content box, including column gaps. */
+  padding-inline: var(--d7-frame-padding);
+  border-inline: var(--d7-frame-border) solid transparent;
+  gap: var(--d7-grid-gap);
+  container-type: inline-size;
+}
+
+.frame {
+  padding: var(--d7-frame-padding);
+  border-width: var(--d7-frame-border);
+}
+
+.discCell {
+  padding: 9%;
+  font-size: 6.4cqw;
+  /* Both query containers have the same width: the seven cells and six gaps. */
+  --d7-cell-pitch: calc((100cqw + var(--d7-grid-gap)) / 7);
+}
+
+.disc {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+}
+
+.root[data-instructional] {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  max-width: 100%;
+  margin: 0;
+}
+
+.root[data-instructional] .frame {
+  border-color: var(--color-rule-strong);
+  background: var(--color-bg);
+}
+
+.root[data-instructional] .grid {
+  gap: var(--d7-grid-gap);
+  background: var(--color-rule-strong);
+}
+
+.root[data-instructional] .cell {
+  box-shadow: inset 0 -1px color-mix(in srgb, var(--color-rule) 60%, transparent);
+}
+
+.root[data-motion-overflow] .grid { overflow: visible; }
+
+.columnLabels {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--d7-grid-gap);
+  padding: 6px 7px 0;
+  color: var(--color-ink-3);
+  font: 500 0.65rem / 1 var(--font-mono);
+  text-align: center;
+}
+
+.columnLabels [data-selected] {
+  color: var(--color-highlight);
+  font-weight: 800;
+}
+
 .explosionPoint {
   position: absolute;
   top: 48%;

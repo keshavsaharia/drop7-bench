@@ -4,6 +4,7 @@ import { Board, BoardCompare, Callout, Disc, Stat } from "./Board";
 import { Drop7Board } from "./Drop7Board";
 import { Drop7Game } from "./Drop7Game";
 import { Drop7Intro } from "./Drop7Intro";
+import { ChoiceLesson } from "./lessons/ChoiceLesson";
 import { Diagram } from "./Diagram";
 import { CodeSnippet } from "./CodeSnippet";
 import { Figure } from "./Figure";
@@ -38,6 +39,7 @@ const components = {
   Drop7Board,
   Drop7Game,
   Drop7Intro,
+  ChoiceLesson,
   Figure,
   GameTreeFigure,
   Stat,

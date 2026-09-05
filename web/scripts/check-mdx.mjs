@@ -54,6 +54,7 @@ function exportedComponentNames(relativeFiles) {
 }
 for (const name of exportedComponentNames([
   "components/primers",
+  "components/lessons/ChoiceLesson.tsx",
   "components/Reveal.tsx",
   "components/technique-art/TechniqueArt.tsx",
   "components/StatTile.tsx",

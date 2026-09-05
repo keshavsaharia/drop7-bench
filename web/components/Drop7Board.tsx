@@ -61,6 +61,10 @@ export interface Drop7BoardProps {
   explosionPoints?: readonly ExplosionPoint[];
   /** Show floating explosion scores. Defaults to true. */
   showExplosionPoints?: boolean;
+  /** Strong column rules and numbered column labels for instructional boards. */
+  showColumnLabels?: boolean;
+  /** Let animated discs travel between the incoming row and the grid. */
+  animateOverflow?: boolean;
   /** Rendered absolutely over the grid (column buttons, an end-of-game panel). */
   overlay?: ReactNode;
 }
@@ -99,6 +103,8 @@ export function Drop7Board({
   cellStyle,
   explosionPoints = [],
   showExplosionPoints = true,
+  showColumnLabels = false,
+  animateOverflow = false,
   overlay,
 }: Drop7BoardProps) {
   const board = parseBoard(cells);
@@ -108,59 +114,70 @@ export function Drop7Board({
   const width = typeof size === "number" ? `${size}px` : (size ?? "min(100%, 22rem)");
 
   return (
-    <figure className={`inline-flex max-w-full flex-col gap-1.5 align-top ${className}`} style={{ width }}>
-      {nextDisc !== undefined && (
-        <div className="grid grid-cols-7 px-1.5" aria-label={nextDisc === null ? "next disc" : `next disc ${nextDisc}`}>
+    <figure className={`${styles.root} inline-flex max-w-full flex-col gap-1.5 align-top ${className}`} style={{ width }} data-instructional={showColumnLabels || undefined} data-motion-overflow={animateOverflow || undefined}>
+      <div className={styles.geometry}>
+        {nextDisc !== undefined && (
+          <div className={`${styles.incoming} grid grid-cols-7`} data-board-incoming aria-label={nextDisc === null ? "next disc" : `next disc ${nextDisc}`}>
+            {Array.from({ length: 7 }, (_, column) => (
+              <div key={column} className={`${styles.discCell} flex aspect-square items-center justify-center`}>
+                {nextDisc !== null && column === (typeof dropColumn === "number" ? dropColumn : 3) ? (
+                  <DiscFace cell={nextDisc} className={styles.disc} />
+                ) : null}
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className={`${styles.frame} relative rounded-lg border border-rule bg-surface p-1.5 [container-type:inline-size]`}>
+          <div
+            className={`${styles.grid} grid aspect-square grid-cols-7 grid-rows-7 gap-px overflow-hidden rounded-sm bg-rule`}
+            data-board-grid
+            role="img"
+            aria-label={label ?? `${occupied} occupied cells, ${covered} of them gray discs`}
+          >
+            {board.map((cell, index) => {
+              const column = index % 7;
+              const ringed = highlight.includes(index);
+              const faded = dim.includes(index);
+              const inDrop = typeof dropColumn === "number" && column === dropColumn;
+              return (
+                <div
+                  key={index}
+                  title={cellLabel(cell)}
+                  className={`${styles.cell} ${styles.discCell} relative flex items-center justify-center ${
+                    inDrop ? "bg-raised" : "bg-cell"
+                  } ${faded ? "opacity-30" : ""}`}
+                >
+                  <DiscFace cell={cell} className={`${styles.disc} ${cellClassName?.(index, cell) ?? ""}`} style={cellStyle?.(index, cell)} />
+                  {showExplosionPoints &&
+                    explosionPoints
+                      .filter((point) => point.index === index)
+                      .map((point) => (
+                        <span key={point.id} aria-hidden="true" className={styles.explosionPoint}>
+                          +{formatValue(point.points)}
+                        </span>
+                      ))}
+                  {ringed && (
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-[3%] rounded-sm border-2 border-highlight"
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          {overlay}
+        </div>
+      </div>
+
+      {showColumnLabels && (
+        <div className={styles.columnLabels} aria-label="Columns 1 through 7">
           {Array.from({ length: 7 }, (_, column) => (
-            <div key={column} className="flex aspect-square items-center justify-center p-[12%]">
-              {nextDisc !== null && column === (typeof dropColumn === "number" ? dropColumn : 3) ? (
-                <DiscFace cell={nextDisc} className="size-full text-[0.9em]" />
-              ) : null}
-            </div>
+            <span key={column} data-selected={column === dropColumn || undefined}>{column + 1}</span>
           ))}
         </div>
       )}
-
-      <div className="relative rounded-lg border border-rule bg-surface p-1.5 [container-type:inline-size]">
-        <div
-          className="grid aspect-square grid-cols-7 grid-rows-7 gap-px overflow-hidden rounded-sm bg-rule"
-          role="img"
-          aria-label={label ?? `${occupied} occupied cells, ${covered} of them gray discs`}
-        >
-          {board.map((cell, index) => {
-            const column = index % 7;
-            const ringed = highlight.includes(index);
-            const faded = dim.includes(index);
-            const inDrop = typeof dropColumn === "number" && column === dropColumn;
-            return (
-              <div
-                key={index}
-                title={cellLabel(cell)}
-                className={`relative flex items-center justify-center p-[9%] text-[6.4cqw] ${
-                  inDrop ? "bg-raised" : "bg-cell"
-                } ${faded ? "opacity-30" : ""}`}
-              >
-                <DiscFace cell={cell} className={`size-full ${cellClassName?.(index, cell) ?? ""}`} style={cellStyle?.(index, cell)} />
-                {showExplosionPoints &&
-                  explosionPoints
-                    .filter((point) => point.index === index)
-                    .map((point) => (
-                      <span key={point.id} aria-hidden="true" className={styles.explosionPoint}>
-                        +{formatValue(point.points)}
-                      </span>
-                    ))}
-                {ringed && (
-                  <span
-                    aria-hidden="true"
-                    className="pointer-events-none absolute inset-[3%] rounded-sm border-2 border-highlight"
-                  />
-                )}
-              </div>
-            );
-          })}
-        </div>
-        {overlay}
-      </div>
 
       {columns && widths && (
         <div className="grid grid-cols-7 gap-1 px-1.5" aria-label="column readout">

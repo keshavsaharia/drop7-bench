@@ -1,147 +1,157 @@
 ---
 title: "Choice and chance"
-summary: "Every drop is a choice and every dealt disc is chance; a strategy looks a few moves ahead, taking the best column on its own turns and averaging over the discs the game might deal."
+summary: "You choose where a disc lands. The game chooses what comes next. See how both shape a good move."
 order: 1
 ---
 
-Every Drop7 turn is two things glued together. First a **choice**: you pick one
-of seven columns. Then **chance**: the game deals the next disc (any of 1–7,
-equally likely) and, if your move opened a gray disc, shows you a hidden number
-you could not have known. A strategy that asks only "which column scores the
-most right now?" ignores half the game.
+Drop7 gives you a disc and a decision: where should it go? A move can clear a
+few discs straight away, or leave a useful arrangement for later. Learning to
+see both is the start of playing ahead.
 
-The examples build the idea of *looking ahead* one piece at a time on a real
-position, using numbers computed by the repository's rules engine. The only
-"evaluation" used here is points scored, so you can check every figure by hand.
+## The idea
 
-## A real position
+A disc falls down the column you choose. It stops at the bottom or on another
+disc. Then the game checks for matches.
 
-<RootAndChoices caption="Every board and score is engine output for this exact position. The yellow number is the largest immediate score. The four ways of judging the position disagree, making the tradeoff visible." />
+<ChoiceLesson view="opening" />
 
-Column 6 looks wonderful: the 1 lands on the stack, clears, the 4 underneath
-finds itself in a column of exactly four and clears too, and the 2 falls beside
-the 3 and clears as a second wave. The move earns 53 points. A player who only looks
-at the present takes it immediately. We will call that player **greedy**.
+A numbered disc clears when its number equals the number of touching discs
+in its row or column, including itself. The other discs can have any number.
+A gap ends the count. An isolated 1 clears; a 2 beside one other disc can clear.
 
-## The disc you do not know yet
+Clears leave gaps. The discs above fall, which can create more matches.
+Each new round of clears is a *wave*. Later waves in the same chain earn more
+points per disc.
 
-Now suppose you are a little more patient. You know the *current* disc is a 1.
-You do not know what comes after. But you know the odds exactly: seven
-possibilities, each one in seven. So for each column you could ask: *after I
-play here, what is the best I can do with each possible next disc, and what is
-that worth on average?*
+This is the part you control: the column. After the move settles, the game
+deals another disc. That is the part you do not control: chance.
 
-That question is a **chance node**, and the average is its **expected value**.
-Here it is for the greedy move:
+## A small example
 
-<ChanceNode column={5} caption="After taking the 53-point chain, the board is almost empty. Whatever disc comes next, the best follow-up is small: the average of the seven best replies is only 14.6 points. The move's fair value is 53 + 14.6 = 67.6." />
+### A real position
 
-And here it is for a quieter move, dropping the 1 in column 1 where it simply
-clears on its own for 7 points and leaves the chain structure standing:
+Here is the same board, with the same 1 waiting above it. Follow a branch
+to see what happens when you choose that column. Every branch starts from
+the board at the top. Watch the replays, or use “Next step” to inspect the
+clears one at a time.
 
-<ChanceNode column={0} caption="The board is unchanged except for 7 points banked. Every possible next disc has a strong follow-up. A 2, for example, starts a 155-point three-wave chain. The average reply is worth 69.1, so the move's fair value is 7 + 69.1 = 76.1. That beats the 53-point chain." />
+<ChoiceLesson view="choices" />
 
-That is the whole idea of expectimax in one comparison. The greedy move banks
-more now; the patient move is worth more *on average*, because it keeps the
-future open. Neither number required a clever trick. They came from enumerating
-what chance can do.
+Column 6 is tempting. The 1 and 4 clear in the first wave for 14 points.
+The 2 then falls beside the 3 and clears for another 39. Together, that is
+53 points. It is the best move if we only count what happens now.
 
-## Four ways to handle the same uncertainty
+Column 1 earns just 7 points. The 1 clears on its own, leaving the rest of
+the board as it was. That leaves something to work with on the next turn.
 
-Averaging is not the only option. You could assume the best disc will come
-(optimistic), or the worst (pessimistic), or ignore the future altogether
-(greedy). On this position, these four attitudes pick **three different
-columns**:
+## How it works
 
-<ChanceStyles caption="The same seven columns valued four ways. Greedy and pessimistic both take the 53-point chain for different reasons: one ignores the future, while the other distrusts it. The optimist plays column 4 and hopes for a 3 next, a one-in-seven chance worth 155 points. The fair player chooses column 1. Columns 1, 2, and 3 are identical here, so the leftmost tied column wins." />
+### The disc you do not know yet
 
-Across the research ledger, the repository's
-status summary lists *"fair chance handling matters"* as its first durable
-conclusion: optimistic, worst-case, and tiny reused reveal samples
-**ranked moves incorrectly** in measured games. The optimist chases jackpots
-that usually do not arrive; the pessimist refuses to build anything; averaging
-is the attitude that survives contact with a random disc stream.
+In the Hardcore version of Drop7 used here, the next disc can be any number
+from 1 to 7. Each has the same chance: one in seven.
 
-## Looking further ahead: depth
+So imagine each possible disc in turn. For each one, find the reply that
+earns the most points. You get to choose that reply after you see the disc.
 
-Everything above looks one move ahead and then stops. Nothing prevents you
-from continuing: after each possible next disc, consider each column again,
-then each disc after that, and so on. How many moves ahead you go is the
-search's **depth**. A depth-4 search, written "D4", plays out four of its own
-choices interleaved with four rounds of chance before it evaluates what it sees.
+The two boards below start *after* our first move. Select a possible next
+disc to watch its best reply on each board. Start with the 2: the quieter
+first move has left a much bigger chain available.
 
-The price is steep:
+<ChoiceLesson view="chance" />
 
-<TreeGrowth caption="Seven columns times seven next discs means every extra move ahead multiplies the tree by 49. Gray-disc reveals multiply it again. A literal depth-4 tree has millions of leaves; the measured work of the repository's depth-4 search is about 1.5 million evaluations per decision, because identical positions reached by different routes are recognised and shared (a transposition table)." />
+### Giving every possibility its share
 
-Because the tree explodes, two tricks are universal:
+A 2 would be helpful, but it might not arrive. To give all seven possibilities
+the same weight, add their best reply scores and divide by seven. That is
+the *average reply*.
 
-- **Evaluate, don't finish.** At the bottom of the tree the game is not over, so
-  the search needs an opinion about how good each leaf board is. That opinion is
-  the **leaf evaluator**: a hand-written scoring function in the reference
-  policy, a learned model in many experiments. The concept page on
-  [evaluating a board](/learn/concepts/ranking-siblings) is about how hard that
-  opinion is to get right.
-- **Sample the chance.** When enumerating every disc and every hidden reveal is
-  too expensive, the search looks at a fixed handful of representative outcomes
-  per chance node. The repository calls these samples **strata**, usually five or seven.
-  Fewer strata is faster and noisier.
+Add the points from the first move to that average. The result is the move’s
+*expected value* over these two moves. It describes an average across the
+possible next discs; a single play will produce one of those outcomes.
 
-## Live expectimax explorer
+Column 1 has an average reply worth about 69.1 points, giving it a two-move
+value of about 76.1. Column 6 gives about 67.6. Looking one turn further
+changes the choice.
 
-Everything above was drawn from one recorded position. The explorer below
-builds the same kind of tree **live, in your browser**, for any seeded game:
-the position is the MAX node, each legal column is a choice whose number is
-the exact average over every chance outcome of that drop, and the outcomes
-under the expanded column are real boards the engine produced, each with its
-probability and the leaf's opinion of it. Click a column to expand it, click
-an outcome to watch the engine play that transition and carry on from the
-board it leaves behind. Set "below each outcome" to one or two plies to see
-the values move as the search looks further.
+<ChoiceLesson view="comparison" />
 
-<GameTreeFigure seed={0x5eed1001} moves={8} caption="A live expectimax tree on a seeded game, built by the browser solver. A fair search plays the column with the highest expected value. The chance branches carry exact probabilities: one in seven for each next disc, then one in seven for each gray disc the move cracks." />
+The buttons show what happens when we change the question. Counting only
+today’s points favors column 6. Hoping for the luckiest disc favors column 4.
+Preparing for the least helpful disc favors column 6. Averaging all the
+possibilities favors columns 1, 2 and 3 equally.
 
-## Depth-2 tree explorer
+This pattern has a name: *expectimax*. At a choice, take the best available
+move. At a chance event, average the possible outcomes. The name can wait;
+those two actions are the idea to keep.
 
-Pick a column, then a next disc, then see every reply ranked. This is exactly
-the tree a depth-2 search walks, and you can verify any of the numbers above by
-following the same path.
+## In Drop7
 
-<TreeExplorerSection caption="Interactive version of the figures above. A real search does this for every column, every disc, and every reply, several levels deep, millions of times per decision." />
+### Looking further ahead
 
-## What "fair D4" means
+We can repeat the same process for another turn. Choose a column, consider
+what might be dealt, choose a reply, and continue. The number of moves we
+look ahead is the search’s *depth*.
 
-The repository's reference policy, **fair
-D4**, is a depth-4 search that takes the best column at every choice node, averages
-over chance at every chance node (no optimism, no pessimism), samples five or
-seven strata per chance node, and scores leaves with a hand-tuned evaluator.
-"Fair" also means it uses only what a real player can see. It never reads hidden
-gray values or the random seed.
+<ChoiceLesson view="depth" />
 
-Fair D4 is a careful, patient, slightly short-sighted player. On
-its broad reference cohort it averaged about 308,000 points per game over 64
-games, compared with a target of one million. It is the yardstick every other
-idea in this repository is measured against.
+Each extra turn creates more possibilities to examine. Eventually the
+search has to stop. It then needs an estimate of how useful the remaining
+board is. That estimate is called a *board evaluator*.
 
-## Why deeper is not automatically better
+The next lesson, [evaluating a board](/learn/concepts/evaluating-a-board),
+looks at that question. You can also [try playing](/play) or see the
+[full rules](/learn/rules), including gray discs and the rising floor.
 
-The natural next question (*so go to depth 5, 6, 7?*) has been asked and
-tested. The status summary records that selective depth 5, full depth 5, and
-cycle-boundary variants *"often spent much more work, sampled chance outcomes
-too noisily, or overrode good D4 actions on unstable estimates."* Deeper trees
-need more chance samples to stay fair, and a deep search with noisy chance can
-talk itself out of a good move. Depth interacts with chance sampling, with the
-quality of the leaf evaluator, and with the work budget; it is a dial, not a
-ladder. The concept page on
-[whether more computation is the answer](/learn/concepts/does-more-compute-help)
-goes through the evidence.
+<ChoiceLesson view="quiz" />
 
-<Callout title="Technical sources" tone="info">
-The reference search is documented on the
-[fair expectimax family page](/approaches/fair-expectimax) and its
-[reference implementation page](/approaches/fair-expectimax/reference). The
-measured conclusions quoted above are from the
-[research status summary](/docs/research/status); the fast reimplementation
-of the same search, with its work census, is on the
-[fast engine page](/approaches/lifetime-objective/fast-engine).
-</Callout>
+## What it cannot do
+
+A better average does not promise a better result on every play. You can
+make a sensible choice and still get an unhelpful disc.
+
+This example compares the points from two moves on a small board. A full
+game also asks you to make room for new discs and survive the rows that
+rise from below. A move that earns more points soon can still leave a
+difficult position later.
+
+Gray discs <Disc solid size={22} /> add another kind of chance. Their numbers are hidden until
+clears beside them open them. A player has to consider those possible
+reveals too. This teaching board has no gray discs, so we can focus on
+the next deal first.
+
+The skill is to make a choice using what you can see, while leaving room
+for what you cannot know yet.
+
+<AgentContext summary="Records and provenance">
+
+The position is a small constructed teaching example, legal under the
+TypeScript engine. It is retained in
+`web/content/learn/concept-scenarios.json`; it is not a position taken from
+a research cohort. Its original generator is
+`web/scripts/generate-concept-scenarios.ts`.
+
+`web/scripts/generate-choice-lesson.ts` replays the retained first moves
+and best replies with `playMove`, checks every final board and score against
+that original artifact, and saves presentation snapshots in
+`web/content/learn/choice-lesson.json`. It does not search for a replacement
+position. All points and averages on this page come from those artifacts.
+
+The animation groups each wave’s bursts to show simultaneous matching.
+Gravity distances are recorded per disc. The first move starts with four
+moves left before a rise, so neither illustrated move reaches a level
+boundary. No gray disc is revealed and no clear-board bonus occurs.
+
+To reproduce and check the presentation data, run from the project root:
+
+```sh
+node --experimental-strip-types web/scripts/generate-choice-lesson.ts
+node --experimental-strip-types web/scripts/generate-choice-lesson.ts --check
+```
+
+The reusable kit is documented in `web/components/board-animation/README.md`.
+These illustrations teach immediate-score look-ahead. They do not measure
+the [reference policy](/approach/fair-expectimax/reference). Its search is
+introduced in the [expectimax primer](/learn/techniques/expectimax).
+
+</AgentContext>

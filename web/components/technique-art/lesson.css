@@ -1,0 +1,77 @@
+/* Each diagram holds its final state so the mechanism remains readable. */
+.tart.tart--lesson {
+  --tart-motion: calc(var(--duration-art, 2400ms) * 1.5);
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+.tart--lesson [data-anim="drop"] { animation-name: tart-lesson-drop; }
+.tart--lesson [data-anim="clear"] { animation-name: tart-lesson-clear; }
+.tart--lesson [data-anim="ring"] { animation-name: tart-lesson-ring; }
+.tart--lesson [data-anim="branch"] { animation-name: tart-lesson-branch; }
+.tart--lesson [data-anim="reveal"] { animation-name: tart-lesson-reveal; }
+.tart--lesson [data-anim="select"] { animation-name: tart-lesson-select; }
+.tart--lesson [data-anim="grow"] { animation-name: tart-lesson-grow; transform-box: fill-box; transform-origin: left; }
+.tart--lesson [data-anim="expand"] { animation-name: tart-lesson-expand; }
+.tart--lesson [data-anim="steps"] { animation-name: tart-lesson-steps; }
+.tart--lesson [data-anim="transfer"] { animation-name: tart-lesson-transfer; }
+.tart--lesson [data-anim="return"] { animation-name: tart-lesson-return; }
+.tart--lesson [data-anim="loop"] { animation-name: tart-lesson-loop; }
+.tart--lesson [data-anim="scan"] { animation-name: tart-lesson-scan; }
+@keyframes tart-lesson-drop {
+  0%, 12% { transform: translateY(-65px); opacity: 0; }
+  35%, 100% { transform: translateY(0); opacity: 1; }
+}
+@keyframes tart-lesson-clear {
+  0%, 25% { opacity: 1; }
+  42%, 100% { opacity: 0; }
+}
+@keyframes tart-lesson-ring {
+  0%, 28% { opacity: 0; }
+  45%, 100% { opacity: 1; }
+}
+@keyframes tart-lesson-branch {
+  0%, 12% { opacity: 0.15; }
+  33%, 100% { opacity: 1; }
+}
+@keyframes tart-lesson-reveal {
+  0%, 28% { opacity: 0; transform: translateY(7px); }
+  52%, 100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes tart-lesson-select {
+  0%, 20% { opacity: 0.1; }
+  48%, 100% { opacity: 1; }
+}
+@keyframes tart-lesson-grow {
+  0%, 10% { transform: scaleX(0.15); }
+  38%, 100% { transform: scaleX(1); }
+}
+@keyframes tart-lesson-expand {
+  0%, 20% { opacity: 0.15; transform: translateY(-10px); }
+  48%, 100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes tart-lesson-steps {
+  0%, 8% { transform: translate(-188px, 84px); }
+  22% { transform: translate(-141px, 56px); }
+  36% { transform: translate(-94px, 28px); }
+  50%, 100% { transform: translate(0, 0); }
+}
+@keyframes tart-lesson-transfer {
+  0%, 10% { opacity: 0; transform: translateX(-20px); }
+  48%, 100% { opacity: 1; transform: translateX(0); }
+}
+@keyframes tart-lesson-return {
+  0%, 28% { opacity: 0; transform: translateX(25px); }
+  58%, 100% { opacity: 1; transform: translateX(0); }
+}
+@keyframes tart-lesson-loop {
+  0% { transform: translate(90px, 0); }
+  20% { transform: translate(130px, 46px); }
+  35% { transform: translate(75px, 82px); }
+  50% { transform: translate(-50px, 46px); }
+  62%, 100% { transform: translate(0, 0); }
+}
+@keyframes tart-lesson-scan {
+  0%, 10% { transform: translateX(180px); }
+  24% { transform: translateX(120px); }
+  38% { transform: translateX(60px); }
+  52%, 100% { transform: translateX(0); }
+}
