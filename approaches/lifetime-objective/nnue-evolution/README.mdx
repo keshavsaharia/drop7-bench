@@ -203,6 +203,27 @@ continuation's own artifacts.
 
 <ScreenGateTable run="RUN-20260903T032832Z-a76a6cf7" />
 
+The second continuation resumed that plateau population with a slower decay
+in mutation size, keeping the same search and stopping rule. The run stopped
+at the same generation. On its fresh 64-game screen, the candidate still lost
+to the fair leaf, and its gain over the immediately prior candidate was not
+statistically distinguishable from zero
+([RS-20260904T090620Z-e5731bf0](/results/RS-20260904T090620Z-e5731bf0), run
+valid, outcome fail, ledger-recorded). This alternative schedule did not
+produce a confirmed further gain.
+
+<EvolutionStatus run="RUN-20260903T190433Z-a87fd7fc" continuation />
+
+<EvolutionFigure run="RUN-20260903T190433Z-a87fd7fc" caption="Second continuation, stage C. Generation 0 is the first continuation's generation-150 population. The violet dashed line is that run's frozen candidate playing the same seeds each generation." />
+
+<SwarmFigure run="RUN-20260903T190433Z-a87fd7fc" caption="Every candidate of the second continuation in every generation." />
+
+<ScreenFigure run="RUN-20260903T190433Z-a87fd7fc" caption="Second continuation, stage D, the primary contrast on the new held-out block: candidate minus the fair leaf." />
+
+<ScreenFigure run="RUN-20260903T190433Z-a87fd7fc" contrast="candidate-vs-baseline-run1" caption="The second continuation's own question, out of sample: this candidate minus the immediately prior candidate on the same 64 never-read games." />
+
+<ScreenGateTable run="RUN-20260903T190433Z-a87fd7fc" />
+
 ## What we learned
 
 Whole-game evolution with common random numbers moves a 572,000-weight leaf.
@@ -231,13 +252,16 @@ levelled. That plateau sits about 45,000 paired points above where the
 continuation started and about 90,000 below the fair leaf on the training
 blocks, and the screen agrees
 ([RS-20260903T163321Z-733076b5](/results/RS-20260903T163321Z-733076b5)). The
-design cannot separate whether the leaf class ran out of improvement or the
-annealed step size, which had fallen from 0.050 to 0.034, starved the search;
-doubling the games per candidate would ask a second question, whether
-selection could still see the small differences that remain once sigma is
-small. The other open question is whether a warm start trained on the
-teacher's ordering, instead of its values, would start close enough to the
-fair leaf for evolution to finish the job.
+design could not separate whether the leaf class ran out of improvement or
+the annealed step size, which had fallen from 0.050 to 0.034, starved the
+search. The second continuation tested a slower decay and still stopped at
+the same generation, with no confirmed further gain on its fresh screen
+([RS-20260904T090620Z-e5731bf0](/results/RS-20260904T090620Z-e5731bf0)). It
+tested one alternative schedule. More games per candidate or a larger
+population remain open ways to ask whether selection can see the small
+differences left as candidates converge. The other open question is whether
+a warm start trained on the teacher's ordering, instead of its values, would
+start close enough to the fair leaf for evolution to finish the job.
 
 <AgentContext summary="Records and provenance">
 
@@ -347,6 +371,21 @@ fair leaf for evolution to finish the job.
   driver (a completed generation could be stranded without its progress row
   or plateau marker, and a restart granted a fresh wall allowance); the
   launched run remains attributable to its recorded source commit.
+- Second continuation:
+  [EX-20260903-nnue-evolution-continuation2-d3-80eebad3](/experiments/EX-20260903-nnue-evolution-continuation2-d3-80eebad3),
+  run `RUN-20260903T190433Z-a87fd7fc`, launched 2026-09-03. Result
+  [RS-20260904T090620Z-e5731bf0](/results/RS-20260904T090620Z-e5731bf0)
+  (valid run, scientific outcome fail); compact evidence promoted under
+  `artifacts/results/EX-20260903-nnue-evolution-continuation2-d3-80eebad3/RUN-20260903T190433Z-a87fd7fc/`.
+  Generation 0 is the first continuation's generation-150 population. The
+  mutation-decay time constant is 1,500 generations instead of 400, a
+  3.75-fold slowdown; sigma is still 0.045 at the equivalent point where the
+  first continuation reached 0.034, and does not reach its floor within the
+  1,000-generation cap. The search, population, fitness blocks, plateau
+  window and checks remain unchanged. The immediately prior candidate plays
+  every block as the third control; the screen artifact calls this arm
+  `baseline-run1`, with its identity recorded in `evolve/config.json`'s
+  `baselineSha256` field. Training and screen use fresh leases.
 - How to continue from here: every generation's population is on disk, so a
   later experiment can resume the loop from any `population-NNN.bin`, start a
   new run from `candidate-weights.bin`, or change one operator at a time.
@@ -433,6 +472,45 @@ leaf's (189,414).
 
 </TechnicalRecord>
 
+<TechnicalRecord summary="Second continuation screen" meta="RS-20260904T090620Z-e5731bf0">
+
+Second continuation screen (stage D), 64 fresh held-out games. Values below
+are recorded in
+[RS-20260904T090620Z-e5731bf0](/results/RS-20260904T090620Z-e5731bf0):
+
+| Arm (depth-3 search) | Mean | Lower quartile |
+| --- | ---: | ---: |
+| second-continuation candidate | 249,757 | 156,534 |
+| frozen fair leaf (comparator) | 335,266 | 176,108 |
+
+| Paired contrast on the same 64 games | Mean delta | Bootstrap 95% lower bound |
+| --- | ---: | ---: |
+| candidate − fair leaf | −85,509 | −128,482 |
+| candidate − immediately prior candidate | +13,572 | −30,165 |
+
+The gain over the prior candidate is not statistically distinguishable from
+zero. The first continuation's equivalent contrast against its own
+predecessor, on its separate 64-game screen, was +36,278 with a lower bound
+of +9,085
+([RS-20260903T163321Z-733076b5](/results/RS-20260903T163321Z-733076b5)).
+
+The plateau rule stopped both continuations after generation 149. The second
+continuation's slope at that check was +164 points per generation, with a
+lower bound of −29, against the first continuation's +37. Its best candidate
+beat the fair control on 26 of 150 training blocks, against 9 before. The
+population mean rose through all three fifty-generation blocks (235,353,
+238,797, 244,800). Each generation used 32 paired games per candidate. These
+training observations did not translate into a confirmed further gain on
+the screen.
+
+The comparison tests one slower schedule. It cannot separate limited room
+for improvement in this leaf class at this population size and search depth
+from a schedule that still shrinks too quickly or selection noise that
+hides small improvements. A further schedule comparison, more games per
+candidate or a larger population would each require a new experiment.
+
+</TechnicalRecord>
+
 <AgentContext summary="Validity, gates and limitations">
 
 - The preregistered gate, fixed before any leased seed was read: on the 64
@@ -446,7 +524,9 @@ leaf's (189,414).
   recorded before the screen lease opened. Outcome: every pass criterion
   except artifact integrity and candidate identity fails. The continuation
   screen (`RS-20260903T163321Z-733076b5`) fails the same gate on a fresh
-  64-game block.
+  64-game block. The second continuation
+  (`RS-20260904T090620Z-e5731bf0`) also fails the same gate on its fresh
+  64-game block; the gain over the immediately prior candidate is unconfirmed.
 - What the rejection covers: this exact configuration, this model class, this
   teacher depth, this optimiser and budget, this deployment depth. It does not
   reject the idea of a learned leaf. Had the candidate passed while the

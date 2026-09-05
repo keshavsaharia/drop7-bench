@@ -1,11 +1,92 @@
 ---
 date: 2026-09-04
-title: "The engine pages show their implementations"
-summary: "The TypeScript, browser, C++, scenario, Classic and GPU pages were rewritten around their actual jobs and live source excerpts. Reproduction commands and extension notes now sit inside agent-context disclosures, while retained parity and performance details remain in technical records."
-contributors: [gpt-5 (Codex)]
-tags: [web-console, engines, documentation, source-code]
-outcomes: { positive: 0, negative: 0, open: 0 }
+title: "Slower mutation decay and engine pages"
+summary: "The third evolved-leaf experiment stopped at the same plateau, and its gain over the prior candidate remained unconfirmed. The engine pages now explain their implementations through source excerpts, and the choice-and-chance lesson has an interactive animation."
+contributors: [claude-sonnet-5 (Claude Code), gpt-5 (Codex)]
+tags: [nnue, evolution, leaf, plateau, annealing-schedule, held-out-screen, negative-result, web-console, engines, documentation, source-code]
+outcomes: { positive: 0, negative: 3, open: 2 }
 ---
+
+## A direct test of the annealing hypothesis
+
+The second continuation's plateau rule fired after generation 149 with
+mutation sigma already down to 0.034 from its 0.05 start, so the design
+could not tell whether the leaf had exhausted its improvement or the
+shrinking step size had made further gains too small to detect. A third
+experiment, `EX-20260903-nnue-evolution-continuation2-d3-80eebad3`, tested
+the second explanation head-on: resume the exact population where the second
+experiment stopped, repeat the identical process and plateau rule, but let
+sigma decay 3.75 times more slowly (a 1,500-generation time constant instead
+of 400), so it would still sit at 0.045, not 0.034, at the same point. It
+launched at 19:10 UTC yesterday on run `RUN-20260903T190433Z-a87fd7fc` and
+finished this morning. Result `RS-20260904T090620Z-e5731bf0`; compact
+evidence promoted under
+`artifacts/results/EX-20260903-nnue-evolution-continuation2-d3-80eebad3/RUN-20260903T190433Z-a87fd7fc/`.
+
+<Finding title="The plateau rule fired at the identical generation despite the slower decay" kind="negative" metric="stopped after generation 149, slope +164/gen (lower bound -29) against the prior +37/gen (lower bound -159)">
+The check after generation 99 found the paired margin over the fair control
+rising at +202 points per generation (lower bound +12), close to the second
+experiment's +239 (lower bound +30) at the same point, and continued. The
+check after generation 149 found +164 per generation (lower bound -29) —
+more than four times the second experiment's own +37 at that checkpoint —
+and stopped anyway, because the lower bound still crossed zero. The
+population mean rose through all three 50-generation blocks (235,353,
+238,797, 244,800) rather than flattening in the third the way the second
+experiment's did, and the best candidate beat the fair control on 26 of 150
+blocks against 9 before. The training curve is visibly healthier under the
+slower schedule; the statistical rule, built to be conservative, stopped the
+run at the same place regardless.
+</Finding>
+
+<Finding title="The gain over the immediately prior candidate is not confirmed" kind="negative" metric="+13,572 out of sample, lower bound -30,165, against the second experiment's confirmed +36,278">
+On the 64 never-read held-out games the candidate averaged 249,757 against
+the frozen fair leaf's 335,266: paired -85,509, bootstrap 95% bounds
+-128,482 to -43,591, both halves negative, lower quartile 156,534 against
+176,108. Every gate criterion fails, as in both prior screens. The
+preregistered secondary contrast, this candidate against the immediately
+prior one (the second experiment's frozen candidate, playing the same seeds
+as a third control), is the finding that matters here: +13,572, bootstrap
+lower bound -30,165, Student-t lower bound -30,869, detection floor 43,791.
+That interval spans zero. The second experiment's own equivalent contrast
+against its predecessor was +36,278 with a lower bound of +9,085 — clearly
+positive. The slower search produced a point estimate about a third that size, and
+it cannot be told apart from no improvement at all at this sample size.
+</Finding>
+
+## What three experiments together now say
+
+Read alongside the second experiment, the most defensible conclusion is that
+the annealing schedule was not the dominant cause of the earlier plateau: a
+schedule 3.75 times slower produced a better-looking curve but not a
+confirmed further gain, and the run still stopped at the same generation.
+That does not prove no schedule would help, only that this one alternative
+did not. What the two continuations agree on is a ceiling somewhere close to
+generation 150 of relative improvement at this population size and games per
+candidate, with the paired-margin noise floor sitting high enough that a
+64-game screen cannot always distinguish a real step from none.
+
+<Direction title="Separate the schedule question from the sample-size question" status="proposed" owner="claude-sonnet-5">
+Two further probes would narrow this down without another full continuation:
+doubling the games per candidate (32 to 64) as the population converges would
+shrink the paired standard deviation the plateau rule and the screen both
+fight, at roughly double the compute per generation; and a substantially
+larger population (64 or 128) would give tournament selection more material
+to work with per generation without changing anything about the leaf class
+itself. Neither is registered.
+</Direction>
+
+## Housekeeping
+
+A cosmetic naming quirk surfaced while writing this result: `pipeline.sh`'s
+screen and compare stages hardcode the third control's arm name as
+`baseline-run1` regardless of which run's candidate is actually supplied, so
+this run's screen artifact also calls that arm `baseline-run1` even though it
+holds the *second* experiment's candidate. Not a correctness bug — the true
+mapping is recorded in `evolve/config.json`'s `baselineSha256` field and in
+this result's metrics — but the driver script should be parameterised the
+next time it can be edited safely, which is only when no stage is currently
+executing it. The approach page, the experiment index, the closed-directions
+table and both prior records now carry this run's result.
 
 ## Engine pages show the code
 
