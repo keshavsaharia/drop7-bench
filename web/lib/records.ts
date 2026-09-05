@@ -41,7 +41,8 @@ type Result = ResultRecord & { $id: string };
  * including inside a longer path. Family and slug are lowercase directory
  * names, so `approaches/<family>/README.mdx` is not a match.
  */
-const APPROACH_PATH = /approach\/([a-z0-9-]+)\/([a-z0-9-]+)(?![a-z0-9-])/g;
+// Records retain plural filesystem paths; canonical website URLs are singular.
+const APPROACH_PATH = /approach(?:es)?\/([a-z0-9-]+)\/([a-z0-9-]+)(?![a-z0-9-])/g;
 
 function refKey(ref: ApproachRef): string {
   return `${ref.family}/${ref.slug}`;
