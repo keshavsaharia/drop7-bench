@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { signIn } from "next-auth/react";
+import "../app/app.css";
 import {
   useCallback,
   useEffect,
@@ -263,13 +264,13 @@ export function CompetitionGame({
   }, [completed, manifest, snapshot.state.score, submission, submitting]);
 
   return (
-    <section className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4 text-zinc-300">
-      <div className="mb-4 flex flex-wrap items-start justify-between gap-4 border-b border-zinc-800 pb-4">
+    <section className="rounded-lg border border-rule bg-surface p-4 text-ink-1">
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-4 border-b border-rule pb-4">
         <div>
-          <p className={LABEL + " text-sky-400"}>
+          <p className={LABEL + " text-accent"}>
             competition · {manifest.gameVersion}
           </p>
-          <p className="mt-1.5 text-sm text-zinc-400">
+          <p className="mt-1.5 text-small text-ink-2">
             Everyone receives this exact disc and reveal tape.
           </p>
         </div>
@@ -283,12 +284,12 @@ export function CompetitionGame({
       <div className="mx-auto max-w-[27rem]">
         <div className="mb-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <span className={LABEL + " text-zinc-500"}>drop</span>
+            <span className={LABEL + " text-ink-3"}>drop</span>
             <span className="inline-flex size-8 text-sm">
               <DiscFace cell={snapshot.state.nextDisc} />
             </span>
           </div>
-          <span className={LABEL + " text-zinc-500"}>
+          <span className={LABEL + " text-ink-3"}>
             {completed ? "run complete" : animating ? animationLabel(animationFrame) : "tap a column"}
           </span>
         </div>
@@ -315,17 +316,17 @@ export function CompetitionGame({
                         ? "Drop " + snapshot.state.nextDisc + " in column " + (column + 1)
                         : "Column " + (column + 1) + " is full"
                     }
-                    className="border-x border-transparent transition-colors enabled:hover:border-sky-500/60 enabled:hover:bg-sky-400/10"
+                    className="border-x border-transparent transition-colors motion-reduce:transition-none enabled:hover:border-accent/60 enabled:hover:bg-accent/10"
                   />
                 ))}
               </div>
               {completed && (
-                <div className="pointer-events-none absolute inset-1.5 flex items-center justify-center rounded-sm bg-zinc-950/75 p-5 text-center backdrop-blur-[2px]">
-                  <div className="rounded-lg border border-zinc-700 bg-zinc-900 p-5 shadow-xl">
-                    <p className="text-2xl font-black text-zinc-50">
+                <div className="pointer-events-none absolute inset-1.5 flex items-center justify-center rounded-sm bg-bg/75 p-5 text-center backdrop-blur-[2px]">
+                  <div className="rounded-md border border-rule-strong bg-surface p-5">
+                    <p className="font-display text-h2 font-bold text-ink">
                       {formatInteger(snapshot.state.score)} points
                     </p>
-                    <p className={LABEL + " mt-2 text-zinc-400"}>
+                    <p className={LABEL + " mt-2 text-ink-2"}>
                       {snapshot.state.movesPlayed} verified choices ready
                     </p>
                   </div>
@@ -336,34 +337,28 @@ export function CompetitionGame({
         />
       </div>
 
-      <div className="mt-5 border-t border-zinc-800 pt-4">
+      <div className="mt-5 border-t border-rule pt-4">
         {completed ? (
           submission ? (
             <div className="space-y-3">
-              <div
-                role="status"
-                className="w-full rounded-lg border border-emerald-500/50 bg-emerald-500/15 px-4 py-4 text-emerald-100"
-              >
+              <div role="status" className="app-notice app-notice--success w-full">
                 <div className="flex items-start gap-3">
-                  <span
-                    aria-hidden="true"
-                    className="flex size-7 shrink-0 items-center justify-center rounded-full bg-emerald-400 font-black text-emerald-950"
-                  >
+                  <span aria-hidden="true" className="app-notice-mark">
                     ✓
                   </span>
                   <div className="min-w-0">
-                    <p className="font-bold">Your most recent run was submitted.</p>
-                    <p className="mt-1 text-sm text-emerald-200/80">
+                    <p className="font-semibold text-ink">Your most recent run was submitted.</p>
+                    <p className="mt-1 text-small text-ink-1">
                       {formatInteger(submission.verifiedScore)} points are now recorded for this game.
                     </p>
                     {submission.scoreMismatch && (
-                      <p className="mt-1 text-sm text-amber-200">
+                      <p className="mt-1 text-small text-status-paused">
                         The reported score differed from the replayed score and was flagged; the replayed score ranks.
                       </p>
                     )}
                     <Link
                       href={"/leaderboard/human/" + submission.submissionId}
-                      className="mt-2 inline-block text-sm font-semibold underline underline-offset-2 hover:text-white"
+                      className="mt-2 inline-block text-small font-semibold text-accent underline underline-offset-2 hover:text-ink"
                     >
                       View submitted replay →
                     </Link>
@@ -373,11 +368,11 @@ export function CompetitionGame({
               <button
                 type="button"
                 onClick={restart}
-                className="w-full rounded-lg border border-sky-400 bg-sky-600 px-4 py-3 text-sm font-black uppercase tracking-[0.08em] text-white shadow-lg shadow-sky-950/30 transition-colors hover:bg-sky-500"
+                className="w-full rounded-md border border-accent-strong bg-accent-strong px-4 py-3 text-small font-bold uppercase tracking-[0.08em] text-accent-fg transition-[filter] motion-reduce:transition-none hover:brightness-110"
               >
                 Play again
               </button>
-              <p className="text-center text-xs text-zinc-500">
+              <p className="text-center text-caption text-ink-3">
                 Starts a fresh local game and clears the saved choices from this run.
               </p>
             </div>
@@ -388,20 +383,20 @@ export function CompetitionGame({
                   type="button"
                   onClick={() => void submit()}
                   disabled={submitting}
-                  className="rounded-md border border-sky-500 bg-sky-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-white transition-colors hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-sm border border-accent-strong bg-accent-strong px-4 py-2.5 text-caption font-bold uppercase tracking-wide text-accent-fg transition-[filter] motion-reduce:transition-none hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {submitting ? "validating…" : "submit verified run"}
                 </button>
                 <button
                   type="button"
                   onClick={restart}
-                  className="rounded-md border border-zinc-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-zinc-200 transition-colors hover:border-sky-400 hover:bg-sky-500/10 hover:text-white"
+                  className="rounded-sm border border-rule-strong px-4 py-2.5 text-caption font-bold uppercase tracking-wide text-ink-1 transition-colors motion-reduce:transition-none hover:border-accent hover:bg-accent-soft hover:text-ink"
                 >
                   Play again
                 </button>
               </div>
               {needsAuth && (
-                <p className="text-sm text-amber-200">
+                <p className="text-small text-status-paused">
                   Sign in explicitly before sharing this run. Nothing has been uploaded yet.{" "}
                   <button
                     type="button"
@@ -412,16 +407,16 @@ export function CompetitionGame({
                   </button>
                 </p>
               )}
-              {submitError && <p className="text-sm text-red-300">{submitError}</p>}
+              {submitError && <p className="text-small text-danger">{submitError}</p>}
             </div>
           )
         ) : (
-          <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-zinc-500">
+          <div className="flex flex-wrap items-center justify-between gap-3 text-caption text-ink-3">
             <p>This run is local-only. No game data is sent while you play.</p>
             <button
               type="button"
               onClick={() => void signIn("github", { redirectTo: "/compete" })}
-              className="text-zinc-400 underline underline-offset-2 hover:text-zinc-200"
+              className="text-ink-2 underline underline-offset-2 hover:text-ink"
             >
               Sign in to contribute later
             </button>
@@ -495,8 +490,8 @@ function replayLocal(
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <p>
-      <span className={LABEL + " block text-zinc-500"}>{label}</span>
-      <span className="font-mono text-sm text-zinc-50 tabular-nums">{value}</span>
+      <span className={LABEL + " block text-ink-3"}>{label}</span>
+      <span className="font-mono text-small text-ink tabular-nums">{value}</span>
     </p>
   );
 }

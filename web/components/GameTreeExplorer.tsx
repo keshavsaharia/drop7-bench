@@ -411,7 +411,7 @@ export function GameTreeExplorer({ seed: initialSeed, moves: initialMoves, leafD
       <div className="tree-canvas" style={{ height }}>
         <ReactFlowProvider>
           <ReactFlow nodes={graph.nodes} edges={graph.edges} nodeTypes={nodeTypes} onNodeClick={onNodeClick} nodesDraggable={false} nodesConnectable={false} elementsSelectable={false} zoomOnDoubleClick={false} minZoom={0.15} maxZoom={2} fitView proOptions={{ hideAttribution: true }} colorMode="dark">
-            <Background gap={24} size={1} color="#27272a" />
+            <Background gap={24} size={1} color="var(--color-rule)" />
             <Controls showInteractive={false} position="bottom-right" />
             <FitOnChange layoutKey={layoutKey} />
           </ReactFlow>

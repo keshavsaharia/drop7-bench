@@ -1,0 +1,90 @@
+/* heuristic-search/sparse-expectimax card art. The fan of every outcome falls
+   back to a ghost, five stratified edges take its place, and the five trunks
+   they carry unfold downwards through two more plies to their leaves. The
+   trunks scale from the top of their own box, which is the row the strata sit
+   on. Play-state, duration and easing are owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-sparse-expectimax {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-sparse-expectimax [data-anim="fan"] {
+  animation-name: tart-approach-sparse-expectimax-fan;
+}
+.tart--approach-sparse-expectimax [data-anim="strata"] {
+  animation-name: tart-approach-sparse-expectimax-strata;
+}
+.tart--approach-sparse-expectimax [data-anim="trunks"] {
+  transform-box: fill-box;
+  transform-origin: center top;
+  animation-name: tart-approach-sparse-expectimax-trunks;
+}
+.tart--approach-sparse-expectimax [data-anim="leaves"] {
+  animation-name: tart-approach-sparse-expectimax-leaves;
+}
+.tart--approach-sparse-expectimax [data-anim="caption"] {
+  animation-name: tart-approach-sparse-expectimax-caption;
+}
+
+@keyframes tart-approach-sparse-expectimax-fan {
+  0%,
+  10.91% {
+    opacity: 0.9;
+  }
+  24%,
+  100% {
+    opacity: 0.26;
+  }
+}
+
+@keyframes tart-approach-sparse-expectimax-strata {
+  0%,
+  17.45% {
+    opacity: 0;
+  }
+  26.18%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes tart-approach-sparse-expectimax-trunks {
+  0%,
+  26.18% {
+    transform: scaleY(0.02);
+    opacity: 0;
+  }
+  30.55% {
+    opacity: 1;
+  }
+  40.36%,
+  100% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+@keyframes tart-approach-sparse-expectimax-leaves {
+  0%,
+  37.09% {
+    opacity: 0;
+  }
+  44.73%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes tart-approach-sparse-expectimax-caption {
+  0%,
+  45.82% {
+    opacity: 0;
+  }
+  52.36%,
+  100% {
+    opacity: 1;
+  }
+}

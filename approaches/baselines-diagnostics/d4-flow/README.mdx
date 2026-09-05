@@ -5,6 +5,7 @@ summary: Replays the reference on used games and records each board, decision, a
 status: support-only
 evidence: repository-verified
 reads: diagnostic
+kind: diagnostic
 ---
 
 The strongest reliable player here is a four-move-deep search, and it is
@@ -87,7 +88,7 @@ Features come from `extractFairFeatures` and the shared phase feature struct;
 the leaf value is `fairLeaf`.
 
 The same four seeds `0x3d6e4000`–`0x3d6e4003` are the fitting quartet used by
-the [structural terminal veto](/approaches/constructive-reservoir/structural-terminal-veto),
+the [structural terminal veto](/approach/constructive-reservoir/structural-terminal-veto),
 which is why they are already consumed.
 
 Source: `d4-flow-audit.cpp`.

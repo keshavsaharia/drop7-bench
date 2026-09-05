@@ -12,7 +12,27 @@ const webRoot =
     ? path.resolve(__dirname)
     : path.resolve(process.cwd());
 
+/**
+ * Next.js dev blocks /_next resources for any origin but localhost, which also
+ * stops hydration when the console is opened from another machine on the LAN.
+ * DROP7_DEV_ORIGINS="10.0.0.104,drop7.local" allows those hosts; unset, nothing
+ * changes. Development only; production ignores it.
+ */
+const allowedDevOrigins = (process.env.DROP7_DEV_ORIGINS ?? "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 const nextConfig: NextConfig = {
+  ...(allowedDevOrigins.length ? { allowedDevOrigins } : {}),
+  async redirects() {
+    return [
+      { source: "/approaches", destination: "/approach", permanent: true },
+      { source: "/approaches/:path*", destination: "/approach/:path*", permanent: true },
+      { source: "/engines", destination: "/engine", permanent: true },
+      { source: "/engines/:path*", destination: "/engine/:path*", permanent: true },
+    ];
+  },
   outputFileTracingRoot: webRoot,
   outputFileTracingIncludes: {
     "/*": [

@@ -1,0 +1,1603 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260902T084356Z-2488ecc7",
+  "theoryIds": [
+    "TH-20260902-kf-linear-q-transfer-68b41d66"
+  ],
+  "experimentId": "EX-20260902-kf-linear-q-rust-transfer-4328a730",
+  "runIds": [
+    "RUN-20260902T081659Z-d2aa6375"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "pass",
+  "assessment": "mixed",
+  "evidenceTier": "pilot",
+  "summary": "On corrected five-move Hardcore rules the six Klein-Friedmann features are a survival heuristic worth about ten moves and 34,000 points over uniform-random play, an order of magnitude below fair depth-4 in points. Pilot on 256 previously evaluated development seeds (0xa5277000-0xa52770ff, 2,000-move cap, no game censored, 0 illegal decisions): uniform-random legal play 26.25 moves / 73263 points; centre-first 21.01 / 55083; the six features re-learned with the upstream schedule (three exploration seeds) 35.79, 35.81, 36.27 moves and 107147, 107231, 109068 points, a paired gain over random of +9.54 moves [LB95 +8.85] and +33884 points [LB95 +31361] for seed a. The authors' own Python-learned weights (reproduction seed 10) transplanted unchanged live 40.53 moves / 123968 points, +4.74 moves over the engine-learned weights [LB95 +3.77]: same features, same update, same schedule, different opening experience (empty board vs gray row) frozen in by the per-move 1/t step size. Fair d4s7 (drop7-rs, 65,536-entry table) on the first 32 seeds: 380205 points / 110.38 moves, beating the transplanted arm by +256507 points [LB95 +182668] on 31/32 paired games. Slower schedules: per-game 1/g diverged to weights near 1e9 (32.47 moves), harmonic tau 50,000 and the score-reward harmonic arm diverged to NaN (20.90 moves, the rightmost-column policy), constant 0.001 gained +0.50 moves over the upstream schedule [LB95 +0.12], the same size as the +0.48 [+0.07] spread between two identical-configuration seeds. Gates G1-G5 pass; G6 records that a slower stable schedule clears LB95 > 0 by under a move, so theory clause (iv) is not supported at the letter while clauses (iii-a) and (iii-b) are. All CHECK gates (feature parity 54,852 pairs / 0 mismatches; update parity 250 steps / exact; determinism and legality) passed before any diagnostic seed was read. Training ran at about 1.4 million moves per second (1.3 s per 50,000-game arm).",
+  "metrics": {
+    "cohort": {
+      "seedsStartHex": "0xa5277000",
+      "games": 256,
+      "moveCap": 2000,
+      "role": "previously-evaluated-development",
+      "trainingSeedsStartHex": "0xa5200000",
+      "trainingGamesPerArm": 50000
+    },
+    "arms": {
+      "random": {
+        "games": 256,
+        "meanScore": 73262.75,
+        "medianScore": 68724.5,
+        "q25Score": 68231.25,
+        "minScore": 34042,
+        "maxScore": 123354,
+        "meanMoves": 26.24609375,
+        "q25Moves": 25.0,
+        "censored": 0,
+        "clearsPerMove": 0.9446346182467629,
+        "revealsPerMove": 0.3269831820211341,
+        "meanChainDepth": 1.4725092952226222,
+        "maxChainDepth": 9,
+        "illegal": 0,
+        "incomplete": 0,
+        "wallSecondsPerGame": 3.078110546875e-05
+      },
+      "center": {
+        "games": 256,
+        "meanScore": 55082.890625,
+        "medianScore": 51204.5,
+        "q25Score": 34109.0,
+        "minScore": 17028,
+        "maxScore": 106655,
+        "meanMoves": 21.0078125,
+        "q25Moves": 15.0,
+        "censored": 0,
+        "clearsPerMove": 0.8921532168092228,
+        "revealsPerMove": 0.23335812569728523,
+        "meanChainDepth": 1.3219567129837737,
+        "maxChainDepth": 8,
+        "illegal": 0,
+        "incomplete": 0,
+        "wallSecondsPerGame": 3.263818359375e-05
+      },
+      "v1a": {
+        "games": 256,
+        "meanScore": 107147.1328125,
+        "medianScore": 103426.5,
+        "q25Score": 102705.5,
+        "minScore": 85228,
+        "maxScore": 209156,
+        "meanMoves": 35.7890625,
+        "q25Moves": 35.0,
+        "censored": 0,
+        "clearsPerMove": 1.2370661427635887,
+        "revealsPerMove": 0.5504256712508186,
+        "meanChainDepth": 1.5714399903152794,
+        "maxChainDepth": 12,
+        "illegal": 0,
+        "incomplete": 0,
+        "wallSecondsPerGame": 2.982292578125e-05
+      },
+      "v1b": {
+        "games": 256,
+        "meanScore": 107230.80859375,
+        "medianScore": 103411.5,
+        "q25Score": 102692.5,
+        "minScore": 85228,
+        "maxScore": 211246,
+        "meanMoves": 35.80859375,
+        "q25Moves": 35.0,
+        "censored": 0,
+        "clearsPerMove": 1.2398821861023235,
+        "revealsPerMove": 0.5520890149449111,
+        "meanChainDepth": 1.5723469662302438,
+        "maxChainDepth": 12,
+        "illegal": 0,
+        "incomplete": 0,
+        "wallSecondsPerGame": 2.930710546875e-05
+      },
+      "v1c": {
+        "games": 256,
+        "meanScore": 109067.734375,
+        "medianScore": 103482.0,
+        "q25Score": 102721.25,
+        "minScore": 85228,
+        "maxScore": 231651,
+        "meanMoves": 36.2734375,
+        "q25Moves": 35.0,
+        "censored": 0,
+        "clearsPerMove": 1.2561921171656256,
+        "revealsPerMove": 0.5646133965108766,
+        "meanChainDepth": 1.5801198353858232,
+        "maxChainDepth": 12,
+        "illegal": 0,
+        "incomplete": 0,
+        "wallSecondsPerGame": 2.985511328125e-05
+      },
+      "v2-pergame": {
+        "games": 256,
+        "meanScore": 95918.03125,
+        "medianScore": 87101.5,
+        "q25Score": 85828.0,
+        "minScore": 51141,
+        "maxScore": 190284,
+        "meanMoves": 32.47265625,
+        "q25Moves": 30.0,
+        "censored": 0,
+        "clearsPerMove": 1.1816432094310116,
+        "revealsPerMove": 0.5537110549741369,
+        "meanChainDepth": 1.733841734911723,
+        "maxChainDepth": 13,
+        "illegal": 0,
+        "incomplete": 0,
+        "wallSecondsPerGame": 2.7114421875e-05
+      },
+      "v3-harmonic50k": {
+        "games": 256,
+        "meanScore": 54564.54296875,
+        "medianScore": 51227.0,
+        "q25Score": 34109.0,
+        "minScore": 17028,
+        "maxScore": 110564,
+        "meanMoves": 20.8984375,
+        "q25Moves": 15.0,
+        "censored": 0,
+        "clearsPerMove": 0.8770093457943925,
+        "revealsPerMove": 0.18,
+        "meanChainDepth": 1.302533114017923,
+        "maxChainDepth": 8,
+        "illegal": 0,
+        "incomplete": 0,
+        "wallSecondsPerGame": 1.3840484375e-05
+      },
+      "v4-const1e-3": {
+        "games": 256,
+        "meanScore": 108917.98046875,
+        "medianScore": 103542.5,
+        "q25Score": 102721.25,
+        "minScore": 85228,
+        "maxScore": 214411,
+        "meanMoves": 36.28515625,
+        "q25Moves": 35.0,
+        "censored": 0,
+        "clearsPerMove": 1.255463451394122,
+        "revealsPerMove": 0.5635698137582086,
+        "meanChainDepth": 1.577951104807294,
+        "maxChainDepth": 12,
+        "illegal": 0,
+        "incomplete": 0,
+        "wallSecondsPerGame": 3.00854453125e-05
+      },
+      "v5-score17k-harmonic": {
+        "games": 256,
+        "meanScore": 54564.54296875,
+        "medianScore": 51227.0,
+        "q25Score": 34109.0,
+        "minScore": 17028,
+        "maxScore": 110564,
+        "meanMoves": 20.8984375,
+        "q25Moves": 15.0,
+        "censored": 0,
+        "clearsPerMove": 0.8770093457943925,
+        "revealsPerMove": 0.18,
+        "meanChainDepth": 1.302533114017923,
+        "maxChainDepth": 8,
+        "illegal": 0,
+        "incomplete": 0,
+        "wallSecondsPerGame": 1.38112265625e-05
+      },
+      "posthoc-v6-const1e-2": {
+        "games": 256,
+        "meanScore": 110032.49609375,
+        "medianScore": 103524.5,
+        "q25Score": 102666.25,
+        "minScore": 85228,
+        "maxScore": 270105,
+        "meanMoves": 36.4921875,
+        "q25Moves": 35.0,
+        "censored": 0,
+        "clearsPerMove": 1.2736030828516378,
+        "revealsPerMove": 0.5796403339755941,
+        "meanChainDepth": 1.5683766976894502,
+        "maxChainDepth": 11,
+        "illegal": 0,
+        "incomplete": 0,
+        "wallSecondsPerGame": 3.051187890625e-05
+      },
+      "posthoc-v7-const1e-4": {
+        "games": 256,
+        "meanScore": 108693.90625,
+        "medianScore": 103560.5,
+        "q25Score": 102721.25,
+        "minScore": 85228,
+        "maxScore": 214315,
+        "meanMoves": 36.1875,
+        "q25Moves": 35.0,
+        "censored": 0,
+        "clearsPerMove": 1.258419689119171,
+        "revealsPerMove": 0.5659542314335061,
+        "meanChainDepth": 1.5801435835807944,
+        "maxChainDepth": 12,
+        "illegal": 0,
+        "incomplete": 0,
+        "wallSecondsPerGame": 3.01738203125e-05
+      },
+      "posthoc-v8-score17k-const1e-3": {
+        "games": 256,
+        "meanScore": 108933.625,
+        "medianScore": 103542.5,
+        "q25Score": 102676.0,
+        "minScore": 85246,
+        "maxScore": 214411,
+        "meanMoves": 36.234375,
+        "q25Moves": 35.0,
+        "censored": 0,
+        "clearsPerMove": 1.2604570935748167,
+        "revealsPerMove": 0.5680250107805088,
+        "meanChainDepth": 1.5802661237724334,
+        "maxChainDepth": 12,
+        "illegal": 0,
+        "incomplete": 0,
+        "wallSecondsPerGame": 2.999366796875e-05
+      },
+      "transplant-py-seed10": {
+        "games": 256,
+        "meanScore": 123967.99609375,
+        "medianScore": 120286.0,
+        "q25Score": 102800.75,
+        "minScore": 85133,
+        "maxScore": 241875,
+        "meanMoves": 40.53125,
+        "q25Moves": 35.0,
+        "censored": 0,
+        "clearsPerMove": 1.4193330763299923,
+        "revealsPerMove": 0.685331534309946,
+        "meanChainDepth": 1.5336733571771228,
+        "maxChainDepth": 9,
+        "illegal": 0,
+        "incomplete": 0,
+        "wallSecondsPerGame": 4.40795703125e-05
+      },
+      "fair-d4s7": {
+        "games": 32,
+        "meanScore": 380204.9375,
+        "medianScore": 284190.0,
+        "q25Score": 198511.75,
+        "minScore": 138800,
+        "maxScore": 1239232,
+        "meanMoves": 110.375,
+        "q25Moves": 60.0,
+        "censored": 0,
+        "clearsPerMove": 2.0637032842582106,
+        "revealsPerMove": 1.160815402038505,
+        "meanChainDepth": 2.1219494331638393,
+        "maxChainDepth": 10,
+        "illegal": 0,
+        "incomplete": 0,
+        "wallSecondsPerGame": 237.5977076405625
+      }
+    },
+    "pairedVsRandom": {
+      "center": {
+        "score": {
+          "meanDelta": -18179.859375,
+          "lowerBound95OneSided": -21128.5625,
+          "detectionFloor": 2970.9663913148383,
+          "wins": 61,
+          "ties": 2,
+          "losses": 193,
+          "n": 256
+        },
+        "moves": {
+          "meanDelta": -5.23828125,
+          "lowerBound95OneSided": -6.078125,
+          "detectionFloor": 0.8428231317879495,
+          "wins": 44,
+          "ties": 39,
+          "losses": 173,
+          "n": 256
+        }
+      },
+      "v1a": {
+        "score": {
+          "meanDelta": 33884.3828125,
+          "lowerBound95OneSided": 31360.62890625,
+          "detectionFloor": 2530.685934273414,
+          "wins": 232,
+          "ties": 0,
+          "losses": 24,
+          "n": 256
+        },
+        "moves": {
+          "meanDelta": 9.54296875,
+          "lowerBound95OneSided": 8.84765625,
+          "detectionFloor": 0.7076797196732517,
+          "wins": 230,
+          "ties": 20,
+          "losses": 6,
+          "n": 256
+        }
+      },
+      "v1b": {
+        "score": {
+          "meanDelta": 33968.05859375,
+          "lowerBound95OneSided": 31443.81640625,
+          "detectionFloor": 2551.58319578593,
+          "wins": 233,
+          "ties": 0,
+          "losses": 23,
+          "n": 256
+        },
+        "moves": {
+          "meanDelta": 9.5625,
+          "lowerBound95OneSided": 8.85546875,
+          "detectionFloor": 0.7114615677767893,
+          "wins": 230,
+          "ties": 20,
+          "losses": 6,
+          "n": 256
+        }
+      },
+      "v1c": {
+        "score": {
+          "meanDelta": 35804.984375,
+          "lowerBound95OneSided": 33039.32421875,
+          "detectionFloor": 2815.8298926057737,
+          "wins": 234,
+          "ties": 0,
+          "losses": 22,
+          "n": 256
+        },
+        "moves": {
+          "meanDelta": 10.02734375,
+          "lowerBound95OneSided": 9.26171875,
+          "detectionFloor": 0.7767460951936782,
+          "wins": 231,
+          "ties": 20,
+          "losses": 5,
+          "n": 256
+        }
+      },
+      "v2-pergame": {
+        "score": {
+          "meanDelta": 22655.28125,
+          "lowerBound95OneSided": 19792.64453125,
+          "detectionFloor": 2916.00439970982,
+          "wins": 204,
+          "ties": 0,
+          "losses": 52,
+          "n": 256
+        },
+        "moves": {
+          "meanDelta": 6.2265625,
+          "lowerBound95OneSided": 5.4375,
+          "detectionFloor": 0.8036584831699297,
+          "wins": 184,
+          "ties": 40,
+          "losses": 32,
+          "n": 256
+        }
+      },
+      "v3-harmonic50k": {
+        "score": {
+          "meanDelta": -18698.20703125,
+          "lowerBound95OneSided": -21678.69921875,
+          "detectionFloor": 3018.835440300639,
+          "wins": 60,
+          "ties": 2,
+          "losses": 194,
+          "n": 256
+        },
+        "moves": {
+          "meanDelta": -5.34765625,
+          "lowerBound95OneSided": -6.1953125,
+          "detectionFloor": 0.8605779344264508,
+          "wins": 41,
+          "ties": 39,
+          "losses": 176,
+          "n": 256
+        }
+      },
+      "v4-const1e-3": {
+        "score": {
+          "meanDelta": 35655.23046875,
+          "lowerBound95OneSided": 33169.34765625,
+          "detectionFloor": 2527.5670754271655,
+          "wins": 236,
+          "ties": 0,
+          "losses": 20,
+          "n": 256
+        },
+        "moves": {
+          "meanDelta": 10.0390625,
+          "lowerBound95OneSided": 9.34765625,
+          "detectionFloor": 0.703746644140385,
+          "wins": 233,
+          "ties": 18,
+          "losses": 5,
+          "n": 256
+        }
+      },
+      "v5-score17k-harmonic": {
+        "score": {
+          "meanDelta": -18698.20703125,
+          "lowerBound95OneSided": -21678.69921875,
+          "detectionFloor": 3018.835440300639,
+          "wins": 60,
+          "ties": 2,
+          "losses": 194,
+          "n": 256
+        },
+        "moves": {
+          "meanDelta": -5.34765625,
+          "lowerBound95OneSided": -6.1953125,
+          "detectionFloor": 0.8605779344264508,
+          "wins": 41,
+          "ties": 39,
+          "losses": 176,
+          "n": 256
+        }
+      },
+      "posthoc-v6-const1e-2": {
+        "score": {
+          "meanDelta": 36769.74609375,
+          "lowerBound95OneSided": 33997.0234375,
+          "detectionFloor": 2798.6296460363806,
+          "wins": 232,
+          "ties": 0,
+          "losses": 24,
+          "n": 256
+        },
+        "moves": {
+          "meanDelta": 10.24609375,
+          "lowerBound95OneSided": 9.48046875,
+          "detectionFloor": 0.7695263452699258,
+          "wins": 228,
+          "ties": 24,
+          "losses": 4,
+          "n": 256
+        }
+      },
+      "posthoc-v7-const1e-4": {
+        "score": {
+          "meanDelta": 35431.15625,
+          "lowerBound95OneSided": 32888.92578125,
+          "detectionFloor": 2584.570782515376,
+          "wins": 234,
+          "ties": 0,
+          "losses": 22,
+          "n": 256
+        },
+        "moves": {
+          "meanDelta": 9.94140625,
+          "lowerBound95OneSided": 9.234375,
+          "detectionFloor": 0.7173544853201864,
+          "wins": 231,
+          "ties": 20,
+          "losses": 5,
+          "n": 256
+        }
+      },
+      "posthoc-v8-score17k-const1e-3": {
+        "score": {
+          "meanDelta": 35670.875,
+          "lowerBound95OneSided": 33191.84765625,
+          "detectionFloor": 2528.9800162905944,
+          "wins": 235,
+          "ties": 0,
+          "losses": 21,
+          "n": 256
+        },
+        "moves": {
+          "meanDelta": 9.98828125,
+          "lowerBound95OneSided": 9.29296875,
+          "detectionFloor": 0.7046106721554741,
+          "wins": 232,
+          "ties": 19,
+          "losses": 5,
+          "n": 256
+        }
+      },
+      "transplant-py-seed10": {
+        "score": {
+          "meanDelta": 50705.24609375,
+          "lowerBound95OneSided": 47009.25,
+          "detectionFloor": 3724.6682583034963,
+          "wins": 238,
+          "ties": 0,
+          "losses": 18,
+          "n": 256
+        },
+        "moves": {
+          "meanDelta": 14.28515625,
+          "lowerBound95OneSided": 13.25,
+          "detectionFloor": 1.0504644332727489,
+          "wins": 232,
+          "ties": 20,
+          "losses": 4,
+          "n": 256
+        }
+      },
+      "fair-d4s7": {
+        "score": {
+          "meanDelta": 310871.1875,
+          "lowerBound95OneSided": 233288.5,
+          "detectionFloor": 81978.23999253676,
+          "wins": 32,
+          "ties": 0,
+          "losses": 0,
+          "n": 32
+        },
+        "moves": {
+          "meanDelta": 85.21875,
+          "lowerBound95OneSided": 64.03125,
+          "detectionFloor": 22.450334738331268,
+          "wins": 32,
+          "ties": 0,
+          "losses": 0,
+          "n": 32
+        }
+      }
+    },
+    "pairedVsUpstreamScheduleSeedA": {
+      "random": {
+        "score": {
+          "meanDelta": -33884.3828125,
+          "lowerBound95OneSided": -36389.29296875,
+          "detectionFloor": 2530.685934273414,
+          "wins": 24,
+          "ties": 0,
+          "losses": 232,
+          "n": 256
+        },
+        "moves": {
+          "meanDelta": -9.54296875,
+          "lowerBound95OneSided": -10.25,
+          "detectionFloor": 0.7076797196732517,
+          "wins": 6,
+          "ties": 20,
+          "losses": 230,
+          "n": 256
+        }
+      },
+      "center": {
+        "score": {
+          "meanDelta": -52064.2421875,
+          "lowerBound95OneSided": -55219.33984375,
+          "detectionFloor": 3225.50563200259,
+          "wins": 16,
+          "ties": 0,
+          "losses": 240,
+          "n": 256
+        },
+        "moves": {
+          "meanDelta": -14.78125,
+          "lowerBound95OneSided": -15.67578125,
+          "detectionFloor": 0.9157376858296383,
+          "wins": 3,
+          "ties": 19,
+          "losses": 234,
+          "n": 256
+        }
+      },
+      "v1b": {
+        "score": {
+          "meanDelta": 83.67578125,
+          "lowerBound95OneSided": -271.96484375,
+          "detectionFloor": 381.32709008952185,
+          "wins": 7,
+          "ties": 244,
+          "losses": 5,
+          "n": 256
+        },
+        "moves": {
+          "meanDelta": 0.01953125,
+          "lowerBound95OneSided": -0.078125,
+          "detectionFloor": 0.10674930364564958,
+          "wins": 2,
+          "ties": 251,
+          "losses": 3,
+          "n": 256
+        }
+      },
+      "v1c": {
+        "score": {
+          "meanDelta": 1920.6015625,
+          "lowerBound95OneSided": 374.15234375,
+          "detectionFloor": 1629.8464748226684,
+          "wins": 33,
+          "ties": 203,
+          "losses": 20,
+          "n": 256
+        },
+        "moves": {
+          "meanDelta": 0.484375,
+          "lowerBound95OneSided": 0.0703125,
+          "detectionFloor": 0.43969567157347805,
+          "wins": 16,
+          "ties": 226,
+          "losses": 14,
+          "n": 256
+        }
+      },
+      "v2-pergame": {
+        "score": {
+          "meanDelta": -11229.1015625,
+          "lowerBound95OneSided": -14208.03125,
+          "detectionFloor": 2983.840921146457,
+          "wins": 99,
+          "ties": 0,
+          "losses": 157,
+          "n": 256
+        },
+        "moves": {
+          "meanDelta": -3.31640625,
+          "lowerBound95OneSided": -4.12890625,
+          "detectionFloor": 0.8189992203578496,
+          "wins": 51,
+          "ties": 62,
+          "losses": 143,
+          "n": 256
+        }
+      },
+      "v3-harmonic50k": {
+        "score": {
+          "meanDelta": -52582.58984375,
+          "lowerBound95OneSided": -55796.94140625,
+          "detectionFloor": 3226.3481967582893,
+          "wins": 17,
+          "ties": 0,
+          "losses": 239,
+          "n": 256
+        },
+        "moves": {
+          "meanDelta": -14.890625,
+          "lowerBound95OneSided": -15.81640625,
+          "detectionFloor": 0.9203700681372022,
+          "wins": 4,
+          "ties": 19,
+          "losses": 233,
+          "n": 256
+        }
+      },
+      "v4-const1e-3": {
+        "score": {
+          "meanDelta": 1770.84765625,
+          "lowerBound95OneSided": 445.38671875,
+          "detectionFloor": 1367.1018431145062,
+          "wins": 51,
+          "ties": 174,
+          "losses": 31,
+          "n": 256
+        },
+        "moves": {
+          "meanDelta": 0.49609375,
+          "lowerBound95OneSided": 0.12109375,
+          "detectionFloor": 0.38705231451657607,
+          "wins": 30,
+          "ties": 208,
+          "losses": 18,
+          "n": 256
+        }
+      },
+      "v5-score17k-harmonic": {
+        "score": {
+          "meanDelta": -52582.58984375,
+          "lowerBound95OneSided": -55796.94140625,
+          "detectionFloor": 3226.3481967582893,
+          "wins": 17,
+          "ties": 0,
+          "losses": 239,
+          "n": 256
+        },
+        "moves": {
+          "meanDelta": -14.890625,
+          "lowerBound95OneSided": -15.81640625,
+          "detectionFloor": 0.9203700681372022,
+          "wins": 4,
+          "ties": 19,
+          "losses": 233,
+          "n": 256
+        }
+      },
+      "posthoc-v6-const1e-2": {
+        "score": {
+          "meanDelta": 2885.36328125,
+          "lowerBound95OneSided": 949.859375,
+          "detectionFloor": 2003.6455504317676,
+          "wins": 69,
+          "ties": 126,
+          "losses": 61,
+          "n": 256
+        },
+        "moves": {
+          "meanDelta": 0.703125,
+          "lowerBound95OneSided": 0.1796875,
+          "detectionFloor": 0.54408737576925,
+          "wins": 35,
+          "ties": 192,
+          "losses": 29,
+          "n": 256
+        }
+      },
+      "posthoc-v7-const1e-4": {
+        "score": {
+          "meanDelta": 1546.7734375,
+          "lowerBound95OneSided": 203.3828125,
+          "detectionFloor": 1403.0655946907175,
+          "wins": 40,
+          "ties": 188,
+          "losses": 28,
+          "n": 256
+        },
+        "moves": {
+          "meanDelta": 0.3984375,
+          "lowerBound95OneSided": 0.0234375,
+          "detectionFloor": 0.38755338525235894,
+          "wins": 23,
+          "ties": 215,
+          "losses": 18,
+          "n": 256
+        }
+      },
+      "posthoc-v8-score17k-const1e-3": {
+        "score": {
+          "meanDelta": 1786.4921875,
+          "lowerBound95OneSided": 247.96875,
+          "detectionFloor": 1553.998730750652,
+          "wins": 60,
+          "ties": 158,
+          "losses": 38,
+          "n": 256
+        },
+        "moves": {
+          "meanDelta": 0.4453125,
+          "lowerBound95OneSided": 0.00390625,
+          "detectionFloor": 0.44304370399090076,
+          "wins": 33,
+          "ties": 199,
+          "losses": 24,
+          "n": 256
+        }
+      },
+      "transplant-py-seed10": {
+        "score": {
+          "meanDelta": 16820.86328125,
+          "lowerBound95OneSided": 13375.140625,
+          "detectionFloor": 3551.9350562963873,
+          "wins": 172,
+          "ties": 1,
+          "losses": 83,
+          "n": 256
+        },
+        "moves": {
+          "meanDelta": 4.7421875,
+          "lowerBound95OneSided": 3.765625,
+          "detectionFloor": 1.0052308743029887,
+          "wins": 146,
+          "ties": 54,
+          "losses": 56,
+          "n": 256
+        }
+      },
+      "fair-d4s7": {
+        "score": {
+          "meanDelta": 270541.75,
+          "lowerBound95OneSided": 192695.03125,
+          "detectionFloor": 82053.32646721751,
+          "wins": 32,
+          "ties": 0,
+          "losses": 0,
+          "n": 32
+        },
+        "moves": {
+          "meanDelta": 73.78125,
+          "lowerBound95OneSided": 52.5625,
+          "detectionFloor": 22.434533412570378,
+          "wins": 32,
+          "ties": 0,
+          "losses": 0,
+          "n": 32
+        }
+      }
+    },
+    "fairD4s7MinusArmOn32Seeds": {
+      "v1a": {
+        "score": {
+          "n": 32,
+          "meanDelta": 270541.75,
+          "lowerBound95OneSided": 192695.03125,
+          "detectionFloor": 82053.32646721751,
+          "d4Wins": 32
+        },
+        "moves": {
+          "n": 32,
+          "meanDelta": 73.78125,
+          "lowerBound95OneSided": 52.5625,
+          "detectionFloor": 22.434533412570378,
+          "d4Wins": 32
+        }
+      },
+      "v1b": {
+        "score": {
+          "n": 32,
+          "meanDelta": 270525.15625,
+          "lowerBound95OneSided": 192682.625,
+          "detectionFloor": 82057.20922348001,
+          "d4Wins": 32
+        },
+        "moves": {
+          "n": 32,
+          "meanDelta": 73.78125,
+          "lowerBound95OneSided": 52.5625,
+          "detectionFloor": 22.434533412570378,
+          "d4Wins": 32
+        }
+      },
+      "v1c": {
+        "score": {
+          "n": 32,
+          "meanDelta": 270887.71875,
+          "lowerBound95OneSided": 193129.65625,
+          "detectionFloor": 82029.19445437868,
+          "d4Wins": 32
+        },
+        "moves": {
+          "n": 32,
+          "meanDelta": 73.9375,
+          "lowerBound95OneSided": 52.6875,
+          "detectionFloor": 22.418502309774887,
+          "d4Wins": 32
+        }
+      },
+      "v4-const1e-3": {
+        "score": {
+          "n": 32,
+          "meanDelta": 267748.4375,
+          "lowerBound95OneSided": 189256.09375,
+          "detectionFloor": 82670.43661176393,
+          "d4Wins": 32
+        },
+        "moves": {
+          "n": 32,
+          "meanDelta": 73,
+          "lowerBound95OneSided": 51.59375,
+          "detectionFloor": 22.60861723182293,
+          "d4Wins": 32
+        }
+      },
+      "posthoc-v6-const1e-2": {
+        "score": {
+          "n": 32,
+          "meanDelta": 268999.65625,
+          "lowerBound95OneSided": 190633.8125,
+          "detectionFloor": 82964.06737634224,
+          "d4Wins": 32
+        },
+        "moves": {
+          "n": 32,
+          "meanDelta": 73.46875,
+          "lowerBound95OneSided": 52.03125,
+          "detectionFloor": 22.673555252741274,
+          "d4Wins": 32
+        }
+      },
+      "transplant-py-seed10": {
+        "score": {
+          "n": 32,
+          "meanDelta": 256506.53125,
+          "lowerBound95OneSided": 182667.84375,
+          "detectionFloor": 78563.49874774784,
+          "d4Wins": 31
+        },
+        "moves": {
+          "n": 32,
+          "meanDelta": 69.78125,
+          "lowerBound95OneSided": 49.625,
+          "detectionFloor": 21.458822876809553,
+          "d4Wins": 30
+        }
+      },
+      "cem-optimum": {
+        "score": {
+          "n": 32,
+          "meanDelta": 233361.8125,
+          "lowerBound95OneSided": 153370.25,
+          "detectionFloor": 84813.95586521014,
+          "d4Wins": 30
+        },
+        "moves": {
+          "n": 32,
+          "meanDelta": 63.28125,
+          "lowerBound95OneSided": 41.375,
+          "detectionFloor": 23.24530659680475,
+          "d4Wins": 30
+        }
+      },
+      "random": {
+        "score": {
+          "n": 32,
+          "meanDelta": 310871.1875,
+          "lowerBound95OneSided": 233288.5,
+          "detectionFloor": 81978.23999253676,
+          "d4Wins": 32
+        },
+        "moves": {
+          "n": 32,
+          "meanDelta": 85.21875,
+          "lowerBound95OneSided": 64.03125,
+          "detectionFloor": 22.450334738331268,
+          "d4Wins": 32
+        }
+      }
+    },
+    "weights": {
+      "v1a": [
+        7.034419633539343,
+        0.4704216784547802,
+        0.7093075576465824,
+        -0.16254354557122674,
+        0.708433867399041,
+        0.32106415691246726
+      ],
+      "v1b": [
+        6.575499911928095,
+        0.47171953576648534,
+        0.712954275798451,
+        0.4958356485959062,
+        0.6286464619830137,
+        0.34155747812060167
+      ],
+      "v1c": [
+        6.30340662076693,
+        0.46907585782716543,
+        0.7100697733109943,
+        0.45269421516434644,
+        0.5079692960337009,
+        0.37623544107588086
+      ],
+      "v2-pergame": [
+        126567372.36467087,
+        5226833.568284964,
+        10255805.673372919,
+        32348357.10683996,
+        1063318289.7717056,
+        -983385274.1063958
+      ],
+      "v4-const1e-3": [
+        7.407369311630548,
+        0.46716554104495167,
+        0.6133818787636283,
+        1.1831073582526992,
+        0.4383842315566765,
+        0.3551139649857014
+      ],
+      "posthoc-v6-const1e-2": [
+        7.191006871026099,
+        0.22813763414157626,
+        0.43360767528696204,
+        1.553913641254215,
+        0.5221547970317826,
+        0.3748851577365717
+      ],
+      "posthoc-v7-const1e-4": [
+        7.432841586026214,
+        0.4623528519567754,
+        0.7064577035391237,
+        1.2737261293844768,
+        0.43094874978235886,
+        0.39350763863299854
+      ],
+      "posthoc-v8-score17k-const1e-3": [
+        1.369919532551276,
+        0.08460784653087831,
+        0.09699259805589358,
+        0.22990592396252357,
+        0.06945021844278582,
+        0.07043275223323353
+      ],
+      "transplant-py-seed10": [
+        175.67544967426653,
+        33.08923614095049,
+        123.97361476703807,
+        15.424699884446161,
+        49.143686787500314,
+        138.66790457434547
+      ]
+    },
+    "trainingCurvesBlockMeanMoves1000": {
+      "v5-score17k-harmonic": [
+        22.299,
+        21.587,
+        21.719,
+        21.425,
+        21.655,
+        21.529,
+        21.372,
+        21.881,
+        21.869,
+        21.443,
+        21.359,
+        21.804,
+        21.61,
+        22.034,
+        21.546,
+        21.615,
+        21.587,
+        21.422,
+        21.231,
+        21.534,
+        21.877,
+        21.906,
+        21.827,
+        21.744,
+        21.699,
+        21.6,
+        21.599,
+        21.185,
+        21.826,
+        21.564,
+        21.521,
+        21.53,
+        21.827,
+        21.54,
+        21.575,
+        21.917,
+        21.492,
+        21.597,
+        22.012,
+        21.482,
+        21.567,
+        21.196,
+        21.568,
+        21.496,
+        21.778,
+        21.94,
+        21.853,
+        22.052,
+        21.395,
+        21.529
+      ],
+      "posthoc-v7-const1e-4": [
+        36.455,
+        36.873,
+        36.014,
+        35.272,
+        35.03,
+        35.25,
+        35.427,
+        35.168,
+        35.56,
+        35.318,
+        35.268,
+        35.384,
+        35.599,
+        35.264,
+        35.526,
+        35.579,
+        35.356,
+        35.436,
+        35.802,
+        35.33,
+        35.397,
+        35.476,
+        35.275,
+        35.777,
+        35.446,
+        35.551,
+        35.567,
+        35.626,
+        35.262,
+        35.221,
+        35.788,
+        35.742,
+        35.193,
+        35.269,
+        35.519,
+        35.822,
+        35.203,
+        35.749,
+        35.481,
+        35.704,
+        36.042,
+        35.421,
+        35.484,
+        35.643,
+        35.806,
+        35.646,
+        35.482,
+        35.828,
+        35.567,
+        35.595
+      ],
+      "v2-pergame": [
+        31.562,
+        32.142,
+        31.977,
+        32.168,
+        31.878,
+        32.293,
+        32.239,
+        31.976,
+        32.45,
+        31.969,
+        32.396,
+        32.312,
+        32.199,
+        32.036,
+        32.415,
+        32.366,
+        32.362,
+        32.181,
+        32.031,
+        32.211,
+        32.29,
+        32.254,
+        32.544,
+        31.75,
+        32.468,
+        32.251,
+        32.41,
+        32.037,
+        32.316,
+        32.36,
+        32.337,
+        32.381,
+        32.166,
+        32.016,
+        32.3,
+        32.634,
+        32.163,
+        32.711,
+        32.528,
+        32.866,
+        32.543,
+        32.372,
+        32.378,
+        32.62,
+        32.332,
+        32.283,
+        32.374,
+        32.295,
+        32.061,
+        32.23
+      ],
+      "v1a": [
+        34.885,
+        34.864,
+        35.169,
+        35.273,
+        34.653,
+        34.972,
+        35.133,
+        35.24,
+        35.418,
+        35.266,
+        35.138,
+        35.289,
+        35.357,
+        34.975,
+        35.411,
+        35.909,
+        35.459,
+        35.385,
+        35.659,
+        35.471,
+        35.635,
+        35.352,
+        35.222,
+        35.288,
+        35.369,
+        35.131,
+        35.087,
+        35.425,
+        35.453,
+        35.293,
+        35.087,
+        35.389,
+        35.254,
+        35.383,
+        35.114,
+        35.731,
+        35.446,
+        35.586,
+        35.378,
+        35.421,
+        35.59,
+        35.467,
+        35.482,
+        35.405,
+        35.514,
+        35.594,
+        35.581,
+        35.858,
+        35.581,
+        35.783
+      ],
+      "posthoc-v6-const1e-2": [
+        34.737,
+        35.345,
+        35.077,
+        34.983,
+        34.656,
+        35.354,
+        35.483,
+        35.448,
+        35.573,
+        35.57,
+        35.232,
+        35.338,
+        35.371,
+        35.151,
+        35.165,
+        35.492,
+        35.597,
+        35.364,
+        35.68,
+        35.665,
+        35.351,
+        35.414,
+        35.058,
+        35.337,
+        35.44,
+        35.371,
+        35.459,
+        35.213,
+        35.725,
+        35.284,
+        35.294,
+        35.496,
+        35.204,
+        35.071,
+        35.512,
+        35.502,
+        35.14,
+        35.582,
+        35.556,
+        35.619,
+        35.375,
+        35.476,
+        35.255,
+        35.434,
+        35.605,
+        35.652,
+        35.451,
+        35.731,
+        35.313,
+        35.973
+      ],
+      "posthoc-v8-score17k-const1e-3": [
+        35.392,
+        34.816,
+        35.453,
+        35.266,
+        35.088,
+        35.273,
+        35.333,
+        35.678,
+        35.699,
+        35.299,
+        35.092,
+        35.146,
+        35.702,
+        35.178,
+        35.72,
+        35.376,
+        35.52,
+        35.354,
+        35.805,
+        35.581,
+        35.493,
+        35.558,
+        35.309,
+        35.567,
+        35.483,
+        35.588,
+        35.211,
+        35.57,
+        35.35,
+        35.417,
+        35.797,
+        35.536,
+        35.259,
+        35.188,
+        35.448,
+        35.803,
+        35.39,
+        35.739,
+        35.578,
+        35.639,
+        35.678,
+        35.494,
+        35.481,
+        35.476,
+        35.61,
+        35.919,
+        35.416,
+        35.861,
+        35.413,
+        35.623
+      ],
+      "v3-harmonic50k": [
+        21.99,
+        21.581,
+        21.534,
+        21.66,
+        21.74,
+        21.532,
+        21.513,
+        21.741,
+        21.855,
+        21.594,
+        21.398,
+        21.804,
+        21.61,
+        22.034,
+        21.546,
+        21.615,
+        21.587,
+        21.422,
+        21.231,
+        21.534,
+        21.877,
+        21.906,
+        21.827,
+        21.744,
+        21.699,
+        21.6,
+        21.599,
+        21.185,
+        21.826,
+        21.564,
+        21.521,
+        21.53,
+        21.827,
+        21.54,
+        21.575,
+        21.917,
+        21.492,
+        21.597,
+        22.012,
+        21.482,
+        21.567,
+        21.196,
+        21.568,
+        21.496,
+        21.778,
+        21.94,
+        21.853,
+        22.052,
+        21.395,
+        21.529
+      ],
+      "v4-const1e-3": [
+        35.162,
+        34.948,
+        35.522,
+        35.323,
+        35.207,
+        35.175,
+        35.578,
+        35.338,
+        35.821,
+        35.21,
+        35.131,
+        35.301,
+        35.436,
+        35.381,
+        35.298,
+        35.536,
+        35.792,
+        35.382,
+        35.914,
+        35.212,
+        35.427,
+        35.471,
+        35.19,
+        35.707,
+        35.526,
+        35.199,
+        35.483,
+        35.734,
+        35.481,
+        35.379,
+        35.361,
+        35.424,
+        35.36,
+        34.933,
+        35.603,
+        35.791,
+        35.265,
+        35.87,
+        35.681,
+        35.648,
+        35.656,
+        35.247,
+        35.429,
+        35.559,
+        35.743,
+        35.847,
+        35.664,
+        35.578,
+        35.859,
+        35.729
+      ],
+      "v1c": [
+        34.762,
+        34.896,
+        35.396,
+        35.001,
+        34.817,
+        35.29,
+        35.334,
+        35.268,
+        35.601,
+        35.386,
+        35.33,
+        35.537,
+        35.581,
+        35.239,
+        35.177,
+        35.498,
+        35.433,
+        35.446,
+        35.751,
+        35.268,
+        35.323,
+        35.522,
+        35.336,
+        35.501,
+        35.327,
+        35.489,
+        35.548,
+        35.861,
+        35.511,
+        35.385,
+        35.491,
+        35.447,
+        35.4,
+        35.3,
+        35.39,
+        35.733,
+        35.055,
+        35.739,
+        35.428,
+        35.535,
+        35.863,
+        35.342,
+        35.475,
+        35.559,
+        35.425,
+        35.605,
+        35.726,
+        35.677,
+        35.649,
+        35.432
+      ],
+      "v1b": [
+        35.095,
+        34.86,
+        34.952,
+        35.262,
+        34.704,
+        34.985,
+        35.487,
+        34.99,
+        35.422,
+        35.658,
+        35.096,
+        35.536,
+        35.351,
+        35.083,
+        35.301,
+        35.457,
+        35.257,
+        35.179,
+        35.663,
+        35.317,
+        35.298,
+        35.291,
+        35.098,
+        35.355,
+        35.424,
+        35.353,
+        35.553,
+        35.428,
+        35.077,
+        35.529,
+        35.667,
+        35.658,
+        35.435,
+        35.429,
+        35.507,
+        35.496,
+        35.428,
+        35.405,
+        35.589,
+        35.596,
+        35.521,
+        35.335,
+        35.583,
+        35.263,
+        35.167,
+        35.632,
+        35.622,
+        35.708,
+        35.33,
+        35.749
+      ]
+    },
+    "trainingMovesPerSecond": {
+      "v5-score17k-harmonic": 1792800.4042110844,
+      "posthoc-v7-const1e-4": 1066290.2992020862,
+      "v2-pergame": 1357777.7132592688,
+      "v1a": 1379994.5961774543,
+      "posthoc-v6-const1e-2": 949765.508538465,
+      "posthoc-v8-score17k-const1e-3": 1052385.4211452978,
+      "v3-harmonic50k": 1798252.7015165382,
+      "v4-const1e-3": 1368570.7128600716,
+      "v1c": 1369640.3358667113,
+      "v1b": 1374364.8756306435
+    },
+    "ledgerReferenceD4Broad64": 308295.578,
+    "bootstrap": {
+      "resamples": 10000,
+      "rngSeedHex": "0x6b660001",
+      "method": "percentile, one-sided 95% lower bound"
+    }
+  },
+  "gateChecks": [
+    {
+      "criterion": "G1 feature parity: >= 20,000 exported (state, action) pairs, 0 mismatches after the gray-encoding swap",
+      "passed": true,
+      "observed": "54,852 pairs from 7,242 upstream states (100 random-play and 100 greedy games), 0 mismatches (parity-features.txt)"
+    },
+    {
+      "criterion": "G2 update parity: >= 3 upstream training games replayed with weights within 1e-9 relative after every step",
+      "passed": true,
+      "observed": "5 games, 250 incorporateFeedback calls, worst relative difference 0 (parity-update.txt)"
+    },
+    {
+      "criterion": "G3 legality and determinism: 0 illegal decisions; rows byte-identical across 1 and 8 threads and a repeat; public-view-only policy type",
+      "passed": true,
+      "observed": "3 arms x 64 probe games identical across threads1/threads8/repeat, 0 illegal decisions (g3-determinism.txt); every cohort arm reports 0 illegal decisions; policies take PublicView only"
+    },
+    {
+      "criterion": "G4 (theory iii-a): upstream-schedule survival arm's paired lifetime delta over uniform-random has LB95 > 0",
+      "passed": true,
+      "observed": "v1a +9.54 moves [LB95 +8.85], 232/0/24; v1b and v1c agree"
+    },
+    {
+      "criterion": "G5 (theory iii-b): every six-feature arm's mean corrected score < 205,530 and fair d4s7 beats the best six-feature arm on the 32-seed subset with LB95 > 0",
+      "passed": true,
+      "observed": "highest six-feature mean in this experiment 123,968 (transplant); fair d4s7 minus transplant +256507 [LB95 +182668], d4s7 wins 31/32; minus v1a +270542 [LB95 +192695], 32/32"
+    },
+    {
+      "criterion": "G6 (theory iv, recorded either way): whether any slower-schedule arm beats the upstream-schedule arm's mean lifetime with LB95 > 0",
+      "passed": true,
+      "observed": "constant 0.001: +0.50 moves [LB95 +0.12] (floor 0.39); per-game step: weights ~1e9, -3.32 moves; harmonic tau 50,000: NaN weights, -14.89 moves. Identical-configuration seed spread v1c-v1a: +0.48 [LB95 +0.07]. Post hoc: constant 0.01 +0.70 [+0.18], constant 0.0001 +0.40 [+0.02], score reward at 0.001 +0.45 [+0.00]. 'passed' means a slower arm did clear LB95 > 0; the effect equals seed noise."
+    }
+  ],
+  "perGameArtifact": {
+    "path": "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/evaluate.json",
+    "sha256": "8926f6415372e2bb6ce9635c5e6f102ca8c5ca76e0683499ea1a294a6958b7b8",
+    "recordCount": 3072
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260902T080517Z-dec42aab.json"
+  ],
+  "artifactManifestRef": "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/manifest.json",
+  "limitations": [
+    "Pilot tier on previously evaluated development seeds: the cohort had been read by the centre policy before and can never become confirmation evidence; nothing here advances a benchmark tier.",
+    "Training re-read the first 50,000 seeds of an already-open training-role block without a new lease record; the coordinator has not yet confirmed that reuse. Any citation outside the pilot tier waits on that decision.",
+    "The fair d4s7 arm covers 32 of the 256 seeds (237.6 s per game on the laptop); its 32-game deltas have detection floors near 82,000 points and 22 moves.",
+    "Three arms (constant 0.01, constant 0.0001, score reward at constant 0.001) were added post hoc after the preregistered arms were trained; they are labelled post hoc everywhere and decide no gate.",
+    "The G6 outcome is recorded as observed: the constant-0.001 arm's +0.50 moves clears its LB95 but equals the identical-configuration seed spread; the theory's clause (iv) is therefore judged not supported at the letter and the theory assessment is 'mixed'.",
+    "Wall times were measured while other arms and the concurrent reproduction run shared the 12-core laptop; the 1.4 million moves per second figure is single-process throughput and not a clean benchmark.",
+    "The rules engine is the repository's; board-level parity with the upstream simulator is not claimed, only feature and update parity."
+  ],
+  "contributionIds": [
+    "CT-20260902T082510Z-4af4b77b"
+  ],
+  "recordedAt": "2026-09-02T08:43:56Z"
+}

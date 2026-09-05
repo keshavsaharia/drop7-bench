@@ -1,0 +1,100 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260902-nnue-evolution-d3-v2-49c18bc2",
+  "theoryIds": [
+    "TH-20260825-evolved-nnue-leaf-d3-0f47e46c"
+  ],
+  "title": "Depth-5-distilled NNUE leaf refined by paired-fitness whole-game evolution inside the depth-3 fair search (v2: operational parameters fixed in the record body)",
+  "classification": "algorithmic",
+  "hypothesis": "Successor to EX-20260825-nnue-evolution-d3-bca7f330. The scientific protocol is carried over unchanged: candidate, comparator, information boundary, benchmark tier, leases, metrics, uncertainty method, pass criteria, failure and pass actions, GA constants and stop rules are those of v1 verbatim below. What v2 adds is the set of operational parameters v1 left open, fixed before any leased seed was read (the training lease opened 2026-09-02T04:24:10Z; these values were first recorded at 04:02Z and 04:23Z as in-place amendments of v1, which the repository rule on frozen records does not permit, hence this successor): (1) stage A plays with --move-cap 500 (teacher game lengths are heavy-tailed per the August 25 T0 pilot; labels are search values, so the cap truncates the late-game state distribution but biases no label; capped games are recorded as censored) and admits no new game after a 46,800 s wall sub-budget, in-flight games finishing and being kept, the completed whole games forming the corpus as the v1 stop rule already permits; (2) stage B uses batch 64, lr 3e-4, Huber delta 1.0 rise unit, seed 0x0e701e57, 16 epochs with the best epoch chosen by validation Huber, and 256 held-out probe roots; (3) stage C uses the v1 GA constants with a 21,600 s wall sub-budget and the elite re-selection block 0xa52e0c80 exactly as leased; (4) every stage runs with 32 threads: a seed-free scaling preflight on the already-opened probe block 0xa5277800-0xa527783f (64 complete d4s7 teacher-corpus games, 7,830 roots) gave bit-identical root and game records at 16 and 32 threads and 1.020 vs 1.577 s per root per thread, a 1.29x throughput gain from SMT on the 16 physical cores; thread count changes no decision, label, seed, gate or metric; (5) the held-out screen is opened once on the frozen candidate regardless of the theory's training-signal falsifier, which is evaluated and reported separately from the screen gate. Every stage is launched through approaches/lifetime-objective/nnue-evolution/scripts/pipeline.sh, which hard-codes the leased sub-blocks and records per-stage wall, CPU and peak-RSS usage. v1 protocol as frozen: Candidate: the stock fair expectimax search at depth 3, seven chance strata, terminal utility -1,000,000, policy seed 0xd7075eed, completion-guaranteeing work bound work_bound_for(3,7)+1, 64k-entry direct-mapped table, with an NNUE leaf (8,902-feature sparse class, 135 active, EmbeddingBag(8902,64)->ReLU->32->ReLU->1, output x 17,000 points). Weights: initialised by supervised distillation of a depth-5 seven-stratum fair teacher's sibling-complete root values (512 training games, whole-origin split, Adam on Huber loss, best epoch by validation Huber), then refined by a mutation-only GA: population 32, 60 generations, fitness = mean score of 32 complete paired games per candidate on a fresh training block per generation, 4 elites cloned, tournament size 3, per-tensor Gaussian mutation sigma = 0.05 x tensor std (floor 1e-4), initial cloud 2 sigma, evolution seed 0x0e701e58, controls fair-d3s7 and init-d3s7 playing every block. Final candidate: top 8 of the last generation re-evaluated on a fresh 128-game block, best mean frozen. The frozen candidate is then screened once on 64 never-read paired development games against the identical search with the frozen fair leaf.",
+  "candidate": {
+    "name": "d3s7-evolved-nnue-leaf",
+    "entryPoint": "approaches/lifetime-objective/nnue-evolution/src/bin/evolve.rs",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "fair-d3s7",
+    "entryPoint": "approaches/fair-expectimax/rust-engine/src/leaf.rs",
+    "manifestRef": "research/benchmarks/baselines-v1.json"
+  },
+  "informationBoundary": "public-policy",
+  "benchmarkTier": "SCREEN",
+  "data": {
+    "role": "public-development",
+    "seedLeaseRefs": [
+      "SL-20260825T063000Z-a52e0300",
+      "SL-20260825T063000Z-a52e1300"
+    ],
+    "datasetRefs": [],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "CHECK gates and the T0 timing pilot read only the already-opened development probe block 0xa5276000-0xa5277fff (the Rust engine's gate/benchmark range); no new seed is opened for mechanics or timing. The teacher corpus, every evolution fitness block, and the elite re-selection open training-lease seeds 0xa52e0300-0xa52e0d00; the held-out screen opens 0xa52e1300-0xa52e133f exactly once, after the candidate is frozen. Training and screen ranges are disjoint by construction. The 2026-09-02 thread-scaling preflight read only the already-opened probe block 0xa5277800-0xa527783f."
+  },
+  "metrics": {
+    "primary": "paired mean whole-game score delta, evolved candidate minus frozen fair leaf, both at the identical d3s7 configuration, 64 held-out games",
+    "secondary": [
+      "paired mean moves delta; numbered clears per move and cover reveals per move; mean occupied cells",
+      "lower quartile, median, maximum score; W-T-L; first-half and second-half paired mean deltas",
+      "ablation arm on the same seeds: the supervised-init (unevolved) NNUE at d3s7, isolating the evolutionary stage's contribution",
+      "reference arm on the same seeds: the fair leaf at d4s7 (the program's standing reference configuration), diagnostic only",
+      "training-curve diagnostics: per-generation best and mean fitness against the paired fair-d3s7 control on the same blocks",
+      "supervised-init diagnostics: whole-origin validation Huber/Pearson and the deployment-faithful ordering probe (d3s7+NNUE top-1 agreement with the teacher's chosen column, teacher-value regret) on held-out corpus roots"
+    ],
+    "statisticalUnit": "whole-game",
+    "uncertaintyMethod": "one-sided 95% percentile bootstrap over whole games, 20,000 resamples, RNG seed 0xb0071eaf (the unchanged compare.py of the prior leaf-evolution screen), plus a one-sided 95% Student-t lower bound; detection floor 1.645*sd/sqrt(n) reported"
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "All CHECK gates passed before the first training seed was read: feature determinism and bounds, information-boundary blindness (score/level/moves_played), reflection consistency on asymmetric boards (finding-13 exclusion), fresh-searcher and 1-vs-4-worker determinism, legality and completed depth under random/zero/saturated weights, leaf finiteness fuzz, serialisation round-trip.",
+      "Every generation artifact and the screen artifact have illegalDecisions 0, incompleteDecisions 0, and censored games reported as censored.",
+      "Held-out screen, 64 paired games on 0xa52e1300-0xa52e133f, candidate vs fair-d3s7: bootstrap 95% lower bound of the paired score delta > 0 AND Student-t 95% lower bound > 0.",
+      "Held-out screen: paired mean score delta > 0 in both halves (seeds 0-31 and 32-63).",
+      "Held-out screen: candidate lower-quartile score >= fair-d3s7 lower-quartile score.",
+      "The screened candidate is the exact frozen winner of the elite re-selection (candidate-weights.bin, SHA-256 recorded before the screen lease opens); no other vector is screened."
+    ],
+    "failureAction": "Record a valid run with scientific outcome fail for this exact configuration (model class, teacher depth, optimiser, budget, deployment depth); do not adopt the vector; the ablation and reference arms are reported as diagnostics; open no further cohort for this candidate.",
+    "passAction": "Freeze candidate-weights.bin with its SHA-256; register a fresh-block replication by a different runner and a fresh-development STANDARD evaluation as successors; do not open protected or final seeds."
+  },
+  "resources": {
+    "wallSeconds": 86400,
+    "cpuThreads": 32,
+    "maxHostBytes": 17179869184,
+    "maxGpuBytes": null,
+    "gpuDevices": []
+  },
+  "stopConditions": [
+    "Stop on any rules, information-boundary, legality, determinism, or parity failure.",
+    "The teacher corpus is checkpointed per game and stops at 512 games or the wall budget; whatever whole games completed are the corpus (the count is recorded; the supervised stage does not depend on it being exactly 512).",
+    "Evolution stops at 60 generations, at the wall budget, or when a STOP file appears in the run directory; the candidate is then the elite re-selection over the last completed generation's population.",
+    "A generation or screen artifact with any illegal or incomplete decision voids the run (invalid), not the candidate.",
+    "The screen is evaluated exactly once; no re-run on the same or a different held-out block without a new experiment record.",
+    "Stage A admits no new teacher game after 46,800 s of wall time; games in flight finish and are kept; the corpus is the set of completed whole games (count recorded).",
+    "Stage C stops at 60 generations or 21,600 s of wall time, whichever comes first; the elite re-selection then runs on the last completed generation."
+  ],
+  "expectedArtifacts": [
+    "runs/<run-id>/nnue-evolution/gates.log (CHECK)",
+    "runs/<run-id>/nnue-evolution/corpus.jsonl + corpus-summary.json (stage A)",
+    "runs/<run-id>/nnue-evolution/pretrain/{epoch-*.bin,init.bin,report.json,probe.json} (stage B)",
+    "runs/<run-id>/nnue-evolution/evolve/{config.json,progress.jsonl,gen-*.json,population-*.bin,final-fitness.json,candidate-weights.bin,selection.json} (stage C)",
+    "runs/<run-id>/nnue-evolution/screen/heldout.json + compare-*.json (stage D)",
+    "runs/<run-id>/nnue-evolution/{pipeline.log,rusage.jsonl,preflight-d4-t16.log,preflight-d4-t32.log,analysis.json,analysis.md}",
+    "artifacts emitted by evolve and screen carry this experiment id in their config field"
+  ],
+  "lifecycle": "completed",
+  "protocolSha256": "66d163bb2d39cf4da157a1044be766eb124af28c158a7750e2064ad61edda942",
+  "amendments": [
+    {
+      "timestamp": "2026-09-03T02:57:51Z",
+      "beforeControlledData": false,
+      "reason": "lifecycle advanced running -> completed after run RUN-20260902T035644Z-c1fd8987 and result RS-20260903T025751Z-6577b33e were written; protocol content otherwise unchanged. The preregistration hash 971a39ef6bb5275a951342245a119cb3d234bed334aa28e2ecfe44eeeeea4dae is retained in the run and lease records."
+    }
+  ],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5-1",
+    "agentId": "claude-code-evolution-experiment"
+  },
+  "createdAt": "2026-09-02T06:57:41Z",
+  "updatedAt": "2026-09-03T02:57:51Z"
+}

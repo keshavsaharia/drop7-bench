@@ -1,0 +1,61 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "lifecycle": "completed",
+  "runValidity": "valid",
+  "startedAt": "2026-09-02T18:42:41Z",
+  "endedAt": "2026-09-03T00:42:41Z",
+  "machineProfileRef": "research/system-profiles/MACH-20260902T080517Z-dec42aab.json",
+  "sourceState": {
+    "gitCommit": "61c18eb019f8ab82634ecdcc984188b183492f20",
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "seedLeaseRefs": [],
+  "exitCode": 0,
+  "stopReason": "completed",
+  "artifactRefs": [
+    "runs/RUN-20260902T184241Z-062fef8c/oneply-q/root-terms.ndjson",
+    "runs/RUN-20260902T184241Z-062fef8c/oneply-q/fit-leaf.json",
+    "runs/RUN-20260902T184241Z-062fef8c/oneply-q/weights-leaf18.txt",
+    "runs/RUN-20260902T184241Z-062fef8c/oneply-q/weights-leaf19.txt",
+    "runs/RUN-20260902T184241Z-062fef8c/oneply-q/leaf-terms.log",
+    "runs/RUN-20260902T184241Z-062fef8c/oneply-q/fit-leaf.log",
+    "runs/RUN-20260902T184241Z-062fef8c/oneply-q/leaf-d5.ndjson",
+    "runs/RUN-20260902T184241Z-062fef8c/oneply-q/leaf-d5-summary.json",
+    "runs/RUN-20260902T184241Z-062fef8c/oneply-q/leaf-d5.log",
+    "runs/RUN-20260902T184241Z-062fef8c/oneply-q/evaluate-leaf.json",
+    "runs/RUN-20260902T184241Z-062fef8c/oneply-q/evaluate-leaf.log",
+    "runs/RUN-20260902T184241Z-062fef8c/oneply-q/leaf-pilot-summary.json",
+    "runs/RUN-20260902T184241Z-062fef8c/oneply-q/leaf-bounds.json",
+    "runs/RUN-20260902T184241Z-062fef8c/oneply-q/leaf-stages.log",
+    "research/results/RS-20260903T013022Z-b0937bf9.json"
+  ],
+  "contributionIds": [
+    "CT-20260902T082510Z-4af4b77b"
+  ],
+  "runId": "RUN-20260902T184241Z-062fef8c",
+  "experimentId": "EX-20260902-treestrap-leaf-refit-panel-and-pilot-4024f360",
+  "protocolSha256": "79d85f7ea7273d92382d12b0b8e33fd9fe2a1cd2efce4cf5d43257d8c3503134",
+  "command": [
+    "target/release/leaf_terms --panel runs/RUN-20260902T175250Z-3164a88a/oneply-q/panel.ndjson --kf-weights runs/RUN-20260902T083357Z-196a7b87/kf-six-weight-cem/weights-cem.txt --out runs/RUN-20260902T184241Z-062fef8c/oneply-q/root-terms.ndjson",
+    "python3 analysis/fit_leaf.py --panel ... --terms runs/RUN-20260902T184241Z-062fef8c/oneply-q/root-terms.ndjson --cem-weights ... --train-games 32 --floor -50000 --out runs/RUN-20260902T184241Z-062fef8c/oneply-q/fit-leaf.json --weights18-out runs/RUN-20260902T184241Z-062fef8c/oneply-q/weights-leaf18.txt --weights19-out runs/RUN-20260902T184241Z-062fef8c/oneply-q/weights-leaf19.txt",
+    "target/release/prune_eval --panel runs/RUN-20260902T175250Z-3164a88a/oneply-q/panel.ndjson --game-min 32 --game-max 47 --every 16 --limit 128 --threads 12 --out runs/RUN-20260902T184241Z-062fef8c/oneply-q/leaf-d5.ndjson --config exact:4:7 --config leaf:4:7:.../weights-leaf18.txt --config leaf:4:7:.../weights-leaf19.txt; python3 analysis/prune_metrics.py --results .../leaf-d5.ndjson --truth-results runs/RUN-20260902T175250Z-3164a88a/oneply-q/d5-panel.ndjson --truth-config exact:5:7 --reference-config exact:4:7 --paired-config exact:4:7 --out .../leaf-d5-summary.json",
+    "target/release/evaluate --seeds-start 0xa5277000 --games 256 --move-cap 2000 --threads 6 --table 65536 --out runs/RUN-20260902T184241Z-062fef8c/oneply-q/evaluate-leaf.json --arm leaf:4:7:runs/RUN-20260902T184241Z-062fef8c/oneply-q/weights-leaf18.txt  (stage 3, started 20:25 UTC alongside the EX-5 arms)",
+    "python3 analysis/paired_bounds.py runs/RUN-20260902T184241Z-43722e86/oneply-q/evaluate-pilot-fair.json runs/RUN-20260902T184241Z-062fef8c/oneply-q/evaluate-leaf.json --reference fair-d4s7 --out runs/RUN-20260902T184241Z-062fef8c/oneply-q/leaf-bounds.json; summarize_evaluate.py (same) --out runs/RUN-20260902T184241Z-062fef8c/oneply-q/leaf-pilot-summary.json"
+  ],
+  "resourceLimits": {
+    "wallSeconds": 14400,
+    "cpuThreads": 12,
+    "maxHostBytes": 8589934592,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": 15700,
+    "cpuSeconds": null,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "Stage 1 under a minute (18:42 UTC); stage 2 178.7 s on 12 threads (20:21-20:24 UTC); stage 3 leaf arm on 6 threads 20:25:12-00:42:41 (15,449 s) concurrent with the three EX-5 arms. Total about 15,700 s exceeds the preregistered 14,400 s stop by about 1,300 s; not enforced; no arm cut short; rows deterministic. Seeds: panel 0xa5200000-0xa520002f (already read) and pilot cohort 0xa5277000-0xa52770ff (repeat read); zero new seeds."
+  }
+}

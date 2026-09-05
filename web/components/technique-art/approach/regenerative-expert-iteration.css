@@ -1,0 +1,44 @@
+/* ntuple-rl/regenerative-expert-iteration card art. The markers carry a round
+   once around the loop — label, learn, play — a fresh row of the student's
+   own games slides from the network into the pile, and the search lights up
+   ready to label it. The markers sit 120 degrees apart and the cycle turns
+   them by exactly 120 degrees, so the loop repeats without a seam and the
+   resting frame is the markup. Play-state is owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-regenerative-expert-iteration {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-regenerative-expert-iteration [data-anim="orbit"] {
+  animation-name: tart-approach-regenerative-expert-iteration-orbit;
+  /* A constant rate: this one turns rather than arriving. */
+  animation-timing-function: linear;
+  transform-box: view-box;
+  transform-origin: 160px 86px;
+}
+.tart--approach-regenerative-expert-iteration [data-anim="fresh"] { animation-name: tart-approach-regenerative-expert-iteration-fresh; }
+.tart--approach-regenerative-expert-iteration [data-anim="relabel"] { animation-name: tart-approach-regenerative-expert-iteration-relabel; }
+.tart--approach-regenerative-expert-iteration [data-anim="caption"] { animation-name: tart-approach-regenerative-expert-iteration-caption; }
+
+@keyframes tart-approach-regenerative-expert-iteration-orbit {
+  0% { transform: rotate(0deg); }
+  54.55%, 100% { transform: rotate(120deg); }
+}
+
+/* The games the student just played travel from the net into the pile. */
+@keyframes tart-approach-regenerative-expert-iteration-fresh {
+  0%, 24% { transform: translate(90px, -9px); opacity: 0; }
+  30.55% { opacity: 1; }
+  37.09%, 100% { transform: translate(0, 0); opacity: 1; }
+}
+@keyframes tart-approach-regenerative-expert-iteration-relabel {
+  0%, 40.36% { opacity: 0; }
+  46.91%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-regenerative-expert-iteration-caption {
+  0%, 44.73% { opacity: 0; }
+  50.18%, 100% { opacity: 1; }
+}

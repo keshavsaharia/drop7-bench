@@ -1,0 +1,94 @@
+/* Heuristic evaluation card art: a scan line reads the board, the tallies fill, the penalty resolves. */
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--heuristic-evaluation {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--heuristic-evaluation [data-anim="scan"] {
+  animation-name: tart-heuristic-evaluation-scan;
+}
+.tart--heuristic-evaluation [data-anim="val-1"] {
+  animation-name: tart-heuristic-evaluation-val-1;
+}
+.tart--heuristic-evaluation [data-anim="val-2"] {
+  animation-name: tart-heuristic-evaluation-val-2;
+}
+.tart--heuristic-evaluation [data-anim="val-3"] {
+  animation-name: tart-heuristic-evaluation-val-3;
+}
+.tart--heuristic-evaluation [data-anim="sum"] {
+  animation-name: tart-heuristic-evaluation-sum;
+}
+.tart--heuristic-evaluation [data-anim="marker"] {
+  animation-name: tart-heuristic-evaluation-marker;
+}
+
+@keyframes tart-heuristic-evaluation-scan {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  32.73% {
+    transform: translateY(126px);
+    opacity: 1;
+  }
+  37.09%,
+  100% {
+    transform: translateY(126px);
+    opacity: 0;
+  }
+}
+@keyframes tart-heuristic-evaluation-val-1 {
+  0%,
+  10.91% {
+    opacity: 0;
+  }
+  14.18%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-heuristic-evaluation-val-2 {
+  0%,
+  19.64% {
+    opacity: 0;
+  }
+  22.91%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-heuristic-evaluation-val-3 {
+  0%,
+  28.36% {
+    opacity: 0;
+  }
+  31.64%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-heuristic-evaluation-sum {
+  0%,
+  36% {
+    opacity: 0;
+  }
+  41.45%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-heuristic-evaluation-marker {
+  0%,
+  42.55% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  48%,
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

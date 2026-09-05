@@ -1,0 +1,678 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260903T025751Z-6577b33e",
+  "theoryIds": [
+    "TH-20260825-evolved-nnue-leaf-d3-0f47e46c"
+  ],
+  "experimentId": "EX-20260902-nnue-evolution-d3-v2-49c18bc2",
+  "runIds": [
+    "RUN-20260902T035644Z-c1fd8987"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "fail",
+  "assessment": "not-supported-as-tested",
+  "evidenceTier": "public-development",
+  "summary": "Valid run of the frozen protocol EX-20260902-nnue-evolution-d3-v2-49c18bc2 on the whole workstation (32 threads), every stage completed, every artifact with zero illegal and zero incomplete decisions. Stage A: the depth-5 seven-stratum teacher played 177 complete games (21,618 sibling-complete labelled roots, 3 stopped at the 500-move cap) before the 46,800 s new-game cutoff; the teacher ran 77.5 s per root, four to seven times slower than the pilot projected, so the corpus is about a third of the 512 games the protocol allowed for. Stage B: the supervised warm start reached validation Huber 0.6873 rise units at epoch 8 of 16 on a whole-origin split (17,641/3,977 roots), and the deployment-faithful ordering probe put the depth-3 search with that leaf at top-1 agreement 0.4414 with the teacher on 256 held-out roots (mean teacher-value regret 2,395 points). Stage C: 60 generations of the mutation-only GA (population 32, 32 paired games per candidate per fresh block, fair-d3s7 and warm-start controls on every block). The population separated steadily from its warm start - ten-generation paired mean margins over the init control of +4,682, +15,853, +22,704, +32,278, +34,037, +40,431 points, best candidate +76,679 in the last block - but never approached the fair control: the population mean was above the fair leaf in 0 of the final 10 generations and the best candidate in 0 (mean margin -121,896), so the theory's training-signal falsifier fails. Elite re-selection on 128 fresh games froze candidate-29 at 202,237 (finalists spanned 187,352 to 202,237). Stage D: on the 64 never-read held-out games (0xa52e1300, opened once at 2026-09-03T02:41:29Z after the candidate's SHA-256 was recorded), the evolved candidate averaged 190,961 against the frozen fair leaf's 297,926 at the identical depth-3 configuration: paired delta -106,964 (bootstrap 95% bounds -146,580 to -69,983, Student-t lower bound -145,890, detection floor 38,357), W-T-L 14-0-50, both halves negative (-109,139 / -104,790), lower quartile 122,253 against 158,387. Every preregistered pass criterion except artifact integrity and candidate identity fails: scientific outcome fail for this exact configuration. The ablation arm shows what evolution did contribute: the unevolved warm start averaged 155,586 (-142,340 against the fair leaf), and the evolved candidate beat it on the same seeds by +35,375 (bootstrap lower bound +16,899, floor 18,949, W-T-L 36-0-28, both halves positive). Whole-game evolution with common random numbers therefore moves a 572k-weight leaf on the deployed objective, which the first (CMA-ES) leaf evolution could not show; it moved it about a quarter of the way from a warm start that plays at half the fair leaf's level. The reference arm reproduced the program's standing result: fair depth 4 over fair depth 3 +97,059 (lower bound +29,330). Read: the claim is not supported as tested; the mechanism's evolutionary leg is supported, its distillation leg is the weak link (a warm start that holds the teacher's values but not its ordering), and the budget (177 teacher games, 60 generations) was too small for evolution to cover the distance.",
+  "metrics": {
+    "cohort": {
+      "seedsStartHex": "0xa52e1300",
+      "games": 64,
+      "moveCap": 2000,
+      "role": "public-development, never read before this screen (lease SL-20260825T063000Z-a52e1300, opened once)"
+    },
+    "arms": {
+      "candidate": {
+        "games": 64,
+        "mean": 190961.21875,
+        "median": 160107.5,
+        "q25": 122253.25,
+        "max": 477758,
+        "movesMean": 58.5,
+        "clearsPerMove": 1.7131410256410255,
+        "revealsPerMove": 0.9123931623931624,
+        "censored": 0,
+        "illegal": 0,
+        "incomplete": 0,
+        "wallSeconds": 443.883982385
+      },
+      "init-d3s7": {
+        "games": 64,
+        "mean": 155585.96875,
+        "median": 140282.0,
+        "q25": 107423.25,
+        "max": 401038,
+        "movesMean": 48.75,
+        "clearsPerMove": 1.5509615384615385,
+        "revealsPerMove": 0.7554487179487179,
+        "censored": 0,
+        "illegal": 0,
+        "incomplete": 0,
+        "wallSeconds": 352.784595566
+      },
+      "fair-d3s7": {
+        "games": 64,
+        "mean": 297925.59375,
+        "median": 254999.5,
+        "q25": 158387.25,
+        "max": 844318,
+        "movesMean": 88.03125,
+        "clearsPerMove": 1.9549165779197728,
+        "revealsPerMove": 1.072239971600994,
+        "censored": 0,
+        "illegal": 0,
+        "incomplete": 0,
+        "wallSeconds": 265.495279802
+      },
+      "fair-d4s7": {
+        "games": 64,
+        "mean": 394984.3125,
+        "median": 302556.0,
+        "q25": 198524.75,
+        "max": 1663637,
+        "movesMean": 114.296875,
+        "clearsPerMove": 2.054682159945318,
+        "revealsPerMove": 1.149419002050581,
+        "censored": 0,
+        "illegal": 0,
+        "incomplete": 0,
+        "wallSeconds": 11302.703857664
+      }
+    },
+    "paired": {
+      "candidate-vs-fair-d3s7": {
+        "meanDelta": -106964.375,
+        "bootstrapLower95": -146579.5390625,
+        "bootstrapUpper95": -69983.37265625001,
+        "studentTLower95": -145890.14646259055,
+        "pairedSd": 186537.53282982516,
+        "detectionFloor": 38356.7801881328,
+        "wtl": [
+          14,
+          0,
+          50
+        ],
+        "halves": [
+          -109138.65625,
+          -104790.09375
+        ],
+        "q25Delta": -36134.0,
+        "movesDelta": -29.53125
+      },
+      "init-vs-fair-d3s7": {
+        "meanDelta": -142339.625,
+        "bootstrapLower95": -178491.54609375,
+        "bootstrapUpper95": -107770.63125,
+        "studentTLower95": -178510.67199533194,
+        "pairedSd": 173336.52263938574,
+        "detectionFloor": 35642.322467723694,
+        "wtl": [
+          9,
+          0,
+          55
+        ],
+        "halves": [
+          -156142.65625,
+          -128536.59375
+        ],
+        "q25Delta": -50964.0,
+        "movesDelta": -39.28125
+      },
+      "candidate-vs-init": {
+        "meanDelta": 35375.25,
+        "bootstrapLower95": 16898.92734375,
+        "bootstrapUpper95": 54629.274999999994,
+        "studentTLower95": 16144.99138038425,
+        "pairedSd": 92153.98600461992,
+        "detectionFloor": 18949.16337219997,
+        "wtl": [
+          36,
+          0,
+          28
+        ],
+        "halves": [
+          47004.0,
+          23746.5
+        ],
+        "q25Delta": 14830.0,
+        "movesDelta": 9.75
+      },
+      "fair-d4s7-vs-fair-d3s7": {
+        "meanDelta": 97058.71875,
+        "bootstrapLower95": 29329.54375,
+        "bootstrapUpper95": 165453.23046875,
+        "studentTLower95": 27011.370236887145,
+        "pairedSd": 335676.31627967773,
+        "detectionFloor": 69023.44253500874,
+        "wtl": [
+          41,
+          0,
+          23
+        ],
+        "halves": [
+          75457.78125,
+          118659.65625
+        ],
+        "q25Delta": 40137.5,
+        "movesDelta": 26.265625
+      }
+    },
+    "training": {
+      "generationsCompleted": 60,
+      "tenGenerationBlockAverages": [
+        {
+          "generations": "0-9",
+          "populationMean": 159340.4412109375,
+          "top4Mean": 176605.07421875,
+          "best": 183544.721875,
+          "meanMinusInit": 4682.4068359375,
+          "bestMinusInit": 28886.6875,
+          "meanMinusFair": -172846.5150390625,
+          "bestMinusFair": -148642.234375
+        },
+        {
+          "generations": "10-19",
+          "populationMean": 168372.49287109374,
+          "top4Mean": 189184.1140625,
+          "best": 194671.825,
+          "meanMinusInit": 15852.61787109375,
+          "bestMinusInit": 42151.95,
+          "meanMinusFair": -154441.29150390625,
+          "bestMinusFair": -128141.959375
+        },
+        {
+          "generations": "20-29",
+          "populationMean": 174464.35146484376,
+          "top4Mean": 197282.43984375,
+          "best": 203909.753125,
+          "meanMinusInit": 22703.59521484375,
+          "bestMinusInit": 52148.996875,
+          "meanMinusFair": -155743.12666015624,
+          "bestMinusFair": -126297.725
+        },
+        {
+          "generations": "30-39",
+          "populationMean": 181219.72109375,
+          "top4Mean": 203060.9921875,
+          "best": 209035.984375,
+          "meanMinusInit": 32277.60859375,
+          "bestMinusInit": 60093.871875,
+          "meanMinusFair": -125175.93515625,
+          "bestMinusFair": -97359.671875
+        },
+        {
+          "generations": "40-49",
+          "populationMean": 184679.33095703126,
+          "top4Mean": 206650.3125,
+          "best": 213143.746875,
+          "meanMinusInit": 34036.96845703125,
+          "bestMinusInit": 62501.384375,
+          "meanMinusFair": -160026.62529296876,
+          "bestMinusFair": -131562.209375
+        },
+        {
+          "generations": "50-59",
+          "populationMean": 190907.8234375,
+          "top4Mean": 216015.68359375,
+          "best": 227155.765625,
+          "meanMinusInit": 40431.1578125,
+          "bestMinusInit": 76679.1,
+          "meanMinusFair": -121896.0890625,
+          "bestMinusFair": -85648.146875
+        }
+      ],
+      "trainingSignalCheck": {
+        "rule": "population mean fitness > paired fair-d3s7 control in the majority of the final 10 completed generations (theory falsifier 2)",
+        "window": [
+          50,
+          51,
+          52,
+          53,
+          54,
+          55,
+          56,
+          57,
+          58,
+          59
+        ],
+        "generationsMeanAboveFair": 0,
+        "generationsTop4AboveFair": 0,
+        "generationsBestAboveFair": 0,
+        "generationsInitAboveFair": 0,
+        "meanMarginLast10": -121896.0890625,
+        "top4MarginLast10": -96788.22890625,
+        "passed": false
+      },
+      "artifactIntegrity": {
+        "generationArtifacts": 60,
+        "illegalDecisions": 0,
+        "incompleteDecisions": 0,
+        "censoredGames": 0
+      },
+      "config": {
+        "population": 32,
+        "games": 32,
+        "generations": 60,
+        "elites": 4,
+        "tournament": 3,
+        "sigmaRel": 0.05,
+        "seed": "0x0e701e58",
+        "leaseStart": "0xa52e0500",
+        "moveCap": 2000,
+        "wallSeconds": 21600
+      }
+    },
+    "selection": {
+      "finalGeneration": 59,
+      "finalists": [
+        12,
+        1,
+        6,
+        29,
+        30,
+        23,
+        13,
+        4
+      ],
+      "blockStart": "0xa52e0c80",
+      "selectGames": 128,
+      "winner": "candidate-29",
+      "winnerMean": 202236.7734375
+    },
+    "corpus": {
+      "games": 177,
+      "roots": 21618,
+      "censoredGames": 3,
+      "score": {
+        "n": 177,
+        "mean": 433131.1525423729,
+        "sd": 323856.2716760365,
+        "min": 103368,
+        "q25": 229522.0,
+        "median": 348847.0,
+        "q75": 549029.0,
+        "max": 1889608
+      },
+      "moves": {
+        "n": 177,
+        "mean": 122.13559322033899,
+        "sd": 85.73262962689691,
+        "min": 34,
+        "q25": 70.0,
+        "median": 100.0,
+        "q75": 150.0,
+        "max": 500
+      },
+      "wallSecondsPerGame": {
+        "n": 177,
+        "mean": 9461.862850904345,
+        "sd": 7988.613086574687,
+        "min": 1209.263792432,
+        "q25": 4178.793242541,
+        "median": 7476.245002829,
+        "q75": 11333.437361899,
+        "max": 49497.191634087
+      },
+      "secondsPerRoot": 77.47015101351046,
+      "rootsPerGame": 122.13559322033899,
+      "legalColumnsPerRoot": {
+        "n": 21618,
+        "mean": 6.85724858913868,
+        "sd": 0.6843321922766913,
+        "min": 1,
+        "q25": 7.0,
+        "median": 7.0,
+        "q75": 7.0,
+        "max": 7
+      },
+      "teacherSiblingSpreadPoints": {
+        "n": 21618,
+        "mean": 40559.6546201937,
+        "sd": 160027.68228828974,
+        "min": 0.0,
+        "q25": 2448.757616991809,
+        "median": 4187.951026923114,
+        "q75": 7480.592974314908,
+        "max": 1017575.6842718842
+      }
+    },
+    "pretrain": {
+      "report": {
+        "roots": 21618,
+        "games": 177,
+        "trainRoots": 17641,
+        "valRoots": 3977,
+        "epochs": 16,
+        "batch": 64,
+        "lr": 0.0003,
+        "seed": "0x0e701e57",
+        "bestEpoch": 8,
+        "bestValHuber": 0.6873202928578702
+      },
+      "probe": {
+        "probeRoots": 256,
+        "top1": 0.44140625,
+        "meanTeacherValueRegret": 2394.670751705883
+      },
+      "epochs": [
+        {
+          "epoch": 0,
+          "trainHuber": 2.301647,
+          "valHuber": 1.885923,
+          "valPearson": 0.879
+        },
+        {
+          "epoch": 1,
+          "trainHuber": 1.281883,
+          "valHuber": 0.95457,
+          "valPearson": 0.9314
+        },
+        {
+          "epoch": 2,
+          "trainHuber": 0.717349,
+          "valHuber": 0.81278,
+          "valPearson": 0.9449
+        },
+        {
+          "epoch": 3,
+          "trainHuber": 0.548766,
+          "valHuber": 0.744877,
+          "valPearson": 0.9491
+        },
+        {
+          "epoch": 4,
+          "trainHuber": 0.451407,
+          "valHuber": 0.710014,
+          "valPearson": 0.9512
+        },
+        {
+          "epoch": 5,
+          "trainHuber": 0.388556,
+          "valHuber": 0.691788,
+          "valPearson": 0.952
+        },
+        {
+          "epoch": 6,
+          "trainHuber": 0.337065,
+          "valHuber": 0.690567,
+          "valPearson": 0.9519
+        },
+        {
+          "epoch": 7,
+          "trainHuber": 0.303579,
+          "valHuber": 0.69189,
+          "valPearson": 0.95
+        },
+        {
+          "epoch": 8,
+          "trainHuber": 0.270594,
+          "valHuber": 0.68732,
+          "valPearson": 0.9504
+        },
+        {
+          "epoch": 9,
+          "trainHuber": 0.244311,
+          "valHuber": 0.693906,
+          "valPearson": 0.9502
+        },
+        {
+          "epoch": 10,
+          "trainHuber": 0.22459,
+          "valHuber": 0.699326,
+          "valPearson": 0.9479
+        },
+        {
+          "epoch": 11,
+          "trainHuber": 0.209241,
+          "valHuber": 0.695451,
+          "valPearson": 0.9496
+        },
+        {
+          "epoch": 12,
+          "trainHuber": 0.191543,
+          "valHuber": 0.711863,
+          "valPearson": 0.948
+        },
+        {
+          "epoch": 13,
+          "trainHuber": 0.180702,
+          "valHuber": 0.693614,
+          "valPearson": 0.9479
+        },
+        {
+          "epoch": 14,
+          "trainHuber": 0.172906,
+          "valHuber": 0.699509,
+          "valPearson": 0.9485
+        },
+        {
+          "epoch": 15,
+          "trainHuber": 0.162009,
+          "valHuber": 0.696882,
+          "valPearson": 0.947
+        }
+      ]
+    },
+    "resources": [
+      {
+        "label": "corpus",
+        "command": [
+          "/home/keshav/Developer/drop7-bench/approaches/lifetime-objective/nnue-evolution/target/release/teacher_corpus",
+          "--seeds-start",
+          "0xa52e0300",
+          "--games",
+          "512",
+          "--threads",
+          "32",
+          "--depth",
+          "5",
+          "--move-cap",
+          "500",
+          "--wall-seconds",
+          "46800",
+          "--out",
+          "/home/keshav/Developer/drop7-bench/runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/corpus"
+        ],
+        "startedAt": "2026-09-02T04:24:10Z",
+        "endedAt": "2026-09-02T22:39:58Z",
+        "wallSeconds": 65747.537,
+        "userSeconds": 1667946.028,
+        "systemSeconds": 641.527,
+        "peakRssBytes": 1615892480,
+        "exitCode": 0
+      },
+      {
+        "label": "pretrain",
+        "command": [
+          "/home/keshav/Developer/drop7-bench/approaches/lifetime-objective/nnue-evolution/target/release/pretrain",
+          "--corpus",
+          "/home/keshav/Developer/drop7-bench/runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/corpus/corpus.jsonl",
+          "--out",
+          "/home/keshav/Developer/drop7-bench/runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/pretrain",
+          "--epochs",
+          "16",
+          "--batch",
+          "64",
+          "--lr",
+          "3e-4",
+          "--seed",
+          "0x0e701e57",
+          "--probe-roots",
+          "256",
+          "--threads",
+          "32"
+        ],
+        "startedAt": "2026-09-02T22:42:11Z",
+        "endedAt": "2026-09-02T22:42:25Z",
+        "wallSeconds": 13.978,
+        "userSeconds": 45.22,
+        "systemSeconds": 0.108,
+        "peakRssBytes": 265060352,
+        "exitCode": 0
+      },
+      {
+        "label": "evolve",
+        "command": [
+          "/home/keshav/Developer/drop7-bench/approaches/lifetime-objective/nnue-evolution/target/release/evolve",
+          "--init",
+          "/home/keshav/Developer/drop7-bench/runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/pretrain/init.bin",
+          "--lease-start",
+          "0xa52e0500",
+          "--out",
+          "/home/keshav/Developer/drop7-bench/runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/evolve",
+          "--population",
+          "32",
+          "--games",
+          "32",
+          "--generations",
+          "60",
+          "--elites",
+          "4",
+          "--tournament",
+          "3",
+          "--sigma-rel",
+          "0.05",
+          "--seed",
+          "0x0e701e58",
+          "--threads",
+          "32",
+          "--wall-seconds",
+          "21600",
+          "--move-cap",
+          "2000"
+        ],
+        "startedAt": "2026-09-02T22:42:25Z",
+        "endedAt": "2026-09-03T02:37:19Z",
+        "wallSeconds": 14093.619,
+        "userSeconds": 441673.146,
+        "systemSeconds": 184.658,
+        "peakRssBytes": 477446144,
+        "exitCode": 0
+      },
+      {
+        "label": "select",
+        "command": [
+          "/home/keshav/Developer/drop7-bench/approaches/lifetime-objective/nnue-evolution/target/release/evolve",
+          "--select",
+          "--lease-start",
+          "0xa52e0500",
+          "--out",
+          "/home/keshav/Developer/drop7-bench/runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/evolve",
+          "--generations",
+          "60",
+          "--games",
+          "32",
+          "--select-games",
+          "128",
+          "--threads",
+          "32",
+          "--move-cap",
+          "2000"
+        ],
+        "startedAt": "2026-09-03T02:37:19Z",
+        "endedAt": "2026-09-03T02:41:29Z",
+        "wallSeconds": 250.404,
+        "userSeconds": 7852.419,
+        "systemSeconds": 3.994,
+        "peakRssBytes": 252526592,
+        "exitCode": 0
+      },
+      {
+        "label": "screen",
+        "command": [
+          "/home/keshav/Developer/drop7-bench/approaches/lifetime-objective/nnue-evolution/target/release/screen",
+          "--candidate",
+          "/home/keshav/Developer/drop7-bench/runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/evolve/candidate-weights.bin",
+          "--init",
+          "/home/keshav/Developer/drop7-bench/runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/pretrain/init.bin",
+          "--seeds-start",
+          "0xa52e1300",
+          "--games",
+          "64",
+          "--threads",
+          "32",
+          "--move-cap",
+          "2000",
+          "--out",
+          "/home/keshav/Developer/drop7-bench/runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/screen/heldout.json"
+        ],
+        "startedAt": "2026-09-03T02:41:29Z",
+        "endedAt": "2026-09-03T02:52:22Z",
+        "wallSeconds": 652.987,
+        "userSeconds": 12346.678,
+        "systemSeconds": 3.898,
+        "peakRssBytes": 1792266240,
+        "exitCode": 0
+      }
+    ]
+  },
+  "gateChecks": [
+    {
+      "criterion": "All CHECK gates passed before the first training seed was read",
+      "passed": true,
+      "observed": "11 of 11 gates passed on the already-open probe block (gates.log), rebuilt binaries, 9/9 unit tests"
+    },
+    {
+      "criterion": "Every generation artifact and the screen artifact: illegalDecisions 0, incompleteDecisions 0, censored games reported",
+      "passed": true,
+      "observed": "60 generation artifacts: 0 illegal, 0 incomplete, 0 censored; screen: 0 illegal, 0 incomplete, 0 censored in all four arms"
+    },
+    {
+      "criterion": "Held-out screen, candidate vs fair-d3s7: bootstrap 95% lower bound of the paired score delta > 0 AND Student-t 95% lower bound > 0",
+      "passed": false,
+      "observed": "delta -106,964; bootstrap LB -146,580, UB -69,983; t LB -145,890; paired sd 186,538; floor 38,357; W-T-L 14-0-50"
+    },
+    {
+      "criterion": "Held-out screen: paired mean score delta > 0 in both halves (seeds 0-31 and 32-63)",
+      "passed": false,
+      "observed": "first half -109,139, second half -104,790"
+    },
+    {
+      "criterion": "Held-out screen: candidate lower-quartile score >= fair-d3s7 lower-quartile score",
+      "passed": false,
+      "observed": "candidate Q25 122,253 vs fair-d3s7 Q25 158,387 (delta -36,134)"
+    },
+    {
+      "criterion": "The screened candidate is the exact frozen winner of the elite re-selection; SHA-256 recorded before the screen lease opened",
+      "passed": true,
+      "observed": "candidate-29 of generation 59, mean 202,237 over 128 fresh games; sha256 edd0d2efd181de43f35d62c4df784cb2c789db3ae296be93a1c6c59082034a9f; recorded 2026-09-03T02:41:29Z, lease opened 2026-09-03T02:41:29Z by the screen stage"
+    },
+    {
+      "criterion": "Theory falsifier (training signal): population mean fitness > paired fair-d3s7 control in the majority of the final 10 generations",
+      "passed": false,
+      "observed": "mean above fair in 0/10, top-4 in 0/10, best in 0/10; mean margin -121,896, top-4 margin -96,788"
+    },
+    {
+      "criterion": "Theory falsifier (supervised initialisation): distilled NNUE's within-root top-1 agreement with the depth-5 teacher on whole-origin held-out roots exceeds the 0.30 level materially",
+      "passed": true,
+      "observed": "deployment-faithful probe (d3s7 search with the NNUE leaf vs the teacher's column) top-1 0.4414 on 256 held-out roots, regret 2,395 points; for scale, the leaf-swing diagnostic put the frozen fair leaf at 0.720 and a zero leaf at 0.450 on a different 400-root sample"
+    },
+    {
+      "criterion": "Theory falsifier (ablative): if the candidate passes but the unevolved init passes equally, evolution contributed nothing",
+      "passed": null,
+      "observed": "precondition not met (candidate failed); recorded anyway: candidate minus init +35,375 (bootstrap LB +16,899, t LB +16,145, floor 18,949, W-T-L 36-0-28, halves +47,004 / +23,746); init minus fair -142,340 (LB -178,492)"
+    }
+  ],
+  "perGameArtifact": {
+    "path": "artifacts/results/EX-20260902-nnue-evolution-d3-v2-49c18bc2/RUN-20260902T035644Z-c1fd8987/screen/heldout.json",
+    "sha256": "70009c09a3fdacd40c9c25fc60bfdb7ffe698041c8e837f714732b86a2874383",
+    "recordCount": 256
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260902T035644Z-f5e59b6e.json"
+  ],
+  "artifactManifestRef": "artifacts/results/EX-20260902-nnue-evolution-d3-v2-49c18bc2/RUN-20260902T035644Z-c1fd8987/manifest.json",
+  "limitations": [
+    "Single 64-game held-out screen: the paired detection floor is about 38,000 points for the primary contrast and 19,000 for the ablation; the primary result is far outside its floor, the ablation clears its own.",
+    "The teacher corpus reached 177 of the 512 games the protocol allowed for because the depth-5 teacher ran four to seven times slower than the pilot projected; the protocol makes the completed games the corpus, so the result is valid, but it rejects this configuration at this corpus size, not the design at 512 games.",
+    "The supervised warm start plays at about half the fair leaf's level; the deployment-faithful probe (0.441 top-1) and the leaf-swing diagnostic (zero leaf 0.450 on a different sample) suggest imitation of state values barely improved the search's ordering over no leaf at all. Evolution then had roughly 150,000 paired points to make up in 60 generations and made up about 35,000 to 40,000.",
+    "The per-game artifact holds four arms x 64 games (256 rows); the primary contrast pairs the candidate and fair-d3s7 rows by seed.",
+    "The fair-d4s7 arm is diagnostic only and reproduces the standing depth-4-over-depth-3 result on these seeds; it is not part of the gate.",
+    "Two operational faults during the unattended chain (a false liveness reading, then a script replacement that crashed the corpus stage's shell after its binary had exited 0) are recorded in the run record; the 'corpus: done' marker in pipeline.log was appended by hand with a note. No artifact was affected.",
+    "The elite re-selection block (0xa52e0c80, 128 games) and every fitness block are training-lease seeds; the last generation's 32-game leaders read 20,000 to 60,000 above their 128-game re-selection means, which is the best-of-32 bias the re-selection exists to remove."
+  ],
+  "contributionIds": [
+    "CT-20260902T042620Z-3b4bf7a8"
+  ],
+  "recordedAt": "2026-09-03T02:57:51Z"
+}

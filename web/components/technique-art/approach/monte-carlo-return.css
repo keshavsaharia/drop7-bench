@@ -1,0 +1,155 @@
+/* value-policy-learning/monte-carlo-return card art. The game draws itself
+   move by move and the return fills behind it; the terminal board arrives;
+   the whole episode funnels down into the single column that was played.
+   Play-state, duration and easing are owned by the shared art.css. */
+
+.tart.tart--approach-monte-carlo-return {
+  --tart-motion: calc(var(--duration-art, 2400ms) * 1.4);
+}
+
+/* Four beats, so a little longer than the standard art cycle. */
+.tart--approach-monte-carlo-return [data-anim] {
+  animation-duration: var(--tart-duration);
+}
+
+/* The return bar grows from the first move; the funnel pours downward; the
+   played column fills from the floor of its slot. */
+.tart--approach-monte-carlo-return .return {
+  transform-box: fill-box;
+  transform-origin: left;
+}
+.tart--approach-monte-carlo-return .funnel {
+  transform-box: fill-box;
+  transform-origin: top;
+}
+.tart--approach-monte-carlo-return .played {
+  transform-box: fill-box;
+  transform-origin: bottom;
+}
+.tart--approach-monte-carlo-return .end {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.tart--approach-monte-carlo-return [data-anim="trail"] {
+  animation-name: tart-approach-monte-carlo-return-trail;
+}
+.tart--approach-monte-carlo-return [data-anim="steps-1"] {
+  animation-name: tart-approach-monte-carlo-return-steps-1;
+}
+.tart--approach-monte-carlo-return [data-anim="steps-2"] {
+  animation-name: tart-approach-monte-carlo-return-steps-2;
+}
+.tart--approach-monte-carlo-return [data-anim="steps-3"] {
+  animation-name: tart-approach-monte-carlo-return-steps-3;
+}
+.tart--approach-monte-carlo-return [data-anim="return"] {
+  animation-name: tart-approach-monte-carlo-return-return;
+}
+.tart--approach-monte-carlo-return [data-anim="end"] {
+  animation-name: tart-approach-monte-carlo-return-end;
+}
+.tart--approach-monte-carlo-return [data-anim="funnel"] {
+  animation-name: tart-approach-monte-carlo-return-funnel;
+}
+.tart--approach-monte-carlo-return [data-anim="played"] {
+  animation-name: tart-approach-monte-carlo-return-played;
+}
+
+/* 224 hides the wandering path, 0 draws it whole. */
+@keyframes tart-approach-monte-carlo-return-trail {
+  0%,
+  4% {
+    stroke-dashoffset: 224;
+  }
+  46%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes tart-approach-monte-carlo-return-steps-1 {
+  0%,
+  6% {
+    opacity: 0;
+  }
+  14%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-monte-carlo-return-steps-2 {
+  0%,
+  20% {
+    opacity: 0;
+  }
+  28%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-monte-carlo-return-steps-3 {
+  0%,
+  34% {
+    opacity: 0;
+  }
+  42%,
+  100% {
+    opacity: 1;
+  }
+}
+/* The return accrues move by move and is whole only when the game is over. */
+@keyframes tart-approach-monte-carlo-return-return {
+  0%,
+  6% {
+    transform: scaleX(0.02);
+  }
+  18% {
+    transform: scaleX(0.3);
+  }
+  30% {
+    transform: scaleX(0.58);
+  }
+  42% {
+    transform: scaleX(0.84);
+  }
+  52%,
+  100% {
+    transform: scaleX(1);
+  }
+}
+@keyframes tart-approach-monte-carlo-return-end {
+  0%,
+  48% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  58%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes tart-approach-monte-carlo-return-funnel {
+  0%,
+  60% {
+    opacity: 0;
+    transform: scaleY(0.02);
+  }
+  76%,
+  100% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+@keyframes tart-approach-monte-carlo-return-played {
+  0%,
+  74% {
+    transform: scaleY(0.02);
+    opacity: 0;
+  }
+  90%,
+  100% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}

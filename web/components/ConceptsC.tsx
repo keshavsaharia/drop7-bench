@@ -20,15 +20,15 @@ import { join } from "node:path";
 import { CellGlyph } from "./Board";
 import { MiniBoard } from "./Engine";
 
-const INK = "#fafafa";
-const INK_2 = "#a1a1aa";
-const INK_3 = "#71717a";
-const GRID = "#27272a";
-const BLUE = "#3987e5";
-const ORANGE = "#d95926";
-const AQUA = "#199e70";
-const ACCENT = "#facc15";
-const FONT = "system-ui, -apple-system, 'Segoe UI', sans-serif";
+const INK = "var(--color-ink)";
+const INK_2 = "var(--color-ink-2)";
+const INK_3 = "var(--color-ink-3)";
+const GRID = "var(--color-rule)";
+const BLUE = "var(--color-series-1)";
+const ORANGE = "var(--color-series-2)";
+const AQUA = "var(--color-series-3)";
+const ACCENT = "var(--color-highlight)";
+const FONT = "var(--font-sans)";
 
 interface OracleScenario {
   seed: string;
@@ -272,7 +272,7 @@ export function TeacherStudentFlow({ caption }: { caption?: string }) {
       <svg viewBox={`0 -18 ${W} ${H}`} role="img" aria-label="Teacher, labels, student, and blind evaluation">
         {boxes.map((box) => (
           <g key={box.title} transform={`translate(${box.x} 0)`}>
-            <rect width={box.w} height={boxH} rx={10} fill="#18181b" stroke={box.tone} strokeOpacity={0.5} />
+            <rect width={box.w} height={boxH} rx={10} fill="var(--color-raised)" stroke={box.tone} strokeOpacity={0.5} />
             <text x={12} y={22} fontSize={12} fontFamily={FONT} fontWeight={700} fill={box.tone}>
               {box.title}
             </text>
@@ -461,7 +461,7 @@ export function ValueNetShape({ caption }: { caption?: string }) {
         </text>
         {planes.map((plane, i) => (
           <g key={plane} transform={`translate(${planeX} ${16 + i * 26})`}>
-            <rect width={150} height={20} rx={5} fill="#18181b" stroke={GRID} />
+            <rect width={150} height={20} rx={5} fill="var(--color-raised)" stroke={GRID} />
             <text x={9} y={14} fontSize={10.5} fontFamily={FONT} fill={INK_2}>
               {plane}
             </text>
@@ -494,7 +494,7 @@ export function ValueNetShape({ caption }: { caption?: string }) {
           two small hidden layers
         </text>
         <g transform={`translate(${outX} 62)`}>
-          <rect width={128} height={56} rx={10} fill="#18181b" stroke={ACCENT} strokeOpacity={0.6} />
+          <rect width={128} height={56} rx={10} fill="var(--color-raised)" stroke={ACCENT} strokeOpacity={0.6} />
           <text x={64} y={24} textAnchor="middle" fontSize={11.5} fontFamily={FONT} fill={INK_2}>
             how promising
           </text>

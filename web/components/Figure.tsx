@@ -1,204 +1,87 @@
 /**
  * <Figure name="score-vs-depth" caption="…" />
  *
- * Inlines a generated research figure from web/content/figures/<name>.svg and
- * lists the spec's points with their source records under a collapsible
- * "Source data" block. The SVG is produced by web/scripts/figures/generate.mjs
- * from web/content/figures/<name>.json; every point in that spec carries a
- * `sourceRecord`, and the generator refuses to draw one without it. This
- * component draws nothing of its own and computes no number: it shows the
- * file as written and the spec as written.
+ * Renders a research figure from its spec, web/content/figures/<name>.json,
+ * through the chart kit (web/components/charts/). The spec is validated
+ * here on the server; every plotted value carries a `sourceRecord` or the
+ * spec is refused and an EmptyState says why. This component computes no
+ * number: the chart draws the values as written and the table view
+ * (frame/TableView.tsx, behind the frame's Chart/Table toggle) lists them as
+ * written. Under the caption, a "Notes and sources" block carries the spec's
+ * notes and links every source record the console can open.
  *
- * Server component. Styled by the `.research-fig` block in globals.css.
+ * Server component; the chart is a client component that receives the
+ * parsed spec as a prop. Styled by charts.css plus the `.fig*` frame blocks
+ * in globals.css.
  */
-import Link from "next/link";
 import { readRepoFile } from "@/lib/repo";
-
-interface FigurePoint {
-  x: number | string;
-  y: number;
-  lo?: number;
-  hi?: number;
-  n?: number;
-  label?: string;
-  sourceRecord: string;
-  sourceField?: string;
-}
-
-interface FigureSeries {
-  name: string;
-  points: FigurePoint[];
-}
-
-interface FigureSpec {
-  title: string;
-  kind: string;
-  x?: { label: string; unit?: string };
-  y?: { label: string; unit?: string };
-  notes?: string;
-  series: FigureSeries[];
-}
+import { sourceRecords, validateFigureSpec, type FigureSpec } from "@/lib/charts/spec";
+import { EmptyState } from "./charts/frame/EmptyState";
+import { SourceRef } from "./charts/frame/SourceRef";
+import { TableView } from "./charts/frame/TableView";
+import { ResearchChart } from "./charts/ResearchChart";
+import { sourceLinks } from "./charts/sources.server";
 
 const NAME = /^[a-z0-9-]+$/;
 
-function loadSpec(name: string): FigureSpec | null {
-  const raw = readRepoFile(`web/content/figures/${name}.json`);
-  if (!raw) return null;
+export function specPath(name: string): string {
+  return `web/content/figures/${name}.json`;
+}
+
+export function loadSpec(name: string): { spec: FigureSpec | null; error: string | null; exists: boolean } {
+  if (!NAME.test(name)) return { spec: null, error: "not a valid figure name (lowercase letters, digits and hyphens)", exists: false };
+  const raw = readRepoFile(specPath(name));
+  if (!raw) return { spec: null, error: null, exists: false };
   try {
-    return JSON.parse(raw) as FigureSpec;
-  } catch {
-    return null;
+    return { spec: validateFigureSpec(JSON.parse(raw), name), error: null, exists: true };
+  } catch (error) {
+    return { spec: null, error: error instanceof Error ? error.message : String(error), exists: true };
   }
 }
 
-/** Where a source record can be opened in the console, if anywhere. */
-function sourceHref(source: string): string | null {
-  if (source.startsWith("EX-")) return `/experiments/${source}`;
-  if (source.startsWith("TH-")) return `/theories/${source}`;
-  if (/^docs\/.+\.md$/.test(source)) return `/${source.replace(/\.md$/, "")}`;
-  // RS-/RUN- records have no route of their own; results render under their experiment.
-  return null;
+export interface FigureProps {
+  name: string;
+  caption?: string;
+  /** Break out to the wide column (default); off inside a FigureGrid. */
+  wide?: boolean;
+  compact?: boolean;
 }
 
-function SourceRef({ source }: { source: string }) {
-  const href = sourceHref(source);
-  return href ? (
-    <Link href={href} className="research-fig-source">
-      {source}
-    </Link>
-  ) : (
-    <code className="research-fig-source">{source}</code>
-  );
-}
+export function Figure({ name, caption, wide = true, compact }: FigureProps) {
+  const { spec, error, exists } = loadSpec(name);
+  const frameClass = `fig fig-frame research-fig rchart-figure${wide ? " fig--wide" : ""}`;
 
-/** Result records render on their experiment's page; resolve that link when the record exists. */
-function resultHref(source: string): string | null {
-  if (!source.startsWith("RS-")) return null;
-  const raw = readRepoFile(`research/results/${source}.json`);
-  if (!raw) return null;
-  try {
-    const record = JSON.parse(raw) as { experimentId?: string };
-    return record.experimentId ? `/experiments/${record.experimentId}#results` : null;
-  } catch {
-    return null;
-  }
-}
-
-function formatValue(value: number, unit?: string) {
-  const text = Math.abs(value) >= 1000 ? value.toLocaleString("en-US", { maximumFractionDigits: 0 }) : value.toLocaleString("en-US", { maximumFractionDigits: 2 });
-  return unit ? `${text} ${unit}` : text;
-}
-
-export function Figure({ name, caption }: { name: string; caption?: string }) {
-  if (!NAME.test(name)) {
+  if (!spec) {
     return (
-      <figure className="research-fig research-fig-missing">
-        <p>Invalid figure name.</p>
-      </figure>
-    );
-  }
-  const svg = readRepoFile(`web/content/figures/${name}.svg`);
-  const spec = loadSpec(name);
-
-  if (!svg) {
-    return (
-      <figure className="research-fig research-fig-missing">
-        <p>
-          Figure <code>{name}</code> has not been generated.
-          {spec ? (
-            <>
-              {" "}
-              Its spec exists; run <code>node web/scripts/figures/generate-all.mjs</code>.
-            </>
-          ) : (
-            <>
-              {" "}
-              No spec was found at <code>web/content/figures/{name}.json</code>.
-            </>
-          )}
-        </p>
+      <figure className={`${frameClass} research-fig-missing`}>
+        {exists || error ? <EmptyState reason="invalid-spec" what={name} detail={error ?? undefined} how={specPath(name)} /> : <EmptyState reason="no-spec" what={name} how={specPath(name)} />}
         {caption && <figcaption>{caption}</figcaption>}
       </figure>
     );
   }
 
-  const sources = spec ? [...new Set(spec.series.flatMap((s) => s.points.map((p) => p.sourceRecord)))] : [];
+  const sources = sourceRecords(spec);
+  const links = sourceLinks(sources);
+  const id = `fig-${name}`;
 
   return (
-    <figure className="research-fig">
-      <div className="research-fig-svg-wrap" dangerouslySetInnerHTML={{ __html: svg }} />
+    <figure className={frameClass}>
+      <ResearchChart spec={spec} id={id} compact={compact} table={<TableView spec={spec} links={links} id={`${id}-table`} />} />
       {caption && <figcaption>{caption}</figcaption>}
-      {spec && (
-        <details className="research-fig-data">
-          <summary>Source data</summary>
-          {spec.notes && <p className="research-fig-notes">{spec.notes}</p>}
-          <div className="research-fig-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th>Series</th>
-                  <th>{spec.x?.label ?? "x"}</th>
-                  <th className="num">{spec.y?.label ?? "y"}</th>
-                  <th className="num">Bounds</th>
-                  <th className="num">n</th>
-                  <th>Source</th>
-                </tr>
-              </thead>
-              <tbody>
-                {spec.series.flatMap((s) =>
-                  s.points.map((p, i) => {
-                    const rs = resultHref(p.sourceRecord);
-                    return (
-                      <tr key={`${s.name}-${i}`}>
-                        <td>{s.name}</td>
-                        <td>
-                          {String(p.x)}
-                          {p.label && (
-                            <span className="research-fig-label" title={p.label}>
-                              {" "}
-                              {p.label}
-                            </span>
-                          )}
-                        </td>
-                        <td className="num">{formatValue(p.y, spec.y?.unit)}</td>
-                        <td className="num">
-                          {p.lo !== undefined && p.hi !== undefined
-                            ? `${formatValue(p.lo)} to ${formatValue(p.hi)}`
-                            : p.lo !== undefined
-                              ? `lower ${formatValue(p.lo)}`
-                              : p.hi !== undefined
-                                ? `upper ${formatValue(p.hi)}`
-                                : "—"}
-                        </td>
-                        <td className="num">{p.n !== undefined ? p.n.toLocaleString("en-US") : "—"}</td>
-                        <td>
-                          {rs ? (
-                            <Link href={rs} className="research-fig-source">
-                              {p.sourceRecord}
-                            </Link>
-                          ) : (
-                            <SourceRef source={p.sourceRecord} />
-                          )}
-                          {p.sourceField && (
-                            <span className="research-fig-field" title={p.sourceField}>
-                              {" "}
-                              {p.sourceField}
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  }),
-                )}
-              </tbody>
-            </table>
-          </div>
-          <p className="research-fig-spec">
-            Spec: <code>web/content/figures/{name}.json</code>
-            {sources.length > 0 && <> · {sources.length} source record{sources.length === 1 ? "" : "s"}</>}
-          </p>
-        </details>
-      )}
+      <details className="rchart-data">
+        <summary>Notes and sources</summary>
+        {spec.notes && <p className="rchart-data-notes">{spec.notes}</p>}
+        <ul className="rchart-data-sources">
+          {sources.map((source) => (
+            <li key={source}>
+              <SourceRef id={source} href={links[source] ?? null} />
+            </li>
+          ))}
+        </ul>
+        <p className="rchart-data-spec">
+          Spec: <code>{specPath(name)}</code> · {sources.length} source record{sources.length === 1 ? "" : "s"} · kind {spec.kind}
+        </p>
+      </details>
     </figure>
   );
 }

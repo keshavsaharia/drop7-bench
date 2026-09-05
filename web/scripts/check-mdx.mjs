@@ -23,8 +23,47 @@ const KNOWN = new Set([
   "LeafXray","LeafTerms","BoardLookalikes","GameTimeline","FlowBalance","ScoreSources","ScoreStrip","CohortScale",
   "OracleSplit","TeacherStudentFlow","NTupleWindows","ValueNetShape","PolicyNetShape","MctsTreeGrowth",
   "EvidenceLabel","ExperimentSummary","ResultSummary","TechnicalDetails","TheorySummary",
-  "GameTreeFigure","Drop7Board","Drop7Game","Diagram","Figure","ArmTable","DeadEnd","Direction","Finding","LogQuote","Timeline",
+  "GameTreeFigure","Drop7Board","Drop7Game","CodeSnippet","Diagram","Figure","ArmTable","DeadEnd","Direction","Finding","LogQuote","Timeline",
+  "EvolutionStatus","CorpusFigure","PretrainFigure","EvolutionFigure","SwarmFigure","ScreenFigure","ScreenGateTable","EvolutionPipeline","GenerationLoop","NnueSketch","PairedSeedsSketch",
 ]);
+
+/**
+ * Components registered for MDX outside the static list above are discovered
+ * from their source files, so a new primer figure or accordion variant does
+ * not need a hand edit here. Only `export function Name` / `export const Name`
+ * with a capitalised name count.
+ */
+function exportedComponentNames(relativeFiles) {
+  const names = new Set();
+  for (const rel of relativeFiles) {
+    const path = join(webDir, rel);
+    let entries = [];
+    try {
+      entries = statSync(path).isDirectory()
+        ? readdirSync(path).filter((f) => f.endsWith(".tsx")).map((f) => join(path, f))
+        : [path];
+    } catch {
+      continue;
+    }
+    for (const file of entries) {
+      const source = readFileSync(file, "utf8");
+      for (const match of source.matchAll(/export (?:function|const) ([A-Z][A-Za-z0-9]*)/g)) names.add(match[1]);
+    }
+  }
+  return names;
+}
+for (const name of exportedComponentNames([
+  "components/primers",
+  "components/lessons/ChoiceLesson.tsx",
+  "components/Reveal.tsx",
+  "components/technique-art/TechniqueArt.tsx",
+  "components/StatTile.tsx",
+  "components/StatRow.tsx",
+  "components/EvidenceStrip.tsx",
+  "components/FigureGrid.tsx",
+  "components/Engines.tsx",
+  "components/RustBitboardFigures.tsx",
+])) KNOWN.add(name);
 
 function* walk(path) {
   const st = statSync(path);

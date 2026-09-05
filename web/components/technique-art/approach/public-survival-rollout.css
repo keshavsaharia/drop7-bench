@@ -1,0 +1,60 @@
+/* terminal-policy-iteration/public-survival-rollout card art. Each column's
+   bar grows up the moves-survived axis, the ticks that scatter around its
+   mean arrive next, and the ring settles on the column that lasted longest.
+   Play-state is owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-public-survival-rollout {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-public-survival-rollout [data-anim] {
+  animation-duration: var(--tart-duration);
+  animation-timing-function: var(--tart-ease, var(--ease-standard, cubic-bezier(0.2, 0, 0, 1)));
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+/* The bars grow out of the baseline, so the box origin is their own bottom. */
+.tart--approach-public-survival-rollout .lifetimes rect {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+}
+.tart--approach-public-survival-rollout .pick {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.tart--approach-public-survival-rollout [data-anim="grow-a"] { animation-name: tart-approach-public-survival-rollout-grow-a; }
+.tart--approach-public-survival-rollout [data-anim="grow-b"] { animation-name: tart-approach-public-survival-rollout-grow-b; }
+.tart--approach-public-survival-rollout [data-anim="grow-c"] { animation-name: tart-approach-public-survival-rollout-grow-c; }
+.tart--approach-public-survival-rollout [data-anim="marks"] { animation-name: tart-approach-public-survival-rollout-marks; }
+.tart--approach-public-survival-rollout [data-anim="pick"] { animation-name: tart-approach-public-survival-rollout-pick; }
+.tart--approach-public-survival-rollout [data-anim="final"] { animation-name: tart-approach-public-survival-rollout-final; }
+
+@keyframes tart-approach-public-survival-rollout-grow-a {
+  0%, 2.18% { transform: scaleY(0.02); }
+  21.82%, 100% { transform: scaleY(1); }
+}
+@keyframes tart-approach-public-survival-rollout-grow-b {
+  0%, 5.45% { transform: scaleY(0.02); }
+  25.09%, 100% { transform: scaleY(1); }
+}
+@keyframes tart-approach-public-survival-rollout-grow-c {
+  0%, 8.73% { transform: scaleY(0.02); }
+  28.36%, 100% { transform: scaleY(1); }
+}
+@keyframes tart-approach-public-survival-rollout-marks {
+  0%, 28.36% { opacity: 0; }
+  36%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-public-survival-rollout-pick {
+  0%, 37.09% { opacity: 0; transform: scale(1.5); }
+  44.73%, 100% { opacity: 1; transform: scale(1); }
+}
+@keyframes tart-approach-public-survival-rollout-final {
+  0%, 44.73% { opacity: 0; }
+  50.18%, 100% { opacity: 1; }
+}

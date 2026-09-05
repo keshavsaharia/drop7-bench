@@ -18,15 +18,15 @@ import { join } from "node:path";
 import { CellGlyph, parseBoard } from "./Board";
 import { MiniBoard } from "./Engine";
 
-const INK = "#fafafa";
-const INK_2 = "#a1a1aa";
-const INK_3 = "#71717a";
-const GRID = "#27272a";
-const BLUE = "#3987e5";
-const AQUA = "#199e70";
-const ORANGE = "#d95926";
-const ACCENT = "#facc15";
-const FONT = "system-ui, -apple-system, 'Segoe UI', sans-serif";
+const INK = "var(--color-ink)";
+const INK_2 = "var(--color-ink-2)";
+const INK_3 = "var(--color-ink-3)";
+const GRID = "var(--color-rule)";
+const BLUE = "var(--color-series-1)";
+const AQUA = "var(--color-series-3)";
+const ORANGE = "var(--color-series-2)";
+const ACCENT = "var(--color-highlight)";
+const FONT = "var(--font-sans)";
 
 /* ------------------------------------------------------------------------ */
 /* Scenario data                                                             */
@@ -338,7 +338,7 @@ function Hud({
           width={10}
           height={10}
           rx={3}
-          fill={i < movesLeft ? AQUA : "#1f1f23"}
+          fill={i < movesLeft ? AQUA : "var(--color-hover)"}
           stroke={GRID}
         />
       ))}
@@ -438,7 +438,7 @@ export function RunCounter({
   return (
     <figure className="engine-fig">
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Counting a run of discs">
-        <rect width={7 * s} height={s} rx={6} fill="#030712" />
+        <rect width={7 * s} height={s} rx={6} fill="var(--color-cell)" />
         {cells.map((cell, i) => (
           <CellGlyph key={i} cell={cell} x={i * s} y={0} s={s} />
         ))}
@@ -493,7 +493,7 @@ export function RunCounter({
                   fontSize={12}
                   fontFamily={FONT}
                   fontWeight={700}
-                  fill="#ffffff"
+                  fill="var(--color-ink)"
                 >
                   {k + 1}
                 </text>
@@ -566,7 +566,7 @@ export function RiseClock({ caption }: { caption?: string }) {
                 width={84}
                 height={72}
                 rx={10}
-                fill={isRise ? "rgba(217,89,38,0.15)" : "#18181b"}
+                fill={isRise ? "rgba(217,89,38,0.15)" : "var(--color-raised)"}
                 stroke={isRise ? ORANGE : GRID}
               />
               <text x={42} y={20} textAnchor="middle" fontSize={11} fontFamily={FONT} fill={INK_3}>
@@ -582,7 +582,7 @@ export function RiseClock({ caption }: { caption?: string }) {
                       width={10}
                       height={10}
                       rx={3}
-                      fill={p < 5 - (i + 1) ? AQUA : "#1f1f23"}
+                      fill={p < 5 - (i + 1) ? AQUA : "var(--color-hover)"}
                       stroke={GRID}
                     />
                   ))}
@@ -731,7 +731,7 @@ export function PlayerView({ caption }: { caption?: string }) {
         </g>
         <g transform={`translate(${7 * s - 74} ${-s + 2})`}>
           {Array.from({ length: 5 }, (_, p) => (
-            <rect key={p} x={p * 14} y={4} width={10} height={10} rx={3} fill={p < 3 ? AQUA : "#1f1f23"} stroke={GRID} />
+            <rect key={p} x={p * 14} y={4} width={10} height={10} rx={3} fill={p < 3 ? AQUA : "var(--color-hover)"} stroke={GRID} />
           ))}
           <text x={0} y={-2} fontSize={10} fontFamily={FONT} fill={INK_3}>
             3 drops to rise
@@ -828,7 +828,7 @@ export function DiscLegend() {
       {entries.map((e) => (
         <div key={e.title} style={{ display: "flex", gap: 12, alignItems: "center" }}>
           <svg width={s} height={s} viewBox={`0 0 ${s} ${s}`} aria-hidden="true">
-            <rect width={s} height={s} rx={6} fill="#030712" />
+            <rect width={s} height={s} rx={6} fill="var(--color-cell)" />
             <CellGlyph cell={e.cell} x={0} y={0} s={s} />
           </svg>
           <div>

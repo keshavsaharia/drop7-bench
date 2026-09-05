@@ -1,0 +1,65 @@
+/* heuristic-search/gray-throughput card art. Numbered discs and covered gray
+   discs slide in on the left; clears and cracked covers leave on the right
+   for a moment and then stop; the outlet closes, the level rises to the top
+   of the board and the top rule goes red. Only transform and opacity
+   animate; play-state, duration and easing are owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-gray-throughput {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-gray-throughput [data-anim="flow-in"] {
+  animation-name: tart-approach-gray-throughput-flow-in;
+}
+.tart--approach-gray-throughput [data-anim="flow-out"] {
+  animation-name: tart-approach-gray-throughput-flow-out;
+}
+.tart--approach-gray-throughput [data-anim="stop"] {
+  animation-name: tart-approach-gray-throughput-stop;
+}
+.tart--approach-gray-throughput [data-anim="level"] {
+  animation-name: tart-approach-gray-throughput-level;
+  transform-box: fill-box;
+  transform-origin: bottom;
+}
+.tart--approach-gray-throughput [data-anim="top"] {
+  animation-name: tart-approach-gray-throughput-top;
+}
+.tart--approach-gray-throughput [data-anim="caption"] {
+  animation-name: tart-approach-gray-throughput-caption;
+}
+
+@keyframes tart-approach-gray-throughput-flow-in {
+  0% { transform: translateX(-36px); }
+  14.18%, 100% { transform: translateX(0); }
+}
+
+@keyframes tart-approach-gray-throughput-flow-out {
+  0%, 7.64% { opacity: 0; transform: translateX(-22px); }
+  18.55% { opacity: 1; transform: translateX(0); }
+  26.18% { opacity: 1; transform: translateX(10px); }
+  33.82%, 100% { opacity: 0; transform: translateX(10px); }
+}
+
+@keyframes tart-approach-gray-throughput-stop {
+  0%, 31.64% { opacity: 0; }
+  39.27%, 100% { opacity: 1; }
+}
+
+@keyframes tart-approach-gray-throughput-level {
+  0%, 13.09% { transform: scaleY(0.32); }
+  49.09%, 100% { transform: scaleY(1); }
+}
+
+@keyframes tart-approach-gray-throughput-top {
+  0%, 45.82% { opacity: 0; }
+  52.36%, 100% { opacity: 1; }
+}
+
+@keyframes tart-approach-gray-throughput-caption {
+  0%, 49.09% { opacity: 0; }
+  54.55%, 100% { opacity: 1; }
+}

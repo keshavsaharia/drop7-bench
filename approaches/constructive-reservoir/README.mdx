@@ -4,6 +4,7 @@ summary: Build structures that pay off later and survive repeated row rises inst
 status: rejected
 evidence: ledger-recorded
 reads: public
+kind: family
 ---
 
 Most policies answer one question: what is the best move right now? These
@@ -100,26 +101,26 @@ internally consistent corrected-17,000-point results by
 
 | Comparison | Games | Candidate | Comparator |
 | --- | ---: | --- | --- |
-| [Vertical reservoir](/approaches/constructive-reservoir/vertical-reservoir) tournament | 128 | 160,498.094 pts / 50.891 moves | fair D1 178,554.438 / 55.750 |
-| [Viability controller](/approaches/constructive-reservoir/viability-controller) Stage A | 32 | 132,537.094 / 43.281 | fair D1 172,697.625 / 53.969 |
-| [Constructive spectrum](/approaches/constructive-reservoir/constructive-spectrum) Stage A | 32 | 266,695.500 / 79.500, 25 joint wins | fair D1 157,198.063 / 49.875 |
+| [Vertical reservoir](/approach/constructive-reservoir/vertical-reservoir) tournament | 128 | 160,498.094 pts / 50.891 moves | fair D1 178,554.438 / 55.750 |
+| [Viability controller](/approach/constructive-reservoir/viability-controller) Stage A | 32 | 132,537.094 / 43.281 | fair D1 172,697.625 / 53.969 |
+| [Constructive spectrum](/approach/constructive-reservoir/constructive-spectrum) Stage A | 32 | 266,695.500 / 79.500, 25 joint wins | fair D1 157,198.063 / 49.875 |
 | Constructive shield on depth 4 | 4 | 283,286 / 83.750, 37.0% switches, 1 pair won | exact D4 372,870.500 / 106.250 |
 | Horizon ablation | 32 | H12 299,730.563 / 88.344 (16 joint wins) | H7 258,223.938 / 77.219; H17 202,634 / 61.969; H27 261,633 / 77.938 |
 | H12 Pareto risk gate | 32 | 302,114.906 / 89.281, 286 of 918 disagreements switched, 17 joint wins | H7 254,541.344 / 76.344; gate required 20 |
-| [Tail-survival CEM](/approaches/constructive-reservoir/tail-survival-cem) tournament | 256 | champion 214,968.934 / 65.590 | starting policy 208,940.695 / 64.004 |
+| [Tail-survival CEM](/approach/constructive-reservoir/tail-survival-cem) tournament | 256 | champion 214,968.934 / 65.590 | starting policy 208,940.695 / 64.004 |
 
 "Fair D1" is the one-move-ahead fair search, a much weaker comparator than the
-[depth-4 reference](/approaches/fair-expectimax/reference), whose broader
+[depth-4 reference](/approach/fair-expectimax/reference), whose broader
 64-game recorded mean is 308,295.578 points. Beating fair D1 is a real result
 and is not close to qualification: the target is a **mean above 1,000,000**.
 
 Two approaches in this family have **no retained numbers at all**:
-[panel value](/approaches/constructive-reservoir/panel-value) and the
-[structural terminal veto](/approaches/constructive-reservoir/structural-terminal-veto)
+[panel value](/approach/constructive-reservoir/panel-value) and the
+[structural terminal veto](/approach/constructive-reservoir/structural-terminal-veto)
 are recorded as rejected on a task record only, which
 [audit 04](/docs/exploratory/audit-04-blind-spots) §B.3 lists among the
 rejections that "cannot be re-derived". One,
-[rise-option QD](/approaches/constructive-reservoir/rise-option-qd), is
+[rise-option QD](/approach/constructive-reservoir/rise-option-qd), is
 deliberately seed-free infrastructure with no gameplay lane at all.
 
 </TechnicalDetails>

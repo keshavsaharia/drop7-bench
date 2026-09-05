@@ -1,0 +1,94 @@
+/* NNUE card art: one cell changes, one row lights, the accumulator grows a unit, the output updates. */
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--nnue {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--nnue .flip {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+.tart--nnue [data-anim="flip"] {
+  animation-name: tart-nnue-flip;
+}
+.tart--nnue [data-anim="row"] {
+  animation-name: tart-nnue-row;
+}
+.tart--nnue .unit {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+.tart--nnue [data-anim="unit"] {
+  animation-name: tart-nnue-unit;
+}
+.tart--nnue [data-anim="out-0"] {
+  animation-name: tart-nnue-out-0;
+}
+.tart--nnue [data-anim="out-1"] {
+  animation-name: tart-nnue-out-1;
+}
+
+@keyframes tart-nnue-flip {
+  0%,
+  4.36% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  9.82% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+  12%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes tart-nnue-row {
+  0%,
+  13.09% {
+    opacity: 0;
+  }
+  16.36% {
+    opacity: 1;
+  }
+  19.64% {
+    opacity: 0.5;
+  }
+  22.91%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-nnue-unit {
+  0%,
+  21.82% {
+    transform: scaleY(0);
+  }
+  28.36%,
+  100% {
+    transform: scaleY(1);
+  }
+}
+@keyframes tart-nnue-out-0 {
+  0%,
+  32.67% {
+    opacity: 1;
+  }
+  32.73%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes tart-nnue-out-1 {
+  0%,
+  32.67% {
+    opacity: 0;
+  }
+  32.73%,
+  100% {
+    opacity: 1;
+  }
+}

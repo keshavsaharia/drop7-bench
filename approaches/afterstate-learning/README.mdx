@@ -1,6 +1,7 @@
 ---
 title: Afterstate learning
 summary: Judge the position a move leaves behind rather than the move itself, and build training data in which every column the player could have chosen has been measured, not guessed.
+kind: family
 ---
 
 Every earlier learning attempt in this repository was asked, at play time, to
@@ -8,7 +9,7 @@ compare boards it had never been shown. This family removes that possibility by
 construction: it trains one evaluator of *resolved positions*, and it labels
 every position the player could reach, not just the one that happened.
 
-## The two changes, and why they go together
+## Afterstates and sibling coverage
 
 Almost every learned evaluator here failed in the same way, and the failure has
 its own page: [evaluating a board, and the sibling trap](/learn/concepts/ranking-siblings).
@@ -64,7 +65,7 @@ One approach, one registered theory, four preregistered experiments and four
 recorded results: the densest evidence trail in the repository for any recent
 idea.
 
-- [Distributional afterstate ranker](/approaches/afterstate-learning/distributional-afterstate):
+- [Distributional afterstate ranker](/approach/afterstate-learning/distributional-afterstate):
   the corpus builder, the evaluator, and the two questions that were actually
   gated: can this model *replace* the reference search, and can it *correct*
   the reference search where the search is least sure.
@@ -88,7 +89,7 @@ agreed well enough for the comparison to mean anything.
 With a trustworthy target in hand, the result was a clean negative: the trained
 evaluator ranked columns clearly better than the weak policy that generated its
 labels, and clearly worse than the
-[fair depth-4 search](/approaches/fair-expectimax/reference) it was hoping to
+[fair depth-4 search](/approach/fair-expectimax/reference) it was hoping to
 replace, in both fresh halves of the held-out games.
 
 A final experiment asked a narrower and more realistic question: leave the

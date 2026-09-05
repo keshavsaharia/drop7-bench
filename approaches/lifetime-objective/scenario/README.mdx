@@ -5,6 +5,7 @@ summary: Fix every future disc and hidden number in advance so a position has on
 status: support-only
 evidence: repository-verified
 reads: oracle
+kind: engine
 ---
 
 This is not a strategy. It is the missing measuring instrument: a way to ask
@@ -119,7 +120,7 @@ the end of this page.
 
 **A board clear is reachable, but only from boards that real play never
 reaches.** This settles an open question the
-[score decomposition](/approaches/lifetime-objective/score-decomposition) had to
+[score decomposition](/approach/lifetime-objective/score-decomposition) had to
 leave open: emptying the board is worth 70,000 points, about 20 moves of
 survival, and the reference policy achieved it zero times in 64 games. Was it
 even possible? Over 128 realistic-to-crowded positions solved with perfect
@@ -202,7 +203,7 @@ and actively exploited by the solver.
 
 </TechnicalDetails>
 
-## The trap this work names, and does not spring
+## Scenario-selection bias
 
 <Callout title="A large gap does not mean a fair policy could have done better" tone="warn">
 It is tempting to build a training suite out of the positions where shallow
@@ -225,7 +226,7 @@ separates strong policy families from weak ones and nothing finer, because at
 that horizon the rise count is nearly fixed and 92% of a scenario score has no
 room to move. See
 [`finding-10-suite-validation`](/docs/exploratory/finding-10-suite-validation)
-and the [suite validation](/approaches/lifetime-objective/suite-validation)
+and the [suite validation](/approach/lifetime-objective/suite-validation)
 approach for the measurement and the proposed repair.
 
 ## What this taught us, and what is still open

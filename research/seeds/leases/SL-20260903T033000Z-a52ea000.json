@@ -1,0 +1,25 @@
+{
+  "$schema": "../schemas/seed-lease-v1.schema.json",
+  "format": "drop7-seed-lease-v1",
+  "experimentId": "EX-20260903-nnue-evolution-continuation-d3-f8ce9181",
+  "rngAlgorithm": "mulberry32 with mix32 domain separation (src/core/native/engine.hpp); headless disc stream kNextDiscDomain, reveal stream kRevealDomain; Rust bitboard engine bit-identical (RS-20260824T075451Z-e89ea128)",
+  "domain": "environment",
+  "cohortManifestSha256": null,
+  "reservedAt": "2026-09-03T03:27:46Z",
+  "openedAt": "2026-09-03T16:21:00Z",
+  "closedAt": null,
+  "protocolSha256": "9a094a0a9e39eac372bfa7366ffadec440e4e68b207299d613a10c9cad99466a",
+  "runIds": [
+    "RUN-20260903T032832Z-a76a6cf7"
+  ],
+  "seedLeaseId": "SL-20260903T033000Z-a52ea000",
+  "role": "public-development",
+  "rangeStartHex": "0xa52ea000",
+  "rangeEndExclusiveHex": "0xa52ea040",
+  "state": "opened",
+  "notes": [
+    "Conservative import 2026-09-03: every 8-hex-digit constant under docs/, approaches/, src/, research/, artifacts/ and web/content/ was enumerated (grep -rhoE '0x[0-9a-fA-F]{8}'); no constant falls inside 0xa52e2000-0xa52ea040. The block lies inside the ./do-research allocator pool (0xa52c0000-0xa5300000), above the first evolution run's leases (0xa52e0300-0xa52e1500), and overlaps no existing lease record and no protected (0x7d) or final (0xd7) prefix.",
+    "64 never-read public-development seeds for the one-shot held-out screen of the continued candidate (five arms on identical seeds: candidate, baseline-run1, init-d3s7, fair-d3s7, fair-d4s7). Opened exactly once by scripts/open-screen-lease.py after candidate-weights.sha256 is recorded; a second opening requires a new experiment record.",
+    "Opened 2026-09-03T16:21:00Z by run RUN-20260903T032832Z-a76a6cf7 for the one-shot screen (0xa52ea000 to 0xa52ea040 exclusive); candidate SHA-256 recorded beforehand in runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/evolve/candidate-weights.sha256: 759084fab97599818d01a5da6d18b9cc77172249f09a68d5104361bca385e09b"
+  ]
+}

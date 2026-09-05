@@ -1,0 +1,81 @@
+/*
+ * Determinized planning card art (DeterminizationArt.tsx).
+ *
+ * Sets animation-name only; duration, easing, iteration count and the
+ * paused/running play state come from art.css. The SVG attributes are the
+ * resting frame (three plans drawn, the merge marker and the ghost "?").
+ * First keyframe: empty lanes. Then each lane's sampled disc appears and its
+ * plan line draws down, the ghost ring over the merge pulses, and the
+ * chosen-column marker slides in.
+ */
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--determinization {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--determinization [data-anim="plan-1"] {
+  animation-name: tart-determinization-plan-1;
+}
+.tart--determinization [data-anim="plan-2"] {
+  animation-name: tart-determinization-plan-2;
+}
+.tart--determinization [data-anim="plan-3"] {
+  animation-name: tart-determinization-plan-3;
+}
+.tart--determinization [data-anim="future-1"] {
+  animation-name: tart-determinization-future-1;
+}
+.tart--determinization [data-anim="future-2"] {
+  animation-name: tart-determinization-future-2;
+}
+.tart--determinization [data-anim="future-3"] {
+  animation-name: tart-determinization-future-3;
+}
+.tart--determinization [data-anim="ghost"] {
+  animation-name: tart-determinization-ghost;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.tart--determinization [data-anim="choose"] {
+  animation-name: tart-determinization-choose;
+}
+
+@keyframes tart-determinization-plan-1 {
+  0%, 3.27% { stroke-dashoffset: 100; }
+  18.55%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes tart-determinization-plan-2 {
+  0%, 7.64% { stroke-dashoffset: 100; }
+  22.91%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes tart-determinization-plan-3 {
+  0%, 12% { stroke-dashoffset: 100; }
+  27.27%, 100% { stroke-dashoffset: 0; }
+}
+
+@keyframes tart-determinization-future-1 {
+  0%, 2.18% { opacity: 0; }
+  5.45%, 100% { opacity: 1; }
+}
+@keyframes tart-determinization-future-2 {
+  0%, 6.55% { opacity: 0; }
+  9.82%, 100% { opacity: 1; }
+}
+@keyframes tart-determinization-future-3 {
+  0%, 10.91% { opacity: 0; }
+  14.18%, 100% { opacity: 1; }
+}
+
+@keyframes tart-determinization-ghost {
+  0%, 28.36% { opacity: 0; transform: scale(0.5); }
+  32.73% { opacity: 1; transform: scale(1); }
+  40.36% { opacity: 0.45; transform: scale(1); }
+  45.82%, 100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes tart-determinization-choose {
+  0%, 33.82% { opacity: 0; transform: translateY(6px); }
+  39.27%, 100% { opacity: 1; transform: translateY(0); }
+}

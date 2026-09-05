@@ -1,0 +1,133 @@
+---
+title: Heuristic evaluation
+slug: heuristic-evaluation
+summary: "When the search has to stop before the game ends, a hand-written formula guesses how good the board it stopped at is."
+order: 2
+technique: heuristic-evaluation
+approaches: [fair-expectimax/fair-policy, heuristic-search, fair-expectimax/cem, lifetime-objective/leaf-reweight]
+glossary: [leaf, leaf evaluator, feature, weight]
+---
+
+## The idea
+
+A look-ahead search stops long before the game does. At the bottom of its tree
+it is staring at positions where nothing has been settled, and it has to rank
+them anyway. Somebody has to say "this board is better than that one", and
+say it fast, because the search will ask millions of times per move.
+
+The oldest answer is a formula. List the things you can count on a board that
+seem to matter. Give each one a weight, positive for good things and negative
+for bad. Multiply, add, and the total is the board's score. The formula is a
+heuristic evaluation: "heuristic" because nobody derived it. A person guessed
+at the counts and the weights and adjusted them until the play looked
+sensible.
+
+The counts are called features. The formula is the
+[leaf evaluator](/learn/glossary), because it scores the leaves of the search
+tree.
+
+## A small example
+
+Here is a game with nothing in it but stacking. There are three columns. Each
+turn you place one block on a column of your choice. A block that lands level
+with a neighbouring column scores a point. You lose the moment any column
+reaches height five.
+
+1. List things you can count. The height of the tallest column. The number of
+   columns already at height four, where one more block ends the game. The
+   number of neighbouring columns of equal height; call them level pairs.
+2. Give each a weight: −3 per unit of tallest height, −10 per column at height
+   four, +2 per level pair.
+3. Score a board by multiplying and adding. Columns of height 4, 3 and 3 have
+   a tallest column of 4 (−12), one column at four (−10) and one level pair
+   (+2). The total is −20.
+
+<HeuristicThreeCounters />
+
+4. To choose a move, imagine each placement, score the board it leaves, and
+   take the highest.
+5. Change a weight and the choice changes. From heights 4, 3, 1, placing on
+   the middle column scores a point and leaves two columns at height four;
+   placing on the right column scores nothing and leaves one. With the danger
+   weight at −1 the formula prefers the point. At −3 or below it prefers the
+   safer board. The weights are the whole policy.
+
+<HeuristicWeightDial />
+
+6. Ask what the formula cannot see. Heights 4, 3, 3 and heights 4, 2, 2 have
+   the same three counts and the same score, −20. The first board has room for
+   two more blocks before a column must reach five; the second has room for
+   four.
+
+<HeuristicLookalikes />
+
+## How it works
+
+The general recipe has three parts, and every part is a human decision.
+
+The features are functions of the visible board that return a number: a
+height, a count, a yes or a no. Choosing them is where the game knowledge
+goes. A feature the designer did not think of cannot influence the score, so
+two boards that agree on every feature get the same score whatever their
+futures hold.
+
+The weights turn the features into one number, usually by a weighted sum,
+sometimes with a hand-shaped bend or two (a penalty that only starts above a
+threshold, say). Weights are set by hand, or fitted by playing games with
+different vectors and keeping the one that scores best. Fitting is easy to
+describe and hard to do well. A small set of games can be won by luck, and a
+weight vector that wins them may lose on fresh ones.
+
+The evaluator then plugs into a search. The search does the looking ahead and
+the evaluator does the judging at the bottom, so the formula is the search's
+entire opinion about anything beyond its horizon. Inside a
+[rollout](/learn/glossary), where a position is played forward with a quick
+policy, the same formula often picks the moves as well.
+
+## In Drop7
+
+The reference search's evaluator is called the fair leaf. Its features are
+things a Drop7 board can still do: structures ready to fire, chain potential
+one step further away, how reachable the buried gray discs are, and, against
+those, penalties for height, for covered discs sitting high, for low numbers
+clogging the board, and for danger with a rise imminent. It has nineteen
+weights, set by hand, and a modelled game over scores a flat −1,000,000. The
+[fair leaf page](/approach/fair-expectimax/fair-policy) walks through the
+terms and the laboratory that fitted them, and the
+[concept page on what makes a board good](/learn/concepts/evaluating-a-board)
+marks the features on a real position.
+
+Pages that use hand-written evaluation:
+
+- [The fair leaf and the laboratory that produced it](/approach/fair-expectimax/fair-policy),
+  the evaluator at the bottom of every search in the reference family.
+- [Hand-built heuristics and shallow search](/approach/heuristic-search),
+  the family of earlier one-move and shallow-search policies.
+- [Machine-tuning the board evaluator](/approach/fair-expectimax/cem),
+  which let an optimiser adjust eight of the coefficients.
+- [Leaf Reweight](/approach/lifetime-objective/leaf-reweight), which turns
+  the nineteen weights into run-time data so refitted vectors can be tested.
+
+## What it cannot do
+
+The formula is where the search spends its time. In the reference depth-4
+search, 96.1% of visited positions are leaves, and evaluating them is 79.1% of
+the attributed time of a single decision
+([finding-13](/docs/exploratory/finding-13-fast-engine), quoted on the
+[board-evaluation concept page](/learn/concepts/evaluating-a-board)). Whatever
+the evaluator cannot see, the search cannot see either.
+
+And the formula is a guess that has resisted improvement. Its weights have
+never been refitted under corrected scoring, or at the depth they are used
+at. One conventional tidiness term, the roughness penalty, was set to exactly
+zero so that the policy would build anything at all. Every later attempt to
+adjust the vector, through
+[machine tuning](/approach/fair-expectimax/cem),
+[transition rewards](/approach/fair-expectimax/transition-rewards) and
+[vertical-ladder energy](/approach/fair-expectimax/vertical-ladder), fitted
+well on the games used to select it and regressed on fresh ones. Both
+statements are recorded on the
+[fair leaf page](/approach/fair-expectimax/fair-policy) and the
+[fair expectimax family page](/approach/fair-expectimax), which read the
+pattern as a sign that the vector sits in a decent local optimum and nothing
+more.

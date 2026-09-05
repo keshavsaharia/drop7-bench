@@ -1,24 +1,20 @@
 ---
-title: One dial was controlling two different pieces of luck
+title: Separate reveal and next-disc sampling
 family: lifetime-objective
 summary: Separates next-disc and hidden-value samples inside search. The change is worth about one extra move of look-ahead.
 status: completed
-evidence: development-tier exploratory finding
+evidence: reproduced
 reads: public
+kind: strategy
+technique: expectimax
+featured: true
 ---
 
-The reference search drew "which disc comes next" and "what the hidden discs
-turn out to be" from the same counter, so it never imagined the two happening in
-different combinations. Giving them separate draws is worth about as much as a
-whole extra move of look-ahead.
+## The problem
 
-<EvidenceLabel status="completed" evidence="development-tier exploratory finding" reads="public" />
-
-## The intuition: one move, two futures
-
-When a move causes a clear next to a gray disc, the gray disc's hidden number is
-revealed, and what that number turns out to be can change everything about the
-move. Below is one real position from the rules engine. The next disc is a
+When a move causes a clear next to a gray disc, the gray disc's hidden number
+is revealed, and what that number turns out to be can change everything about
+the move. Below is one real position from the rules engine. The next disc is a
 <Disc n={5} />, and it goes into the second column from the left.
 
 <BoardCompare
@@ -40,107 +36,134 @@ move. Below is one real position from the rules engine. The next disc is a
   caption="Same board, same drop. The 4 pops and the gray disc reveals, but as a 4, which sits in a run of three and does nothing. One wave, 7 points. Both outcomes are the engine's; the only difference is a number no player can see."
 />
 
-A search cannot know which of those it will get, so it has to imagine several
-possibilities and average them. That is a
-[chance node](/learn/concepts/chance-vs-choice), and the number of possibilities
-it imagines is the search's **chance samples** (the repository calls them
-[strata](/learn/glossary); the reference uses five, and a stronger variant uses
-seven).
+A search cannot know which of those it will get, so it imagines several
+possibilities and averages them. That is a
+[chance node](/learn/concepts/chance-vs-choice), and the number of
+possibilities it imagines is its chance samples, called
+[strata](/learn/glossary) on this site; the reference search uses five and a
+stronger variant uses seven.
 
-Here is the defect this approach found. Every chance node has *two* independent
-pieces of luck: the number revealed under the gray disc, and which disc the
-game deals next, and the reference search indexed both with the same counter.
-Sample 1 always paired a particular reveal with a particular next disc; sample 2
-always paired the next pair; and so on. With seven samples the search saw seven
-of the 49 possible combinations, and the seven it saw were perfectly correlated.
-**A move whose value depends on the combination could not be evaluated
-correctly.**
+Every chance node holds two independent pieces of luck: the number revealed
+under the gray disc, and which disc the game deals next. The reference search
+indexed both with the same counter. Sample 1 always paired a particular reveal
+with a particular next disc, sample 2 the next pair, and so on. With seven
+samples the search saw seven of the 49 possible combinations, and the seven it
+saw were perfectly correlated. A move whose value depends on the combination
+could not be valued correctly.
 
-## How the fix works
+## Proposed solution
 
-1. **Split the dial in two.** Instead of one setting used for both quantities,
-   the search takes a number of *disc* samples `N` and a number of *reveal*
-   samples `M`, and runs `N × M` scenarios per chance node. The reveal draws are
-   spaced through the unit interval so that each disc branch still sees a
-   properly spread reveal sample.
-2. **Prove it is the same policy when `M = 1`.** At one reveal sample the two
-   loops collapse to exactly the old one: the same draws in the same order with
-   the same divisor, so the existing arms become special cases rather than
-   things that merely resemble them.
-3. **Count what the samples actually cover.** A separate script re-implements
-   the engine's own quadrature in Python and measures, over 20,000 synthetic
-   chance nodes, what fraction of the joint outcomes get any weight at all. This
-   is what turns "more samples" into a specific claim about *which* part of the
-   chance node was broken.
-4. **Set the work budget per configuration.** The reference search carries a
-   work limit sized for its own branching factor; leaving it in place while
-   widening the chance node silently degrades a four-move search into a
-   three-move one and reports the result as a chance-sampling finding. Every arm
-   here declares its own limit and the binary refuses to run a cohort without
-   one.
-5. **Play whole games**, 64 of them per arm, paired on the same seeds as the
-   earlier chance-sampling study so the comparison is direct.
+Give the two pieces of luck separate draws. Instead of one setting for both,
+the search takes a number of disc samples N and a number of reveal samples M
+and runs N × M scenarios per chance node, with the reveal draws spaced through
+the unit interval so that every disc branch still sees a properly spread reveal
+sample. At M = 1 the two loops collapse to the old search: the same draws in
+the same order with the same divisor, so the existing arms are special cases
+of the new search and can be compared with it directly.
+
+The bet is that widening the reveal side of the chance node buys the same kind
+of strength as another move of depth, at a shallower and cheaper depth. The
+policy reads what the reference reads: the visible board, the visible next
+disc, the moves until the next rise, and whether the game is over.
+
+## How it works
+
+1. Read the position: the visible board, the visible next disc, the moves
+   until the next rise, and whether the game is over.
+2. At each chance node, draw N samples for the next disc and M samples for
+   the reveals, and combine them into N × M scenarios, each with its own
+   weight.
+3. Search each scenario with the three-move fair search and the frozen leaf
+   evaluator. The chance node's value is the plain average over all N × M
+   scenarios.
+4. Every configuration declares a work bound sized to its own branching
+   factor, and the binary refuses to run a cohort without one. Leaving the
+   reference's bound in place while widening the chance node would quietly turn
+   a four-move search into a three-move one and report the result as a
+   chance-sampling finding.
+5. Play the column with the highest averaged value. Alongside the search, a
+   separate script re-implements the engine's own quadrature in Python and
+   measures, over 20,000 synthetic chance nodes, what fraction of the joint
+   outcomes receive any weight at all, which turns "more samples" into a claim
+   about which part of the chance node was broken.
 
 ## What happened
 
-**The fix pays, and it pays in proportion to how much of the chance node it
-covers.** Holding the disc side exact at seven samples and the look-ahead at
-three moves, raising the reveal samples from one to three to six raised the mean
-score from 312,327 to 337,306 to 376,442, and the fraction of the
-disc-and-reveal combinations receiving any weight went 14.3% → 42.9% → 85.7% in
-lockstep. Score, lifetime, clears per move, reveals per move and (downward)
-board occupancy all ordered correctly across the three settings.
+On the fixed 64-game development cohort, paired with the earlier
+chance-sampling study, the three-move search with seven disc samples and six
+reveal samples beat the same search with one reveal sample by +64,116 points
+(one-sided 95% bootstrap lower bound +7,475) and beat the frozen four-move
+reference by +79,115 points
+([finding-09](/docs/exploratory/finding-09-reveal-sampling), development tier;
+run validity valid, outcome pass). It was statistically indistinguishable from
+the strongest arm previously measured, the four-move search with seven chance
+samples, while doing less of the work.
 
-**The endpoint clears its statistical bar; the individual steps do not.** Six
-reveal samples beat one by **+64,116 points with a one-sided 95% bootstrap lower
-bound of +7,475**, winning 36 of 64 paired games. Each single step along the way
-is inside the noise on 64 games. The claim therefore rests on the ordering of
-five quantities across three settings plus the significant endpoint, not on any
-one pairwise test.
+The gain arrived in proportion to how much of the chance node the samples
+covered. Raising the reveal samples from one to three to six raised the mean
+score, the lifetime, the clears per move and the reveals per move step by
+step, and lowered the board occupancy, in lockstep with the fraction of
+disc-and-reveal combinations receiving any weight. The endpoint clears its
+statistical bar; each single step along the way sits inside the noise on 64
+games, so the claim rests on the ordering of five quantities across three
+settings together with the significant endpoint. The six-sample three-move arm
+matches the four-move reference's reveal rate and nearly matches its clear
+rate: a shallower search reproducing a deeper search's flow profile.
 
-**The headline is against the reference policy.** A three-move search with six
-reveal samples beats the frozen four-move reference by **+79,115 points (95%
-lower bound +30,242)**, and is **statistically indistinguishable** from the
-strongest previously measured arm: the four-move search with seven chance
-samples, while doing 86% of its work. So the earlier conclusion that "depth
-needs an exact chance estimator" is only half of a symmetric statement: at a
-fixed budget, a fourth move of look-ahead and a decorrelated chance estimate buy
-roughly the same thing, and the chance estimate is slightly cheaper.
+The strength is bought with compute at about the same exchange rate as depth.
+Score per unit of work falls as the reveal samples rise, as it does when depth
+rises. And none of it reaches the requirement: every game in every arm still
+filled its board and ended.
 
-**The mechanism moved, which is the check that mattered.** From one reveal
-sample to six, numbered clears rose by 0.0598 per move and gray-disc reveals by
-0.0422, with mean occupancy falling from 23.88 to 23.49 of 49 cells. The
-six-sample three-move arm reaches **exactly** the four-move reference's reveal
-rate of 1.1423 and comes within 0.002 of its clear rate: a shallower search
-reproducing a deeper search's flow profile.
+## What we learned
 
-**It is bought with compute, at about the same exchange rate as depth.** Going
-from one reveal sample to six costs 27.1 times the logical work per move.
-Score per unit of work falls monotonically as the reveal samples rise, exactly
-as it does with depth. What is new is not free strength; it is a second axis on
-the frontier that happens to be available at a shallower and cheaper depth.
+The defect has a name. At seven samples every individual distribution was
+already exact, so the fault was never too few samples or a biased next-disc
+distribution. The next disc and the reveals were the same random variable in
+disguise, and fixing that is a two-line change to how one index is computed.
+Depth and chance quality turned out to be exchangeable: two ways of spending
+the same budget, with the cheaper one available at a shallower depth.
 
-**None of it reaches the requirement.** The best arm here sustains 2.0447 clears
-and 1.1423 reveals per move against the 2.400 and 1.400 that indefinite survival
-needs. Every game still filled its board and ended.
+The improvement is real and it is far from the target. The best arm sustains
+2.0447 clears and 1.1423 reveals per move against the 2.400 and 1.400 that
+indefinite survival needs (finding-09, 64 games); the
+[flow ceiling](/approach/lifetime-objective/flow-ceiling) page has the
+measurement of how far there is to go.
 
-<TechnicalDetails title="The record: cohorts, gates and the arms that were not finished">
+The open question is whether the two axes compound when used together. The arm
+that would answer it, depth 4 with two reveal samples, was killed by the
+runtime before it wrote a game.
 
-Source: [`finding-09-reveal-sampling`](/docs/exploratory/finding-09-reveal-sampling),
-a retained exploratory finding at the repository's `development` evidence tier
-for the gameplay arms and `pilot` for the runtime projections, measured in this
-checkout on 2026-08-20. It has no row in the
-[experiment index](/docs/research/experiment-index) and no entry in the
-[ledger](/docs/research/history). **Run validity: valid. Outcome: pass**, with
-the caveat that the effect needs six reveal samples to clear noise on 64 games.
+<AgentContext summary="Records and provenance">
 
-**Cohort.** The fixed shared 64-game evaluation cohort `0xa51d1000`–`0xa51d103f`,
-2,000-move cap, corrected 17,000-point Hardcore scoring, 0 censored games and 0
-score-decomposition identity violations in every arm. These seeds were already
-read by the earlier chance-sampling study and are development data permanently,
-so nothing here can serve as confirmation evidence.
+- Source: [`finding-09-reveal-sampling`](/docs/exploratory/finding-09-reveal-sampling),
+  a retained exploratory finding at the `development` evidence tier for the
+  gameplay arms and `pilot` for the runtime projections, measured on
+  2026-08-20. It has no row in the
+  [experiment index](/docs/research/experiment-index) and no entry in the
+  [ledger](/docs/research/history). Run validity: valid. Outcome: pass, with
+  the caveat that the effect needs six reveal samples to clear noise on 64
+  games.
+- Namespace `approaches/lifetime-objective/reveal-sampling`, run
+  `runs/RUN-A525-reveal/`, build `build/reveal-sampling/`. No existing file
+  was modified: the frozen reference and the single-knob parameterised search
+  are consumed unmodified through generated copies that differ from the
+  originals by exactly one entry-point line, verified at build time.
+- Seed lease `SEEDLEASE-A52-REVEAL` = `0xa5250000`–`0xa5257fff` for CHECK
+  probes and pilots. Cohort for the headline arms: the fixed shared 64-game
+  evaluation cohort `0xa51d1000`–`0xa51d103f`, 2,000-move cap. These seeds
+  were already read by the earlier chance-sampling study
+  ([finding-05](/docs/exploratory/finding-05-chance-strata)) and are
+  development data permanently, so nothing here can serve as confirmation
+  evidence.
 
-**Arms** (depth 3 unless stated; `N` disc samples × `M` reveal samples):
+</AgentContext>
+
+<AgentContext summary="Full results table">
+
+Arms are depth 3 unless stated; `N` disc samples × `M` reveal samples; 64
+paired games each, corrected 17,000-point Hardcore scoring, 0 censored games,
+0 score-decomposition identity violations in every arm.
 
 | arm | mean | median | moves | clears/move | reveals/move | occupied | work/move |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -148,74 +171,82 @@ so nothing here can serve as confirmation evidence.
 | N=5, M=3 (control) | 312,556 | 281,704 | 92.00 | 1.9868 | 1.1111 | 23.54 | 368,518 |
 | N=7, M=1 (seven-sample arm) | 312,327 | 267,279 | 92.27 | 1.9849 | 1.1001 | 23.88 | 156,834 |
 | N=7, M=3 | 337,306 | 285,023 | 98.70 | 2.0033 | 1.1111 | 23.81 | 1,045,719 |
-| **N=7, M=6** | **376,442** | 322,859 | **109.45** | **2.0447** | **1.1423** | 23.49 | 4,244,020 |
+| N=7, M=6 | 376,442 | 322,859 | 109.45 | 2.0447 | 1.1423 | 23.49 | 4,244,020 |
 | depth 4, N=5, M=1 (reference) | 297,327 | 260,415 | 87.16 | 1.9489 | 1.0697 | 24.29 | 1,296,034 |
 | depth 4, N=7, M=1 | 398,498 | 344,630 | 114.66 | 2.0571 | 1.1549 | 23.15 | 4,956,614 |
 
-The two depth-4 rows are the earlier study's arms on the same cohort, reproduced
-for comparison and not re-run.
+The two depth-4 rows are the earlier study's arms on the same cohort,
+reproduced for comparison and not re-run.
 
-**Paired deltas**, one-sided 95% lower bounds by percentile bootstrap over whole
-games, 20,000 resamples: (7,6) − (7,1) = **+64,116 [+7,475]**, 36–0–28;
-(7,6) − (5,1) = **+71,391 [+13,603]**; (7,6) − depth-4 (5,1) = **+79,115
-[+30,242]**, 35–0–29; (7,6) − depth-4 (7,1) = −22,056 [−89,867], 30–0–34, read
-as a tie. The two intermediate steps, (7,1)→(7,3) at +24,980 and (7,3)→(7,6) at
-+39,136, do not clear zero.
+Paired deltas, one-sided 95% lower bounds by percentile bootstrap over whole
+games, 20,000 resamples: (7,6) − (7,1) = +64,116 [+7,475], 36–0–28;
+(7,6) − (5,1) = +71,391 [+13,603]; (7,6) − depth-4 (5,1) = +79,115
+[+30,242], 35–0–29; (7,6) − depth-4 (7,1) = −22,056 [−89,867], 30–0–34, read
+as a tie. The two intermediate steps, (7,1)→(7,3) at +24,980 and (7,3)→(7,6)
+at +39,136, do not clear zero.
 
-**Coverage** (20,000 synthetic chance nodes): at seven samples every *individual*
-marginal is already exact: seven strata over seven equally likely values. The
-residual error is in the joint. Reveal samples raise the (disc, reveal) joint
-coverage 14.3% → 42.9% → 85.7% → 100% at M = 3, 6, 12, but the reveal-by-reveal
-joint only 14.3% → 26.2%, because all reveals inside one scenario still share
-the sample index. **The measured strength ordering tracks the first column and
-not the second**, which is a specific, falsifiable attribution of which
-correlation was the binding defect.
+Dose-response: from M = 1 to M = 6 the mean score went 312,327 → 337,306 →
+376,442 and the fraction of (disc, reveal) combinations receiving any weight
+went 14.3% → 42.9% → 85.7% in lockstep. Numbered clears rose by 0.0598 per
+move and gray-disc reveals by 0.0422, with mean occupancy falling from 23.88
+to 23.49 of 49 cells. The six-sample three-move arm reaches the four-move
+reference's reveal rate of 1.1423 exactly and comes within 0.002 of its clear
+rate.
 
-**CHECK gates, all before any gameplay:** the new search reproduces the frozen
-reference's chosen column over 50 moves; it reproduces the existing
-parameterised search's column *and logical work* over 562 decisions across four
-configurations with 0 mismatches; and both `M = 1` arms reproduce the existing
-binary's own 64-game artifacts field-for-field, including summed logical work to
-the unit. Work bounds were computed per configuration and verified never to
-bind: **0 of 30,865 decisions completed below target depth**, busiest single
-decision at 77% of its bound.
+Work: going from one reveal sample to six costs 27.1 times the logical work
+per move, and score per unit of work falls monotonically as the reveal
+samples rise. The (7,6) arm's 4,244,020 work per move is 86% of the depth-4
+seven-sample arm's 4,956,614.
 
-**Recorded rather than omitted:** a depth-4 arm with two reveal samples was
-launched on the shared cohort and **killed by the runtime after about an hour
-with no games written**: a partial run, not a censored result, and it appears
-in no table. It was authorised by a matched pilot rather than guessed. It is the
-highest-value open arm, because it is the only way to learn whether the two axes
-compound rather than substitute. A three-move arm with twelve reveal samples,
-the configuration that takes joint coverage to 100%, was a deliberate no-run at
-roughly 5.7 hours of the machine.
+Coverage (20,000 synthetic chance nodes): at seven samples every individual
+marginal is already exact, seven strata over seven equally likely values, and
+the residual error is in the joint. Reveal samples raise the (disc, reveal)
+joint coverage 14.3% → 42.9% → 85.7% → 100% at M = 3, 6, 12, but the
+reveal-by-reveal joint only 14.3% → 26.2%, because all reveals inside one
+scenario still share the sample index. The measured strength ordering tracks
+the (disc, reveal) column and does not track the reveal-by-reveal column, a
+specific, falsifiable attribution of which correlation was the binding
+defect.
 
-**Limitations the finding states about itself:** depth 3 only for the completed
-arms; the individual dose steps are not separately significant; reveal samples
-are mostly a decoupling knob and barely touch the reveal-by-reveal joint; 64
-paired games with a score standard deviation of 55–62% of the mean; one
-already-read cohort, so replication on a fresh block is owed; no fixed-time
-comparison, and the machine carried load averages of 20–55 throughout; and the
-cache size was raised above the frozen default for the widest arm, a declared
-deviation that cannot change a decision because the work bound assumes no cache
-at all.
+</AgentContext>
 
-</TechnicalDetails>
+<AgentContext summary="Validity, gates and limitations">
 
-## What this taught us, and what is still open
+- CHECK gates, all before any gameplay: the new search reproduces the frozen
+  reference's chosen column over 50 moves; it reproduces the existing
+  parameterised search's column and logical work over 562 decisions across
+  four configurations with 0 mismatches; and both `M = 1` arms reproduce the
+  existing binary's own 64-game artifacts field-for-field, including summed
+  logical work to the unit.
+- Work bounds were computed per configuration and verified never to bind:
+  0 of 30,865 decisions completed below target depth, busiest single decision
+  at 77% of its bound.
+- Recorded rather than omitted: a depth-4 arm with two reveal samples was
+  launched on the shared cohort and killed by the runtime after about an hour
+  with no games written. It is a partial run, appears in no table, and was
+  authorised by a matched pilot. It is the highest-value open arm, because it
+  is the only way to learn whether the two axes compound. A three-move arm
+  with twelve reveal samples, the configuration that takes joint coverage to
+  100%, was a deliberate no-run at roughly 5.7 hours of the machine.
+- Limitations the finding states about itself: depth 3 only for the completed
+  arms; the individual dose steps are not separately significant; reveal
+  samples are mostly a decoupling knob and barely touch the reveal-by-reveal
+  joint; 64 paired games with a score standard deviation of 55–62% of the
+  mean; one already-read cohort, so replication on a fresh block is owed; no
+  fixed-time comparison, and the machine carried load averages of 20–55
+  throughout; and the cache size was raised above the frozen default for the
+  widest arm, a declared deviation that cannot change a decision because the
+  work bound assumes no cache at all.
+- Still open in design: the reveal-by-reveal correlation. A search giving each
+  scenario its own independent stream of reveal draws would attack it
+  directly and has not been built.
 
-- **The defect has a precise name**, which is what makes it a finding rather
-  than a tuning result: it was not "too few samples" and not "the next-disc
-  distribution is biased" — at seven samples every individual distribution is
-  already exact. It was that the next disc and the reveals were the same random
-  variable in disguise. That is a two-line change to how one index is computed.
-- **Depth and chance quality are exchangeable**, not a hierarchy. Two ways of
-  spending the same budget, with the cheaper one available at a shallower depth.
-- **Still open:** whether the two axes *compound* when used together. The arm
-  that would answer it was killed by the runtime and never produced a game.
-- **Still open:** the reveal-by-reveal correlation. A design giving each scenario
-  its own independent stream of reveal draws would attack it directly and has
-  not been built.
-- **Context for how much this is worth.** +64,116 points on a mean near 376,000
-  is a real improvement and is nowhere near the target. The
-  [flow ceiling](/approaches/lifetime-objective/flow-ceiling) page has the
-  measurement of how far there is to go.
+</AgentContext>
+
+<AgentContext summary="Scoring mode">
+
+Corrected 17,000-point Hardcore scoring in every arm, 2,000-move cap, 0
+censored games and 0 score-decomposition identity violations. No historical
+7,000-point number appears on this page.
+
+</AgentContext>

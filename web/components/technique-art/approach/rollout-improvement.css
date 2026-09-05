@@ -1,0 +1,72 @@
+/* fair-expectimax/rollout-improvement card art. The lattice fills one tape at
+   a time — every candidate column replayed on the same seven futures — then
+   the column means grow and the move the rollout picks lights beside the base
+   policy's own move. Play-state is owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-rollout-improvement {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-rollout-improvement [data-anim="tape-0"] { animation-name: tart-approach-rollout-improvement-tape-0; }
+.tart--approach-rollout-improvement [data-anim="tape-1"] { animation-name: tart-approach-rollout-improvement-tape-1; }
+.tart--approach-rollout-improvement [data-anim="tape-2"] { animation-name: tart-approach-rollout-improvement-tape-2; }
+.tart--approach-rollout-improvement [data-anim="tape-3"] { animation-name: tart-approach-rollout-improvement-tape-3; }
+.tart--approach-rollout-improvement [data-anim="tape-4"] { animation-name: tart-approach-rollout-improvement-tape-4; }
+.tart--approach-rollout-improvement [data-anim="tape-5"] { animation-name: tart-approach-rollout-improvement-tape-5; }
+.tart--approach-rollout-improvement [data-anim="tape-6"] { animation-name: tart-approach-rollout-improvement-tape-6; }
+.tart--approach-rollout-improvement [data-anim="means"] {
+  animation-name: tart-approach-rollout-improvement-means;
+  transform-box: fill-box;
+  transform-origin: center bottom;
+}
+.tart--approach-rollout-improvement [data-anim="band"] { animation-name: tart-approach-rollout-improvement-band; }
+.tart--approach-rollout-improvement [data-anim="improved"] { animation-name: tart-approach-rollout-improvement-improved; }
+.tart--approach-rollout-improvement [data-anim="caption"] { animation-name: tart-approach-rollout-improvement-caption; }
+
+@keyframes tart-approach-rollout-improvement-tape-0 {
+  0%, 2.18% { opacity: 0; }
+  6.55%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-rollout-improvement-tape-1 {
+  0%, 5.45% { opacity: 0; }
+  9.82%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-rollout-improvement-tape-2 {
+  0%, 8.73% { opacity: 0; }
+  13.09%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-rollout-improvement-tape-3 {
+  0%, 12% { opacity: 0; }
+  16.36%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-rollout-improvement-tape-4 {
+  0%, 15.27% { opacity: 0; }
+  19.64%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-rollout-improvement-tape-5 {
+  0%, 18.55% { opacity: 0; }
+  22.91%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-rollout-improvement-tape-6 {
+  0%, 21.82% { opacity: 0; }
+  26.18%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-rollout-improvement-means {
+  0%, 28.36% { transform: scaleY(0); }
+  36%, 100% { transform: scaleY(1); }
+}
+@keyframes tart-approach-rollout-improvement-band {
+  0%, 37.09% { opacity: 0; }
+  42.55%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-rollout-improvement-improved {
+  0%, 38.18% { opacity: 0; }
+  43.64%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-rollout-improvement-caption {
+  0%, 46.91% { opacity: 0; }
+  52.36%, 100% { opacity: 1; }
+}

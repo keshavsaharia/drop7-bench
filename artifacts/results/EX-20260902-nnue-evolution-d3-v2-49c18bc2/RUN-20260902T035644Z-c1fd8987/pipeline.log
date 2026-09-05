@@ -1,0 +1,21 @@
+[2026-09-02T04:24:10Z] corpus: /home/keshav/Developer/drop7-bench/approaches/lifetime-objective/nnue-evolution/target/release/teacher_corpus --seeds-start 0xa52e0300 --games 512 --threads 32 --depth 5 --move-cap 500 --wall-seconds 46800 --out /home/keshav/Developer/drop7-bench/runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/corpus
+[2026-09-02T04:27:47Z] chain: waiting for the corpus stage
+[2026-09-02T22:09:38Z] chain: corpus process ended without its done marker; aborting
+[2026-09-02T22:10:58Z] chain: waiting for the corpus stage
+[2026-09-02T22:41:23Z] chain: corpus process ended without its done marker; aborting
+[2026-09-02T22:42:11Z] corpus: note: teacher_corpus exited 0 at 2026-09-02T22:39:58Z (177 games, 21618 roots, corpus.jsonl and corpus-summary.json assembled, rusage recorded) but the corpus stage's shell crashed on its final line because pipeline.sh was replaced at 22:10Z while it was still executing; the marker below was appended by hand
+[2026-09-02T22:42:11Z] corpus: done
+[2026-09-02T22:42:11Z] chain: waiting for the corpus stage
+[2026-09-02T22:42:11Z] pretrain: /home/keshav/Developer/drop7-bench/approaches/lifetime-objective/nnue-evolution/target/release/pretrain --corpus /home/keshav/Developer/drop7-bench/runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/corpus/corpus.jsonl --out /home/keshav/Developer/drop7-bench/runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/pretrain --epochs 16 --batch 64 --lr 3e-4 --seed 0x0e701e57 --probe-roots 256 --threads 32
+[2026-09-02T22:42:25Z] pretrain: done
+[2026-09-02T22:42:25Z] evolve: /home/keshav/Developer/drop7-bench/approaches/lifetime-objective/nnue-evolution/target/release/evolve --init /home/keshav/Developer/drop7-bench/runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/pretrain/init.bin --lease-start 0xa52e0500 --out /home/keshav/Developer/drop7-bench/runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/evolve --population 32 --games 32 --generations 60 --elites 4 --tournament 3 --sigma-rel 0.05 --seed 0x0e701e58 --threads 32 --wall-seconds 21600 --move-cap 2000
+[2026-09-03T02:37:19Z] evolve: done
+[2026-09-03T02:37:19Z] select: /home/keshav/Developer/drop7-bench/approaches/lifetime-objective/nnue-evolution/target/release/evolve --select --lease-start 0xa52e0500 --out /home/keshav/Developer/drop7-bench/runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/evolve --generations 60 --games 32 --select-games 128 --threads 32 --move-cap 2000
+[2026-09-03T02:41:29Z] select: done
+[2026-09-03T02:41:29Z] screen: opening the held-out lease
+opened research/seeds/leases/SL-20260825T063000Z-a52e1300.json 2026-09-03T02:41:29Z
+[2026-09-03T02:41:29Z] screen: /home/keshav/Developer/drop7-bench/approaches/lifetime-objective/nnue-evolution/target/release/screen --candidate /home/keshav/Developer/drop7-bench/runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/evolve/candidate-weights.bin --init /home/keshav/Developer/drop7-bench/runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/pretrain/init.bin --seeds-start 0xa52e1300 --games 64 --threads 32 --move-cap 2000 --out /home/keshav/Developer/drop7-bench/runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/screen/heldout.json
+[2026-09-03T02:52:22Z] screen: done
+[2026-09-03T02:52:23Z] compare: done
+[2026-09-03T02:52:23Z] chain: analysis written to /home/keshav/Developer/drop7-bench/runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/analysis.md
+[2026-09-03T02:52:23Z] chain: done

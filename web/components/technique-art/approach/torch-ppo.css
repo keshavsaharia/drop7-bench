@@ -1,0 +1,63 @@
+/* ntuple-rl/torch-ppo card art. Two labelled positions travel the leash from
+   the two-move teacher into the policy; then the leash is dropped, the teacher
+   fades to a ghost, and the loop from the policy's own games draws itself
+   closed in its place. Play-state is owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-torch-ppo {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-torch-ppo [data-anim="teacher"] { animation-name: tart-approach-torch-ppo-teacher; }
+.tart--approach-torch-ppo [data-anim="leash"] { animation-name: tart-approach-torch-ppo-leash; }
+.tart--approach-torch-ppo [data-anim="label-1"] { animation-name: tart-approach-torch-ppo-label-1; }
+.tart--approach-torch-ppo [data-anim="label-2"] { animation-name: tart-approach-torch-ppo-label-2; }
+.tart--approach-torch-ppo [data-anim="forward"] { animation-name: tart-approach-torch-ppo-forward; }
+.tart--approach-torch-ppo [data-anim="loop"] { animation-name: tart-approach-torch-ppo-loop; }
+.tart--approach-torch-ppo [data-anim="loop-head"] { animation-name: tart-approach-torch-ppo-loop-head; }
+.tart--approach-torch-ppo [data-anim="caption"] { animation-name: tart-approach-torch-ppo-caption; }
+
+/* The teacher is the whole first half, then it is left behind. */
+@keyframes tart-approach-torch-ppo-teacher {
+  0%, 22.91% { opacity: 1; }
+  30.55%, 100% { opacity: 0.4; }
+}
+@keyframes tart-approach-torch-ppo-leash {
+  0%, 22.91% { opacity: 1; }
+  29.45%, 100% { opacity: 0.3; }
+}
+
+/* Two labelled positions travel it. */
+@keyframes tart-approach-torch-ppo-label-1 {
+  0% { transform: translate(-22px, 0); opacity: 0; }
+  4.36% { transform: translate(-22px, 0); opacity: 1; }
+  13.09% { transform: translate(18px, 0); opacity: 1; }
+  16.36%, 100% { transform: translate(18px, 0); opacity: 0; }
+}
+@keyframes tart-approach-torch-ppo-label-2 {
+  0%, 10.91% { transform: translate(-22px, 0); opacity: 0; }
+  14.18% { transform: translate(-22px, 0); opacity: 1; }
+  22.91% { transform: translate(18px, 0); opacity: 1; }
+  26.18%, 100% { transform: translate(18px, 0); opacity: 0; }
+}
+
+/* The policy starts playing its own games, and the return closes the loop. */
+@keyframes tart-approach-torch-ppo-forward {
+  0%, 27.27% { transform: translate(-10px, 0); opacity: 0; }
+  33.82%, 100% { transform: translate(0, 0); opacity: 1; }
+}
+/* 168 is the return path's length: 168 hides it, 0 draws it whole. */
+@keyframes tart-approach-torch-ppo-loop {
+  0%, 32.73% { stroke-dashoffset: 168; }
+  46.91%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes tart-approach-torch-ppo-loop-head {
+  0%, 45.82% { opacity: 0; }
+  50.18%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-torch-ppo-caption {
+  0%, 48% { opacity: 0; }
+  52.36%, 100% { opacity: 1; }
+}

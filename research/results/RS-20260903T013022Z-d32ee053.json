@@ -1,0 +1,207 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260903T013022Z-d32ee053",
+  "theoryIds": [
+    "TH-20260902-oneply-linear-q-prune-prior-28faed27"
+  ],
+  "experimentId": "EX-20260902-pruned-search-gameplay-pilot-bf465b1d",
+  "runIds": [
+    "RUN-20260902T184241Z-43722e86"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "inconclusive",
+  "assessment": "mixed",
+  "evidenceTier": "pilot",
+  "summary": "On the 256 previously evaluated pilot games, full-width fair d4s7 (the same FairSearch as before; its first 32 rows reproduce RUN-20260902T081659Z-d2aa6375's checksums exactly) averages 404,497 points and 116.41 moves (median 315,158, lower quartile 211,976, maximum 1,746,375, no game censored). The pruned search selected by EX-4 (exact one-ply prior, width three at both interior layers) averages 370,889 points and 107.77 moves at 26.8% of the logical work per move (1.40M against 5.22M) and 3.4x faster wall time even under contention. Its paired score delta is -33,608 points with one-sided 95% bounds -69,418 and +1,448 (detection floor 35,114), and its paired lifetime delta is -8.64 moves (bounds -18.35, +0.89; floor 9.54); it wins 121 of 256 games and loses 135. Gate G1 is therefore inconclusive: the non-inferiority bound (-40,000) is not met and a measurable loss (upper bound below zero) is not shown either; the point estimate is 8.3% of the comparator's mean and its sign agrees with the panel (8% of decisions changed, all near-ties in value) and with the lifetime delta. The pruned depth-5 arm (one-ply prior, width two on all three interior layers, first 128 seeds, 1.80x the depth-4 work per move) averages 383,515 points and 111.17 moves against the comparator's 405,130 on the same 128 games: paired delta -21,615 (bounds -76,153, +31,957; floor 54,839), 62 wins to 66, so G2 is a non-measurement whose point estimate is negative, consistent with the panel finding that pruned depth 5 is no better than depth 4 in points. No illegal or incomplete decision in any arm. Read: the pruning is a four-times-cheaper policy that appears to give up about a twelfth of the score, not an engineering speed-up; and buying a fifth ply through pruning does not pay. Pilot tier, previously evaluated development cohort, zero new seeds.",
+  "metrics": {
+    "cohort": {
+      "seedsStartHex": "0xa5277000",
+      "games": 256,
+      "moveCap": 2000,
+      "role": "previously-evaluated-development"
+    },
+    "arms": {
+      "fair-d4s7": {
+        "games": 256,
+        "score": {
+          "mean": 404496.85546875,
+          "sd": 282958.16473424336,
+          "median": 315157.5,
+          "q25": 211976.25,
+          "min": 103308,
+          "max": 1746375
+        },
+        "moves": {
+          "mean": 116.40625,
+          "median": 90.0,
+          "q25": 65.0,
+          "min": 35,
+          "max": 475
+        },
+        "censoredGames": 0,
+        "numberedClearsPerMove": 2.0715436241610736,
+        "coveredRevealsPerMove": 1.1651677852348994,
+        "meanChainDepth": 2.1474804920594655,
+        "maximumChainDepth": 13,
+        "illegalDecisions": 0,
+        "incompleteDecisions": 0,
+        "logicalWorkPerMove": 5221078.2737919465,
+        "wallSecondsPerGame": 464.770412030582
+      },
+      "pruned-d4s7-w3,3-d1": {
+        "games": 256,
+        "score": {
+          "mean": 370888.515625,
+          "sd": 231761.88944342008,
+          "median": 316931.5,
+          "q25": 192708.75,
+          "min": 102621,
+          "max": 1750847
+        },
+        "moves": {
+          "mean": 107.76953125,
+          "median": 91.0,
+          "q25": 60.0,
+          "min": 33,
+          "max": 485
+        },
+        "censoredGames": 0,
+        "numberedClearsPerMove": 2.04103084562688,
+        "coveredRevealsPerMove": 1.1437891913443763,
+        "meanChainDepth": 2.0800861759437703,
+        "maximumChainDepth": 12,
+        "illegalDecisions": 0,
+        "incompleteDecisions": 0,
+        "logicalWorkPerMove": 1400421.7092681867,
+        "wallSecondsPerGame": 137.91978032360157
+      },
+      "pruned-d5s7-w2,2,2-d1": {
+        "games": 128,
+        "score": {
+          "mean": 383514.5625,
+          "sd": 271954.94480400684,
+          "median": 305832.5,
+          "q25": 211994.5,
+          "min": 103122,
+          "max": 1615128
+        },
+        "moves": {
+          "mean": 111.171875,
+          "median": 90.0,
+          "q25": 65.0,
+          "min": 35,
+          "max": 450
+        },
+        "censoredGames": 0,
+        "numberedClearsPerMove": 2.0551651440618413,
+        "coveredRevealsPerMove": 1.1543921293042867,
+        "meanChainDepth": 2.1150024690721514,
+        "maximumChainDepth": 12,
+        "illegalDecisions": 0,
+        "incompleteDecisions": 0,
+        "logicalWorkPerMove": 9367274.879409697,
+        "wallSecondsPerGame": 723.1912741194922
+      }
+    },
+    "pairedVsFairD4s7": {
+      "pruned-d4s7-w3,3-d1": {
+        "score": {
+          "n": 256,
+          "meanDelta": -33608.33984375,
+          "sdDelta": 341534.8191081389,
+          "lb95": -69417.625,
+          "ub95": 1448.359375,
+          "detectionFloor": 35114.04858955553,
+          "wins": 121,
+          "ties": 0,
+          "losses": 135
+        },
+        "moves": {
+          "n": 256,
+          "meanDelta": -8.63671875,
+          "sdDelta": 92.78330679058112,
+          "lb95": -18.3515625,
+          "ub95": 0.890625,
+          "detectionFloor": 9.539283729406622,
+          "wins": 119,
+          "ties": 10,
+          "losses": 127
+        },
+        "workPerMoveRatio": 0.26822461488421495,
+        "meanScore": 370888.515625,
+        "referenceMeanScore": 404496.85546875
+      },
+      "pruned-d5s7-w2,2,2-d1": {
+        "score": {
+          "n": 128,
+          "meanDelta": -21615.3359375,
+          "sdDelta": 377161.56220187066,
+          "lb95": -76153.1484375,
+          "ub95": 31956.640625,
+          "detectionFloor": 54838.850574747594,
+          "wins": 62,
+          "ties": 0,
+          "losses": 66
+        },
+        "moves": {
+          "n": 128,
+          "meanDelta": -5.6015625,
+          "sdDelta": 102.37543534129121,
+          "lb95": -20.3671875,
+          "ub95": 8.9453125,
+          "detectionFloor": 14.885268711982118,
+          "wins": 59,
+          "ties": 5,
+          "losses": 64
+        },
+        "workPerMoveRatio": 1.7966694775996583,
+        "meanScore": 383514.5625,
+        "referenceMeanScore": 405129.8984375
+      }
+    },
+    "checksumGate": "first 32 rows of the new fair-d4s7 arm vs RUN-20260902T081659Z-d2aa6375: 0 mismatches (checksum, score, moves, logicalWork)",
+    "wallClock": {
+      "fair-d4s7": "2026-09-02T18:42:52Z to 2026-09-03T00:18:15Z on 6 threads, 20,122 s, shared with three other arms and the EX-4 stages",
+      "pruned-d4s7-w3,3-d1": "2026-09-02T19:29:35Z to 21:09:36Z, 6,001 s",
+      "pruned-d5s7-w2,2,2-d1": "2026-09-02T20:25:44Z to 2026-09-03T00:53:23Z, 16,059 s"
+    }
+  },
+  "gateChecks": [
+    {
+      "criterion": "G1: pruned-d4s7 paired score delta LB95 > -40,000 and lifetime delta LB95 > -5 at work ratio <= 0.35; fail if score UB95 < 0",
+      "passed": null,
+      "observed": "inconclusive: score -33,608 [LB -69,418, UB +1,448], floor 35,114; moves -8.64 [LB -18.35, UB +0.89], floor 9.54; work ratio 0.268; W/T/L 121/0/135"
+    },
+    {
+      "criterion": "G2 (recorded either way): pruned-d5s7 paired score delta over full-width d4s7 on 128 games",
+      "passed": null,
+      "observed": "inconclusive: -21,615 [LB -76,153, UB +31,957], floor 54,839; moves -5.60 [LB -20.37, UB +8.95]; work ratio 1.797; W/T/L 62/0/66"
+    },
+    {
+      "criterion": "Mechanics: zero illegal and incomplete decisions; full-width arm's first 32 rows byte-identical to the existing fair-d4s7 rows",
+      "passed": true,
+      "observed": "0 illegal, 0 incomplete, 0 censored in every arm; 0 checksum mismatches"
+    }
+  ],
+  "perGameArtifact": {
+    "path": "runs/RUN-20260902T184241Z-43722e86/oneply-q/evaluate-pilot-fair.json",
+    "sha256": "764cff3a650fb0c7d9c745de35f9469ded185b206b2d9d05972f8bb14d0c1585",
+    "recordCount": 256
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260902T080517Z-dec42aab.json"
+  ],
+  "artifactManifestRef": null,
+  "limitations": [
+    "Pilot tier on a previously evaluated development cohort read for the fourth time; nothing here can become confirmation evidence.",
+    "A 256-game paired cohort cannot resolve effects below about 35,000 points; the pruned-d4 point estimate sits at that floor, so 'about 8% worse' is the estimate, not a finding, and 0% to 17% are both inside the bounds. The 128-game depth-5 arm has a 55,000-point floor.",
+    "The four arms ran concurrently on the 12-core laptop with the EX-4 stages; wall times are contended and only logical work per move should be compared. The overall span (18:42 to 00:53 UTC, 22,230 s) exceeded the preregistered 21,600 s stop by 630 s; no arm was cut short and every row is a deterministic function of policy and seed, so no number is affected, but the stop was not enforced.",
+    "The pruned-d5 arm's configuration was chosen by the primary (normalised) regret metric of EX-4, whose raw-regret reading was unfavourable; the arm was run to the letter of the frozen protocol and is disclosed as such.",
+    "The per-game artifact for the candidate arms is evaluate-pilot-pruned-d4.json (256 rows) and evaluate-pilot-pruned-d5.json (128 rows) in the same directory."
+  ],
+  "contributionIds": [
+    "CT-20260902T082510Z-4af4b77b"
+  ],
+  "recordedAt": "2026-09-03T01:30:22Z"
+}

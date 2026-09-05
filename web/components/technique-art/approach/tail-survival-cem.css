@@ -1,0 +1,58 @@
+/* constructive-reservoir/tail-survival-cem card art. The population is
+   sampled along how long its games lived, the few that reached the far
+   milestones are ringed as elites, and the sampling distribution slides
+   right and narrows onto them: one generation of the cross-entropy method
+   ranked by the survival tail. Only transform and opacity animate;
+   play-state, duration and easing are owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-tail-survival-cem {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-tail-survival-cem [data-anim="pop"] {
+  animation-name: tart-approach-tail-survival-cem-pop;
+}
+.tart--approach-tail-survival-cem [data-anim="elite"] {
+  animation-name: tart-approach-tail-survival-cem-elite;
+}
+.tart--approach-tail-survival-cem [data-anim="shift"] {
+  animation-name: tart-approach-tail-survival-cem-shift;
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+.tart--approach-tail-survival-cem [data-anim="pull"] {
+  animation-name: tart-approach-tail-survival-cem-pull;
+}
+.tart--approach-tail-survival-cem [data-anim="caption"] {
+  animation-name: tart-approach-tail-survival-cem-caption;
+}
+
+@keyframes tart-approach-tail-survival-cem-pop {
+  0%, 3.27% { opacity: 0; transform: translateY(6px); }
+  15.27%, 100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes tart-approach-tail-survival-cem-elite {
+  0%, 24% { opacity: 0; }
+  32.73%, 100% { opacity: 1; }
+}
+
+/* Starts wide and back over the crowd of short games, ends narrow and over
+   the elites. */
+@keyframes tart-approach-tail-survival-cem-shift {
+  0%, 28.36% { transform: translateX(-100px) scaleX(1.3); }
+  46.91%, 100% { transform: translateX(0) scaleX(1); }
+}
+
+@keyframes tart-approach-tail-survival-cem-pull {
+  0%, 29.45% { opacity: 0; }
+  38.18%, 100% { opacity: 1; }
+}
+
+@keyframes tart-approach-tail-survival-cem-caption {
+  0%, 48% { opacity: 0; }
+  53.45%, 100% { opacity: 1; }
+}

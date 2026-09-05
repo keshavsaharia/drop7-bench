@@ -1,6 +1,7 @@
 ---
 title: Terminal policy iteration
 summary: Play every move forward many times, then override the reference only when one move produces clearly longer, higher-scoring games.
+kind: family
 ---
 
 Choose between moves by actually playing each of them forward many times and
@@ -19,7 +20,7 @@ objective. Not dying is the objective, and points arrive as a by-product at a
 near-constant rate.
 
 That reframing exposes a structural problem with the
-[reference search](/approaches/fair-expectimax/reference). It looks four of the
+[reference search](/approach/fair-expectimax/reference). It looks four of the
 player's moves ahead. The board rises every five moves. So the reference can
 barely see one rise boundary, while the thing that actually ends its games is a
 shortfall that accumulates over dozens of them: it clears about 1.973 discs per
@@ -142,12 +143,12 @@ enough to act.
 
 | Approach | Status and evidence | Recorded outcome |
 | --- | --- | --- |
-| [Terminal rollout](/approaches/terminal-policy-iteration/terminal-rollout) | Runtime-paused; task-record only | A faithful full-terminal design projected roughly hundreds of seconds per move |
-| [Public survival rollout](/approaches/terminal-policy-iteration/public-survival-rollout) | Rejected; task-record only | 31 aligned 100-move continuations were worse than fair D1 on fitting games |
-| [Terminal policy iteration](/approaches/terminal-policy-iteration/terminal-policy-iteration) | Rejected; task-record only | 255 aligned 200-move continuations: the gain was real but missed the frozen gates |
-| [Public rollout policy iteration](/approaches/terminal-policy-iteration/public-rollout-policy-iteration) | Rejected; ledger-recorded | 1.0697× score and 1.0256× moves against a 1.20× gate |
-| [Deployment panel](/approaches/terminal-policy-iteration/deployment-panel) | Mixed. See the page | The 477-root corpus, one completed diagnostic, and two rejected rankers |
-| [Public regenerative B0](/approaches/terminal-policy-iteration/public-regenerative-b0) | Rejected; ledger-recorded | Overrode 11 of 477 roots; every gate but one failed |
+| [Terminal rollout](/approach/terminal-policy-iteration/terminal-rollout) | Runtime-paused; task-record only | A faithful full-terminal design projected roughly hundreds of seconds per move |
+| [Public survival rollout](/approach/terminal-policy-iteration/public-survival-rollout) | Rejected; task-record only | 31 aligned 100-move continuations were worse than fair D1 on fitting games |
+| [Terminal policy iteration](/approach/terminal-policy-iteration/terminal-policy-iteration) | Rejected; task-record only | 255 aligned 200-move continuations: the gain was real but missed the frozen gates |
+| [Public rollout policy iteration](/approach/terminal-policy-iteration/public-rollout-policy-iteration) | Rejected; ledger-recorded | 1.0697× score and 1.0256× moves against a 1.20× gate |
+| [Deployment panel](/approach/terminal-policy-iteration/deployment-panel) | Mixed. See the page | The 477-root corpus, one completed diagnostic, and two rejected rankers |
+| [Public regenerative B0](/approach/terminal-policy-iteration/public-regenerative-b0) | Rejected; ledger-recorded | Overrode 11 of 477 roots; every gate but one failed |
 
 **A caveat about the family's name.** The lifetime framing above is the
 motivation, and two of these programs did require a gain in survived moves as
@@ -189,5 +190,5 @@ the summary in [research status](/docs/research/status).
   more informative open directions and says the existing implementation is
   neither fast nor robust enough. It also warns that the one striking positive
   pilot in this line of work: a 25-move rollout veto, which lives in the
-  [D4 and long-outcome](/approaches/d4-long-outcome) family — must not be turned
+  [D4 and long-outcome](/approach/d4-long-outcome) family — must not be turned
   into a tuning target.

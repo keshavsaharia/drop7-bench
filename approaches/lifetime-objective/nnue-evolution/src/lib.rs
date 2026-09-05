@@ -18,6 +18,7 @@ pub mod features;
 pub mod game;
 pub mod json;
 pub mod nnue;
+pub mod schedule;
 
 use drop7_rs::search::{work_bound_for, SearchParams};
 

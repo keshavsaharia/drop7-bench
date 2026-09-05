@@ -1,48 +1,56 @@
+import "../app.css";
 import Link from "next/link";
+import { Card } from "@/components/Card";
 import { CompetitionGame } from "@/components/CompetitionGame";
 import { GitHubSignInButton } from "@/components/GitHubSignInButton";
+import { PageHeader } from "@/components/PageHeader";
 import {
   COMPETITION_GAME,
   COMPETITION_ROUND,
 } from "@/lib/competition/game";
+import { pageMetadata } from "@/lib/metadata";
 
 export const dynamic = "force-dynamic";
+
+export const metadata = pageMetadata({
+  title: "Compete on the global game",
+  description:
+    "Play the same visible discs and hidden gray-disc values as every human and computer policy, then submit your column choices for server replay.",
+  path: "/compete",
+});
 
 export default function CompetePage() {
   return (
     <div className="space-y-8">
-      <section className="max-w-3xl">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-400">
-          Human strategy lab
-        </p>
-        <h1 className="mt-2 text-3xl font-black text-zinc-50">Compete on the global game</h1>
-        <p className="mt-3 leading-relaxed text-zinc-400">
-          You and every computer policy face the same visible discs and the same hidden
-          values under gray discs. Play entirely in your browser, then optionally sign in
-          and submit only your column choices. The server validates your score and puts you
-          on the same leaderboard as all the autonomous strategies.
-        </p>
-        <div className="mt-4">
-          <GitHubSignInButton />
-        </div>
-      </section>
+      <PageHeader
+        crumbs={[{ href: "/leaderboard", label: "leaderboard" }]}
+        title="Compete on the global game"
+        lead="You and every computer policy face the same visible discs and the same hidden values under gray discs. Play entirely in your browser, then optionally sign in and submit only your column choices. The server validates your score and puts you on the same leaderboard as all the autonomous strategies."
+      >
+        <span className="label">Human strategy lab</span>
+      </PageHeader>
+
+      <div>
+        <GitHubSignInButton />
+      </div>
 
       <CompetitionGame manifest={COMPETITION_GAME} round={COMPETITION_ROUND} />
 
-      <section className="max-w-3xl">
-        <p className="mt-3 text-sm text-zinc-500">
+      <section className="max-w-prose">
+        <p className="text-small text-ink-2">
           You can submit as many runs as you want. When the game is over, you will see an explicit request to
           contribute your moves and score. A submission links your GitHub username and numeric account ID to the
           validated game record; research datasets derived from the move stream omit those identifiers. See the{" "}
-          <Link href="/privacy" className="text-sky-400 hover:text-sky-300">privacy policy</Link> and{" "}
-          <Link href="/terms" className="text-sky-400 hover:text-sky-300">terms</Link>.
+          <Link href="/privacy" className="text-accent hover:underline">privacy policy</Link> and{" "}
+          <Link href="/terms" className="text-accent hover:underline">terms</Link>.
         </p>
       </section>
 
-      <section className="grid gap-4 text-sm md:grid-cols-3">
-        <InfoCard
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card
+          heading="h2"
           title="One global game"
-          body={
+          summary={
             "Game " +
             COMPETITION_GAME.gameVersion +
             " pins " +
@@ -50,24 +58,17 @@ export default function CompetePage() {
             " and its SHA-256 digest. It is open-source, and can be used by anyone to determine an optimal strategy using any language or framework, and submit their results to the competition leaderboard."
           }
         />
-        <InfoCard
+        <Card
+          heading="h2"
           title="Three bits per move"
-          body="Since every turn involves making one of seven choices, your sequence of choices in a game can be packed into a bit stream using three bits per move. These anonymous streams will be publicly released at the end of every competition, to hopefully advance the open research. Submitter information will never be shared."
+          summary="Since every turn involves making one of seven choices, your sequence of choices in a game can be packed into a bit stream using three bits per move. These anonymous streams will be publicly released at the end of every competition, to hopefully advance the open research. Submitter information will never be shared."
         />
-        <InfoCard
+        <Card
+          heading="h2"
           title="Server score wins"
-          body="The submitted columns are replayed in a cloud environment which rejects illegal, incomplete, or trailing moves. Only a server-validated score can appear in rankings."
+          summary="The submitted columns are replayed in a cloud environment which rejects illegal, incomplete, or trailing moves. Only a server-validated score can appear in rankings."
         />
-      </section>
+      </div>
     </div>
-  );
-}
-
-function InfoCard({ title, body }: { title: string; body: string }) {
-  return (
-    <article className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-4">
-      <h2 className="font-bold text-zinc-100">{title}</h2>
-      <p className="mt-2 leading-relaxed text-zinc-500">{body}</p>
-    </article>
   );
 }

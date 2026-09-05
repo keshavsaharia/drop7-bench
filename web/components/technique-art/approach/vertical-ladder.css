@@ -1,0 +1,68 @@
+/* fair-expectimax/vertical-ladder card art. The three-disc column is inert;
+   the covered row rises in under it and makes it four tall, so its 4 clears
+   for the first wave; the 6 above falls into a row of six and clears for the
+   second. The resting frame is the spent column with both wave scores still
+   floating over it. Play-state, duration and easing are owned by art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-vertical-ladder {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-vertical-ladder [data-anim="rise"] { animation-name: tart-approach-vertical-ladder-rise; }
+.tart--approach-vertical-ladder [data-anim="row"] { animation-name: tart-approach-vertical-ladder-row; }
+.tart--approach-vertical-ladder [data-anim="four"] { animation-name: tart-approach-vertical-ladder-four; }
+.tart--approach-vertical-ladder [data-anim="six"] { animation-name: tart-approach-vertical-ladder-six; }
+.tart--approach-vertical-ladder [data-anim="wave-one"] { animation-name: tart-approach-vertical-ladder-wave-one; }
+.tart--approach-vertical-ladder [data-anim="wave-two"] { animation-name: tart-approach-vertical-ladder-wave-two; }
+.tart--approach-vertical-ladder [data-anim="step-a"] { animation-name: tart-approach-vertical-ladder-step-a; }
+.tart--approach-vertical-ladder [data-anim="step-b"] { animation-name: tart-approach-vertical-ladder-step-b; }
+.tart--approach-vertical-ladder [data-anim="step-c"] { animation-name: tart-approach-vertical-ladder-step-c; }
+.tart--approach-vertical-ladder [data-anim="rest"] { animation-name: tart-approach-vertical-ladder-rest; }
+
+/* One cell is 18px, so the rise is exactly one row of travel. */
+@keyframes tart-approach-vertical-ladder-rise {
+  0%, 8.73% { transform: translateY(18px); }
+  16.36%, 100% { transform: translateY(0); }
+}
+@keyframes tart-approach-vertical-ladder-row {
+  0%, 9.82% { opacity: 0; }
+  16.36%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-vertical-ladder-four {
+  0%, 24% { opacity: 1; }
+  29.45%, 100% { opacity: 0; }
+}
+@keyframes tart-approach-vertical-ladder-six {
+  0%, 27.27% { transform: translateY(-18px); opacity: 1; }
+  32.73%, 37.09% { transform: translateY(0); opacity: 1; }
+  41.45%, 100% { transform: translateY(0); opacity: 0; }
+}
+@keyframes tart-approach-vertical-ladder-wave-one {
+  0%, 25.09% { transform: translateY(6px); opacity: 0; }
+  30.55%, 100% { transform: translateY(0); opacity: 1; }
+}
+@keyframes tart-approach-vertical-ladder-wave-two {
+  0%, 38.18% { transform: translateY(6px); opacity: 0; }
+  43.64%, 100% { transform: translateY(0); opacity: 1; }
+}
+@keyframes tart-approach-vertical-ladder-step-a {
+  0%, 12% { opacity: 1; }
+  16.36%, 100% { opacity: 0; }
+}
+@keyframes tart-approach-vertical-ladder-step-b {
+  0%, 14.18% { opacity: 0; }
+  18.55%, 25.09% { opacity: 1; }
+  29.45%, 100% { opacity: 0; }
+}
+@keyframes tart-approach-vertical-ladder-step-c {
+  0%, 27.27% { opacity: 0; }
+  31.64%, 40.36% { opacity: 1; }
+  44.73%, 100% { opacity: 0; }
+}
+@keyframes tart-approach-vertical-ladder-rest {
+  0%, 43.64% { opacity: 0; }
+  48%, 100% { opacity: 1; }
+}

@@ -1,0 +1,77 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260903T032832Z-a76a6cf7",
+  "experimentId": "EX-20260903-nnue-evolution-continuation-d3-f8ce9181",
+  "lifecycle": "completed",
+  "runValidity": "valid",
+  "startedAt": "2026-09-03T03:34:49Z",
+  "endedAt": "2026-09-03T16:30:44Z",
+  "protocolSha256": "9a094a0a9e39eac372bfa7366ffadec440e4e68b207299d613a10c9cad99466a",
+  "machineProfileRef": "research/system-profiles/MACH-20260903T032430Z-4e906a6e.json",
+  "sourceState": {
+    "gitCommit": "e4fd0182bf9697c1996c946652a1ec28bc30c30f",
+    "dirty": false,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "approaches/lifetime-objective/nnue-evolution/build.sh (RUSTFLAGS=-C target-cpu=native, release, lto fat) after adding src/schedule.rs, --resume-population/--baseline/--sigma-decay-tau/--sigma-floor/--plateau-* /--experiment-id to evolve.rs and --arm/--experiment-id to screen.rs",
+    "cargo test --release (13 unit tests, including the schedule and plateau tests)",
+    "target/release/gate 0xa5277000 -> runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/gates.log (11 CHECK gates, probe block only)",
+    "smoke test on the already-open probe block 0xa5277000-0xa5277107: evolve --resume-population population-060.bin --baseline <run-1 candidate> --population 32 --games 2 --generations 4 --sigma-decay-tau 1 --sigma-floor 0.02 --plateau-window 3 --plateau-check-every 1 --plateau-min-generations 3 --move-cap 60; --select --select-games 2; screen --arm baseline-run1=... --games 2 --move-cap 40 (scratch directory, not retained)",
+    "RUN_ID=RUN-20260903T032832Z-a76a6cf7 THREADS=32 EXPERIMENT_ID=EX-20260903-nnue-evolution-continuation-d3-f8ce9181 LEASE_START=0xa52e2000 SCREEN_START=0xa52ea000 SCREEN_LEASE=research/seeds/leases/SL-20260903T033000Z-a52ea000.json GENERATIONS=1000 EVOLVE_SEED=0x0e701e59 INIT=artifacts/results/EX-20260902-nnue-evolution-d3-v2-49c18bc2/RUN-20260902T035644Z-c1fd8987/pretrain/init.bin RESUME_POP=runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/evolve/population-060.bin BASELINE=artifacts/results/EX-20260902-nnue-evolution-d3-v2-49c18bc2/RUN-20260902T035644Z-c1fd8987/evolve/candidate-weights.bin SIGMA_REL=0.05 SIGMA_TAU=400 SIGMA_FLOOR=0.01 PLATEAU_WINDOW=100 PLATEAU_EVERY=50 PLATEAU_MIN=100 EVOLVE_WALL=259200 scripts/pipeline.sh chain-evolve (evolve -> select -> screen -> compare -> analyze)"
+  ],
+  "seedLeaseRefs": [
+    "SL-20260903T033000Z-a52e2000",
+    "SL-20260903T033000Z-a52ea000"
+  ],
+  "resourceLimits": {
+    "wallSeconds": 275000,
+    "cpuThreads": 32,
+    "maxHostBytes": 17179869184,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": 46555,
+    "cpuSeconds": 1454710.4,
+    "peakHostBytes": 1793974272,
+    "peakGpuBytes": null,
+    "measurementNotes": "Launched 2026-09-03T03:34:49Z from commit e4fd0182bf9697c1996c946652a1ec28bc30c30f (clean tree) with scripts/pipeline.sh chain-evolve. Planned. Per-stage kernel rusage is appended to rusage.jsonl by scripts/with-rusage.py; the first run measured about 235 s per generation for 34 rows of 32 depth-3 games at 32 threads, so 35 rows should take about 240 s and 1,000 generations about 67 h if the plateau rule never fires. Final: wall 46555 s from launch to analysis; evolve wall 45649 s, cpu 1432033 s, peak RSS 0.48 GB, exit 0; select wall 321 s, cpu 9955 s, peak RSS 0.25 GB, exit 0; screen wall 584 s, cpu 12723 s, peak RSS 1.79 GB, exit 0. Evolution averaged about 304 s per generation for 35 rows of 32 depth-3 games at 32 threads. The branch received commit e2b0d19 mid-run; the run never resumed and every stage ran the binaries built from e4fd018. Result record RS-20260903T163321Z-733076b5."
+  },
+  "exitCode": 0,
+  "stopReason": "completed: evolution stopped by the preregistered plateau rule after generation 149, elite re-selection, held-out screen played once, compare and analysis written",
+  "artifactRefs": [
+    "runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/gates.log",
+    "runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/screen/heldout.json",
+    "runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/screen/compare-candidate-vs-fair-d3s7.json",
+    "runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/screen/compare-candidate-vs-baseline-run1.json",
+    "runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/screen/compare-baseline-run1-vs-fair-d3s7.json",
+    "runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/screen/compare-init-vs-fair-d3s7.json",
+    "runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/screen/compare-candidate-vs-init.json",
+    "runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/screen/compare-fair-d4s7-vs-fair-d3s7.json",
+    "runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/evolve/selection.json",
+    "runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/evolve/candidate-weights.bin",
+    "runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/evolve/candidate-weights.sha256",
+    "runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/evolve/config.json",
+    "runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/evolve/progress.jsonl",
+    "runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/evolve/plateau.jsonl",
+    "runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/evolve/PLATEAU",
+    "runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/analysis.json",
+    "runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/analysis.md",
+    "runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/rusage.jsonl",
+    "runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/pipeline.log",
+    "runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/launch-continuation.sh",
+    "runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/evolve/gen-000.json .. gen-149.json",
+    "runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/evolve/population-000.bin .. population-150.bin",
+    "runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/evolve/final-fitness.json",
+    "runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/evolve.log",
+    "runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/select.log",
+    "runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/screen.log",
+    "runs/RUN-20260903T032832Z-a76a6cf7/nnue-evolution/stage-chain.nohup",
+    "artifacts/results/EX-20260903-nnue-evolution-continuation-d3-f8ce9181/RUN-20260903T032832Z-a76a6cf7/manifest.json"
+  ],
+  "contributionIds": [
+    "CT-20260902T042620Z-3b4bf7a8"
+  ]
+}

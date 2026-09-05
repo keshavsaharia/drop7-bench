@@ -2,22 +2,26 @@
   "$schema": "../schemas/seed-lease-v1.schema.json",
   "format": "drop7-seed-lease-v1",
   "seedLeaseId": "SL-20260825T063000Z-a52e1300",
-  "experimentId": "EX-20260825-nnue-evolution-d3-bca7f330",
+  "experimentId": "EX-20260902-nnue-evolution-d3-v2-49c18bc2",
   "rngAlgorithm": "mulberry32 with mix32 domain separation (src/core/native/engine.hpp); headless disc stream kNextDiscDomain, reveal stream kRevealDomain; Rust bitboard engine bit-identical (RS-20260824T075451Z-e89ea128)",
   "domain": "environment",
   "role": "public-development",
   "rangeStartHex": "0xa52e1300",
   "rangeEndExclusiveHex": "0xa52e1500",
   "cohortManifestSha256": null,
-  "state": "reserved",
+  "state": "opened",
   "reservedAt": "2026-08-25T06:30:00Z",
-  "openedAt": null,
+  "openedAt": "2026-09-03T02:41:29Z",
   "closedAt": null,
-  "protocolSha256": null,
-  "runIds": [],
+  "protocolSha256": "971a39ef6bb5275a951342245a119cb3d234bed334aa28e2ecfe44eeeeea4dae",
+  "runIds": [
+    "RUN-20260902T035644Z-c1fd8987"
+  ],
   "notes": [
     "Conservative import: every 8-hex-digit constant under docs/, approaches/, src/, research/ and artifacts/ was enumerated; no constant falls inside 0xa52e1300-0xa52e1500, and the block overlaps no existing lease record. It follows the companion training lease 0xa52e0300-0xa52e1300 inside the SEEDLEASE-A52 reserve and the ./do-research allocator pool.",
     "Held-out screen cohort: the first 64 seeds (0xa52e1300-0xa52e133f) are opened exactly once, by the preregistered SCREEN gate of EX-20260825-nnue-evolution-d3-bca7f330, after the candidate vector is frozen and its SHA-256 recorded. The remaining 448 seeds (0xa52e1340-0xa52e1500) stay reserved for a successor replication by a different runner. Never read by any training, tuning, or model-selection step; disjoint from every training block of the companion lease.",
-    "Once read, these seeds are development data forever and can never become confirmation evidence."
+    "Once read, these seeds are development data forever and can never become confirmation evidence.",
+    "Experiment reference moved from EX-20260825-nnue-evolution-d3-bca7f330 to its successor EX-20260902-nnue-evolution-d3-v2-49c18bc2 (identical protocol content) on 2026-09-02T06:58:27Z; still reserved and unopened.",
+    "Opened 2026-09-03T02:41:29Z by run RUN-20260902T035644Z-c1fd8987 for the one-shot 64-game screen (0xa52e1300-0xa52e133f); candidate SHA-256 recorded beforehand in runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/evolve/candidate-weights.sha256: edd0d2efd181de43f35d62c4df784cb2c789db3ae296be93a1c6c59082034a9f"
   ]
 }

@@ -87,8 +87,11 @@ pub struct PackedKey {
 }
 
 impl PackedKey {
+    /// Public so that a search living in another crate (the pruned searcher
+    /// of approaches/value-policy-learning/oneply-q-prune) can share the
+    /// DepthTable with identical keys and therefore identical hit behaviour.
     #[inline]
-    fn new(state: &State, depth: i32) -> PackedKey {
+    pub fn new(state: &State, depth: i32) -> PackedKey {
         let c = &state.board.cols;
         PackedKey {
             words: [
@@ -115,7 +118,7 @@ fn mix_key(mut value: u64) -> u64 {
 }
 
 #[inline]
-fn hash_key(key: &PackedKey) -> u64 {
+pub fn hash_key(key: &PackedKey) -> u64 {
     let mut hash = key.words[0];
     hash = mix_key(hash ^ key.words[1].wrapping_add(0x9e37_79b9_7f4a_7c15));
     hash = mix_key(hash ^ key.words[2].wrapping_add(0xbf58_476d_1ce4_e5b9));

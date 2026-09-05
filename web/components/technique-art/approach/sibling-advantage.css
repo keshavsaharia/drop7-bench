@@ -1,0 +1,40 @@
+/* value-policy-learning/sibling-advantage card art. The same disc appears over
+   all seven legal columns of one root, the shared continuation tape arrives,
+   and the seven bars grow out of the zero line together — the family is
+   compared in one act, not scored one at a time — before the widest gap is
+   ringed. The bar group's box is centred on the zero line, so a single scaleY
+   collapses every bar into it. Play-state is owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-sibling-advantage {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-sibling-advantage [data-anim="bars"] {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.tart--approach-sibling-advantage [data-anim="siblings"] { animation-name: tart-approach-sibling-advantage-siblings; }
+.tart--approach-sibling-advantage [data-anim="tape"] { animation-name: tart-approach-sibling-advantage-tape; }
+.tart--approach-sibling-advantage [data-anim="bars"] { animation-name: tart-approach-sibling-advantage-bars; }
+.tart--approach-sibling-advantage [data-anim="rank"] { animation-name: tart-approach-sibling-advantage-rank; }
+
+@keyframes tart-approach-sibling-advantage-siblings {
+  0%, 2.18% { opacity: 0; transform: translateY(-6px); }
+  9.82%, 100% { opacity: 0.6; transform: translateY(0); }
+}
+@keyframes tart-approach-sibling-advantage-tape {
+  0%, 12% { opacity: 0; }
+  18.55%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-sibling-advantage-bars {
+  0%, 20.73% { transform: scaleY(0.03); }
+  38.18%, 100% { transform: scaleY(1); }
+}
+@keyframes tart-approach-sibling-advantage-rank {
+  0%, 42.55% { opacity: 0; }
+  48%, 100% { opacity: 1; }
+}

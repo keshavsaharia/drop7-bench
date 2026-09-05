@@ -1,0 +1,147 @@
+/*
+ * Policy gradient card art. Heights are the final frame; the keyframes scale
+ * each bar from its starting probability through the plus update to the
+ * minus update. Sampled bars pulse by fill before their badge appears.
+ */
+.tart.tart--policy-gradient {
+  --tart-motion: calc(var(--duration-art, 2400ms) * 1.25);
+}
+
+.tart--policy-gradient [data-anim] {
+  animation-duration: var(--tart-duration);
+}
+.tart--policy-gradient .bar {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+.tart--policy-gradient [data-anim="bar-plus"] {
+  animation-name: tart-policy-gradient-bar-plus;
+}
+.tart--policy-gradient [data-anim="bar-minus"] {
+  animation-name: tart-policy-gradient-bar-minus;
+}
+.tart--policy-gradient [data-anim="bar-rest"] {
+  animation-name: tart-policy-gradient-bar-rest;
+}
+.tart--policy-gradient [data-anim="badges"] {
+  animation-name: tart-policy-gradient-badges;
+}
+.tart--policy-gradient [data-anim="plus"] {
+  animation-name: tart-policy-gradient-plus;
+}
+.tart--policy-gradient [data-anim="minus"] {
+  animation-name: tart-policy-gradient-minus;
+}
+
+/* Column 4: starts at 0.22, rises to 0.34 after the plus, settles at 0.377. */
+@keyframes tart-policy-gradient-bar-plus {
+  0% {
+    transform: scaleY(0.584);
+    fill: var(--color-accent-strong);
+  }
+  5% {
+    fill: var(--color-highlight);
+  }
+  10% {
+    fill: var(--color-accent-strong);
+  }
+  15% {
+    fill: var(--color-highlight);
+  }
+  20%,
+  25% {
+    transform: scaleY(0.584);
+    fill: var(--color-accent-strong);
+  }
+  42%,
+  78% {
+    transform: scaleY(0.902);
+  }
+  92%,
+  100% {
+    transform: scaleY(1);
+    fill: var(--color-accent-strong);
+  }
+}
+/* Column 2: starts at 0.18, shrinks with the rest, then drops to 0.06 after the minus. */
+@keyframes tart-policy-gradient-bar-minus {
+  0%,
+  25% {
+    transform: scaleY(3);
+    fill: var(--color-accent-strong);
+  }
+  42%,
+  58% {
+    transform: scaleY(2.53);
+    fill: var(--color-accent-strong);
+  }
+  62% {
+    fill: var(--color-highlight);
+  }
+  66% {
+    fill: var(--color-accent-strong);
+  }
+  70% {
+    fill: var(--color-highlight);
+  }
+  74%,
+  78% {
+    transform: scaleY(2.53);
+    fill: var(--color-accent-strong);
+  }
+  92%,
+  100% {
+    transform: scaleY(1);
+    fill: var(--color-accent-strong);
+  }
+}
+/* The other five: shrink to make room for the plus, grow back after the minus. */
+@keyframes tart-policy-gradient-bar-rest {
+  0%,
+  25% {
+    transform: scaleY(1.067);
+  }
+  42%,
+  78% {
+    transform: scaleY(0.9025);
+  }
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+}
+/* The resting-frame group appears with the plus badge; the minus badge fades in on its own. */
+@keyframes tart-policy-gradient-badges {
+  0%,
+  18% {
+    opacity: 0;
+  }
+  26%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-policy-gradient-plus {
+  0%,
+  18% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  26%,
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes tart-policy-gradient-minus {
+  0%,
+  72% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  80%,
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

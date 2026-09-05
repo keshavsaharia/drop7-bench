@@ -1,0 +1,87 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260902-oneply-q-fit-and-pruned-search-panel-46c75cdf",
+  "theoryIds": [
+    "TH-20260902-oneply-linear-q-prune-prior-28faed27"
+  ],
+  "title": "Depth-4 sibling-value panel, linear Q fit, and pruned-search regret on held-out roots",
+  "classification": "algorithmic",
+  "hypothesis": "Build a sibling-complete panel of every root state visited by fair d4s7 in 48 complete games on training-role seeds, with exact column values at depths one to four, per-sibling one-ply features under the depth-4 chance scenarios, and remaining lifetime. Fit a ridge-regression linear action value on the first 32 games and evaluate every ranker (centre order, the CEM six-feature Q of RS-20260902T084356Z-784ebf14, the exact d1 value, the exact d3 value, and the fitted Q) on the 16 held-out games for top-1 agreement, recall@k and normalised regret against exact d4s7. Then run the pruned search (interior max nodes with two or more plies remaining expand only the prior's top-w siblings; the root and the one-ply-remaining layer stay full width; chance scenarios, leaf and terminal utility unchanged) at depth four on every held-out root and at depth five on a 128-root held-out sub-panel with exact d5s7 values, recording chosen action, root values and logical work. Tests theory clauses (a)-(d).",
+  "candidate": {
+    "name": "pruned fair expectimax (drop7-oneply-q crate: prune.rs) with priors centre, kf-cem, d1, lq",
+    "entryPoint": "approaches/value-policy-learning/oneply-q-prune/rust/src/bin/prune_eval.rs",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "full-width fair d4s7 (drop7-rs Searcher, FairLeaf, 65,536-entry depth table from depth 1, terminal -1,000,000, policy seed 0xd7075eed) and exact full-width d5s7 on the sub-panel",
+    "entryPoint": "approaches/fair-expectimax/rust-engine/src/search.rs",
+    "manifestRef": null
+  },
+  "informationBoundary": "public-policy",
+  "benchmarkTier": "PILOT",
+  "data": {
+    "role": "previously-evaluated-development",
+    "seedLeaseRefs": [],
+    "datasetRefs": [],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "Zero new seeds. The panel games read 0xa5200000-0xa520002f, the first 48 seeds of the already-opened TRAINING-role block SEEDLEASE-A52 d2 (docs/exploratory/lease-map.md), a block re-read for training by RUN-20260902T081659Z-d2aa6375 and RUN-20260902T083357Z-196a7b87; the role stays training and nothing read here can become evaluation evidence. The whole-origin split is by game: cohort ordinals 0-31 fit, 32-47 held out; no fit, lambda choice or configuration choice may read a held-out game. CHECK probes may read 0xa5278000-0xa52784ff. No evaluation-role seed is read under this record; a gameplay pilot, if warranted, is a separate preregistered experiment. The coordinator's confirmation of the training-block reuse requested in the 2026-09-02 log covers this record too."
+  },
+  "metrics": {
+    "primary": "held-out top-1 agreement and mean normalised regret ((V*(best)-V*(chosen))/(V*(best)-V*(worst)), 0 when all legal values are equal) of each pruned-d4s7 configuration against full-width d4s7, with the ratio of logical work (move calls plus leaf calls, prior calls included) per root",
+    "secondary": [
+      "fit quality of the linear Q on held-out roots: R^2 on raw values, within-root Spearman, top-1, recall@2, recall@3, recall@4, normalised regret; the same ranking metrics for centre order, kf-cem, exact d1, exact d2 and exact d3",
+      "the fitted weight vector, the CV-selected ridge lambda and the CV curve",
+      "on the 128-root sub-panel with exact d5s7 values: mean normalised and raw regret under d5 of exact d4s7 and of every pruned-d5s7 configuration, their top-1 agreement with d5, work per root relative to full-width d4s7, and the d5-vs-d4 disagreement rate",
+      "monotonicity check: every pruned root value is at most the full-width root value on the same root (bit-level lower bound)",
+      "panel descriptives: roots per game, legal columns per root, remaining-lifetime distribution",
+      "wall seconds per stage"
+    ],
+    "statisticalUnit": "root",
+    "uncertaintyMethod": "root-level proportions with game-clustered (16 held-out games) standard errors; paired per-root regret differences with a one-sided 95% percentile bootstrap over games (10,000 resamples, RNG seed 0x6b660002); detection floors reported"
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "P1 (theory a): the fitted Q's held-out top-1 agreement with exact d4s7 exceeds the exact d1 value's on the same roots.",
+      "P2 (theory b): the fitted Q's held-out recall@3 is at least 0.95 (fail below 0.90).",
+      "P3 (theory c): a preregistered pruned-d4s7 configuration with work ratio at most 0.35 reaches top-1 agreement at least 0.95 and mean normalised regret at most 0.02 on held-out roots (fail if none reaches 0.90 and 0.05).",
+      "P4 (theory d): a preregistered pruned-d5s7 configuration with work at most 2.0 times full-width d4s7 has mean regret under exact d5s7 below exact d4s7's, with a game-bootstrap one-sided 95% lower bound on the paired difference above zero (inconclusive if the point estimate is favourable but the bound is not).",
+      "Mechanics (CHECK, before any panel game): the pruned searcher with all widths seven reproduces drop7-rs Searcher per-column values, chosen actions and work bit-for-bit on probe states; determinism across worker counts; every pruned decision is a legal column; the leaf-term accessor reconstructs the frozen fair leaf bit-for-bit.",
+      "Preregistered configuration set. Depth 4, widths (three plies remaining, two plies remaining) in {(2,2),(3,3),(4,4),(3,2)} times priors {centre, kf-cem, d1, lq}. Depth 5, widths (four, three, two plies remaining) in {(2,2,2),(3,3,2),(3,3,3)} times priors {d1, lq}. The fitted Q used as the lq prior is the per-root-centred ridge fit at the CV-selected lambda from the grid {0.001, 0.01, 0.1, 1, 10} on standardised features (4-fold, grouped by game, within the 32 fit games); the raw-value fit is reported but not deployed."
+    ],
+    "failureAction": "Record valid + fail for the failed clause(s) with the exact configuration set; a failed P2 closes the pruning clauses without a gameplay pilot; a failed P3 records that one-ply pruning changes d4 decisions too often to be an engineering speed-up and must be treated as a new algorithmic candidate.",
+    "passAction": "If P3 passes, preregister a separate PILOT gameplay experiment on the previously evaluated cohort 0xa5277000-0xa52770ff (256 paired games; arms full-width fair d4s7, the lowest-regret d4 configuration at work ratio at most 0.35, and, if P4 passes, the lowest-regret d5 configuration at work at most 2.0 times d4s7). Selection uses only held-out panel metrics recorded here."
+  },
+  "resources": {
+    "wallSeconds": 7200,
+    "cpuThreads": 12,
+    "maxHostBytes": 8589934592,
+    "maxGpuBytes": null,
+    "gpuDevices": []
+  },
+  "stopConditions": [
+    "Stop at 7,200 s wall for the panel and pruning stages together.",
+    "No seed outside 0xa5200000-0xa520002f (panel games) and 0xa5278000-0xa52784ff (CHECK probes) may be read under this record.",
+    "Any illegal decision, incomplete search, or non-finite value aborts the affected stage as invalid.",
+    "The 128-root sub-panel is every floor(N/128)-th held-out root in cohort order (first 128 such roots); its size is not enlarged after reading."
+  ],
+  "expectedArtifacts": [
+    "approaches/value-policy-learning/oneply-q-prune/rust/ (crate: oneply.rs, prune.rs, panel.rs, bins panel, prune_eval, evaluate)",
+    "approaches/value-policy-learning/oneply-q-prune/analysis/fit_q.py and prune_metrics.py",
+    "runs/<run-id>/oneply-q/panel.ndjson (dataset record DS-... registered on completion)",
+    "runs/<run-id>/oneply-q/fit.json and weights-lq.txt",
+    "runs/<run-id>/oneply-q/prune-d4.ndjson, d5-panel.ndjson, prune-d5.ndjson",
+    "runs/<run-id>/oneply-q/summary.json and manifest.json"
+  ],
+  "lifecycle": "preregistered",
+  "amendments": [],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5-1",
+    "agentId": "claude-q-learning"
+  },
+  "createdAt": "2026-09-02T17:39:05Z",
+  "updatedAt": "2026-09-02T17:53:08Z",
+  "protocolSha256": "75f3c5aa9f39a7f22f1cf86d260f94323ec65dce668cf8c478330b885fde3d49"
+}

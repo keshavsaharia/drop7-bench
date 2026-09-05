@@ -1,0 +1,63 @@
+/* value-policy-learning/conservative-fitted-policy-iteration card art. The
+   fitted step runs all the way out past the floor; the four members arrive and
+   disagree; the lowest of them draws the bound; the step is pulled back to it
+   and the rest of the move is left dashed and refused. The resting frame is
+   the short constrained step.
+   animation-name only: play-state and delay are owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-conservative-fitted-policy-iteration {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-conservative-fitted-policy-iteration [data-anim] {
+  animation-duration: var(--tart-duration);
+  animation-timing-function: var(--tart-ease, var(--ease-standard, cubic-bezier(0.2, 0, 0, 1)));
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+.tart--approach-conservative-fitted-policy-iteration [data-anim="step"] {
+  animation-name: tart-approach-conservative-fitted-policy-iteration-step;
+  transform-box: fill-box;
+  transform-origin: left center;
+}
+.tart--approach-conservative-fitted-policy-iteration [data-anim="head"] {
+  animation-name: tart-approach-conservative-fitted-policy-iteration-head;
+}
+.tart--approach-conservative-fitted-policy-iteration [data-anim="members"] {
+  animation-name: tart-approach-conservative-fitted-policy-iteration-members;
+}
+.tart--approach-conservative-fitted-policy-iteration [data-anim="bound"] {
+  animation-name: tart-approach-conservative-fitted-policy-iteration-bound;
+}
+.tart--approach-conservative-fitted-policy-iteration [data-anim="refused"] {
+  animation-name: tart-approach-conservative-fitted-policy-iteration-refused;
+}
+
+/* The bar scales about its left end and the head translates; both use the same
+   keyframe times, so the head stays on the bar's right edge throughout. */
+@keyframes tart-approach-conservative-fitted-policy-iteration-step {
+  0% { transform: scaleX(0.04); }
+  13.09%, 30.55% { transform: scaleX(3.118); }
+  39.27%, 100% { transform: scaleX(1); }
+}
+@keyframes tart-approach-conservative-fitted-policy-iteration-head {
+  0% { transform: translateX(-65.28px); }
+  13.09%, 30.55% { transform: translateX(144px); }
+  39.27%, 100% { transform: translateX(0); }
+}
+@keyframes tart-approach-conservative-fitted-policy-iteration-members {
+  0%, 15.27% { opacity: 0; }
+  22.91%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-conservative-fitted-policy-iteration-bound {
+  0%, 25.09% { opacity: 0; }
+  31.64%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-conservative-fitted-policy-iteration-refused {
+  0%, 32.73% { opacity: 0; }
+  41.45%, 100% { opacity: 1; }
+}

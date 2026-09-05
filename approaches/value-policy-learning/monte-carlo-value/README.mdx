@@ -5,6 +5,8 @@ summary: Label every board with how many more moves the game it came from actual
 status: rejected
 evidence: ledger-recorded
 reads: public
+kind: strategy
+technique: q-learning
 ---
 
 Play games with a trusted policy, write down for every board how much longer
@@ -99,7 +101,7 @@ Both entries appear in the ledger *before* the corrected-Hardcore scoring replay
 that restored the five-move level award to 17,000 points. Read their point
 totals as within-run, paired comparisons against their own behavior baseline;
 they are not comparable with the corrected-score
-[fair D4 reference](/approaches/fair-expectimax/reference).
+[fair D4 reference](/approach/fair-expectimax/reference).
 
 </TechnicalDetails>
 
@@ -120,4 +122,4 @@ Two separate lessons, and it matters that they are separate.
 Still open: nothing here tested a *conservative* deployment with a model that
 had passed its gate: the second program never reached deployment. The
 conservative-override mechanism itself was tested much later, and successfully,
-in the [afterstate line](/approaches/afterstate-learning/distributional-afterstate).
+in the [afterstate line](/approach/afterstate-learning/distributional-afterstate).

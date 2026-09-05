@@ -5,6 +5,8 @@ summary: Eliminate weak columns cheaply, test the survivors against the referenc
 status: rejected
 evidence: ledger-recorded
 reads: public
+kind: strategy
+technique: rollout-policy-iteration
 ---
 
 Spend the measurement budget where it matters: eliminate weak columns cheaply,
@@ -22,7 +24,7 @@ is best. So run the comparison as a tournament instead of a survey: a short
 look at everything, a longer look at the survivors, and a final independent
 test between the winner and the reference's own move.
 
-The word "regenerative" refers to the cycle structure of the game. The board
+*Regenerative* refers to the cycle structure of the game. The board
 rises every five moves, and a policy is really trying to arrive at each rise in
 a state it can recover from. The staged horizons here — 25 moves, then 50, then
 75 — are five, ten and fifteen of those cycles.

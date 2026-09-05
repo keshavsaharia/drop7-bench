@@ -456,7 +456,29 @@ are infeasible. Its reward and reported units emphasize surviving moves, and
 its environment and evaluation protocol are not interchangeable with this
 repository's corrected Hardcore score benchmark. It is useful prior work for
 feature-based Q-learning and for explaining the state-space problem, not a
-numeric baseline here.
+numeric baseline here. On 2026-09-02 the report was reproduced from its own
+code and its six features were ported onto the Rust engine
+([approach page](../approaches/value-policy-learning/klein-friedmann-linear-q/README.mdx)):
+the numbers reproduce, the training is front-loaded by its per-move 1/t step
+size, the regularisation claim does not hold for the shipped code
+([RS-20260902T082726Z-75606ce7](../research/results/RS-20260902T082726Z-75606ce7.json)),
+and on corrected Hardcore rules the features are a survival heuristic worth
+about ten moves over random at pilot tier
+([RS-20260902T084356Z-2488ecc7](../research/results/RS-20260902T084356Z-2488ecc7.json)).
+Later the same day the Q-learning family was turned toward the search itself
+([approach page](../approaches/value-policy-learning/oneply-q-prune/README.mdx)):
+a linear action value fitted by least squares to exact depth-4 sibling values
+ranks depth-4's choice worse than the one-ply value it can represent, because
+million-point deaths dominate the objective, while the exact one-ply value
+used as a sibling-pruning prior reproduces 92.3% of depth-4's decisions at
+26.4% of the work, and pruned depth 5 is no better than depth 4 in points
+([RS-20260902T202705Z-75d87947](../research/results/RS-20260902T202705Z-75d87947.json));
+in play the pruned search is a non-measurement leaning about 8% below
+full-width depth 4 at a quarter of the work
+([RS-20260903T013022Z-d32ee053](../research/results/RS-20260903T013022Z-d32ee053.json)),
+and a one-step linear leaf refit to the search's own value loses a fifth of
+the score
+([RS-20260903T013022Z-b0937bf9](../research/results/RS-20260903T013022Z-b0937bf9.json)).
 
 ### David Walton's Sequence-mode solver
 

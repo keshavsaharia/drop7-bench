@@ -5,9 +5,11 @@ summary: Train a tiny fast network to copy how the expensive depth-4 search orde
 status: rejected
 evidence: ledger-recorded
 reads: public
+kind: strategy
+technique: oracle-distillation
 ---
 
-The reference [depth-4 search](/approaches/fair-expectimax/reference) is strong
+The reference [depth-4 search](/approach/fair-expectimax/reference) is strong
 but slow. It imagines hundreds of thousands of futures per move. This
 experiment asked whether its *decisions* could be squeezed into a small network
 that reproduces the same ordering of columns in microseconds.
@@ -123,7 +125,7 @@ What it does not rule out: the same architecture with far more labelled
 positions, or a clone used as a *move-ordering prior* inside a search rather
 than as a standalone policy, where a 45% top-2 rate would still save work
 without being trusted to decide. The closely related
-[scaled D4 distillation](/approaches/d4-long-outcome/d4-distillation)
+[scaled D4 distillation](/approach/d4-long-outcome/d4-distillation)
 experiment pushed on the data-scale side of that question.
 
 Note also what the failure is *not*: this training set labelled every legal

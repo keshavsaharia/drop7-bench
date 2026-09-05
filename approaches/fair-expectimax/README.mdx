@@ -1,6 +1,7 @@
 ---
 title: Fair expectimax
 summary: Look a few moves ahead, take the best column on your own turns, and average over every sampled disc the game might deal.
+kind: family
 ---
 
 Look a few moves ahead, take the best column on your own turns, and average
@@ -117,16 +118,16 @@ worse, which is the useful part: each is a specific configuration ruled out.
 
 | Idea | What changed | Outcome |
 | --- | --- | --- |
-| [The fair leaf](/approaches/fair-expectimax/fair-policy) | The evaluator itself, and how its coefficients were fitted | Completed; produced the reference weights |
-| [A rise-cycle residual](/approaches/fair-expectimax/phase-fair-combination) | Added a phase-throughput term to the leaf | Completed; part of the recovered depth-3 lineage |
-| [Seven chance samples](/approaches/fair-expectimax/chance-strata) | Five representative next discs became seven — exact coverage | Rejected in the ledger; **an exploratory re-test found the opposite** |
-| [Deeper than four moves](/approaches/fair-expectimax/selective-depth) | A fifth move, selectively or full width | Two rejected, one stopped by its runtime budget |
-| [Weighting the downside](/approaches/fair-expectimax/root-risk) | Root value became part average, part worst-case | Rejected; score, survival and flow all fell |
-| [Tuning the leaf on whole games](/approaches/fair-expectimax/cem) | Eight coefficients optimised, then frozen | Rejected at its fresh screen and at depth 4 |
-| [The old placement rewards](/approaches/fair-expectimax/full-action-terms) | Restored a one-move policy's landing-geometry terms | Rejected; the geometry was already in the leaf |
-| [Paying for clears and reveals](/approaches/fair-expectimax/transition-rewards) | Explicit reward per numbered clear or per reveal | Rejected on held-out games after promising fits |
-| [Stacking a column deliberately](/approaches/fair-expectimax/vertical-ladder) | A leaf term for energy stored in a vertical ladder | Cheap probe positive; the transfer to depth 4 failed |
-| [Playing the position out](/approaches/fair-expectimax/rollout-improvement) | Root actions scored by short simulated continuations | Rejected; worse than the one-move policy it improved on |
+| [The fair leaf](/approach/fair-expectimax/fair-policy) | The evaluator itself, and how its coefficients were fitted | Completed; produced the reference weights |
+| [A rise-cycle residual](/approach/fair-expectimax/phase-fair-combination) | Added a phase-throughput term to the leaf | Completed; part of the recovered depth-3 lineage |
+| [Seven chance samples](/approach/fair-expectimax/chance-strata) | Five representative next discs became seven — exact coverage | Rejected in the ledger; **an exploratory re-test found the opposite** |
+| [Deeper than four moves](/approach/fair-expectimax/selective-depth) | A fifth move, selectively or full width | Two rejected, one stopped by its runtime budget |
+| [Weighting the downside](/approach/fair-expectimax/root-risk) | Root value became part average, part worst-case | Rejected; score, survival and flow all fell |
+| [Tuning the leaf on whole games](/approach/fair-expectimax/cem) | Eight coefficients optimised, then frozen | Rejected at its fresh screen and at depth 4 |
+| [The old placement rewards](/approach/fair-expectimax/full-action-terms) | Restored a one-move policy's landing-geometry terms | Rejected; the geometry was already in the leaf |
+| [Paying for clears and reveals](/approach/fair-expectimax/transition-rewards) | Explicit reward per numbered clear or per reveal | Rejected on held-out games after promising fits |
+| [Stacking a column deliberately](/approach/fair-expectimax/vertical-ladder) | A leaf term for energy stored in a vertical ladder | Cheap probe positive; the transfer to depth 4 failed |
+| [Playing the position out](/approach/fair-expectimax/rollout-improvement) | Root actions scored by short simulated continuations | Rejected; worse than the one-move policy it improved on |
 
 ## What this taught us, and what is still open
 

@@ -1,0 +1,58 @@
+/* tree-search/puct card art. The prior is fixed and drawn once; the visit
+   bars grow below it, first under the column the prior likes, then under the
+   one that earns it, and the selection band follows. Only transform animates;
+   play-state is owned by art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-puct {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-puct [data-anim="visit-early"] { animation-name: tart-approach-puct-visit-early; }
+.tart--approach-puct [data-anim="visit-mid"] { animation-name: tart-approach-puct-visit-mid; }
+.tart--approach-puct [data-anim="visit-late"] { animation-name: tart-approach-puct-visit-late; }
+.tart--approach-puct [data-anim="visit-slow"] { animation-name: tart-approach-puct-visit-slow; }
+.tart--approach-puct [data-anim="pick"] { animation-name: tart-approach-puct-pick; }
+.tart--approach-puct [data-anim="caption"] { animation-name: tart-approach-puct-caption; }
+
+/* Every visit bar grows downward from the line. */
+.tart--approach-puct [data-anim^="visit-"] {
+  transform-box: fill-box;
+  transform-origin: top center;
+}
+
+/* The prior's favourite is tried first, and its visits arrive early. */
+@keyframes tart-approach-puct-visit-early {
+  0%, 4.36% { transform: scaleY(0); }
+  18.55%, 100% { transform: scaleY(1); }
+}
+/* Its neighbour takes the next share. */
+@keyframes tart-approach-puct-visit-mid {
+  0%, 21.82% { transform: scaleY(0); }
+  30.55%, 100% { transform: scaleY(1); }
+}
+/* The column the prior barely liked, once the prior term has decayed. */
+@keyframes tart-approach-puct-visit-late {
+  0%, 33.82% { transform: scaleY(0); }
+  50.18%, 100% { transform: scaleY(1); }
+}
+/* The columns that are never forgotten but never preferred. */
+@keyframes tart-approach-puct-visit-slow {
+  0%, 5.45% { transform: scaleY(0); }
+  38.18%, 100% { transform: scaleY(1); }
+}
+
+/* Which child the search descends into: the prior's pick, then the earned one. */
+@keyframes tart-approach-puct-pick {
+  0%, 3.27% { transform: translateX(-160px); }
+  18.55% { transform: translateX(-160px); }
+  22.91%, 29.45% { transform: translateX(-200px); }
+  34.91%, 100% { transform: translateX(0); }
+}
+
+@keyframes tart-approach-puct-caption {
+  0%, 41.45% { opacity: 0; }
+  48%, 100% { opacity: 1; }
+}

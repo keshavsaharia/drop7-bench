@@ -316,16 +316,42 @@ struct Features {
     next_disc_vertical_options: f64,
 }
 
-/// The runtime-weighted fair leaf. At `LeafWeights::frozen()` this preserves
-/// the exact operation order and is bit-identical to fastFairLeaf.
-pub fn weighted_fair_leaf(
-    state: &State,
-    scratch: &mut LeafScratch,
-    leaf_weights: &LeafWeights,
-) -> f64 {
-    if state.game_over {
-        return weights::FAIR_TERMINAL_UTILITY;
-    }
+/// The eighteen leaf terms in `LEAF_TERM_NAMES` order, before any weight is
+/// applied.  This is stages 1-6 of the reference leaf (`leaf_features`),
+/// which `weighted_fair_leaf` also calls, so the terms are exactly the
+/// quantities the frozen leaf dots with its constants; the
+/// `terms_dot_frozen_weights_match_fair_leaf_bits` test reconstructs the
+/// frozen leaf from them bit-for-bit.  A game-over state is not special-cased
+/// here: callers that need the terminal utility check `state.game_over`.
+pub fn fair_leaf_terms(state: &State, scratch: &mut LeafScratch) -> [f64; 18] {
+    let f = leaf_features(state, scratch);
+    [
+        f.open_columns as f64,
+        f.height_load,
+        f.solid_cells as f64,
+        f.cracked_cells as f64,
+        f.numbered_cells as f64,
+        f.high_low_numbers as f64,
+        f.direct_potential,
+        f.latent_chain_potential,
+        f.cracked_exposure,
+        f.solid_exposure,
+        f.adjacent_ones,
+        f.triple_twos,
+        f.dead_low_numbers,
+        f.covered_height_risk,
+        f.low_number_height_risk,
+        f.danger_height_squared,
+        f.rise_pressure,
+        f.next_disc_vertical_options,
+    ]
+}
+
+/// Stages 1-6 of the reference leaf: every feature, computed in the
+/// reference order.  Extracted unchanged from `weighted_fair_leaf` so that
+/// `fair_leaf_terms` can expose the terms; the weighted leaf's arithmetic is
+/// the same code it always was.
+fn leaf_features(state: &State, scratch: &mut LeafScratch) -> Features {
     // The leaf reads cells many times in row-major order; unpack the packed
     // column words to the byte view once (7 PDEPs) so every read below is a
     // direct byte load, the same access cost the C++ leaf pays.
@@ -623,6 +649,20 @@ pub fn weighted_fair_leaf(
         }
     }
 
+    f
+}
+
+/// The runtime-weighted fair leaf. At `LeafWeights::frozen()` this preserves
+/// the exact operation order and is bit-identical to fastFairLeaf.
+pub fn weighted_fair_leaf(
+    state: &State,
+    scratch: &mut LeafScratch,
+    leaf_weights: &LeafWeights,
+) -> f64 {
+    if state.game_over {
+        return weights::FAIR_TERMINAL_UTILITY;
+    }
+    let f = leaf_features(state, scratch);
     // The dot product, in the reference's order (L7: the roughness term is
     // exactly +0.0 and is removed, as proven in the C++ header).
     let mut result = 0.0f64;
@@ -675,4 +715,40 @@ pub fn weighted_fair_leaf(
 /// drop7::fast::fastFairLeaf.
 pub fn fair_leaf(state: &State, scratch: &mut LeafScratch) -> f64 {
     weighted_fair_leaf(state, scratch, &LeafWeights::frozen())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::engine::{center_first_move, play_headless_move, FullWaveSink};
+
+    /// The accessor contract: dotting the exposed terms with the frozen
+    /// constants, in the reference order, reproduces the frozen leaf's bits on
+    /// opening and mid-game boards.
+    #[test]
+    fn terms_dot_frozen_weights_match_fair_leaf_bits() {
+        let mut scratch = LeafScratch::default();
+        let mut compared = 0;
+        for seed in [0xa527_8000u32, 0xa527_8001, 0xa527_8002, 0xa527_8003] {
+            let mut state = State::initial_headless(seed);
+            let mut sink = FullWaveSink::new();
+            for _ in 0..40 {
+                if state.game_over {
+                    break;
+                }
+                let terms = fair_leaf_terms(&state, &mut scratch);
+                let mut reconstructed = 0.0f64;
+                for j in 0..18 {
+                    reconstructed += FROZEN_LEAF_WEIGHTS[j] * terms[j];
+                }
+                let reference = fair_leaf(&state, &mut scratch);
+                assert_eq!(reconstructed.to_bits(), reference.to_bits(), "seed {seed:#x}");
+                compared += 1;
+                let column = center_first_move(&state.board).expect("legal column");
+                sink.clear();
+                play_headless_move(&mut state, seed, column, &mut sink).expect("legal move");
+            }
+        }
+        assert!(compared >= 80, "compared only {compared} boards");
+    }
 }

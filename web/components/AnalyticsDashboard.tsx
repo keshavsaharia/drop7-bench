@@ -1,5 +1,6 @@
 "use client";
 
+import "../app/app.css";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 import type {
@@ -137,22 +138,20 @@ export function AnalyticsDashboard() {
 
   return (
     <div className="space-y-8">
-      <section className="flex flex-col gap-5 border-b border-zinc-800 pb-7 lg:flex-row lg:items-end lg:justify-between">
-        <div className="max-w-3xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
-            Admin · first-party analytics
-          </p>
-          <h1 className="mt-2 text-3xl font-black text-zinc-50">
+      <section className="flex flex-col gap-5 border-b border-rule pb-7 lg:flex-row lg:items-end lg:justify-between">
+        <div className="max-w-prose">
+          <p className="label">Admin · first-party analytics</p>
+          <h1 className="mt-2 text-h1 font-display font-bold text-ink">
             {view === "ios" ? "iOS app analytics" : "Site analytics"}
           </h1>
-          <p className="mt-3 leading-relaxed text-zinc-400">
+          <p className="mt-3 text-ink-2">
             {view === "ios"
               ? "Server-validated completed games submitted by the iOS app. The raw move and game tapes stay in the hourly S3 archive. Times are UTC."
               : "Aggregate server-side page views from the Firehose-backed Iceberg table. The table normally trails live traffic by about five minutes. Times are UTC."}
           </p>
         </div>
         <div className="flex flex-wrap items-end gap-3">
-          <div className="flex rounded-lg border border-zinc-800 p-1" aria-label="Analytics view">
+          <div className="flex rounded-md border border-rule p-1" aria-label="Analytics view">
             <ViewButton active={view === "site"} onClick={() => setView("site")}>Website</ViewButton>
             <ViewButton active={view === "ios"} onClick={() => setView("ios")}>iOS app</ViewButton>
           </div>
@@ -206,10 +205,10 @@ export function AnalyticsDashboard() {
           <section className="analytics-panel">
             <div className="mb-5 flex flex-wrap items-baseline justify-between gap-2">
               <div>
-                <h2 className="text-lg font-bold text-zinc-100">Traffic over time</h2>
-                <p className="mt-1 text-sm text-zinc-500">Page views per reporting bucket</p>
+                <h2 className="text-h3 font-display font-semibold text-ink">Traffic over time</h2>
+                <p className="mt-1 text-small text-ink-2">Page views per reporting bucket</p>
               </div>
-              <span className="text-xs text-zinc-600">
+              <span className="text-caption text-ink-3">
                 {loading ? "Refreshing…" : `${dashboard.timeSeries.length} buckets`}
               </span>
             </div>
@@ -244,10 +243,10 @@ export function AnalyticsDashboard() {
           <section className="analytics-panel">
             <div className="mb-5 flex flex-wrap items-baseline justify-between gap-2">
               <div>
-                <h2 className="text-lg font-bold text-zinc-100">Completed games over time</h2>
-                <p className="mt-1 text-sm text-zinc-500">Validated iOS submissions per reporting bucket</p>
+                <h2 className="text-h3 font-display font-semibold text-ink">Completed games over time</h2>
+                <p className="mt-1 text-small text-ink-2">Validated iOS submissions per reporting bucket</p>
               </div>
-              <span className="text-xs text-zinc-600">
+              <span className="text-caption text-ink-3">
                 {iosLoading ? "Refreshing…" : `${iosDashboard.timeSeries.length} buckets`}
               </span>
             </div>
@@ -287,12 +286,10 @@ export function AnalyticsDashboard() {
       ) : null}
 
       <section className="analytics-panel">
-        <div className="max-w-3xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-400">
-            Athena workspace
-          </p>
-          <h2 className="mt-2 text-xl font-bold text-zinc-100">Run a read-only query</h2>
-          <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+        <div className="max-w-prose">
+          <p className="label">Athena workspace</p>
+          <h2 className="mt-2 text-h3 font-display font-semibold text-ink">Run a read-only query</h2>
+          <p className="mt-2 text-small text-ink-2">
             SELECT and WITH queries run in the analytics workgroup and return at most 500 rows.
             The workgroup enforces its S3 result location and a 1 GiB scan ceiling.
           </p>
@@ -322,9 +319,9 @@ export function AnalyticsDashboard() {
 
 function MetricCard({ label, value }: { label: string; value: number }) {
   return (
-    <article className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5">
-      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">{label}</p>
-      <p className="mt-2 text-3xl font-black tabular-nums text-zinc-50">
+    <article className="rounded-lg border border-rule bg-surface p-5">
+      <p className="label">{label}</p>
+      <p className="mt-2 font-display text-h1 font-bold tabular-nums text-ink">
         {value.toLocaleString()}
       </p>
     </article>
@@ -346,8 +343,8 @@ function ViewButton({
       aria-pressed={active}
       onClick={onClick}
       className={
-        "rounded-md px-3 py-2 text-xs font-semibold transition-colors " +
-        (active ? "bg-zinc-700 text-zinc-50" : "text-zinc-500 hover:text-zinc-200")
+        "rounded-sm px-3 py-2 text-caption font-semibold transition-colors motion-reduce:transition-none " +
+        (active ? "bg-hover text-ink" : "text-ink-3 hover:text-ink-1")
       }
     >
       {children}
@@ -413,26 +410,26 @@ function TimeSeriesChart({
                 x2={geometry.width - geometry.right}
                 y1={y}
                 y2={y}
-                stroke="#27272a"
+                stroke="var(--color-rule)"
                 strokeWidth="1"
               />
-              <text x={geometry.left - 9} y={y + 4} textAnchor="end" fill="#71717a" fontSize="11">
+              <text x={geometry.left - 9} y={y + 4} textAnchor="end" fill="var(--color-ink-3)" fontSize="11">
                 {value.toLocaleString()}
               </text>
             </g>
           );
         })}
-        <polygon points={area} fill="rgba(16, 185, 129, 0.11)" />
+        <polygon points={area} fill="var(--color-series-1)" fillOpacity="0.14" />
         <polyline
           points={line}
           fill="none"
-          stroke="#34d399"
+          stroke="var(--color-series-1)"
           strokeWidth="3"
           strokeLinejoin="round"
           strokeLinecap="round"
         />
         {geometry.coordinates.map(({ x, y, point }) => (
-          <circle key={point.bucket} cx={x} cy={y} r="3" fill="#09090b" stroke="#6ee7b7" strokeWidth="2">
+          <circle key={point.bucket} cx={x} cy={y} r="3" fill="var(--color-bg)" stroke="var(--color-series-1)" strokeWidth="2">
             <title>{`${formatBucket(point.bucket)}: ${point.views.toLocaleString()} ${metricLabel}`}</title>
           </circle>
         ))}
@@ -445,7 +442,7 @@ function TimeSeriesChart({
               x={coordinate.x}
               y={geometry.height - 8}
               textAnchor={index === 0 ? "start" : index === points.length - 1 ? "end" : "middle"}
-              fill="#71717a"
+              fill="var(--color-ink-3)"
               fontSize="11"
             >
               {formatBucket(coordinate.point.bucket)}
@@ -461,7 +458,7 @@ function BreakdownCard({ title, points }: { title: string; points: DashboardPoin
   const max = Math.max(1, ...points.map((point) => point.views));
   return (
     <article className="analytics-panel min-w-0">
-      <h2 className="text-base font-bold text-zinc-100">{title}</h2>
+      <h2 className="text-body font-display font-semibold text-ink">{title}</h2>
       {points.length === 0 ? (
         <div className="mt-4"><EmptyState label="No data in this window." /></div>
       ) : (
@@ -469,14 +466,14 @@ function BreakdownCard({ title, points }: { title: string; points: DashboardPoin
           {points.map((point) => (
             <li key={point.label}>
               <div className="flex items-baseline justify-between gap-3 text-sm">
-                <span className="truncate text-zinc-300" title={point.label}>{point.label}</span>
-                <span className="shrink-0 tabular-nums text-zinc-500">
+                <span className="truncate text-ink-1" title={point.label}>{point.label}</span>
+                <span className="shrink-0 tabular-nums text-ink-3">
                   {point.views.toLocaleString()}
                 </span>
               </div>
-              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-zinc-800">
+              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-hover">
                 <div
-                  className="h-full rounded-full bg-emerald-500/75"
+                  className="h-full rounded-full bg-series-1"
                   style={{ width: `${Math.max(2, (point.views / max) * 100)}%` }}
                 />
               </div>
@@ -496,12 +493,12 @@ function CustomResultTable({ result }: { result: AthenaQueryResult }) {
         engineExecutionMs={result.engineExecutionMs}
         queryExecutionId={result.queryExecutionId}
       />
-      <div className="mt-3 overflow-x-auto rounded-lg border border-zinc-800">
+      <div className="mt-3 overflow-x-auto rounded-md border border-rule">
         <table className="w-full min-w-max border-collapse text-left text-sm">
-          <thead className="bg-zinc-900 text-xs uppercase tracking-wide text-zinc-500">
+          <thead className="bg-raised">
             <tr>
               {result.columns.map((column) => (
-                <th key={column} className="border-b border-zinc-800 px-3 py-2.5 font-semibold">
+                <th key={column} className="label border-b border-rule px-3 py-2.5 text-left">
                   {column}
                 </th>
               ))}
@@ -509,10 +506,10 @@ function CustomResultTable({ result }: { result: AthenaQueryResult }) {
           </thead>
           <tbody>
             {result.rows.map((row, rowIndex) => (
-              <tr key={rowIndex} className="border-b border-zinc-900 last:border-0">
+              <tr key={rowIndex} className="border-b border-rule last:border-0">
                 {result.columns.map((column) => (
-                  <td key={column} className="max-w-xl px-3 py-2 font-mono text-xs text-zinc-300">
-                    {row[column] ?? <span className="text-zinc-700">null</span>}
+                  <td key={column} className="max-w-xl px-3 py-2 font-mono text-caption text-ink-1">
+                    {row[column] ?? <span className="text-ink-4">null</span>}
                   </td>
                 ))}
               </tr>
@@ -535,7 +532,7 @@ function QueryFootnote({
   queryExecutionId: string;
 }) {
   return (
-    <p className="break-all text-xs text-zinc-600">
+    <p className="break-all text-caption text-ink-3">
       Athena scanned {formatBytes(dataScannedBytes)} in {(engineExecutionMs / 1000).toFixed(2)}s · query{" "}
       {queryExecutionId}
     </p>
@@ -544,14 +541,14 @@ function QueryFootnote({
 
 function ErrorNotice({ message }: { message: string }) {
   return (
-    <div role="alert" className="rounded-xl border border-red-900/70 bg-red-950/25 px-4 py-3 text-sm text-red-200">
+    <div role="alert" className="app-notice app-notice--error">
       {message}
     </div>
   );
 }
 
 function EmptyState({ label }: { label: string }) {
-  return <p className="py-8 text-center text-sm text-zinc-600">{label}</p>;
+  return <p className="py-8 text-center text-small text-ink-3">{label}</p>;
 }
 
 function DashboardSkeleton() {
@@ -559,10 +556,10 @@ function DashboardSkeleton() {
     <div className="space-y-4" aria-label="Loading analytics">
       <div className="grid gap-3 sm:grid-cols-3">
         {[0, 1, 2].map((item) => (
-          <div key={item} className="h-28 animate-pulse rounded-xl border border-zinc-800 bg-zinc-900/40" />
+          <div key={item} className="h-28 animate-pulse rounded-lg border border-rule bg-surface motion-reduce:animate-none" />
         ))}
       </div>
-      <div className="h-80 animate-pulse rounded-xl border border-zinc-800 bg-zinc-900/30" />
+      <div className="h-80 animate-pulse rounded-lg border border-rule bg-surface motion-reduce:animate-none" />
     </div>
   );
 }

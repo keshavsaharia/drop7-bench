@@ -1,0 +1,44 @@
+/* ntuple-rl/manifold-ppo card art. The board walks its own trajectory inside
+   the learned region, stops where two near-tied moves are open, and takes the
+   branch that stays inside; the branch that leaves the region is drawn and
+   crossed. Play-state is owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-manifold-ppo {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-manifold-ppo [data-anim="walk"] { animation-name: tart-approach-manifold-ppo-walk; }
+.tart--approach-manifold-ppo [data-anim="keep"] { animation-name: tart-approach-manifold-ppo-keep; }
+.tart--approach-manifold-ppo [data-anim="leave"] { animation-name: tart-approach-manifold-ppo-leave; }
+.tart--approach-manifold-ppo [data-anim="ring"] { animation-name: tart-approach-manifold-ppo-ring; }
+.tart--approach-manifold-ppo [data-anim="caption"] { animation-name: tart-approach-manifold-ppo-caption; }
+
+/* Four positions inside the region, a pause at the fork, then the move that
+   keeps the board in. Offsets are measured back from the resting position. */
+@keyframes tart-approach-manifold-ppo-walk {
+  0%, 5.45% { transform: translate(-108px, 4px); }
+  14.18% { transform: translate(-82px, -14px); }
+  21.82% { transform: translate(-56px, 2px); }
+  29.45%, 36% { transform: translate(-28px, -16px); }
+  44.73%, 100% { transform: translate(0, 0); }
+}
+
+@keyframes tart-approach-manifold-ppo-keep {
+  0%, 30.55% { opacity: 0; }
+  37.09%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-manifold-ppo-leave {
+  0%, 32.73% { opacity: 0; }
+  40.36%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-manifold-ppo-ring {
+  0%, 45.82% { opacity: 0; }
+  51.27%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-manifold-ppo-caption {
+  0%, 46.91% { opacity: 0; }
+  52.36%, 100% { opacity: 1; }
+}

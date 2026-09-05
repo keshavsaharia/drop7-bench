@@ -1,0 +1,167 @@
+---
+date: 2026-09-01
+title: "The evolved-NNUE-leaf experiment is audited and launched, and a depth-6 gauntlet game joins the leaderboard by import"
+summary: "The depth-5-distilled, whole-game-evolved NNUE leaf registered on 2026-08-25 was audited end to end - theory, frozen protocol, leases, and every line of the Rust crate - then launched for real. Eleven CHECK gates passed again on the rebuilt binaries, a seed-free preflight showed the teacher's labels are bit-identical at 16 and 32 threads with a 1.29x throughput gain from SMT, the protocol was amended before any leased seed was read, and the 512-game depth-5 teacher corpus began at 04:24 UTC on all 32 hardware threads. Separately, the rust-fair-d6-s7 gauntlet-01 game recorded on the larger workstation on 27 August was imported into the competition ledger for both stages. The seed command could not take it as designed, because it re-plays every policy live, so it gained a --replay path that verifies a recorded game against the immutable round instead of re-running the search. Playground demonstration only; the game's provenance is declared, not observed."
+contributors: [claude-fable-5-1 (Claude Code)]
+tags: [nnue, evolution, leaf, teacher-distillation, audit, validation, rust-engine, benchmark-playground, infrastructure, leaderboard]
+outcomes: { positive: 3, negative: 0, open: 2 }
+---
+
+## What was audited before a single leased seed was read
+
+The request was to run the registered evolutionary-NNUE experiment to a
+verdict, with a reproducible teacher and a baseline set of weights that later
+work can improve on, using the Rust solver and the whole machine. Before
+launching, the theory (`TH-20260825-evolved-nnue-leaf-d3-0f47e46c`), the
+frozen experiment (`EX-20260825-nnue-evolution-d3-bca7f330`), both seed
+leases, the August 25 smoke-run record, and all 2,800 lines of the
+`nnue-evolution` crate were read against the methodology and benchmark
+contract. The audit found no blocking defect. The points worth writing down:
+
+- **The deployed policy is depth 3.** The depth-5 search is the teacher only:
+  its sibling-complete root values are distilled into the leaf, and the
+  candidate is then the ordinary d3s7 fair search with that leaf. Anyone
+  reading "depth 5 plus NNUE" should expect a depth-3 player that has seen a
+  depth-5 teacher, not a depth-5 player.
+- **Labels are search values, not outcomes.** That is what makes a per-game
+  move cap on the teacher stage safe: capping a heavy-tailed teacher game
+  truncates the late-game state distribution but changes no label. The
+  frozen protocol left the cap open; it was fixed at 500 moves before launch.
+- **Common random numbers hold by construction.** Every chance scenario in
+  the search is keyed on the public state and the fixed policy seed, so every
+  candidate in a generation, and both controls, face identical futures on
+  identical seeds. Fitness comparisons within a generation are paired.
+- **The information boundary is structural.** The Rust engine draws a covered
+  disc's value at reveal time, so the board bytes the NNUE reads contain no
+  hidden value to leak; the gate that disguises score, level and move count
+  then confirms the network is blind to everything else.
+- **The 64-game screen can only see a large effect.** The prior CMA-ES screen
+  at this cohort size had a detection floor near 40,000 points; a real but
+  smaller improvement will read as a non-measurement. The gate is
+  preregistered and stays as written, but the result must be read against its
+  floor.
+- **The crash-recovery fix of August 27 is in the binaries** that were rebuilt
+  today from this branch (`cargo test --release`, 9 unit tests).
+- `make research-validate` still reports the eight pre-existing errors from
+  the deleted August 25 run artifacts noted on 2026-08-27; nothing today adds
+  to them.
+
+<Finding title="All eleven CHECK gates pass on the rebuilt binaries" kind="positive" metric="11/11 gates, 160 s, probe block only">
+Feature determinism and bounds, information-boundary blindness, reflection
+consistency on eleven asymmetric mirrored roots (one symmetric board excluded
+per finding-13), fresh-searcher and 1-vs-4-worker determinism, legality and
+completed depth under random, all-zero and saturated weights, finiteness
+fuzz, teacher argmax equivalence at depth 3 and depth 5, and serialisation
+round-trip all passed against 220 harvested probe states from the
+already-opened block `0xa5277000`. Record:
+`runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/gates.log`.
+</Finding>
+
+<Finding title="The teacher's labels are bit-identical at 16 and 32 threads, and SMT is worth 1.29x" kind="positive" metric="7,830 roots identical; 1.020 vs 1.577 s per root">
+A seed-free scaling preflight played the same 64 probe games
+(`0xa5277800`, depth 4, seven strata) through the corpus generator at 16 and
+then 32 threads. Every root record and every game record was identical
+between the two runs once the wall-clock field was ignored, which is the
+thread-count independence the corpus stage relies on. In the fully concurrent
+phase a root cost 1.020 s per thread at 16 threads and 1.577 s at 32, so the
+second hardware thread on each of the 16 physical cores adds about 29% to
+total throughput. The frozen record declared 16 threads; it was amended to 32
+before any leased seed was read, with the preflight as the reason. Records:
+`runs/RUN-20260902T035644Z-c1fd8987/nnue-evolution/preflight-d4-t{16,32}.log`.
+</Finding>
+
+Two of those 64 probe-block games, played by the fair leaf at depth 4, ended
+above 1.5 million points. They are on already-read development seeds, in a
+timing preflight, with no comparator: a demonstration that the tail exists,
+not evidence about anything.
+
+<Direction title="Stage A is running: 512 depth-5 teacher games on 32 threads" status="active" owner="claude-fable-5-1 (Claude Code)">
+The training lease `SL-20260825T063000Z-a52e0300` was marked opened at
+04:24 UTC (2026-09-02) and the teacher corpus started on seeds
+`0xa52e0300-0xa52e0500` with the move cap at 500, a 46,800 s sub-budget after
+which no new game starts, and per-game part files so an interruption loses
+nothing finished. Every stage is launched through
+`scripts/pipeline.sh`, which hard-codes the leased sub-blocks and records
+wall, CPU and peak-RSS usage per stage. The supervised warm start, the
+60-generation evolution, the 128-game elite re-selection and the one-shot
+64-game screen follow in order; the screen lease stays reserved until the
+frozen candidate's SHA-256 is on disk. The approach page now carries a
+step-by-step, plain-language account of the evolutionary loop.
+</Direction>
+
+## Review fix: the amended protocol becomes a successor record
+
+Greptile's review of PR #17 flagged that the two pre-launch amendments had
+been written into the frozen August 25 experiment record with its hash
+recomputed, which the repository rule on frozen records does not permit even
+though earlier records had done the same. The fix follows the P-SOL-1 to
+P-SOL-2 precedent: the original record is restored byte for byte, marked
+superseded with one note, and keeps its historical hash; a successor
+`EX-20260902-nnue-evolution-d3-v2-49c18bc2` carries the identical scientific protocol with the operational
+parameters (move cap, sub-budgets, 16 epochs, 256 probe roots, 32 threads,
+one-shot screen) fixed in its body. The opened training lease, the run record
+and the contribution record now reference the successor's preregistration
+hash, and the evolve and screen binaries were rebuilt with the successor's
+identifier before stage C so their artifacts name the record they ran under;
+the corpus binary and its running process were untouched. Two script findings
+from the same review were also fixed: the `screen` stage now performs the
+held-out lease transition itself, so no invocation path can read the block
+while the registry still says reserved, and the corpus wall default matches
+the protocol.
+
+---
+
+## Importing a game instead of re-playing it
+
+On 27 August the operator played `rust-fair-d6-s7` through gauntlet-01 on the
+16-core workstation with `just play-round`, and the resulting `runs/BENCH-*`
+directory was copied to the research laptop today. The goal was to put that
+game on the public competition leaderboard, which lives in the DynamoDB ledger
+rather than in `web/data/leaderboard.json`.
+
+The ledger's seeding command (`npm run competition -- seed`) was built for the
+fast TypeScript policies: it plays each policy live on the immutable round,
+replays the chosen columns independently, packs them, and does a conditional
+insert. Used as designed it would have re-run the whole depth-6 search here,
+and the run artifact records the original game at 9,925,584 ms of wall time on
+the larger machine. So the command gained a `--replay` option. It reads the
+bench replay file, checks that it names the competition's round and a
+registered policy, replays the recorded columns from the opening position, and
+requires the replayed score, move count, censor flag, every per-move board, and
+the sixteen-hex trajectory checksum to match the recording exactly. The policy
+itself never runs. The bench checksum moved into an exported helper in
+`src/bench/runner.ts` so the bench and the importer compute it the same way;
+two tests cover acceptance and rejection (another round, a changed column, an
+inflated score, illegal play, a wrong checksum).
+
+<Finding title="The recorded depth-6 game replays exactly and is now in both ledgers" kind="positive" metric="428,292 points in 120 moves">
+The imported replay (`runs/BENCH-20260827T150335Z-rust-fair-d6-s7--gauntlet-01/`,
+generated 2026-08-27T17:49:01Z) reproduced under the independent competition
+replay: 428,292 points, 120 moves, game over rather than censored, no illegal
+decisions, longest chain 11, 248 discs cleared, 139 covered discs revealed,
+trajectory checksum `df69d802b6e3b377`. The same record was inserted into the
+production and dev competition ledgers under `global#2026-08-v1` with
+submission id
+`8ffae14844e9767ac989aee2197186afceef33c8bee7f6a52e644a053af004e5`, and both
+items were read back and compared field for field with the dry-run preview.
+It enters the production leaderboard behind the top human entry and above
+every previously seeded policy. That is a playground demonstration on one
+scripted future and says nothing about policy strength; scripted rounds are
+never tier evidence.
+</Finding>
+
+Two records differ deliberately from a live seed. The source revision is
+declared by the operator rather than observed by the command:
+`4bebccdff26d9335c25740161fc101ded535e22c`, the empty-frontier fix committed
+minutes before the run started, which a depth-6 game needs to survive near a
+board-filling rise. The command verifies that the named commit exists in this
+repository and nothing more. The dirty-worktree flag is omitted for imports
+instead of being asserted, and the ledger timestamps are the import time, not
+the 27 August completion time.
+
+Open: nothing has shown that the current `decide` binary at `HEAD` reproduces
+this trajectory, only that the recorded columns are legal and score as
+claimed on the fixed round. The `runs/` directory holding the original
+artifact is gitignored and local to this laptop, so the ledger record and this
+entry are the durable references to the game. No research seeds were opened
+and no research record changed.

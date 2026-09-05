@@ -1,0 +1,82 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260902T081659Z-d2aa6375",
+  "experimentId": "EX-20260902-kf-linear-q-rust-transfer-4328a730",
+  "lifecycle": "completed",
+  "runValidity": "valid",
+  "startedAt": "2026-09-02T08:17:28Z",
+  "endedAt": "2026-09-02T08:40:25Z",
+  "protocolSha256": "c1080a23a5bf006b72c3edb58b663bbde9d6bc8a4a858e88635c9a4fd6fd1348",
+  "machineProfileRef": "research/system-profiles/MACH-20260902T080517Z-dec42aab.json",
+  "sourceState": {
+    "gitCommit": "dbe0bc83641eb07766de2ec4c4df1149ba7b64fd",
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "approaches/value-policy-learning/klein-friedmann-linear-q/reproduction/fetch-upstream.sh build/kf-upstream",
+    "python approaches/value-policy-learning/klein-friedmann-linear-q/reproduction/export_parity.py --upstream build/kf-upstream --mode features --games 200 --seed 1  (and --mode update --games 5 --seed 2)",
+    "cargo build --release  (in approaches/value-policy-learning/klein-friedmann-linear-q/rust)",
+    "target/release/parity_features --input parity-features-input.txt; target/release/parity_update --input parity-update-input.txt",
+    "target/release/evaluate --seeds-start 0xa5278000 --games 64 --threads 1|8 --arm random --arm center --arm kf:smoke=...  (G3 probe, twice at 8 threads)",
+    "target/release/train --seeds-start 0xa5200000 --games 50000 --move-cap 2000 --lambda 0.1 --explore upstream --reward survival|score:17000 --step upstream|pergame|harmonic:50000|const:0.001|const:0.01|const:0.0001 --policy-seed 0x6b660001|2|3",
+    "target/release/evaluate --seeds-start 0xa5277000 --games 256 --move-cap 2000 --threads 4 --arm random --arm center --arm kf:<arm>=weights-<arm>.txt ...  (evaluate.json; evaluate-transplant.json)",
+    "target/release/evaluate --seeds-start 0xa5277000 --games 256 --move-cap 2000 --threads 8 --arm fair:4:7:32  (evaluate-fair-d4s7.json)",
+    "python approaches/value-policy-learning/klein-friedmann-linear-q/analysis/summarize_evaluate.py evaluate.json evaluate-transplant.json evaluate-fair-d4s7.json --reference random --baseline v1a --out summary.json"
+  ],
+  "seedLeaseRefs": [],
+  "resourceLimits": {
+    "wallSeconds": 7200,
+    "cpuThreads": 8,
+    "maxHostBytes": 8589934592,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": 1377.0,
+    "cpuSeconds": null,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "Seeds read: training 0xa5200000-0xa520c34f (50,000 games, SEEDLEASE-A52 d2 training block, role unchanged); diagnostic 0xa5277000-0xa52770ff (256 previously evaluated development seeds); CHECK probes 0xa5278000-0xa527803f. Zero new seeds opened. Wall 1377 s end to end including the 1,224.7 s fair-d4s7 arm at 8 threads; ten 50,000-game training arms took 0.6-1.9 s each; the 256-game fast-arm evaluation took under a second per arm. Peak memory not captured (all processes well under 1 GiB)."
+  },
+  "exitCode": 0,
+  "stopReason": "completed all gates and arms",
+  "artifactRefs": [
+    "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/upstream-commit.txt",
+    "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/parity-features.txt",
+    "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/parity-update.txt",
+    "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/g3-determinism.txt",
+    "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/evaluate.json",
+    "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/evaluate-transplant.json",
+    "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/evaluate-fair-d4s7.json",
+    "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/summary.json",
+    "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/train-posthoc-v6-const1e-2.json",
+    "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/train-posthoc-v7-const1e-4.json",
+    "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/train-posthoc-v8-score17k-const1e-3.json",
+    "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/train-v1a.json",
+    "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/train-v1b.json",
+    "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/train-v1c.json",
+    "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/train-v2-pergame.json",
+    "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/train-v3-harmonic50k.json",
+    "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/train-v4-const1e-3.json",
+    "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/train-v5-score17k-harmonic.json",
+    "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/weights-posthoc-v6-const1e-2.txt",
+    "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/weights-posthoc-v7-const1e-4.txt",
+    "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/weights-posthoc-v8-score17k-const1e-3.txt",
+    "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/weights-smoke-transplant.txt",
+    "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/weights-transplant-py-seed10.txt",
+    "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/weights-v1a.txt",
+    "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/weights-v1b.txt",
+    "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/weights-v1c.txt",
+    "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/weights-v2-pergame.txt",
+    "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/weights-v3-harmonic50k.txt",
+    "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/weights-v4-const1e-3.txt",
+    "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/weights-v5-score17k-harmonic.txt",
+    "runs/RUN-20260902T081659Z-d2aa6375/kf-linear-q/manifest.json",
+    "research/results/RS-20260902T084356Z-2488ecc7.json"
+  ],
+  "contributionIds": [
+    "CT-20260902T082510Z-4af4b77b"
+  ]
+}

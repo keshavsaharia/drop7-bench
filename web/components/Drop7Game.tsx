@@ -127,7 +127,7 @@ function recordBest(key: string | undefined, score: number) {
 }
 
 const BUTTON =
-  `${LABEL} rounded-md border border-zinc-700 px-2.5 py-1.5 text-zinc-300 transition-colors hover:border-zinc-500 hover:text-zinc-50 disabled:cursor-not-allowed disabled:opacity-40`;
+  `${LABEL} rounded-sm border border-rule-strong px-2.5 py-1.5 text-ink-1 transition-colors motion-reduce:transition-none hover:border-ink-4 hover:text-ink disabled:cursor-not-allowed disabled:opacity-40`;
 
 export function Drop7Game({
   mode: initialMode = "play",
@@ -434,20 +434,20 @@ export function Drop7Game({
       ref={hostRef}
       aria-label={`Drop7 in ${mode} mode`}
       aria-busy={animating || thinking}
-      className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4 text-zinc-300"
+      className="rounded-lg border border-rule bg-surface p-4 text-ink-1"
     >
-      <div className="mb-4 flex flex-wrap items-start justify-between gap-4 border-b border-zinc-800 pb-4">
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-4 border-b border-rule pb-4">
         <div>
           {modeSwitcher ? (
-            <div role="group" aria-label="Mode" className="inline-flex rounded-md border border-zinc-700 p-0.5">
+            <div role="group" aria-label="Mode" className="inline-flex rounded-sm border border-rule-strong p-0.5">
               {(["play", "evaluate", "auto"] as const).map((option) => (
                 <button
                   key={option}
                   type="button"
                   onClick={() => switchMode(option)}
                   aria-pressed={mode === option}
-                  className={`${LABEL} rounded px-2.5 py-1 transition-colors ${
-                    mode === option ? "bg-sky-500/20 text-sky-300" : "text-zinc-400 hover:text-zinc-100"
+                  className={`${LABEL} rounded-xs px-2.5 py-1 transition-colors motion-reduce:transition-none ${
+                    mode === option ? "bg-accent-soft text-accent" : "text-ink-2 hover:text-ink"
                   }`}
                 >
                   {option}
@@ -455,9 +455,9 @@ export function Drop7Game({
               ))}
             </div>
           ) : (
-            <p className={`${LABEL} text-sky-400`}>{mode}</p>
+            <p className={`${LABEL} text-accent`}>{mode}</p>
           )}
-          <p className="mt-1.5 text-sm text-zinc-400">{MODE_COPY[mode]}</p>
+          <p className="mt-1.5 text-small text-ink-2">{MODE_COPY[mode]}</p>
         </div>
         <div className="flex items-center gap-5 text-right">
           <Stat label="score" value={formatInteger(game.score)} />
@@ -471,29 +471,29 @@ export function Drop7Game({
         <div className="min-w-0">
           <div className="mb-3 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
-              <span className={`${LABEL} text-zinc-500`}>drop</span>
+              <span className={`${LABEL} text-ink-3`}>drop</span>
               <span className="inline-flex size-8 text-sm">
                 <DiscFace cell={game.nextDisc} />
               </span>
               {animating ? (
-                <span className={`${LABEL} text-sky-400`} aria-live="polite">
+                <span className={`${LABEL} text-accent`} aria-live="polite">
                   {animationLabel(animationFrame)}
                 </span>
               ) : thinking ? (
-                <span className={`${LABEL} text-sky-400`} aria-live="polite">
+                <span className={`${LABEL} text-accent`} aria-live="polite">
                   searching<span className={styles.caret}>_</span>
                 </span>
               ) : null}
             </div>
             {lastMove ? (
-              <span className={`${LABEL} text-zinc-500 tabular-nums`} aria-live="polite">
+              <span className={`${LABEL} text-ink-3 tabular-nums`} aria-live="polite">
                 c{lastMove.column + 1} · +{formatInteger(lastMove.scoreDelta)}
                 {lastMove.chainLength > 1 ? ` · chain ×${lastMove.chainLength}` : ""}
                 {lastMove.levelAdvanced ? " · level up" : ""}
                 {lastMove.clearedBoard ? " · board clear" : ""}
               </span>
             ) : (
-              <span className={`${LABEL} text-zinc-500`}>tap a column</span>
+              <span className={`${LABEL} text-ink-3`}>tap a column</span>
             )}
           </div>
 
@@ -526,25 +526,25 @@ export function Drop7Game({
                             ? `Drop ${game.nextDisc} in column ${column + 1}${isBest ? ", recommended" : ""}`
                             : `Column ${column + 1} is full`
                         }
-                        className={`border-x border-transparent transition-colors enabled:hover:border-sky-500/60 enabled:hover:bg-sky-400/10 ${
-                          isBest ? "border-sky-500/70 bg-sky-400/10" : ""
+                        className={`border-x border-transparent transition-colors motion-reduce:transition-none enabled:hover:border-accent/60 enabled:hover:bg-accent/10 ${
+                          isBest ? "border-accent/70 bg-accent/10" : ""
                         }`}
                       />
                     );
                   })}
                 </div>
                 {game.gameOver && (
-                  <div className="absolute inset-1.5 z-10 flex items-center justify-center rounded-sm bg-zinc-950/85 p-5 text-center backdrop-blur-[2px]">
-                    <div className="rounded-lg border border-zinc-700 bg-zinc-900 p-5 shadow-xl">
-                      <p className="text-2xl font-black text-zinc-50">board overflow</p>
-                      <p className={`${LABEL} mt-2 text-zinc-400`}>
+                  <div className="absolute inset-1.5 z-10 flex items-center justify-center rounded-sm bg-bg/85 p-5 text-center backdrop-blur-[2px]">
+                    <div className="rounded-md border border-rule-strong bg-surface p-5">
+                      <p className="font-display text-h2 font-bold text-ink">board overflow</p>
+                      <p className={`${LABEL} mt-2 text-ink-2`}>
                         {formatInteger(game.score)} points · {game.movesPlayed} drops · level {game.level}
                       </p>
                       <div className="mt-4 flex justify-center gap-2">
                         <button
                           type="button"
                           onClick={newGame}
-                          className={`${LABEL} rounded-md border border-sky-500 bg-sky-500 px-3 py-2 text-white transition-colors hover:bg-sky-400`}
+                          className={`${LABEL} rounded-sm border border-accent-strong bg-accent-strong px-3 py-2 text-accent-fg transition-colors motion-reduce:transition-none hover:brightness-110`}
                         >
                           new game
                         </button>
@@ -561,11 +561,11 @@ export function Drop7Game({
         </div>
 
         {mode !== "play" && (
-          <aside className="rounded-lg border border-zinc-800 bg-zinc-950/60 p-4">
+          <aside className="rounded-md border border-rule bg-raised p-4">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className={`${LABEL} text-zinc-500`}>expectimax</p>
-                <p className="mt-1 text-xl font-bold text-zinc-50">{recommendation}</p>
+                <p className={`${LABEL} text-ink-3`}>expectimax</p>
+                <p className="mt-1 font-display text-h3 font-semibold text-ink">{recommendation}</p>
               </div>
               {mode === "auto" && (
                 <button
@@ -607,7 +607,7 @@ export function Drop7Game({
               />
             </div>
 
-            <dl className="mt-5 space-y-2 border-t border-zinc-800 pt-4">
+            <dl className="mt-5 space-y-2 border-t border-rule pt-4">
               <Metric label="completed" value={evaluation ? `${evaluation.depth}/${evaluation.requestedDepth} ply` : "—"} />
               <Metric label="positions" value={evaluation ? formatInteger(evaluation.nodes) : "—"} />
               <Metric label="work" value={evaluation ? formatInteger(evaluation.work) : "—"} />
@@ -633,9 +633,9 @@ export function Drop7Game({
               />
             </dl>
 
-            <div className="mt-5 border-t border-zinc-800 pt-4">
-              <p className={`${LABEL} text-zinc-500`}>model</p>
-              <p className="mt-2 text-xs leading-relaxed text-zinc-400">
+            <div className="mt-5 border-t border-rule pt-4">
+              <p className={`${LABEL} text-ink-3`}>model</p>
+              <p className="mt-2 text-caption text-ink-2">
                 Iterative-deepening expectimax over every legal column, every hidden
                 number a reveal could show, and every next disc, with a mirror-aware
                 transposition cache. The horizon score is the engine&apos;s
@@ -648,14 +648,14 @@ export function Drop7Game({
         )}
       </div>
 
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-zinc-800 pt-4">
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-rule pt-4">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <Legend cell={SOLID} label="solid · 2 hits to open" />
           <Legend cell={CRACKED} label="cracked · 1 hit to open" />
-          <span className={`${LABEL} text-zinc-500`}>match a run&apos;s length to clear</span>
+          <span className={`${LABEL} text-ink-3`}>match a run&apos;s length to clear</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className={`${LABEL} font-mono text-zinc-600 normal-case tracking-normal`} title="seed of this game">
+          <span className={`${LABEL} font-mono text-ink-3 normal-case tracking-normal`} title="seed of this game">
             game {formatSeed(seed)}
           </span>
           <button type="button" onClick={replayGame} className={BUTTON} title="Start this seed again">
@@ -666,7 +666,7 @@ export function Drop7Game({
           </button>
         </div>
       </div>
-      {caption && <p className="mt-3 text-xs leading-relaxed text-zinc-400">{caption}</p>}
+      {caption && <p className="mt-3 text-caption text-ink-2">{caption}</p>}
     </section>
   );
 }
@@ -705,18 +705,18 @@ function NumericStepper({
     setDraft(String(onChange(base + direction * step)));
   };
   const stepButton =
-    "border border-zinc-700 text-lg text-zinc-300 transition-colors hover:border-zinc-500 hover:text-zinc-50 disabled:cursor-not-allowed disabled:opacity-35";
+    "border border-rule-strong text-lg text-ink-1 transition-colors motion-reduce:transition-none hover:border-ink-4 hover:text-ink disabled:cursor-not-allowed disabled:opacity-35";
 
   return (
     <>
-      <p className={`${LABEL} text-zinc-500`}>{label}</p>
+      <p className={`${LABEL} text-ink-3`}>{label}</p>
       <div className="mt-2 grid grid-cols-[2.5rem_1fr_2.5rem]" role="group" aria-label={`${label} in ${unit}`}>
         <button
           type="button"
           onClick={() => takeStep(-1)}
           disabled={value <= minimum}
           aria-label={`Decrease ${label}`}
-          className={`${stepButton} rounded-l-md border-r-0`}
+          className={`${stepButton} rounded-l-sm border-r-0`}
         >
           −
         </button>
@@ -734,19 +734,19 @@ function NumericStepper({
             event.currentTarget.blur();
           }}
           aria-label={`${label} in ${unit}`}
-          className={`min-w-0 border border-zinc-700 bg-zinc-950 px-2 py-2 text-center font-mono text-sm text-zinc-100 outline-none transition-colors focus:border-sky-500 ${styles.numberInput}`}
+          className={`min-w-0 border border-rule-strong bg-bg px-2 py-2 text-center font-mono text-small text-ink outline-none transition-colors motion-reduce:transition-none focus:border-accent ${styles.numberInput}`}
         />
         <button
           type="button"
           onClick={() => takeStep(1)}
           disabled={maximum !== undefined && value >= maximum}
           aria-label={`Increase ${label}`}
-          className={`${stepButton} rounded-r-md border-l-0`}
+          className={`${stepButton} rounded-r-sm border-l-0`}
         >
           +
         </button>
       </div>
-      <p className={`${LABEL} mt-1.5 text-right text-zinc-600`}>
+      <p className={`${LABEL} mt-1.5 text-right text-ink-3`}>
         {maximum === undefined ? `${minimum}+ ${unit}` : `${minimum}–${maximum} ${unit}`}
       </p>
     </>
@@ -759,7 +759,7 @@ function Legend({ cell, label }: { cell: number; label: string }) {
       <span className="inline-flex size-4">
         <DiscFace cell={cell} />
       </span>
-      <span className={`${LABEL} text-zinc-500`}>{label}</span>
+      <span className={`${LABEL} text-ink-3`}>{label}</span>
     </span>
   );
 }
@@ -767,8 +767,8 @@ function Legend({ cell, label }: { cell: number; label: string }) {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <p>
-      <span className={`${LABEL} block text-zinc-500`}>{label}</span>
-      <span className="font-mono text-sm text-zinc-50 tabular-nums">{value}</span>
+      <span className={`${LABEL} block text-ink-3`}>{label}</span>
+      <span className="font-mono text-small text-ink tabular-nums">{value}</span>
     </p>
   );
 }
@@ -776,8 +776,8 @@ function Stat({ label, value }: { label: string; value: string }) {
 function Metric({ label, value, accent = false }: { label: string; value: string; accent?: boolean }) {
   return (
     <div className="flex items-baseline justify-between gap-3">
-      <dt className={`${LABEL} text-zinc-500`}>{label}</dt>
-      <dd className={`font-mono text-xs tabular-nums ${accent ? "text-sky-400" : "text-zinc-300"}`}>{value}</dd>
+      <dt className={`${LABEL} text-ink-3`}>{label}</dt>
+      <dd className={`font-mono text-caption tabular-nums ${accent ? "text-accent" : "text-ink-1"}`}>{value}</dd>
     </div>
   );
 }

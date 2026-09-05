@@ -3,7 +3,7 @@
 ## August 2026
 
 The best dependable policy found so far is [fair depth-4
-expectimax](/approaches/fair-expectimax) — a four-move look-ahead that treats
+expectimax](/approach/fair-expectimax) — a four-move look-ahead that treats
 the game's luck honestly. Even with its best chance model, its measured
 means sit under half of that target. This page shows where the gap is, what has
 been measured, and which directions the evidence has closed.
@@ -24,7 +24,7 @@ caption: Paired contrasts from the same factorial: seven strata minus five strat
 
 The simulator and reference searches are mature enough to support reproducible
 research, but the strategy problem is unsolved. Corrected-score [fair depth-4
-expectimax](/approaches/fair-expectimax) is the strongest dependable reference found so far. 
+expectimax](/approach/fair-expectimax) is the strongest dependable reference found so far.
 Its average score across 64 games is **308,296 points**, far below the goal of a
 one-million-point average.
 
@@ -199,6 +199,8 @@ caption: Every closed direction whose headline is a points number, one row each,
 | Direct action override by the compact afterstate model | Override gate failed narrowly, and full training was harmful in one half-fold ([RS-20260820T184500Z-63c0a8e2](../../research/results/RS-20260820T184500Z-63c0a8e2.json), [RS-20260821T094500Z-1a7e3c55](../../research/results/RS-20260821T094500Z-1a7e3c55.json)) | A materially larger student, or a stronger teacher than D1-continuation |
 | Compact afterstate model reproducing D4's ordering | Top-1 0.375 against a 0.60 gate; exact D1 scores 0.486 ([RS-20260821T104500Z-77d21e90](../../research/results/RS-20260821T104500Z-77d21e90.json)) | A materially larger model; the claim is only established for compact evaluators |
 | The `suite-h9-v1` scenario benchmark as a strength measure | Ranked policies backwards, Spearman −0.257 ([finding-10](../exploratory/finding-10-suite-validation.md)) | A validated longer horizon; it remains usable as a diagnostic |
+| A depth-5-distilled NNUE leaf refined by whole-game evolution inside the depth-3 search | Rejected at this budget: −106,964 paired on 64 held-out games (LB −146,580, floor 38,357), 14-0-50; the training-signal falsifier failed (0 of the last 10 generations above the fair control). Evolution did beat its own warm start by +35,375 (LB +16,899) ([RS-20260903T025751Z-6577b33e](../../research/results/RS-20260903T025751Z-6577b33e.json)) | A warm start that holds the teacher's ordering (the 0.441 top-1 probe is near the zero-leaf level), a larger teacher corpus than the 177 games the slow depth-5 teacher produced, or a continuation from the generation-60 population to see where the still-rising curve plateaus |
+| The same leaf evolved 150 generations further with annealed mutation, until a preregistered plateau rule stopped it | Rejected at this budget: −68,441 paired on 64 fresh held-out games (LB −112,090, floor 43,193), 25-0-39; the continuation did beat the first run's candidate out of sample (+36,278, LB +9,085) and the curve levelled about 90,000 paired points below the fair control ([RS-20260903T163321Z-733076b5](../../research/results/RS-20260903T163321Z-733076b5.json)) | A constant-sigma continuation from the same population to separate the plateau from the annealing; a warm start that holds the teacher's ordering; more games per candidate as sigma shrinks, so selection is not steered by noise |
 
 The two afterstate rows matter more than their tier suggests. The program's
 standing explanation for every failed learned policy was insufficient sibling

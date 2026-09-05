@@ -1,6 +1,6 @@
 ---
-title: Glossary
-summary: One-line definitions for the game, search, learning, and evidence terms used throughout the site.
+title: "Vocabulary"
+summary: "Definitions for the game, search, learning, and research results, grouped by topic."
 order: 5
 ---
 
@@ -36,13 +36,15 @@ a concept page explains the idea properly, it is linked.
 | **full-width** | Considering every legal column at every choice node; no pruning. |
 | **strata / chance samples** | A fixed handful of representative outcomes used at a chance node when enumerating all of them is too expensive; "five strata" and "seven strata" are the common settings. |
 | **leaf / leaf evaluator** | A board at the bottom of the search, and the function that scores it. |
-| **logical work** | The count of leaf evaluations (and similar unit operations) a search performs; the repository's fixed currency for comparing cost. |
+| **logical work** | The count of leaf evaluations (and similar unit operations) a search performs; this program's fixed currency for comparing cost. |
 | **transposition table** | A cache of positions already evaluated, so a position reached by two routes is scored once. |
 | **sibling** | One of the legal columns available at a position, as compared with the others. |
 | **strategy fusion** | The error a planner makes when it imagines a fixed future and then plans as if it had known that future all along, so it "decides" differently in worlds it could not actually tell apart. It is why determinized planners overvalue moves that depend on the covers being right. |
 | **determinization / clairvoyant planner** | Imagining many complete futures with the hidden values filled in, planning in each, and averaging. Reads hidden values, so it is an oracle, not a legal policy. [→ concept](/learn/concepts/does-more-compute-help) |
 | **MCTS** | Monte Carlo tree search: building the look-ahead tree selectively, guided by random playouts. |
 | **rollout** | Playing a position forward to the end (or a horizon) with a quick policy to estimate its value. |
+| **UCB** | Upper confidence bound: a rule for choosing which branch to try next that adds a bonus for branches tried less often, so the search keeps exploring while favouring what has done well. |
+| **PUCT** | A UCB rule whose exploration bonus is weighted by a prior probability for each move, so a learned policy steers where the tree grows. |
 
 ## Learning
 
@@ -62,6 +64,16 @@ a concept page explains the idea properly, it is linked.
 | **policy gradient / PPO / DQN** | Reinforcement-learning methods that adjust a policy or value network from play experience. |
 | **self-play** | Generating training data by having the current policy (or a search guided by it) play games. |
 | **policy iteration** | Alternating between evaluating a policy and improving it; the loop the scale-out direction proposes. [→ concept](/learn/concepts/scale-out-direction) |
+| **temporal difference (TD)** | Learning a value function by nudging the prediction at one position toward the reward received plus the prediction at the next position, so later predictions teach earlier ones. |
+| **replay buffer** | A store of past positions and outcomes that training samples from repeatedly, so one game's data is used more than once and consecutive samples are less correlated. |
+| **actor and critic** | Two learned parts of one player: the actor picks columns and the critic predicts how the game will go, and the critic's judgment tells the actor which choices to reinforce. |
+| **behaviour cloning** | Training a policy to copy a teacher's recorded choices directly, position by position, with no reward signal. |
+| **distillation** | Training one model to reproduce another's outputs, so a slow or privileged teacher's judgment can be carried by a small public student. |
+| **DAgger** | Dataset aggregation: the student plays, the teacher labels the positions the student actually reached, and those labels join the training set, so the student is corrected on its own mistakes. |
+| **quantile label** | A training target that records several points of the distribution of outcomes from a position, so the model learns how wide the spread is as well as where its centre lies. |
+| **evolution strategies** | Optimisers that improve a set of weights by sampling variations, scoring each with complete games, and moving toward the variations that scored best. CEM and CMA-ES are two of them. |
+| **cross-entropy method (CEM)** | An optimiser that samples a population of weight settings, keeps the best-scoring fraction, refits the sampling distribution to them, and repeats. |
+| **CMA-ES** | Covariance matrix adaptation evolution strategy: an optimiser that samples weights from a Gaussian and adapts its mean and covariance toward the samples that scored best. |
 
 ## Evidence and records
 
@@ -80,3 +92,9 @@ a concept page explains the idea properly, it is linked.
 | **bootstrap lower bound** | A confidence bound on the mean computed by resampling whole games; the qualification protocol requires it above one million. |
 | **task-record only / ledger-recorded / reproduced** | Labels for how well a historical number is backed: by a conversation only, by the written ledger, or by a re-run in the current checkout. |
 | **engineering result** | A faster implementation proven to make identical decisions; it adds no evidence about strength. |
+| **common random numbers** | Evaluating two candidates on the same sequence of dealt discs and hidden values, so that luck is shared and the difference in scores is down to the candidates. |
+| **whole-origin split** | Dividing a training set so that every position from one game lands in the same fold, which keeps near-duplicate positions from one game out of both the training and the held-out data. |
+| **top-1 accuracy** | The share of positions on which a model's first-choice column matches the label's first choice. |
+| **pairwise accuracy** | The share of pairs of columns at a position that a model orders the same way as the label does. |
+| **normalised regret** | The value a model's chosen column gives up against the label's best column at that position, scaled by the spread of values there and averaged over positions; zero means it always picked the best. |
+| **split-half stability** | How well a measurement agrees with itself when the data is split in two and each half is scored separately; low agreement means the measurement is mostly noise. |

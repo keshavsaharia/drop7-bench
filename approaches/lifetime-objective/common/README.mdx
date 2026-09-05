@@ -5,6 +5,7 @@ summary: One instrumented game loop and one results writer, shared by every expe
 status: support-only
 evidence: repository-verified
 reads: diagnostic
+kind: engine
 ---
 
 A single header that plays whole games, counts the same things every time, and
@@ -44,7 +45,7 @@ is a run whose engine or instrumentation is wrong, and it stops rather than
 reporting a number. That check is not decorative: several results in this family
 are quoted with "0 score-identity violations" as part of their validity
 statement, and a 32-game cohort in the
-[rollout veto](/approaches/lifetime-objective/rollout-veto-17k) work reports 0
+[rollout veto](/approach/lifetime-objective/rollout-veto-17k) work reports 0
 runner failures, 0 illegal moves and 0 identity violations directly from it.
 
 It also flags games stopped at the move cap as **censored**, so that a capped
@@ -70,11 +71,11 @@ It is named as a retained artifact in the contribution record
 `CT-20260820T100249Z-b1ea4b1a`, whose recorded validation includes the score
 decomposition identity holding for **64 of 64** reference-policy games and
 **192 of 192** weak-control games in the
-[score decomposition](/approaches/lifetime-objective/score-decomposition) run.
+[score decomposition](/approach/lifetime-objective/score-decomposition) run.
 
 Experiments in this family that adopt it report the identity check and the
 censoring flag as part of their own run-validity statements — for example the
-[rollout veto](/approaches/lifetime-objective/rollout-veto-17k) cohort, which
+[rollout veto](/approach/lifetime-objective/rollout-veto-17k) cohort, which
 records the harness's game loop and artifact writer as a deliberate substitute
 for the historical program's bespoke one, specifically so its output would carry
 the same fields and the same per-game assertion as every other arm.

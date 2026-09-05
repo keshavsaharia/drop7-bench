@@ -5,6 +5,8 @@ summary: Ask whether a player can recognise, from board shape alone, the positio
 status: rejected
 evidence: ledger-recorded
 reads: teacher
+kind: strategy
+technique: oracle-distillation
 ---
 
 Stop trying to copy the teacher's moves. Ask something narrower: looking only at
@@ -19,7 +21,7 @@ being asked to reproduce a choice that depended on invisible information.
 
 ## Why this is a better question than "what would the teacher play?"
 
-[Copying the teacher's column](/approaches/oracle-curriculum/oracle-distillation)
+[Copying the teacher's column](/approach/oracle-curriculum/oracle-distillation)
 failed because the choice depends on gray numbers a player cannot see. But two
 boards can be equally unknowable and still be very differently *arranged* — one
 with its high numbers stacked where they can never fire and its covers buried
@@ -129,7 +131,7 @@ oracle-topology prediction extension". Sources: `oracle-topology-audit.cpp`,
 
 - **The split-stable feature list is the durable output.** Those directions
   survived an independent-halves test and were reused directly by
-  [accessible energy](/approaches/oracle-curriculum/accessible-energy). The two
+  [accessible energy](/approach/oracle-curriculum/accessible-energy). The two
   rejected candidates are equally useful: they are recorded as *not* supported.
 - **Telling good boards apart is not the same as ranking moves.** The model
   answered its own question correctly on fresh data and still lost games. This

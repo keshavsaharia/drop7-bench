@@ -12,28 +12,39 @@ records live in `web/content/research/<record-id>.mdx`.
 
 ## Page structure
 
-Every approach and family page has these four levels, in order:
+The voice, the banned constructions and the checklist live in
+`.agents/skills/drop7-writing-style/SKILL.md`; read it first. This file
+keeps the page skeleton and the component list.
 
-1. **One direct sentence.** Say what the idea tries to do without unexplained
-   jargon. Use the same sentence in the frontmatter `summary` and body opening.
-2. **The intuition, visually.** Why someone thought it would work, on a board.
-   Use the figure components (below) or a `BoardCompare` from real positions.
-   A figure earns its place only if it shows the mechanism; no decorative
-   diagrams. If no figure fits, a concrete worked example in prose.
-3. **How it works.** Use numbered steps. Name the inputs (what the
-   policy reads), the computation, and the output (a column). Link every term
-   to the glossary or a concept page the first time it appears; do not
-   re-explain expectimax, strata, leaf, sibling, or oracle. Link to
-   `/learn/concepts/...` and `/learn/glossary`.
-4. **What happened.** Begin with a direct result a newcomer can understand:
-   "On the same 64 games, it scored about a third less than the reference and
-   was retired." Then put the
-   technical record inside `<TechnicalDetails>`: cohort, tier, numbers, IDs,
-   links to `/docs/research/history`, `/docs/research/experiment-index`,
-   result records. A negative result is a finished contribution, not an
-   embarrassment; say what it ruled out and what it did not.
+Every approach page has these parts, in order:
 
-Then a short **"What this taught us / what is still open"** section.
+1. **Frontmatter.** `title` is a plain noun phrase, `summary` is the one
+   direct sentence the page renders as its deck. The body never repeats it.
+2. **The technique strip** (rendered by the page, not written by you): the
+   technique's card figure and a link to its primer under
+   `/learn/techniques/`, chosen from the `technique` frontmatter key.
+3. **The problem.** What is wrong or unknown before this work, in the game's
+   terms. One engine-generated figure if it shows the mechanism.
+4. **Proposed solution.** The bet and the mechanism, the information
+   boundary in one sentence (the `reads` chip carries the label).
+5. **How it works.** Numbered steps naming inputs (what the policy reads),
+   the computation, and the output (a column). Link every term to the
+   glossary or a concept page the first time it appears; do not re-explain
+   expectimax, strata, leaf, sibling, or oracle.
+6. **What happened.** A direct result a newcomer can understand, with the
+   cohort size and the evidence label, then at most three numbers. A
+   negative result is a finished contribution; say what it ruled out and
+   what it did not.
+7. **What we learned.** Prose, not bullets; ends with the one open question.
+8. **Agent-context accordions.** `<AgentContext summary="…">` blocks with
+   fixed titles, in this order: Records and provenance; Full results table;
+   Validity, gates and limitations; Source files; Scoring mode. Everything
+   the visible page leaves out (record IDs, seed leases, commands, paths,
+   gate tables, full arm tables) lives here so an agent loses nothing.
+
+Section headings at `##` are exactly "The problem", "Proposed solution",
+"How it works", "What happened", "What we learned", each once. Family pages
+use the same headings where they apply and otherwise plain noun phrases.
 
 ## Ground rules
 
@@ -73,20 +84,75 @@ Then a short **"What this taught us / what is still open"** section.
 title: Readable title (not the slug)
 family: <family-slug>            # approach pages only
 summary: The one-sentence, no-jargon description.
-status: completed | rejected | runtime-paused | preregistered | support-only | proposal
+status: completed | rejected | runtime-paused | preregistered | support-only | proposal | unknown
 evidence: ledger-recorded | task-record only | repository-verified | reproduced | none
 reads: public | oracle | teacher | diagnostic   # what the code is allowed to see
+kind: strategy | engine | diagnostic            # family pages: kind: family
+technique: <catalogue slug>                     # strategies only
+featured: true                                  # optional; strategies only
 ---
 ```
 
+`kind` says what the directory is. A `strategy` is a deployable player (or a
+bounded correction to one) that can be evaluated through the public
+interface. An `engine` is infrastructure that plays no game of its own: a
+game engine, a data factory, a training harness. A `diagnostic` is a
+measurement of something other than a policy's strength: a parity sweep, a
+score decomposition, a benchmark audit. A family `README.mdx` carries
+`kind: family` and no `technique`.
+
+`technique` groups strategies on the site and is required for every
+`kind: strategy` page; engines and diagnostics carry none. It takes one of
+the fourteen catalogue slugs, which are also `TECHNIQUE_ORDER` in
+`web/lib/techniques.ts`:
+
+| Slug | Group |
+| --- | --- |
+| `expectimax` | Expectimax search |
+| `heuristic-evaluation` | Heuristic evaluation |
+| `q-learning` | Q-learning and value learning |
+| `n-tuple` | N-tuple networks |
+| `nnue` | NNUE evaluators |
+| `policy-gradient` | Policy gradients |
+| `evolution` | Evolutionary optimisation |
+| `mcts` | Monte Carlo tree search |
+| `rollout-policy-iteration` | Rollouts and policy iteration |
+| `oracle-distillation` | Oracles, teachers and distillation |
+| `risk-survival` | Risk and survival objectives |
+| `afterstate` | Afterstates |
+| `constructive-planning` | Constructive planning |
+| `determinization` | Determinized planning |
+
+`featured: true` marks the one or two best-documented pages of a technique
+(a real explanation, engine-generated figures, a result with a record behind
+it). It is a curation choice made when the group page is designed; do not add
+it to your own page.
+
 `draft: true` is reserved for machine-generated pages; remove it when you
 hand-write the page.
+
+`node scripts/check-approach-frontmatter.mjs` validates every approach and
+family README against this vocabulary (status, evidence, reads, kind,
+technique, featured) and exits non-zero on any value outside it. Run it after
+editing frontmatter; `make research-validate` does not cover it.
 
 ## Components available in MDX
 
 - `Board`, `BoardCompare`, `Disc`, `Stat`, `Callout` (tones: info, warn,
   success) — from the existing kit.
-- `TechnicalDetails title="..."` — collapsible technical block.
+- `AgentContext summary="..."` — the click-to-open accordion with the bot
+  icon for agent-facing detail; `TechnicalRecord summary="..." meta="EX-…"`
+  is the same accordion with a ledger icon for cohorts, gates and record
+  tables. `TechnicalDetails title="..."` is kept as an alias of
+  `TechnicalRecord` for existing pages.
+- `TechniqueArt name="q-learning" mode="loop"` — a technique's animated card
+  figure (names are the catalogue slugs plus `engine-native`,
+  `engine-typescript`, `engine-rust`); the approach page renders it in the
+  technique strip, so a page rarely needs it inline.
+- Primer figures from `web/components/primers/` (for example
+  `ExpectimaxTwoDoors`, `QLearningCorridor`, `NnueGather`) are registered for
+  MDX and may be reused on an approach page when the technique needs
+  re-explaining there.
 - `EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public"` —
   the coloured label row; put it under the opening sentence.
 - `ResultSummary id="RS-..."`, `ExperimentSummary id="EX-..."`,
@@ -105,8 +171,7 @@ Check every MDX file compiles before finishing:
 
 ## Tone
 
-Be curious, concrete, and precise. Use short paragraphs and complete sentences.
-Lead with the idea, not the author or the writing process. Prefer "the search
-looks four moves ahead" to "the D4 policy". Prefer "it was retired because…"
-to "rejected". Use em dashes sparingly. A reader should finish the page able to
-explain the idea and judge the strength of its evidence.
+See `.agents/skills/drop7-writing-style/SKILL.md`. In short: plain, concrete,
+curious; no em dashes; no "not X but Y" verdicts; no witty titles; only
+recorded numbers, each with its cohort and source; the closed label
+vocabulary, never softened ("retired") or invented.

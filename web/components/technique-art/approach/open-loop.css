@@ -1,0 +1,52 @@
+/* heuristic-search/open-loop card art. The plan is committed first — all four
+   columns at once, before a single disc is dealt — and then the playhead steps
+   through the four moments while each stream delivers its own discs. The plan
+   never moves: it cannot branch on what arrives, and it is the same plan in
+   every stream. Play-state is owned by the shared art.css, and the SVG's own
+   attributes are the resting frame. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-open-loop {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-open-loop [data-anim="plan"] { animation-name: tart-approach-open-loop-plan; }
+.tart--approach-open-loop [data-anim="playhead"] { animation-name: tart-approach-open-loop-playhead; }
+.tart--approach-open-loop [data-anim="step-1"] { animation-name: tart-approach-open-loop-step-1; }
+.tart--approach-open-loop [data-anim="step-2"] { animation-name: tart-approach-open-loop-step-2; }
+.tart--approach-open-loop [data-anim="step-3"] { animation-name: tart-approach-open-loop-step-3; }
+.tart--approach-open-loop [data-anim="step-4"] { animation-name: tart-approach-open-loop-step-4; }
+.tart--approach-open-loop [data-anim="caption"] { animation-name: tart-approach-open-loop-caption; }
+
+@keyframes tart-approach-open-loop-plan {
+  0%, 2.18% { opacity: 0; }
+  7.64%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-open-loop-playhead {
+  0%, 8.73% { transform: translateX(-186px); }
+  10.91%, 19.64% { transform: translateX(-124px); }
+  21.82%, 30.55% { transform: translateX(-62px); }
+  32.73%, 100% { transform: translateX(0); }
+}
+@keyframes tart-approach-open-loop-step-1 {
+  0%, 8.73% { opacity: 0; }
+  12%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-open-loop-step-2 {
+  0%, 19.64% { opacity: 0; }
+  22.91%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-open-loop-step-3 {
+  0%, 30.55% { opacity: 0; }
+  33.82%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-open-loop-step-4 {
+  0%, 41.45% { opacity: 0; }
+  44.73%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-open-loop-caption {
+  0%, 46.91% { opacity: 0; }
+  51.27%, 100% { opacity: 1; }
+}

@@ -1,0 +1,55 @@
+/* fair-expectimax/chance-strata card art. Five weight bars fill while two
+   stay at zero, then every bar settles at the same height, and the cycle
+   returns to the five the reference draws — the resting frame. The bars are
+   lines whose dash is drawn from the bottom up; play-state is owned by the
+   shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-chance-strata {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-chance-strata [data-anim] {
+  animation-duration: var(--tart-duration);
+  animation-timing-function: var(--tart-ease, var(--ease-standard, cubic-bezier(0.2, 0, 0, 1)));
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+.tart--approach-chance-strata [data-anim="sampled"] { animation-name: tart-approach-chance-strata-sampled; }
+.tart--approach-chance-strata [data-anim="missed"] { animation-name: tart-approach-chance-strata-missed; }
+.tart--approach-chance-strata [data-anim="zeros"] { animation-name: tart-approach-chance-strata-zeros; }
+.tart--approach-chance-strata [data-anim="caption-a"] { animation-name: tart-approach-chance-strata-caption-a; }
+.tart--approach-chance-strata [data-anim="caption-b"] { animation-name: tart-approach-chance-strata-caption-b; }
+
+/* 56 is the track height: 56 hides the bar, 0 fills it, 18 is the even share. */
+@keyframes tart-approach-chance-strata-sampled {
+  0% { stroke-dashoffset: 56; }
+  12%, 28.36% { stroke-dashoffset: 0; }
+  38.18%, 45.82% { stroke-dashoffset: 18; }
+  54.55%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes tart-approach-chance-strata-missed {
+  0%, 28.36% { stroke-dashoffset: 56; }
+  38.18%, 45.82% { stroke-dashoffset: 18; }
+  54.55%, 100% { stroke-dashoffset: 56; }
+}
+@keyframes tart-approach-chance-strata-zeros {
+  0%, 6.55% { opacity: 0; }
+  12%, 27.27% { opacity: 1; }
+  33.82%, 48% { opacity: 0; }
+  54.55%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-chance-strata-caption-a {
+  0%, 7.64% { opacity: 0; }
+  13.09%, 27.27% { opacity: 1; }
+  33.82%, 48% { opacity: 0; }
+  54.55%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-chance-strata-caption-b {
+  0%, 31.64% { opacity: 0; }
+  38.18%, 46.91% { opacity: 1; }
+  52.36%, 100% { opacity: 0; }
+}

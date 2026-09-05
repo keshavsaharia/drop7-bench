@@ -1,6 +1,7 @@
 ---
 title: N-tuple networks and learning from play
 summary: Learn what makes a Drop7 board good from small cell patterns and millions of self-play games.
+kind: family
 ---
 
 Instead of hand-writing what makes a Drop7 board good, learn it — from small
@@ -11,7 +12,7 @@ the repository's first learned policy and, after it, a long line of
 reinforcement-learning variants: temporal-difference updates, Q-learning,
 policy gradients, actor-critic, and expert iteration. None of them produced a
 policy stronger than the hand-tuned
-[fair depth-4 search](/approaches/fair-expectimax/reference) that the project
+[fair depth-4 search](/approach/fair-expectimax/reference) that the project
 uses as its reference. For how this family compares with the other three ways
 of learning tried here, see
 [four ways a program can learn Drop7](/learn/concepts/learning-from-play).
@@ -87,12 +88,12 @@ attempt never got past trying to imitate a one-move search.
 
 | Approach | Recorded mean score | Mean moves | Cohort | Source |
 | --- | ---: | ---: | --- | --- |
-| [Learned value plus depth-2 search](/approaches/ntuple-rl/native-suite) | 232,107.156 | 70.766 | 64-game development probe | ledger |
-| [Optimistic phase n-tuple, direct play](/approaches/ntuple-rl/optimistic-phase) | 181,733.422 | 56.359 | 64-game burned gate | ledger |
-| [Primal-dual actor-critic](/approaches/ntuple-rl/primal-dual-actor-critic) | 175,834 | 55.006 | 512-game calibration | ledger |
-| [PyTorch PPO, best candidate](/approaches/ntuple-rl/torch-ppo) | 142,677.781 | 45.656 | 64-game development cohort | ledger |
-| [Regenerative expert iteration, round 8](/approaches/ntuple-rl/regenerative-expert-iteration) | 116,598 | 38.046 | training roll-ins | ledger |
-| [Optimistic phase n-tuple, two-rise search](/approaches/ntuple-rl/optimistic-phase) | 113,643.969 | 37.375 | 64-game burned gate | ledger |
+| [Learned value plus depth-2 search](/approach/ntuple-rl/native-suite) | 232,107.156 | 70.766 | 64-game development probe | ledger |
+| [Optimistic phase n-tuple, direct play](/approach/ntuple-rl/optimistic-phase) | 181,733.422 | 56.359 | 64-game burned gate | ledger |
+| [Primal-dual actor-critic](/approach/ntuple-rl/primal-dual-actor-critic) | 175,834 | 55.006 | 512-game calibration | ledger |
+| [PyTorch PPO, best candidate](/approach/ntuple-rl/torch-ppo) | 142,677.781 | 45.656 | 64-game development cohort | ledger |
+| [Regenerative expert iteration, round 8](/approach/ntuple-rl/regenerative-expert-iteration) | 116,598 | 38.046 | training roll-ins | ledger |
+| [Optimistic phase n-tuple, two-rise search](/approach/ntuple-rl/optimistic-phase) | 113,643.969 | 37.375 | 64-game burned gate | ledger |
 | Fair depth-4 reference, for comparison | 308,295.578 | 90.031 | 64 games | ledger |
 
 <Callout title="These numbers are not all on the same scale" tone="warn">
@@ -101,8 +102,8 @@ project a scoring audit found that a 7,000-point constant had been introduced
 by mistake, and results from that window are on a different scale. The ledger
 labels the scoring mode for some of these runs and not others; where it does
 not, the per-page technical records say so. The
-[temporal-coherence](/approaches/ntuple-rl/temporal-coherence) and
-[native PPO](/approaches/ntuple-rl/native-ppo) point totals are on the
+[temporal-coherence](/approach/ntuple-rl/temporal-coherence) and
+[native PPO](/approach/ntuple-rl/native-ppo) point totals are on the
 historical 7,000-point scale and cannot be compared with the rest of this table.
 </Callout>
 

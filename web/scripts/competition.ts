@@ -22,6 +22,10 @@ import {
   type CompetitionGameDefinition,
   type CompetitionGameManifest,
 } from "../lib/competition/game.ts";
+import {
+  importBenchReplay,
+  type VerifiedSeedGame,
+} from "../lib/competition/bench-import.ts";
 import { packColumns } from "../lib/competition/packing.ts";
 import { replayCompetitionColumns } from "../lib/competition/replay.ts";
 import {
@@ -332,6 +336,61 @@ function selectGame(gameKey: string): CompetitionGameDefinition {
   return game;
 }
 
+function resolveReplayPath(value: string) {
+  return resolve(process.env.INIT_CWD ?? process.cwd(), value);
+}
+
+/*
+ * An imported game was not produced by this checkout, so its provenance is
+ * declared rather than observed: the commit the producing machine had checked
+ * out, or the literal "unknown" when that cannot be established.
+ */
+function importedRevision(value: string) {
+  if (value === "unknown") return value;
+  if (!/^[0-9a-f]{7,40}$/.test(value)) {
+    throw new Error('--source-revision must be a commit hash or the literal "unknown"');
+  }
+  try {
+    return execFileSync("git", ["rev-parse", "--verify", `${value}^{commit}`], {
+      cwd: REPO_ROOT,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+  } catch {
+    throw new Error(`--source-revision ${value} is not a commit in this repository`);
+  }
+}
+
+function playPolicyGame(
+  policy: BenchPolicy,
+  game: CompetitionGameDefinition,
+): VerifiedSeedGame {
+  const played = playScriptedGame(policy, game.round);
+  if (played.illegalMoves !== 0) {
+    throw new Error(`${policy.id} made ${played.illegalMoves} illegal choices`);
+  }
+  const columns = played.frames.map((frame) => frame.column);
+  const replay = replayCompetitionColumns(game.round, columns);
+  if (!replay.valid || replay.score !== played.score || replay.moves !== played.moves) {
+    throw new Error(`${policy.id} failed the independent competition replay`);
+  }
+  return {
+    policyId: policy.id,
+    columns,
+    replay,
+    checksum: played.checksum,
+    clientScore: played.score,
+  };
+}
+
+/** The item as DynamoDB will hold it; the binary move stream is shown base64-encoded. */
+function previewRecord(record: Record<string, unknown>) {
+  return {
+    ...record,
+    packedMoves: Buffer.from(record.packedMoves as Uint8Array).toString("base64"),
+  };
+}
+
 async function seedCompetition(options: ParsedOptions) {
   const stageName = option(options, "--stage");
   if (!(stageName in STAGES)) throw new Error("--stage must be dev or production");
@@ -343,14 +402,30 @@ async function seedCompetition(options: ParsedOptions) {
   const game = selectGame(
     option(options, "--game-key", COMPETITION_GAME_KEY),
   );
-  const policyIds = option(
-    options,
-    "--policies",
-    COMPETITION_POLICY_IDS.join(","),
-  )
-    .split(",")
-    .map((value) => value.trim())
-    .filter(Boolean);
+
+  const replayPath = options.values.get("--replay");
+  const imported = replayPath
+    ? importBenchReplay(
+        game,
+        JSON.parse(readFileSync(resolveReplayPath(replayPath), "utf8")),
+      )
+    : null;
+  const requestedPolicies = options.values.get("--policies");
+  if (
+    imported &&
+    requestedPolicies !== undefined &&
+    requestedPolicies !== imported.policyId
+  ) {
+    throw new Error(
+      `--replay holds a ${imported.policyId} game; --policies may only name that policy`,
+    );
+  }
+  const policyIds = imported
+    ? [imported.policyId]
+    : (requestedPolicies ?? COMPETITION_POLICY_IDS.join(","))
+        .split(",")
+        .map((value) => value.trim())
+        .filter(Boolean);
   const policies = policyIds.map(getPolicy);
   if (new Set(policyIds).size !== policyIds.length) {
     throw new Error("--policies contains duplicate ids");
@@ -362,25 +437,24 @@ async function seedCompetition(options: ParsedOptions) {
         marshallOptions: { removeUndefinedValues: true },
       })
     : null;
-  const revision = currentRevision();
-  const dirty = worktreeIsDirty();
+  const revision = imported
+    ? importedRevision(option(options, "--source-revision"))
+    : currentRevision();
+  const dirty = imported ? undefined : worktreeIsDirty();
 
   console.log(
     `${write ? "Seeding" : "Dry-running"} ${policies.length} policies on ${game.gameKey} (${game.manifest.roundId})`,
   );
+  if (imported) {
+    console.log(
+      `Importing ${replayPath}: its recorded columns were replayed independently here; the policy was not re-run.`,
+    );
+  }
   console.log("Scripted playground only; these scores are not research-tier evidence.\n");
 
   for (const policy of policies) {
-    const played = playScriptedGame(policy, game.round);
-    if (played.illegalMoves !== 0) {
-      throw new Error(`${policy.id} made ${played.illegalMoves} illegal choices`);
-    }
-    const columns = played.frames.map((frame) => frame.column);
-    const replay = replayCompetitionColumns(game.round, columns);
-    if (!replay.valid || replay.score !== played.score || replay.moves !== played.moves) {
-      throw new Error(`${policy.id} failed the independent competition replay`);
-    }
-    const packedMoves = packColumns(columns);
+    const outcome = imported ?? playPolicyGame(policy, game);
+    const packedMoves = packColumns(outcome.columns);
     const timestamp = new Date().toISOString();
     const record = {
       submissionId: policySubmissionId(game.gameKey, policy.id),
@@ -394,13 +468,13 @@ async function seedCompetition(options: ParsedOptions) {
       provider: "research-registry",
       providerAccountId: policy.id,
       displayName: policy.name,
-      verifiedScore: replay.score,
-      clientScore: played.score,
-      scoreMismatch: false,
-      moveCount: columns.length,
+      verifiedScore: outcome.replay.score,
+      clientScore: outcome.clientScore,
+      scoreMismatch: outcome.clientScore !== outcome.replay.score,
+      moveCount: outcome.columns.length,
       packedMovesFormat: "drop7-columns-3bit-v1",
       packedMoves,
-      censored: replay.censored,
+      censored: outcome.replay.censored,
       submittedAt: timestamp,
       validatedAt: timestamp,
       policyId: policy.id,
@@ -408,15 +482,16 @@ async function seedCompetition(options: ParsedOptions) {
       policyDescription: policy.description,
       publicInformation: policy.publicInformation,
       researchUrl: researchUrl(policy, siteUrl),
-      trajectoryChecksum: played.checksum,
+      trajectoryChecksum: outcome.checksum,
       policySourceRevision: revision,
       policySourceDirty: dirty,
     };
+    if (!client) console.log(JSON.stringify(previewRecord(record), null, 2));
     const disposition = client
       ? await putPolicyRecord(client, tableName, record)
       : "validated";
     console.log(
-      `${policy.id.padEnd(18)} score=${String(replay.score).padStart(8)} moves=${String(replay.moves).padStart(4)} ${disposition}`,
+      `${policy.id.padEnd(18)} score=${String(outcome.replay.score).padStart(8)} moves=${String(outcome.replay.moves).padStart(4)} ${disposition}`,
     );
   }
   if (!write) {
@@ -433,8 +508,12 @@ Usage:
   npm run competition -- activate --game-key global#2026-08-v1 [--write]
   npm run competition -- archive --game-key global#2026-08-v1 [--write]
   npm run competition -- seed --stage production --profile personal-deploy [--policies expectimax-d4,greedy] [--write]
+  npm run competition -- seed --stage production --profile personal-deploy --replay runs/<run-id>/replays/<policy>--<round>.json --source-revision <sha> [--write]
 
-Mutating commands preview by default. --write updates the catalog or DynamoDB.`);
+Mutating commands preview by default. --write updates the catalog or DynamoDB.
+--replay imports a game already played by npm run bench (or just play-round) on any
+machine: its recorded columns are replayed independently here and the policy is not
+re-run. --source-revision names the commit that machine had checked out, or "unknown".`);
 }
 
 async function main() {

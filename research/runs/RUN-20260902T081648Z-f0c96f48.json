@@ -1,0 +1,55 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260902T081648Z-f0c96f48",
+  "experimentId": "EX-20260902-kf-report-reproduction-b7f61bf1",
+  "lifecycle": "completed",
+  "runValidity": "valid",
+  "startedAt": "2026-09-02T08:16:49Z",
+  "endedAt": "2026-09-02T08:25:40Z",
+  "protocolSha256": "3f17b7a1df011ad14f95903d7f39e60683bd7c68dbf0426759827d65692c5a63",
+  "machineProfileRef": "research/system-profiles/MACH-20260902T080517Z-dec42aab.json",
+  "sourceState": {
+    "gitCommit": "dbe0bc83641eb07766de2ec4c4df1149ba7b64fd",
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "approaches/value-policy-learning/klein-friedmann-linear-q/reproduction/fetch-upstream.sh runs/RUN-20260902T081648Z-f0c96f48/kf-reproduction/upstream",
+    "python approaches/value-policy-learning/klein-friedmann-linear-q/reproduction/reproduce_kf.py --upstream runs/RUN-20260902T081648Z-f0c96f48/kf-reproduction/upstream --seed 10|11|12 --out runs/RUN-20260902T081648Z-f0c96f48/kf-reproduction/seed10|11|12.json  (lambda 0.1, 5,000 random, 50,000 train, 10,000 test)",
+    "python approaches/value-policy-learning/klein-friedmann-linear-q/reproduction/reproduce_kf.py --upstream ... --seed 10 --lam 0 --random 0 --out .../seed10-noreg.json",
+    "python approaches/value-policy-learning/klein-friedmann-linear-q/reproduction/reproduce_kf.py --upstream ... --seed 10 --train 300 --random 0 --out .../seed10-300.json",
+    "python approaches/value-policy-learning/klein-friedmann-linear-q/analysis/summarize_reproduction.py runs/RUN-20260902T081648Z-f0c96f48/kf-reproduction"
+  ],
+  "seedLeaseRefs": [],
+  "resourceLimits": {
+    "wallSeconds": 3600,
+    "cpuThreads": 5,
+    "maxHostBytes": 4294967296,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": 531.0,
+    "cpuSeconds": null,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "External Python 3.12 simulator (uv venv with the upstream imports); five arms run concurrently, one process each. No repository seed is read. Upstream commit 8cc8a0edfa04f1a93088c951e217d3cd3d6013f0; file hashes in upstream-commit.txt. Wall 531 s for the five concurrent arms (longest arm 528 s); CPU seconds and peak memory were not captured for the Python processes."
+  },
+  "exitCode": 0,
+  "stopReason": "completed all five arms",
+  "artifactRefs": [
+    "runs/RUN-20260902T081648Z-f0c96f48/kf-reproduction/upstream-commit.txt",
+    "runs/RUN-20260902T081648Z-f0c96f48/kf-reproduction/seed10.json",
+    "runs/RUN-20260902T081648Z-f0c96f48/kf-reproduction/seed11.json",
+    "runs/RUN-20260902T081648Z-f0c96f48/kf-reproduction/seed12.json",
+    "runs/RUN-20260902T081648Z-f0c96f48/kf-reproduction/seed10-noreg.json",
+    "runs/RUN-20260902T081648Z-f0c96f48/kf-reproduction/seed10-300.json",
+    "runs/RUN-20260902T081648Z-f0c96f48/kf-reproduction/summary.json",
+    "runs/RUN-20260902T081648Z-f0c96f48/kf-reproduction/manifest.json",
+    "research/results/RS-20260902T082726Z-75606ce7.json"
+  ],
+  "contributionIds": [
+    "CT-20260902T082510Z-4af4b77b"
+  ]
+}

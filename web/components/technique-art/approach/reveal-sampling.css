@@ -1,0 +1,83 @@
+/* lifetime-objective/reveal-sampling card art. Both dials turn as one until
+   the rod snaps at mid-cycle; after that the next-disc dial runs on and the
+   hidden-value dial lags, and the grid fills from its diagonal to all 49
+   pairs. The cycle closes back on the joined rod and the diagonal, so the
+   resting frame and the first frame agree. Play-state is owned by art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-reveal-sampling {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-reveal-sampling [data-anim] {
+  animation-duration: var(--tart-duration);
+  animation-timing-function: var(--tart-ease, var(--ease-standard, cubic-bezier(0.2, 0, 0, 1)));
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+/* Each dial rotates about its own centre: the circle fixes the box. */
+.tart--approach-reveal-sampling .dial-a,
+.tart--approach-reveal-sampling .dial-b {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.tart--approach-reveal-sampling [data-anim="dial-a"] { animation-name: tart-approach-reveal-sampling-dial-a; }
+.tart--approach-reveal-sampling [data-anim="dial-b"] { animation-name: tart-approach-reveal-sampling-dial-b; }
+/* The dials turn at a constant rate; doubled class so this beats art.css's
+   own timing-function whichever way round the two files are bundled. */
+.tart.tart--approach-reveal-sampling [data-anim="dial-a"],
+.tart.tart--approach-reveal-sampling [data-anim="dial-b"] {
+  animation-timing-function: linear;
+}
+.tart--approach-reveal-sampling [data-anim="rod-up"] { animation-name: tart-approach-reveal-sampling-rod-up; }
+.tart--approach-reveal-sampling [data-anim="rod-down"] { animation-name: tart-approach-reveal-sampling-rod-down; }
+.tart--approach-reveal-sampling [data-anim="snap"] { animation-name: tart-approach-reveal-sampling-snap; }
+.tart--approach-reveal-sampling [data-anim="rest"] { animation-name: tart-approach-reveal-sampling-rest; }
+.tart--approach-reveal-sampling [data-anim="caption-a"] { animation-name: tart-approach-reveal-sampling-caption-a; }
+.tart--approach-reveal-sampling [data-anim="caption-b"] { animation-name: tart-approach-reveal-sampling-caption-b; }
+
+@keyframes tart-approach-reveal-sampling-dial-a {
+  0% { transform: rotate(0deg); }
+  25.09% { transform: rotate(180deg); }
+  54.55%, 100% { transform: rotate(720deg); }
+}
+@keyframes tart-approach-reveal-sampling-dial-b {
+  0% { transform: rotate(0deg); }
+  25.09% { transform: rotate(180deg); }
+  54.55%, 100% { transform: rotate(360deg); }
+}
+@keyframes tart-approach-reveal-sampling-rod-up {
+  0%, 25.09% { transform: translate(0, 0); }
+  30.55%, 48% { transform: translate(-3px, -4px); }
+  53.45%, 100% { transform: translate(0, 0); }
+}
+@keyframes tart-approach-reveal-sampling-rod-down {
+  0%, 25.09% { transform: translate(0, 0); }
+  30.55%, 48% { transform: translate(3px, 4px); }
+  53.45%, 100% { transform: translate(0, 0); }
+}
+@keyframes tart-approach-reveal-sampling-snap {
+  0%, 25.09% { opacity: 0; }
+  29.45%, 48% { opacity: 1; }
+  52.36%, 100% { opacity: 0; }
+}
+@keyframes tart-approach-reveal-sampling-rest {
+  0%, 28.36% { opacity: 0; }
+  38.18%, 48% { opacity: 0.55; }
+  53.45%, 100% { opacity: 0; }
+}
+@keyframes tart-approach-reveal-sampling-caption-a {
+  0%, 4.36% { opacity: 0; }
+  9.82%, 25.09% { opacity: 1; }
+  31.64%, 50.18% { opacity: 0; }
+  54.55%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-reveal-sampling-caption-b {
+  0%, 30.55% { opacity: 0; }
+  38.18%, 48% { opacity: 1; }
+  52.36%, 100% { opacity: 0; }
+}

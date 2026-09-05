@@ -1,0 +1,141 @@
+/* Figures for the evolution primer (components/primers/Evolution.tsx).
+   Only opacity animates. With animation off, every generation panel is fully
+   visible and every ring set in the selection-noise figure shows at once, so
+   the static state still explains the idea. */
+
+.primer-evo {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Cloud on a curve: emphasis sweeps across the four generation panels. */
+.primer-evo [data-anim="evo-gen"] {
+  animation: 4.8s ease-in-out infinite;
+}
+.primer-evo [data-anim="evo-gen"][data-step="1"] {
+  animation-name: evo-gen-1;
+}
+.primer-evo [data-anim="evo-gen"][data-step="2"] {
+  animation-name: evo-gen-2;
+}
+.primer-evo [data-anim="evo-gen"][data-step="3"] {
+  animation-name: evo-gen-3;
+}
+.primer-evo [data-anim="evo-gen"][data-step="4"] {
+  animation-name: evo-gen-4;
+}
+@keyframes evo-gen-1 {
+  0%,
+  22% {
+    opacity: 1;
+  }
+  27%,
+  95% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes evo-gen-2 {
+  0%,
+  22% {
+    opacity: 0.3;
+  }
+  27%,
+  47% {
+    opacity: 1;
+  }
+  52%,
+  100% {
+    opacity: 0.3;
+  }
+}
+@keyframes evo-gen-3 {
+  0%,
+  47% {
+    opacity: 0.3;
+  }
+  52%,
+  72% {
+    opacity: 1;
+  }
+  77%,
+  100% {
+    opacity: 0.3;
+  }
+}
+@keyframes evo-gen-4 {
+  0%,
+  72% {
+    opacity: 0.3;
+  }
+  77%,
+  97% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.3;
+  }
+}
+
+/* Selection noise: three ring sets take turns on the fresh-noise panel. */
+.primer-evo [data-anim^="evo-noise-"] {
+  animation: 4.5s ease-in-out infinite;
+}
+.primer-evo [data-anim="evo-noise-1"] {
+  animation-name: evo-noise-1;
+}
+.primer-evo [data-anim="evo-noise-2"] {
+  animation-name: evo-noise-2;
+}
+.primer-evo [data-anim="evo-noise-3"] {
+  animation-name: evo-noise-3;
+}
+@keyframes evo-noise-1 {
+  0%,
+  30% {
+    opacity: 1;
+  }
+  34%,
+  96% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes evo-noise-2 {
+  0%,
+  30% {
+    opacity: 0;
+  }
+  34%,
+  63% {
+    opacity: 1;
+  }
+  67%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes evo-noise-3 {
+  0%,
+  63% {
+    opacity: 0;
+  }
+  67%,
+  96% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primer-evo [data-anim] {
+    animation: none;
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260902T175250Z-3164a88a",
+  "experimentId": "EX-20260902-oneply-q-fit-and-pruned-search-panel-46c75cdf",
+  "lifecycle": "completed",
+  "runValidity": "valid",
+  "startedAt": "2026-09-02T17:52:50Z",
+  "endedAt": "2026-09-02T20:20:26Z",
+  "protocolSha256": "75f3c5aa9f39a7f22f1cf86d260f94323ec65dce668cf8c478330b885fde3d49",
+  "machineProfileRef": "research/system-profiles/MACH-20260902T080517Z-dec42aab.json",
+  "sourceState": {
+    "gitCommit": "61c18eb019f8ab82634ecdcc984188b183492f20",
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "cargo test --release  (approaches/fair-expectimax/rust-engine: 23 tests; approaches/value-policy-learning/oneply-q-prune/rust: 6 tests incl. full_width_matches_drop7_rs_bit_for_bit)",
+    "target/release/panel --seeds-start 0xa5200000 --games 48 --depth 4 --strata 7 --table 65536 --move-cap 2000 --threads 12 --parts-dir runs/RUN-20260902T175250Z-3164a88a/oneply-q/panel-parts --out runs/RUN-20260902T175250Z-3164a88a/oneply-q/panel.ndjson --games-out runs/RUN-20260902T175250Z-3164a88a/oneply-q/panel-games.json",
+    "sh approaches/value-policy-learning/oneply-q-prune/scripts/run-ex4-stages.sh runs/RUN-20260902T175250Z-3164a88a/oneply-q runs/RUN-20260902T083357Z-196a7b87/kf-six-weight-cem/weights-cem.txt 12  (fit_q.py; prune_eval depth 4 on games 32-47 with 17 configs; prune_eval exact:5:7 on every 16th held-out root, 128 roots; prune_eval depth 5 with 7 configs; prune_metrics.py twice)",
+    "python3 approaches/value-policy-learning/oneply-q-prune/analysis/posthoc_fit_diagnostics.py --panel ... --fit ... --out runs/RUN-20260902T175250Z-3164a88a/oneply-q/posthoc-fit.json --weights-out .../weights-lq-clipped-posthoc.txt  (POST HOC, after the held-out metrics)"
+  ],
+  "seedLeaseRefs": [],
+  "resourceLimits": {
+    "wallSeconds": 7200,
+    "cpuThreads": 12,
+    "maxHostBytes": 8589934592,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": 7392,
+    "cpuSeconds": null,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "Panel relaunch 18:16-18:40 UTC, 1,433.6 s on 12 threads (a first attempt, same seeds, was killed by the session harness at 47/48 games at about 1,380 s with no artifact; the binary then gained per-game part files and resume). Stages 18:41:08-20:20:26 UTC, 5,958 s: fit 6 s; depth-4 pruning 2,832 s; exact depth-5 sub-panel 2,042 s; depth-5 pruning 1,048 s; the stages shared the 12 cores with two 6-thread pilot gameplay arms of RUN-20260902T184241Z-43722e86, so wall times are contended. Total 7,392 s exceeds the preregistered 7,200 s stop by 192 s; no watchdog enforced it; every output is deterministic. Seeds read: 0xa5200000-0xa520002f (training role, repeat read) and CHECK probes 0xa5278000-0xa5278007 in crate tests; zero new seeds."
+  },
+  "exitCode": 0,
+  "stopReason": "completed",
+  "artifactRefs": [
+    "runs/RUN-20260902T175250Z-3164a88a/oneply-q/panel.ndjson",
+    "runs/RUN-20260902T175250Z-3164a88a/oneply-q/panel-games.json",
+    "runs/RUN-20260902T175250Z-3164a88a/oneply-q/panel-parts/",
+    "runs/RUN-20260902T175250Z-3164a88a/oneply-q/panel.log",
+    "runs/RUN-20260902T175250Z-3164a88a/oneply-q/fit.json",
+    "runs/RUN-20260902T175250Z-3164a88a/oneply-q/fit.log",
+    "runs/RUN-20260902T175250Z-3164a88a/oneply-q/weights-lq.txt",
+    "runs/RUN-20260902T175250Z-3164a88a/oneply-q/weights-lq-raw.txt",
+    "runs/RUN-20260902T175250Z-3164a88a/oneply-q/prune-d4.ndjson",
+    "runs/RUN-20260902T175250Z-3164a88a/oneply-q/prune-d4.log",
+    "runs/RUN-20260902T175250Z-3164a88a/oneply-q/prune-d4-summary.json",
+    "runs/RUN-20260902T175250Z-3164a88a/oneply-q/d5-panel.ndjson",
+    "runs/RUN-20260902T175250Z-3164a88a/oneply-q/d5-panel.log",
+    "runs/RUN-20260902T175250Z-3164a88a/oneply-q/prune-d5.ndjson",
+    "runs/RUN-20260902T175250Z-3164a88a/oneply-q/prune-d5.log",
+    "runs/RUN-20260902T175250Z-3164a88a/oneply-q/prune-d5-summary.json",
+    "runs/RUN-20260902T175250Z-3164a88a/oneply-q/posthoc-fit.json",
+    "runs/RUN-20260902T175250Z-3164a88a/oneply-q/posthoc-fit.log",
+    "runs/RUN-20260902T175250Z-3164a88a/oneply-q/weights-lq-clipped-posthoc.txt",
+    "runs/RUN-20260902T175250Z-3164a88a/oneply-q/stages.log",
+    "runs/RUN-20260902T175250Z-3164a88a/oneply-q/stages-stdout.log",
+    "research/results/RS-20260902T202705Z-75d87947.json",
+    "research/datasets/DS-20260902-fair-d4s7-sibling-panel-e4e06b7c.json"
+  ],
+  "contributionIds": [
+    "CT-20260902T082510Z-4af4b77b"
+  ]
+}

@@ -1,0 +1,129 @@
+/* lifetime-objective/leaf-reweight card art. A band passes down the fixed list
+   of leaf terms and each weight bar resizes inside the outline of the frozen
+   one it replaces — the last of them crossing the axis to the other sign —
+   while the names themselves never move. Every bar is anchored at the axis, so
+   the scale origin is the edge that touches it. Play-state, duration and easing
+   are owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-leaf-reweight {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-leaf-reweight [data-anim="pass"] {
+  animation-name: tart-approach-leaf-reweight-pass;
+}
+.tart--approach-leaf-reweight [data-anim="caption"] {
+  animation-name: tart-approach-leaf-reweight-caption;
+}
+
+.tart--approach-leaf-reweight .refit rect {
+  transform-box: fill-box;
+}
+.tart--approach-leaf-reweight [data-anim="w1"] {
+  transform-origin: left center;
+  animation-name: tart-approach-leaf-reweight-w1;
+}
+.tart--approach-leaf-reweight [data-anim="w2"] {
+  transform-origin: right center;
+  animation-name: tart-approach-leaf-reweight-w2;
+}
+.tart--approach-leaf-reweight [data-anim="w3"] {
+  transform-origin: left center;
+  animation-name: tart-approach-leaf-reweight-w3;
+}
+.tart--approach-leaf-reweight [data-anim="w4"] {
+  transform-origin: right center;
+  animation-name: tart-approach-leaf-reweight-w4;
+}
+.tart--approach-leaf-reweight [data-anim="w5"] {
+  transform-origin: right center;
+  animation-name: tart-approach-leaf-reweight-w5;
+}
+
+/* Five rows 24px apart: the band travels 96px from the first to the last. */
+@keyframes tart-approach-leaf-reweight-pass {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  3.27% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  37.09% {
+    transform: translateY(96px);
+    opacity: 1;
+  }
+  42.55%,
+  100% {
+    transform: translateY(96px);
+    opacity: 0;
+  }
+}
+
+@keyframes tart-approach-leaf-reweight-w1 {
+  0%,
+  3.27% {
+    transform: scaleX(0.458);
+  }
+  12%,
+  100% {
+    transform: scaleX(1);
+  }
+}
+@keyframes tart-approach-leaf-reweight-w2 {
+  0%,
+  11.45% {
+    transform: scaleX(2.222);
+  }
+  20.18%,
+  100% {
+    transform: scaleX(1);
+  }
+}
+@keyframes tart-approach-leaf-reweight-w3 {
+  0%,
+  19.64% {
+    transform: scaleX(0.389);
+  }
+  28.36%,
+  100% {
+    transform: scaleX(1);
+  }
+}
+@keyframes tart-approach-leaf-reweight-w4 {
+  0%,
+  27.82% {
+    transform: scaleX(0.5);
+  }
+  36%,
+  100% {
+    transform: scaleX(1);
+  }
+}
+/* This one starts on the far side of the axis: a negative scale about the edge
+   that touches it puts the frozen bar back on the right. */
+@keyframes tart-approach-leaf-reweight-w5 {
+  0%,
+  36% {
+    transform: scaleX(-0.9);
+  }
+  43.64%,
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes tart-approach-leaf-reweight-caption {
+  0%,
+  44.73% {
+    opacity: 0;
+  }
+  51.27%,
+  100% {
+    opacity: 1;
+  }
+}

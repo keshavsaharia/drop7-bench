@@ -1,36 +1,44 @@
 # Research figures
 
-A small, dependency-free toolchain that turns a JSON spec of recorded numbers
-into a self-contained SVG the console can inline with `<Figure name="…" />`.
-The point is reproducibility: a figure is regenerated from its spec, every
-number on it names the record it was copied from, and nothing is computed.
+A figure is a JSON spec of recorded numbers under `web/content/figures/`,
+rendered in the console by `<Figure name="…" />` through the visx chart kit in
+`web/components/charts/`. The point is reproducibility: every number on a
+figure names the record it was copied from, and the chart computes nothing but
+pixel positions and axis ranges.
 
 ```
-web/content/figures/<name>.json   the spec (hand-written, numbers copied verbatim)
-web/content/figures/<name>.svg    the rendered figure (generated, committed)
-web/scripts/figures/generate.mjs  render one spec
-web/scripts/figures/generate-all.mjs  render every spec
-web/components/Figure.tsx         the MDX component
+web/content/figures/<name>.json      the spec (hand-written, numbers copied verbatim)
+web/lib/charts/spec.ts               the spec type, validator and number formatters
+web/components/charts/ResearchChart.tsx   the renderer (client component)
+web/components/Figure.tsx            the MDX / Markdown-fence component (server)
+web/scripts/check-figures.mjs        resolves every embed and validates every spec
 ```
 
-## Regenerate
+The old string-templated SVG generator that lived here (`generate.mjs`) is
+gone. It estimated text widths at 0.6 em per character inside a fixed
+720 x 400 box, which is why legends ran into axis labels, crowded category
+labels overlapped, and popovers were squeezed inside the SVG. The chart kit
+lays text out from measured widths after hydration, keeps the title and legend
+in HTML so they wrap, turns crowded categorical figures into horizontal rows
+with a measured label gutter, and shows tooltips in a portal clamped to the
+viewport. Figures render on the server too; the client only re-measures.
+
+## Check
 
 ```sh
-node web/scripts/figures/generate-all.mjs                      # every spec
-node web/scripts/figures/generate.mjs web/content/figures/score-vs-depth.json
+node web/scripts/check-figures.mjs          # every doc embed + every spec
+node web/scripts/check-figures.mjs docs/research/status.md
 ```
-
-Output is deterministic (no dates, no random ids), so regenerating an unchanged
-spec produces a byte-identical SVG. Commit the SVG with the spec.
 
 ## The provenance rule
 
 **Every point must carry `sourceRecord`.** It is a research record ID
-(`RS-…`, `RUN-…`, `EX-…`, `TH-…`) or a finding document path under `docs/`
-(for example `docs/exploratory/finding-05-chance-strata.md`). The generator
-refuses to render a spec with a point that lacks one. `sourceField` is optional
-but strongly encouraged: name the metric key or table row the number came from
-so a reader can check it in seconds.
+(`RS-…`, `RUN-…`, `EX-…`, `TH-…`), a finding document path under `docs/`
+(for example `docs/exploratory/finding-05-chance-strata.md`), or a research
+log entry path. The validator refuses a spec with a point that lacks one, and
+`<Figure/>` renders a visible notice instead of the chart. `sourceField` is
+optional but strongly encouraged: name the metric key or table row the number
+came from so a reader can check it in seconds.
 
 The rules of `AGENTS.md` and the web-console skill apply with no exceptions:
 copy numbers verbatim, never average or interpolate, never merge cohorts into
@@ -65,47 +73,55 @@ scoring rule, evidence tier and any partial or stopped arm.
 
 Point fields: `x` (number for `line`, string category for `bar`, `dot` and
 `forest`), `y`, optional `lo` / `hi` (drawn as whiskers; a lone `lo` is
-labelled as a one-sided 95% lower bound in the popover), optional `n` (games),
-optional `label` (shown in the popover; for `dot` also drawn next to the
+labelled as a one-sided 95% lower bound in the tooltip), optional `n` (games),
+optional `label` (shown in the tooltip; for `dot` also drawn beside the
 marker, useful for W-T-L), `sourceRecord` (required), `sourceField` (optional).
+
+Axis fields: `label`, optional `unit`, and for a numeric x axis an optional
+`scale: "log"` (positive values only), which is a presentation choice, not a
+change to any number.
 
 Kinds:
 
-- `line` — metric against a numeric parameter, one polyline per series.
+- `line` — metric against a numeric parameter, one polyline per series. A
+  series with one point draws a marker only. `dashed: true` gives a dashed
+  line and hollow markers; use it for a stopped, partial or reference arm.
 - `bar` — paired deltas around a zero line, one bar per point, whiskers for
   bounds. Use for candidate-minus-comparator contrasts.
 - `dot` — per-arm comparisons on categorical x; series sit side by side
   within each category.
 - `forest` — the same categorical points as `dot`, laid out as rows with the
-  metric on the horizontal axis. Use when category names or point labels are
-  too long to share a vertical x-axis. Row names and the title are truncated
-  with an ellipsis; the full string is on hover. Long `label` text stays in
-  the popover.
+  metric on the horizontal axis. Dashed series draw as hollow diamonds.
 
-## What the SVG contains
+`bar` and `dot` figures with more than six categories, or whose labels do not
+fit their slot at the current width, are drawn as rows automatically, so a
+category name never needs to be shortened to fit.
 
-- `viewBox` with `width="100%"`, so it is responsive.
-- Colours through CSS variables (`--fig-fg`, `--fig-muted`, `--fig-grid`,
-  `--fig-pop-bg`, `--fig-pop-border`) with fallbacks, set by the
-  `.research-fig` block in `web/app/globals.css`.
-- Each point is `<g class="fig-pt" tabindex="0">` holding the marker and a
-  hidden `<g class="fig-pop">` popover (label, value, bounds, n, source) shown
-  on hover or keyboard focus; a `<title>` carries the same text for assistive
-  technology. Popovers are clamped inside the viewBox.
-- A `<desc>` with the title, notes and the de-duplicated list of sources.
+## Using a figure
 
-Text width is estimated at 0.6 em per character; keep titles, series names and
-`sourceField` values short enough to read.
-
-## Using a figure in MDX
+In MDX:
 
 ```mdx
 <Figure name="score-vs-depth" caption="One sentence on what the reader should see." />
 ```
 
-`Figure` reads the SVG and the spec through `web/lib/repo.ts`, inlines the
-SVG, renders the caption, and lists every point and its source under a
+In plain Markdown under `docs/`:
+
+    ```figure score-vs-depth
+    caption: One sentence on what the reader should see.
+    ```
+
+`Figure` reads the spec through `web/lib/repo.ts`, validates it, renders the
+chart and the caption, and lists every point and its source under a
 collapsible "Source data" table (experiment, theory and docs sources link to
 their pages; result records link to their experiment's results section). If
-the SVG is missing it renders a visible "not generated" notice rather than
-failing, so a checkout without generated figures still builds.
+the spec is missing or invalid it renders a visible notice rather than
+failing, so a broken spec cannot take a page down.
+
+## Other charts in the kit
+
+`web/components/charts/EvolutionCharts.tsx` draws the nnue-evolution run
+snapshot (`web/content/figures/nnue-evolution/<run-id>.json`, produced by
+`web/scripts/extract-nnue-evolution.ts` from the run's artifacts). Those
+charts share the primitives, tooltip and layout rules above; they take the
+snapshot's rows as props and draw them as written.

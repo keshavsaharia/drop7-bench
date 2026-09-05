@@ -1,32 +1,63 @@
+import "./home.css";
 import Link from "next/link";
+import { Badge } from "@/components/Badge";
+import { Stat } from "@/components/Board";
+import { Button } from "@/components/Button";
+import { Card } from "@/components/Card";
 import { Drop7Intro } from "@/components/Drop7Intro";
 import { Markdown } from "@/components/Markdown";
-import { Stat } from "@/components/Board";
-import { ShimmerButton } from "@/components/ShimmerButton";
+import { TechniqueArt } from "@/components/technique-art/TechniqueArt";
+import { COMPETITION_GAME_KEY } from "@/lib/competition/game";
+import { loadCompetitionLeaderboard } from "@/lib/competition/ledger";
+import { getCompetitionGame } from "@/lib/competition/registry";
+import { loadLeaderboard } from "@/lib/leaderboard";
+import { listLogEntries } from "@/lib/log";
 import {
   getExperiments,
   getResults,
   getTheories,
   listApproaches,
+  listApproachesByTechnique,
   listFamilies,
   readRepoFile,
 } from "@/lib/repo";
-import { loadLeaderboard } from "@/lib/leaderboard";
-import { loadCompetitionLeaderboard } from "@/lib/competition/ledger";
-import { COMPETITION_GAME_KEY } from "@/lib/competition/game";
-import { getCompetitionGame } from "@/lib/competition/registry";
+import { listTechniques } from "@/lib/techniques";
 
 export const dynamic = "force-dynamic";
 
-function GitHubMark() {
-  return (
-    <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true" fill="currentColor">
-      <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z" />
-    </svg>
-  );
+const STATUS_PATH = "docs/research/status.md";
+
+/**
+ * The first `count` second-level sections of a Markdown document, without its
+ * document title. Fenced blocks are skipped so a `##` inside a fence is not
+ * counted as a heading. Nothing is rewritten or summarised: the text is the
+ * document's own, cut at the next `## ` heading.
+ */
+function leadingSections(markdown: string, count: number): string {
+  const lines = markdown.replace(/\r\n?/g, "\n").split("\n");
+  const out: string[] = [];
+  let fence: string | null = null;
+  let seen = 0;
+  for (const line of lines) {
+    const fenceMatch = /^ {0,3}(`{3,}|~{3,})/.exec(line);
+    if (fence) {
+      if (fenceMatch && fenceMatch[1][0] === fence[0] && fenceMatch[1].length >= fence.length) {
+        fence = null;
+      }
+    } else if (fenceMatch) {
+      fence = fenceMatch[1];
+    } else if (/^# /.test(line) && seen === 0) {
+      continue;
+    } else if (/^## /.test(line)) {
+      seen += 1;
+      if (seen > count) break;
+    }
+    out.push(line);
+  }
+  return out.join("\n").trim();
 }
 
-export default async function OverviewPage() {
+export default async function HomePage() {
   const theories = getTheories();
   const experiments = getExperiments();
   const results = getResults();
@@ -35,6 +66,11 @@ export default async function OverviewPage() {
     (sum, family) => sum + listApproaches(family).length,
     0,
   );
+  const techniques = listTechniques();
+  const logEntries = listLogEntries().slice(0, 3);
+  const status = readRepoFile(STATUS_PATH);
+  const statusExcerpt = status ? leadingSections(status, 2) : null;
+
   const leaderboard = loadLeaderboard();
   const competitionGame = getCompetitionGame(COMPETITION_GAME_KEY);
   if (!competitionGame) throw new Error("Current competition is not registered");
@@ -74,126 +110,155 @@ export default async function OverviewPage() {
         };
       }),
   ].sort((a, b) => b.score - a.score)[0] ?? null;
-  const status = readRepoFile("docs/research/status.md");
 
   return (
-    <div className="space-y-10">
-      <section className="grid items-center gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,25rem)] lg:gap-10">
+    <div className="home">
+      <section className="home-hero" aria-labelledby="home-title">
         <div>
-          <h1 className="text-3xl font-black text-zinc-50">
+          <h1 id="home-title" className="home-hero-title text-display">
             What is the best strategy in a game with chance?
           </h1>
-          <p className="mt-2 max-w-3xl text-zinc-400">
-            Drop7 is widely considered one of the great puzzle games of all time<sup><Link href="https://en.wikipedia.org/wiki/Drop7" target="_blank" className="text-sky-400 hover:text-sky-300">1</Link></sup>.
+          <p className="home-hero-lead">
+            Drop7 is widely considered the greatest puzzle game of all time<sup className="home-reference">
+              <Link
+                href="https://en.wikipedia.org/wiki/Drop7"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Drop7 on Wikipedia, reference 1"
+              >
+                [1]
+              </Link>
+            </sup>.{" "}
             The goal of this research is to find an autonomous strategy for playing the game as well as a human can.
           </p>
-          <p className="mt-2 max-w-3xl text-zinc-400">
-            An experienced human player can score millions of points in this game with the right long-term strategic thinking. The strongest
-            research reference so far (<Link href="/approaches/fair-expectimax/reference" className="text-sky-400 hover:text-sky-300">fair depth-4 expectimax</Link>)
-            averages about 309k points, so the research problem is very much still open.
+          <p className="home-hero-lead">
+            An experienced human player can score a million points in this game with the right long-term strategic thinking. The strongest research reference so far (<Link href="/approach/fair-expectimax/reference">depth-4 expectimax</Link>) averages about 300k points, so the research problem is very much still open.
+          </p>
+          <div className="home-hero-actions">
+            <Button href="/play">Play the game</Button>
+            <Button variant="ghost" href="/learn/rules">
+              Read the rules
+            </Button>
+          </div>
+          <p className="home-hero-steps">
+            New here? <Link href="/learn/rules">Learn the game</Link>, then{" "}
+            <Link href="/learn/concepts">the ideas behind the strategies</Link>, then see{" "}
+            <Link href="/approach">what has been tried</Link> and{" "}
+            <Link href="/theories">what is still open</Link>.
           </p>
         </div>
         <Drop7Intro />
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-2">
-        <Link
-          href="/learn/rules"
-          className="group rounded-xl border border-sky-900/70 bg-sky-950/30 p-5 hover:border-sky-700"
-        >
-          <div className="text-xs font-semibold uppercase tracking-wide text-sky-300">
-            Gameplay Guide
-          </div>
-          <h2 className="mt-1 text-lg font-bold text-zinc-50 group-hover:text-white">
-            How Drop7 works
-          </h2>
-          <p className="mt-1 text-sm text-zinc-400">
-            Learn the rules and play the game right here in your browser, and see for yourself why this is such a captivating research prize.
-          </p>
-          <span className="mt-3 inline-block text-sm text-sky-400 group-hover:text-sky-300">
-            Learn how to play Drop7 →
-          </span>
-        </Link>
-        <a
-          href="https://github.com/keshavsaharia/drop7-bench"
-          rel="noopener noreferrer"
-          className="group rounded-xl border border-zinc-800 bg-zinc-900/50 p-5 hover:border-zinc-600"
-        >
-          <div className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-            Open Source
-          </div>
-          <h2 className="mt-1 flex items-center gap-2 text-lg font-bold text-zinc-50">
-            <GitHubMark />
-            keshavsaharia/drop7-bench
-          </h2>
-          <p className="mt-1 text-sm text-zinc-400">
-            All of the game engines, research approaches, scripted-round benchmarks, and this website are all open-source.
-          </p>
-          <span className="mt-3 inline-block text-sm text-zinc-300 group-hover:text-zinc-100">
-            github.com/keshavsaharia/drop7-bench →
-          </span>
-        </a>
-      </section>
-
-      <section>
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">
-          How to start researching
-        </h2>
-        <ol className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            { href: "/learn/rules", step: "1", title: "Learn the game", text: "Learn the rules, and play the game right here in your browser." },
-            { href: "/learn/concepts", step: "2", title: "Learn the ideas", text: "Chance, look-ahead, evaluating a board, the sibling trap, and what compute can and cannot buy." },
-            { href: "/approaches", step: "3", title: "See what was tried", text: "Twelve strategy families have been developed so far, and each has a hierarchy of records into specific approaches that were attempted." },
-            { href: "/theories", step: "4", title: "See what is open", text: "Browse the theories and contribute your own, to guide the large-scale direction of the research." },
-          ].map((item) => (
-            <li key={item.href}>
-              <Link
-                href={item.href}
-                className="block h-full rounded-lg border border-zinc-800 bg-zinc-950/50 p-3 hover:border-sky-800"
-              >
-                <div className="text-xs text-zinc-500">step {item.step}</div>
-                <div className="mt-0.5 font-semibold text-zinc-100">{item.title}</div>
-                <div className="mt-1 text-xs text-zinc-400">{item.text}</div>
-              </Link>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <section className="home-stats" aria-label="Where things stand">
+        <Stat label="Reference mean" value="308,296" hint="fair D4, 64 games (ledger)" />
+        <Stat label="Target mean" value="1,000,000+" hint="frozen qualification bar" />
         <Stat label="Approaches" value={String(approachCount)} hint={`${families.length} families`} />
         <Stat label="Theories" value={String(theories.length)} hint="registered claims" />
         <Stat label="Experiments" value={String(experiments.length)} hint="preregistered" />
         <Stat label="Results" value={String(results.length)} hint="recorded outcomes" />
-        <Stat
-          label="Reference mean"
-          value="308,296"
-          hint="fair D4, 64 games (ledger)"
-        />
-        <Stat
-          label="Target mean"
-          value="1,000,000+"
-          hint="frozen qualification bar"
-        />
       </section>
 
-      <section>
-        <h2 className="text-2xl font-black text-zinc-50">
-          Compete with the computer strategies
-        </h2>
-        <p className="mt-2 max-w-3xl text-zinc-400">
-          There are monthly competitions where you can compete with the computer strategies and get yourself onto the same leaderboard. 
-        </p>
-      </section>
-
-      <section className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg font-bold text-zinc-100">
-            Global human-computer competition
-          </h2>
-          <ShimmerButton href="/leaderboard">View leaderboard</ShimmerButton>
+      <section className="home-ideas" aria-labelledby="home-ideas-title">
+        <div className="home-section-head">
+          <div>
+            <span className="label">The ideas</span>
+            <h2 id="home-ideas-title" className="home-h2">
+              Fourteen ways to build a player
+            </h2>
+            <p className="home-section-lead">
+              Each technique is explained from the ground up before it meets the game, and
+              each links to the strategies that tried it.
+            </p>
+          </div>
+          <Link href="/approach" className="home-more">
+            all approaches →
+          </Link>
         </div>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <ol className="home-technique-grid">
+          {techniques.map((technique) => {
+            const count = listApproachesByTechnique(technique.slug).length;
+            return (
+              <li key={technique.slug}>
+                <Card
+                  href={`/approach/technique/${technique.slug}`}
+                  art={<TechniqueArt name={technique.slug} title={technique.title} />}
+                  title={technique.title}
+                  summary={technique.oneLine}
+                  foot={
+                    <span className="label">
+                      {count === 1 ? "1 approach" : `${count} approaches`}
+                    </span>
+                  }
+                />
+              </li>
+            );
+          })}
+        </ol>
+      </section>
+
+      <section className="home-evidence">
+        <div className="home-evidence-status">
+          <h2 className="label">Where the evidence stands</h2>
+          {statusExcerpt ? (
+            <>
+              <Markdown source={statusExcerpt} fromPath={STATUS_PATH} />
+              <p className="home-read-more">
+                <Link href="/docs/research/status">Read the full status →</Link>
+              </p>
+            </>
+          ) : (
+            <p className="home-empty">
+              The status document is not present in this checkout.
+            </p>
+          )}
+        </div>
+        <aside className="home-evidence-log">
+          <h2 className="label">Latest from the log</h2>
+          {logEntries.length > 0 ? (
+            <ol className="home-log">
+              {logEntries.map((entry) => (
+                <li key={entry.date}>
+                  <Link href={`/log/${entry.date}`}>
+                    <time dateTime={entry.date}>{entry.date}</time>
+                    <span className="home-log-title">{entry.title}</span>
+                    {entry.summary && <p className="home-log-summary">{entry.summary}</p>}
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className="home-empty">No log entries are present in this checkout.</p>
+          )}
+          <Link href="/log" className="home-log-all">
+            all entries →
+          </Link>
+        </aside>
+      </section>
+
+      <section className="home-compete" aria-labelledby="home-compete-title">
+        <div className="home-section-head">
+          <div>
+            <span className="label">Compete</span>
+            <h2 id="home-compete-title" className="home-h2">
+              Play the same game as the computer strategies
+            </h2>
+            <p className="home-section-lead">
+              You and every computer policy face the same visible discs and the same hidden
+              values. Play in your browser, submit your column choices, and your verified score
+              goes on the same leaderboard as the autonomous strategies.
+            </p>
+          </div>
+          <div className="home-actions">
+            <Button variant="secondary" href="/leaderboard">
+              View the leaderboard
+            </Button>
+            <Button variant="ghost" href="/compete">
+              Compete →
+            </Button>
+          </div>
+        </div>
+        <div className="home-leaders">
           <CompetitionLeader
             label="Current human leader"
             name={humanLeader?.displayName ?? null}
@@ -212,17 +277,11 @@ export default async function OverviewPage() {
             empty="No computer score available"
           />
         </div>
-        <p className="mt-3 text-xs text-zinc-500">
-          Both leaders play {competitionGame.manifest.roundId}, with the same
-          visible discs and hidden values.
+        <p className="home-compete-note">
+          Both leaders play {competitionGame.manifest.roundId}, with the same visible discs
+          and hidden values.
         </p>
       </section>
-
-      {status && (
-        <section>
-          <Markdown source={status} fromPath="docs/research/status.md" />
-        </section>
-      )}
     </div>
   );
 }
@@ -241,26 +300,21 @@ function CompetitionLeader({
   empty: string;
 }) {
   return (
-    <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 px-4 py-3">
-      <p className="text-xs font-semibold uppercase tracking-wide text-sky-400">
-        {label}
-      </p>
+    <div className="home-leader">
+      <span className="label">{label}</span>
       {name !== null && score !== null ? (
-        <p className="mt-1 text-sm text-zinc-300">
-          <strong className="text-zinc-100">{name}</strong>
+        <p className="home-leader-line">
+          <strong>{name}</strong>
           {extendedState && (
-            <span
-              className="ml-2 rounded bg-amber-900/60 px-1.5 py-0.5 text-[10px] font-medium text-amber-200"
+            <Badge
+              label="extended state"
               title="Reads level or move number in addition to the strict public state"
-            >
-              extended state
-            </span>
+            />
           )}
-          <span className="text-zinc-500"> · </span>
-          {score.toLocaleString()} points
+          <span className="home-leader-score">{score.toLocaleString()} points</span>
         </p>
       ) : (
-        <p className="mt-1 text-sm text-zinc-500">{empty}</p>
+        <p className="home-leader-empty">{empty}</p>
       )}
     </div>
   );

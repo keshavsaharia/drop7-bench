@@ -1,5 +1,6 @@
 "use client";
 
+import "../app/app.css";
 import {
   useCallback,
   useEffect,
@@ -133,7 +134,7 @@ function ScoreChart({
   return (
     <svg
       viewBox={`0 0 ${width} ${height}`}
-      className="w-full rounded-lg border border-zinc-800 bg-zinc-950"
+      className="w-full rounded-md border border-rule bg-bg"
       role="img"
       aria-label={`Explosion points ${ariaMode}. Level-rise bonuses excluded.`}
     >
@@ -150,7 +151,7 @@ function ScoreChart({
             y1="0"
             x2="0"
             y2="8"
-            stroke="#38bdf8"
+            stroke="var(--color-accent)"
             strokeOpacity="0.09"
             strokeWidth="3"
           />
@@ -166,7 +167,7 @@ function ScoreChart({
               y={plot.top}
               width={spanWidth}
               height={plotHeight}
-              fill={index % 2 === 0 ? "url(#replay-round-stripes)" : "#fff"}
+              fill={index % 2 === 0 ? "url(#replay-round-stripes)" : "var(--color-ink)"}
               fillOpacity={index % 2 === 0 ? 1 : 0.018}
             />
             {index > 0 && (
@@ -175,7 +176,7 @@ function ScoreChart({
                 y1={plot.top}
                 x2={x}
                 y2={baseline}
-                stroke="#3f3f46"
+                stroke="var(--color-rule-strong)"
                 strokeWidth={1}
               />
             )}
@@ -185,7 +186,7 @@ function ScoreChart({
                 x={x + spanWidth / 2}
                 y={height - 8}
                 textAnchor="middle"
-                fill="#71717a"
+                fill="var(--color-ink-3)"
                 fontSize={9}
               >
                 R{span.round}
@@ -199,21 +200,21 @@ function ScoreChart({
         y1={baseline}
         x2={width - plot.right}
         y2={baseline}
-        stroke="#3f3f46"
+        stroke="var(--color-rule-strong)"
       />
       <line
         x1={plot.left}
         y1={plot.top}
         x2={width - plot.right}
         y2={plot.top}
-        stroke="#27272a"
+        stroke="var(--color-rule)"
         strokeDasharray="3 4"
       />
       <text
         x={plot.left - 7}
         y={plot.top + 3}
         textAnchor="end"
-        fill="#71717a"
+        fill="var(--color-ink-3)"
         fontSize={9}
       >
         {formatCompactInteger(maxPoints)}
@@ -222,7 +223,7 @@ function ScoreChart({
         x={plot.left - 7}
         y={baseline + 3}
         textAnchor="end"
-        fill="#52525b"
+        fill="var(--color-ink-4)"
         fontSize={9}
       >
         0
@@ -240,7 +241,7 @@ function ScoreChart({
             width={barWidth}
             height={barHeight}
             rx={Math.min(2.5, barWidth / 3)}
-            fill={active ? "#facc15" : "#38bdf8"}
+            fill={active ? "var(--color-highlight)" : "var(--color-accent)"}
             fillOpacity={active ? 0.95 : 0.78}
           />
         );
@@ -474,13 +475,13 @@ export function ReplayPlayer({
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(17rem,0.75fr)]">
       <section
         aria-busy={animating}
-        className="rounded-xl border border-zinc-800 bg-zinc-900/45 p-4 sm:p-5"
+        className="rounded-lg border border-rule bg-surface p-4 sm:p-5"
       >
-        <div className="flex items-center gap-2 border-b border-zinc-800 pb-4 text-zinc-100">
+        <div className="flex items-center gap-2 border-b border-rule pb-4 text-ink">
           <span className="inline-flex size-8 text-sm">
             <DiscFace cell={frame.disc} />
           </span>
-          <span className="text-sm text-zinc-400">placed in</span>
+          <span className="text-small text-ink-2">placed in</span>
           <strong className="text-lg">column {frame.column + 1}</strong>
         </div>
 
@@ -502,14 +503,14 @@ export function ReplayPlayer({
               type="button"
               onClick={() => step(-1)}
               disabled={cursor === 0}
-              className="rounded-lg border border-zinc-700 px-3 py-2 text-sm font-semibold text-zinc-300 transition-colors hover:border-zinc-500 hover:text-zinc-50 disabled:cursor-not-allowed disabled:opacity-35"
+              className="rounded-md border border-rule-strong px-3 py-2 text-small font-semibold text-ink-1 transition-colors motion-reduce:transition-none hover:border-ink-4 hover:text-ink disabled:cursor-not-allowed disabled:opacity-35"
             >
               ← Previous
             </button>
             <button
               type="button"
               onClick={togglePlay}
-              className="min-w-24 rounded-lg bg-violet-500 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-violet-400"
+              className="min-w-24 rounded-md bg-accent-strong px-4 py-2 text-small font-semibold text-accent-fg transition-[filter] motion-reduce:transition-none hover:brightness-110"
             >
               {animating
                 ? "Pause"
@@ -521,12 +522,12 @@ export function ReplayPlayer({
               type="button"
               onClick={() => step(1)}
               disabled={cursor === frames.length - 1}
-              className="rounded-lg border border-zinc-700 px-3 py-2 text-sm font-semibold text-zinc-300 transition-colors hover:border-zinc-500 hover:text-zinc-50 disabled:cursor-not-allowed disabled:opacity-35"
+              className="rounded-md border border-rule-strong px-3 py-2 text-small font-semibold text-ink-1 transition-colors motion-reduce:transition-none hover:border-ink-4 hover:text-ink disabled:cursor-not-allowed disabled:opacity-35"
             >
               Next →
             </button>
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-zinc-500">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-caption text-ink-3">
             <span>Arrow keys step · space plays</span>
             {hasAnimations && (
               <button
@@ -534,19 +535,10 @@ export function ReplayPlayer({
                 role="switch"
                 aria-checked={animationsEnabled}
                 onClick={toggleAnimations}
-                className="inline-flex items-center gap-2 rounded-full border border-zinc-700 px-2.5 py-1.5 font-semibold text-zinc-300 hover:border-zinc-500"
+                className="app-switch"
               >
-                <span
-                  aria-hidden="true"
-                  className={`relative h-4 w-7 rounded-full transition-colors ${
-                    animationsEnabled ? "bg-violet-500" : "bg-zinc-700"
-                  }`}
-                >
-                  <span
-                    className={`absolute left-0 top-0.5 size-3 rounded-full bg-white transition-transform ${
-                      animationsEnabled ? "translate-x-3.5" : "translate-x-0.5"
-                    }`}
-                  />
+                <span aria-hidden="true" className="app-switch-track">
+                  <span className="app-switch-knob" />
                 </span>
                 Animations {animationsEnabled ? "on" : "off"}
               </button>
@@ -556,19 +548,17 @@ export function ReplayPlayer({
       </section>
 
       <aside className="space-y-4">
-        <section className="rounded-xl border border-zinc-800 bg-zinc-900/45 p-4">
+        <section className="rounded-lg border border-rule bg-surface p-4">
           <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
             <div>
-              <p className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-zinc-500">
-                Explosion points
-              </p>
-              <p className="mt-1 font-mono text-lg font-bold tabular-nums text-zinc-50">
+              <p className="label">Explosion points</p>
+              <p className="mt-1 font-mono text-h3 font-semibold tabular-nums text-ink">
                 {cumulativeScore && scoreAggregation === "round" ? "" : "+"}
                 {formatInteger(
                   activeScoreBar?.points ?? explosionPointsForFrame(frame),
                 )}
               </p>
-              <p className="text-[0.65rem] text-zinc-500">
+              <p className="text-caption text-ink-3">
                 {scoreAggregation === "move"
                   ? `move ${frame.move}`
                   : `round ${activeScoreBar?.round ?? 1}${
@@ -577,7 +567,7 @@ export function ReplayPlayer({
               </p>
             </div>
             <div
-              className="inline-flex rounded-lg border border-zinc-700 bg-zinc-950/70 p-0.5 text-[0.65rem] font-bold"
+              className="inline-flex rounded-md border border-rule-strong bg-raised p-0.5 text-caption font-semibold"
               role="group"
               aria-label="Explosion score aggregation"
             >
@@ -585,10 +575,10 @@ export function ReplayPlayer({
                 type="button"
                 aria-pressed={scoreAggregation === "move"}
                 onClick={() => setScoreAggregation("move")}
-                className={`rounded-md px-2.5 py-1.5 transition-colors ${
+                className={`rounded-sm px-2.5 py-1.5 transition-colors motion-reduce:transition-none ${
                   scoreAggregation === "move"
-                    ? "bg-zinc-700 text-zinc-50"
-                    : "text-zinc-500 hover:text-zinc-200"
+                    ? "bg-hover text-ink"
+                    : "text-ink-3 hover:text-ink-1"
                 }`}
               >
                 Each move
@@ -597,10 +587,10 @@ export function ReplayPlayer({
                 type="button"
                 aria-pressed={scoreAggregation === "round"}
                 onClick={() => setScoreAggregation("round")}
-                className={`rounded-md px-2.5 py-1.5 transition-colors ${
+                className={`rounded-sm px-2.5 py-1.5 transition-colors motion-reduce:transition-none ${
                   scoreAggregation === "round"
-                    ? "bg-zinc-700 text-zinc-50"
-                    : "text-zinc-500 hover:text-zinc-200"
+                    ? "bg-hover text-ink"
+                    : "text-ink-3 hover:text-ink-1"
                 }`}
               >
                 By round
@@ -613,7 +603,7 @@ export function ReplayPlayer({
             aggregation={scoreAggregation}
             cumulative={scoreAggregation === "round" && cumulativeScore}
           />
-          <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 text-[0.65rem] text-zinc-500">
+          <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 text-caption text-ink-3">
             <span>Level-rise bonuses excluded · stripes mark 5 moves</span>
             {scoreAggregation === "round" && (
               <button
@@ -621,21 +611,10 @@ export function ReplayPlayer({
                 role="switch"
                 aria-checked={cumulativeScore}
                 onClick={() => setCumulativeScore((current) => !current)}
-                className="inline-flex items-center gap-2 rounded-full border border-zinc-700 px-2.5 py-1.5 font-semibold text-zinc-300 hover:border-zinc-500"
+                className="app-switch"
               >
-                <span
-                  aria-hidden="true"
-                  className={`relative h-4 w-7 rounded-full transition-colors ${
-                    cumulativeScore ? "bg-sky-500" : "bg-zinc-700"
-                  }`}
-                >
-                  <span
-                    className={`absolute left-0 top-0.5 size-3 rounded-full bg-white transition-transform ${
-                      cumulativeScore
-                        ? "translate-x-3.5"
-                        : "translate-x-0.5"
-                    }`}
-                  />
+                <span aria-hidden="true" className="app-switch-track">
+                  <span className="app-switch-knob" />
                 </span>
                 Running total {cumulativeScore ? "on" : "off"}
               </button>
@@ -643,10 +622,8 @@ export function ReplayPlayer({
           </div>
         </section>
 
-        <section className="rounded-xl border border-zinc-800 bg-zinc-900/45 p-4">
-          <p className="mb-3 text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-zinc-500">
-            Move metrics
-          </p>
+        <section className="rounded-lg border border-rule bg-surface p-4">
+          <p className="label mb-3">Move metrics</p>
           <div className="grid grid-cols-2 gap-2.5">
             <Metric label="Score" value={formatInteger(frame.score)} />
             <Metric label="This move" value={`+${formatInteger(frame.scoreDelta)}`} tone="emerald" />
@@ -656,7 +633,7 @@ export function ReplayPlayer({
             <Metric label="Revealed" value={`${frame.revealed} gray`} />
           </div>
           {frame.levelAdvanced && (
-            <p className="mt-2.5 rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-xs font-semibold text-sky-200">
+            <p className="app-level-rise">
               Level rise · +17,000 points
             </p>
           )}
@@ -676,13 +653,11 @@ function Metric({
   tone?: "default" | "emerald";
 }) {
   return (
-    <div className="rounded-lg border border-zinc-800 bg-zinc-950/55 px-3 py-2.5">
-      <p className="text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-zinc-600">
-        {label}
-      </p>
+    <div className="rounded-md border border-rule bg-raised px-3 py-2.5">
+      <p className="label">{label}</p>
       <p
-        className={`mt-0.5 font-mono text-sm font-bold tabular-nums ${
-          tone === "emerald" ? "text-emerald-400" : "text-zinc-100"
+        className={`mt-0.5 font-mono text-small font-semibold tabular-nums ${
+          tone === "emerald" ? "text-status-completed" : "text-ink"
         }`}
       >
         {value}

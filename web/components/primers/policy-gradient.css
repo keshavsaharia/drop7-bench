@@ -1,0 +1,227 @@
+/* Figures for the policy-gradient primer (components/primers/PolicyGradient.tsx).
+   Bars animate by transform only; badges and rings by opacity; label swaps by
+   opacity. The resting state, with animation off, is the two-lever machine
+   after a few pulls (B likelier) with the critic's estimate at 0.45. */
+
+.primer-pg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.primer-pg [data-anim="pg-bar-a"],
+.primer-pg [data-anim="pg-bar-b"] {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: 4.5s ease-in-out infinite;
+}
+.primer-pg [data-anim="pg-bar-a"] {
+  animation-name: pg-bar-a;
+}
+.primer-pg [data-anim="pg-bar-b"] {
+  animation-name: pg-bar-b;
+}
+
+/* Base heights are A = 0.40 and B = 0.60. The loop starts at 50/50, then
+   two payouts of 1 after pulling B move the bars to the base state. */
+@keyframes pg-bar-a {
+  0%,
+  22% {
+    transform: scaleY(1.25);
+  }
+  28%,
+  54% {
+    transform: scaleY(1.125);
+  }
+  60%,
+  96% {
+    transform: scaleY(1);
+  }
+  100% {
+    transform: scaleY(1.25);
+  }
+}
+@keyframes pg-bar-b {
+  0%,
+  22% {
+    transform: scaleY(0.8333);
+  }
+  28%,
+  54% {
+    transform: scaleY(0.9167);
+  }
+  60%,
+  96% {
+    transform: scaleY(1);
+  }
+  100% {
+    transform: scaleY(0.8333);
+  }
+}
+
+.primer-pg [data-anim^="pg-ring-"],
+.primer-pg [data-anim^="pg-badge-"] {
+  animation: 4.5s ease-in-out infinite;
+}
+.primer-pg [data-anim="pg-ring-1"] {
+  animation-name: pg-ring-1;
+}
+.primer-pg [data-anim="pg-badge-1"] {
+  animation-name: pg-badge-1;
+}
+.primer-pg [data-anim="pg-ring-2"] {
+  animation-name: pg-ring-2;
+}
+.primer-pg [data-anim="pg-badge-2"] {
+  animation-name: pg-badge-2;
+}
+.primer-pg [data-anim="pg-ring-3"] {
+  animation-name: pg-ring-3;
+}
+.primer-pg [data-anim="pg-badge-3"] {
+  animation-name: pg-badge-3;
+}
+
+@keyframes pg-ring-1 {
+  0%,
+  9% {
+    opacity: 0;
+  }
+  12%,
+  20% {
+    opacity: 1;
+  }
+  23%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes pg-badge-1 {
+  0%,
+  13% {
+    opacity: 0;
+  }
+  16%,
+  25% {
+    opacity: 1;
+  }
+  28%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes pg-ring-2 {
+  0%,
+  31% {
+    opacity: 0;
+  }
+  34%,
+  42% {
+    opacity: 1;
+  }
+  45%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes pg-badge-2 {
+  0%,
+  35% {
+    opacity: 0;
+  }
+  38%,
+  47% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes pg-ring-3 {
+  0%,
+  45% {
+    opacity: 0;
+  }
+  48%,
+  54% {
+    opacity: 1;
+  }
+  57%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes pg-badge-3 {
+  0%,
+  47% {
+    opacity: 0;
+  }
+  50%,
+  58% {
+    opacity: 1;
+  }
+  61%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* The critic's dashed line drifts from 0.45 toward the running mean 0.50 and
+   back; the two labels swap by opacity. Base: 0.45, first label visible. */
+.primer-pg [data-anim="pg-critic"] {
+  animation: pg-critic 4s ease-in-out infinite;
+}
+.primer-pg [data-anim="pg-critic-label-a"] {
+  animation: pg-critic-label-a 4s ease-in-out infinite;
+}
+.primer-pg [data-anim="pg-critic-label-b"] {
+  animation: pg-critic-label-b 4s ease-in-out infinite;
+}
+@keyframes pg-critic {
+  0%,
+  25% {
+    transform: translateY(0);
+  }
+  50%,
+  75% {
+    transform: translateY(-5.5px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+@keyframes pg-critic-label-a {
+  0%,
+  30% {
+    opacity: 1;
+  }
+  45%,
+  80% {
+    opacity: 0;
+  }
+  95%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes pg-critic-label-b {
+  0%,
+  30% {
+    opacity: 0;
+  }
+  45%,
+  80% {
+    opacity: 1;
+  }
+  95%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primer-pg [data-anim] {
+    animation: none;
+  }
+}

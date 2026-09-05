@@ -1,0 +1,51 @@
+/* lifetime-objective/nnue-evolution card art. The cloud of twelve rises from
+   the warm start in steps — one per generation — while the outer clusters
+   draw in toward the centre, and it settles below the fair leaf. Longer than
+   the standard art beat, because the climb needs its generations to read.
+   Play-state is owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-nnue-evolution {
+  --tart-motion: calc(var(--duration-art, 2400ms) * 1.6);
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-nnue-evolution [data-anim] {
+  animation-duration: var(--tart-duration);
+  animation-timing-function: var(--tart-ease, var(--ease-standard, cubic-bezier(0.2, 0, 0, 1)));
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+.tart--approach-nnue-evolution [data-anim="rise"] { animation-name: tart-approach-nnue-evolution-rise; }
+.tart--approach-nnue-evolution [data-anim="cluster-l"] { animation-name: tart-approach-nnue-evolution-cluster-l; }
+.tart--approach-nnue-evolution [data-anim="cluster-c"] { animation-name: tart-approach-nnue-evolution-cluster-c; }
+.tart--approach-nnue-evolution [data-anim="cluster-r"] { animation-name: tart-approach-nnue-evolution-cluster-r; }
+.tart--approach-nnue-evolution [data-anim="gap"] { animation-name: tart-approach-nnue-evolution-gap; }
+
+/* Four generations, then the population holds where it got to. */
+@keyframes tart-approach-nnue-evolution-rise {
+  0%, 5.26% { transform: translate(0, 0); }
+  14.47%, 19.73% { transform: translate(0, -24px); }
+  28.93%, 34.19% { transform: translate(0, -44px); }
+  43.4%, 48.66% { transform: translate(0, -58px); }
+  56.55%, 100% { transform: translate(0, -68px); }
+}
+@keyframes tart-approach-nnue-evolution-cluster-l {
+  0%, 5.26% { transform: translate(0, 0); }
+  56.55%, 100% { transform: translate(30px, 4px); }
+}
+@keyframes tart-approach-nnue-evolution-cluster-c {
+  0%, 5.26% { transform: translate(0, 0); }
+  56.55%, 100% { transform: translate(2px, -1px); }
+}
+@keyframes tart-approach-nnue-evolution-cluster-r {
+  0%, 5.26% { transform: translate(0, 0); }
+  56.55%, 100% { transform: translate(-28px, -3px); }
+}
+@keyframes tart-approach-nnue-evolution-gap {
+  0%, 49.97% { opacity: 0; }
+  59.18%, 100% { opacity: 1; }
+}

@@ -1,0 +1,119 @@
+---
+title: N-tuple networks
+slug: n-tuple
+summary: "Look at the board through many small windows, look each window's contents up in a table of learned numbers, and add the numbers."
+order: 4
+technique: n-tuple
+approaches: [ntuple-rl, ntuple-rl/optimistic-phase, ntuple-rl/native-suite, ntuple-rl/temporal-coherence, ntuple-rl/phase-blend, ntuple-rl/bellman-ntuple]
+glossary: [n-tuple network, afterstate, sibling extrapolation]
+---
+
+## The idea
+
+A hand-written evaluator needs a person to decide what to count. An
+[n-tuple network](/learn/glossary) replaces the person's short list with a
+very long list of very small questions, and lets play answer them.
+
+The questions are windows: a fixed set of small groups of cells, say four in a
+row. What sits in a window is read as a code, the code picks one slot in a
+table of numbers, and the board's score is the sum of the slots picked by
+every window. Nothing is multiplied. The numbers start at zero and are nudged
+up or down according to how the games they were looked up in turned out. The
+name comes from the n-tuple, a group of n cells; the network is the set of
+tables.
+
+## A small example
+
+Take a strip of five cells. Each cell is empty, red or blue. We want a score
+for any strip.
+
+1. Choose the windows: every pair of neighbouring cells. Five cells give four
+   windows.
+2. Read each window as a code. (empty, red) is one code and (red, red) is
+   another; two cells with three possible contents each give nine codes.
+3. Make one table with nine slots, shared by all four windows, every slot at
+   zero. Learning will fill it.
+4. To score a strip, read each window, look up its slot, and add the four
+   numbers. In the figure the strip red, red, empty, red, red reads as
+   (red, red), (red, empty), (empty, red), (red, red), and with the table
+   shown it scores 3 + 1 + 0 + 3 = 7.
+
+<NTupleStripWindows />
+
+5. To learn, play the strip game. When a game ends well, add a small amount
+   to every slot that was looked up during it; when it ends badly, subtract.
+   A slot that keeps appearing in good games drifts upward.
+
+<NTupleNudge />
+
+6. Notice what generalises. The first and last windows both read (red, red)
+   and both use the same slot, so a pattern learned at one end of the strip
+   is recognised at the other. Notice, too, what cannot be learned: anything
+   that depends on two cells further apart than a window. If red in cell 1
+   with blue in cell 5 is what wins, no pair window ever sees both.
+
+## How it works
+
+The general method scales the strip up without changing it.
+
+Windows are laid over a board in many positions: rows, columns, diagonals,
+small blocks. Each position reads its cells as a code. Windows of the same
+shape share one table, so the number of learned values is the number of
+shapes times the number of codes per shape, whatever the board size. Larger
+windows see more context and have more codes; a window of four cells with ten
+possible contents each has ten thousand.
+
+Evaluation is a lookup and a sum, which makes it very fast. There is no matrix
+multiplication anywhere, so an n-tuple evaluator can sit at the bottom of a
+search tree or score every legal move directly.
+
+Learning follows the outcome or the next board. After a move, compare the
+score the tables gave with what followed, and move every looked-up slot a
+small step toward the difference. When one slot is looked up by several
+windows on the same board, the update has to count it that many times.
+Getting that bookkeeping wrong is a real bug, and one of the pages below found
+it.
+
+## In Drop7
+
+The native implementation on this site reads 92 windows on every board: 28
+rows of four cells, 28 columns of four, and 36 two-by-two blocks, sharing 17
+tables of 10,000 codes each and keyed also by the rise phase and the next disc
+([the learning-from-play concept page](/learn/concepts/learning-from-play)).
+To choose a column it drops the visible disc in each legal column, scores the
+board that results (its [afterstate](/learn/glossary)), and takes the best.
+
+<NTupleDropWindows />
+
+Pages that use it:
+
+- [N-tuple networks and learning from play](/approach/ntuple-rl), the
+  family page.
+- [Fifty million moves, then a two-rise look-ahead](/approach/ntuple-rl/optimistic-phase),
+  the family's largest training run.
+- [The native suite](/approach/ntuple-rl/native-suite), the C++ program
+  that trains the original evaluator and searches with it.
+- [Fixing the learning rule, and conditioning on the rise clock](/approach/ntuple-rl/temporal-coherence),
+  the shared-weight update bug and its fix.
+- [Blending the learned value with the hand-written one](/approach/ntuple-rl/phase-blend).
+- [Learning from every column, not just the one played](/approach/ntuple-rl/bellman-ntuple).
+
+## What it cannot do
+
+The family's largest run trained for exactly 50 million transitions and was
+then opened on its burned 64-game gate. The direct n-tuple policy averaged
+181,733.422 points and 56.359 moves, and a two-rise search built on top of it
+did worse, at 113,643.969 points and 37.375 moves, against an absolute gate
+of 300,000 points and 90 moves
+([Fifty million moves, then a two-rise look-ahead](/approach/ntuple-rl/optimistic-phase);
+the figures are also on the [family page](/approach/ntuple-rl) and the
+[learning-from-play concept page](/learn/concepts/learning-from-play)).
+
+The family page's own conclusion is that the representation was never the
+bottleneck. More capacity, more training and better-conditioned updates did
+not fix these policies; a real update bug was found and corrected, and the
+corrected policy still failed. The bottleneck was which moves the data
+covered. Almost every program learned from the move it actually played, then,
+at play time, was asked to rank up to seven columns it had never been scored
+on. That is the [sibling trap](/learn/concepts/ranking-siblings), and it
+applies to any evaluator trained this way, windows or not.

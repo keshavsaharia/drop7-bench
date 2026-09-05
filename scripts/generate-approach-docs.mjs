@@ -157,7 +157,7 @@ function main() {
       body.push(
         "## Where to look next",
         "",
-        `- The [${family} family page](/approaches/${family}) for the idea in plain language.`,
+        `- The [${family} family page](/approach/${family}) for the idea in plain language.`,
         "- The [experiment index](/docs/research/experiment-index) and [full ledger](/docs/research/history) for the recorded evidence.",
         "- The [concepts primer](/learn/concepts) for the search and learning ideas this approach uses.",
         "",

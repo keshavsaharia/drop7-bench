@@ -18,15 +18,15 @@ import { CellGlyph } from "./Board";
 import { MiniBoard } from "./Engine";
 import { TreeExplorer } from "./TreeExplorer";
 
-const INK = "#fafafa";
-const INK_2 = "#a1a1aa";
-const INK_3 = "#71717a";
-const GRID = "#27272a";
-const BLUE = "#3987e5";
-const ORANGE = "#d95926";
-const AQUA = "#199e70";
-const ACCENT = "#facc15";
-const FONT = "system-ui, -apple-system, 'Segoe UI', sans-serif";
+const INK = "var(--color-ink)";
+const INK_2 = "var(--color-ink-2)";
+const INK_3 = "var(--color-ink-3)";
+const GRID = "var(--color-rule)";
+const BLUE = "var(--color-series-1)";
+const ORANGE = "var(--color-series-2)";
+const AQUA = "var(--color-series-3)";
+const ACCENT = "var(--color-highlight)";
+const FONT = "var(--font-sans)";
 
 interface Reply { column: number; points: number; board: string; waves: number }
 interface Branch { disc: number; replies: Reply[]; best: Reply | null }
@@ -202,7 +202,7 @@ export function ChanceNode({
                 <text x={0} y={20 + 7 * t + 14} fontSize={10.5} fontFamily={FONT} fill={INK_2}>
                   reply: column {b.best ? b.best.column + 1 : "—"}
                 </text>
-                <rect x={0} y={20 + 7 * t + 22} width={barW} height={8} rx={3} fill="#1f1f23" />
+                <rect x={0} y={20 + 7 * t + 22} width={barW} height={8} rx={3} fill="var(--color-hover)" />
                 <rect x={0} y={20 + 7 * t + 22} width={(p / max) * barW} height={8} rx={3} fill={BLUE} />
                 <text x={0} y={20 + 7 * t + 44} fontSize={12} fontFamily={FONT} fontWeight={700} fill={INK}>
                   +{fmt(p)}
@@ -280,7 +280,7 @@ export function ChanceStyles({ caption }: { caption?: string }) {
           const pick = tree.choice[st.key];
           return (
             <g key={st.key} transform={`translate(${si * (panelW + 12)} 0)`}>
-              <rect width={panelW} height={panelH} rx={10} fill="#18181b" stroke={GRID} />
+              <rect width={panelW} height={panelH} rx={10} fill="var(--color-raised)" stroke={GRID} />
               <text x={10} y={18} fontSize={12.5} fontFamily={FONT} fontWeight={700} fill={INK}>
                 {st.title}
               </text>
