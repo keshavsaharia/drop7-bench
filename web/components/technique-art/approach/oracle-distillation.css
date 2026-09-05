@@ -1,0 +1,42 @@
+/* oracle-curriculum/oracle-distillation card art. The teacher's labels slide
+   into the net, the net emits a column, and the cross lands on the student's
+   board. Only transform and opacity animate; play-state is owned by the
+   shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-oracle-distillation {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-oracle-distillation [data-anim] {
+  animation-duration: var(--tart-duration);
+  animation-timing-function: var(--tart-ease, var(--ease-standard, cubic-bezier(0.2, 0, 0, 1)));
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+.tart--approach-oracle-distillation [data-anim="tags"] { animation-name: tart-approach-oracle-distillation-tags; }
+.tart--approach-oracle-distillation [data-anim="pick"] { animation-name: tart-approach-oracle-distillation-pick; }
+.tart--approach-oracle-distillation [data-anim="cross"] { animation-name: tart-approach-oracle-distillation-cross; }
+.tart--approach-oracle-distillation [data-anim="caption"] { animation-name: tart-approach-oracle-distillation-caption; }
+
+@keyframes tart-approach-oracle-distillation-tags {
+  0% { transform: translate(-56px, 0); opacity: 0; }
+  6.55% { opacity: 1; }
+  25.09% { transform: translate(40px, 0); opacity: 1; }
+  30.55%, 100% { transform: translate(44px, 0); opacity: 0; }
+}
+@keyframes tart-approach-oracle-distillation-pick {
+  0%, 28.36% { opacity: 0; transform: translate(-10px, 0); }
+  36%, 100% { opacity: 1; transform: translate(0, 0); }
+}
+@keyframes tart-approach-oracle-distillation-cross {
+  0%, 38.18% { opacity: 0; }
+  44.73%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-oracle-distillation-caption {
+  0%, 42.55% { opacity: 0; }
+  49.09%, 100% { opacity: 1; }
+}

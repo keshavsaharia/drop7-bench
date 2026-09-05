@@ -5,6 +5,8 @@ summary: Give the weight search a larger phase-aware evaluator and optimise comp
 status: rejected
 evidence: ledger-recorded
 reads: public
+kind: strategy
+technique: evolution
 ---
 
 Give the weight search a bigger, phase-aware evaluator and let it optimise
@@ -22,7 +24,7 @@ Each candidate weight vector is judged by **playing complete games to the end**
 on shared seeds, and by nothing else.
 
 Two design choices make it more than a bigger version of the earlier
-[evolution](/approaches/heuristic-search/evolution) work:
+[evolution](/approach/heuristic-search/evolution) work:
 
 - **Phase blocks.** The five positions in a rise cycle get *independent*
   weights. A board four drops from a [rise](/learn/glossary) and the same

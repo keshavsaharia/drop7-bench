@@ -1,0 +1,63 @@
+/* Motion for the expectimax primer figures (web/components/primers/Expectimax.tsx).
+   The finished tree is always drawn; the animation is a highlight that walks
+   from the leaves to the root. Only opacity animates. */
+
+.primer-expectimax svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.primer-expectimax [data-anim] {
+  opacity: 0;
+  animation-duration: 4s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.primer-expectimax [data-anim="leaves"] {
+  animation-name: primer-expectimax-leaves;
+}
+
+.primer-expectimax [data-anim="circle"] {
+  animation-name: primer-expectimax-circle;
+}
+
+.primer-expectimax [data-anim="root"] {
+  animation-name: primer-expectimax-root;
+}
+
+@keyframes primer-expectimax-leaves {
+  0% { opacity: 0; }
+  6% { opacity: 1; }
+  28% { opacity: 1; }
+  34% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+@keyframes primer-expectimax-circle {
+  0%, 30% { opacity: 0; }
+  36% { opacity: 1; }
+  60% { opacity: 1; }
+  66% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+@keyframes primer-expectimax-root {
+  0%, 62% { opacity: 0; }
+  68% { opacity: 1; }
+  96% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Resting frame: the root's decision and the chosen branch, no sweep. */
+@media (prefers-reduced-motion: reduce) {
+  .primer-expectimax [data-anim] {
+    animation: none;
+    opacity: 0;
+  }
+
+  .primer-expectimax [data-anim="root"] {
+    opacity: 1;
+  }
+}

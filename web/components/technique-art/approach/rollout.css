@@ -1,0 +1,63 @@
+/* heuristic-search/rollout card art. The three tries appear on the board, the
+   rehearsals draw out across the five rises (the ones that die stop sooner and
+   take a cross), and the two lanes that lost dim while the surviving lane and
+   its column stay lit. Play-state is owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-rollout {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-rollout [data-anim="rest"] {
+  animation-name: tart-approach-rollout-rest;
+}
+.tart--approach-rollout [data-anim="best"] {
+  animation-name: tart-approach-rollout-best;
+}
+.tart--approach-rollout .run-full {
+  animation-name: tart-approach-rollout-run-full;
+}
+.tart--approach-rollout .run-early {
+  animation-name: tart-approach-rollout-run-early;
+}
+.tart--approach-rollout [data-anim="died"] {
+  animation-name: tart-approach-rollout-died;
+}
+.tart--approach-rollout [data-anim="alive"] {
+  animation-name: tart-approach-rollout-alive;
+}
+.tart--approach-rollout [data-anim="caption"] {
+  animation-name: tart-approach-rollout-caption;
+}
+
+@keyframes tart-approach-rollout-rest {
+  0%, 3.27% { opacity: 0; }
+  8.73%, 36% { opacity: 1; }
+  43.64%, 100% { opacity: 0.42; }
+}
+@keyframes tart-approach-rollout-best {
+  0%, 3.27% { opacity: 0; }
+  8.73%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-rollout-run-full {
+  0%, 7.64% { stroke-dashoffset: 1; }
+  33.82%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes tart-approach-rollout-run-early {
+  0%, 7.64% { stroke-dashoffset: 1; }
+  20.73%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes tart-approach-rollout-died {
+  0%, 20.73% { opacity: 0; }
+  25.09%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-rollout-alive {
+  0%, 33.82% { opacity: 0; }
+  38.18%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-rollout-caption {
+  0%, 45.82% { opacity: 0; }
+  51.27%, 100% { opacity: 1; }
+}

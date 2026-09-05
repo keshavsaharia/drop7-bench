@@ -1,0 +1,63 @@
+/* value-policy-learning/phase-distillation card art. The search deepens
+   through its five chance strata, then forks: one branch reaches the student
+   that copies the chosen column, the other the student that copies the value.
+   The resting frame keeps both forks and both answers. Play-state, duration
+   and easing are owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-phase-distillation {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+/* The value bar fills from its left edge. */
+.tart--approach-phase-distillation .value {
+  transform-box: fill-box;
+  transform-origin: left;
+}
+
+.tart--approach-phase-distillation [data-anim="search"] {
+  animation-name: tart-approach-phase-distillation-search;
+}
+.tart--approach-phase-distillation [data-anim="fork-top"] {
+  animation-name: tart-approach-phase-distillation-fork-top;
+}
+.tart--approach-phase-distillation [data-anim="fork-bottom"] {
+  animation-name: tart-approach-phase-distillation-fork-bottom;
+}
+.tart--approach-phase-distillation [data-anim="column"] {
+  animation-name: tart-approach-phase-distillation-column;
+}
+.tart--approach-phase-distillation [data-anim="value"] {
+  animation-name: tart-approach-phase-distillation-value;
+}
+.tart--approach-phase-distillation [data-anim="caption"] {
+  animation-name: tart-approach-phase-distillation-caption;
+}
+
+@keyframes tart-approach-phase-distillation-search {
+  0%, 1.09% { opacity: 0; }
+  13.09%, 100% { opacity: 1; }
+}
+/* 100 covers each fork and its arrowhead. */
+@keyframes tart-approach-phase-distillation-fork-top {
+  0%, 14.18% { stroke-dashoffset: 100; }
+  27.27%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes tart-approach-phase-distillation-fork-bottom {
+  0%, 17.45% { stroke-dashoffset: 100; }
+  30.55%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes tart-approach-phase-distillation-column {
+  0%, 29.45% { opacity: 0; }
+  36%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-phase-distillation-value {
+  0%, 32.73% { transform: scaleX(0); }
+  44.73%, 100% { transform: scaleX(1); }
+}
+@keyframes tart-approach-phase-distillation-caption {
+  0%, 45.82% { opacity: 0; }
+  51.27%, 100% { opacity: 1; }
+}

@@ -5,6 +5,8 @@ summary: Judge each column by survival over thirty-one shared futures of one hun
 status: rejected
 evidence: task-record only
 reads: public
+kind: strategy
+technique: rollout-policy-iteration
 ---
 
 Judge each column by how long the game survives afterwards: thirty-one shared
@@ -82,7 +84,7 @@ time.
 ## What this taught us, and what is still open
 
 - **A rollout inherits the judgement of its continuation policy.** This is the
-  same conclusion the [tree search](/approaches/tree-search) family reached from
+  same conclusion the [tree search](/approach/tree-search) family reached from
   the opposite direction, where scaling a search with a myopic playout made
   long-horizon ranking worse.
 - **Still open:** the same measurement with a stronger continuation — the

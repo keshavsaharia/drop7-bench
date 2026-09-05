@@ -1,0 +1,44 @@
+/* Afterstate card art. The disc drops, the middle board is ringed and gets its
+   value badge, the unknown next disc appears over the third board, and the
+   ring stays. Only transform and opacity animate; play-state is owned by the
+   shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--afterstate {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+:where(.tart--afterstate) .tart-final {
+  opacity: 0;
+}
+
+.tart--afterstate [data-anim] {
+  animation-duration: var(--tart-duration);
+  animation-timing-function: var(--ease-standard, cubic-bezier(0.2, 0, 0, 1));
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+.tart--afterstate .drop { animation-name: tart-afterstate-drop; }
+.tart--afterstate .ring { animation-name: tart-afterstate-ring; }
+.tart--afterstate .badge { animation-name: tart-afterstate-badge; }
+.tart--afterstate .next { animation-name: tart-afterstate-next; }
+
+@keyframes tart-afterstate-drop {
+  0%, 3.27% { transform: translate(0, -58px); }
+  12%, 100% { transform: translate(0, 0); }
+}
+@keyframes tart-afterstate-ring {
+  0%, 14.18% { opacity: 0; }
+  17.45%, 100% { opacity: 1; }
+}
+@keyframes tart-afterstate-badge {
+  0%, 19.64% { opacity: 0; }
+  22.91%, 100% { opacity: 1; }
+}
+@keyframes tart-afterstate-next {
+  0%, 27.27% { opacity: 0; }
+  30.55%, 100% { opacity: 1; }
+}

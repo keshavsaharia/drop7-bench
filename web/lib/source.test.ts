@@ -29,7 +29,7 @@ test("reads nested approach code through its natural repository path", () => {
   assert.equal(source?.kind, "file");
   if (source?.kind !== "file") return;
   assert.equal(source.language, "cpp");
-  assert.equal(source.href, "/approaches/d4-long-outcome/rollout-veto/d4-d2-rollout-veto.cpp");
+  assert.equal(source.href, "/approach/d4-long-outcome/rollout-veto/d4-d2-rollout-veto.cpp");
 });
 
 test("rejects paths outside the two published source roots", () => {

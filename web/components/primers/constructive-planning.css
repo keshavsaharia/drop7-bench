@@ -1,0 +1,166 @@
+/*
+ * Motion for the constructive-planning primer figures
+ * (components/primers/ConstructivePlanning.tsx).
+ *
+ * Base styles describe the explanatory final state; keyframes start from the
+ * "before" state and end where they began so the loop is continuous. Under
+ * prefers-reduced-motion the animation is removed and the base styles show.
+ * Only transform, opacity and stroke-dashoffset change.
+ */
+.fig--cp [data-anim] {
+  animation-duration: 7s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+/* ---- Domino toy ------------------------------------------------------ */
+
+.fig--cp [data-anim^="cp-dom-"] {
+  transform-box: fill-box;
+  transform-origin: 100% 100%;
+  transform: rotate(78deg);
+  opacity: 1;
+}
+.fig--cp [data-anim="cp-dom-1"] { animation-name: cp-dom-1; }
+.fig--cp [data-anim="cp-dom-2"] { animation-name: cp-dom-2; }
+.fig--cp [data-anim="cp-dom-3"] { animation-name: cp-dom-3; }
+.fig--cp [data-anim="cp-dom-4"] { animation-name: cp-dom-4; }
+.fig--cp [data-anim="cp-dom-5"] { animation-name: cp-dom-5; }
+
+@keyframes cp-dom-1 {
+  0%, 6% { opacity: 0; transform: rotate(0deg); }
+  7%, 58% { opacity: 1; transform: rotate(0deg); }
+  62%, 96% { opacity: 1; transform: rotate(78deg); }
+  100% { opacity: 0; transform: rotate(78deg); }
+}
+@keyframes cp-dom-2 {
+  0%, 14% { opacity: 0; transform: rotate(0deg); }
+  15%, 63% { opacity: 1; transform: rotate(0deg); }
+  67%, 96% { opacity: 1; transform: rotate(78deg); }
+  100% { opacity: 0; transform: rotate(78deg); }
+}
+@keyframes cp-dom-3 {
+  0%, 22% { opacity: 0; transform: rotate(0deg); }
+  23%, 68% { opacity: 1; transform: rotate(0deg); }
+  72%, 96% { opacity: 1; transform: rotate(78deg); }
+  100% { opacity: 0; transform: rotate(78deg); }
+}
+@keyframes cp-dom-4 {
+  0%, 30% { opacity: 0; transform: rotate(0deg); }
+  31%, 73% { opacity: 1; transform: rotate(0deg); }
+  77%, 96% { opacity: 1; transform: rotate(78deg); }
+  100% { opacity: 0; transform: rotate(78deg); }
+}
+@keyframes cp-dom-5 {
+  0%, 38% { opacity: 0; transform: rotate(0deg); }
+  39%, 78% { opacity: 1; transform: rotate(0deg); }
+  82%, 96% { opacity: 1; transform: rotate(78deg); }
+  100% { opacity: 0; transform: rotate(78deg); }
+}
+
+.fig--cp [data-anim="cp-tip"] {
+  animation-name: cp-tip;
+  opacity: 1;
+  transform: translateX(0);
+}
+@keyframes cp-tip {
+  0%, 50% { opacity: 0; transform: translateX(-10px); }
+  55%, 96% { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0; transform: translateX(0); }
+}
+
+.fig--cp [data-anim="cp-pay"] {
+  animation-name: cp-pay;
+  opacity: 1;
+}
+@keyframes cp-pay {
+  0%, 82% { opacity: 0; }
+  86%, 96% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ---- The rise as trigger --------------------------------------------- */
+
+.fig--cp [data-anim="cp-shift"] {
+  animation-name: cp-shift;
+  transform: translateY(-22px);
+  opacity: 1;
+}
+@keyframes cp-shift {
+  0%, 28% { transform: translateY(0); opacity: 1; }
+  40%, 92% { transform: translateY(-22px); opacity: 1; }
+  95% { transform: translateY(-22px); opacity: 0; }
+  96% { transform: translateY(0); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.fig--cp [data-anim="cp-six"] {
+  animation-name: cp-six;
+  opacity: 0;
+}
+@keyframes cp-six {
+  0%, 48% { opacity: 1; }
+  51% { opacity: 0.25; }
+  54% { opacity: 1; }
+  57% { opacity: 0.25; }
+  60% { opacity: 1; }
+  66%, 95% { opacity: 0; }
+  96%, 100% { opacity: 1; }
+}
+
+.fig--cp [data-anim="cp-gray-solid"] {
+  animation-name: cp-gray-solid;
+  opacity: 0;
+}
+@keyframes cp-gray-solid {
+  0%, 62% { opacity: 1; }
+  68%, 95% { opacity: 0; }
+  96%, 100% { opacity: 1; }
+}
+
+.fig--cp [data-anim="cp-gray-cracked"] {
+  animation-name: cp-gray-cracked;
+  opacity: 1;
+}
+@keyframes cp-gray-cracked {
+  0%, 62% { opacity: 0; }
+  68%, 95% { opacity: 1; }
+  96%, 100% { opacity: 0; }
+}
+
+.fig--cp [data-anim="cp-newrow"] {
+  animation-name: cp-newrow;
+  opacity: 1;
+  transform: translateY(0);
+}
+@keyframes cp-newrow {
+  0%, 28% { opacity: 0; transform: translateY(22px); }
+  40%, 92% { opacity: 1; transform: translateY(0); }
+  95%, 100% { opacity: 0; transform: translateY(0); }
+}
+
+.fig--cp [data-anim="cp-run6"] {
+  animation-name: cp-run6;
+  opacity: 0;
+}
+@keyframes cp-run6 {
+  0%, 42% { opacity: 0; }
+  46%, 62% { opacity: 1; }
+  66%, 100% { opacity: 0; }
+}
+
+.fig--cp [data-anim="cp-flash"] {
+  animation-name: cp-flash;
+  opacity: 0;
+}
+@keyframes cp-flash {
+  0%, 47% { opacity: 0; }
+  50%, 60% { opacity: 1; }
+  64%, 100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fig--cp [data-anim] {
+    animation: none !important;
+  }
+}

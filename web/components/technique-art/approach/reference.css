@@ -1,0 +1,49 @@
+/* fair-expectimax/reference card art. The fan fills a level at a time, then
+   the chosen root edge lights and the rest of the tree dims. Only opacity
+   animates here; play-state is owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-reference {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-reference [data-anim] {
+  animation-duration: var(--tart-duration);
+  animation-timing-function: var(--tart-ease, var(--ease-standard, cubic-bezier(0.2, 0, 0, 1)));
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+.tart--approach-reference [data-anim="lv1"] { animation-name: tart-approach-reference-lv1; }
+.tart--approach-reference [data-anim="lv2"] { animation-name: tart-approach-reference-lv2; }
+.tart--approach-reference [data-anim="lv3"] { animation-name: tart-approach-reference-lv3; }
+.tart--approach-reference [data-anim="dim"] { animation-name: tart-approach-reference-dim; }
+.tart--approach-reference [data-anim="choice"] { animation-name: tart-approach-reference-choice; }
+.tart--approach-reference [data-anim="caption"] { animation-name: tart-approach-reference-caption; }
+
+@keyframes tart-approach-reference-lv1 {
+  0% { opacity: 0; }
+  8.73%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-reference-lv2 {
+  0%, 7.64% { opacity: 0; }
+  17.45%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-reference-lv3 {
+  0%, 16.36% { opacity: 0; }
+  27.27%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-reference-dim {
+  0%, 32.73% { opacity: 1; }
+  41.45%, 100% { opacity: 0.3; }
+}
+@keyframes tart-approach-reference-choice {
+  0%, 33.82% { opacity: 0; }
+  42.55%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-reference-caption {
+  0%, 38.18% { opacity: 0; }
+  46.91%, 100% { opacity: 1; }
+}

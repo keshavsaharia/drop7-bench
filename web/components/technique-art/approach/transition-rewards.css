@@ -1,0 +1,86 @@
+/* fair-expectimax/transition-rewards card art. A 5 drops into the fifth
+   column; three 5s clear at +7 and hit the gray once, so it cracks; the two
+   4s above fall into the gap and clear at +39, hitting the cracked gray a
+   second time so its number opens. The two ledger dots light as the search is
+   paid for each event. Play-state is owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-transition-rewards {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-transition-rewards [data-anim] {
+  animation-duration: var(--tart-duration);
+  animation-timing-function: var(--tart-ease, var(--ease-standard, cubic-bezier(0.2, 0, 0, 1)));
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+.tart--approach-transition-rewards [data-anim="drop"] { animation-name: tart-approach-transition-rewards-drop; }
+.tart--approach-transition-rewards [data-anim="wave-one"] { animation-name: tart-approach-transition-rewards-wave-one; }
+.tart--approach-transition-rewards [data-anim="wave-two"] { animation-name: tart-approach-transition-rewards-wave-two; }
+.tart--approach-transition-rewards [data-anim="fall"] { animation-name: tart-approach-transition-rewards-fall; }
+.tart--approach-transition-rewards [data-anim="score-one"] { animation-name: tart-approach-transition-rewards-score-one; }
+.tart--approach-transition-rewards [data-anim="score-two"] { animation-name: tart-approach-transition-rewards-score-two; }
+.tart--approach-transition-rewards [data-anim="gray-solid"] { animation-name: tart-approach-transition-rewards-gray-solid; }
+.tart--approach-transition-rewards [data-anim="gray-cracked"] { animation-name: tart-approach-transition-rewards-gray-cracked; }
+.tart--approach-transition-rewards [data-anim="opened"] { animation-name: tart-approach-transition-rewards-opened; }
+.tart--approach-transition-rewards [data-anim="pay-clear"] { animation-name: tart-approach-transition-rewards-pay-clear; }
+.tart--approach-transition-rewards [data-anim="pay-reveal"] { animation-name: tart-approach-transition-rewards-pay-reveal; }
+
+/* Doubled class so the fall of a dropped disc keeps its own easing whichever
+   way round art.css and this file are bundled. */
+.tart.tart--approach-transition-rewards [data-anim="drop"],
+.tart.tart--approach-transition-rewards [data-anim="fall"] {
+  animation-timing-function: var(--ease-drop, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+@keyframes tart-approach-transition-rewards-drop {
+  0% { transform: translateY(-126px); }
+  7.64%, 100% { transform: translateY(0); }
+}
+@keyframes tart-approach-transition-rewards-wave-one {
+  0%, 10.91% { opacity: 1; }
+  14.18%, 100% { opacity: 0; }
+}
+@keyframes tart-approach-transition-rewards-score-one {
+  0%, 10.91% { opacity: 0; transform: translateY(4px); }
+  14.18%, 18.55% { opacity: 1; transform: translateY(-6px); }
+  21.82%, 100% { opacity: 0; transform: translateY(-10px); }
+}
+@keyframes tart-approach-transition-rewards-gray-solid {
+  0%, 12% { opacity: 1; }
+  14.18%, 100% { opacity: 0; }
+}
+@keyframes tart-approach-transition-rewards-gray-cracked {
+  0%, 12% { opacity: 0; }
+  14.18%, 32.73% { opacity: 1; }
+  36%, 100% { opacity: 0; }
+}
+@keyframes tart-approach-transition-rewards-pay-clear {
+  0%, 12% { opacity: 0; }
+  16.36%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-transition-rewards-fall {
+  0%, 21.82% { transform: translateY(0); }
+  27.27%, 100% { transform: translateY(18px); }
+}
+@keyframes tart-approach-transition-rewards-wave-two {
+  0%, 31.64% { opacity: 1; }
+  34.91%, 100% { opacity: 0; }
+}
+@keyframes tart-approach-transition-rewards-score-two {
+  0%, 30.55% { opacity: 0; transform: translateY(4px); }
+  34.91%, 42.55% { opacity: 1; transform: translateY(-10px); }
+  46.91%, 100% { opacity: 0; transform: translateY(-14px); }
+}
+@keyframes tart-approach-transition-rewards-opened {
+  0%, 33.82% { opacity: 0; }
+  38.18%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-transition-rewards-pay-reveal {
+  0%, 33.82% { opacity: 0; }
+  38.18%, 100% { opacity: 1; }
+}

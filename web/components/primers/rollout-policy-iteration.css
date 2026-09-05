@@ -1,0 +1,113 @@
+/* Motion for the rollouts and policy iteration primer figures
+   (web/components/primers/RolloutPolicyIteration.tsx).
+   Every figure is drawn complete at its first frame: the walks are already
+   traced and the bars already filled. The animation replays the race (a
+   stroke-dashoffset sweep), refills the bars (a transform), steps a shared
+   playhead across the gust tapes, and swaps two positions by opacity. Only
+   transform, opacity and stroke-dashoffset animate; no text animates. */
+
+.primer-rollout svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.primer-rollout [data-anim] {
+  animation-duration: 4s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.primer-rollout [data-anim="race"] {
+  animation-name: primer-rollout-race;
+}
+
+.primer-rollout [data-anim="mark"] {
+  animation-name: primer-rollout-mark;
+}
+
+.primer-rollout [data-anim="bar"] {
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation-name: primer-rollout-bar;
+  animation-timing-function: ease-out;
+}
+
+.primer-rollout [data-anim="playhead"] {
+  animation-name: primer-rollout-playhead;
+  animation-timing-function: steps(8, end);
+}
+
+.primer-rollout [data-anim="pos-a"] {
+  animation-name: primer-rollout-pos-a;
+  animation-duration: 5s;
+  animation-timing-function: ease-in-out;
+}
+
+.primer-rollout [data-anim="pos-b"] {
+  opacity: 0;
+  animation-name: primer-rollout-pos-b;
+  animation-duration: 5s;
+  animation-timing-function: ease-in-out;
+}
+
+@keyframes primer-rollout-race {
+  0%, 12% { stroke-dashoffset: 0; }
+  14% { stroke-dashoffset: 1; }
+  70%, 100% { stroke-dashoffset: 0; }
+}
+
+@keyframes primer-rollout-mark {
+  0%, 12% { opacity: 1; }
+  14%, 62% { opacity: 0; }
+  72%, 100% { opacity: 1; }
+}
+
+@keyframes primer-rollout-bar {
+  0%, 12% { transform: scaleX(1); }
+  14%, 66% { transform: scaleX(0); }
+  86%, 100% { transform: scaleX(1); }
+}
+
+@keyframes primer-rollout-playhead {
+  from { transform: translateX(0); }
+  to { transform: translateX(224px); }
+}
+
+@keyframes primer-rollout-pos-a {
+  0%, 42% { opacity: 1; }
+  50%, 92% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes primer-rollout-pos-b {
+  0%, 42% { opacity: 0; }
+  50%, 92% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primer-rollout [data-anim] {
+    animation: none !important;
+  }
+  /* Resting frames: walks traced, bars full, the first turn of the tape
+     highlighted, and the flag-up position with its switch showing. */
+  .primer-rollout [data-anim="race"] {
+    stroke-dashoffset: 0;
+  }
+  .primer-rollout [data-anim="mark"] {
+    opacity: 1;
+  }
+  .primer-rollout [data-anim="bar"] {
+    transform: scaleX(1);
+  }
+  .primer-rollout [data-anim="playhead"] {
+    transform: translateX(0);
+  }
+  .primer-rollout [data-anim="pos-a"] {
+    opacity: 1;
+  }
+  .primer-rollout [data-anim="pos-b"] {
+    opacity: 0;
+  }
+}

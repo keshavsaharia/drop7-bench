@@ -1,0 +1,50 @@
+/* lifetime-objective/learned-leaf card art. In every leaf the hand-made
+   formula slides half out of the box and the hourglass slides half in, and
+   the root value changes once the blend has taken. The nested <svg> around
+   each pair does the clipping. Play-state is owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-learned-leaf {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-learned-leaf [data-anim] {
+  animation-duration: var(--tart-duration);
+  animation-timing-function: var(--tart-ease, var(--ease-standard, cubic-bezier(0.2, 0, 0, 1)));
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+.tart--approach-learned-leaf [data-anim="formula"] { animation-name: tart-approach-learned-leaf-formula; }
+.tart--approach-learned-leaf [data-anim="glass"] { animation-name: tart-approach-learned-leaf-glass; }
+.tart--approach-learned-leaf [data-anim="value-a"] { animation-name: tart-approach-learned-leaf-value-a; }
+.tart--approach-learned-leaf [data-anim="value-b"] { animation-name: tart-approach-learned-leaf-value-b; }
+.tart--approach-learned-leaf [data-anim="caption-a"] { animation-name: tart-approach-learned-leaf-caption-a; }
+.tart--approach-learned-leaf [data-anim="caption-b"] { animation-name: tart-approach-learned-leaf-caption-b; }
+
+@keyframes tart-approach-learned-leaf-formula {
+  0%, 8.73% { transform: translate(0, 0); }
+  30.55%, 100% { transform: translate(-15px, 0); }
+}
+@keyframes tart-approach-learned-leaf-glass {
+  0%, 8.73% { transform: translate(34px, 0); }
+  30.55%, 100% { transform: translate(15px, 0); }
+}
+@keyframes tart-approach-learned-leaf-value-a {
+  0%, 31.64% { opacity: 1; }
+  38.18%, 100% { opacity: 0; }
+}
+@keyframes tart-approach-learned-leaf-value-b {
+  0%, 32.73% { opacity: 0; }
+  39.27%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-learned-leaf-caption-a {
+  0%, 5.45% { opacity: 1; }
+  13.09%, 100% { opacity: 0; }
+}
+@keyframes tart-approach-learned-leaf-caption-b {
+  0%, 33.82% { opacity: 0; }
+  42.55%, 100% { opacity: 1; }
+}

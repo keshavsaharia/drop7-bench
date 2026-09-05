@@ -5,6 +5,8 @@ summary: Keeps the four-move search in charge unless a long simulation favors it
 status: rejected
 evidence: task-record only
 reads: public
+kind: strategy
+technique: rollout-policy-iteration
 ---
 
 A safety-first way to use the family's structural planner: never let it choose
@@ -16,7 +18,7 @@ imagined futures agree.
 ## The intuition
 
 By this point in the research the pattern was established: the
-[constructive planner](/approaches/constructive-reservoir/constructive-spectrum)
+[constructive planner](/approach/constructive-reservoir/constructive-spectrum)
 knows something about long-term structure, and letting it override the
 four-move search damages the search. The natural response is not to abandon the
 signal but to make the override rare and expensive to earn.
@@ -28,7 +30,7 @@ generated from independent random streams. A conclusion that appears on one
 panel and not the other is exactly the kind of noise that made earlier
 overrides unstable, and the two-panel rule is designed to catch it.
 
-The word "terminal" here means the simulation runs to the end of the game (or a
+*Terminal* here means the simulation runs to the end of the game (or a
 long horizon) and cares about *when the game ends*, rather than about points
 collected in the next few moves.
 
@@ -87,7 +89,7 @@ upper bound on downside, ratios of 1.10 on the fitting quartet with 3 joint
 wins and 1.05 on the screen with 5 joint wins.
 
 Note the size of the fitting stage: **four paired games**. Those same four
-seeds are the ones the [D4 flow audit](/approaches/baselines-diagnostics/d4-flow)
+seeds are the ones the [D4 flow audit](/approach/baselines-diagnostics/d4-flow)
 is licensed to replay. A four-game aggregate can show that a candidate is not
 promising; it cannot establish by how much.
 

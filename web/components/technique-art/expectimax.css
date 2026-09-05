@@ -1,0 +1,60 @@
+/* Expectimax card art: values fill in from the leaves up, then the root keeps the best average. */
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--expectimax {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--expectimax [data-anim="leaf-values"] {
+  animation-name: tart-expectimax-leaf-values;
+}
+.tart--expectimax [data-anim="node-values"] {
+  animation-name: tart-expectimax-node-values;
+}
+.tart--expectimax [data-anim="choice"] {
+  animation-name: tart-expectimax-choice;
+}
+.tart--expectimax [data-anim="losers"] {
+  animation-name: tart-expectimax-losers;
+}
+
+@keyframes tart-expectimax-leaf-values {
+  0% {
+    opacity: 0;
+  }
+  12%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-expectimax-node-values {
+  0%,
+  16.36% {
+    opacity: 0;
+  }
+  26.18%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-expectimax-choice {
+  0%,
+  30.55% {
+    opacity: 0;
+  }
+  39.27%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-expectimax-losers {
+  0%,
+  30.55% {
+    opacity: 1;
+  }
+  39.27%,
+  100% {
+    opacity: 0.3;
+  }
+}

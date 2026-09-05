@@ -1,0 +1,186 @@
+/* d4-long-outcome/h200-sibling-nnue card art. The fan draws from the root to
+   its seven siblings, all of them resting on the depth-4 line because the
+   residual is initialised to zero; then training pushes each one off the line
+   by its own amount and the highlighted pick moves to another column.
+   Play-state is owned by the shared art.css; only names belong here. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-h200-sibling-nnue {
+  --tart-motion: calc(var(--duration-art, 2400ms) * 1.25);
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-h200-sibling-nnue [data-anim] {
+  animation-duration: var(--tart-duration);
+}
+
+.tart--approach-h200-sibling-nnue [data-anim="fan"] {
+  animation-name: tart-approach-h200-sibling-nnue-fan;
+}
+.tart--approach-h200-sibling-nnue [data-anim="sib-0"] {
+  animation-name: tart-approach-h200-sibling-nnue-sib-0;
+}
+.tart--approach-h200-sibling-nnue [data-anim="sib-1"] {
+  animation-name: tart-approach-h200-sibling-nnue-sib-1;
+}
+.tart--approach-h200-sibling-nnue [data-anim="sib-2"] {
+  animation-name: tart-approach-h200-sibling-nnue-sib-2;
+}
+.tart--approach-h200-sibling-nnue [data-anim="sib-3"] {
+  animation-name: tart-approach-h200-sibling-nnue-sib-3;
+}
+.tart--approach-h200-sibling-nnue [data-anim="sib-4"] {
+  animation-name: tart-approach-h200-sibling-nnue-sib-4;
+}
+.tart--approach-h200-sibling-nnue [data-anim="sib-5"] {
+  animation-name: tart-approach-h200-sibling-nnue-sib-5;
+}
+.tart--approach-h200-sibling-nnue [data-anim="sib-6"] {
+  animation-name: tart-approach-h200-sibling-nnue-sib-6;
+}
+.tart--approach-h200-sibling-nnue [data-anim="pick-a"] {
+  animation-name: tart-approach-h200-sibling-nnue-pick-a;
+}
+.tart--approach-h200-sibling-nnue [data-anim="pick-b"] {
+  animation-name: tart-approach-h200-sibling-nnue-pick-b;
+}
+.tart--approach-h200-sibling-nnue [data-anim="caption-a"] {
+  animation-name: tart-approach-h200-sibling-nnue-caption-a;
+}
+.tart--approach-h200-sibling-nnue [data-anim="caption-b"] {
+  animation-name: tart-approach-h200-sibling-nnue-caption-b;
+}
+
+/* 150 is longer than any one fan edge, so the seven draw together. */
+@keyframes tart-approach-h200-sibling-nnue-fan {
+  0% {
+    stroke-dashoffset: 150;
+  }
+  15.6%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Each sibling holds the zero residual until training starts, then travels to
+   the offset the markup already draws. */
+@keyframes tart-approach-h200-sibling-nnue-sib-0 {
+  0%,
+  21.6% {
+    transform: translateY(-14px);
+  }
+  44.4%,
+  100% {
+    transform: translateY(0);
+  }
+}
+@keyframes tart-approach-h200-sibling-nnue-sib-1 {
+  0%,
+  22.8% {
+    transform: translateY(18px);
+  }
+  45.6%,
+  100% {
+    transform: translateY(0);
+  }
+}
+@keyframes tart-approach-h200-sibling-nnue-sib-2 {
+  0%,
+  21.6% {
+    transform: translateY(-5px);
+  }
+  43.2%,
+  100% {
+    transform: translateY(0);
+  }
+}
+@keyframes tart-approach-h200-sibling-nnue-sib-3 {
+  0%,
+  24% {
+    transform: translateY(9px);
+  }
+  46.8%,
+  100% {
+    transform: translateY(0);
+  }
+}
+@keyframes tart-approach-h200-sibling-nnue-sib-4 {
+  0%,
+  22.2% {
+    transform: translateY(-20px);
+  }
+  45%,
+  100% {
+    transform: translateY(0);
+  }
+}
+@keyframes tart-approach-h200-sibling-nnue-sib-5 {
+  0%,
+  23.4% {
+    transform: translateY(4px);
+  }
+  43.8%,
+  100% {
+    transform: translateY(0);
+  }
+}
+@keyframes tart-approach-h200-sibling-nnue-sib-6 {
+  0%,
+  25.2% {
+    transform: translateY(26px);
+  }
+  48%,
+  100% {
+    transform: translateY(0);
+  }
+}
+@keyframes tart-approach-h200-sibling-nnue-pick-a {
+  0%,
+  12% {
+    opacity: 0;
+  }
+  16.8%,
+  27.6% {
+    opacity: 1;
+  }
+  34.8%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes tart-approach-h200-sibling-nnue-pick-b {
+  0%,
+  48% {
+    opacity: 0;
+  }
+  55.2%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-h200-sibling-nnue-caption-a {
+  0%,
+  8.4% {
+    opacity: 0;
+  }
+  14.4%,
+  28.8% {
+    opacity: 1;
+  }
+  36%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes tart-approach-h200-sibling-nnue-caption-b {
+  0%,
+  39.6% {
+    opacity: 0;
+  }
+  48%,
+  100% {
+    opacity: 1;
+  }
+}

@@ -1,0 +1,117 @@
+/*
+ * Technique card art: the shared play/pause contract.
+ *
+ * Every art is <svg class="tart tart--<name>" data-mode="hover|loop|once|static">.
+ * Animated elements carry data-anim and are paused on their first keyframe
+ * until the enclosing .card is hovered or focused, or the art is asked to
+ * loop. The SVG's own attributes describe the resting (final) frame, so
+ * `static`, `prefers-reduced-motion` and the end of a `once` play all agree.
+ *
+ * The .tart-final group holds the elements that exist only in the resting
+ * frame. It is hidden by default and shown when animation is off (static
+ * mode, reduced motion). An art reveals it at the right moment of a play by
+ * animating the group's own opacity (data-anim on the group): a running or
+ * paused animation overrides the hidden default, so the group is invisible
+ * on the first keyframe and visible at the end of the cycle.
+ *
+ * Per-art stylesheets (<name>.css) set `animation-name` only, never the
+ * `animation` shorthand: the shorthand resets play-state and fill-mode and
+ * would override the paused state below. Duration and easing come from the
+ * tokens through the custom properties on .tart.
+ *
+ * A cycle is `--tart-motion` (the drawing) plus `--tart-read` (the still beat
+ * after it). An art whose last frame puts up a label the first frame did not
+ * have sets `--tart-read` on its own root, so the label stays up long enough
+ * to be read before the cycle repeats; an art that ends where it began leaves
+ * it at zero. Keyframes are written against the whole cycle, so a held art's
+ * stops all sit inside its motion share and its last stop carries out to
+ * 100%: the drawing keeps the timing it was authored with and the extra time
+ * is spent standing still. An art that needs longer to tell its story raises
+ * `--tart-motion` rather than reaching for the duration directly.
+ *
+ * `--tart-phase` is a negative fraction of the cycle an index grid sets per
+ * card, so a screen full of arts starts at different points rather than
+ * beating in lockstep, and their still frames do not all fall together. It is
+ * a fraction rather than a time so it keeps covering the whole cycle whatever
+ * an art's own motion and read add up to (see the `.card-wrap:nth-child`
+ * block in app/approach/approaches.css).
+ */
+.tart {
+  display: block;
+  width: 100%;
+  height: 100%;
+  --tart-motion: var(--duration-art, 2400ms);
+  --tart-read: 0ms;
+  --tart-duration: calc(var(--tart-motion) + var(--tart-read));
+  --tart-ease: var(--ease-standard, cubic-bezier(0.2, 0, 0, 1));
+}
+
+.tart [data-anim] {
+  animation-play-state: paused;
+  animation-fill-mode: both;
+  animation-duration: var(--tart-duration);
+  animation-timing-function: var(--tart-ease);
+  animation-iteration-count: infinite;
+  animation-delay: calc(var(--tart-duration) * var(--tart-phase, 0));
+}
+
+.card:hover .tart [data-anim],
+.card:focus-within .tart [data-anim],
+.card[data-playing] .tart [data-anim],
+.tart[data-mode="loop"] [data-anim],
+.tart[data-mode="once"] [data-anim] {
+  animation-play-state: running;
+}
+
+/* An index of approach cards plays continuously rather than on hover. Each
+   card draws a different mechanism, which is the point of the grid, and a
+   reader should not have to hover ninety of them to find that out. The cost
+   is bounded by `content-visibility: auto` on the wrapper: a card below the
+   fold is not rendered, so its animation is not painted either. */
+.card-wrap .tart [data-anim] {
+  animation-play-state: running;
+}
+
+.card[data-playing="once"] .tart [data-anim],
+.tart[data-mode="once"] [data-anim] {
+  animation-iteration-count: 1;
+}
+
+.tart .tart-final {
+  opacity: 0;
+}
+
+.tart[data-mode="static"] [data-anim] {
+  animation: none;
+}
+
+.tart[data-mode="static"] .tart-final {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tart [data-anim] {
+    animation: none !important;
+  }
+  .tart .tart-final {
+    opacity: 1;
+  }
+}
+
+/* Fallback art: a disc drops into a column of an otherwise quiet board. */
+.tart--fallback [data-anim="drop"] {
+  animation-name: tart-fallback-drop;
+}
+
+@keyframes tart-fallback-drop {
+  0%,
+  12% {
+    transform: translateY(-128px);
+    opacity: 1;
+  }
+  55%,
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

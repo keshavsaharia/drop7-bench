@@ -5,6 +5,8 @@ summary: Play each column forward for twenty-five moves under shared imagined fu
 status: rejected
 evidence: ledger-recorded
 reads: public
+kind: strategy
+technique: q-learning
 ---
 
 Measure what each of the seven columns is worth by playing it forward
@@ -154,7 +156,7 @@ positives, 10th percentile −39,470.31, clear retention 33.33%.
 
 **Curriculum network** (rejected; task-record only; **no ledger entry**).
 Artifact-only, 3,072 training and 1,024 held-out states from the frozen 4,096-state
-[public oracle curriculum](/approaches/oracle-curriculum/state-curriculum), every
+[public oracle curriculum](/approach/oracle-curriculum/state-curriculum), every
 action, seven scenarios, horizon 100, five heads, 36 epochs, no gameplay runner
 and no gameplay seed accepted. Retained outcome: survival prediction was useful,
 action ordering regressed versus exact search. No numbers are retained.

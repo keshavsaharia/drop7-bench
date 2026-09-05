@@ -1,0 +1,48 @@
+/* heuristic-search/edge-priority card art. The two outer columns band off as
+   their own territory, the strips beside the board show a covered disc that
+   can be reached from both sides against one that has a wall on one side, the
+   covered discs at the edges ring as the cells the term charges for, and the
+   drop preference slides outward from the middle to the edge column.
+   Play-state is owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-edge-priority {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-edge-priority [data-anim] {
+  animation-duration: var(--tart-duration);
+  animation-timing-function: var(--tart-ease, var(--ease-standard, cubic-bezier(0.2, 0, 0, 1)));
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+.tart--approach-edge-priority [data-anim="bands"] { animation-name: tart-approach-edge-priority-bands; }
+.tart--approach-edge-priority [data-anim="arrows"] { animation-name: tart-approach-edge-priority-arrows; }
+.tart--approach-edge-priority [data-anim="rings"] { animation-name: tart-approach-edge-priority-rings; }
+.tart--approach-edge-priority [data-anim="marker"] { animation-name: tart-approach-edge-priority-marker; }
+.tart--approach-edge-priority [data-anim="caption"] { animation-name: tart-approach-edge-priority-caption; }
+
+@keyframes tart-approach-edge-priority-bands {
+  0% { opacity: 0; }
+  8.73%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-edge-priority-arrows {
+  0%, 9.82% { opacity: 0; }
+  19.64%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-edge-priority-rings {
+  0%, 22.91% { opacity: 0; }
+  30.55%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-edge-priority-marker {
+  0%, 30.55% { opacity: 0; transform: translateX(-54px); }
+  34.91% { opacity: 1; transform: translateX(-54px); }
+  43.64%, 100% { opacity: 1; transform: translateX(0); }
+}
+@keyframes tart-approach-edge-priority-caption {
+  0%, 42.55% { opacity: 0; }
+  49.09%, 100% { opacity: 1; }
+}

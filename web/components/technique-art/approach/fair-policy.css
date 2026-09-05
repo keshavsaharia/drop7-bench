@@ -1,0 +1,106 @@
+/* fair-expectimax/fair-policy card art: the leaf's terms light one at a time,
+   each ringing the cell it is read from, and the total bar fills last. Only
+   opacity and one scaled bar animate; play-state is owned by the shared
+   art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-fair-policy {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-fair-policy [data-anim="term-1"] {
+  animation-name: tart-approach-fair-policy-term-1;
+}
+.tart--approach-fair-policy [data-anim="term-2"] {
+  animation-name: tart-approach-fair-policy-term-2;
+}
+.tart--approach-fair-policy [data-anim="term-3"] {
+  animation-name: tart-approach-fair-policy-term-3;
+}
+.tart--approach-fair-policy [data-anim="term-4"] {
+  animation-name: tart-approach-fair-policy-term-4;
+}
+.tart--approach-fair-policy [data-anim="term-5"] {
+  animation-name: tart-approach-fair-policy-term-5;
+}
+.tart--approach-fair-policy [data-anim="total"] {
+  animation-name: tart-approach-fair-policy-total;
+  transform-box: fill-box;
+  transform-origin: left center;
+}
+.tart--approach-fair-policy [data-anim="caption"] {
+  animation-name: tart-approach-fair-policy-caption;
+}
+
+@keyframes tart-approach-fair-policy-term-1 {
+  0%,
+  2.18% {
+    opacity: 0;
+  }
+  7.64%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-fair-policy-term-2 {
+  0%,
+  9.82% {
+    opacity: 0;
+  }
+  15.27%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-fair-policy-term-3 {
+  0%,
+  17.45% {
+    opacity: 0;
+  }
+  22.91%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-fair-policy-term-4 {
+  0%,
+  25.09% {
+    opacity: 0;
+  }
+  30.55%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-fair-policy-term-5 {
+  0%,
+  32.73% {
+    opacity: 0;
+  }
+  38.18%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-fair-policy-total {
+  0%,
+  39.27% {
+    transform: scaleX(0);
+  }
+  50.18%,
+  100% {
+    transform: scaleX(1);
+  }
+}
+@keyframes tart-approach-fair-policy-caption {
+  0%,
+  46.91% {
+    opacity: 0;
+  }
+  52.36%,
+  100% {
+    opacity: 1;
+  }
+}

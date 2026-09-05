@@ -1,7 +1,8 @@
 ---
-title: What a large-scale run would look like
-summary: A gated proposal for search-guided self-play with every-sibling labels, including what failed locally and what must pass before any cluster run.
-order: 4
+title: "The proposed large-scale run"
+summary: "A gated proposal for search-guided self-play with every-sibling labels: what failed locally and what must pass before any cluster run."
+order: 99
+hidden: true
 ---
 
 This is a **proposal**, and its original compact-leaf route is currently
@@ -35,7 +36,7 @@ next round of data. Repeat until improvement stops.
 
 1. **Batched simulator.** Thousands of boards in lockstep on the CPU (later,
    possibly, the GPU), proven move-for-move identical to the reference engine
-   by the same differential gates the [fast engine](/approaches/lifetime-objective/fast-engine)
+   by the same differential gates the [fast engine](/approach/lifetime-objective/fast-engine)
    passed. The rules never change; only how many games run at once.
 2. **Actors.** Processes that run the search at each visited position, for
    each column, with shared chance scenarios across siblings, and emit one

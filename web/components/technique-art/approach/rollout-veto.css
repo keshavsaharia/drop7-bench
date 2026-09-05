@@ -1,0 +1,49 @@
+/* d4-long-outcome/rollout-veto card art. The twenty-five-move bar draws
+   across the five rises, the margin badge runs up to the gate and stops
+   short of the threshold, and the gate answers with a twitch and stays shut.
+   Play-state is owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-rollout-veto {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-rollout-veto [data-anim] {
+  animation-duration: var(--tart-duration);
+  animation-timing-function: var(--tart-ease, var(--ease-standard, cubic-bezier(0.2, 0, 0, 1)));
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+.tart--approach-rollout-veto [data-anim="long"] { animation-name: tart-approach-rollout-veto-long; }
+.tart--approach-rollout-veto [data-anim="badge"] { animation-name: tart-approach-rollout-veto-badge; }
+.tart--approach-rollout-veto [data-anim="gate-top"] { animation-name: tart-approach-rollout-veto-gate-top; }
+.tart--approach-rollout-veto [data-anim="gate-bottom"] { animation-name: tart-approach-rollout-veto-gate-bottom; }
+.tart--approach-rollout-veto [data-anim="caption"] { animation-name: tart-approach-rollout-veto-caption; }
+
+/* 196 is the long bar's length: 196 hides it, 0 draws it whole. */
+@keyframes tart-approach-rollout-veto-long {
+  0%, 2.18% { stroke-dashoffset: 196; }
+  26.18%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes tart-approach-rollout-veto-badge {
+  0%, 24% { transform: translate(-24px, 0); opacity: 0; }
+  29.45% { transform: translate(-24px, 0); opacity: 1; }
+  41.45%, 100% { transform: translate(60px, 0); opacity: 1; }
+}
+@keyframes tart-approach-rollout-veto-gate-top {
+  0%, 42.55% { transform: translate(0, 0); }
+  46.91% { transform: translate(0, -3px); }
+  51.27%, 100% { transform: translate(0, 0); }
+}
+@keyframes tart-approach-rollout-veto-gate-bottom {
+  0%, 42.55% { transform: translate(0, 0); }
+  46.91% { transform: translate(0, 3px); }
+  51.27%, 100% { transform: translate(0, 0); }
+}
+@keyframes tart-approach-rollout-veto-caption {
+  0%, 45.82% { opacity: 0; }
+  51.27%, 100% { opacity: 1; }
+}

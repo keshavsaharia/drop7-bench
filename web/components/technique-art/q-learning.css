@@ -1,0 +1,170 @@
+/* Q-learning card art: three passes down the corridor, each backing the value up one cell. */
+.tart.tart--q-learning {
+  --tart-motion: calc(var(--duration-art, 2400ms) * 1.5);
+}
+
+.tart--q-learning [data-anim] {
+  animation-duration: var(--tart-duration);
+}
+.tart--q-learning [data-anim="agent"] {
+  animation-name: tart-q-learning-agent;
+}
+.tart--q-learning .bar {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+.tart--q-learning [data-anim="bar-4"] {
+  animation-name: tart-q-learning-bar-4;
+}
+.tart--q-learning [data-anim="bar-3"] {
+  animation-name: tart-q-learning-bar-3;
+}
+.tart--q-learning [data-anim="bar-2"] {
+  animation-name: tart-q-learning-bar-2;
+}
+.tart--q-learning [data-anim="arrows"] {
+  animation-name: tart-q-learning-arrows;
+}
+.tart--q-learning [data-anim="arrow-2"] {
+  animation-name: tart-q-learning-arrow-2;
+}
+
+/* Three passes of four steps; the dot blinks back to the first cell between passes. */
+@keyframes tart-q-learning-agent {
+  0%,
+  8% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  11%,
+  16% {
+    transform: translateX(64px);
+  }
+  19%,
+  24% {
+    transform: translateX(128px);
+  }
+  27%,
+  32% {
+    transform: translateX(192px);
+    opacity: 1;
+  }
+  33% {
+    transform: translateX(192px);
+    opacity: 0;
+  }
+  34% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  35%,
+  41% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  44%,
+  49% {
+    transform: translateX(64px);
+  }
+  52%,
+  57% {
+    transform: translateX(128px);
+  }
+  60%,
+  65% {
+    transform: translateX(192px);
+    opacity: 1;
+  }
+  66% {
+    transform: translateX(192px);
+    opacity: 0;
+  }
+  67% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  68%,
+  74% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  77%,
+  82% {
+    transform: translateX(64px);
+  }
+  85%,
+  90% {
+    transform: translateX(128px);
+  }
+  93%,
+  97% {
+    transform: translateX(192px);
+    opacity: 1;
+  }
+  98% {
+    transform: translateX(192px);
+    opacity: 0;
+  }
+  99% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+@keyframes tart-q-learning-bar-4 {
+  0%,
+  28% {
+    transform: scaleY(0.1);
+  }
+  32% {
+    transform: scaleY(1.12);
+  }
+  36%,
+  100% {
+    transform: scaleY(1);
+  }
+}
+@keyframes tart-q-learning-bar-3 {
+  0%,
+  61% {
+    transform: scaleY(0.1);
+  }
+  66%,
+  100% {
+    transform: scaleY(1);
+  }
+}
+@keyframes tart-q-learning-bar-2 {
+  0%,
+  94% {
+    transform: scaleY(0.1);
+  }
+  99%,
+  100% {
+    transform: scaleY(1);
+  }
+}
+/* The resting-frame group appears with the first backup arrow; the second arrow fades in on its own. */
+@keyframes tart-q-learning-arrows {
+  0%,
+  58% {
+    opacity: 0;
+  }
+  62%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-q-learning-arrow-2 {
+  0%,
+  91% {
+    opacity: 0;
+  }
+  95%,
+  100% {
+    opacity: 1;
+  }
+}

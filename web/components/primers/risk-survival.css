@@ -1,0 +1,81 @@
+/* Motion for the risk and survival objectives primer figures
+   (web/components/primers/RiskSurvival.tsx).
+   The dial figure starts at the mean end, where the machines tie, walks the
+   knob to the worst-case end while machine B's bar shrinks and the verdict
+   swaps by opacity, and returns. Under reduced motion it rests at the
+   worst-case end with A chosen. Only transform and opacity animate. */
+
+.primer-risk svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.primer-risk [data-anim] {
+  animation-duration: 5s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.primer-risk [data-anim="knob"] {
+  animation-name: primer-risk-knob;
+}
+
+.primer-risk [data-anim="bar-b"] {
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation-name: primer-risk-bar-b;
+}
+
+.primer-risk [data-anim="tie"] {
+  animation-name: primer-risk-tie;
+}
+
+.primer-risk [data-anim="a-wins"] {
+  opacity: 0;
+  animation-name: primer-risk-a-wins;
+}
+
+@keyframes primer-risk-knob {
+  0%, 8% { transform: translateX(0); }
+  46%, 60% { transform: translateX(360px); }
+  94%, 100% { transform: translateX(0); }
+}
+
+@keyframes primer-risk-bar-b {
+  0%, 8% { transform: scaleX(1); }
+  46%, 60% { transform: scaleX(0.03); }
+  94%, 100% { transform: scaleX(1); }
+}
+
+@keyframes primer-risk-tie {
+  0%, 14% { opacity: 1; }
+  30%, 74% { opacity: 0; }
+  90%, 100% { opacity: 1; }
+}
+
+@keyframes primer-risk-a-wins {
+  0%, 14% { opacity: 0; }
+  30%, 74% { opacity: 1; }
+  90%, 100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primer-risk [data-anim] {
+    animation: none !important;
+  }
+  /* Resting frame: the dial at the worst-case end, machine B's value gone,
+     machine A chosen. */
+  .primer-risk [data-anim="knob"] {
+    transform: translateX(360px);
+  }
+  .primer-risk [data-anim="bar-b"] {
+    transform: scaleX(0.03);
+  }
+  .primer-risk [data-anim="tie"] {
+    opacity: 0;
+  }
+  .primer-risk [data-anim="a-wins"] {
+    opacity: 1;
+  }
+}

@@ -1,11 +1,13 @@
 import { createHmac, randomUUID } from "node:crypto";
 
-export interface PageViewEvent {
+export interface AnalyticsEventRow {
   event_id: string;
-  event_name: "page_view";
+  event_name: string;
   schema_version: number;
   occurred_at: string;
   occurred_at_ms: number;
+  received_at: string;
+  received_at_ms: number;
   path: string;
   host: string;
   referrer_host: string;
@@ -21,6 +23,15 @@ export interface PageViewEvent {
   is_bot: boolean;
   visitor_id: string;
   stage: string;
+  source_application: string;
+  source_platform: string;
+  app_version: string;
+  screen: string;
+  properties_json: string;
+}
+
+export interface PageViewEvent extends AnalyticsEventRow {
+  event_name: "page_view";
 }
 
 const BOT_PATTERN =
@@ -45,6 +56,8 @@ export function buildPageViewEvent(
     schema_version: 1,
     occurred_at: now.toISOString(),
     occurred_at_ms: now.getTime(),
+    received_at: now.toISOString(),
+    received_at_ms: now.getTime(),
     path: normalizePath(pathOverride ?? url.pathname),
     host: clean(url.hostname, 255),
     referrer_host: referrerHost,
@@ -60,6 +73,11 @@ export function buildPageViewEvent(
     is_bot: isBot,
     visitor_id: pseudonymousVisitorId(request, visitorHashKey, userAgent),
     stage: clean(process.env.DROP7_STAGE ?? "local", 32),
+    source_application: "drop7-web",
+    source_platform: "web",
+    app_version: "",
+    screen: normalizePath(pathOverride ?? url.pathname),
+    properties_json: "{}",
   };
 }
 

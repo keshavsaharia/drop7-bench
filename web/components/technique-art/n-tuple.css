@@ -1,0 +1,185 @@
+/* N-tuple card art: three windows light in turn, each looks up a table row, the sum steps up. */
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--n-tuple {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--n-tuple [data-anim="win-1"] {
+  animation-name: tart-n-tuple-win-1;
+}
+.tart--n-tuple [data-anim="win-2"] {
+  animation-name: tart-n-tuple-win-2;
+}
+.tart--n-tuple [data-anim="win-3"] {
+  animation-name: tart-n-tuple-win-3;
+}
+.tart--n-tuple [data-anim="link-1"] {
+  animation-name: tart-n-tuple-link-1;
+}
+.tart--n-tuple [data-anim="link-2"] {
+  animation-name: tart-n-tuple-link-2;
+}
+.tart--n-tuple [data-anim="link-3"] {
+  animation-name: tart-n-tuple-link-3;
+}
+.tart--n-tuple [data-anim="row-1"] {
+  animation-name: tart-n-tuple-row-1;
+}
+.tart--n-tuple [data-anim="row-2"] {
+  animation-name: tart-n-tuple-row-2;
+}
+.tart--n-tuple [data-anim="row-3"] {
+  animation-name: tart-n-tuple-row-3;
+}
+.tart--n-tuple [data-anim="sum-0"] {
+  animation-name: tart-n-tuple-sum-0;
+}
+.tart--n-tuple [data-anim="sum-1"] {
+  animation-name: tart-n-tuple-sum-1;
+}
+.tart--n-tuple [data-anim="sum-2"] {
+  animation-name: tart-n-tuple-sum-2;
+}
+.tart--n-tuple [data-anim="sum-3"] {
+  animation-name: tart-n-tuple-sum-3;
+}
+
+@keyframes tart-n-tuple-win-1 {
+  0% {
+    opacity: 0.3;
+  }
+  4.36%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-n-tuple-win-2 {
+  0%,
+  18.55% {
+    opacity: 0.3;
+  }
+  22.91%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-n-tuple-win-3 {
+  0%,
+  34.91% {
+    opacity: 0.3;
+  }
+  39.27%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-n-tuple-link-1 {
+  0%,
+  4.36% {
+    stroke-dashoffset: 64;
+  }
+  8.73%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes tart-n-tuple-link-2 {
+  0%,
+  20.73% {
+    stroke-dashoffset: 64;
+  }
+  25.09%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes tart-n-tuple-link-3 {
+  0%,
+  37.09% {
+    stroke-dashoffset: 64;
+  }
+  41.45%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes tart-n-tuple-row-1 {
+  0%,
+  7.64% {
+    opacity: 0;
+  }
+  10.91%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-n-tuple-row-2 {
+  0%,
+  24% {
+    opacity: 0;
+  }
+  27.27%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-n-tuple-row-3 {
+  0%,
+  40.36% {
+    opacity: 0;
+  }
+  43.64%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-n-tuple-sum-0 {
+  0%,
+  10.85% {
+    opacity: 1;
+  }
+  10.91%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes tart-n-tuple-sum-1 {
+  0%,
+  10.85% {
+    opacity: 0;
+  }
+  10.91%,
+  27.22% {
+    opacity: 1;
+  }
+  27.27%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes tart-n-tuple-sum-2 {
+  0%,
+  27.22% {
+    opacity: 0;
+  }
+  27.27%,
+  43.58% {
+    opacity: 1;
+  }
+  43.64%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes tart-n-tuple-sum-3 {
+  0%,
+  43.58% {
+    opacity: 0;
+  }
+  43.64%,
+  100% {
+    opacity: 1;
+  }
+}

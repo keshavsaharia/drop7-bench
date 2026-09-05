@@ -5,12 +5,14 @@ summary: Fit a linear action value to the depth-4 search's own sibling values, t
 status: completed
 evidence: reproduced
 reads: public
+kind: strategy
+technique: q-learning
 ---
 
 Fit a linear action value to the depth-4 search's own sibling values, then
 use it not to play but to decide which siblings the search may skip; and,
 separately, refit the leaf to the search's own value. This page follows the
-[Klein-Friedmann reproduction](/approaches/value-policy-learning/klein-friedmann-linear-q),
+[Klein-Friedmann reproduction](/approach/value-policy-learning/klein-friedmann-linear-q),
 whose six-feature policy turned out to be a survival heuristic an order of
 magnitude below the depth-4 reference, and asks the two questions that were
 left: can a cheap learned value make the reference search *cheaper*, and can

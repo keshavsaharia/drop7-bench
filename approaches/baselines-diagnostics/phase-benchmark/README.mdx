@@ -5,6 +5,7 @@ summary: Plays complete games with the shared hand-written policy and reports sc
 status: support-only
 evidence: repository-verified
 reads: public
+kind: diagnostic
 ---
 
 A stopwatch and a set of scales for the policy that most of the native
@@ -27,7 +28,7 @@ So this harness reports the score, and then the mechanism underneath it:
   same statement as the score;
 - **clears per move** and **reveals per move**: the flow rates the board has
   to sustain against the rise (see the
-  [family page](/approaches/baselines-diagnostics) for why 2.4 and 1.4 are the
+  [family page](/approach/baselines-diagnostics) for why 2.4 and 1.4 are the
   numbers that matter);
 - **mean maximum height**: how close to the ceiling the policy was living;
 - **work per move** — search cost in the repository's own unit, so a strength
@@ -74,7 +75,7 @@ Defaults: 8 games from seed `0x3d700100`, `--max-moves 1000`, `--depth 3`,
 is `drop7::cfpi::chooseBehaviorAction` in `src/core/native/public-behavior.hpp`
 — the same shared phase behaviour that several other experiments freeze and
 build on, including the
-[tail-survival CEM](/approaches/constructive-reservoir/tail-survival-cem), which
+[tail-survival CEM](/approach/constructive-reservoir/tail-survival-cem), which
 records its version as a 165-weight public evaluator inside a depth-3,
 internal-width-two, three-stratum selective search.
 

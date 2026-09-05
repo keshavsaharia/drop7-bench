@@ -1,0 +1,138 @@
+---
+title: NNUE evaluators
+slug: nnue
+summary: "A small neural network built so that when one move changes a few cells, only the affected part of the first layer is recomputed."
+order: 5
+technique: nnue
+approaches: [lifetime-objective/learned-leaf, lifetime-objective/nnue-evolution, lifetime-objective/nnue-d4q-probe, value-policy-learning/structured-nnue, value-policy-learning/chance-state-nnue, d4-long-outcome/h200-sibling-nnue]
+glossary: [NNUE, leaf evaluator, feature, accumulator, incremental update]
+---
+
+## The idea
+
+A search that looks a few moves ahead stops at thousands of boards it cannot
+see past, and it needs a number for every one of them: how good is this
+position? The function that supplies that number is the
+[leaf evaluator](/learn/glossary), and it is called more often than anything
+else in the program. The reference search on this site uses a hand-written sum
+of terms. A neural network could recognise patterns a sum of terms cannot, but
+an ordinary network reads the whole board through large matrix multiplications
+every call, and a leaf has about a microsecond to spend.
+
+An NNUE ("efficiently updatable neural network", a design from computer shogi
+and chess) is built around two facts about boards. First, a board is sparse: describe it as a long list of yes/no
+questions and only a few dozen answers are yes. Second, one move changes only a
+few cells, so the answers barely change from one board to the next. A network
+whose first layer is a lookup table turns both facts into speed.
+
+## A small example
+
+Take a board of nine lights in a three-by-three grid, each on or off, and ask
+for one number that says how good the arrangement is.
+
+1. Describe the board as nine yes/no features, one per light. Only the lit
+   ones matter.
+2. Make the first layer a table with one row per feature, each row a short
+   vector of learned numbers. The board's hidden vector is the sum of the rows
+   for the lights that are on. Five lights on, five rows gathered and added.
+   No multiplication happens.
+3. Pass that short vector through two small dense layers to get the output.
+
+<NnueGather />
+
+4. Flip one light on. Exactly one row joins the sum, so add it to the running
+   total instead of rebuilding the vector. Flip it off and subtract the row.
+   That is the "efficiently updatable" part: the expensive layer is maintained
+   by adding and subtracting rows as the board changes.
+
+<NnueOneFlip />
+
+5. Make the features richer than single lights: add one for each pair of
+   adjacent lights, so a run of two is recognised as one thing. The table
+   grows, but the number of features on for any board stays small.
+6. Count the cost: a few dozen row additions and two small matrix products.
+   That is microseconds, which is what a function called hundreds of thousands
+   of times per decision can afford.
+
+## How it works
+
+The network has three parts. A feature set turns a board into the list of
+features currently on; most of the game knowledge goes into choosing that
+list. An accumulator holds the sum of the active rows of the
+first-layer table and is updated incrementally when a move changes the board.
+A small head of one or two dense layers turns the accumulator into a single
+number.
+
+Training is ordinary gradient descent on targets. The targets can be a slower
+search's values or a measured outcome such as how long the game lasted, and
+the weights can later be adjusted by another method, as the
+[evolution primer](/learn/techniques/evolution) describes. What the
+architecture fixes is the budget. Almost every weight lives
+in the first table, which is read sparsely, so the cost of a call is set by the
+number of active features and the width of the head, and barely grows with
+the table.
+
+Two things follow. A feature that never appeared in training has no useful row
+to gather, so the network generalises only through features that recur. And
+because the head is small, its opinion stays close to a weighted sum of
+feature rows: a step up from a hand-written sum of terms, and a long way from
+a deep convolutional network.
+
+## In Drop7
+
+An NNUE here reads exactly what a player can see. The learned-leaf page
+describes the feature set: 8,902 binary features, of which exactly 135 are
+active for any board, including 84 adjacent-pair features, because a disc
+clears when its number matches the length of the run it lands in and a bag of
+single-cell features cannot see a run
+([A learned survival estimate inside the reference search](/approach/lifetime-objective/learned-leaf)).
+The output is in units of a row rise, 17,000 points, so the search can add it
+to points it has already counted.
+
+<NnueBudget />
+
+The budget is why the shape was chosen. A four-move search scores 615,090
+boards per decision with five chance samples, measured over 30 real decisions,
+and 2,271,280 with seven. The convolutional network first specified for that
+leaf costs 4,122 microseconds per board; the NNUE-shaped student that replaced
+it costs 1.33 (the same page).
+
+Pages that use one:
+
+- [A learned survival estimate inside the reference search](/approach/lifetime-objective/learned-leaf),
+  the budget measurement and the first NNUE-shaped leaf, blended into the
+  hand-written one.
+- [An evolved NNUE leaf, distilled from a depth-5 teacher](/approach/lifetime-objective/nnue-evolution),
+  a warm start by imitation followed by evolution on whole-game score.
+- [Can a leaf-sized network hold the four-ply search's ordering?](/approach/lifetime-objective/nnue-d4q-probe),
+  the smallest network that could run in a leaf, trained on the four-move
+  search's exact values for every sibling.
+- [Structured NNUE](/approach/value-policy-learning/structured-nnue) and
+  [Chance-state NNUE](/approach/value-policy-learning/chance-state-nnue),
+  two earlier designs: one predicts remaining lifetime, the other judges the
+  board just before the next disc is dealt.
+- [Sibling network on the 200-move panel](/approach/d4-long-outcome/h200-sibling-nnue),
+  started as an exact copy of the reference search and trained on a panel
+  where every legal column was measured.
+
+## What it cannot do
+
+The first limit is arithmetic. The three-million-parameter convolutional
+network originally specified as the leaf would have taken 2,535 seconds per
+decision at 4,122 microseconds a board, a factor of 2,860 over the reference's
+0.887-second decision
+([A learned survival estimate inside the reference search](/approach/lifetime-objective/learned-leaf)).
+The NNUE-shaped student gave up 0.008 of held-out lifetime correlation (0.8564
+against the convolutional network's 0.8646) to run in 1.33 microseconds.
+
+The second limit is fidelity of another kind. Fitting a teacher's numbers
+closely does not mean ranking moves the way the teacher would. The NNUE warm
+start on the evolution page matched a depth-5 teacher's values to a validation
+Pearson correlation of 0.95 and then, placed inside the real depth-3 search,
+picked the teacher's column only 44% of the time, about what a leaf that
+returns zero manages
+([An evolved NNUE leaf, distilled from a depth-5 teacher](/approach/lifetime-objective/nnue-evolution)).
+A leaf is judged by the order it puts sibling moves in, and a small error
+in value can swap two of them; the
+[concept page on the sibling trap](/learn/concepts/ranking-siblings) is about
+that problem.

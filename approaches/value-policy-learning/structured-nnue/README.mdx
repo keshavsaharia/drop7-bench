@@ -5,6 +5,9 @@ summary: Give every cell a learned description and predict the game's remaining 
 status: rejected
 evidence: ledger-recorded
 reads: public
+kind: strategy
+technique: nnue
+featured: true
 ---
 
 A small network whose input is not a summary of the board but the board itself:
@@ -110,7 +113,7 @@ on grouped, within-position ranking evidence."*
 
 The first experiment's ledger entry precedes the corrected-Hardcore scoring
 replay, so read its point totals as within-run rather than comparable with the
-corrected-score [fair D4 reference](/approaches/fair-expectimax/reference).
+corrected-score [fair D4 reference](/approach/fair-expectimax/reference).
 
 </TechnicalDetails>
 
@@ -125,7 +128,7 @@ correlation.
 What it did not rule out: the architecture. Position-specific embeddings with
 exact reflection symmetry were never shown to be the problem; the labels and the
 objective were. The
-[distributional afterstate ranker](/approaches/afterstate-learning/distributional-afterstate)
+[distributional afterstate ranker](/approach/afterstate-learning/distributional-afterstate)
 kept the "value a resolved position" idea and changed both: a within-root
 ranking loss instead of pure regression, and aligned chance scenarios shared
 across siblings instead of independent continuations per successor.

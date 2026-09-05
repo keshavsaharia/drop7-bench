@@ -1,0 +1,784 @@
+/*
+ * Chart kit styles (web/components/charts/). ChartFrame.tsx, StatTile.tsx and
+ * EvidenceStrip.tsx import this file, so it is present wherever a chart, a
+ * stat tile or an evidence strip renders. Written unlayered because these
+ * components render inside .prose-drop7, whose element rules beat Tailwind
+ * utilities; selectors carry two classes (or a .prose-drop7 twin) so they
+ * also beat those element rules.
+ *
+ * Colour: series slots, ink, rules and surfaces are the site tokens
+ * (--color-series-1..8, --color-ink*, --color-rule*, --color-surface,
+ * --color-raised). The chart-only tokens below were validated with the
+ * dataviz palette tool on #111114 and #18181c (sequential ramp: monotone,
+ * adjacent delta-L >= 0.06, darkest step 2.33:1; status: every step >= 3:1)
+ * and are mirrored in web/lib/charts/palette.ts, which palette.test.ts keeps
+ * in step with this block. No other hex literal belongs in this file.
+ */
+:root {
+  --chart-seq-1: #184f95;
+  --chart-seq-2: #256abf;
+  --chart-seq-3: #3987e5;
+  --chart-seq-4: #6da7ec;
+  --chart-seq-5: #9ec5f4;
+  --chart-div-neg: #e66767;
+  --chart-div-mid: #52525b;
+  --chart-div-pos: #3987e5;
+  --chart-status-good: #0ca30c;
+  --chart-status-warning: #fab219;
+  --chart-status-serious: #ec835a;
+  --chart-status-critical: #d03b3b;
+  --chart-deemphasis: #52525b;
+}
+
+/* ------------------------------------------------------------- frame */
+
+.rchart {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+/* The header row: the title, and the Chart/Table toggle when the figure
+   carries a source table. The toggle is a segmented pair of buttons, mono
+   like every other label on the site. */
+.prose-drop7 .rchart-head,
+.rchart-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.6rem;
+}
+.prose-drop7 .rchart-head > .rchart-title,
+.rchart-head > .rchart-title {
+  margin: 0;
+  flex: 1 1 16rem;
+}
+.rchart-toggle {
+  display: inline-flex;
+  flex: 0 0 auto;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.rchart-toggle button {
+  appearance: none;
+  border: 0;
+  margin: 0;
+  padding: 0.25rem 0.6rem;
+  background: transparent;
+  color: var(--color-ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+.rchart-toggle button + button {
+  border-left: 1px solid var(--color-rule);
+}
+.rchart-toggle button:hover {
+  color: var(--color-ink-1);
+  background: var(--color-hover);
+}
+.rchart-toggle button.is-on {
+  color: var(--color-ink);
+  background: var(--color-accent-soft);
+}
+.rchart-toggle button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+.rchart-table-inline {
+  overflow-x: auto;
+}
+
+.prose-drop7 .rchart-title,
+.rchart-title {
+  margin: 0 0 0.6rem;
+  font-family: var(--font-sans, inherit);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--color-ink);
+}
+.rchart .rchart-svg,
+.rchart-svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  overflow: visible;
+  font-family: var(--font-sans, inherit);
+  outline: none;
+  touch-action: pan-y;
+}
+.rchart-svg:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm, 4px);
+}
+.rchart-svg text {
+  user-select: none;
+}
+.rchart-svg .rchart-tick {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  fill: var(--color-ink-2);
+}
+.rchart-svg .rchart-cat {
+  font-family: var(--font-sans, inherit);
+  font-size: 11px;
+  fill: var(--color-ink-2);
+}
+.rchart-svg .rchart-axis-title {
+  font-family: var(--font-sans, inherit);
+  font-size: 12px;
+  fill: var(--color-ink-2);
+}
+.rchart-svg .rchart-value-label {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 11px;
+  font-weight: 600;
+  fill: var(--color-ink-1);
+}
+.rchart-svg .rchart-end-label {
+  font-family: var(--font-sans, inherit);
+  font-size: 11px;
+  font-weight: 600;
+  fill: var(--color-ink-1);
+}
+.rchart-svg .rchart-ref-label {
+  font-family: var(--font-sans, inherit);
+  font-size: 11px;
+  fill: var(--color-ink-2);
+}
+.rchart-svg .rchart-grid {
+  stroke: var(--color-rule);
+  stroke-width: 1;
+}
+.rchart-svg .rchart-axis {
+  stroke: var(--color-rule-strong);
+  stroke-width: 1;
+}
+.rchart-svg .rchart-zero {
+  stroke: var(--color-ink-3);
+  stroke-width: 1;
+}
+.rchart-svg .rchart-ref {
+  stroke: var(--color-ink-2);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+  fill: none;
+}
+.rchart-svg .rchart-ref.is-solid {
+  stroke: var(--color-ink-1);
+  stroke-dasharray: none;
+}
+.rchart-svg .rchart-ref-band {
+  fill: var(--color-ink-3);
+  fill-opacity: 0.16;
+}
+.rchart-svg .rchart-crosshair {
+  stroke: var(--color-ink-2);
+  stroke-width: 1;
+  pointer-events: none;
+}
+.rchart-svg .rchart-whisker {
+  stroke: var(--color-ink-2);
+  stroke-width: 1.5;
+  fill: none;
+}
+.rchart-svg .rchart-whisker.is-strong {
+  stroke: var(--color-ink-1);
+}
+.rchart-svg .rchart-whisker-ring {
+  stroke: var(--color-surface);
+  stroke-width: 5.5;
+  fill: none;
+}
+.rchart-svg .rchart-floor {
+  fill: var(--chart-div-mid);
+  fill-opacity: 0.25;
+}
+.rchart-svg .rchart-hair {
+  stroke: var(--color-rule-strong);
+  stroke-width: 1;
+}
+.rchart-svg .rchart-row-rule {
+  stroke: var(--color-rule);
+  stroke-width: 1;
+}
+
+/* Marks. Colours arrive inline as var(--color-series-N) etc.; classes carry
+   the geometry rules and the hover response. */
+.rchart-svg .rchart-line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.rchart-svg .rchart-line.is-thin {
+  stroke-width: 1.5;
+}
+.rchart-svg .rchart-band {
+  fill-opacity: 0.1;
+  stroke: none;
+}
+.rchart-svg .rchart-marker {
+  stroke: var(--color-surface);
+  stroke-width: 2;
+  transition: r var(--duration-fast, 120ms) var(--ease-standard, ease);
+}
+.rchart-svg .rchart-marker.is-hollow {
+  fill: var(--color-surface);
+  stroke-width: 1.5;
+}
+.rchart-svg .rchart-bar {
+  transition: filter var(--duration-fast, 120ms) var(--ease-standard, ease);
+}
+.rchart-svg .rchart-bar.is-hot {
+  filter: brightness(1.08);
+}
+.rchart-svg .rchart-hit {
+  fill: transparent;
+  stroke: none;
+}
+.rchart-svg .rchart-dim {
+  opacity: 0.3;
+  transition: opacity var(--duration-fast, 120ms) var(--ease-standard, ease);
+}
+
+/* Legend: swatch by mark type, hover dims the others. */
+.prose-drop7 .rchart-legend,
+.rchart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.1rem;
+  margin: 0.55rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-sans, inherit);
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: var(--color-ink-2);
+}
+.prose-drop7 .rchart-legend li,
+.rchart-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  transition: opacity var(--duration-fast, 120ms) var(--ease-standard, ease);
+}
+.rchart-legend li.is-dim {
+  opacity: 0.3;
+}
+.rchart-key {
+  --key: var(--color-ink-2);
+  flex: none;
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--key);
+  box-sizing: border-box;
+}
+.rchart-key.is-line {
+  width: 14px;
+  height: 2px;
+  border-radius: 1px;
+}
+.rchart-key.is-line.is-thin {
+  height: 1.5px;
+}
+.rchart-key.is-dashed {
+  width: 14px;
+  height: 0;
+  border-radius: 0;
+  background: none;
+  border-top: 2px dashed var(--key);
+}
+.rchart-key.is-band {
+  opacity: 0.35;
+}
+.rchart-key.is-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+.rchart-key.is-hollow {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: none;
+  border: 2px solid var(--key);
+}
+.rchart-key.is-diamond {
+  width: 8px;
+  height: 8px;
+  border-radius: 1px;
+  background: none;
+  border: 1.5px solid var(--key);
+  transform: rotate(45deg);
+}
+
+/* Visually hidden live region: repeats the tooltip for screen readers. */
+.rchart-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Tooltip: one portal component, value first, anchored to the crosshair or
+   the mark (never under the pointer). */
+.rchart-tooltip {
+  max-width: min(320px, calc(100vw - 16px));
+  padding: 10px 12px;
+  border: 1px solid var(--color-rule-strong);
+  border-radius: var(--radius-md, 8px);
+  background: var(--color-raised);
+  color: var(--color-ink);
+  font-family: var(--font-sans, inherit);
+  font-size: 12px;
+  line-height: 1.45;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  transition: opacity 80ms linear;
+}
+.rchart-tooltip-head {
+  margin: 0 0 4px;
+  color: var(--color-ink-2);
+  overflow-wrap: anywhere;
+}
+.rchart-tooltip-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  margin: 2px 0;
+  overflow-wrap: anywhere;
+}
+.rchart-tooltip-row .rchart-key {
+  position: relative;
+  top: -1px;
+}
+.rchart-tooltip-value {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-ink);
+  white-space: nowrap;
+}
+.rchart-tooltip-label {
+  color: var(--color-ink-2);
+}
+.rchart-tooltip-row.is-hot .rchart-tooltip-label {
+  color: var(--color-ink-1);
+}
+.rchart-tooltip-note {
+  margin: 1px 0 0 1.35rem;
+  font-size: 11px;
+  color: var(--color-ink-2);
+}
+.rchart-tooltip-meta {
+  margin: 4px 0 0;
+  font-size: 11px;
+  color: var(--color-ink-2);
+}
+.rchart-tooltip-source {
+  margin: 5px 0 0;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 11px;
+  color: var(--color-ink-3);
+  overflow-wrap: anywhere;
+}
+
+/* A one-line note inside a frame (a stage whose rows were not retained). */
+.prose-drop7 .rchart-empty,
+.rchart-empty {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--color-ink-2);
+}
+
+/* Reason-driven empty state: title line, one sentence, an optional muted
+   "how it would be produced" line. Never a number, never a CLI command. */
+.rchart-empty-state {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  border: 1px dashed var(--color-rule-strong);
+  border-radius: var(--radius-md, 8px);
+  background: var(--color-surface);
+  color: var(--color-ink-2);
+}
+.prose-drop7 .rchart-empty-state p,
+.rchart-empty-state p {
+  margin: 0;
+}
+.rchart-empty-title {
+  font-family: var(--font-sans, inherit);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.rchart-empty-text {
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.rchart-empty-how {
+  margin-top: 0.4rem;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--color-ink-3);
+}
+.rchart-empty-state .evidence-strip {
+  margin-top: 0.6rem;
+}
+
+/* The "Source data" table: the accessibility twin of every chart. */
+.prose-drop7 .rchart-data,
+.rchart-data {
+  margin-top: 0.7rem;
+  font-size: 0.78rem;
+  color: var(--color-ink-2);
+}
+.rchart-data > summary {
+  cursor: pointer;
+  color: var(--color-ink-2);
+}
+.prose-drop7 .rchart-data-notes,
+.rchart-data-notes {
+  margin: 0.5rem 0 0.6rem;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+.rchart-data-scroll {
+  overflow-x: auto;
+}
+.prose-drop7 .rchart-data-table,
+.rchart-data-table {
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+}
+.prose-drop7 .rchart-data-table th,
+.prose-drop7 .rchart-data-table td,
+.rchart-data-table th,
+.rchart-data-table td {
+  border: 0;
+  border-bottom: 1px solid var(--color-rule);
+  padding: 0.35rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+  white-space: nowrap;
+  background: none;
+}
+.prose-drop7 .rchart-data-table thead th,
+.rchart-data-table thead th {
+  border-bottom-color: var(--color-rule-strong);
+  color: var(--color-ink-3);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+.rchart-data-table th.num,
+.rchart-data-table td.num {
+  text-align: right;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-variant-numeric: tabular-nums;
+}
+.rchart-data-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.rchart-data-note,
+.rchart-data-field {
+  color: var(--color-ink-3);
+  display: inline-block;
+  max-width: 22rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+.prose-drop7 .rchart-source,
+.rchart-source {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.72rem;
+  color: var(--color-ink-1);
+  text-decoration: none;
+  background: none;
+  padding: 0;
+}
+.prose-drop7 a.rchart-source,
+a.rchart-source {
+  color: var(--color-ink-1);
+  text-decoration: underline;
+  text-decoration-color: var(--color-rule-strong);
+  text-underline-offset: 0.15em;
+}
+a.rchart-source:hover {
+  color: var(--color-ink);
+  text-decoration-color: currentColor;
+}
+.prose-drop7 .rchart-data-spec,
+.rchart-data-spec {
+  margin: 0.6rem 0 0;
+  font-size: 0.75rem;
+  color: var(--color-ink-3);
+}
+
+/* ---------------------------------------------------------- stat tiles */
+
+.prose-drop7 .stat-row,
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 1.2rem 0;
+}
+.stat-row.is-columns-2 {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+}
+.stat-row.is-columns-4 {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+.stat-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-md, 8px);
+  background: var(--color-raised);
+  color: var(--color-ink-1);
+}
+.prose-drop7 .stat-tile p,
+.stat-tile p {
+  margin: 0;
+}
+.stat-tile-label {
+  font-family: var(--font-sans, inherit);
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--color-ink-2);
+}
+.stat-tile-value-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2rem 0.5rem;
+}
+.stat-tile-value {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--color-ink);
+  overflow-wrap: anywhere;
+}
+.stat-tile.is-lg .stat-tile-value {
+  font-size: 40px;
+  line-height: 1.05;
+}
+.stat-tile-unit {
+  font-size: 12px;
+  color: var(--color-ink-2);
+}
+.stat-tile-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-ink-2);
+}
+.stat-tile-delta.is-favourable {
+  color: var(--chart-status-good);
+}
+.stat-tile-delta.is-unfavourable {
+  color: var(--chart-status-serious);
+}
+.stat-tile-hint {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--color-ink-2);
+}
+.stat-tile-trend {
+  margin-top: 0.3rem;
+}
+.stat-tile-trend .rchart-svg {
+  width: 100%;
+  height: 28px;
+}
+.stat-tile-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem 0.75rem;
+  margin-top: 0.35rem;
+}
+.stat-tile-foot .evidence-strip {
+  margin: 0;
+}
+.stat-tile-source {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 11px;
+  color: var(--color-ink-3);
+  overflow-wrap: anywhere;
+}
+.stat-tile-source-field {
+  color: var(--color-ink-3);
+}
+
+/* ------------------------------------------------------ evidence strip */
+
+.prose-drop7 .evidence-strip,
+.evidence-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.prose-drop7 .evidence-strip li,
+.evidence-strip li {
+  margin: 0;
+}
+.evidence-chip {
+  --chip: var(--color-ink-2);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.1rem 0.45rem 0.1rem 0.35rem;
+  border: 1px solid var(--color-rule-strong);
+  border-radius: 999px;
+  font-family: var(--font-sans, inherit);
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--color-ink-1);
+  background: none;
+  cursor: default;
+}
+.evidence-chip-field {
+  color: var(--color-ink-3);
+}
+.evidence-chip-icon {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  color: var(--chip);
+}
+.evidence-chip.is-good {
+  --chip: var(--chart-status-good);
+}
+.evidence-chip.is-warning {
+  --chip: var(--chart-status-warning);
+}
+.evidence-chip.is-serious {
+  --chip: var(--chart-status-serious);
+  border-color: var(--chart-status-serious);
+}
+.evidence-chip.is-critical {
+  --chip: var(--chart-status-critical);
+  border-color: var(--chart-status-critical);
+}
+.evidence-chip.is-running {
+  --chip: var(--color-series-1);
+}
+.evidence-chip.is-unknown {
+  border-style: dashed;
+}
+
+/* ------------------------------------------------------------- motion */
+
+/* Mount: once, when the figure enters the viewport, ChartFrame adds
+   .is-entering. The server HTML is the final state; only the class changes
+   after hydration, so nothing about hydration changes. */
+.rchart.is-entering .rchart-bar {
+  animation: rchart-grow-y var(--duration-slow, 360ms) cubic-bezier(0.2, 0, 0, 1) both;
+  transform-box: fill-box;
+}
+.rchart.is-entering .rchart-bar.is-horizontal {
+  animation-name: rchart-grow-x;
+}
+.rchart.is-entering .rchart-line.is-drawn {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: rchart-draw 420ms cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+.rchart.is-entering .rchart-line.is-dashed,
+.rchart.is-entering .rchart-marker,
+.rchart.is-entering .rchart-whisker,
+.rchart.is-entering .rchart-whisker-ring,
+.rchart.is-entering .rchart-value-label,
+.rchart.is-entering .rchart-end-label {
+  animation: rchart-fade var(--duration-base, 200ms) linear both;
+  animation-delay: 120ms;
+}
+.rchart.is-entering .rchart-band {
+  animation: rchart-wash 420ms linear both;
+}
+@keyframes rchart-grow-y {
+  from {
+    transform: scaleY(0);
+  }
+}
+@keyframes rchart-grow-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes rchart-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes rchart-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes rchart-wash {
+  from {
+    fill-opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rchart.is-entering .rchart-bar,
+  .rchart.is-entering .rchart-line.is-drawn,
+  .rchart.is-entering .rchart-line.is-dashed,
+  .rchart.is-entering .rchart-marker,
+  .rchart.is-entering .rchart-whisker,
+  .rchart.is-entering .rchart-whisker-ring,
+  .rchart.is-entering .rchart-value-label,
+  .rchart.is-entering .rchart-end-label,
+  .rchart.is-entering .rchart-band {
+    animation: none;
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+  }
+  .rchart.is-entering .rchart-line.is-dashed {
+    stroke-dasharray: 6 4;
+  }
+  .rchart-svg .rchart-marker,
+  .rchart-svg .rchart-bar,
+  .rchart-svg .rchart-dim,
+  .rchart-legend li {
+    transition: none;
+  }
+}

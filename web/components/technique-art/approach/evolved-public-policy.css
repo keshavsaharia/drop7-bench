@@ -1,0 +1,79 @@
+/* heuristic-search/evolved-public-policy card art. The frame closes around the
+   three things the policy may read, the four things it may not appear outside
+   it and are struck off left to right, and only then does the policy commit to
+   a column. The strikes grow from a shared left edge, so one scaleX on the
+   group draws all four.
+   Play-state, duration and easing are owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-evolved-public-policy {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-evolved-public-policy [data-anim="frame"] {
+  transform-origin: 79px 84px;
+  animation-name: tart-approach-evolved-public-policy-frame;
+}
+.tart--approach-evolved-public-policy [data-anim="hidden"] {
+  animation-name: tart-approach-evolved-public-policy-hidden;
+}
+.tart--approach-evolved-public-policy [data-anim="strike"] {
+  transform-origin: 204px 94px;
+  animation-name: tart-approach-evolved-public-policy-strike;
+}
+.tart--approach-evolved-public-policy [data-anim="pick"] {
+  animation-name: tart-approach-evolved-public-policy-pick;
+}
+
+/* The boundary closes in on what the policy is given. */
+@keyframes tart-approach-evolved-public-policy-frame {
+  0% {
+    opacity: 0;
+    transform: scale(1.12);
+  }
+  9.82%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes tart-approach-evolved-public-policy-hidden {
+  0%,
+  8.73% {
+    opacity: 0;
+  }
+  20.73%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes tart-approach-evolved-public-policy-strike {
+  0%,
+  21.82% {
+    transform: scaleX(0.02);
+    opacity: 0;
+  }
+  24% {
+    opacity: 1;
+  }
+  36%,
+  100% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+@keyframes tart-approach-evolved-public-policy-pick {
+  0%,
+  39.27% {
+    opacity: 0;
+  }
+  48%,
+  100% {
+    opacity: 1;
+  }
+}

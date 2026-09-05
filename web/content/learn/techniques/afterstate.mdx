@@ -1,0 +1,136 @@
+---
+title: Afterstates
+slug: afterstate
+summary: "Value the board after your move has resolved but before luck deals the next thing; then you never need to give the evaluator the action, and you never split a value seven ways by what comes next."
+order: 12
+technique: afterstate
+approaches: [afterstate-learning/distributional-afterstate, lifetime-objective/afterstate-net, lifetime-objective/sibling-corpus, value-policy-learning/sibling-advantage, value-policy-learning/chance-state-nnue]
+glossary: [state, action, afterstate, sibling, successor-closed data, common random numbers, label stability]
+---
+
+## The idea
+
+A learned evaluator has to attach a number to something. The obvious something
+is the pair of a situation and an action: from this board, dropping in column 3
+is worth so much. But there is a moment between your decision and the next
+piece of luck that is a better thing to value. Make the move, let everything
+that clears clear and everything that falls fall, and stop just before the game
+deals the next disc. That board is the [afterstate](/learn/glossary).
+
+Value afterstates instead of pairs and two things follow. The evaluator never
+needs to be told which action was taken, because the action's whole effect is
+already in the picture. And the value of a move never has to be split by what
+the game does next: whatever the next disc turns out to be, it arrives after
+the afterstate, so the afterstate's value is one number, an average over the
+luck still to come.
+
+## A small example
+
+Tic-tac-toe against an opponent who plays at random.
+
+1. A state is the board when it is your turn. An action is a square. An
+   afterstate is the board after your mark is placed, before the opponent's
+   random reply.
+2. Value states directly and you also have to learn, for every state, which of
+   up to nine actions is best. Value afterstates and there is one number per
+   resulting board. To choose, place each candidate mark, look at the value of
+   each afterstate, take the best.
+3. Different pairs of state and action lead to the same afterstate, and they
+   share one value. There is less to learn.
+4. The opponent's reply sits after the afterstate, so an afterstate's value is
+   an average over that reply, learned from experience.
+
+<AfterstateThreeFrames />
+
+5. To train fairly, label every candidate afterstate at a position, and label
+   them under the same random replies (common random numbers), so the ranking
+   measures the moves and the luck cancels.
+6. The catch. The label is itself an average over imagined futures. With too
+   few futures the "best" afterstate is mostly noise, and you have to check the
+   label's stability before you trust a model trained on it.
+
+## How it works
+
+At a position, form every legal afterstate: for each candidate action, apply it
+and resolve everything that follows without luck. Hand each afterstate to one
+evaluator, which sees the board and whatever else is public but never the
+action, and get one number back. Play the action whose afterstate scored
+highest.
+
+<AfterstateSevenBoards />
+
+Training the evaluator needs a label for each afterstate: how the game went
+from there. Since the future depends on luck, the label is an average over
+imagined futures, played out by some continuation policy. Two decisions matter.
+Label every [sibling](/learn/glossary) afterstate at each position, so that the
+training data contains the comparisons the evaluator will be asked to make at
+play time; a corpus built that way is
+[successor-closed](/learn/glossary). And run the siblings through the same
+imagined futures, so that a difference between two labels is a difference
+between two boards. Then, before training anything, check that the labels hold
+still: split the futures into two halves, rank the siblings under each half, and
+see whether the two rankings agree.
+
+<AfterstateLabelStability />
+
+## In Drop7
+
+A Drop7 afterstate is the board after the visible disc has landed and every
+wave of clearing, falling and revealing has finished, together with the next
+visible disc and the moves until the next rise. Everything in it is on the
+screen. At a position there are up to seven of them, one per legal column, and
+often fewer distinct ones, because two columns can leave the same board.
+
+Almost every learned evaluator on this site chooses a column this way, by
+simulating each drop and scoring the board it leaves; the
+[n-tuple family page](/approach/ntuple-rl) describes that step. What the
+afterstate-learning pages add is the training side: labelling every sibling
+under pinned futures, and testing the labels before trusting them. The
+[concept page on ranking siblings](/learn/concepts/ranking-siblings) explains
+the failure this is meant to prevent: a model that has only ever seen the moves
+that were played, asked to rank the ones that were not.
+
+Pages that use afterstates:
+
+- [Distributional afterstate ranker](/approach/afterstate-learning/distributional-afterstate),
+  which labels every sibling with 16 quantiles of its outcome under pinned
+  futures and trains one network with a ranking loss.
+- [A network that predicts how long you will live](/approach/lifetime-objective/afterstate-net),
+  a proposal for an afterstate evaluator whose target is remaining lifetime; it
+  has never been trained.
+- [The data factory, and the switch that was left off](/approach/lifetime-objective/sibling-corpus),
+  which builds the labelled positions for that family.
+- [Sibling advantage](/approach/value-policy-learning/sibling-advantage), which
+  learns only which of the seven siblings came out ahead under an aligned
+  future.
+- [Chance-state NNUE](/approach/value-policy-learning/chance-state-nnue), which
+  judges the board just before the next disc is dealt, so the value is never
+  split seven ways by the deal.
+
+## What it cannot do
+
+The one full test of the idea on this site never played a game. Its results are
+offline ranking comparisons at pilot tier, and they turn on the stability check
+in step 6.
+
+With eight pinned futures per column the labels were noise. Agreement between
+the two half-rankings was 0.2457 against a floor of 0.50 fixed in advance, on
+2,470 held-out positions, and the spread of outcomes within one column, 20,922
+points, was about three times the typical gap between columns, 7,096 points
+([Distributional afterstate ranker](/approach/afterstate-learning/distributional-afterstate)).
+With 256 futures per column the labels held still, and the verdict was a clean
+negative: on 2,523 held-out positions the model ranked columns better than the
+one-move policy that had generated its labels and worse than the fair depth-4
+search, with top-1 agreement of 0.4245 against 0.4986, in both halves of the
+data. Letting the model override the search only on near-ties, and only when
+its advantage survived a resampling test, improved on the search in both halves
+and failed its frozen gate in one of them: 0.0075 where 0.01 was required, on
+1,030 eligible positions out of 2,689.
+
+The record states its own limitation. The labels are 40-move outcomes under a
+weak, fixed continuation policy, and the search is scored against that same
+target, so an offline ranking cannot say what either would do over a whole
+game. The afterstate takes the action out of the evaluator's input and makes
+every sibling measurable. It does not make the measurement cheap: the noise in
+an averaged future is paid for in futures, 256 per column here, before a label
+is worth training on.

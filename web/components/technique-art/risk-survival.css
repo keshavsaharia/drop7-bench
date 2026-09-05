@@ -1,0 +1,49 @@
+/* Risk and survival card art. Score and height draw together, the cross and
+   the end marker appear when the height line meets the top rule. Only
+   stroke-dashoffset, transform and opacity animate; play-state is owned by
+   the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--risk-survival {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+:where(.tart--risk-survival) .tart-final {
+  opacity: 0;
+}
+
+.tart--risk-survival [data-anim] {
+  animation-duration: var(--tart-duration);
+  animation-timing-function: var(--ease-standard, cubic-bezier(0.2, 0, 0, 1));
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+.tart--risk-survival .score,
+.tart--risk-survival .height { animation-name: tart-risk-survival-draw; }
+.tart--risk-survival .end { animation-name: tart-risk-survival-end; }
+.tart--risk-survival .hit {
+  animation-name: tart-risk-survival-hit;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.tart--risk-survival .over { animation-name: tart-risk-survival-over; }
+
+@keyframes tart-risk-survival-draw {
+  0%, 2.18% { stroke-dashoffset: 1; }
+  38.18%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes tart-risk-survival-end {
+  0%, 38.18% { opacity: 0; }
+  40.36%, 100% { opacity: 1; }
+}
+@keyframes tart-risk-survival-hit {
+  0%, 39.27% { opacity: 0; transform: scale(0.4); }
+  42.55%, 100% { opacity: 1; transform: scale(1); }
+}
+@keyframes tart-risk-survival-over {
+  0%, 43.64% { opacity: 0; }
+  45.82%, 100% { opacity: 1; }
+}

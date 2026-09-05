@@ -1,0 +1,83 @@
+/* heuristic-search/evolution card art. Three bands read top to bottom: the
+   population, the three elites ringed and dropped down, and the new generation
+   bred from them with one stripe of every copy changed. Only the culled half of
+   the first band dims; everything else arrives by falling into place, which is
+   the generational loop the page describes.
+   Play-state, duration and easing are owned by the shared art.css. */
+
+.tart--approach-evolution [data-anim="cull"] {
+  animation-name: tart-approach-evolution-cull;
+}
+.tart--approach-evolution [data-anim="rings"] {
+  animation-name: tart-approach-evolution-rings;
+}
+.tart--approach-evolution [data-anim="keep"] {
+  animation-name: tart-approach-evolution-keep;
+}
+.tart--approach-evolution [data-anim="breed"] {
+  animation-name: tart-approach-evolution-breed;
+}
+.tart--approach-evolution [data-anim="mutate"] {
+  animation-name: tart-approach-evolution-mutate;
+}
+
+/* Ranking: the three that are not kept fade back but stay on the board. */
+@keyframes tart-approach-evolution-cull {
+  0%,
+  20% {
+    opacity: 1;
+  }
+  36%,
+  100% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes tart-approach-evolution-rings {
+  0%,
+  16% {
+    opacity: 0;
+  }
+  32%,
+  100% {
+    opacity: 1;
+  }
+}
+
+/* The elites drop one band; the children drop one band further. */
+@keyframes tart-approach-evolution-keep {
+  0%,
+  38% {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  58%,
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes tart-approach-evolution-breed {
+  0%,
+  60% {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  80%,
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes tart-approach-evolution-mutate {
+  0%,
+  82% {
+    opacity: 0;
+  }
+  96%,
+  100% {
+    opacity: 1;
+  }
+}

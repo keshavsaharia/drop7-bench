@@ -54,7 +54,7 @@ test("every checked-in scripted round is valid and self-consistent", () => {
 test("competition policies are public and link to checked-in approach pages", () => {
   assert.ok(COMPETITION_POLICY_IDS.includes("expectimax-d4"));
   for (const policy of BENCH_POLICIES) {
-    const relative = policy.researchPath.replace(/^\//, "");
+    const relative = policy.researchPath.replace(/^\/approach\//, "approaches/");
     assert.ok(
       existsSync(join(REPO_ROOT, relative, "README.mdx")),
       `${policy.id} research page exists`,
@@ -119,7 +119,7 @@ test("an illegal policy choice falls back to a legal column and is counted", () 
     name: "Always illegal",
     family: "test",
     description: "test double",
-    researchPath: "/approaches/heuristic-search/policy-comparison" as const,
+    researchPath: "/approach/heuristic-search/policy-comparison" as const,
     publicInformation: true,
     chooseColumn: () => 99,
   };

@@ -8,47 +8,20 @@
  * of a delta cell to pick an accent colour; it reports the sign the author
  * already wrote and makes no judgement about whether that sign is good.
  *
- * Styling follows the console's existing vocabulary (Research.tsx, Board.tsx):
- * zinc cards, emerald for positive, orange for negative, amber for unsettled,
- * sky for open, purple for proposals. A negative result is a completed
- * scientific contribution and is never styled as an error.
+ * Colour comes from the tokens through the `.log-*`, `.badge` and `.chip`
+ * blocks in globals.css. A negative result is a completed scientific
+ * contribution and is never styled as an error.
  *
  * Server components only.
  */
 
 import { Badge } from "./Badge";
 
-/* ---------------------------------------------------------------- accents */
+/* ---------------------------------------------------------------- Finding */
 
 export type FindingKind = "positive" | "negative" | "neutral" | "open";
 
-interface Accent {
-  rail: string;
-  chip: string;
-  label: string;
-}
-
-const FINDING_ACCENTS: Record<FindingKind, Accent> = {
-  positive: { rail: "border-l-emerald-600", chip: "bg-emerald-900/60 text-emerald-200", label: "positive" },
-  negative: { rail: "border-l-orange-700", chip: "bg-orange-900/60 text-orange-200", label: "negative" },
-  neutral: { rail: "border-l-zinc-600", chip: "bg-zinc-800 text-zinc-300", label: "neutral" },
-  open: { rail: "border-l-sky-700", chip: "bg-sky-900/60 text-sky-200", label: "open" },
-};
-
-const OUTCOME_CHIPS: Record<string, string> = {
-  positive: "bg-emerald-900/60 text-emerald-200",
-  negative: "bg-orange-900/60 text-orange-200",
-  open: "bg-sky-900/60 text-sky-200",
-  neutral: "bg-zinc-800 text-zinc-300",
-  inconclusive: "bg-amber-900/60 text-amber-200",
-};
-
-/** Chip colour for an outcome tally key; unknown keys stay neutral zinc. */
-export function outcomeChipClass(key: string): string {
-  return OUTCOME_CHIPS[key] ?? "bg-zinc-800 text-zinc-300";
-}
-
-/* ---------------------------------------------------------------- Finding */
+const FINDING_KINDS: ReadonlySet<string> = new Set(["positive", "negative", "neutral", "open"]);
 
 /**
  * The workhorse card: one result from the day's work.
@@ -67,23 +40,15 @@ export function Finding({
   metric?: string;
   children?: React.ReactNode;
 }) {
-  const accent = FINDING_ACCENTS[kind] ?? FINDING_ACCENTS.neutral;
+  const resolved: FindingKind = FINDING_KINDS.has(kind) ? kind : "neutral";
   return (
-    <section className={`log-card my-4 rounded-xl border border-l-4 border-zinc-800 bg-zinc-900/50 p-4 ${accent.rail}`}>
-      <header className="flex flex-wrap items-center gap-2">
-        <Badge label={accent.label} className={accent.chip} />
-        <h3 className="text-sm font-bold text-zinc-100">{title}</h3>
-        {metric && (
-          <span className="ml-auto rounded-md border border-zinc-700 bg-zinc-950/60 px-2 py-0.5 text-xs font-semibold tabular-nums text-zinc-200">
-            {metric}
-          </span>
-        )}
+    <section className={`log-card log-card--${resolved}`}>
+      <header className="log-card-head">
+        <Badge kind="outcome" value={resolved} />
+        <h3>{title}</h3>
+        {metric && <span className="log-card-metric">{metric}</span>}
       </header>
-      {children && (
-        <div className="log-body mt-2 text-sm leading-relaxed text-zinc-300">
-          {children}
-        </div>
-      )}
+      {children && <div className="log-body">{children}</div>}
     </section>
   );
 }
@@ -118,24 +83,16 @@ export function DeadEnd({
   children?: React.ReactNode;
 }) {
   return (
-    <section className="log-card my-4 rounded-xl border border-l-4 border-zinc-800 border-l-zinc-500 bg-zinc-900/50 p-4">
-      <header className="flex flex-wrap items-center gap-2">
-        <Badge label="dead end · recorded result" className="bg-zinc-700/70 text-zinc-100" />
-        <h3 className="text-sm font-bold text-zinc-100">{title}</h3>
-        {cost && (
-          <span className="ml-auto rounded-md border border-zinc-700 bg-zinc-950/60 px-2 py-0.5 text-xs font-semibold tabular-nums text-zinc-300">
-            cost: {cost}
-          </span>
-        )}
+    <section className="log-card log-card--negative">
+      <header className="log-card-head">
+        <Badge value="dead end · recorded result" />
+        <h3>{title}</h3>
+        {cost && <span className="log-card-metric">cost: {cost}</span>}
       </header>
-      {children && (
-        <div className="log-body mt-2 text-sm leading-relaxed text-zinc-300">
-          {children}
-        </div>
-      )}
+      {children && <div className="log-body">{children}</div>}
       {verdict && (
-        <footer className="mt-3 flex flex-wrap items-center gap-2 border-t border-zinc-800 pt-2 text-xs text-zinc-500">
-          <Badge label={VERDICT_LABEL[verdict] ?? verdict} />
+        <footer className="log-card-foot">
+          <Badge value={VERDICT_LABEL[verdict] ?? verdict} />
           <span>{VERDICT_TEXT[verdict] ?? ""}</span>
         </footer>
       )}
@@ -147,12 +104,7 @@ export function DeadEnd({
 
 export type DirectionStatus = "proposed" | "running" | "blocked" | "closed";
 
-const DIRECTION_ACCENTS: Record<DirectionStatus, Accent> = {
-  proposed: { rail: "border-l-purple-700", chip: "bg-purple-900/60 text-purple-200", label: "proposed" },
-  running: { rail: "border-l-sky-700", chip: "bg-sky-900/60 text-sky-200", label: "running" },
-  blocked: { rail: "border-l-amber-700", chip: "bg-amber-900/60 text-amber-200", label: "blocked" },
-  closed: { rail: "border-l-zinc-600", chip: "bg-zinc-800 text-zinc-300", label: "closed" },
-};
+const DIRECTION_STATUSES: ReadonlySet<string> = new Set(["proposed", "running", "blocked", "closed"]);
 
 /** A research direction: new, running, stuck, or shut. */
 export function Direction({
@@ -167,19 +119,15 @@ export function Direction({
   owner?: string;
   children?: React.ReactNode;
 }) {
-  const accent = DIRECTION_ACCENTS[status] ?? DIRECTION_ACCENTS.proposed;
+  const resolved: DirectionStatus = DIRECTION_STATUSES.has(status) ? status : "proposed";
   return (
-    <section className={`log-card my-4 rounded-xl border border-l-4 border-zinc-800 bg-zinc-950/50 p-4 ${accent.rail}`}>
-      <header className="flex flex-wrap items-center gap-2">
-        <Badge label={accent.label} className={accent.chip} />
-        <h3 className="text-sm font-bold text-zinc-100">{title}</h3>
-        {owner && <span className="ml-auto text-xs text-zinc-500">owner: {owner}</span>}
+    <section className={`log-card log-card--${resolved}`}>
+      <header className="log-card-head">
+        <Badge kind="status" value={resolved} />
+        <h3>{title}</h3>
+        {owner && <span className="log-card-owner">owner: {owner}</span>}
       </header>
-      {children && (
-        <div className="log-body mt-2 text-sm leading-relaxed text-zinc-300">
-          {children}
-        </div>
-      )}
+      {children && <div className="log-body">{children}</div>}
     </section>
   );
 }
@@ -213,12 +161,6 @@ function deltaTone(value: string): "up" | "down" | "flat" {
   return "flat";
 }
 
-const DELTA_TONE_CLASS: Record<string, string> = {
-  up: "text-emerald-300",
-  down: "text-orange-300",
-  flat: "text-zinc-300",
-};
-
 /**
  * A compact comparison of experiment arms. Every cell is a pre-formatted
  * string from the entry's author; a missing cell renders as an em dash rather
@@ -239,7 +181,7 @@ export function ArmTable({
   return (
     <figure className="arm-table">
       <div className="arm-table-scroll">
-        <table>
+        <table className="data-table">
           <thead>
             <tr>
               {cols.map((column) => (
@@ -263,14 +205,10 @@ export function ArmTable({
                   // Absent (undefined/null) renders an em dash; an explicit
                   // empty string is an intentionally blank cell and stays blank.
                   const text = raw === undefined || raw === null ? null : String(raw);
-                  const tone = text && spec?.delta ? DELTA_TONE_CLASS[deltaTone(text)] : undefined;
+                  const tone = text && spec?.delta ? `delta-${deltaTone(text)}` : undefined;
                   return (
                     <td key={key} className={spec?.numeric ? "num" : undefined}>
-                      {text === null ? (
-                        <span className="text-zinc-600">—</span>
-                      ) : (
-                        <span className={tone}>{text}</span>
-                      )}
+                      {text === null ? <span className="cell-absent">—</span> : <span className={tone}>{text}</span>}
                     </td>
                   );
                 })}
@@ -279,7 +217,7 @@ export function ArmTable({
           </tbody>
         </table>
       </div>
-      {caption && <figcaption className="engine-caption">{caption}</figcaption>}
+      {caption && <figcaption className="fig-caption">{caption}</figcaption>}
     </figure>
   );
 }
@@ -292,12 +230,6 @@ export interface TimelineEntry {
   kind?: "positive" | "negative" | "neutral";
 }
 
-const MARKER_CLASS: Record<string, string> = {
-  positive: "bg-emerald-500",
-  negative: "bg-orange-500",
-  neutral: "bg-zinc-500",
-};
-
 /** What happened when, over a night of runs. Times are the author's strings. */
 export function Timeline({
   entries,
@@ -309,29 +241,20 @@ export function Timeline({
   const list = entries ?? [];
   if (list.length === 0) return null;
   return (
-    <figure className="log-timeline my-4 rounded-xl border border-zinc-800 bg-zinc-950/40 px-4 py-3">
+    <figure className="log-timeline">
       <ol>
         {list.map((entry, index) => (
-          <li key={index} className="relative flex gap-3 py-1.5">
-            <span className="w-14 shrink-0 pt-px text-right text-xs tabular-nums text-zinc-500">
-              {entry.time}
+          <li key={index}>
+            <span className="log-timeline-time">{entry.time}</span>
+            <span className="log-timeline-rail">
+              <span aria-hidden="true" className={`log-timeline-dot log-timeline-dot--${entry.kind ?? "neutral"}`} />
+              {index < list.length - 1 && <span aria-hidden="true" className="log-timeline-line" />}
             </span>
-            <span className="relative flex w-3 shrink-0 justify-center">
-              <span
-                aria-hidden="true"
-                className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${
-                  MARKER_CLASS[entry.kind ?? "neutral"] ?? MARKER_CLASS.neutral
-                }`}
-              />
-              {index < list.length - 1 && (
-                <span aria-hidden="true" className="absolute top-3.5 bottom-[-0.5rem] w-px bg-zinc-800" />
-              )}
-            </span>
-            <span className="text-sm leading-relaxed text-zinc-300">{entry.text}</span>
+            <span className="log-timeline-text">{entry.text}</span>
           </li>
         ))}
       </ol>
-      {caption && <figcaption className="engine-caption">{caption}</figcaption>}
+      {caption && <figcaption className="fig-caption">{caption}</figcaption>}
     </figure>
   );
 }
@@ -341,11 +264,9 @@ export function Timeline({
 /** The day's one-sentence takeaway, attributed to whoever wrote it. */
 export function LogQuote({ who, children }: { who?: string; children: React.ReactNode }) {
   return (
-    <figure className="log-quote my-5 border-l-4 border-sky-800 bg-sky-950/20 px-5 py-4">
-      <blockquote className="log-body text-base leading-relaxed text-sky-50">
-        {children}
-      </blockquote>
-      {who && <figcaption className="mt-2 text-xs text-sky-300/80">— {who}</figcaption>}
+    <figure className="log-quote">
+      <blockquote className="log-body">{children}</blockquote>
+      {who && <figcaption>— {who}</figcaption>}
     </figure>
   );
 }
@@ -358,10 +279,7 @@ export function ContributorChips({ contributors }: { contributors: readonly stri
   return (
     <div className="flex flex-wrap items-center gap-1.5">
       {contributors.map((who) => (
-        <span
-          key={who}
-          className="rounded-full border border-zinc-700 bg-zinc-900 px-2 py-0.5 text-[11px] text-zinc-300"
-        >
+        <span key={who} className="chip">
           {who}
         </span>
       ))}
@@ -375,7 +293,7 @@ export function TagChips({ tags }: { tags: readonly string[] }) {
   return (
     <div className="flex flex-wrap items-center gap-1.5">
       {tags.map((tag) => (
-        <span key={tag} className="rounded bg-zinc-800/80 px-1.5 py-0.5 text-[11px] text-zinc-400">
+        <span key={tag} className="chip chip--tag">
           #{tag}
         </span>
       ))}
@@ -391,7 +309,7 @@ export function OutcomeCounts({ outcomes }: { outcomes: Record<string, number> |
   return (
     <div className="flex flex-wrap items-center gap-1.5">
       {keys.map((key) => (
-        <Badge key={key} label={`${outcomes[key]} ${key}`} className={outcomeChipClass(key)} />
+        <Badge key={key} kind="outcome" value={key} label={`${outcomes[key]} ${key}`} />
       ))}
     </div>
   );

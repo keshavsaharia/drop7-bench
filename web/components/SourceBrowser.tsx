@@ -42,23 +42,23 @@ function DirectoryContents({ entries }: { entries: RepoSourceTreeNode[] }) {
           <Link
             key={child.path}
             href={child.href}
-            className="group flex min-w-0 items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900/40 p-3 hover:border-sky-900 hover:bg-zinc-900/70"
+            className="group flex min-w-0 items-center gap-3 rounded-lg border border-rule bg-surface p-3 transition-colors hover:border-rule-strong hover:bg-hover"
           >
             <span
               className={
                 directory
-                  ? "flex size-9 shrink-0 items-center justify-center rounded-lg bg-sky-500/10 text-sky-400"
-                  : "flex size-9 shrink-0 items-center justify-center rounded-lg bg-zinc-800 font-mono text-[10px] font-bold text-zinc-400"
+                  ? "flex size-9 shrink-0 items-center justify-center rounded-md bg-accent-soft text-accent"
+                  : "flex size-9 shrink-0 items-center justify-center rounded-md bg-raised font-mono text-[10px] font-bold text-ink-2"
               }
               aria-hidden="true"
             >
               {directory ? "▰" : language === "cpp" ? "C++" : language === "rust" ? "RS" : language === "typescript" || language === "tsx" ? "TS" : "·/·"}
             </span>
             <span className="min-w-0">
-              <span className="block truncate font-mono text-sm text-zinc-200 group-hover:text-sky-300">
+              <span className="block truncate font-mono text-small text-ink-1 group-hover:text-accent">
                 {child.name}
               </span>
-              <span className="mt-0.5 block text-xs text-zinc-600">
+              <span className="mt-0.5 block text-caption text-ink-3">
                 {directory ? `${child.children?.length ?? 0} entries` : sourceLanguageLabel(language ?? "text")}
               </span>
             </span>
@@ -72,6 +72,8 @@ function DirectoryContents({ entries }: { entries: RepoSourceTreeNode[] }) {
 async function HighlightedCode({ entry }: { entry: Extract<RepoSourceEntry, { kind: "file" }> }) {
   const html = await codeToHtml(entry.source, {
     lang: entry.language as BundledLanguage,
+    // Paired with `--code-ground` in SourceBrowser.module.css, which is this
+    // theme's own background; change both together.
     theme: "github-dark-default",
     transformers: [
       {
@@ -91,11 +93,11 @@ async function HighlightedCode({ entry }: { entry: Extract<RepoSourceEntry, { ki
           <span />
           <span />
         </span>
-        <span className="min-w-0 truncate font-mono text-xs text-zinc-400">{entry.path}</span>
-        <span className="shrink-0 rounded border border-zinc-800 bg-zinc-950 px-1.5 py-0.5 text-[10px] text-zinc-500">
+        <span className="min-w-0 truncate font-mono text-caption text-ink-2">{entry.path}</span>
+        <span className="shrink-0 rounded-xs border border-rule bg-bg px-1.5 py-0.5 text-[10px] text-ink-3">
           {sourceLanguageLabel(entry.language)}
         </span>
-        <span className="ml-auto shrink-0 text-xs text-zinc-600">
+        <span className="ml-auto shrink-0 text-caption text-ink-3">
           {entry.lines.toLocaleString()} lines · {formatBytes(entry.bytes)}
         </span>
       </div>
@@ -115,8 +117,8 @@ export async function SourceBrowser({ entry, treeRoot }: SourceBrowserProps) {
     <div className={`source-workspace ${styles.workspace}`}>
       <aside className={styles.sidebar} aria-label="Source navigation">
         <div className={styles.treeToolbar}>
-          <span className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-400">Explorer</span>
-          <span className="min-w-0 truncate font-mono text-[10px] text-zinc-600">{treeRoot}</span>
+          <span className="label">Explorer</span>
+          <span className="min-w-0 truncate font-mono text-[10px] text-ink-3">{treeRoot}</span>
         </div>
         <FileTree
           tree={[tree]}
@@ -132,8 +134,8 @@ export async function SourceBrowser({ entry, treeRoot }: SourceBrowserProps) {
         ) : (
           <div className={styles.directoryPane}>
             <div className="mb-4 flex items-center justify-between gap-3">
-              <h1 className="min-w-0 truncate font-mono text-sm font-semibold text-zinc-200">{entry.path}</h1>
-              <span className="shrink-0 text-xs text-zinc-600">{entry.children.length} entries</span>
+              <h1 className="min-w-0 truncate font-mono text-small font-semibold text-ink">{entry.path}</h1>
+              <span className="shrink-0 text-caption text-ink-3">{entry.children.length} entries</span>
             </div>
             <DirectoryContents entries={entry.children} />
           </div>

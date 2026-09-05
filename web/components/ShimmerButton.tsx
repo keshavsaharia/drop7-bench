@@ -1,35 +1,9 @@
-import Link, { type LinkProps } from "next/link";
-import type { AnchorHTMLAttributes, ReactNode } from "react";
+import { Button, type ButtonLinkProps } from "./Button";
 
-type ShimmerButtonProps = LinkProps &
-  Omit<AnchorHTMLAttributes<HTMLAnchorElement>, keyof LinkProps> & {
-    icon?: ReactNode;
-  };
-
-/** Primary navigation CTA with the shared Drop7 blue shimmer treatment. */
-export function ShimmerButton({
-  children,
-  className,
-  icon,
-  ...props
-}: ShimmerButtonProps) {
-  return (
-    <Link
-      {...props}
-      className={[
-        "shimmer-button",
-        icon ? "shimmer-button-with-icon" : "",
-        className ?? "",
-      ]
-        .filter(Boolean)
-        .join(" ")}
-    >
-      {icon && (
-        <span className="shimmer-button-icon" aria-hidden="true">
-          {icon}
-        </span>
-      )}
-      {children}
-    </Link>
-  );
+/**
+ * @deprecated The shimmer sweep is gone; this is the primary `Button`, kept
+ * so existing call sites compile. Import `Button` from "./Button" instead.
+ */
+export function ShimmerButton(props: Omit<ButtonLinkProps, "variant">) {
+  return <Button variant="primary" {...props} />;
 }

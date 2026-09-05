@@ -5,6 +5,8 @@ summary: Adds one human rule to the depth-4 search by refusing risky drops above
 status: preregistered
 evidence: none
 reads: public
+kind: strategy
+technique: risk-survival
 ---
 
 Give the depth-4 search one human rule at the root — refuse to drop a 3 or
@@ -21,7 +23,7 @@ as the fifth or sixth disc of a column, where it can never clear downward, and
 a few rises later the game ends under it. A human treats that placement as a
 danger — "it must be cracked horizontally now", and simply does not make it
 when there is a choice. The
-[entombed-disc analysis](/approaches/lifetime-objective/entombed-discs) showed
+[entombed-disc analysis](/approach/lifetime-objective/entombed-discs) showed
 the observation is real (three quarters of the search's deaths end with such a
 disc on the board, with about two rises of warning) but that the search's
 board scorer already *values* those positions correctly. What it left open is

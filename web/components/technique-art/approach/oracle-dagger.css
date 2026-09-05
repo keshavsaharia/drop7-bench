@@ -1,0 +1,57 @@
+/* oracle-curriculum/oracle-dagger card art. The student's branch draws itself
+   away from the teacher's line, then three corrections drop onto the states
+   the drift reached — each one longer than the last — and the labelled states
+   are ringed. The resting frame keeps the branch, the corrections and the
+   rings. Play-state, duration and easing are owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-oracle-dagger {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-oracle-dagger [data-anim="drift"] {
+  animation-name: tart-approach-oracle-dagger-drift;
+}
+.tart--approach-oracle-dagger [data-anim="fix-0"] {
+  animation-name: tart-approach-oracle-dagger-fix-0;
+}
+.tart--approach-oracle-dagger [data-anim="fix-1"] {
+  animation-name: tart-approach-oracle-dagger-fix-1;
+}
+.tart--approach-oracle-dagger [data-anim="fix-2"] {
+  animation-name: tart-approach-oracle-dagger-fix-2;
+}
+.tart--approach-oracle-dagger [data-anim="marks"] {
+  animation-name: tart-approach-oracle-dagger-marks;
+}
+.tart--approach-oracle-dagger [data-anim="caption"] {
+  animation-name: tart-approach-oracle-dagger-caption;
+}
+
+/* 210 is the branch's dash length: 210 hides it, 0 draws it whole. */
+@keyframes tart-approach-oracle-dagger-drift {
+  0%, 2.18% { stroke-dashoffset: 210; }
+  19.64%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes tart-approach-oracle-dagger-fix-0 {
+  0%, 17.45% { stroke-dashoffset: 40; }
+  24%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes tart-approach-oracle-dagger-fix-1 {
+  0%, 21.82% { stroke-dashoffset: 76; }
+  29.45%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes tart-approach-oracle-dagger-fix-2 {
+  0%, 26.18% { stroke-dashoffset: 104; }
+  34.91%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes tart-approach-oracle-dagger-marks {
+  0%, 36% { opacity: 0; }
+  42.55%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-oracle-dagger-caption {
+  0%, 44.73% { opacity: 0; }
+  50.18%, 100% { opacity: 1; }
+}

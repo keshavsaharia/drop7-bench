@@ -294,7 +294,7 @@ Nothing else ends a game: there are no timers, no move limits, and no way to los
 
 ## Vocabulary
 
-| Rule | Precisely |
+| Rule | Exact statement |
 | --- | --- |
 | Board | 7 columns × 7 rows. |
 | A turn | You are shown the next disc; you choose a column whose top cell is empty; the disc falls to the lowest empty cell in that column. |
@@ -309,7 +309,9 @@ Nothing else ends a game: there are no timers, no move limits, and no way to los
 
 ## Why the strategy is hard
 
-A common pattern that human players naturally do in this game, that every computer
-policy so far has not been able to perform, involves the long-term strategic thinking to 
-build up large chain reactions. If you review the computer games, you will see they tend
-to play very efficiently but currently lose because of avoidable mistakes.
+Nearly all the points in this mode come from surviving rise cycles: across 64
+games of the reference policy, 94.29% of the points came from the 17,000-point
+rise bonus and 5.71% from chains
+([finding-01](/docs/exploratory/finding-01-score-is-survival), development tier).
+So a strategy's real job is to keep the board alive for one more cycle, and
+[Score and survival](/learn/concepts/survival-vs-score) measures what that costs.

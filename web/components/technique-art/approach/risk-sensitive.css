@@ -1,0 +1,50 @@
+/* heuristic-search/risk-sensitive card art. The scenarios fan out from the
+   mean line, both columns put their plain average on the same mark, the
+   worst-quarter brackets and their averages arrive, and only then do the two
+   columns separate: the wide one dims and the shallow-tailed one is picked.
+   animation-name only: play-state and delay are owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-risk-sensitive {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-risk-sensitive [data-anim] {
+  animation-duration: var(--tart-duration);
+  animation-timing-function: var(--tart-ease, var(--ease-standard, cubic-bezier(0.2, 0, 0, 1)));
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+.tart--approach-risk-sensitive [data-anim="fan"] {
+  animation-name: tart-approach-risk-sensitive-fan;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.tart--approach-risk-sensitive [data-anim="mid"] { animation-name: tart-approach-risk-sensitive-mid; }
+.tart--approach-risk-sensitive [data-anim="tail"] { animation-name: tart-approach-risk-sensitive-tail; }
+.tart--approach-risk-sensitive [data-anim="dim"] { animation-name: tart-approach-risk-sensitive-dim; }
+.tart--approach-risk-sensitive [data-anim="pick"] { animation-name: tart-approach-risk-sensitive-pick; }
+
+@keyframes tart-approach-risk-sensitive-fan {
+  0% { opacity: 0; transform: scaleY(0.08); }
+  16.36%, 100% { opacity: 1; transform: scaleY(1); }
+}
+@keyframes tart-approach-risk-sensitive-mid {
+  0%, 14.18% { opacity: 0; }
+  20.73%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-risk-sensitive-tail {
+  0%, 25.09% { opacity: 0; }
+  32.73%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-risk-sensitive-dim {
+  0%, 37.09% { opacity: 1; }
+  44.73%, 100% { opacity: 0.45; }
+}
+@keyframes tart-approach-risk-sensitive-pick {
+  0%, 38.18% { opacity: 0; }
+  46.91%, 100% { opacity: 1; }
+}

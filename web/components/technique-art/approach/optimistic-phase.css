@@ -1,0 +1,149 @@
+/* ntuple-rl/optimistic-phase card art: the search fans to all seven columns,
+   then crosses one rise boundary with the best two and a second with one. Each
+   gate it crosses is a row rise on the board beside it, so a fresh row of
+   covers arrives underneath and the stack is pushed up. Longer than the
+   standard beat because two boundaries have to be told apart. Play-state,
+   duration and easing are owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-optimistic-phase {
+  --tart-motion: calc(var(--duration-art, 2400ms) * 1.6);
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-optimistic-phase [data-anim] {
+  animation-duration: var(--tart-duration);
+}
+
+.tart--approach-optimistic-phase [data-anim="stack"] {
+  animation-name: tart-approach-optimistic-phase-stack;
+}
+.tart--approach-optimistic-phase [data-anim="cover-1"] {
+  animation-name: tart-approach-optimistic-phase-cover-1;
+}
+.tart--approach-optimistic-phase [data-anim="cover-2"] {
+  animation-name: tart-approach-optimistic-phase-cover-2;
+}
+.tart--approach-optimistic-phase [data-anim="fan"] {
+  animation-name: tart-approach-optimistic-phase-fan;
+}
+.tart--approach-optimistic-phase [data-anim="gate-1"] {
+  animation-name: tart-approach-optimistic-phase-gate-1;
+}
+.tart--approach-optimistic-phase [data-anim="pair"] {
+  animation-name: tart-approach-optimistic-phase-pair;
+}
+.tart--approach-optimistic-phase [data-anim="gate-2"] {
+  animation-name: tart-approach-optimistic-phase-gate-2;
+}
+.tart--approach-optimistic-phase [data-anim="deep"] {
+  animation-name: tart-approach-optimistic-phase-deep;
+}
+.tart--approach-optimistic-phase [data-anim="value"] {
+  animation-name: tart-approach-optimistic-phase-value;
+}
+
+/* One row up at each rise, so the board ends two rows higher than it began. */
+@keyframes tart-approach-optimistic-phase-stack {
+  0%,
+  17.1% {
+    transform: translateY(36px);
+  }
+  23.67%,
+  38.14% {
+    transform: translateY(18px);
+  }
+  44.71%,
+  100% {
+    transform: translateY(0);
+  }
+}
+@keyframes tart-approach-optimistic-phase-cover-1 {
+  0%,
+  17.1% {
+    transform: translateY(18px);
+    opacity: 0;
+  }
+  22.36%,
+  38.14% {
+    transform: translateY(18px);
+    opacity: 1;
+  }
+  44.71%,
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-optimistic-phase-cover-2 {
+  0%,
+  38.14% {
+    opacity: 0;
+  }
+  44.71%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-optimistic-phase-fan {
+  0%,
+  2.63% {
+    stroke-dashoffset: 72;
+  }
+  13.15%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes tart-approach-optimistic-phase-gate-1 {
+  0%,
+  14.47% {
+    opacity: 0;
+  }
+  21.04%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-optimistic-phase-pair {
+  0%,
+  22.36% {
+    stroke-dashoffset: 70;
+  }
+  34.19%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes tart-approach-optimistic-phase-gate-2 {
+  0%,
+  35.51% {
+    opacity: 0;
+  }
+  42.08%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-optimistic-phase-deep {
+  0%,
+  43.4% {
+    stroke-dashoffset: 52;
+  }
+  55.23%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes tart-approach-optimistic-phase-value {
+  0%,
+  56.55% {
+    opacity: 0;
+  }
+  63.12%,
+  100% {
+    opacity: 1;
+  }
+}

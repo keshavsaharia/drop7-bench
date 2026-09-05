@@ -5,6 +5,8 @@ summary: Let a small learned board evaluator decide where a deeper search should
 status: rejected
 evidence: ledger-recorded
 reads: public
+kind: strategy
+technique: nnue
 ---
 
 Let a small learned board evaluator decide where a deeper search should spend
@@ -127,7 +129,7 @@ tree-search table in the [experiment index](/docs/research/experiment-index).
 - **A rare override is a risky override.** Changing under 5% of decisions still
   lost the game, because a model disagrees with an exact search precisely where
   it is least reliable. The same shape appears again in the
-  [terminal policy iteration](/approaches/terminal-policy-iteration) family.
+  [terminal policy iteration](/approach/terminal-policy-iteration) family.
 - **More chance coverage is not a substitute for a better leaf.** The
   quadrature arm isolated that lever and it did not help.
 - **The current guidance is explicit about ordering.** The research roadmap

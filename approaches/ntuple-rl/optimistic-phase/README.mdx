@@ -1,95 +1,108 @@
 ---
-title: Fifty million moves, then a two-rise look-ahead
+title: N-tuple value with a two-rise look-ahead
 family: ntuple-rl
 summary: The family's largest run trained a pattern evaluator on 50 million moves and searched two row rises deep. Search made it worse than trusting the network alone.
 status: rejected
 evidence: ledger-recorded
 reads: public
+kind: strategy
+technique: n-tuple
+featured: true
 ---
 
-The family's largest training run: a pattern evaluator trained on 50 million
-moves, then searched two row-rises deep, and the search made it worse than just
-trusting the network.
+## The problem
 
-<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
+Nearly every learning experiment in this family taught a network the value of
+the one column the policy played, then asked it to rank the six columns it never
+played. That is the [sibling trap](/learn/concepts/ranking-siblings), and it has
+sunk most learned evaluators on this site.
 
-## The intuition
+A second problem is timing. Drop7's deadline is the row rise every five drops
+(the [rise](/learn/glossary)), and a look-ahead that stops in the middle of a
+cycle is judging a board that is about to be pushed up a row. A search that
+looked past the next rise, or the next two, would judge boards at the moment
+that decides whether the game continues. Searching that far through every
+chance outcome is expensive, so something in the chance handling has to give.
 
-Two ideas, stacked.
+## Proposed solution
 
-The first is about *what* to learn. Nearly everything else in this family
-regressed the value of the one column the policy happened to play, then had to
-guess about the six it did not. This experiment instead learns the value of a
-position directly, before the next disc is dealt — a
-[chance-state](/learn/concepts/chance-vs-choice) value, so the same learned
-number serves every column that leads there. It also starts pooled: all five
-positions in the [rise cycle](/learn/glossary) share one set of tables, and only
-after 20 million moves are the weights copied into five separate phase-specific
-heads. Pooling first means the rare phases get data from the common ones before
-they are allowed to specialise.
+Two ideas, stacked. The first is to learn the value of a position before the
+next disc is dealt, a [chance-state](/learn/concepts/chance-vs-choice) value, so
+one learned number serves every column that leads to that position and no
+column is left unlabelled. The evaluator is an
+[n-tuple network](/learn/glossary): a table of learned weights for many small
+patterns of cells, summed. It starts pooled, with all five positions in the rise
+cycle sharing one set of tables, and after 20 million moves the weights are
+copied into five phase-specific heads, so the rare phases inherit data from the
+common ones before they specialise.
 
-The second is about *how far* to look. Drop7's real deadline is the row rise
-every five drops. A search that stops in the middle of a cycle is judging a
-board that is about to be shoved upward. So this policy deepens iteratively
-across one rise boundary and then two, keeping every legal column at the root
-and admitting the best two deeper.
+The second is to look across one rise boundary and then two, keeping every legal
+column at the root and admitting the best two deeper. To make that affordable
+the search does not average over the whole chance tree. For each bundle of
+sampled outcomes it follows the single sampled outcome whose value is closest to
+the bundle's average and continues down that one line: a bounded, deterministic
+representative-outcome rollout. It is an approximation of a
+[fair](/learn/glossary) average, and it turned out to be the part that mattered.
 
-To make two-rise search affordable, it does not average over the whole chance
-tree. For each bundle of sampled outcomes it follows the single sampled outcome
-whose value is closest to the bundle's average, and continues down that line.
-That is a bounded, deterministic **representative-outcome rollout**, not an
-exact fair expectimax: a deliberate approximation, and the one that turned out
-to matter.
+The policy reads the visible board, the visible next disc and the moves until
+the next rise, and nothing else.
 
-## How it works, step by step
+## How it works
 
-1. **Train pooled.** On-policy temporal-difference learning over 184 active
-   four-cell [n-tuple](/learn/glossary) windows, reflection-canonicalised, with
-   an undiscounted three-step forward view.
-2. **Split by rise phase at 20 million moves.** Copy the pooled weights into
-   five phase-specific heads and keep training.
-3. **Stabilise at the end.** Adaptive per-weight rates are enabled only for the
-   last ten million moves of the budget.
-4. **Play.** For each legal column, take all seven coordinate-stratified
-   gray-disc reveal outcomes; deepen across one rise boundary, then two; follow
-   the representative outcome down each line; finish both boundaries inside
-   100,000 simulator calls per decision. A decision that cannot finish is a
-   fatal error, not a fallback.
+1. Train pooled. On-policy [temporal-difference](/learn/glossary) learning over
+   184 active four-cell n-tuple windows, canonicalised by reflection, with an
+   undiscounted three-step forward view. The input is the public position; the
+   output is one value for that position.
+2. Split by rise phase at 20 million moves. Copy the pooled weights into five
+   phase-specific heads and keep training to the 50-million-move budget.
+3. Stabilise at the end. Adaptive per-weight learning rates run only for the
+   last ten million moves.
+4. Play. For each legal column, take all seven coordinate-stratified gray-disc
+   reveal outcomes; deepen across one rise boundary, then two; follow the
+   representative outcome down each line; finish both boundaries inside 100,000
+   simulator calls per decision. A decision that cannot finish is a fatal error
+   rather than a fallback to a shallower answer. The output is the column with
+   the best two-rise value.
 
 ## What happened
 
-Training completed exactly as planned: 50 million moves across 1,057,844
-complete games, with no intermediate checkpoint chosen and nothing selected on
-results.
+Training ran to its budget with no checkpoint chosen on results, and the
+mandatory gate then rejected the search. On the 64-game cohort recorded in the
+[ledger](/docs/research/history) (rejected, ledger-recorded), playing the
+network's own first choice averaged 181,733 points; adding the two-rise search
+to the same weights dropped the average to 113,644. The gate required at least
+300,000. The search was worse in both halves of the cohort, on score and on
+moves, and every decision finished inside its work budget with no illegal move
+and no game cut short. The search believed in worse moves.
 
-Then the mandatory gate ran, and it rejected the whole family decisively. Just
-playing the network's own first choice scored 181,733 points and 56.4 moves per
-game. Adding the two-rise search (the entire point of the design) dropped it
-to 113,644 points and 37.4 moves. It was worse in both halves of the cohort, on
-both score and moves. The gate required at least 300,000 points and 90 moves;
-the search was nowhere near either.
+## What we learned
 
-The failure is not a resource excuse. Every decision completed inside its work
-budget, no move was illegal, and no game was cut short. The search genuinely
-believed in worse moves.
+Search over a weak evaluator can be worse than no search. Identical weights on
+an identical cohort, and two rise cycles of look-ahead lowered the mean from
+181,733 to 113,644 points (64 games, ledger). A deeper search compounds the leaf
+evaluator's errors instead of averaging them away, and here it also chased the
+approximation that made the tree affordable: following one representative
+outcome rather than averaging over chance is the kind of unfair chance handling
+this site has repeatedly measured as harmful.
 
-<TechnicalDetails title="The technical record">
+The training scale was not the problem. Fifty million moves of on-policy
+learning produced a policy roughly level with much cheaper ones in this family;
+the [compute concept page](/learn/concepts/does-more-compute-help) collects the
+other cases.
 
-Status in [the experiment index](/docs/research/experiment-index): **rejected,
-ledger-recorded** — "after 50 million transitions the representative-outcome
-search was worse than direct n-tuple play."
+The rejection covers this configuration: this learning target, this
+pooled-then-split schedule, and this representative-outcome rollout. The open
+question is what a phase-conditioned n-tuple network does as the leaf of a fair
+search such as the [reference](/approach/fair-expectimax/reference), which
+was never run.
 
-From [the ledger](/docs/research/history), on the burned 64-game cohort
-`0x3d200000...0x3d20003f`:
+<AgentContext summary="Records and provenance">
 
-| Policy | Mean score | Mean moves |
-| --- | ---: | ---: |
-| Direct n-tuple play | 181,733.422 | 56.359 |
-| Two-rise-boundary search | 113,643.969 | 37.375 |
-
-Ordered halves: direct 180,667 / 182,800 points and 56.125 / 56.594 moves;
-search 118,367 / 108,921 points and 38.719 / 36.031 moves. The final training
-chunk averaged 176,247 points and 54.811 moves.
+Status in the [experiment index](/docs/research/experiment-index): rejected,
+ledger-recorded, "after 50 million transitions the representative-outcome
+search was worse than direct n-tuple play." Ledger:
+[history](/docs/research/history), on the burned 64-game cohort
+`0x3d200000...0x3d20003f`.
 
 Training: exactly 50,000,000 transitions over 1,057,844 completed games in
 1,504.404 seconds, in resumable chunks of at most 5 million, with no
@@ -100,48 +113,52 @@ unused seed family `0x6d000000...0x6dffffff`. The 256-game development cohort
 no qualification artifact was written and training stopped before the
 100-million-move continuation.
 
-Provenance is unusually tight for this family: two independent semantic reviews
-before the source was frozen, strict Clang 21 and GCC 14 optimized executable
-and library builds, sanitizer runs, and an immutable preregistration at
+Provenance: two independent semantic reviews before the source was frozen,
+strict Clang 21 and GCC 14 optimized executable and library builds, sanitizer
+runs, and an immutable preregistration at
 `artifacts/protocols/optimistic-phase-ntuple/protocol.json`.
 
-**A recorded defect in that frozen protocol.**
-`docs/exploratory/audit-03-claim-arithmetic.md` records as its most severe
-finding (C1) that the protocol's 100-million-move qualification clause requires
-a corrected-scoring depth-4 search to "reproduce frozen means 176925.25 score
-and 116.375 moves". That score is the *historical 7,000-point* mean of an
-eight-game confirmation; the corrected-scoring replay of the identical
-trajectories is 400,675.25. A corrected-score run can never reproduce it, so
-that clause of the gate is permanently unsatisfiable. The audit's own remedy is
-a new versioned protocol, because frozen artifacts are not edited. This did not
-affect the Stage-A rejection above, which used absolute floors rather than that
-clause.
+</AgentContext>
 
-**Scoring mode.** The ledger section does not name the level bonus. The same
-audit classifies all of this experiment's rows as consistent with the corrected
-17,000-point award.
+<AgentContext summary="Full results table">
 
-Source: `optimistic-phase-ntuple.cpp`.
+Stage-A gate on the 64-game cohort `0x3d200000...0x3d20003f`, from the ledger:
 
-</TechnicalDetails>
+| Policy | Mean score | Mean moves |
+| --- | ---: | ---: |
+| Direct n-tuple play | 181,733.422 | 56.359 |
+| Two-rise-boundary search | 113,643.969 | 37.375 |
 
-## What this taught us, and what is still open
+Ordered halves: direct 180,667 / 182,800 points and 56.125 / 56.594 moves;
+search 118,367 / 108,921 points and 38.719 / 36.031 moves. The final training
+chunk averaged 176,247 points and 54.811 moves.
 
-**Search over a weak evaluator can be worse than no search.** This is the
-sharpest demonstration of it in the repository: identical weights, identical
-cohort, and adding two rise-cycles of look-ahead cost roughly a third of the
-score. A deeper search compounds the leaf evaluator's errors instead of
-averaging them away, and it also chases the approximation used to keep the tree
-affordable — here, following one representative outcome rather than averaging
-over chance, which is precisely the "unfair" chance handling the repository has
-repeatedly measured as harmful.
+</AgentContext>
 
-**The training scale was not the problem.** 50 million moves of on-policy
-learning produced a policy roughly level with much cheaper ones elsewhere in
-this family. See
-[is more computation the answer?](/learn/concepts/does-more-compute-help).
+<AgentContext summary="Validity, gates and limitations">
 
-**What it did not rule out.** It rejects this configuration: this target, this
-pooled-then-split schedule, and this representative-outcome rollout. It says
-nothing about a phase-conditioned n-tuple used as the leaf of a fair
-[fair search](/approaches/fair-expectimax/reference), which was never run.
+The Stage-A gate required at least 300,000 points and 90 moves as absolute
+floors; the search reached neither. Every decision completed inside the
+100,000-call work budget, no move was illegal, and no game was censored, so the
+rejection is not a resource artifact.
+
+A recorded defect in the frozen protocol:
+[audit-03](/docs/exploratory/audit-03-claim-arithmetic) records as its most
+severe finding (C1) that the protocol's 100-million-move qualification clause
+requires a corrected-scoring depth-4 search to "reproduce frozen means 176925.25
+score and 116.375 moves". That score is the mean of an eight-game confirmation
+under historical 7,000-point scoring, archival; the corrected-scoring replay of
+the identical trajectories is 400,675.25. A corrected-score run can never
+reproduce it, so that clause of the gate is permanently unsatisfiable. The
+audit's remedy is a new versioned protocol, because frozen artifacts are not
+edited. This did not affect the Stage-A rejection above, which used the absolute
+floors rather than that clause.
+
+</AgentContext>
+
+<AgentContext summary="Scoring mode">
+
+The ledger section does not name the level bonus. Audit-03 classifies all of
+this experiment's rows as consistent with the corrected 17,000-point award.
+
+</AgentContext>

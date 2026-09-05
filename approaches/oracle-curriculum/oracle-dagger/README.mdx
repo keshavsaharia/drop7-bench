@@ -5,6 +5,8 @@ summary: Copy the future-reading teacher's moves, then let the copy play and ask
 status: rejected
 evidence: task-record only
 reads: teacher
+kind: strategy
+technique: oracle-distillation
 ---
 
 Copy the moves of a planner that can see the future. Then let the copy play,
@@ -27,7 +29,7 @@ names, and this approach is that fix applied here.
 
 The teacher deliberately reads one training game's **exact future tape**: the
 discs to come and the hidden gray numbers. It is the same beam planner as the
-[perfect-information oracle](/approaches/oracle-curriculum/perfect-information-oracle),
+[perfect-information oracle](/approach/oracle-curriculum/perfect-information-oracle),
 run here at depth 4 with a beam of 128 by default.
 
 The student receives **no seed, no tape, no move index, no score and no level**.
@@ -92,7 +94,7 @@ repository, so none is quoted here.
   the trainer reshuffles the whole pool every epoch, so this run says nothing
   about whether the order of training examples matters.
 - The closely related native experiment that *was* measured is
-  [oracle distillation](/approaches/oracle-curriculum/oracle-distillation), whose
+  [oracle distillation](/approach/oracle-curriculum/oracle-distillation), whose
   held-out top-1 accuracy of 0.218 is the nearest thing to a number for the same
   hypothesis.
 - Source: `main.ts`.
@@ -109,7 +111,7 @@ repository, so none is quoted here.
   quantity, and the repository does not upgrade it by restating it.
 - **Still open:** the same aggregation loop against a teacher whose advantage is
   public rather than privileged. That is the shape of the later
-  [planner distillation](/approaches/lifetime-objective/planner-distill) work,
+  [planner distillation](/approach/lifetime-objective/planner-distill) work,
   which had a fair teacher and still failed its held-out sibling-ranking gate —
   for reasons documented in
   [finding-11](/docs/exploratory/finding-11-planner-distillation).

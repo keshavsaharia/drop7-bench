@@ -1,0 +1,107 @@
+/* heuristic-search/exact-search card art. The three members complete one after
+   another — each block fills downwards from its own node row, dividers and all
+   — then the votes drop and the column two of them named is kept. Each block
+   scales from the top of its own box, which is the row of columns above it.
+   Play-state, duration and easing are owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-exact-search {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-exact-search .block {
+  transform-box: fill-box;
+  transform-origin: center top;
+}
+
+.tart--approach-exact-search [data-anim="block-1"] {
+  animation-name: tart-approach-exact-search-block-1;
+}
+.tart--approach-exact-search [data-anim="block-2"] {
+  animation-name: tart-approach-exact-search-block-2;
+}
+.tart--approach-exact-search [data-anim="block-3"] {
+  animation-name: tart-approach-exact-search-block-3;
+}
+.tart--approach-exact-search [data-anim="votes"] {
+  animation-name: tart-approach-exact-search-votes;
+}
+.tart--approach-exact-search [data-anim="kept"] {
+  animation-name: tart-approach-exact-search-kept;
+}
+.tart--approach-exact-search [data-anim="caption"] {
+  animation-name: tart-approach-exact-search-caption;
+}
+
+@keyframes tart-approach-exact-search-block-1 {
+  0% {
+    transform: scaleY(0.02);
+    opacity: 0.3;
+  }
+  12%,
+  100% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-exact-search-block-2 {
+  0%,
+  7.64% {
+    transform: scaleY(0.02);
+    opacity: 0.3;
+  }
+  19.64%,
+  100% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-exact-search-block-3 {
+  0%,
+  15.27% {
+    transform: scaleY(0.02);
+    opacity: 0.3;
+  }
+  27.27%,
+  100% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+@keyframes tart-approach-exact-search-votes {
+  0%,
+  28.36% {
+    transform: translateY(-7px);
+    opacity: 0;
+  }
+  37.09%,
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes tart-approach-exact-search-kept {
+  0%,
+  38.18% {
+    opacity: 0;
+  }
+  45.82%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes tart-approach-exact-search-caption {
+  0%,
+  44.73% {
+    opacity: 0;
+  }
+  51.27%,
+  100% {
+    opacity: 1;
+  }
+}

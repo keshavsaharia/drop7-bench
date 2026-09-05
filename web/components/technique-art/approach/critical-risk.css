@@ -1,0 +1,83 @@
+/* heuristic-search/critical-risk card art. The board is settled and the
+   policy is about to drop on the tallest column; then the height line and
+   the `critical` tag come up, the top cell of that column is ringed and
+   crossed as the square that ends the game, the root ranking switches from
+   the plain mean to the mean blended with the worst 40%, and the next disc
+   slides across to the shortest column. Only transform and opacity animate;
+   play-state, duration and easing are owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-critical-risk {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-critical-risk [data-anim="tag"] {
+  animation-name: tart-approach-critical-risk-tag;
+}
+.tart--approach-critical-risk [data-anim="kill"] {
+  animation-name: tart-approach-critical-risk-kill;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.tart--approach-critical-risk [data-anim="dim"] {
+  animation-name: tart-approach-critical-risk-dim;
+}
+.tart--approach-critical-risk [data-anim="switch"] {
+  animation-name: tart-approach-critical-risk-switch;
+}
+.tart--approach-critical-risk [data-anim="lit"] {
+  animation-name: tart-approach-critical-risk-lit;
+}
+.tart--approach-critical-risk [data-anim="move"] {
+  animation-name: tart-approach-critical-risk-move;
+}
+.tart--approach-critical-risk [data-anim="path"] {
+  animation-name: tart-approach-critical-risk-path;
+}
+.tart--approach-critical-risk [data-anim="caption"] {
+  animation-name: tart-approach-critical-risk-caption;
+}
+
+@keyframes tart-approach-critical-risk-tag {
+  0%, 12% { opacity: 0; }
+  21.82%, 100% { opacity: 1; }
+}
+
+@keyframes tart-approach-critical-risk-kill {
+  0%, 18.55% { opacity: 0; transform: scale(0.55); }
+  27.27%, 100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes tart-approach-critical-risk-dim {
+  0%, 27.27% { opacity: 1; }
+  36%, 100% { opacity: 0.32; }
+}
+
+@keyframes tart-approach-critical-risk-switch {
+  0%, 28.36% { opacity: 0; }
+  34.91%, 100% { opacity: 1; }
+}
+
+@keyframes tart-approach-critical-risk-lit {
+  0%, 29.45% { opacity: 0.18; }
+  38.18%, 100% { opacity: 1; }
+}
+
+/* Three columns to the left is the tall one the averaging policy would have
+   played; the disc rests over the shortest column instead. */
+@keyframes tart-approach-critical-risk-move {
+  0%, 34.91% { transform: translateX(-54px); }
+  46.91%, 100% { transform: translateX(0); }
+}
+
+@keyframes tart-approach-critical-risk-path {
+  0%, 41.45% { opacity: 0; }
+  49.09%, 100% { opacity: 1; }
+}
+
+@keyframes tart-approach-critical-risk-caption {
+  0%, 48% { opacity: 0; }
+  53.45%, 100% { opacity: 1; }
+}

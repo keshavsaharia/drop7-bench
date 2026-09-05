@@ -1,0 +1,130 @@
+---
+title: Monte Carlo tree search
+slug: mcts
+summary: "Instead of examining every branch to a fixed depth, spend each unit of thinking where past playouts say it is most worth spending, and grow the tree lopsided."
+order: 8
+technique: mcts
+approaches: [tree-search/observable-mcts, tree-search/mcts, tree-search/puct, tree-search/nnue-guided]
+glossary: [MCTS, playout, rollout, upper confidence bound, exploration bonus, PUCT, prior, strategy fusion, determinization]
+---
+
+## The idea
+
+A full-width look-ahead such as [expectimax](/learn/techniques/expectimax)
+examines every branch to the same depth and pays for it: with seven columns and
+seven possible next discs the tree grows 49-fold per move, so it stops after
+three or four. Much of that effort goes on columns a player would dismiss at
+a glance.
+
+Monte Carlo tree search (MCTS) spends its effort unevenly. It runs many short
+walks from the current position. Each walk goes down the branches that have
+paid best so far, with a bonus for branches that have hardly been tried, adds
+one new position to the tree, plays the rest of the game out with a cheap rule,
+and carries the result back up. Branches that keep paying get walked again and
+grow deep; branches that stop paying stay one node thick. When the time is up,
+the move with the most visits is played.
+
+## A small example
+
+A maze with three paths from the start cell. Each path has a dice roll midway
+that may send you to a dead end, and the far cells pay from 0 to 10.
+
+1. Start with a root and its three children, each with a visit count of 0 and
+   a total of 0.
+2. Selection: pick the child with the highest average value plus
+   c × √(ln N ÷ n), where N is the parent's visits, n the child's, and c a
+   constant that sets how adventurous the search is. A child with no visits
+   has an unbounded bonus, so every child is tried once.
+3. Expansion: when the walk reaches a position that is not yet in the tree,
+   add it.
+4. Playout: from there, finish the maze with a cheap rule, say random moves,
+   and note the payout.
+5. Backup: add the payout to the total and 1 to the visit count of every node
+   the walk passed through.
+
+<MctsLopsidedGrowth />
+
+6. Repeat a few hundred times. The child with the best record gets most of the
+   visits, so the tree is deep under it and shallow elsewhere. Play the
+   most-visited child.
+
+<MctsUcbBars />
+
+7. PUCT: multiply the exploration bonus by a prior P(child), a cheap guess at
+   how plausible each move is before any walk. Plausible moves get tried
+   first; implausible ones must earn attention by paying well when they are
+   finally tried. This is the rule the AlphaGo programs used, with a policy
+   network supplying the prior.
+
+<MctsPrior />
+
+## How it works
+
+The four steps (select, expand, play out, back up) are the whole algorithm,
+and each has a dial. The selection rule above is the upper confidence bound
+(UCB) formula; its constant c trades exploiting good averages against
+exploring untried branches. Expansion can add one node per walk or several.
+The [playout](/learn/glossary), also called a rollout, can be random moves, a
+one-move rule or a full policy, and it can run to the end of the game or to a
+horizon and then hand over to a leaf evaluator. Backup can average payouts or
+keep the best.
+
+Chance needs care. In a game with dice, a walk that crosses a chance event has
+to sample it at that moment, and the node it arrives at has to be identified
+by what the player would see, so that two walks through the same visible
+position share one node however the dice fell on the way. Otherwise the tree
+can learn a plan that depends on a roll it has not seen yet.
+
+What comes out is a search whose cost is set by the number of walks rather
+than by the branching factor, and whose shape tracks what the walks found. Its
+quality is bounded by the playout: the tree can rank futures only as well as
+the player it imagines playing them.
+
+## In Drop7
+
+Between your move and your next one the game deals a disc and may reveal a
+hidden number. The tree-search family page describes the trap: guessing all
+of that in advance, planning inside the guessed future and averaging over many
+such futures is [determinization](/learn/glossary), and it credits a first
+move with a plan that could only have been made by someone who already knew
+the hidden number. The ledger calls that failure
+[strategy fusion](/learn/glossary). The main implementation here samples each
+chance event only when the walk crosses it and keys every node by the visible
+position alone ([the tree-search family page](/approach/tree-search)). The
+playout is usually a one-move fair search out to a fixed horizon.
+
+Pages that build the tree by walks:
+
+- [Observable-state MCTS](/approach/tree-search/observable-mcts), the main
+  implementation, which lets the search know only what a player could see.
+- [TypeScript MCTS lab](/approach/tree-search/mcts), a small search you can
+  run in a terminal and watch one decision at a time.
+- [PUCT](/approach/tree-search/puct), a complete search that starts from a
+  prior over columns; it carries frozen gates and has never been run.
+- [Learned-guidance search](/approach/tree-search/nnue-guided), which lets a
+  small learned evaluator decide where a deeper search spends its time, with
+  the exact search kept as a safety net.
+
+## What it cannot do
+
+The observable-state search missed its frozen gate by one root. Frozen at
+16,384 simulations and horizon 32, its top choice matched the held-out label
+on 11 of 32 roots, 0.34375 against a 0.35 gate, while it beat exact depth-3
+on pairwise accuracy (0.6498 against 0.6418) and on mean regret over the same
+panel ([Observable-state MCTS](/approach/tree-search/observable-mcts)).
+
+Then the budget went up and the result went the wrong way. A scaled version
+at 65,536 simulations and horizon 64, audited on 12 disjoint held-out roots,
+agreed with the depth-4 search's own move rankings more often (top-1 from
+66.67% to 91.67%) and ranked the 25-move outcome worse (pairwise 56.78%
+against the old configuration's 61.02%), so the frozen gate failed before any
+gameplay seed was opened (same page). Twelve roots is a very small panel, as
+the page says. The family page draws the lesson that budget was not the
+bottleneck: every playout finished with a one-move-ahead policy, and a search
+cannot rank futures better than the player it imagines playing them. The open
+direction it names is the continuation policy
+([the tree-search family page](/approach/tree-search)).
+
+PUCT has no result at all. The lab is complete and carries its own frozen
+gates, and until it runs, whether a prior helps here is something this site
+does not know.

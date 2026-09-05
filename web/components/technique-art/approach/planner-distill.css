@@ -1,0 +1,68 @@
+/* lifetime-objective/planner-distill card art. A marker walks each guessed
+   board's five-move plan, one step at a time, and is then absorbed into the
+   single evaluator that is meant to replace all of them; the evaluator
+   answers with one value per legal column. Play-state is owned by art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-planner-distill {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-planner-distill [data-anim="token-1"] { animation-name: tart-approach-planner-distill-token-1; }
+.tart--approach-planner-distill [data-anim="token-2"] { animation-name: tart-approach-planner-distill-token-2; }
+.tart--approach-planner-distill [data-anim="token-3"] { animation-name: tart-approach-planner-distill-token-3; }
+.tart--approach-planner-distill [data-anim="call"] { animation-name: tart-approach-planner-distill-call; }
+.tart--approach-planner-distill [data-anim="caption"] { animation-name: tart-approach-planner-distill-caption; }
+
+.tart--approach-planner-distill [data-anim="values"] {
+  animation-name: tart-approach-planner-distill-values;
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+
+/* Five steps of the window, then the trip into the single call. */
+@keyframes tart-approach-planner-distill-token-1 {
+  0%, 3.27% { transform: translate(0, 0); opacity: 0; }
+  5.45% { transform: translate(0, 0); opacity: 1; }
+  9.82% { transform: translate(22px, 0); }
+  14.18% { transform: translate(44px, 0); }
+  18.55% { transform: translate(66px, 0); }
+  22.91% { transform: translate(88px, 0); opacity: 1; }
+  31.64% { transform: translate(172px, 45px); opacity: 1; }
+  36%, 100% { transform: translate(172px, 45px); opacity: 0; }
+}
+@keyframes tart-approach-planner-distill-token-2 {
+  0%, 5.45% { transform: translate(0, 0); opacity: 0; }
+  7.64% { transform: translate(0, 0); opacity: 1; }
+  12% { transform: translate(22px, 0); }
+  16.36% { transform: translate(44px, 0); }
+  20.73% { transform: translate(66px, 0); }
+  25.09% { transform: translate(88px, 0); opacity: 1; }
+  32.73% { transform: translate(172px, 11px); opacity: 1; }
+  37.09%, 100% { transform: translate(172px, 11px); opacity: 0; }
+}
+@keyframes tart-approach-planner-distill-token-3 {
+  0%, 7.64% { transform: translate(0, 0); opacity: 0; }
+  9.82% { transform: translate(0, 0); opacity: 1; }
+  14.18% { transform: translate(22px, 0); }
+  18.55% { transform: translate(44px, 0); }
+  22.91% { transform: translate(66px, 0); }
+  27.27% { transform: translate(88px, 0); opacity: 1; }
+  33.82% { transform: translate(172px, -23px); opacity: 1; }
+  38.18%, 100% { transform: translate(172px, -23px); opacity: 0; }
+}
+
+@keyframes tart-approach-planner-distill-call {
+  0%, 33.82% { opacity: 0; }
+  40.36%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-planner-distill-values {
+  0%, 37.09% { transform: scaleY(0); }
+  45.82%, 100% { transform: scaleY(1); }
+}
+@keyframes tart-approach-planner-distill-caption {
+  0%, 45.82% { opacity: 0; }
+  51.27%, 100% { opacity: 1; }
+}

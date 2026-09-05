@@ -1,77 +1,110 @@
 ---
-title: Weighting the bad outcomes at the root
+title: Weighting the worst outcomes at the root
 family: fair-expectimax
 summary: Instead of judging a column by its average outcome, judge it partly by its worst outcomes, and find that the resulting policy dies much sooner.
 status: rejected
 evidence: ledger-recorded
 reads: public
+kind: strategy
+technique: risk-survival
+featured: true
 ---
 
-Instead of judging a column by what happens on average, judge it partly by what
-happens in its worst cases. This experiment mixed three parts average with one
-part bad-tail into the value of every root move, and measured whether the more
-cautious player survived longer.
+## The problem
 
-<EvidenceLabel status="rejected" evidence="ledger-recorded" reads="public" />
+Drop7 scores are [heavy-tailed](/learn/concepts/heavy-tails) and every game ends.
+A policy that maximises the average can be buying a big average with a small
+chance of dying at once, and dying at once costs everything that would have come
+after. So it is natural to ask the search to be a little afraid, and to value a
+column by more than the plain average over the futures it examines. What had
+never been measured is what happens to the
+[reference search](/approach/fair-expectimax/reference) when it is asked to be
+afraid in a fixed, declared way.
 
-## The intuition
+## Proposed solution
 
-Drop7 scores are heavy-tailed and every game eventually ends. A policy that
-maximises the average can be quietly buying a big average with a small chance
-of dying immediately, and dying immediately costs everything that would have
-come after. So it is natural to ask the search to be a little afraid: value a
-column not by the mean over the seven futures it examines, but by a blend of
-that mean with the outcomes at the bottom of the distribution.
+Replace the average at the root with a blend of the average and the worst
+outcomes. The statistician's name for "the average of the worst slice" is
+conditional value at risk; this experiment used the worst 25%. With seven sampled
+outcomes that slice gives full weight to the worst outcome and three-quarters
+weight to the second worst, then divides by the 1.75 outcomes of tail mass. The
+blend was fixed at three parts average to one part worst slice before any game
+was played, and neither the coefficient nor the scenario count was retuned
+afterwards.
 
-The statistician's name for "the average of the worst slice" is *conditional
-value at risk*; the experiment used the worst 25%. With seven sampled outcomes
-that slice gives full weight to the worst outcome and three-quarters weight to
-the second worst, then divides by the 1.75 outcomes of tail mass.
+The bet has an obvious way to fail. Being afraid of the worst sampled future is
+also being afraid of building anything, because chain structure is fragile in the
+moves before it fires, and a player who never builds clears less.
 
-The reason this can go wrong is the mirror image of the reason it can go right.
-Being afraid of the worst sampled future is *also* being afraid of building
-anything — chain structure is temporarily fragile before it fires. The recorded
-result is a clean example of that trade going badly.
+Everything the search reads is public. Each of the seven scenarios is
+constructed from a hash of the canonical visible position, and no later decision
+sees a scenario tape, the game's seed, the score, the level or the move count.
 
-## How it works, step by step
+## How it works
 
 1. At the root, take every legal column.
 2. For each, construct exactly seven scenarios from a hash of the public
-   position. A scenario fixes only the **immediate** chance outcome: the next
-   disc and any reveal.
+   position. A scenario fixes only the immediate chance outcome: the next disc
+   and any reveal.
 3. Once that outcome is on the board it is observable, so from there the
    unchanged fair search completes two more of the player's moves with the
-   normal five chance samples at every chance point. No later decision ever
-   sees the scenario tape, the game's seed, the score, the level, or the move
-   count.
-4. Combine the seven scenario values as `0.75 × mean + 0.25 × worst-25%`
-   instead of the plain mean. The coefficient and the scenario count were fixed
-   in advance and never retuned.
-5. Play the column with the best blended value.
+   normal five chance samples at every chance point.
+4. Combine the seven scenario values as `0.75 × mean + 0.25 × worst-25%` in
+   place of the plain mean.
+5. Play the column with the best blended value. The output at every position is
+   one column.
 
 ## What happened
 
-The cautious policy was decisively worse. On the eight
-fresh games of its screen it scored about 87,000 points and survived 61.5 moves,
-against about 177,000 points and 114 moves for the unchanged search. It lost
-seven of eight games on both score and survival. Its clear and reveal rates per
-move both fell, and its average longest chain fell from 7.9 to 5.1 — the
-signature of a player who stops assembling anything.
+On the eight fresh games of its screen, the cautious policy lost 89,707.75 points
+and 52.625 moves per game to the unchanged fair depth-3 search, and won one game
+of the eight on each measure (rejected, ledger-recorded,
+[ledger](/docs/research/history) section "Fair root CVaR ablation"; historical
+7,000-point scoring, archival).
 
-It disagreed with the ordinary fair recommendation on about 28% of its
-decisions, so this is a real behavioural change, not a rounding difference. The
-gate required both averages to improve; both regressed by a wide margin, so the
-confirmation cohort was never opened.
+The flow numbers say the same thing from the other side. Clears per move, reveals
+per move and the average longest chain all fell, which is what a player that
+stops assembling anything looks like. The policy switched away from the ordinary
+fair recommendation on 28.25% of its trajectory decisions, so the change in
+behaviour was real rather than a rounding difference. Both admission means had to
+improve before the confirmation cohort could open; both regressed, and it was
+never read.
 
-<TechnicalDetails title="The technical record">
+## What we learned
 
-**Source.** `approaches/fair-expectimax/root-risk/fair-root-risk.cpp`.
-[Experiment index](/docs/research/experiment-index): **rejected —
-ledger-recorded**, "score, survival, and flow all regressed."
+What is rejected is exact: a fixed 75/25 blend of mean and worst-25%, applied at
+the root only, over seven immediate-outcome scenarios, on top of the depth-3 fair
+search. Eight games is a screen and cannot resolve a small effect, but this
+effect was large, it went the same way on both admission measures, and it is
+legible in the flow numbers, so the configuration is closed.
 
-Ledger section "Fair root CVaR ablation". Fresh screen `0x3e9d0000...007`, eight
-games, **historical 7,000-point Sequence scoring**; the comparator is the
-confirmed fair depth-3 search with five chance samples.
+What the run does not settle is whether the reference search is already cautious
+in a way nobody chose. An audit of that search points out that its penalty for a
+modelled game over is a flat −1,000,000, which the audit prices at 58.82 row
+rises of survival ([audit 02](/docs/exploratory/audit-02-fair-d4), H2). One
+modelled death among five samples therefore swamps the differences between the
+options that survive, so the search minimises modelled death probability first
+and maximises the board evaluation second. If that reading holds, adding explicit
+downside weighting on top was pushing an already-cautious search further in the
+direction it was leaning. The open question is what that one constant should be,
+and calibrating it has not been run.
+
+<AgentContext summary="Records and provenance">
+
+Records: [experiment index](/docs/research/experiment-index) row "Root CVaR",
+rejected, ledger-recorded, "score, survival, and flow all regressed";
+[ledger](/docs/research/history) section "Fair root CVaR ablation".
+
+Fresh screen cohort `0x3e9d0000...007`, eight games; confirmation cohort
+`0x3e9e0000...00f`, not read. The comparator is the confirmed fair depth-3 search
+with five chance samples. The single preregistered root utility is
+`0.75 * mean + 0.25 * CVaR25`.
+
+</AgentContext>
+
+<AgentContext summary="Full results table">
+
+Eight-game fresh screen, historical 7,000-point Sequence scoring, archival:
 
 | Arm | Mean score | Mean moves | Clears / move | Reveals / move | Mean max chain |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -81,45 +114,39 @@ confirmed fair depth-3 search with five chance samples.
 Paired change −89,707.75 points and −52.625 moves; one win and seven losses on
 both measures; neither cohort censored. The policy switched away from the local
 fair recommendation on 28.25% of trajectory decisions. Policy work 53,423 units
-per move versus 55,674 for the reference (the optional switch audit added
-another 50,333 and is not part of the deployable policy). Peak resident memory
-3,948,544 bytes; 30.7 wall seconds. Because both admission means regressed,
-`0x3e9e0000...00f` was not read.
+per move against 55,674 for the reference; the optional switch audit added
+another 50,333 units per move and is not part of the deployable policy. Peak
+resident memory 3,948,544 bytes; 30.7 wall seconds.
 
-Both means regressed in the same direction, so this is one of the ledger
-rejections that a rescoring to corrected Hardcore rules would strengthen rather
-than reverse ([audit 03](/docs/exploratory/audit-03-claim-arithmetic) checked
-every 7,000-point paired comparison for a sign change and found only two, of
-which this is not one).
+</AgentContext>
 
-**Verification.** Strict `-Werror`, ASan/UBSan, frozen fair-search parity,
+<AgentContext summary="Validity, gates and limitations">
+
+The admission gate required both means to improve. Both regressed by a wide
+margin, so `0x3e9e0000...00f` was not read, and the coefficient and scenario
+count were left as preregistered. Eight games is a screen: it can catch a
+regression this size and it certifies nothing about a small one.
+
+Verification: strict `-Werror`, ASan/UBSan, frozen fair-search parity,
 deterministic scenario values, fractional-tail arithmetic, reflection, metadata
 blindness, game-seed exclusion, legality, and resource-bound tests all passed.
 
-</TechnicalDetails>
+The [audit 02](/docs/exploratory/audit-02-fair-d4) H2 arithmetic behind the open
+question: `terminalUtility` is −1,000,000, equal to 58.82 row rises, 294.1 moves
+of survival, and 3.24× the entire 64-game mean of 308,295.578 recorded for the
+reference search.
 
-## What this taught us, and what is still open
+</AgentContext>
 
-This rejects one specific risk rule: a fixed 75/25 blend of mean and worst-25%,
-applied at the root only, over seven immediate-outcome scenarios, on top of the
-depth-3 fair search. It rejects it firmly: the regression is large, consistent,
-and mechanistically legible in the flow numbers.
+<AgentContext summary="Scoring mode">
 
-What it does not settle is whether the reference search is *already* risk-averse
-in a way nobody chose. An audit of the reference points out that its penalty for
-a modelled game over is a flat −1,000,000, equal to about 59 row rises or 294
-moves of survival, and 3.24× the entire recorded 64-game mean. One modelled
-death among five samples therefore swamps the differences between the surviving
-options, which makes the search minimise modelled death probability first and
-maximise the board evaluation second
-([audit 02](/docs/exploratory/audit-02-fair-d4), H2). If that reading is right,
-adding explicit downside weighting on top was pushing an already-cautious search
-further in the direction it was already leaning. Calibrating that one constant
-is the open experiment; it has not been run.
+The screen ran under historical 7,000-point Sequence scoring, archival, so its
+absolute point totals are not corrected 17,000-point Hardcore evidence and are
+not compared with corrected figures elsewhere on this site. Both admission means
+regressed in the same direction, so this is one of the ledger rejections that a
+rescoring to corrected Hardcore rules would strengthen rather than reverse:
+[audit 03](/docs/exploratory/audit-03-claim-arithmetic) checked every 7,000-point
+paired comparison for a sign change and found only two, and this is not one of
+them.
 
-## Sources
-
-- `approaches/fair-expectimax/root-risk/fair-root-risk.cpp`: one bounded
-  risk-sensitive ablation over the reference depth-3 evaluator; seven fixed
-  public root scenarios differing only in the immediate chance transition, then
-  the exact non-clairvoyant fair continuation for two more moves.
+</AgentContext>

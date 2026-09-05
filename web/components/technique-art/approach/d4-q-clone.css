@@ -1,0 +1,64 @@
+/* value-policy-learning/d4-q-clone card art. The search's seven column values
+   stand up, a bracket closes around all seven and an arrow carries them over,
+   and the clone's row rises inside its own frame in the same order at a
+   different scale. The resting frame keeps both rows. Play-state, duration
+   and easing are owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-d4-q-clone {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+/* Both rows grow out of their own baseline. */
+.tart--approach-d4-q-clone .teacher,
+.tart--approach-d4-q-clone .clone {
+  transform-box: fill-box;
+  transform-origin: bottom;
+}
+
+.tart--approach-d4-q-clone [data-anim="teacher"] {
+  animation-name: tart-approach-d4-q-clone-teacher;
+}
+.tart--approach-d4-q-clone [data-anim="bracket"] {
+  animation-name: tart-approach-d4-q-clone-bracket;
+}
+.tart--approach-d4-q-clone [data-anim="carry"] {
+  animation-name: tart-approach-d4-q-clone-carry;
+}
+.tart--approach-d4-q-clone [data-anim="frame"] {
+  animation-name: tart-approach-d4-q-clone-frame;
+}
+.tart--approach-d4-q-clone [data-anim="clone"] {
+  animation-name: tart-approach-d4-q-clone-clone;
+}
+.tart--approach-d4-q-clone [data-anim="caption"] {
+  animation-name: tart-approach-d4-q-clone-caption;
+}
+
+@keyframes tart-approach-d4-q-clone-teacher {
+  0%, 2.18% { transform: scaleY(0); }
+  15.27%, 100% { transform: scaleY(1); }
+}
+/* 92 covers the bracket's three sides; 44 covers the arrow and its head. */
+@keyframes tart-approach-d4-q-clone-bracket {
+  0%, 15.27% { stroke-dashoffset: 92; }
+  24%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes tart-approach-d4-q-clone-carry {
+  0%, 24% { stroke-dashoffset: 44; }
+  31.64%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes tart-approach-d4-q-clone-frame {
+  0%, 28.36% { opacity: 0; }
+  33.82%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-d4-q-clone-clone {
+  0%, 31.64% { transform: scaleY(0); }
+  45.82%, 100% { transform: scaleY(1); }
+}
+@keyframes tart-approach-d4-q-clone-caption {
+  0%, 45.82% { opacity: 0; }
+  51.27%, 100% { opacity: 1; }
+}

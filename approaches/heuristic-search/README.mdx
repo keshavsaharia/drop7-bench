@@ -1,6 +1,7 @@
 ---
 title: Hand-built heuristics and shallow search
 summary: Scores visible board traits, adds them together, and plays the highest-valued column.
+kind: family
 ---
 
 Give points to the things about a board that a human would notice — low
@@ -111,7 +112,7 @@ demonstration; they are never evidence about a policy's strength.
 1. **Read the public position.** The visible board, the visible next disc, and
    the [rise clock](/learn/glossary). Nothing else, not the seed, not the
    hidden gray numbers, not the score. (One member of the family breaks this
-   and is flagged where it appears: see [gray throughput](/approaches/heuristic-search/gray-throughput).)
+   and is flagged where it appears: see [gray throughput](/approach/heuristic-search/gray-throughput).)
 2. **Simulate each legal column** with the real rules engine. Every disc that
    clears, every gray disc that cracks or reveals, every wave of the chain.
 3. **Measure the resulting board.** The hand evaluator counts open columns, a
@@ -126,13 +127,13 @@ demonstration; they are never evidence about a policy's strength.
    its own subject.
 5. **Optionally look further.** Members of this family extend step 4 in four
    different directions: average over the possible next discs
-   ([sparse expectimax](/approaches/heuristic-search/sparse-expectimax)); play
+   ([sparse expectimax](/approach/heuristic-search/sparse-expectimax)); play
    the position forward with a quick policy
-   ([rollout](/approaches/heuristic-search/rollout)); commit to a whole
+   ([rollout](/approach/heuristic-search/rollout)); commit to a whole
    sequence of columns before seeing the discs
-   ([open loop](/approaches/heuristic-search/open-loop)); or weight the bad
+   ([open loop](/approach/heuristic-search/open-loop)); or weight the bad
    outcomes more heavily than the good ones
-   ([risk sensitive](/approaches/heuristic-search/risk-sensitive)).
+   ([risk sensitive](/approach/heuristic-search/risk-sensitive)).
 6. **Play the winning column.** Ties are broken by a fixed order, so the same
    visible position always produces the same move.
 
@@ -159,7 +160,7 @@ Two evaluators in `src/core/typescript` encode the arithmetic directly — five
 drops arrive per cycle, a rise adds seven covered discs, so a board that never
 fills needs about **2.4 numbered clears and 1.4 covered reveals per move**.
 
-<Callout title="Read that pair of numbers carefully" tone="warn">
+<Callout title="Clearing-rate caveat" tone="warn">
 2.4 and 1.4 are arithmetic about the board, not a measured threshold for
 winning. The research status page records them as *"diagnostic targets from
 limited runs, not proven universal thresholds"*. The one measurement of the
@@ -180,21 +181,21 @@ search") and, where marked, the
 
 | Approach | Status | Evidence |
 | --- | --- | --- |
-| [Sparse expectimax](/approaches/heuristic-search/sparse-expectimax) | completed | task-record only |
-| [Open loop](/approaches/heuristic-search/open-loop) | support-only | repository-verified |
-| [Phase horizon](/approaches/heuristic-search/phase-horizon) | rejected | task-record only |
-| [Tunneling](/approaches/heuristic-search/tunneling) | completed | task-record only |
-| [Virtual ignition](/approaches/heuristic-search/virtual-ignition) | rejected | task-record only |
-| [Risk sensitive](/approaches/heuristic-search/risk-sensitive) | rejected | task-record only |
-| [Policy comparison](/approaches/heuristic-search/policy-comparison) | support-only | repository-verified |
-| [Gray throughput](/approaches/heuristic-search/gray-throughput) | rejected | task-record only |
-| [Rollout](/approaches/heuristic-search/rollout) | rejected (planner) / completed (teacher) | task-record only |
-| [Cycle abstraction](/approaches/heuristic-search/cycle-abstraction) | rejected | task-record only |
-| [Edge priority](/approaches/heuristic-search/edge-priority) | unknown | repository-verified |
-| [Critical risk](/approaches/heuristic-search/critical-risk) | unknown | repository-verified |
-| [Evolution](/approaches/heuristic-search/evolution) | rejected | ledger-recorded |
-| [Evolved public policy](/approaches/heuristic-search/evolved-public-policy) | rejected | ledger-recorded |
-| [Exact search](/approaches/heuristic-search/exact-search) | rejected (quadrature, historical D4) / completed (ensemble) | ledger-recorded / task-record only |
+| [Sparse expectimax](/approach/heuristic-search/sparse-expectimax) | completed | task-record only |
+| [Open loop](/approach/heuristic-search/open-loop) | support-only | repository-verified |
+| [Phase horizon](/approach/heuristic-search/phase-horizon) | rejected | task-record only |
+| [Tunneling](/approach/heuristic-search/tunneling) | completed | task-record only |
+| [Virtual ignition](/approach/heuristic-search/virtual-ignition) | rejected | task-record only |
+| [Risk sensitive](/approach/heuristic-search/risk-sensitive) | rejected | task-record only |
+| [Policy comparison](/approach/heuristic-search/policy-comparison) | support-only | repository-verified |
+| [Gray throughput](/approach/heuristic-search/gray-throughput) | rejected | task-record only |
+| [Rollout](/approach/heuristic-search/rollout) | rejected (planner) / completed (teacher) | task-record only |
+| [Cycle abstraction](/approach/heuristic-search/cycle-abstraction) | rejected | task-record only |
+| [Edge priority](/approach/heuristic-search/edge-priority) | unknown | repository-verified |
+| [Critical risk](/approach/heuristic-search/critical-risk) | unknown | repository-verified |
+| [Evolution](/approach/heuristic-search/evolution) | rejected | ledger-recorded |
+| [Evolved public policy](/approach/heuristic-search/evolved-public-policy) | rejected | ledger-recorded |
+| [Exact search](/approach/heuristic-search/exact-search) | rejected (quadrature, historical D4) / completed (ensemble) | ledger-recorded / task-record only |
 
 **A scoring caveat that applies to most of the older numbers.** A 2026-08-15
 audit found that several early experiments had used the 7,000-point level
@@ -242,8 +243,8 @@ this family says which of its numbers are affected.
   [sibling-ranking](/learn/concepts/ranking-siblings) problem that later
   defeated much larger learned models, arriving early and cheaply.
 - **A whole line of this family is unfinished, not refuted.** Two labs —
-  [edge priority](/approaches/heuristic-search/edge-priority) and
-  [critical risk](/approaches/heuristic-search/critical-risk) — are complete,
+  [edge priority](/approach/heuristic-search/edge-priority) and
+  [critical risk](/approach/heuristic-search/critical-risk) — are complete,
   gated programs with no located outcome at all. The correct label is
   *unknown*, and running them is cheap.
 - **Human strategy advice has never been tested properly here.** The strategy

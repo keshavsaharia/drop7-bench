@@ -1,0 +1,73 @@
+/* heuristic-search/cycle-abstraction card art. The five drops of one rise cycle
+   fan open in turn over the seven columns; a bracket then draws
+   across the whole cycle, the pointer slides off centre onto the plan the cycle
+   adopts, and that plan lights. The resting frame is the five drops gathered
+   under one bracket with one of five plans chosen. Play-state, duration and
+   easing are owned by art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-cycle-abstraction {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-cycle-abstraction [data-anim^="fan-"] {
+  transform-box: fill-box;
+  transform-origin: 50% 0%;
+}
+
+.tart--approach-cycle-abstraction [data-anim="fan-1"] { animation-name: tart-approach-cycle-abstraction-fan-1; }
+.tart--approach-cycle-abstraction [data-anim="fan-2"] { animation-name: tart-approach-cycle-abstraction-fan-2; }
+.tart--approach-cycle-abstraction [data-anim="fan-3"] { animation-name: tart-approach-cycle-abstraction-fan-3; }
+.tart--approach-cycle-abstraction [data-anim="fan-4"] { animation-name: tart-approach-cycle-abstraction-fan-4; }
+.tart--approach-cycle-abstraction [data-anim="fan-5"] { animation-name: tart-approach-cycle-abstraction-fan-5; }
+.tart--approach-cycle-abstraction [data-anim="bracket"] { animation-name: tart-approach-cycle-abstraction-bracket; }
+.tart--approach-cycle-abstraction [data-anim="pointer"] { animation-name: tart-approach-cycle-abstraction-pointer; }
+.tart--approach-cycle-abstraction [data-anim="chips"] { animation-name: tart-approach-cycle-abstraction-chips; }
+.tart--approach-cycle-abstraction [data-anim="pick"] { animation-name: tart-approach-cycle-abstraction-pick; }
+.tart--approach-cycle-abstraction [data-anim="rest"] { animation-name: tart-approach-cycle-abstraction-rest; }
+
+@keyframes tart-approach-cycle-abstraction-fan-1 {
+  0%, 1.09% { transform: scaleX(0.06); }
+  5.45%, 100% { transform: scaleX(1); }
+}
+@keyframes tart-approach-cycle-abstraction-fan-2 {
+  0%, 3.27% { transform: scaleX(0.06); }
+  7.64%, 100% { transform: scaleX(1); }
+}
+@keyframes tart-approach-cycle-abstraction-fan-3 {
+  0%, 5.45% { transform: scaleX(0.06); }
+  9.82%, 100% { transform: scaleX(1); }
+}
+@keyframes tart-approach-cycle-abstraction-fan-4 {
+  0%, 7.64% { transform: scaleX(0.06); }
+  12%, 100% { transform: scaleX(1); }
+}
+@keyframes tart-approach-cycle-abstraction-fan-5 {
+  0%, 9.82% { transform: scaleX(0.06); }
+  14.18%, 100% { transform: scaleX(1); }
+}
+/* 268 is the bracket's own length: 268 hides it, 0 draws it whole. */
+@keyframes tart-approach-cycle-abstraction-bracket {
+  0%, 16.36% { stroke-dashoffset: 268; }
+  27.27%, 100% { stroke-dashoffset: 0; }
+}
+/* 53 is one chip pitch: the pointer leaves the centre for the chosen plan. */
+@keyframes tart-approach-cycle-abstraction-pointer {
+  0%, 27.27% { transform: translateX(53px); opacity: 0; }
+  31.64% { transform: translateX(53px); opacity: 1; }
+  41.45%, 100% { transform: translateX(0); opacity: 1; }
+}
+@keyframes tart-approach-cycle-abstraction-chips {
+  0%, 30.55% { opacity: 0; }
+  36%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-cycle-abstraction-pick {
+  0%, 42.55% { opacity: 0; }
+  48%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-cycle-abstraction-rest {
+  0%, 46.91% { opacity: 0; }
+  51.27%, 100% { opacity: 1; }
+}

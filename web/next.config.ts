@@ -25,6 +25,14 @@ const allowedDevOrigins = (process.env.DROP7_DEV_ORIGINS ?? "")
 
 const nextConfig: NextConfig = {
   ...(allowedDevOrigins.length ? { allowedDevOrigins } : {}),
+  async redirects() {
+    return [
+      { source: "/approaches", destination: "/approach", permanent: true },
+      { source: "/approaches/:path*", destination: "/approach/:path*", permanent: true },
+      { source: "/engines", destination: "/engine", permanent: true },
+      { source: "/engines/:path*", destination: "/engine/:path*", permanent: true },
+    ];
+  },
   outputFileTracingRoot: webRoot,
   outputFileTracingIncludes: {
     "/*": [

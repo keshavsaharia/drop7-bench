@@ -5,6 +5,8 @@ summary: Look several moves ahead, but instead of considering every disc the gam
 status: completed
 evidence: task-record only
 reads: public
+kind: strategy
+technique: expectimax
 ---
 
 Look several moves ahead, but instead of considering every disc the game might
@@ -43,8 +45,8 @@ half-finished one.
 3. **At each player node, try every legal column**; at each chance node, take
    the fixed handful of stratified outcomes and average them.
 4. **Score the boards at the bottom** with a swappable evaluator — the
-   [combined hand evaluator](/approaches/heuristic-search), the fair leaf, the
-   [phase-horizon](/approaches/heuristic-search/phase-horizon) evaluator, or a
+   [combined hand evaluator](/approach/heuristic-search), the fair leaf, the
+   [phase-horizon](/approach/heuristic-search/phase-horizon) evaluator, or a
    hybrid.
 5. **Stop on the work or time budget**, and play the best column from the last
    completed depth.
@@ -75,7 +77,7 @@ repository**, and none is quoted here.
 A closely related *native* sparse search is recorded properly, but it belongs
 to a different family and used a learned n-tuple value at its leaves rather
 than a hand evaluator; its numbers are on the
-[n-tuple family](/approaches/ntuple-rl) pages and in the
+[n-tuple family](/approach/ntuple-rl) pages and in the
 [experiment history](/docs/research/history), and they are not this lab's
 numbers.
 

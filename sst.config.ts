@@ -173,14 +173,14 @@ export default $config({
       "AnalyticsDatabase",
       {
         name: analyticsDatabaseName,
-        description: `Drop7 ${$app.stage} first-party page-view analytics`,
+        description: `Drop7 ${$app.stage} first-party product analytics`,
       },
     );
     const analyticsTable = new aws.glue.CatalogTable("AnalyticsPageViews", {
       name: analyticsTableName,
       databaseName: analyticsDatabase.name,
       description:
-        "Append-only, server-side page-view events delivered by Amazon Data Firehose",
+        "Append-only first-party page views and batched app interactions delivered by Amazon Data Firehose",
       tableType: "EXTERNAL_TABLE",
       parameters: {
         // Glue owns reserved Iceberg parameters when openTableFormatInput creates the table.
@@ -202,6 +202,8 @@ export default $config({
           { name: "schema_version", type: "int" },
           { name: "occurred_at", type: "string" },
           { name: "occurred_at_ms", type: "bigint" },
+          { name: "received_at", type: "string" },
+          { name: "received_at_ms", type: "bigint" },
           { name: "path", type: "string" },
           { name: "host", type: "string" },
           { name: "referrer_host", type: "string" },
@@ -217,6 +219,11 @@ export default $config({
           { name: "is_bot", type: "boolean" },
           { name: "visitor_id", type: "string" },
           { name: "stage", type: "string" },
+          { name: "source_application", type: "string" },
+          { name: "source_platform", type: "string" },
+          { name: "app_version", type: "string" },
+          { name: "screen", type: "string" },
+          { name: "properties_json", type: "string" },
         ],
       },
     });
@@ -656,7 +663,7 @@ export default $config({
           resources: [githubSecretArn],
         },
         {
-          actions: ["firehose:PutRecord"],
+          actions: ["firehose:PutRecord", "firehose:PutRecordBatch"],
           resources: [analyticsFirehose.arn, gameSubmissionFirehose.arn],
         },
         {

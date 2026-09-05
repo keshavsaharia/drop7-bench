@@ -1,0 +1,126 @@
+/* Motion for the n-tuple primer figures (web/components/primers/NTuple.tsx).
+   The strip's windows light one at a time with the table row each selects;
+   the nudge figure alternates a good outcome (slots tick up) with a bad one
+   (slots tick down). Only opacity and transform animate. */
+
+.primer-ntuple svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.primer-ntuple [data-anim] {
+  animation-duration: 4.4s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  transform-box: fill-box;
+}
+
+/* Figure 1: one window at a time. */
+.primer-ntuple [data-anim^="win-"] {
+  opacity: 0;
+}
+
+.primer-ntuple [data-anim="win-1"] { animation-name: primer-ntuple-win-1; }
+.primer-ntuple [data-anim="win-2"] { animation-name: primer-ntuple-win-2; }
+.primer-ntuple [data-anim="win-3"] { animation-name: primer-ntuple-win-3; }
+.primer-ntuple [data-anim="win-4"] { animation-name: primer-ntuple-win-4; }
+
+@keyframes primer-ntuple-win-1 {
+  0% { opacity: 0; }
+  3% { opacity: 1; }
+  22% { opacity: 1; }
+  25% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+@keyframes primer-ntuple-win-2 {
+  0%, 25% { opacity: 0; }
+  28% { opacity: 1; }
+  47% { opacity: 1; }
+  50% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+@keyframes primer-ntuple-win-3 {
+  0%, 50% { opacity: 0; }
+  53% { opacity: 1; }
+  72% { opacity: 1; }
+  75% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+@keyframes primer-ntuple-win-4 {
+  0%, 75% { opacity: 0; }
+  78% { opacity: 1; }
+  97% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Figure 2: a good outcome, then a bad one. */
+.primer-ntuple [data-anim="good"],
+.primer-ntuple [data-anim="bad"],
+.primer-ntuple [data-anim="tick-up"],
+.primer-ntuple [data-anim="tick-down"] {
+  animation-duration: 5s;
+}
+
+.primer-ntuple [data-anim="good"] { animation-name: primer-ntuple-good; }
+.primer-ntuple [data-anim="bad"] { opacity: 0; animation-name: primer-ntuple-bad; }
+
+.primer-ntuple [data-anim="tick-up"] {
+  transform-origin: 0 50%;
+  animation-name: primer-ntuple-tick-up;
+}
+
+.primer-ntuple [data-anim="tick-down"] {
+  transform-origin: 100% 50%;
+  transform: scaleX(0);
+  animation-name: primer-ntuple-tick-down;
+}
+
+@keyframes primer-ntuple-good {
+  0% { opacity: 1; }
+  45% { opacity: 1; }
+  50% { opacity: 0; }
+  95% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes primer-ntuple-bad {
+  0% { opacity: 0; }
+  45% { opacity: 0; }
+  50% { opacity: 1; }
+  95% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes primer-ntuple-tick-up {
+  0% { transform: scaleX(0); }
+  10% { transform: scaleX(1); }
+  45% { transform: scaleX(1); }
+  50% { transform: scaleX(0); }
+  100% { transform: scaleX(0); }
+}
+
+@keyframes primer-ntuple-tick-down {
+  0%, 50% { transform: scaleX(0); }
+  60% { transform: scaleX(1); }
+  95% { transform: scaleX(1); }
+  100% { transform: scaleX(0); }
+}
+
+/* Resting frames: every window outlined with its row; the good outcome with
+   its ticks up. */
+@media (prefers-reduced-motion: reduce) {
+  .primer-ntuple [data-anim] {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .primer-ntuple [data-anim="bad"],
+  .primer-ntuple [data-anim="tick-down"] {
+    opacity: 0;
+  }
+}

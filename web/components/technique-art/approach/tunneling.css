@@ -1,0 +1,146 @@
+/* heuristic-search/tunneling card art: a fourth four lands on a column of
+   fours, the column clears from top to floor, and the trench it leaves opens
+   the covers buried high in the wall beside it. Play-state, duration and
+   easing are owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-tunneling {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-tunneling [data-anim="drop"] {
+  animation-name: tart-approach-tunneling-drop;
+}
+.tart--approach-tunneling [data-anim="dig"] {
+  animation-name: tart-approach-tunneling-dig;
+}
+.tart--approach-tunneling [data-anim="flash"] {
+  animation-name: tart-approach-tunneling-flash;
+}
+.tart--approach-tunneling [data-anim="score"] {
+  animation-name: tart-approach-tunneling-score;
+}
+.tart--approach-tunneling [data-anim="cover-out"] {
+  animation-name: tart-approach-tunneling-cover-out;
+}
+.tart--approach-tunneling [data-anim="cover-in"] {
+  animation-name: tart-approach-tunneling-cover-in;
+}
+.tart--approach-tunneling [data-anim="step-a"] {
+  animation-name: tart-approach-tunneling-step-a;
+}
+.tart--approach-tunneling [data-anim="step-b"] {
+  animation-name: tart-approach-tunneling-step-b;
+}
+.tart--approach-tunneling [data-anim="rest"] {
+  animation-name: tart-approach-tunneling-rest;
+}
+
+/* Doubled class so the falling disc keeps its own easing whichever way round
+   the two stylesheets are bundled. */
+.tart.tart--approach-tunneling [data-anim="drop"] {
+  animation-timing-function: var(--ease-drop, cubic-bezier(0.22, 0.78, 0.28, 1));
+}
+
+@keyframes tart-approach-tunneling-drop {
+  0% {
+    transform: translateY(-76px);
+  }
+  9.82%,
+  100% {
+    transform: translateY(0);
+  }
+}
+@keyframes tart-approach-tunneling-dig {
+  0%,
+  14.18% {
+    opacity: 1;
+  }
+  18.55%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes tart-approach-tunneling-flash {
+  0%,
+  10.91% {
+    opacity: 0;
+  }
+  14.73% {
+    opacity: 0.8;
+  }
+  20.73%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes tart-approach-tunneling-score {
+  0%,
+  13.09% {
+    opacity: 0;
+  }
+  17.45%,
+  31.64% {
+    opacity: 1;
+  }
+  37.09%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes tart-approach-tunneling-cover-out {
+  0%,
+  16.36% {
+    opacity: 1;
+  }
+  20.73%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes tart-approach-tunneling-cover-in {
+  0%,
+  18.55% {
+    opacity: 0;
+  }
+  24%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tart-approach-tunneling-step-a {
+  0%,
+  10.91% {
+    opacity: 1;
+  }
+  15.27%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes tart-approach-tunneling-step-b {
+  0%,
+  16.36% {
+    opacity: 0;
+  }
+  21.82%,
+  31.64% {
+    opacity: 1;
+  }
+  36%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes tart-approach-tunneling-rest {
+  0%,
+  33.82% {
+    opacity: 0;
+  }
+  40.36%,
+  100% {
+    opacity: 1;
+  }
+}

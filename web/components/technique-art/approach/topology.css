@@ -1,0 +1,47 @@
+/* oracle-curriculum/topology card art. A scan line runs down the board and
+   the numerals go out behind it, leaving the silhouette of the occupied
+   cells; the pocket, the dead block and the cover are then marked on that
+   shape. The resting frame is the shape with its marks and no numbers.
+   Play-state, duration and easing are owned by the shared art.css. */
+
+/* The frame this rests on introduces a label, so the cycle holds it for a
+   beat before repeating: the keyframes below finish the drawing inside the
+   motion share and the rest of the cycle is the still frame. */
+.tart.tart--approach-topology {
+  --tart-read: var(--duration-art-read, 2000ms);
+}
+
+.tart--approach-topology [data-anim="values"] {
+  animation-name: tart-approach-topology-values;
+}
+.tart--approach-topology [data-anim="scan"] {
+  animation-name: tart-approach-topology-scan;
+}
+.tart--approach-topology [data-anim="marks"] {
+  animation-name: tart-approach-topology-marks;
+}
+.tart--approach-topology [data-anim="caption"] {
+  animation-name: tart-approach-topology-caption;
+}
+
+@keyframes tart-approach-topology-values {
+  0%, 10.91% { opacity: 1; }
+  25.09%, 100% { opacity: 0; }
+}
+
+/* 126px is the board's height: the line starts on the top edge and leaves at
+   the bottom one, then stays there out of sight. */
+@keyframes tart-approach-topology-scan {
+  0%, 3.27% { transform: translateY(0); opacity: 0; }
+  6.55% { opacity: 1; }
+  21.82% { transform: translateY(126px); opacity: 1; }
+  27.27%, 100% { transform: translateY(126px); opacity: 0; }
+}
+@keyframes tart-approach-topology-marks {
+  0%, 27.27% { opacity: 0; }
+  36%, 100% { opacity: 1; }
+}
+@keyframes tart-approach-topology-caption {
+  0%, 42.55% { opacity: 0; }
+  49.09%, 100% { opacity: 1; }
+}
