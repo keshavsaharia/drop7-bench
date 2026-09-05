@@ -67,7 +67,7 @@ export default async function TechniquePage({ params }: { params: Promise<{ slug
           <ul className="aside-list">
             {approaches.map((entry) => (
               <li key={`${entry.family}/${entry.slug}`}>
-                <Link href={`/approaches/${entry.family}/${entry.slug}`}>{entry.title}</Link>
+                <Link href={`/approach/${entry.family}/${entry.slug}`}>{entry.title}</Link>
                 {entry.status && <Badge kind="status" value={entry.status} dot={false} />}
               </li>
             ))}
@@ -78,7 +78,7 @@ export default async function TechniquePage({ params }: { params: Promise<{ slug
         <div className="aside-block">
           <span className="label">Group page</span>
           <p>
-            <Link href={`/approaches/technique/${catalogue.slug}`}>
+            <Link href={`/approach/technique/${catalogue.slug}`}>
               {catalogue.title} approaches
             </Link>
           </p>

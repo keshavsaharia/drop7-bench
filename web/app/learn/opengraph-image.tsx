@@ -1,3 +1,4 @@
+import { LEARN_DESCRIPTION } from "@/lib/lesson-guides";
 /**
  * The link preview for the learn index. The words are the page's own title
  * and description.
@@ -5,8 +6,8 @@
 import { cardAlt, renderPageCard, SOCIAL_CONTENT_TYPE, SOCIAL_SIZE } from "@/lib/social-card";
 
 const CARD = {
-  title: "Learn",
-  summary: "The game, the ideas behind every strategy on this site, and how to read a result.",
+  title: "Learn the game",
+  summary: LEARN_DESCRIPTION,
   path: "/learn",
 };
 

@@ -11,8 +11,8 @@
 
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
-import GithubSlugger from "github-slugger";
-import { listConceptPages, listLearnPages, listTechniquePages, LEARN_DIR } from "./learn.ts";
+import { VOCABULARY_TOPICS, vocabularyTerms } from "./vocabulary.ts";
+import { listConceptPages, listLearnPages, listTechniquePages } from "./learn.ts";
 import { listLogEntries } from "./log.ts";
 import { listResults } from "./records.ts";
 import { DOCS_DIR, familyMeta, getExperiments, getTheories, listAllApproaches, listFamilies } from "./repo.ts";
@@ -78,7 +78,7 @@ function approachEntries(): SearchEntry[] {
     entries.push({
       kind: "approach",
       title: meta.title,
-      href: `/approaches/${family}`,
+      href: `/approach/${family}`,
       summary: clip(meta.summary),
       tags: tags(family, "family"),
     });
@@ -87,7 +87,7 @@ function approachEntries(): SearchEntry[] {
     entries.push({
       kind: approach.kind === "engine" ? "engine" : "approach",
       title: approach.title,
-      href: `/approaches/${approach.family}/${approach.slug}`,
+      href: `/approach/${approach.family}/${approach.slug}`,
       summary: clip(approach.summary),
       tags: tags(
         approach.family,
@@ -123,7 +123,7 @@ function learnEntries(): SearchEntry[] {
   return listLearnPages().map((page) => ({
     kind: "guide",
     title: page.title,
-    href: `/learn/${page.slug}`,
+    href: page.slug === "glossary" ? "/learn/vocabulary" : `/learn/${page.slug}`,
     summary: clip(page.summary),
     tags: tags("learn", page.slug),
   }));
@@ -139,41 +139,18 @@ function conceptEntries(): SearchEntry[] {
   }));
 }
 
-/**
- * Glossary terms are table rows under section headings in
- * web/content/learn/glossary.mdx: `| **term** | meaning |`. Each entry links
- * to its section, whose id rehype-slug derives from the heading text.
- */
+/** Topic pages and individual definitions share the same canonical URLs as the UI. */
 function glossaryEntries(): SearchEntry[] {
-  const path = join(LEARN_DIR, "glossary.mdx");
-  if (!existsSync(path)) return [];
-  const slugger = new GithubSlugger();
-  const entries: SearchEntry[] = [];
-  let section = "";
-  let sectionId = "";
-  for (const line of readFileSync(path, "utf8").split("\n")) {
-    const heading = /^#{2,3}\s+(.+?)\s*$/.exec(line);
-    if (heading) {
-      section = plain(heading[1]);
-      sectionId = slugger.slug(section);
-      continue;
-    }
-    if (!line.startsWith("|")) continue;
-    const cells = line.split("|").slice(1, -1).map((cell) => cell.trim());
-    if (cells.length < 2) continue;
-    const [term, meaning] = cells;
-    if (term === "Term" || /^-+$/.test(term)) continue;
-    const title = plain(term);
-    if (!title) continue;
-    entries.push({
-      kind: "glossary",
-      title,
-      href: sectionId ? `/learn/glossary#${sectionId}` : "/learn/glossary",
-      summary: clip(plain(meaning)),
-      tags: tags("glossary", section),
-    });
-  }
-  return entries;
+  return VOCABULARY_TOPICS.flatMap((topic) => [
+    { kind: "glossary" as const, title: topic.title, href: `/learn/vocabulary/${topic.slug}`, summary: topic.summary, tags: ["vocabulary", topic.slug] },
+    ...vocabularyTerms(topic.slug).map((term) => ({
+      kind: "glossary" as const,
+      title: term.title,
+      href: `/learn/vocabulary/${topic.slug}#${term.id}`,
+      summary: clip(plain(term.meaning)),
+      tags: tags("glossary", "vocabulary", topic.title),
+    })),
+  ]);
 }
 
 /* ---- Repository docs ---- */
@@ -293,6 +270,13 @@ function logEntries(): SearchEntry[] {
  */
 export function buildSearchIndex(): SearchEntry[] {
   return [
+    {
+      kind: "guide",
+      title: "App support",
+      href: "/support",
+      summary: "Contact support@drop7.dev for help with the app, saved games, replays, competitions, or privacy.",
+      tags: ["support", "help", "contact", "app", "email", "troubleshooting"],
+    },
     ...safe(approachEntries),
     ...safe(techniqueEntries),
     ...safe(learnEntries),

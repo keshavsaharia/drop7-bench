@@ -1,3 +1,4 @@
+import { CONCEPTS_DESCRIPTION } from "@/lib/lesson-guides";
 /**
  * The link preview for the concepts index. The words are the page's own title
  * and description.
@@ -7,8 +8,7 @@ import { cardAlt, renderPageCard, SOCIAL_CONTENT_TYPE, SOCIAL_SIZE } from "@/lib
 const CARD = {
   eyebrow: "Learn",
   title: "Concepts",
-  summary:
-    "The ideas behind every Drop7 strategy on this site, in reading order, shown on positions the rules engine produced.",
+  summary: CONCEPTS_DESCRIPTION,
   path: "/learn/concepts",
 };
 

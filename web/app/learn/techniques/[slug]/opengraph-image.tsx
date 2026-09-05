@@ -3,6 +3,7 @@
  */
 import { listTechniquePages } from "@/lib/learn";
 import { cardAlt, renderPageCard, SOCIAL_CONTENT_TYPE, SOCIAL_SIZE } from "@/lib/social-card";
+import { TechniqueArt } from "@/components/technique-art/TechniqueArt";
 
 export const dynamic = "force-dynamic";
 
@@ -20,5 +21,6 @@ export default async function Image({ params }: Props) {
     title: page?.title || slug,
     summary: page?.summary || undefined,
     path: `/learn/techniques/${slug}`,
+    art: <TechniqueArt name={page?.technique ?? "fallback"} mode="static" />,
   });
 }

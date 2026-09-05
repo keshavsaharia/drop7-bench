@@ -4,16 +4,18 @@ import { Card } from "@/components/Card";
 import { PageHeader } from "@/components/PageHeader";
 import { TechniqueArt } from "@/components/technique-art/TechniqueArt";
 import { listTechniquePages } from "@/lib/learn";
+import { pageMetadata } from "@/lib/metadata";
 import { listApproachesByTechnique } from "@/lib/repo";
 import { listTechniques } from "@/lib/techniques";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = {
+export const metadata = pageMetadata({
   title: "Techniques",
   description:
     "The ideas behind every Drop7 strategy on this site, each explained from the ground up before it meets the game.",
-};
+  path: "/learn/techniques",
+});
 
 export default function TechniquesIndexPage() {
   const pages = listTechniquePages();
@@ -37,7 +39,7 @@ export default function TechniquesIndexPage() {
         {techniques.map((technique) => {
           const page = bySlug.get(technique.slug);
           const count = listApproachesByTechnique(technique.slug).length;
-          const href = page ? `/learn/techniques/${page.slug}` : `/approaches/technique/${technique.slug}`;
+          const href = page ? `/learn/techniques/${page.slug}` : `/approach/technique/${technique.slug}`;
           return (
             <li key={technique.slug}>
               <Card
@@ -58,7 +60,7 @@ export default function TechniquesIndexPage() {
       </ol>
       <p className="techniques-footnote">
         Every technique group also has a page under{" "}
-        <Link href="/approaches">Approaches</Link> listing the strategies that used it and how
+        <Link href="/approach">Approaches</Link> listing the strategies that used it and how
         each one fared.
       </p>
     </div>

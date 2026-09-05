@@ -1,4 +1,5 @@
 import "../learn.css";
+import { VocabularyIndex } from "@/components/VocabularyIndex";
 import { notFound } from "next/navigation";
 import { ArticleLayout } from "@/components/ArticleLayout";
 import { Button } from "@/components/Button";
@@ -72,28 +73,12 @@ export default async function LearnDocPage({
   const { slug } = await params;
   const doc = loadLearnPage(slug);
   if (!doc) notFound();
+  if (slug === "glossary") return <VocabularyIndex />;
 
   const title = typeof doc.data.title === "string" ? doc.data.title : slug;
   const summary = typeof doc.data.summary === "string" ? doc.data.summary : undefined;
   const headings = extractHeadings(doc.content, { minDepth: 2, maxDepth: 2 });
-  const isGlossary = slug === "glossary";
   const { previous, next } = neighbours(slug);
-
-  // The glossary's tables are its content, so it gets no "On this page" list;
-  // its aside lists the term groups as anchors instead.
-  const aside =
-    isGlossary && headings.length > 0 ? (
-      <div className="aside-block">
-        <span className="label">Groups</span>
-        <ul className="learn-aside-list">
-          {headings.map((heading) => (
-            <li key={heading.id}>
-              <a href={`#${heading.id}`}>{heading.text}</a>
-            </li>
-          ))}
-        </ul>
-      </div>
-    ) : undefined;
 
   return (
     <div className="learn-doc">
@@ -104,11 +89,7 @@ export default async function LearnDocPage({
           </Button>
         )}
       </PageHeader>
-      <ArticleLayout
-        toc={isGlossary ? undefined : headings}
-        tocTitle={isGlossary ? "Groups" : "On this page"}
-        aside={aside}
-      >
+      <ArticleLayout toc={headings}>
         <Mdx source={doc.content} fromPath={`web/content/learn/${slug}.mdx`} />
         {(previous || next) && (
           <nav className="learn-nav" aria-label="Continue reading">
