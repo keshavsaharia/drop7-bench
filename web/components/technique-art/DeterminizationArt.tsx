@@ -40,7 +40,7 @@ export function DeterminizationArt(props: ArtProps) {
           <path key={lane.x} d={lanePath(lane.x)} stroke="var(--color-rule-strong)" strokeWidth={1.5} fill="none" />
         ))}
       </g>
-      <g className="tart-final">
+      <g>
         {LANES.map((lane, k) => (
           <path
             key={lane.x}
