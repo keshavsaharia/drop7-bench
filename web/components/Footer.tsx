@@ -25,6 +25,7 @@ const FOOTER_GROUPS = [
   {
     title: "Project",
     links: [
+      { href: "/support", label: "App support" },
       { href: "/src", label: "Browse the source" },
       { href: "/docs", label: "Documentation" },
       {
