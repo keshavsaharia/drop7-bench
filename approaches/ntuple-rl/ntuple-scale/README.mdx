@@ -1,0 +1,174 @@
+---
+title: Row and column lookup tables, learned from a billion moves
+family: ntuple-rl
+summary: A lookup-table evaluator that reads every full row and full column of the board as one pattern, learns its numbers by temporal-difference play on the Rust engine, and replaces the hand-written leaf inside the depth-3 fair search.
+status: preregistered
+evidence: none
+reads: public
+kind: strategy
+technique: n-tuple
+---
+
+## The problem
+
+Every search on this site ends the same way: after a few imagined moves it
+stops and asks a [leaf evaluator](/learn/glossary) how good the board is. The
+frozen fair leaf is a sum of eighteen hand-written terms, and a diagnostic on
+the [evolved NNUE page](/approach/lifetime-objective/nnue-evolution) measured
+that term carrying about nineteen twentieths of the spread between columns at
+every search depth. The evaluator is where the decisions are made.
+
+A numbered disc clears when the run of occupied cells through it, along its
+row or its column, is exactly as long as its number. Eighteen linear terms can
+only approximate that rule. This family's earlier
+[n-tuple networks](/learn/glossary) looked at the board through four-cell
+windows, or five- and six-cell windows trained on ten thousand games, and
+were played on their own or under a search that followed one guessed outcome
+instead of averaging over chance. None of them ever saw a whole row or a
+whole column, and none was ever the leaf of the fair search.
+
+## Proposed solution
+
+Read every full row and every full column as one seven-cell pattern. Each cell
+holds one of ten things (empty, a number from 1 to 7, an untouched gray disc, a
+cracked one), so a line has ten million possible patterns and each pattern gets
+its own learned number. Thirty two-by-three windows and thirty three-by-two
+windows add local structure between lines. The column tables are also split by
+the number of drops left before the next [rise](/learn/glossary). The whole
+evaluator is the sum of 74 looked-up numbers, from about 480 million table
+entries.
+
+The numbers are learned the way 2048 evaluators were: the program plays
+complete games with a one-move-ahead policy over the tables, and after each
+move nudges the entries it just used toward the points the move scored plus its
+own estimate of the next board. Temporal coherence gives every entry its own
+step size, which shrinks once that entry's errors stop pointing the same way.
+The policy reads the visible board and the moves until the next rise, and
+nothing else; the visible next disc is deliberately not an input, so one
+learned number serves every column that leads to the same board.
+
+## How it works
+
+1. Index straight from the engine. The
+   [Rust bitboard engine](/approach/fair-expectimax/rust-engine) keeps the
+   board as seven packed column words, four bits per cell. A column's pattern
+   number comes from its word through two small lookup tables, without
+   unpacking a single cell. Row patterns come from a nibble gather across the
+   seven words, and windows from two or three adjacent nibbles of neighbouring
+   words. Feature extraction costs about forty nanoseconds per board.
+2. Train. Thirty-two threads play games at once on the shared tables, each
+   thread picking the column whose expected value, averaged over the same
+   seven covered-disc reveal samples the fair search uses, is highest. After
+   every move the previous board's entries move toward the observed reward
+   plus the new board's value. Tables start optimistic, at twenty row-rises of
+   value for any board, so unexplored boards look attractive.
+3. Validate as it trains. At fixed move counts the tables are dropped into the
+   real depth-3, seven-stratum fair search and played on 64 fixed training-role
+   games against the same search with the frozen fair leaf, and also played
+   directly one ply. The point with the largest paired margin is frozen as the
+   candidate.
+4. Choose the configuration first. Six configurations train for two hundred
+   million moves each on the same seeds: with and without rise-phase tables,
+   with and without the windows, windows only (which tests whether the full
+   lines are what matters), and a smaller step size. The one with the largest
+   final validation margin is trained again from scratch for four billion
+   moves.
+5. Screen once. The frozen candidate plays 256 games on a seed block nothing
+   has ever opened, as the leaf of the depth-3 search, against three arms on
+   the identical seeds: the frozen fair leaf in the same search (the
+   comparator), the same tables played directly one ply, and the fair leaf at
+   depth 4 (the program's standing reference).
+
+## What happened
+
+<NTupleStatus run="RUN-20260905T193006Z-4fbeb4e5" />
+
+The run is in progress. The figures below are cut from the run's own
+artifacts and update as new snapshots are taken; the numbers on them are
+training-role validation numbers until the screen section says otherwise.
+
+<NTuplePilotFigure run="RUN-20260905T193006Z-4fbeb4e5" caption="Stage A. Each bar is one configuration's paired margin over the fair leaf on the 64-game training-role validation block after two hundred million training moves, with its bootstrap bounds and detection floor. These games chose the configuration, so they cannot confirm it." />
+
+<NTupleTrainingFigure run="RUN-20260905T193006Z-4fbeb4e5" caption="Stage B. The selected configuration trained from scratch. The solid line is the tables as the leaf of the depth-3 search on the 64 validation games; the dashed line is the frozen fair leaf in the same search on the same games; the thin lines are the tables played directly and the training games themselves. The point marked as frozen is the candidate the screen plays." />
+
+<NTupleScreenFigure run="RUN-20260905T193006Z-4fbeb4e5" caption="Stage D, the primary contrast. One bar per held-out game: the candidate as the depth-3 leaf minus the frozen fair leaf in the same search on the same seed, in seed order. The dashed line is the recorded paired mean and the divider separates the two halves the gate checks separately." />
+
+<NTupleScreenFigure run="RUN-20260905T193006Z-4fbeb4e5" contrast="candidate-d3s7-vs-fair-d4s7" caption="For context: the same candidate against the fair leaf at depth 4, the program's standing reference, on the same 256 games." />
+
+<NTupleGateTable run="RUN-20260905T193006Z-4fbeb4e5" />
+
+## What we learned
+
+This section is written when the screen has been played.
+
+<AgentContext summary="Records and provenance">
+
+Theory
+[TH-20260905-ntuple-line-tuples-tc-td-leaf-bcb25133](/theories/TH-20260905-ntuple-line-tuples-tc-td-leaf-bcb25133),
+experiment
+[EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620](/experiments/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620)
+(frozen protocol SHA-256 `ee8eabb0512f459bb0acbb717e335d5e6953d2ac7ec57400f2a35b9f1c76b65d`),
+run `RUN-20260905T193006Z-4fbeb4e5`, machine profile
+`MACH-20260905T192901Z-83559f62`, contribution `CT-20260905T192505Z-c487efca`.
+
+Seed leases: training `SL-20260905T191317Z-09895ea2` (`0xa5300000`
+to `0xa54f0000`, read in order and wrapped; wrap counts in each
+`progress.jsonl`), validation `SL-20260905T191317Z-549265de` (`0xa52f2240`,
+64 games, training role, re-read at every validation point), screen
+`SL-20260905T191317Z-c25f58cd` (`0xa52f2140`, 256 games, public development,
+opened once). CHECK gates and the throughput smoke run read only the
+already-opened probe block `0xa5277000`.
+
+Run artifacts live under `runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/`
+(gitignored): `gates.log`, `pilot/<arm>/`, `main/`, `screen/`, `rusage.jsonl`,
+`analysis.json`, `analysis.md`. The web snapshot is
+`web/content/figures/ntuple-scale/RUN-20260905T193006Z-4fbeb4e5.json`, written
+by `web/scripts/extract-ntuple-scale.ts`. Table files are 1.9 GB (weights) and
+5.8 GB (with coherence accumulators) and are retained on the workstation with
+their SHA-256 in the result record; they are not committed.
+
+Reproduce:
+
+```sh
+approaches/ntuple-rl/ntuple-scale/build.sh
+cd approaches/ntuple-rl/ntuple-scale && cargo test --release
+RUN_ID=RUN-... THREADS=32 scripts/pipeline.sh chain
+```
+
+</AgentContext>
+
+<AgentContext summary="Validity, gates and limitations">
+
+CHECK gates (all pass, `gates.log`): the two-table base-10 codec against a
+Horner reference on two million random line words; the row gather against the
+engine's cell accessor; feature indices against an independent reference for
+every layout, with distinctness and range; information-boundary blindness
+(score, level, moves played and the visible next disc leave the leaf value
+unchanged; score, level and moves played leave the direct decision unchanged);
+reflection (mirrored boards share the value and the direct decision mirrors);
+direct-policy legality; the tables inside the depth-3 search play legal,
+complete, deterministic games that are identical at one and four workers; two
+single-thread training runs on the same games produce identical tables; values
+finite.
+
+Known limitations, fixed before any leased seed was read: training uses
+lock-free asynchronous updates from 32 threads, so a training run is not
+bit-reproducible (the serial update rule is); the validation block is
+training-role data read many times, so validation margins select and cannot
+confirm; the pilot's configuration choice is made on the same 64 games; the
+one-shot screen is 256 games, whose detection floor for this contrast is
+recorded in the analysis; the candidate is chosen at the validation point with
+the best margin, which is an upward-biased estimate the screen exists to
+correct.
+
+</AgentContext>
+
+<AgentContext summary="Scoring mode">
+
+Corrected five-move Hardcore scoring, 17,000 points per row rise and 70,000 per
+board clear, 2,000-move cap, on the Rust bitboard engine that is
+trace-identical to the frozen C++ reference. All scores on this page are on
+that scale. Table values are learned in units of one row rise and multiplied
+by 17,000 inside the search.
+
+</AgentContext>

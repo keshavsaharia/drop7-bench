@@ -1,0 +1,80 @@
+---
+date: 2026-09-05
+title: "Full-row and full-column lookup tables"
+summary: "A morning of reading settled that Drop7 is Markov in the public state, so a POMDP solver has nothing to add here. The afternoon built a lookup-table leaf that reads whole rows and columns, trained it by temporal-difference play on the Rust engine at 1.4 million moves per second, and started the preregistered pilot."
+contributors: [claude-fable-5-1 (Claude Code)]
+tags: [n-tuple, temporal-difference, leaf, rust, pomdp, pilot]
+outcomes: { positive: 0, negative: 0, open: 2 }
+---
+
+## Is it a POMDP?
+
+The owner asked whether the Drop7 decision problem had been framed as a
+partially observable Markov decision process anywhere in the program, and
+what the literature on solving such problems offers. The answer from the
+record is narrower than the question. The flow-ceiling findings do describe
+the fair planner as a determinized, hindsight-optimization controller with
+strategy-fusion bias, which is POMDP vocabulary, and recommend a belief-state
+search. But Kimi's direct-policy program argued the public state is a
+sufficient statistic, and audit 01 found the base engine draws a covered
+disc's value at the moment it is revealed: covered values are independent,
+uniform and only ever observed by being revealed. The belief over them never
+sharpens, so the belief-MDP is the public-state MDP and the fair search with
+an exact reveal quadrature already solves it. What the POMDP literature
+does offer is a name for the fair planner's bias (DESPOT keeps one action
+per belief node across sampled scenarios, where hindsight optimization
+plans each scenario separately) and a literature on students imitating
+privileged teachers, which is the shape of the program's oracle failures.
+
+<Direction title="Which open directions have the best odds" status="closed" owner="claude-fable-5-1 (Claude Code)">
+Ranked for the owner: evolve a zero-initialised residual on top of the fair
+leaf rather than a distilled replacement; row and column n-tuples at 2048
+scale trained by temporal-difference play; play the finding-11 blend;
+re-run the survival-leaf blend at seven strata with low-noise labels; and,
+as the one measurement that decides between search and evaluator work, a
+scenario-tree fair search at seven plies. The owner chose the n-tuple
+direction.
+</Direction>
+
+## The experiment
+
+The recorded n-tuple attempts used four-cell windows, or five- and six-cell
+windows on ten thousand games, were played standalone or under a
+representative-outcome search, and were scored on the old 7,000-point
+scale. This one reads every full row and full column as a seven-cell pattern
+(ten million patterns per line), adds two-by-three and three-by-two windows,
+splits the column tables by the rise clock, and trains the resulting 480
+million entries by TD(0) with temporal-coherence step sizes from one-ply play
+on the Rust bitboard engine. The tables are then the leaf of the depth-3,
+seven-stratum fair search. Theory
+`TH-20260905-ntuple-line-tuples-tc-td-leaf-bcb25133`, experiment
+`EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620`, run
+`RUN-20260905T193006Z-4fbeb4e5`, all on branch
+`claude/n-tuple-scale-experiment`.
+
+<Finding title="Pattern indices come straight from the packed column words" kind="neutral" metric="44 ns per board for 74 patterns">
+The engine stores each column as one 32-bit word with four bits per cell. A
+column's pattern number is two small table lookups on that word (the low
+four nibbles and the high three), with no unpacking. Rows need one nibble
+from each of the seven words; windows read two or three adjacent nibbles of
+neighbouring words. The gate binary measured feature extraction at 44
+nanoseconds per board and a direct one-ply decision at about 5 microseconds
+with the reveal-sample shortcut, which skips the remaining samples when the
+first one revealed nothing.
+</Finding>
+
+<Finding title="The trainer runs at 1.4 million moves per second on 32 threads" kind="neutral" metric="4 million-move smoke run, 5.8 GB of tables">
+A four-million-move smoke run on the already-open probe block measured
+1.4 million training moves per second with the full 480-million-entry
+layout, so a billion training moves is about twelve minutes. Training-game
+mean score rose from 117,500 to 162,186 over the four chunks of that run
+(one-ply play, no search).
+</Finding>
+
+<Direction title="The pipeline is running" status="running" owner="claude-fable-5-1 (Claude Code)">
+The CHECK gates passed at 19:30 UTC and the six pilot arms started. The
+[approach page](/approach/ntuple-rl/ntuple-scale) shows the run's status
+strip, the pilot arms, the main run's validation curve and, once played, the
+one-shot 256-game screen; each figure is cut from the run's artifacts by the
+snapshot script and refreshed as the run advances.
+</Direction>
