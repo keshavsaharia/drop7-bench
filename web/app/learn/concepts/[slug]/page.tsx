@@ -1,7 +1,6 @@
 import "../../learn.css";
 import Link from "next/link";
 import { Card } from "@/components/Card";
-import { LessonMotionToggle } from "@/components/LearnCards";
 import { LessonArt } from "@/components/technique-art/LessonArt";
 import { LESSON_GUIDES } from "@/lib/lesson-guides";
 import { vocabularyTopic } from "@/lib/vocabulary";
@@ -76,7 +75,7 @@ export default async function ConceptPage({
   );
 
   return (
-    <div className="concept-page learn-motion-scope">
+    <div className="concept-page">
       <PageHeader
         crumbs={[
           { href: "/learn", label: "learn the game" },
@@ -87,7 +86,7 @@ export default async function ConceptPage({
       />
       {guide && <figure className="lesson-overview">
         <div className="lesson-overview-art"><LessonArt name={slug} mode="loop" /></div>
-        <figcaption><span className="label">Concept in focus</span><p className="lesson-overview-idea">{guide.idea}</p><p className="lesson-overview-watch">{guide.watch}</p><LessonMotionToggle /></figcaption>
+        <figcaption><span className="label">Concept in focus</span><p className="lesson-overview-idea">{guide.idea}</p><p className="lesson-overview-watch">{guide.watch}</p></figcaption>
       </figure>}
       <ArticleLayout toc={toc} aside={aside}>
         <Mdx source={doc.content} fromPath={`web/content/learn/concepts/${slug}.mdx`} />

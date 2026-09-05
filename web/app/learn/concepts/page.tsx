@@ -1,5 +1,5 @@
 import "../learn.css";
-import { LessonMotionToggle, ConceptCards } from "@/components/LearnCards";
+import { ConceptCards } from "@/components/LearnCards";
 import { PageHeader } from "@/components/PageHeader";
 import { listConceptPages } from "@/lib/learn";
 import { CONCEPTS_DESCRIPTION } from "@/lib/lesson-guides";
@@ -10,9 +10,8 @@ export const metadata = pageMetadata({ title: "Concepts", description: CONCEPTS_
 
 export default function ConceptsIndexPage() {
   const pages = listConceptPages().filter((page) => !page.hidden);
-  return <div className="concepts-index learn-motion-scope">
+  return <div className="concepts-index">
     <PageHeader crumbs={[{ href: "/learn", label: "learn the game" }]} title="Concepts" lead={CONCEPTS_DESCRIPTION} />
-    <div className="learn-tools"><LessonMotionToggle /></div>
-      {pages.length ? <ConceptCards pages={pages} heading="h2" /> : <p className="learn-empty">Concept lessons will appear here when available.</p>}
+    {pages.length ? <ConceptCards pages={pages} heading="h2" /> : <p className="learn-empty">Concept lessons will appear here when available.</p>}
   </div>;
 }
