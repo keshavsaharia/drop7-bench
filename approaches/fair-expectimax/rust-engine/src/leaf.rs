@@ -353,7 +353,7 @@ pub fn fair_leaf_terms(state: &State, scratch: &mut LeafScratch) -> [f64; 18] {
 /// the same code it always was.
 fn leaf_features(state: &State, scratch: &mut LeafScratch) -> Features {
     // The leaf reads cells many times in row-major order; unpack the packed
-    // column words to the byte view once (7 PDEPs) so every read below is a
+    // column words to the byte view once so every read below is a
     // direct byte load, the same access cost the C++ leaf pays.
     let cells = state.board.to_bytes();
     let board = &state.board;
@@ -473,39 +473,43 @@ fn leaf_features(state: &State, scratch: &mut LeafScratch) -> Features {
         let column = index % BOARD_SIZE;
         let horizontal = &RUN_TABLE[scratch.row_mask[row] as usize];
         let vertical = &RUN_TABLE[scratch.column_mask[column] as usize];
-        let mut horizontal_support = [0.0f64; BOARD_SIZE];
-        let mut vertical_support = [0.0f64; BOARD_SIZE];
-        let mut horizontal_count = 0usize;
-        let mut vertical_count = 0usize;
-        let mut scan_col = horizontal.start[column] as i32;
-        while scan_col <= horizontal.end[column] as i32 {
-            let supporter = row * BOARD_SIZE + scan_col as usize;
-            if supporter != index && scratch.present(supporter) {
-                horizontal_support[horizontal_count] = scratch.addition[supporter];
-                horizontal_count += 1;
-            }
-            scan_col += 1;
-        }
-        let mut scan_row = vertical.start[row] as i32;
-        while scan_row <= vertical.end[row] as i32 {
-            let supporter = scan_row as usize * BOARD_SIZE + column;
-            if supporter != index && scratch.present(supporter) {
-                vertical_support[vertical_count] = scratch.addition[supporter];
-                vertical_count += 1;
-            }
-            scan_row += 1;
-        }
         let value = cells[index] as i32;
-        let horizontal_release = release_readiness(
-            horizontal.length[column] as i32 - value,
-            &mut horizontal_support,
-            horizontal_count,
-        );
-        let vertical_release = release_readiness(
-            vertical.length[row] as i32 - value,
-            &mut vertical_support,
-            vertical_count,
-        );
+        let horizontal_excess = horizontal.length[column] as i32 - value;
+        let vertical_excess = vertical.length[row] as i32 - value;
+        // Release is exactly zero unless the run is longer than the disc's
+        // value. Avoid gathering a supporter inventory that cannot be read.
+        let horizontal_release = if horizontal_excess > 0 {
+            let mut support = [0.0f64; BOARD_SIZE];
+            let mut count = 0usize;
+            let mut scan_col = horizontal.start[column] as i32;
+            while scan_col <= horizontal.end[column] as i32 {
+                let supporter = row * BOARD_SIZE + scan_col as usize;
+                if supporter != index && scratch.present(supporter) {
+                    support[count] = scratch.addition[supporter];
+                    count += 1;
+                }
+                scan_col += 1;
+            }
+            release_readiness(horizontal_excess, &mut support, count)
+        } else {
+            0.0
+        };
+        let vertical_release = if vertical_excess > 0 {
+            let mut support = [0.0f64; BOARD_SIZE];
+            let mut count = 0usize;
+            let mut scan_row = vertical.start[row] as i32;
+            while scan_row <= vertical.end[row] as i32 {
+                let supporter = scan_row as usize * BOARD_SIZE + column;
+                if supporter != index && scratch.present(supporter) {
+                    support[count] = scratch.addition[supporter];
+                    count += 1;
+                }
+                scan_row += 1;
+            }
+            release_readiness(vertical_excess, &mut support, count)
+        } else {
+            0.0
+        };
         let release = union_readiness(horizontal_release, vertical_release);
         scratch.horizontal_release[index] = horizontal_release;
         scratch.vertical_release[index] = vertical_release;
@@ -636,16 +640,30 @@ fn leaf_features(state: &State, scratch: &mut LeafScratch) -> Features {
                 union_readiness(scratch.addition[index + 1], scratch.release[index + 1]);
             count += 1;
         }
-        sort_descending(&mut support[..count]);
         if cells[index] == CRACKED {
+            // Retain the sorted multiplication order for exact f64 parity.
+            sort_descending(&mut support[..count]);
             let mut inverse = 1.0f64;
             for item in support.iter().take(count) {
                 inverse *= 1.0 - item;
             }
             f.cracked_exposure += 1.0 - inverse;
         } else {
-            f.solid_exposure += (if count > 0 { support[0] * 0.35 } else { 0.0 })
-                + (if count > 1 { support[1] * 0.65 } else { 0.0 });
+            // Solid exposure reads only the two largest supports. All
+            // readiness values are finite and nonnegative; ties have the
+            // same bits, so selection preserves the sorted result exactly.
+            let mut largest = 0.0f64;
+            let mut second = 0.0f64;
+            for &value in &support[..count] {
+                if value > largest {
+                    second = largest;
+                    largest = value;
+                } else if value > second {
+                    second = value;
+                }
+            }
+            f.solid_exposure += (if count > 0 { largest * 0.35 } else { 0.0 })
+                + (if count > 1 { second * 0.65 } else { 0.0 });
         }
     }
 
@@ -742,7 +760,11 @@ mod tests {
                     reconstructed += FROZEN_LEAF_WEIGHTS[j] * terms[j];
                 }
                 let reference = fair_leaf(&state, &mut scratch);
-                assert_eq!(reconstructed.to_bits(), reference.to_bits(), "seed {seed:#x}");
+                assert_eq!(
+                    reconstructed.to_bits(),
+                    reference.to_bits(),
+                    "seed {seed:#x}"
+                );
                 compared += 1;
                 let column = center_first_move(&state.board).expect("legal column");
                 sink.clear();
@@ -750,5 +772,397 @@ mod tests {
             }
         }
         assert!(compared >= 80, "compared only {compared} boards");
+    }
+
+    /// Compare every term with the pre-optimization evaluator, including
+    /// transient boards with holes that cannot be reached between moves.
+    /// No game seeds or trajectories are opened by this constructed matrix.
+    #[test]
+    fn optimized_terms_match_baseline_on_constructed_boards() {
+        use crate::board::Board;
+        let mut boards = vec![Board::empty(), Board::initial()];
+        for value in 1..=9u32 {
+            boards.push(Board {
+                cols: [value * 0x0111_1111; BOARD_SIZE],
+            });
+            for index in 0..CELL_COUNT {
+                let mut board = Board::empty();
+                board.cols[index % BOARD_SIZE] = value << (4 * (6 - index / BOARD_SIZE));
+                boards.push(board);
+            }
+        }
+        for pattern in 0..512usize {
+            let mut board = Board::empty();
+            for column in 0..BOARD_SIZE {
+                let height = (pattern + 3 * column) % 8;
+                for nibble in 0..BOARD_SIZE {
+                    let occupied = match pattern % 4 {
+                        0 => nibble < height,                          // bottom-packed
+                        1 => (pattern + column + nibble) % 3 == 0,     // sparse holes
+                        2 => (pattern + 2 * column + nibble) % 5 != 0, // dense holes
+                        _ => true,                                     // full mixed board
+                    };
+                    if occupied {
+                        let value = 1 + ((pattern * 13 + column * 5 + nibble * 7) % 9) as u32;
+                        board.cols[column] |= value << (4 * nibble);
+                    }
+                }
+            }
+            boards.push(board);
+        }
+        let mut optimized = LeafScratch::default();
+        let mut reference = LeafScratch::default();
+        let mut compared = 0;
+        for (board_index, &board) in boards.iter().enumerate() {
+            for next_disc in 1..=7 {
+                for moves_remaining in 1..=5 {
+                    let state = State {
+                        board,
+                        next_disc,
+                        moves_remaining,
+                        game_over: false,
+                        score: 0,
+                        level: 0,
+                        moves_played: 0,
+                    };
+                    let actual = fair_leaf_terms(&state, &mut optimized);
+                    let expected = baseline_leaf_terms(&state, &mut reference);
+                    for term in 0..LEAF_TERM_NAMES.len() {
+                        assert_eq!(actual[term].to_bits(), expected[term].to_bits(),
+                            "board {board_index}, disc {next_disc}, rise {moves_remaining}, term {}",
+                            LEAF_TERM_NAMES[term]);
+                    }
+                    compared += 1;
+                }
+            }
+        }
+        assert_eq!(compared, 33_740);
+    }
+
+    // Frozen test-only snapshot of leaf_features at
+    // 7adb6b36412b4bbef25623183dac1a905570cd1a. Keep its eager supporter
+    // gathering and full cover sort as an independent regression oracle.
+    fn baseline_leaf_terms(state: &State, scratch: &mut LeafScratch) -> [f64; 18] {
+        let f = baseline_leaf_features(state, scratch);
+        [
+            f.open_columns as f64,
+            f.height_load,
+            f.solid_cells as f64,
+            f.cracked_cells as f64,
+            f.numbered_cells as f64,
+            f.high_low_numbers as f64,
+            f.direct_potential,
+            f.latent_chain_potential,
+            f.cracked_exposure,
+            f.solid_exposure,
+            f.adjacent_ones,
+            f.triple_twos,
+            f.dead_low_numbers,
+            f.covered_height_risk,
+            f.low_number_height_risk,
+            f.danger_height_squared,
+            f.rise_pressure,
+            f.next_disc_vertical_options,
+        ]
+    }
+
+    fn baseline_leaf_features(state: &State, scratch: &mut LeafScratch) -> Features {
+        // Decode independently of the optimized Board::to_bytes implementation.
+        let cells: [u8; CELL_COUNT] =
+            std::array::from_fn(|index| state.board.get(index / BOARD_SIZE, index % BOARD_SIZE));
+        let board = &state.board;
+        let mut f = Features::default();
+
+        // --- stage 1: occupancy masks, heights, open columns -------------------
+        // The packed representation yields the masks directly (measured faster
+        // than a byte sweep here); contents are the same as the C++ row sweep.
+        let (row_mask, col_mask) = board.scan_masks();
+        scratch.row_mask = row_mask;
+        scratch.column_mask = col_mask;
+        let mut maximum_height = 0i32;
+        for column in 0..BOARD_SIZE {
+            let height = scratch.column_mask[column].count_ones() as i32;
+            scratch.heights[column] = height;
+            if cells[column] == EMPTY {
+                f.open_columns += 1;
+            }
+            maximum_height = maximum_height.max(height);
+            f.rise_pressure += ((height * height * height) as f64) / state.moves_remaining as f64;
+            if height < BOARD_SIZE as i32 && height + 1 == state.next_disc as i32 {
+                f.next_disc_vertical_options += 1.0;
+            }
+        }
+        let danger = (maximum_height - 4).max(0);
+        f.danger_height_squared = (danger * danger) as f64;
+        scratch.present_bits = 0;
+        scratch.cover_bits = 0;
+        scratch.ones_bits = 0;
+        scratch.twos_row = [0; BOARD_SIZE];
+        scratch.twos_column = [0; BOARD_SIZE];
+
+        // --- stage 2: per-cell sweep -------------------------------------------
+        for row in 0..BOARD_SIZE {
+            let elevation = (BOARD_SIZE - row) as i32;
+            let mut prefix = [0i32; BOARD_SIZE + 1];
+            for column in 0..BOARD_SIZE {
+                prefix[column + 1] = prefix[column] + (elevation - scratch.heights[column]).max(0);
+            }
+            let horizontal = &RUN_TABLE[scratch.row_mask[row] as usize];
+            for column in 0..BOARD_SIZE {
+                let index = row * BOARD_SIZE + column;
+                let cell = cells[row * BOARD_SIZE + column];
+                if cell == EMPTY {
+                    continue;
+                }
+                f.height_load += (elevation * elevation) as f64;
+                let edge_multiplier = if column == 0 || column == BOARD_SIZE - 1 {
+                    1.65
+                } else {
+                    1.0
+                };
+                if cell == SOLID || cell == CRACKED {
+                    if cell == SOLID {
+                        f.solid_cells += 1;
+                        f.covered_height_risk += (elevation * elevation) as f64 * edge_multiplier;
+                    } else {
+                        f.cracked_cells += 1;
+                        f.covered_height_risk +=
+                            (elevation * elevation) as f64 * edge_multiplier * 0.72;
+                    }
+                    scratch.cover_bits |= 1u64 << index;
+                    continue;
+                }
+                if !(1..=7).contains(&cell) {
+                    continue;
+                }
+                f.numbered_cells += 1;
+                if cell <= 2 {
+                    let height_risk = (elevation - 2).max(0);
+                    f.low_number_height_risk += (height_risk * height_risk) as f64;
+                    if elevation >= 5 {
+                        f.high_low_numbers += 1;
+                    }
+                }
+                scratch.present_bits |= 1u64 << index;
+                if cell == 1 {
+                    scratch.ones_bits |= 1u64 << index;
+                } else if cell == 2 {
+                    scratch.twos_row[row] |= 1u8 << column;
+                    scratch.twos_column[column] |= 1u8 << row;
+                }
+                let height = scratch.heights[column];
+                let vertical_addition = if cell as i32 > height {
+                    readiness(cell as i32 - height)
+                } else {
+                    0.0
+                };
+                let horizontal_cost = minimum_horizontal_addition_cost(
+                    cell as i32,
+                    horizontal.start[column] as i32,
+                    horizontal.end[column] as i32,
+                    horizontal.length[column] as i32,
+                    &scratch.heights,
+                    elevation,
+                    &prefix,
+                );
+                let horizontal_addition = if horizontal_cost < 0.0 {
+                    0.0
+                } else {
+                    readiness(horizontal_cost as i32)
+                };
+                let addition = union_readiness(horizontal_addition, vertical_addition);
+                scratch.vertical_addition[index] = vertical_addition;
+                scratch.horizontal_addition[index] = horizontal_addition;
+                scratch.addition[index] = addition;
+                f.direct_potential += addition;
+            }
+        }
+
+        // --- stage 3: release inventory ----------------------------------------
+        let mut remaining = scratch.present_bits;
+        while remaining != 0 {
+            let index = remaining.trailing_zeros() as usize;
+            remaining &= remaining - 1;
+            let row = index / BOARD_SIZE;
+            let column = index % BOARD_SIZE;
+            let horizontal = &RUN_TABLE[scratch.row_mask[row] as usize];
+            let vertical = &RUN_TABLE[scratch.column_mask[column] as usize];
+            let mut horizontal_support = [0.0f64; BOARD_SIZE];
+            let mut vertical_support = [0.0f64; BOARD_SIZE];
+            let mut horizontal_count = 0usize;
+            let mut vertical_count = 0usize;
+            let mut scan_col = horizontal.start[column] as i32;
+            while scan_col <= horizontal.end[column] as i32 {
+                let supporter = row * BOARD_SIZE + scan_col as usize;
+                if supporter != index && scratch.present(supporter) {
+                    horizontal_support[horizontal_count] = scratch.addition[supporter];
+                    horizontal_count += 1;
+                }
+                scan_col += 1;
+            }
+            let mut scan_row = vertical.start[row] as i32;
+            while scan_row <= vertical.end[row] as i32 {
+                let supporter = scan_row as usize * BOARD_SIZE + column;
+                if supporter != index && scratch.present(supporter) {
+                    vertical_support[vertical_count] = scratch.addition[supporter];
+                    vertical_count += 1;
+                }
+                scan_row += 1;
+            }
+            let value = cells[index] as i32;
+            let horizontal_release = release_readiness(
+                horizontal.length[column] as i32 - value,
+                &mut horizontal_support,
+                horizontal_count,
+            );
+            let vertical_release = release_readiness(
+                vertical.length[row] as i32 - value,
+                &mut vertical_support,
+                vertical_count,
+            );
+            let release = union_readiness(horizontal_release, vertical_release);
+            scratch.horizontal_release[index] = horizontal_release;
+            scratch.vertical_release[index] = vertical_release;
+            scratch.release[index] = release;
+            f.latent_chain_potential += release;
+            if value <= 2
+                && horizontal.length[column] as i32 > value
+                && vertical.length[row] as i32 > value
+            {
+                f.dead_low_numbers += 1.0 - union_readiness(scratch.addition[index], release);
+            }
+        }
+
+        // --- stage 4: adjacent ones --------------------------------------------
+        let mut remaining = scratch.ones_bits;
+        while remaining != 0 {
+            let index = remaining.trailing_zeros() as usize;
+            remaining &= remaining - 1;
+            let row = index / BOARD_SIZE;
+            let column = index % BOARD_SIZE;
+            if column + 1 < BOARD_SIZE && cells[index + 1] == 1 {
+                let escape = union_readiness(
+                    scratch.vertical_addition[index],
+                    scratch.vertical_release[index],
+                )
+                .max(union_readiness(
+                    scratch.vertical_addition[index + 1],
+                    scratch.vertical_release[index + 1],
+                ));
+                f.adjacent_ones += 1.0 - escape;
+            }
+            if row + 1 < BOARD_SIZE && cells[index + BOARD_SIZE] == 1 {
+                let escape = union_readiness(
+                    scratch.horizontal_addition[index],
+                    scratch.horizontal_release[index],
+                )
+                .max(union_readiness(
+                    scratch.horizontal_addition[index + BOARD_SIZE],
+                    scratch.horizontal_release[index + BOARD_SIZE],
+                ));
+                f.adjacent_ones += 1.0 - escape;
+            }
+        }
+
+        // --- stage 5: runs of twos ----------------------------------------------
+        for row in 0..BOARD_SIZE {
+            let mut mask = scratch.twos_row[row];
+            while mask != 0 {
+                let start = mask.trailing_zeros() as usize;
+                let mut run = mask >> start;
+                let mut length = 0usize;
+                while run & 1 != 0 {
+                    length += 1;
+                    run >>= 1;
+                }
+                let excess = length as i32 - 2;
+                if excess > 0 {
+                    let mut escape = 0.0f64;
+                    for column in start..start + length {
+                        let slot = row * BOARD_SIZE + column;
+                        escape = escape.max(union_readiness(
+                            scratch.vertical_addition[slot],
+                            scratch.vertical_release[slot],
+                        ));
+                    }
+                    f.triple_twos += (excess * excess) as f64 * (1.0 - escape);
+                }
+                mask &= !(((1u8 << length) - 1) << start);
+            }
+        }
+        for column in 0..BOARD_SIZE {
+            let mut mask = scratch.twos_column[column];
+            while mask != 0 {
+                let start = mask.trailing_zeros() as usize;
+                let mut run = mask >> start;
+                let mut length = 0usize;
+                while run & 1 != 0 {
+                    length += 1;
+                    run >>= 1;
+                }
+                let excess = length as i32 - 2;
+                if excess > 0 {
+                    let mut escape = 0.0f64;
+                    for row in start..start + length {
+                        let slot = row * BOARD_SIZE + column;
+                        escape = escape.max(union_readiness(
+                            scratch.horizontal_addition[slot],
+                            scratch.horizontal_release[slot],
+                        ));
+                    }
+                    f.triple_twos += (excess * excess) as f64 * (1.0 - escape);
+                }
+                mask &= !(((1u8 << length) - 1) << start);
+            }
+        }
+
+        // --- stage 6: cover exposure --------------------------------------------
+        let mut remaining = scratch.cover_bits;
+        while remaining != 0 {
+            let index = remaining.trailing_zeros() as usize;
+            remaining &= remaining - 1;
+            let row = index / BOARD_SIZE;
+            let column = index % BOARD_SIZE;
+            let mut support = [0.0f64; 4];
+            let mut count = 0usize;
+            // Neighbour order {-1,0},{1,0},{0,-1},{0,1} as in the reference.
+            if row > 0 && scratch.present(index - BOARD_SIZE) {
+                support[count] = union_readiness(
+                    scratch.addition[index - BOARD_SIZE],
+                    scratch.release[index - BOARD_SIZE],
+                );
+                count += 1;
+            }
+            if row + 1 < BOARD_SIZE && scratch.present(index + BOARD_SIZE) {
+                support[count] = union_readiness(
+                    scratch.addition[index + BOARD_SIZE],
+                    scratch.release[index + BOARD_SIZE],
+                );
+                count += 1;
+            }
+            if column > 0 && scratch.present(index - 1) {
+                support[count] =
+                    union_readiness(scratch.addition[index - 1], scratch.release[index - 1]);
+                count += 1;
+            }
+            if column + 1 < BOARD_SIZE && scratch.present(index + 1) {
+                support[count] =
+                    union_readiness(scratch.addition[index + 1], scratch.release[index + 1]);
+                count += 1;
+            }
+            sort_descending(&mut support[..count]);
+            if cells[index] == CRACKED {
+                let mut inverse = 1.0f64;
+                for item in support.iter().take(count) {
+                    inverse *= 1.0 - item;
+                }
+                f.cracked_exposure += 1.0 - inverse;
+            } else {
+                f.solid_exposure += (if count > 0 { support[0] * 0.35 } else { 0.0 })
+                    + (if count > 1 { support[1] * 0.65 } else { 0.0 });
+            }
+        }
+
+        f
     }
 }

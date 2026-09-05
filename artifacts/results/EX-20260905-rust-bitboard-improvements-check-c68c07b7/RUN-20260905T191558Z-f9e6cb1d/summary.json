@@ -1,0 +1,3968 @@
+{
+  "format": "drop7-rust-optimization-check-v1",
+  "rootsPerRepeat": 6,
+  "repeats": 5,
+  "strata": 7,
+  "machine": "Apple M3 Pro",
+  "timingScope": "Interactive shared host, descriptive CHECK; no gameplay or strength claim.",
+  "wallMetricScope": {
+    "compareAndSweep": "Sum of six search timers, excluding table allocation and process startup; micro/unpack use their inner-loop timer.",
+    "parallel": "Sum of six decision wall timers, including planning, allocation, execution and reduction, excluding process startup."
+  },
+  "counterScope": "Whole measured process including harness, setup and output; macOS printed CPU seconds have 0.01 second resolution.",
+  "phases": {
+    "leaf-compare": [
+      {
+        "group": "unpack-d4-g1",
+        "arm": "baseline",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 0.004392417,
+          "min": 0.004316625,
+          "max": 0.006111834
+        },
+        "processCpuSeconds": {
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "instructions": {
+          "median": 109744103,
+          "min": 109675421,
+          "max": 110312079
+        },
+        "cycles": {
+          "median": 23389876,
+          "min": 22729393,
+          "max": 24499557
+        },
+        "peakRssBytes": {
+          "median": 1540096,
+          "min": 1540096,
+          "max": 1540096
+        },
+        "work": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "processElapsedSeconds": {
+          "median": 0.012565250042825937,
+          "min": 0.011316207936033607,
+          "max": 0.014312874991446733
+        },
+        "initializationSeconds": null,
+        "tableBytes": [],
+        "leafCalls": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "cacheHits": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      {
+        "group": "unpack-d4-g1",
+        "arm": "candidate",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 0.004731084,
+          "min": 0.004390833,
+          "max": 0.01324225
+        },
+        "processCpuSeconds": {
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.01
+        },
+        "instructions": {
+          "median": 109653738,
+          "min": 109617255,
+          "max": 110686044
+        },
+        "cycles": {
+          "median": 23640905,
+          "min": 23402902,
+          "max": 38576838
+        },
+        "peakRssBytes": {
+          "median": 1523712,
+          "min": 1523712,
+          "max": 1523712
+        },
+        "work": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "processElapsedSeconds": {
+          "median": 0.014582125004380941,
+          "min": 0.011193874990567565,
+          "max": 0.36466054106131196
+        },
+        "initializationSeconds": null,
+        "tableBytes": [],
+        "leafCalls": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "cacheHits": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      {
+        "group": "micro-d4-g1",
+        "arm": "baseline",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 0.586690875,
+          "min": 0.570458917,
+          "max": 0.601975916
+        },
+        "processCpuSeconds": {
+          "median": 0.58,
+          "min": 0.56,
+          "max": 0.59
+        },
+        "instructions": {
+          "median": 10348271692,
+          "min": 10345931981,
+          "max": 10350473327
+        },
+        "cycles": {
+          "median": 2153558582,
+          "min": 2108548314,
+          "max": 2187826098
+        },
+        "peakRssBytes": {
+          "median": 1556480,
+          "min": 1556480,
+          "max": 1556480
+        },
+        "work": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "processElapsedSeconds": {
+          "median": 0.5943579580634832,
+          "min": 0.5756868747994304,
+          "max": 0.6072360419202596
+        },
+        "initializationSeconds": null,
+        "tableBytes": [],
+        "leafCalls": {
+          "median": 1200000,
+          "min": 1200000,
+          "max": 1200000
+        },
+        "cacheHits": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      {
+        "group": "micro-d4-g1",
+        "arm": "candidate",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 0.501040708,
+          "min": 0.484803167,
+          "max": 0.536348916
+        },
+        "processCpuSeconds": {
+          "median": 0.49,
+          "min": 0.48,
+          "max": 0.52
+        },
+        "instructions": {
+          "median": 9245104182,
+          "min": 9243220272,
+          "max": 9246259426
+        },
+        "cycles": {
+          "median": 1840664752,
+          "min": 1796181041,
+          "max": 1871679633
+        },
+        "peakRssBytes": {
+          "median": 1540096,
+          "min": 1540096,
+          "max": 1540096
+        },
+        "work": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "processElapsedSeconds": {
+          "median": 0.5067259159404784,
+          "min": 0.49044475005939603,
+          "max": 0.541534167015925
+        },
+        "initializationSeconds": null,
+        "tableBytes": [],
+        "leafCalls": {
+          "median": 1200000,
+          "min": 1200000,
+          "max": 1200000
+        },
+        "cacheHits": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      {
+        "group": "search-d3-g1",
+        "arm": "baseline",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 0.326895251,
+          "min": 0.325278749,
+          "max": 0.328110877
+        },
+        "processCpuSeconds": {
+          "median": 0.32,
+          "min": 0.32,
+          "max": 0.32
+        },
+        "instructions": {
+          "median": 6331266063,
+          "min": 6330826853,
+          "max": 6331767429
+        },
+        "cycles": {
+          "median": 1196013334,
+          "min": 1194476676,
+          "max": 1197342907
+        },
+        "peakRssBytes": {
+          "median": 2375680,
+          "min": 2375680,
+          "max": 2392064
+        },
+        "work": {
+          "median": 1056909,
+          "min": 1056909,
+          "max": 1056909
+        },
+        "processElapsedSeconds": {
+          "median": 0.33293870906345546,
+          "min": 0.3307047919370234,
+          "max": 0.33379970910027623
+        },
+        "initializationSeconds": {
+          "median": 0.000142624,
+          "min": 0.000131123,
+          "max": 0.000151416
+        },
+        "tableBytes": [
+          786432
+        ],
+        "leafCalls": {
+          "median": 522291,
+          "min": 522291,
+          "max": 522291
+        },
+        "cacheHits": {
+          "median": 1418,
+          "min": 1418,
+          "max": 1418
+        }
+      },
+      {
+        "group": "search-d3-g1",
+        "arm": "candidate",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 0.306124959,
+          "min": 0.30034858200000003,
+          "max": 0.308819999
+        },
+        "processCpuSeconds": {
+          "median": 0.3,
+          "min": 0.29,
+          "max": 0.3
+        },
+        "instructions": {
+          "median": 6076956618,
+          "min": 6076132822,
+          "max": 6077985408
+        },
+        "cycles": {
+          "median": 1123345314,
+          "min": 1119158971,
+          "max": 1125460521
+        },
+        "peakRssBytes": {
+          "median": 2392064,
+          "min": 2359296,
+          "max": 2392064
+        },
+        "work": {
+          "median": 1056909,
+          "min": 1056909,
+          "max": 1056909
+        },
+        "processElapsedSeconds": {
+          "median": 0.3118799580261111,
+          "min": 0.30641870899125934,
+          "max": 0.3147282500285655
+        },
+        "initializationSeconds": {
+          "median": 0.000139583,
+          "min": 0.000132292,
+          "max": 0.000155541
+        },
+        "tableBytes": [
+          786432
+        ],
+        "leafCalls": {
+          "median": 522291,
+          "min": 522291,
+          "max": 522291
+        },
+        "cacheHits": {
+          "median": 1418,
+          "min": 1418,
+          "max": 1418
+        }
+      },
+      {
+        "group": "search-d4-g1",
+        "arm": "baseline",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 11.880663582,
+          "min": 11.523778459,
+          "max": 12.457112499
+        },
+        "processCpuSeconds": {
+          "median": 11.77,
+          "min": 11.49,
+          "max": 12.09
+        },
+        "instructions": {
+          "median": 222809644215,
+          "min": 222747903864,
+          "max": 222961965744
+        },
+        "cycles": {
+          "median": 42181127379,
+          "min": 42005171097,
+          "max": 42705067986
+        },
+        "peakRssBytes": {
+          "median": 2375680,
+          "min": 2375680,
+          "max": 2375680
+        },
+        "work": {
+          "median": 39288466,
+          "min": 39288466,
+          "max": 39288466
+        },
+        "processElapsedSeconds": {
+          "median": 11.887646874878556,
+          "min": 11.529559708200395,
+          "max": 12.465526457875967
+        },
+        "initializationSeconds": {
+          "median": 0.000155168,
+          "min": 0.00014675,
+          "max": 0.000219708
+        },
+        "tableBytes": [
+          786432
+        ],
+        "leafCalls": {
+          "median": 19377708,
+          "min": 19377708,
+          "max": 19377708
+        },
+        "cacheHits": {
+          "median": 126478,
+          "min": 126478,
+          "max": 126478
+        }
+      },
+      {
+        "group": "search-d4-g1",
+        "arm": "candidate",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 10.943615124999999,
+          "min": 10.832863626,
+          "max": 11.061914042
+        },
+        "processCpuSeconds": {
+          "median": 10.88,
+          "min": 10.790000000000001,
+          "max": 10.92
+        },
+        "instructions": {
+          "median": 212939447666,
+          "min": 212906170882,
+          "max": 212950603555
+        },
+        "cycles": {
+          "median": 39288185051,
+          "min": 39140008134,
+          "max": 39360181912
+        },
+        "peakRssBytes": {
+          "median": 2359296,
+          "min": 2359296,
+          "max": 2392064
+        },
+        "work": {
+          "median": 39288466,
+          "min": 39288466,
+          "max": 39288466
+        },
+        "processElapsedSeconds": {
+          "median": 10.95579466689378,
+          "min": 10.839064000174403,
+          "max": 11.068849250208586
+        },
+        "initializationSeconds": {
+          "median": 0.000151209,
+          "min": 0.000134543,
+          "max": 0.000159416
+        },
+        "tableBytes": [
+          786432
+        ],
+        "leafCalls": {
+          "median": 19377708,
+          "min": 19377708,
+          "max": 19377708
+        },
+        "cacheHits": {
+          "median": 126478,
+          "min": 126478,
+          "max": 126478
+        }
+      },
+      {
+        "group": "search-d4-g2",
+        "arm": "baseline",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 15.503888332999999,
+          "min": 15.232584459,
+          "max": 16.010911
+        },
+        "processCpuSeconds": {
+          "median": 15.309999999999999,
+          "min": 15.11,
+          "max": 15.57
+        },
+        "instructions": {
+          "median": 288238401436,
+          "min": 288188652863,
+          "max": 288438222483
+        },
+        "cycles": {
+          "median": 54232436107,
+          "min": 54057750803,
+          "max": 54973152414
+        },
+        "peakRssBytes": {
+          "median": 2375680,
+          "min": 2375680,
+          "max": 2375680
+        },
+        "work": {
+          "median": 51537948,
+          "min": 51537948,
+          "max": 51537948
+        },
+        "processElapsedSeconds": {
+          "median": 15.510789417196065,
+          "min": 15.240704915951937,
+          "max": 16.019552749814466
+        },
+        "initializationSeconds": {
+          "median": 0.000146667,
+          "min": 0.000142166,
+          "max": 0.000175167
+        },
+        "tableBytes": [
+          786432
+        ],
+        "leafCalls": {
+          "median": 25502449,
+          "min": 25502449,
+          "max": 25502449
+        },
+        "cacheHits": {
+          "median": 1450,
+          "min": 1450,
+          "max": 1450
+        }
+      },
+      {
+        "group": "search-d4-g2",
+        "arm": "candidate",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 14.661904791,
+          "min": 14.364808332,
+          "max": 14.812507165
+        },
+        "processCpuSeconds": {
+          "median": 14.399999999999999,
+          "min": 14.1,
+          "max": 14.52
+        },
+        "instructions": {
+          "median": 275646811816,
+          "min": 275577572226,
+          "max": 275780145917
+        },
+        "cycles": {
+          "median": 50805935341,
+          "min": 50548358675,
+          "max": 51110331267
+        },
+        "peakRssBytes": {
+          "median": 2359296,
+          "min": 2359296,
+          "max": 2375680
+        },
+        "work": {
+          "median": 51537948,
+          "min": 51537948,
+          "max": 51537948
+        },
+        "processElapsedSeconds": {
+          "median": 14.67588020907715,
+          "min": 14.372976333135739,
+          "max": 14.822473166976124
+        },
+        "initializationSeconds": {
+          "median": 0.000151208,
+          "min": 0.000142668,
+          "max": 0.000370124
+        },
+        "tableBytes": [
+          786432
+        ],
+        "leafCalls": {
+          "median": 25502449,
+          "min": 25502449,
+          "max": 25502449
+        },
+        "cacheHits": {
+          "median": 1450,
+          "min": 1450,
+          "max": 1450
+        }
+      }
+    ],
+    "compare": [
+      {
+        "group": "unpack-d4-g1",
+        "arm": "baseline",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 0.004975042,
+          "min": 0.004418834,
+          "max": 0.005635292
+        },
+        "processCpuSeconds": {
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "instructions": {
+          "median": 109784960,
+          "min": 109665937,
+          "max": 110877143
+        },
+        "cycles": {
+          "median": 22274399,
+          "min": 22147788,
+          "max": 25325063
+        },
+        "peakRssBytes": {
+          "median": 1540096,
+          "min": 1540096,
+          "max": 1540096
+        },
+        "work": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "processElapsedSeconds": {
+          "median": 0.011534957913681865,
+          "min": 0.009980333037674427,
+          "max": 0.01856679213233292
+        },
+        "initializationSeconds": null,
+        "tableBytes": [],
+        "leafCalls": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "cacheHits": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      {
+        "group": "unpack-d4-g1",
+        "arm": "candidate",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 0.005177292,
+          "min": 0.004613917,
+          "max": 0.014284167
+        },
+        "processCpuSeconds": {
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.01
+        },
+        "instructions": {
+          "median": 109720197,
+          "min": 109709084,
+          "max": 110803839
+        },
+        "cycles": {
+          "median": 22730395,
+          "min": 21901868,
+          "max": 40119971
+        },
+        "peakRssBytes": {
+          "median": 1523712,
+          "min": 1523712,
+          "max": 1523712
+        },
+        "work": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "processElapsedSeconds": {
+          "median": 0.011835583951324224,
+          "min": 0.010009916964918375,
+          "max": 0.3920573329087347
+        },
+        "initializationSeconds": null,
+        "tableBytes": [],
+        "leafCalls": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "cacheHits": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      {
+        "group": "micro-d4-g1",
+        "arm": "baseline",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 0.604415917,
+          "min": 0.594268291,
+          "max": 0.627280792
+        },
+        "processCpuSeconds": {
+          "median": 0.6,
+          "min": 0.59,
+          "max": 0.62
+        },
+        "instructions": {
+          "median": 10346642712,
+          "min": 10346106558,
+          "max": 10349591787
+        },
+        "cycles": {
+          "median": 2166043263,
+          "min": 2144130004,
+          "max": 2206369346
+        },
+        "peakRssBytes": {
+          "median": 1556480,
+          "min": 1556480,
+          "max": 1556480
+        },
+        "work": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "processElapsedSeconds": {
+          "median": 0.6099980419967324,
+          "min": 0.6001549998763949,
+          "max": 0.6327887498773634
+        },
+        "initializationSeconds": null,
+        "tableBytes": [],
+        "leafCalls": {
+          "median": 1200000,
+          "min": 1200000,
+          "max": 1200000
+        },
+        "cacheHits": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      {
+        "group": "micro-d4-g1",
+        "arm": "candidate",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 0.516645375,
+          "min": 0.5074255,
+          "max": 0.539259292
+        },
+        "processCpuSeconds": {
+          "median": 0.51,
+          "min": 0.5,
+          "max": 0.52
+        },
+        "instructions": {
+          "median": 9244298981,
+          "min": 9243640658,
+          "max": 9252202284
+        },
+        "cycles": {
+          "median": 1848038145,
+          "min": 1821452409,
+          "max": 1865480440
+        },
+        "peakRssBytes": {
+          "median": 1540096,
+          "min": 1540096,
+          "max": 1540096
+        },
+        "work": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "processElapsedSeconds": {
+          "median": 0.5225050840526819,
+          "min": 0.5130176250822842,
+          "max": 0.5446271251421422
+        },
+        "initializationSeconds": null,
+        "tableBytes": [],
+        "leafCalls": {
+          "median": 1200000,
+          "min": 1200000,
+          "max": 1200000
+        },
+        "cacheHits": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      {
+        "group": "search-d3-g1",
+        "arm": "baseline",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 0.338100415,
+          "min": 0.333400834,
+          "max": 0.344138625
+        },
+        "processCpuSeconds": {
+          "median": 0.33,
+          "min": 0.33,
+          "max": 0.33
+        },
+        "instructions": {
+          "median": 6332174374,
+          "min": 6330796624,
+          "max": 6333846498
+        },
+        "cycles": {
+          "median": 1194370284,
+          "min": 1191677296,
+          "max": 1202938008
+        },
+        "peakRssBytes": {
+          "median": 2375680,
+          "min": 2375680,
+          "max": 2392064
+        },
+        "work": {
+          "median": 1056909,
+          "min": 1056909,
+          "max": 1056909
+        },
+        "processElapsedSeconds": {
+          "median": 0.3437734581530094,
+          "min": 0.3406800839584321,
+          "max": 0.35088920779526234
+        },
+        "initializationSeconds": {
+          "median": 0.000149042,
+          "min": 0.000139583,
+          "max": 0.000193834
+        },
+        "tableBytes": [
+          786432
+        ],
+        "leafCalls": {
+          "median": 522291,
+          "min": 522291,
+          "max": 522291
+        },
+        "cacheHits": {
+          "median": 1418,
+          "min": 1418,
+          "max": 1418
+        }
+      },
+      {
+        "group": "search-d3-g1",
+        "arm": "candidate",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 0.317867251,
+          "min": 0.310799582,
+          "max": 0.326126
+        },
+        "processCpuSeconds": {
+          "median": 0.31,
+          "min": 0.31,
+          "max": 0.32
+        },
+        "instructions": {
+          "median": 6076931465,
+          "min": 6075615934,
+          "max": 6080904545
+        },
+        "cycles": {
+          "median": 1123053211,
+          "min": 1120709257,
+          "max": 1135277915
+        },
+        "peakRssBytes": {
+          "median": 2359296,
+          "min": 2359296,
+          "max": 2375680
+        },
+        "work": {
+          "median": 1056909,
+          "min": 1056909,
+          "max": 1056909
+        },
+        "processElapsedSeconds": {
+          "median": 0.32520220801234245,
+          "min": 0.317794332979247,
+          "max": 0.3495005830191076
+        },
+        "initializationSeconds": {
+          "median": 0.000145167,
+          "min": 0.000140458,
+          "max": 0.00015075
+        },
+        "tableBytes": [
+          786432
+        ],
+        "leafCalls": {
+          "median": 522291,
+          "min": 522291,
+          "max": 522291
+        },
+        "cacheHits": {
+          "median": 1418,
+          "min": 1418,
+          "max": 1418
+        }
+      },
+      {
+        "group": "search-d4-g1",
+        "arm": "baseline",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 12.052394167,
+          "min": 12.021757916,
+          "max": 12.490582667
+        },
+        "processCpuSeconds": {
+          "median": 11.93,
+          "min": 11.89,
+          "max": 12.16
+        },
+        "instructions": {
+          "median": 222843607698,
+          "min": 222806770393,
+          "max": 222935386535
+        },
+        "cycles": {
+          "median": 42331217682,
+          "min": 42119107836,
+          "max": 42755593316
+        },
+        "peakRssBytes": {
+          "median": 2375680,
+          "min": 2375680,
+          "max": 3178496
+        },
+        "work": {
+          "median": 39288466,
+          "min": 39288466,
+          "max": 39288466
+        },
+        "processElapsedSeconds": {
+          "median": 12.059259457979351,
+          "min": 12.028674041852355,
+          "max": 12.498043291037902
+        },
+        "initializationSeconds": {
+          "median": 0.000152458,
+          "min": 0.000144208,
+          "max": 0.000332085
+        },
+        "tableBytes": [
+          786432
+        ],
+        "leafCalls": {
+          "median": 19377708,
+          "min": 19377708,
+          "max": 19377708
+        },
+        "cacheHits": {
+          "median": 126478,
+          "min": 126478,
+          "max": 126478
+        }
+      },
+      {
+        "group": "search-d4-g1",
+        "arm": "candidate",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 11.257799041,
+          "min": 11.159420623,
+          "max": 11.420857832
+        },
+        "processCpuSeconds": {
+          "median": 11.15,
+          "min": 11.06,
+          "max": 11.25
+        },
+        "instructions": {
+          "median": 212952842410,
+          "min": 212927232830,
+          "max": 213033543847
+        },
+        "cycles": {
+          "median": 39521720535,
+          "min": 39369280952,
+          "max": 39756591427
+        },
+        "peakRssBytes": {
+          "median": 2359296,
+          "min": 2359296,
+          "max": 2359296
+        },
+        "work": {
+          "median": 39288466,
+          "min": 39288466,
+          "max": 39288466
+        },
+        "processElapsedSeconds": {
+          "median": 11.267911833012477,
+          "min": 11.169585957890376,
+          "max": 11.428009999915957
+        },
+        "initializationSeconds": {
+          "median": 0.000143957,
+          "min": 0.00014125,
+          "max": 0.000154459
+        },
+        "tableBytes": [
+          786432
+        ],
+        "leafCalls": {
+          "median": 19377708,
+          "min": 19377708,
+          "max": 19377708
+        },
+        "cacheHits": {
+          "median": 126478,
+          "min": 126478,
+          "max": 126478
+        }
+      },
+      {
+        "group": "search-d4-g2",
+        "arm": "baseline",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 15.686286376,
+          "min": 15.499231709,
+          "max": 15.773352875
+        },
+        "processCpuSeconds": {
+          "median": 15.43,
+          "min": 15.33,
+          "max": 15.5
+        },
+        "instructions": {
+          "median": 288325409184,
+          "min": 288255478703,
+          "max": 288365872324
+        },
+        "cycles": {
+          "median": 54536468146,
+          "min": 54348050883,
+          "max": 54618592726
+        },
+        "peakRssBytes": {
+          "median": 2375680,
+          "min": 2375680,
+          "max": 2375680
+        },
+        "work": {
+          "median": 51537948,
+          "min": 51537948,
+          "max": 51537948
+        },
+        "processElapsedSeconds": {
+          "median": 15.693831915967166,
+          "min": 15.508503708057106,
+          "max": 15.782269167015329
+        },
+        "initializationSeconds": {
+          "median": 0.0001495,
+          "min": 0.000139875,
+          "max": 0.00017870899999999999
+        },
+        "tableBytes": [
+          786432
+        ],
+        "leafCalls": {
+          "median": 25502449,
+          "min": 25502449,
+          "max": 25502449
+        },
+        "cacheHits": {
+          "median": 1450,
+          "min": 1450,
+          "max": 1450
+        }
+      },
+      {
+        "group": "search-d4-g2",
+        "arm": "candidate",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 14.543592584,
+          "min": 14.528659207,
+          "max": 14.951257416
+        },
+        "processCpuSeconds": {
+          "median": 14.35,
+          "min": 14.34,
+          "max": 14.629999999999999
+        },
+        "instructions": {
+          "median": 275589751824,
+          "min": 275530380658,
+          "max": 275713056780
+        },
+        "cycles": {
+          "median": 50823867162,
+          "min": 50795737446,
+          "max": 51301340165
+        },
+        "peakRssBytes": {
+          "median": 2359296,
+          "min": 2359296,
+          "max": 2359296
+        },
+        "work": {
+          "median": 51537948,
+          "min": 51537948,
+          "max": 51537948
+        },
+        "processElapsedSeconds": {
+          "median": 14.552310374798253,
+          "min": 14.539432208053768,
+          "max": 14.965152916032821
+        },
+        "initializationSeconds": {
+          "median": 0.000157457,
+          "min": 0.000142583,
+          "max": 0.000166707
+        },
+        "tableBytes": [
+          786432
+        ],
+        "leafCalls": {
+          "median": 25502449,
+          "min": 25502449,
+          "max": 25502449
+        },
+        "cacheHits": {
+          "median": 1450,
+          "min": 1450,
+          "max": 1450
+        }
+      }
+    ],
+    "sweep": [
+      {
+        "group": "cache-sweep",
+        "arm": "g1-c1024",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 13.765320706999999,
+          "min": 12.900046083,
+          "max": 15.87003029
+        },
+        "processCpuSeconds": {
+          "median": 13.41,
+          "min": 12.85,
+          "max": 14.790000000000001
+        },
+        "instructions": {
+          "median": 253701172069,
+          "min": 253467576590,
+          "max": 255143609933
+        },
+        "cycles": {
+          "median": 47236942036,
+          "min": 46388632319,
+          "max": 49245529756
+        },
+        "peakRssBytes": {
+          "median": 1622016,
+          "min": 1605632,
+          "max": 1622016
+        },
+        "work": {
+          "median": 47250952,
+          "min": 47250952,
+          "max": 47250952
+        },
+        "processElapsedSeconds": {
+          "median": 13.772338167065755,
+          "min": 12.906704957829788,
+          "max": 15.881736582843587
+        },
+        "initializationSeconds": {
+          "median": 3.1376e-05,
+          "min": 2.7e-05,
+          "max": 6.8793e-05
+        },
+        "tableBytes": [
+          49152
+        ],
+        "leafCalls": {
+          "median": 23356305,
+          "min": 23356305,
+          "max": 23356305
+        },
+        "cacheHits": {
+          "median": 50443,
+          "min": 50443,
+          "max": 50443
+        }
+      },
+      {
+        "group": "cache-sweep",
+        "arm": "g1-c16384",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 11.305829207,
+          "min": 10.863634457,
+          "max": 13.915851373999999
+        },
+        "processCpuSeconds": {
+          "median": 11.15,
+          "min": 10.83,
+          "max": 12.8
+        },
+        "instructions": {
+          "median": 212966030742,
+          "min": 212833191647,
+          "max": 214548004410
+        },
+        "cycles": {
+          "median": 39544869486,
+          "min": 39114513573,
+          "max": 41762647333
+        },
+        "peakRssBytes": {
+          "median": 2359296,
+          "min": 2359296,
+          "max": 2801664
+        },
+        "work": {
+          "median": 39288466,
+          "min": 39288466,
+          "max": 39288466
+        },
+        "processElapsedSeconds": {
+          "median": 11.313873582985252,
+          "min": 10.870261125033721,
+          "max": 13.930099749937654
+        },
+        "initializationSeconds": {
+          "median": 0.000151584,
+          "min": 0.000139291,
+          "max": 0.000341167
+        },
+        "tableBytes": [
+          786432
+        ],
+        "leafCalls": {
+          "median": 19377708,
+          "min": 19377708,
+          "max": 19377708
+        },
+        "cacheHits": {
+          "median": 126478,
+          "min": 126478,
+          "max": 126478
+        }
+      },
+      {
+        "group": "cache-sweep",
+        "arm": "g1-c262144",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 10.844751666,
+          "min": 10.567564667000001,
+          "max": 15.703921667
+        },
+        "processCpuSeconds": {
+          "median": 10.78,
+          "min": 10.54,
+          "max": 13.350000000000001
+        },
+        "instructions": {
+          "median": 206568524011,
+          "min": 206456697823,
+          "max": 209666453198
+        },
+        "cycles": {
+          "median": 38394788225,
+          "min": 38004905537,
+          "max": 43476766235
+        },
+        "peakRssBytes": {
+          "median": 14172160,
+          "min": 14172160,
+          "max": 14172160
+        },
+        "work": {
+          "median": 38002223,
+          "min": 38002223,
+          "max": 38002223
+        },
+        "processElapsedSeconds": {
+          "median": 10.853585083037615,
+          "min": 10.576330207986757,
+          "max": 15.722085459157825
+        },
+        "initializationSeconds": {
+          "median": 0.002196042,
+          "min": 0.0021653749999999998,
+          "max": 0.002850334
+        },
+        "tableBytes": [
+          12582912
+        ],
+        "leafCalls": {
+          "median": 18734660,
+          "min": 18734660,
+          "max": 18734660
+        },
+        "cacheHits": {
+          "median": 139460,
+          "min": 139460,
+          "max": 139460
+        }
+      },
+      {
+        "group": "cache-sweep",
+        "arm": "g2-c1024",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 14.552607167,
+          "min": 14.22443475,
+          "max": 19.221573707
+        },
+        "processCpuSeconds": {
+          "median": 14.39,
+          "min": 14.129999999999999,
+          "max": 17.28
+        },
+        "instructions": {
+          "median": 277996841907,
+          "min": 277839451060,
+          "max": 280971001803
+        },
+        "cycles": {
+          "median": 51251855861,
+          "min": 50811786164,
+          "max": 55861436637
+        },
+        "peakRssBytes": {
+          "median": 1622016,
+          "min": 1605632,
+          "max": 1638400
+        },
+        "work": {
+          "median": 52061856,
+          "min": 52061856,
+          "max": 52061856
+        },
+        "processElapsedSeconds": {
+          "median": 14.559531457955018,
+          "min": 14.231813583057374,
+          "max": 19.233210084028542
+        },
+        "initializationSeconds": {
+          "median": 3.8334e-05,
+          "min": 2.8124e-05,
+          "max": 5.4624e-05
+        },
+        "tableBytes": [
+          49152
+        ],
+        "leafCalls": {
+          "median": 25761757,
+          "min": 25761757,
+          "max": 25761757
+        },
+        "cacheHits": {
+          "median": 1342,
+          "min": 1342,
+          "max": 1342
+        }
+      },
+      {
+        "group": "cache-sweep",
+        "arm": "g2-c16384",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 14.691235999,
+          "min": 14.226332792000001,
+          "max": 18.742962541
+        },
+        "processCpuSeconds": {
+          "median": 14.32,
+          "min": 14.12,
+          "max": 16.89
+        },
+        "instructions": {
+          "median": 275573104205,
+          "min": 275434296372,
+          "max": 278381082943
+        },
+        "cycles": {
+          "median": 50846693350,
+          "min": 50382487008,
+          "max": 54635593982
+        },
+        "peakRssBytes": {
+          "median": 2359296,
+          "min": 2342912,
+          "max": 2359296
+        },
+        "work": {
+          "median": 51537948,
+          "min": 51537948,
+          "max": 51537948
+        },
+        "processElapsedSeconds": {
+          "median": 14.698777999961749,
+          "min": 14.233791957842186,
+          "max": 18.752109665889293
+        },
+        "initializationSeconds": {
+          "median": 0.000157335,
+          "min": 0.00014637599999999998,
+          "max": 0.000177208
+        },
+        "tableBytes": [
+          786432
+        ],
+        "leafCalls": {
+          "median": 25502449,
+          "min": 25502449,
+          "max": 25502449
+        },
+        "cacheHits": {
+          "median": 1450,
+          "min": 1450,
+          "max": 1450
+        }
+      },
+      {
+        "group": "cache-sweep",
+        "arm": "g2-c262144",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 14.636157542000001,
+          "min": 14.264442209,
+          "max": 19.334200167
+        },
+        "processCpuSeconds": {
+          "median": 14.4,
+          "min": 14.219999999999999,
+          "max": 17.17
+        },
+        "instructions": {
+          "median": 275587188949,
+          "min": 275432401057,
+          "max": 278607451408
+        },
+        "cycles": {
+          "median": 51029660937,
+          "min": 50428395397,
+          "max": 55658408622
+        },
+        "peakRssBytes": {
+          "median": 14172160,
+          "min": 14155776,
+          "max": 14172160
+        },
+        "work": {
+          "median": 51523395,
+          "min": 51523395,
+          "max": 51523395
+        },
+        "processElapsedSeconds": {
+          "median": 14.646846374962479,
+          "min": 14.273608792107552,
+          "max": 19.357522499980405
+        },
+        "initializationSeconds": {
+          "median": 0.003279667,
+          "min": 0.002932627,
+          "max": 0.006136835
+        },
+        "tableBytes": [
+          12582912
+        ],
+        "leafCalls": {
+          "median": 25495246,
+          "min": 25495246,
+          "max": 25495246
+        },
+        "cacheHits": {
+          "median": 1453,
+          "min": 1453,
+          "max": 1453
+        }
+      },
+      {
+        "group": "cache-sweep",
+        "arm": "g3-c1024",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 16.145632625,
+          "min": 16.093131833,
+          "max": 20.142076583
+        },
+        "processCpuSeconds": {
+          "median": 15.99,
+          "min": 15.9,
+          "max": 18.09
+        },
+        "instructions": {
+          "median": 309346390792,
+          "min": 309287103904,
+          "max": 311614031219
+        },
+        "cycles": {
+          "median": 56963327330,
+          "min": 56906382060,
+          "max": 61032600301
+        },
+        "peakRssBytes": {
+          "median": 1622016,
+          "min": 1622016,
+          "max": 1638400
+        },
+        "work": {
+          "median": 58439451,
+          "min": 58439451,
+          "max": 58439451
+        },
+        "processElapsedSeconds": {
+          "median": 16.152305957861245,
+          "min": 16.100463916081935,
+          "max": 20.154471290996298
+        },
+        "initializationSeconds": {
+          "median": 3.0749e-05,
+          "min": 2.771e-05,
+          "max": 8.3083e-05
+        },
+        "tableBytes": [
+          49152
+        ],
+        "leafCalls": {
+          "median": 28918337,
+          "min": 28918337,
+          "max": 28918337
+        },
+        "cacheHits": {
+          "median": 27,
+          "min": 27,
+          "max": 27
+        }
+      },
+      {
+        "group": "cache-sweep",
+        "arm": "g3-c16384",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 16.163902168,
+          "min": 15.8311245,
+          "max": 16.791400042
+        },
+        "processCpuSeconds": {
+          "median": 15.9,
+          "min": 15.69,
+          "max": 16.37
+        },
+        "instructions": {
+          "median": 309272499672,
+          "min": 309218416357,
+          "max": 309591690199
+        },
+        "cycles": {
+          "median": 56691217480,
+          "min": 56655955228,
+          "max": 57577934308
+        },
+        "peakRssBytes": {
+          "median": 2359296,
+          "min": 2342912,
+          "max": 2359296
+        },
+        "work": {
+          "median": 58439451,
+          "min": 58439451,
+          "max": 58439451
+        },
+        "processElapsedSeconds": {
+          "median": 16.171113499905914,
+          "min": 15.838016499998048,
+          "max": 16.799982083030045
+        },
+        "initializationSeconds": {
+          "median": 0.000205958,
+          "min": 0.000180459,
+          "max": 0.000454875
+        },
+        "tableBytes": [
+          786432
+        ],
+        "leafCalls": {
+          "median": 28918337,
+          "min": 28918337,
+          "max": 28918337
+        },
+        "cacheHits": {
+          "median": 27,
+          "min": 27,
+          "max": 27
+        }
+      },
+      {
+        "group": "cache-sweep",
+        "arm": "g3-c262144",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 16.042083918,
+          "min": 15.574642708,
+          "max": 16.474896875
+        },
+        "processCpuSeconds": {
+          "median": 15.9,
+          "min": 15.52,
+          "max": 16.169999999999998
+        },
+        "instructions": {
+          "median": 309285156704,
+          "min": 309191827125,
+          "max": 309523929397
+        },
+        "cycles": {
+          "median": 56780574024,
+          "min": 56445935419,
+          "max": 57329568796
+        },
+        "peakRssBytes": {
+          "median": 14172160,
+          "min": 14155776,
+          "max": 14172160
+        },
+        "work": {
+          "median": 58439451,
+          "min": 58439451,
+          "max": 58439451
+        },
+        "processElapsedSeconds": {
+          "median": 16.05198595789261,
+          "min": 15.584441957995296,
+          "max": 16.48879620898515
+        },
+        "initializationSeconds": {
+          "median": 0.003814791,
+          "min": 0.002942125,
+          "max": 0.004140792
+        },
+        "tableBytes": [
+          12582912
+        ],
+        "leafCalls": {
+          "median": 28918337,
+          "min": 28918337,
+          "max": 28918337
+        },
+        "cacheHits": {
+          "median": 27,
+          "min": 27,
+          "max": 27
+        }
+      },
+      {
+        "group": "cache-sweep",
+        "arm": "g0-c0",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 17.604948875,
+          "min": 17.074608959,
+          "max": 17.932630875
+        },
+        "processCpuSeconds": {
+          "median": 17.419999999999998,
+          "min": 16.98,
+          "max": 17.62
+        },
+        "instructions": {
+          "median": 337401963168,
+          "min": 337247989512,
+          "max": 337552735421
+        },
+        "cycles": {
+          "median": 62042545546,
+          "min": 61542194239,
+          "max": 62305014549
+        },
+        "peakRssBytes": {
+          "median": 1540096,
+          "min": 1540096,
+          "max": 1540096
+        },
+        "work": {
+          "median": 64858647,
+          "min": 64858647,
+          "max": 64858647
+        },
+        "processElapsedSeconds": {
+          "median": 17.613145333947614,
+          "min": 17.085146042052656,
+          "max": 17.940864416072145
+        },
+        "initializationSeconds": {
+          "median": 7.92e-07,
+          "min": 5.83e-07,
+          "max": 8.74e-07
+        },
+        "tableBytes": [
+          0
+        ],
+        "leafCalls": {
+          "median": 32094860,
+          "min": 32094860,
+          "max": 32094860
+        },
+        "cacheHits": {
+          "median": 0,
+          "min": 0,
+          "max": 0
+        }
+      }
+    ],
+    "parallel": [
+      {
+        "group": "parallel-w1-g1",
+        "arm": "private",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 10.696571666,
+          "min": 10.679717751,
+          "max": 10.749042124999999
+        },
+        "processCpuSeconds": {
+          "median": 10.65,
+          "min": 10.64,
+          "max": 10.700000000000001
+        },
+        "instructions": {
+          "median": 207596566898,
+          "min": 207563281515,
+          "max": 207607758508
+        },
+        "cycles": {
+          "median": 38808745741,
+          "min": 38663898889,
+          "max": 38855422848
+        },
+        "peakRssBytes": {
+          "median": 5095424,
+          "min": 5029888,
+          "max": 5128192
+        },
+        "work": {
+          "median": 38318329,
+          "min": 38318329,
+          "max": 38318329
+        },
+        "processElapsedSeconds": {
+          "median": 10.70319200004451,
+          "min": 10.686071541858837,
+          "max": 11.240744708105922
+        },
+        "initializationSeconds": {
+          "median": 0.000700167,
+          "min": 0.000688042,
+          "max": 0.001288585
+        },
+        "tableBytes": [
+          3145728
+        ],
+        "leafCalls": {
+          "median": 18892713,
+          "min": 18892713,
+          "max": 18892713
+        },
+        "cacheHits": {
+          "median": 136207,
+          "min": 136207,
+          "max": 136207
+        }
+      },
+      {
+        "group": "parallel-w1-g1",
+        "arm": "shared",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 10.765254581,
+          "min": 10.690454625,
+          "max": 10.836154793
+        },
+        "processCpuSeconds": {
+          "median": 10.700000000000001,
+          "min": 10.63,
+          "max": 10.75
+        },
+        "instructions": {
+          "median": 207716586163,
+          "min": 207708393549,
+          "max": 207736550484
+        },
+        "cycles": {
+          "median": 38850885000,
+          "min": 38809025348,
+          "max": 38935627075
+        },
+        "peakRssBytes": {
+          "median": 5373952,
+          "min": 5357568,
+          "max": 5406720
+        },
+        "work": {
+          "median": 38318329,
+          "min": 38318329,
+          "max": 38318329
+        },
+        "processElapsedSeconds": {
+          "median": 10.77244554203935,
+          "min": 10.696705291979015,
+          "max": 10.843328832881525
+        },
+        "initializationSeconds": {
+          "median": 0.000902667,
+          "min": 0.000821624,
+          "max": 0.000996792
+        },
+        "tableBytes": [
+          3186688
+        ],
+        "leafCalls": {
+          "median": 18892713,
+          "min": 18892713,
+          "max": 18892713
+        },
+        "cacheHits": {
+          "median": 136207,
+          "min": 136207,
+          "max": 136207
+        }
+      },
+      {
+        "group": "parallel-w1-g2",
+        "arm": "private",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 14.065021667,
+          "min": 14.021036125,
+          "max": 14.355967873
+        },
+        "processCpuSeconds": {
+          "median": 14.03,
+          "min": 13.99,
+          "max": 14.16
+        },
+        "instructions": {
+          "median": 274847035219,
+          "min": 274841305892,
+          "max": 274928648531
+        },
+        "cycles": {
+          "median": 50811200211,
+          "min": 50801050890,
+          "max": 51188800338
+        },
+        "peakRssBytes": {
+          "median": 5111808,
+          "min": 4997120,
+          "max": 5128192
+        },
+        "work": {
+          "median": 51523395,
+          "min": 51523395,
+          "max": 51523395
+        },
+        "processElapsedSeconds": {
+          "median": 14.071735166944563,
+          "min": 14.027689290931448,
+          "max": 14.363894209032878
+        },
+        "initializationSeconds": {
+          "median": 0.000749958,
+          "min": 0.000714666,
+          "max": 0.000978957
+        },
+        "tableBytes": [
+          3145728
+        ],
+        "leafCalls": {
+          "median": 25495246,
+          "min": 25495246,
+          "max": 25495246
+        },
+        "cacheHits": {
+          "median": 1426,
+          "min": 1426,
+          "max": 1426
+        }
+      },
+      {
+        "group": "parallel-w1-g2",
+        "arm": "shared",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 14.150282749999999,
+          "min": 14.075311874,
+          "max": 14.404607248
+        },
+        "processCpuSeconds": {
+          "median": 14.1,
+          "min": 14.03,
+          "max": 14.2
+        },
+        "instructions": {
+          "median": 274886533881,
+          "min": 274866307408,
+          "max": 274930175926
+        },
+        "cycles": {
+          "median": 50877639045,
+          "min": 50785514404,
+          "max": 51067428546
+        },
+        "peakRssBytes": {
+          "median": 5308416,
+          "min": 5259264,
+          "max": 5324800
+        },
+        "work": {
+          "median": 51523395,
+          "min": 51523395,
+          "max": 51523395
+        },
+        "processElapsedSeconds": {
+          "median": 14.15701145795174,
+          "min": 14.082211917033419,
+          "max": 14.412953374907374
+        },
+        "initializationSeconds": {
+          "median": 0.000903542,
+          "min": 0.000834333,
+          "max": 0.001043083
+        },
+        "tableBytes": [
+          3186688
+        ],
+        "leafCalls": {
+          "median": 25495246,
+          "min": 25495246,
+          "max": 25495246
+        },
+        "cacheHits": {
+          "median": 1426,
+          "min": 1426,
+          "max": 1426
+        }
+      },
+      {
+        "group": "parallel-w2-g1",
+        "arm": "private",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 5.655911085,
+          "min": 5.635821458,
+          "max": 5.708403541
+        },
+        "processCpuSeconds": {
+          "median": 11.1,
+          "min": 11.08,
+          "max": 11.15
+        },
+        "instructions": {
+          "median": 213090890321,
+          "min": 213048350116,
+          "max": 213136396616
+        },
+        "cycles": {
+          "median": 39885522106,
+          "min": 39773633065,
+          "max": 39914663134
+        },
+        "peakRssBytes": {
+          "median": 5160960,
+          "min": 5144576,
+          "max": 5177344
+        },
+        "work": {
+          "median": 39699072,
+          "min": 39684239,
+          "max": 39699968
+        },
+        "processElapsedSeconds": {
+          "median": 5.662278082920238,
+          "min": 5.641512208152562,
+          "max": 5.715468709124252
+        },
+        "initializationSeconds": {
+          "median": 0.000528625,
+          "min": 0.00052246,
+          "max": 0.000537583
+        },
+        "tableBytes": [
+          3145728
+        ],
+        "leafCalls": {
+          "median": 19579140,
+          "min": 19571797,
+          "max": 19579588
+        },
+        "cacheHits": {
+          "median": 129926,
+          "min": 129870,
+          "max": 129932
+        }
+      },
+      {
+        "group": "parallel-w2-g1",
+        "arm": "shared",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 5.489913958,
+          "min": 5.4776246660000005,
+          "max": 5.675756291
+        },
+        "processCpuSeconds": {
+          "median": 10.81,
+          "min": 10.8,
+          "max": 10.950000000000001
+        },
+        "instructions": {
+          "median": 207899156109,
+          "min": 207890658913,
+          "max": 207943459530
+        },
+        "cycles": {
+          "median": 38875504159,
+          "min": 38813115609,
+          "max": 39101033709
+        },
+        "peakRssBytes": {
+          "median": 5455872,
+          "min": 5308416,
+          "max": 5472256
+        },
+        "work": {
+          "median": 38347995,
+          "min": 38346623,
+          "max": 38348387
+        },
+        "processElapsedSeconds": {
+          "median": 5.496512042125687,
+          "min": 5.48414370813407,
+          "max": 5.682257791981101
+        },
+        "initializationSeconds": {
+          "median": 0.000882876,
+          "min": 0.000849917,
+          "max": 0.00091746
+        },
+        "tableBytes": [
+          3186688
+        ],
+        "leafCalls": {
+          "median": 18907546,
+          "min": 18906860,
+          "max": 18907742
+        },
+        "cacheHits": {
+          "median": 135909,
+          "min": 135900,
+          "max": 135950
+        }
+      },
+      {
+        "group": "parallel-w2-g2",
+        "arm": "private",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 7.443337125,
+          "min": 7.3110293340000005,
+          "max": 7.644868874999999
+        },
+        "processCpuSeconds": {
+          "median": 14.59,
+          "min": 14.370000000000001,
+          "max": 14.77
+        },
+        "instructions": {
+          "median": 278201965479,
+          "min": 277989279522,
+          "max": 278349591744
+        },
+        "cycles": {
+          "median": 51776708725,
+          "min": 51575175372,
+          "max": 52288809785
+        },
+        "peakRssBytes": {
+          "median": 5128192,
+          "min": 5013504,
+          "max": 5177344
+        },
+        "work": {
+          "median": 52357767,
+          "min": 52318959,
+          "max": 52357767
+        },
+        "processElapsedSeconds": {
+          "median": 7.450116749852896,
+          "min": 7.318209249991924,
+          "max": 7.651960333110765
+        },
+        "initializationSeconds": {
+          "median": 0.000581249,
+          "min": 0.000526042,
+          "max": 0.000666584
+        },
+        "tableBytes": [
+          3145728
+        ],
+        "leafCalls": {
+          "median": 25908218,
+          "min": 25889010,
+          "max": 25908218
+        },
+        "cacheHits": {
+          "median": 1254,
+          "min": 1254,
+          "max": 1262
+        }
+      },
+      {
+        "group": "parallel-w2-g2",
+        "arm": "shared",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 7.3697251249999995,
+          "min": 7.271057416,
+          "max": 7.49253425
+        },
+        "processCpuSeconds": {
+          "median": 14.45,
+          "min": 14.25,
+          "max": 14.6
+        },
+        "instructions": {
+          "median": 274988414455,
+          "min": 274912901938,
+          "max": 275080204822
+        },
+        "cycles": {
+          "median": 51306149555,
+          "min": 51061868411,
+          "max": 51584514472
+        },
+        "peakRssBytes": {
+          "median": 5406720,
+          "min": 5324800,
+          "max": 5439488
+        },
+        "work": {
+          "median": 51523395,
+          "min": 51523395,
+          "max": 51528246
+        },
+        "processElapsedSeconds": {
+          "median": 7.376737584127113,
+          "min": 7.277916207909584,
+          "max": 7.500454957829788
+        },
+        "initializationSeconds": {
+          "median": 0.000892166,
+          "min": 0.000865168,
+          "max": 0.00096771
+        },
+        "tableBytes": [
+          3186688
+        ],
+        "leafCalls": {
+          "median": 25495246,
+          "min": 25495246,
+          "max": 25497647
+        },
+        "cacheHits": {
+          "median": 1426,
+          "min": 1425,
+          "max": 1426
+        }
+      },
+      {
+        "group": "parallel-w4-g1",
+        "arm": "private",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 3.108119542,
+          "min": 3.0800594169999997,
+          "max": 3.122287833
+        },
+        "processCpuSeconds": {
+          "median": 11.75,
+          "min": 11.680000000000001,
+          "max": 11.8
+        },
+        "instructions": {
+          "median": 217477401651,
+          "min": 217251167021,
+          "max": 217539551514
+        },
+        "cycles": {
+          "median": 41355521533,
+          "min": 41220869170,
+          "max": 41463251042
+        },
+        "peakRssBytes": {
+          "median": 6029312,
+          "min": 5210112,
+          "max": 6848512
+        },
+        "work": {
+          "median": 40655419,
+          "min": 40622589,
+          "max": 40670805
+        },
+        "processElapsedSeconds": {
+          "median": 3.1150323329493403,
+          "min": 3.0880523750092834,
+          "max": 3.1286453341599554
+        },
+        "initializationSeconds": {
+          "median": 0.0006300419999999999,
+          "min": 0.00058421,
+          "max": 0.000761498
+        },
+        "tableBytes": [
+          3145728
+        ],
+        "leafCalls": {
+          "median": 20055574,
+          "min": 20039110,
+          "max": 20063022
+        },
+        "cacheHits": {
+          "median": 123938,
+          "min": 123610,
+          "max": 124042
+        }
+      },
+      {
+        "group": "parallel-w4-g1",
+        "arm": "shared",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 3.017273043,
+          "min": 2.992334875,
+          "max": 3.052450832
+        },
+        "processCpuSeconds": {
+          "median": 11.370000000000001,
+          "min": 11.299999999999999,
+          "max": 11.49
+        },
+        "instructions": {
+          "median": 208973601556,
+          "min": 208914534070,
+          "max": 209020837903
+        },
+        "cycles": {
+          "median": 39932338986,
+          "min": 39816663651,
+          "max": 40170278564
+        },
+        "peakRssBytes": {
+          "median": 5537792,
+          "min": 5521408,
+          "max": 5554176
+        },
+        "work": {
+          "median": 38549700,
+          "min": 38545794,
+          "max": 38553228
+        },
+        "processElapsedSeconds": {
+          "median": 3.023562208050862,
+          "min": 2.999641624977812,
+          "max": 3.0591576660517603
+        },
+        "initializationSeconds": {
+          "median": 0.001095084,
+          "min": 0.000987209,
+          "max": 0.001169832
+        },
+        "tableBytes": [
+          3186688
+        ],
+        "leafCalls": {
+          "median": 19007051,
+          "min": 19005049,
+          "max": 19008766
+        },
+        "cacheHits": {
+          "median": 136523,
+          "min": 136503,
+          "max": 136650
+        }
+      },
+      {
+        "group": "parallel-w4-g2",
+        "arm": "private",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 3.9693108329999998,
+          "min": 3.920692167,
+          "max": 4.05398675
+        },
+        "processCpuSeconds": {
+          "median": 15.05,
+          "min": 14.870000000000001,
+          "max": 15.229999999999999
+        },
+        "instructions": {
+          "median": 279611480507,
+          "min": 279593161295,
+          "max": 279843948865
+        },
+        "cycles": {
+          "median": 52902764267,
+          "min": 52491092299,
+          "max": 53246700742
+        },
+        "peakRssBytes": {
+          "median": 5275648,
+          "min": 5210112,
+          "max": 6832128
+        },
+        "work": {
+          "median": 52629423,
+          "min": 52619721,
+          "max": 52658529
+        },
+        "processElapsedSeconds": {
+          "median": 3.9766337499022484,
+          "min": 3.92680516699329,
+          "max": 4.061137749813497
+        },
+        "initializationSeconds": {
+          "median": 0.0006824169999999999,
+          "min": 0.000577961,
+          "max": 0.0009615419999999999
+        },
+        "tableBytes": [
+          3145728
+        ],
+        "leafCalls": {
+          "median": 26042674,
+          "min": 26037872,
+          "max": 26057080
+        },
+        "cacheHits": {
+          "median": 1198,
+          "min": 1192,
+          "max": 1200
+        }
+      },
+      {
+        "group": "parallel-w4-g2",
+        "arm": "shared",
+        "repeats": 5,
+        "searchSeconds": {
+          "median": 3.956130708,
+          "min": 3.822677582,
+          "max": 3.983289749
+        },
+        "processCpuSeconds": {
+          "median": 14.9,
+          "min": 14.56,
+          "max": 14.959999999999999
+        },
+        "instructions": {
+          "median": 275836205925,
+          "min": 275707243432,
+          "max": 275897134898
+        },
+        "cycles": {
+          "median": 52288789842,
+          "min": 51572989546,
+          "max": 52349268212
+        },
+        "peakRssBytes": {
+          "median": 5521408,
+          "min": 5390336,
+          "max": 5537792
+        },
+        "work": {
+          "median": 51707733,
+          "min": 51698031,
+          "max": 51717435
+        },
+        "processElapsedSeconds": {
+          "median": 3.9629578748717904,
+          "min": 3.8293360001407564,
+          "max": 4.0039115839172155
+        },
+        "initializationSeconds": {
+          "median": 0.000999248,
+          "min": 0.000961584,
+          "max": 0.001040167
+        },
+        "tableBytes": [
+          3186688
+        ],
+        "leafCalls": {
+          "median": 25586484,
+          "min": 25581682,
+          "max": 25591286
+        },
+        "cacheHits": {
+          "median": 1388,
+          "min": 1386,
+          "max": 1390
+        }
+      }
+    ]
+  },
+  "comparisons": [
+    {
+      "phase": "leaf-compare",
+      "group": "unpack-d4-g1",
+      "wallSpeedRatio": 0.9284166165724388,
+      "pairedWallSpeedRatios": {
+        "median": 0.9830993344543051,
+        "min": 0.3314863410674168,
+        "max": 1.0702270346499871
+      },
+      "instructionReductionPercent": 0.08234155415166589,
+      "baselineSeconds": 0.004392417,
+      "candidateSeconds": 0.004731084,
+      "baselineInstructions": 109744103,
+      "candidateInstructions": 109653738
+    },
+    {
+      "phase": "leaf-compare",
+      "group": "micro-d4-g1",
+      "wallSpeedRatio": 1.1709445273257117,
+      "pairedWallSpeedRatios": {
+        "median": 1.1859927058062516,
+        "min": 1.0635966625128779,
+        "max": 1.1942832136729076
+      },
+      "instructionReductionPercent": 10.660403426137643,
+      "baselineSeconds": 0.586690875,
+      "candidateSeconds": 0.501040708,
+      "baselineInstructions": 10348271692,
+      "candidateInstructions": 9245104182
+    },
+    {
+      "phase": "leaf-compare",
+      "group": "search-d3-g1",
+      "wallSpeedRatio": 1.0678490642117162,
+      "pairedWallSpeedRatios": {
+        "median": 1.071820076585131,
+        "min": 1.060006910368522,
+        "max": 1.086736723797817
+      },
+      "instructionReductionPercent": 4.0167233925958,
+      "baselineSeconds": 0.326895251,
+      "candidateSeconds": 0.306124959,
+      "baselineInstructions": 6331266063,
+      "candidateInstructions": 6076956618
+    },
+    {
+      "phase": "leaf-compare",
+      "group": "search-d4-g1",
+      "wallSpeedRatio": 1.0856251290178667,
+      "pairedWallSpeedRatios": {
+        "median": 1.0803575835701247,
+        "min": 1.0499343435415207,
+        "max": 1.1499371661156736
+      },
+      "instructionReductionPercent": 4.429878510768481,
+      "baselineSeconds": 11.880663582,
+      "candidateSeconds": 10.943615124999999,
+      "baselineInstructions": 222809644215,
+      "candidateInstructions": 212939447666
+    },
+    {
+      "phase": "leaf-compare",
+      "group": "search-d4-g2",
+      "wallSpeedRatio": 1.0574266136632424,
+      "pairedWallSpeedRatios": {
+        "median": 1.0604098646458708,
+        "min": 1.0481819786085118,
+        "max": 1.0871622672931145
+      },
+      "instructionReductionPercent": 4.368463590301941,
+      "baselineSeconds": 15.503888332999999,
+      "candidateSeconds": 14.661904791,
+      "baselineInstructions": 288238401436,
+      "candidateInstructions": 275646811816
+    },
+    {
+      "phase": "compare",
+      "group": "unpack-d4-g1",
+      "wallSpeedRatio": 0.9609351761500027,
+      "pairedWallSpeedRatios": {
+        "median": 1.0010927808194208,
+        "min": 0.3482906633617487,
+        "max": 1.140247779294047
+      },
+      "instructionReductionPercent": 0.05899077615002524,
+      "baselineSeconds": 0.004975042,
+      "candidateSeconds": 0.005177292,
+      "baselineInstructions": 109784960,
+      "candidateInstructions": 109720197
+    },
+    {
+      "phase": "compare",
+      "group": "micro-d4-g1",
+      "wallSpeedRatio": 1.1698854693124854,
+      "pairedWallSpeedRatios": {
+        "median": 1.1711439235907537,
+        "min": 1.1284469438497873,
+        "max": 1.2141418898794942
+      },
+      "instructionReductionPercent": 10.654120004757727,
+      "baselineSeconds": 0.604415917,
+      "candidateSeconds": 0.516645375,
+      "baselineInstructions": 10346642712,
+      "candidateInstructions": 9244298981
+    },
+    {
+      "phase": "compare",
+      "group": "search-d3-g1",
+      "wallSpeedRatio": 1.0636528737589264,
+      "pairedWallSpeedRatios": {
+        "median": 1.0727196988315124,
+        "min": 1.051175134763864,
+        "max": 1.078451887693356
+      },
+      "instructionReductionPercent": 4.030888821508627,
+      "baselineSeconds": 0.338100415,
+      "candidateSeconds": 0.317867251,
+      "baselineInstructions": 6332174374,
+      "candidateInstructions": 6076931465
+    },
+    {
+      "phase": "compare",
+      "group": "search-d4-g1",
+      "wallSpeedRatio": 1.070581747205306,
+      "pairedWallSpeedRatios": {
+        "median": 1.0678604114550032,
+        "min": 1.0582717723825705,
+        "max": 1.11585451087128
+      },
+      "instructionReductionPercent": 4.4384334781566,
+      "baselineSeconds": 12.052394167,
+      "candidateSeconds": 11.257799041,
+      "baselineInstructions": 222843607698,
+      "candidateInstructions": 212952842410
+    },
+    {
+      "phase": "compare",
+      "group": "search-d4-g2",
+      "wallSpeedRatio": 1.0785702559666808,
+      "pairedWallSpeedRatios": {
+        "median": 1.0657086011919323,
+        "min": 1.0457200581313477,
+        "max": 1.0856716129317907
+      },
+      "instructionReductionPercent": 4.417112385635258,
+      "baselineSeconds": 15.686286376,
+      "candidateSeconds": 14.543592584,
+      "baselineInstructions": 288325409184,
+      "candidateInstructions": 275589751824
+    }
+  ],
+  "cacheSweep": [
+    {
+      "group": "cache-sweep",
+      "arm": "g1-c1024",
+      "repeats": 5,
+      "searchSeconds": {
+        "median": 13.765320706999999,
+        "min": 12.900046083,
+        "max": 15.87003029
+      },
+      "processCpuSeconds": {
+        "median": 13.41,
+        "min": 12.85,
+        "max": 14.790000000000001
+      },
+      "instructions": {
+        "median": 253701172069,
+        "min": 253467576590,
+        "max": 255143609933
+      },
+      "cycles": {
+        "median": 47236942036,
+        "min": 46388632319,
+        "max": 49245529756
+      },
+      "peakRssBytes": {
+        "median": 1622016,
+        "min": 1605632,
+        "max": 1622016
+      },
+      "work": {
+        "median": 47250952,
+        "min": 47250952,
+        "max": 47250952
+      },
+      "processElapsedSeconds": {
+        "median": 13.772338167065755,
+        "min": 12.906704957829788,
+        "max": 15.881736582843587
+      },
+      "initializationSeconds": {
+        "median": 3.1376e-05,
+        "min": 2.7e-05,
+        "max": 6.8793e-05
+      },
+      "tableBytes": [
+        49152
+      ],
+      "leafCalls": {
+        "median": 23356305,
+        "min": 23356305,
+        "max": 23356305
+      },
+      "cacheHits": {
+        "median": 50443,
+        "min": 50443,
+        "max": 50443
+      }
+    },
+    {
+      "group": "cache-sweep",
+      "arm": "g1-c16384",
+      "repeats": 5,
+      "searchSeconds": {
+        "median": 11.305829207,
+        "min": 10.863634457,
+        "max": 13.915851373999999
+      },
+      "processCpuSeconds": {
+        "median": 11.15,
+        "min": 10.83,
+        "max": 12.8
+      },
+      "instructions": {
+        "median": 212966030742,
+        "min": 212833191647,
+        "max": 214548004410
+      },
+      "cycles": {
+        "median": 39544869486,
+        "min": 39114513573,
+        "max": 41762647333
+      },
+      "peakRssBytes": {
+        "median": 2359296,
+        "min": 2359296,
+        "max": 2801664
+      },
+      "work": {
+        "median": 39288466,
+        "min": 39288466,
+        "max": 39288466
+      },
+      "processElapsedSeconds": {
+        "median": 11.313873582985252,
+        "min": 10.870261125033721,
+        "max": 13.930099749937654
+      },
+      "initializationSeconds": {
+        "median": 0.000151584,
+        "min": 0.000139291,
+        "max": 0.000341167
+      },
+      "tableBytes": [
+        786432
+      ],
+      "leafCalls": {
+        "median": 19377708,
+        "min": 19377708,
+        "max": 19377708
+      },
+      "cacheHits": {
+        "median": 126478,
+        "min": 126478,
+        "max": 126478
+      }
+    },
+    {
+      "group": "cache-sweep",
+      "arm": "g1-c262144",
+      "repeats": 5,
+      "searchSeconds": {
+        "median": 10.844751666,
+        "min": 10.567564667000001,
+        "max": 15.703921667
+      },
+      "processCpuSeconds": {
+        "median": 10.78,
+        "min": 10.54,
+        "max": 13.350000000000001
+      },
+      "instructions": {
+        "median": 206568524011,
+        "min": 206456697823,
+        "max": 209666453198
+      },
+      "cycles": {
+        "median": 38394788225,
+        "min": 38004905537,
+        "max": 43476766235
+      },
+      "peakRssBytes": {
+        "median": 14172160,
+        "min": 14172160,
+        "max": 14172160
+      },
+      "work": {
+        "median": 38002223,
+        "min": 38002223,
+        "max": 38002223
+      },
+      "processElapsedSeconds": {
+        "median": 10.853585083037615,
+        "min": 10.576330207986757,
+        "max": 15.722085459157825
+      },
+      "initializationSeconds": {
+        "median": 0.002196042,
+        "min": 0.0021653749999999998,
+        "max": 0.002850334
+      },
+      "tableBytes": [
+        12582912
+      ],
+      "leafCalls": {
+        "median": 18734660,
+        "min": 18734660,
+        "max": 18734660
+      },
+      "cacheHits": {
+        "median": 139460,
+        "min": 139460,
+        "max": 139460
+      }
+    },
+    {
+      "group": "cache-sweep",
+      "arm": "g2-c1024",
+      "repeats": 5,
+      "searchSeconds": {
+        "median": 14.552607167,
+        "min": 14.22443475,
+        "max": 19.221573707
+      },
+      "processCpuSeconds": {
+        "median": 14.39,
+        "min": 14.129999999999999,
+        "max": 17.28
+      },
+      "instructions": {
+        "median": 277996841907,
+        "min": 277839451060,
+        "max": 280971001803
+      },
+      "cycles": {
+        "median": 51251855861,
+        "min": 50811786164,
+        "max": 55861436637
+      },
+      "peakRssBytes": {
+        "median": 1622016,
+        "min": 1605632,
+        "max": 1638400
+      },
+      "work": {
+        "median": 52061856,
+        "min": 52061856,
+        "max": 52061856
+      },
+      "processElapsedSeconds": {
+        "median": 14.559531457955018,
+        "min": 14.231813583057374,
+        "max": 19.233210084028542
+      },
+      "initializationSeconds": {
+        "median": 3.8334e-05,
+        "min": 2.8124e-05,
+        "max": 5.4624e-05
+      },
+      "tableBytes": [
+        49152
+      ],
+      "leafCalls": {
+        "median": 25761757,
+        "min": 25761757,
+        "max": 25761757
+      },
+      "cacheHits": {
+        "median": 1342,
+        "min": 1342,
+        "max": 1342
+      }
+    },
+    {
+      "group": "cache-sweep",
+      "arm": "g2-c16384",
+      "repeats": 5,
+      "searchSeconds": {
+        "median": 14.691235999,
+        "min": 14.226332792000001,
+        "max": 18.742962541
+      },
+      "processCpuSeconds": {
+        "median": 14.32,
+        "min": 14.12,
+        "max": 16.89
+      },
+      "instructions": {
+        "median": 275573104205,
+        "min": 275434296372,
+        "max": 278381082943
+      },
+      "cycles": {
+        "median": 50846693350,
+        "min": 50382487008,
+        "max": 54635593982
+      },
+      "peakRssBytes": {
+        "median": 2359296,
+        "min": 2342912,
+        "max": 2359296
+      },
+      "work": {
+        "median": 51537948,
+        "min": 51537948,
+        "max": 51537948
+      },
+      "processElapsedSeconds": {
+        "median": 14.698777999961749,
+        "min": 14.233791957842186,
+        "max": 18.752109665889293
+      },
+      "initializationSeconds": {
+        "median": 0.000157335,
+        "min": 0.00014637599999999998,
+        "max": 0.000177208
+      },
+      "tableBytes": [
+        786432
+      ],
+      "leafCalls": {
+        "median": 25502449,
+        "min": 25502449,
+        "max": 25502449
+      },
+      "cacheHits": {
+        "median": 1450,
+        "min": 1450,
+        "max": 1450
+      }
+    },
+    {
+      "group": "cache-sweep",
+      "arm": "g2-c262144",
+      "repeats": 5,
+      "searchSeconds": {
+        "median": 14.636157542000001,
+        "min": 14.264442209,
+        "max": 19.334200167
+      },
+      "processCpuSeconds": {
+        "median": 14.4,
+        "min": 14.219999999999999,
+        "max": 17.17
+      },
+      "instructions": {
+        "median": 275587188949,
+        "min": 275432401057,
+        "max": 278607451408
+      },
+      "cycles": {
+        "median": 51029660937,
+        "min": 50428395397,
+        "max": 55658408622
+      },
+      "peakRssBytes": {
+        "median": 14172160,
+        "min": 14155776,
+        "max": 14172160
+      },
+      "work": {
+        "median": 51523395,
+        "min": 51523395,
+        "max": 51523395
+      },
+      "processElapsedSeconds": {
+        "median": 14.646846374962479,
+        "min": 14.273608792107552,
+        "max": 19.357522499980405
+      },
+      "initializationSeconds": {
+        "median": 0.003279667,
+        "min": 0.002932627,
+        "max": 0.006136835
+      },
+      "tableBytes": [
+        12582912
+      ],
+      "leafCalls": {
+        "median": 25495246,
+        "min": 25495246,
+        "max": 25495246
+      },
+      "cacheHits": {
+        "median": 1453,
+        "min": 1453,
+        "max": 1453
+      }
+    },
+    {
+      "group": "cache-sweep",
+      "arm": "g3-c1024",
+      "repeats": 5,
+      "searchSeconds": {
+        "median": 16.145632625,
+        "min": 16.093131833,
+        "max": 20.142076583
+      },
+      "processCpuSeconds": {
+        "median": 15.99,
+        "min": 15.9,
+        "max": 18.09
+      },
+      "instructions": {
+        "median": 309346390792,
+        "min": 309287103904,
+        "max": 311614031219
+      },
+      "cycles": {
+        "median": 56963327330,
+        "min": 56906382060,
+        "max": 61032600301
+      },
+      "peakRssBytes": {
+        "median": 1622016,
+        "min": 1622016,
+        "max": 1638400
+      },
+      "work": {
+        "median": 58439451,
+        "min": 58439451,
+        "max": 58439451
+      },
+      "processElapsedSeconds": {
+        "median": 16.152305957861245,
+        "min": 16.100463916081935,
+        "max": 20.154471290996298
+      },
+      "initializationSeconds": {
+        "median": 3.0749e-05,
+        "min": 2.771e-05,
+        "max": 8.3083e-05
+      },
+      "tableBytes": [
+        49152
+      ],
+      "leafCalls": {
+        "median": 28918337,
+        "min": 28918337,
+        "max": 28918337
+      },
+      "cacheHits": {
+        "median": 27,
+        "min": 27,
+        "max": 27
+      }
+    },
+    {
+      "group": "cache-sweep",
+      "arm": "g3-c16384",
+      "repeats": 5,
+      "searchSeconds": {
+        "median": 16.163902168,
+        "min": 15.8311245,
+        "max": 16.791400042
+      },
+      "processCpuSeconds": {
+        "median": 15.9,
+        "min": 15.69,
+        "max": 16.37
+      },
+      "instructions": {
+        "median": 309272499672,
+        "min": 309218416357,
+        "max": 309591690199
+      },
+      "cycles": {
+        "median": 56691217480,
+        "min": 56655955228,
+        "max": 57577934308
+      },
+      "peakRssBytes": {
+        "median": 2359296,
+        "min": 2342912,
+        "max": 2359296
+      },
+      "work": {
+        "median": 58439451,
+        "min": 58439451,
+        "max": 58439451
+      },
+      "processElapsedSeconds": {
+        "median": 16.171113499905914,
+        "min": 15.838016499998048,
+        "max": 16.799982083030045
+      },
+      "initializationSeconds": {
+        "median": 0.000205958,
+        "min": 0.000180459,
+        "max": 0.000454875
+      },
+      "tableBytes": [
+        786432
+      ],
+      "leafCalls": {
+        "median": 28918337,
+        "min": 28918337,
+        "max": 28918337
+      },
+      "cacheHits": {
+        "median": 27,
+        "min": 27,
+        "max": 27
+      }
+    },
+    {
+      "group": "cache-sweep",
+      "arm": "g3-c262144",
+      "repeats": 5,
+      "searchSeconds": {
+        "median": 16.042083918,
+        "min": 15.574642708,
+        "max": 16.474896875
+      },
+      "processCpuSeconds": {
+        "median": 15.9,
+        "min": 15.52,
+        "max": 16.169999999999998
+      },
+      "instructions": {
+        "median": 309285156704,
+        "min": 309191827125,
+        "max": 309523929397
+      },
+      "cycles": {
+        "median": 56780574024,
+        "min": 56445935419,
+        "max": 57329568796
+      },
+      "peakRssBytes": {
+        "median": 14172160,
+        "min": 14155776,
+        "max": 14172160
+      },
+      "work": {
+        "median": 58439451,
+        "min": 58439451,
+        "max": 58439451
+      },
+      "processElapsedSeconds": {
+        "median": 16.05198595789261,
+        "min": 15.584441957995296,
+        "max": 16.48879620898515
+      },
+      "initializationSeconds": {
+        "median": 0.003814791,
+        "min": 0.002942125,
+        "max": 0.004140792
+      },
+      "tableBytes": [
+        12582912
+      ],
+      "leafCalls": {
+        "median": 28918337,
+        "min": 28918337,
+        "max": 28918337
+      },
+      "cacheHits": {
+        "median": 27,
+        "min": 27,
+        "max": 27
+      }
+    },
+    {
+      "group": "cache-sweep",
+      "arm": "g0-c0",
+      "repeats": 5,
+      "searchSeconds": {
+        "median": 17.604948875,
+        "min": 17.074608959,
+        "max": 17.932630875
+      },
+      "processCpuSeconds": {
+        "median": 17.419999999999998,
+        "min": 16.98,
+        "max": 17.62
+      },
+      "instructions": {
+        "median": 337401963168,
+        "min": 337247989512,
+        "max": 337552735421
+      },
+      "cycles": {
+        "median": 62042545546,
+        "min": 61542194239,
+        "max": 62305014549
+      },
+      "peakRssBytes": {
+        "median": 1540096,
+        "min": 1540096,
+        "max": 1540096
+      },
+      "work": {
+        "median": 64858647,
+        "min": 64858647,
+        "max": 64858647
+      },
+      "processElapsedSeconds": {
+        "median": 17.613145333947614,
+        "min": 17.085146042052656,
+        "max": 17.940864416072145
+      },
+      "initializationSeconds": {
+        "median": 7.92e-07,
+        "min": 5.83e-07,
+        "max": 8.74e-07
+      },
+      "tableBytes": [
+        0
+      ],
+      "leafCalls": {
+        "median": 32094860,
+        "min": 32094860,
+        "max": 32094860
+      },
+      "cacheHits": {
+        "median": 0,
+        "min": 0,
+        "max": 0
+      }
+    }
+  ],
+  "parallelSweep": [
+    {
+      "group": "parallel-w1-g1",
+      "arm": "private",
+      "repeats": 5,
+      "searchSeconds": {
+        "median": 10.696571666,
+        "min": 10.679717751,
+        "max": 10.749042124999999
+      },
+      "processCpuSeconds": {
+        "median": 10.65,
+        "min": 10.64,
+        "max": 10.700000000000001
+      },
+      "instructions": {
+        "median": 207596566898,
+        "min": 207563281515,
+        "max": 207607758508
+      },
+      "cycles": {
+        "median": 38808745741,
+        "min": 38663898889,
+        "max": 38855422848
+      },
+      "peakRssBytes": {
+        "median": 5095424,
+        "min": 5029888,
+        "max": 5128192
+      },
+      "work": {
+        "median": 38318329,
+        "min": 38318329,
+        "max": 38318329
+      },
+      "processElapsedSeconds": {
+        "median": 10.70319200004451,
+        "min": 10.686071541858837,
+        "max": 11.240744708105922
+      },
+      "initializationSeconds": {
+        "median": 0.000700167,
+        "min": 0.000688042,
+        "max": 0.001288585
+      },
+      "tableBytes": [
+        3145728
+      ],
+      "leafCalls": {
+        "median": 18892713,
+        "min": 18892713,
+        "max": 18892713
+      },
+      "cacheHits": {
+        "median": 136207,
+        "min": 136207,
+        "max": 136207
+      }
+    },
+    {
+      "group": "parallel-w1-g1",
+      "arm": "shared",
+      "repeats": 5,
+      "searchSeconds": {
+        "median": 10.765254581,
+        "min": 10.690454625,
+        "max": 10.836154793
+      },
+      "processCpuSeconds": {
+        "median": 10.700000000000001,
+        "min": 10.63,
+        "max": 10.75
+      },
+      "instructions": {
+        "median": 207716586163,
+        "min": 207708393549,
+        "max": 207736550484
+      },
+      "cycles": {
+        "median": 38850885000,
+        "min": 38809025348,
+        "max": 38935627075
+      },
+      "peakRssBytes": {
+        "median": 5373952,
+        "min": 5357568,
+        "max": 5406720
+      },
+      "work": {
+        "median": 38318329,
+        "min": 38318329,
+        "max": 38318329
+      },
+      "processElapsedSeconds": {
+        "median": 10.77244554203935,
+        "min": 10.696705291979015,
+        "max": 10.843328832881525
+      },
+      "initializationSeconds": {
+        "median": 0.000902667,
+        "min": 0.000821624,
+        "max": 0.000996792
+      },
+      "tableBytes": [
+        3186688
+      ],
+      "leafCalls": {
+        "median": 18892713,
+        "min": 18892713,
+        "max": 18892713
+      },
+      "cacheHits": {
+        "median": 136207,
+        "min": 136207,
+        "max": 136207
+      }
+    },
+    {
+      "group": "parallel-w1-g2",
+      "arm": "private",
+      "repeats": 5,
+      "searchSeconds": {
+        "median": 14.065021667,
+        "min": 14.021036125,
+        "max": 14.355967873
+      },
+      "processCpuSeconds": {
+        "median": 14.03,
+        "min": 13.99,
+        "max": 14.16
+      },
+      "instructions": {
+        "median": 274847035219,
+        "min": 274841305892,
+        "max": 274928648531
+      },
+      "cycles": {
+        "median": 50811200211,
+        "min": 50801050890,
+        "max": 51188800338
+      },
+      "peakRssBytes": {
+        "median": 5111808,
+        "min": 4997120,
+        "max": 5128192
+      },
+      "work": {
+        "median": 51523395,
+        "min": 51523395,
+        "max": 51523395
+      },
+      "processElapsedSeconds": {
+        "median": 14.071735166944563,
+        "min": 14.027689290931448,
+        "max": 14.363894209032878
+      },
+      "initializationSeconds": {
+        "median": 0.000749958,
+        "min": 0.000714666,
+        "max": 0.000978957
+      },
+      "tableBytes": [
+        3145728
+      ],
+      "leafCalls": {
+        "median": 25495246,
+        "min": 25495246,
+        "max": 25495246
+      },
+      "cacheHits": {
+        "median": 1426,
+        "min": 1426,
+        "max": 1426
+      }
+    },
+    {
+      "group": "parallel-w1-g2",
+      "arm": "shared",
+      "repeats": 5,
+      "searchSeconds": {
+        "median": 14.150282749999999,
+        "min": 14.075311874,
+        "max": 14.404607248
+      },
+      "processCpuSeconds": {
+        "median": 14.1,
+        "min": 14.03,
+        "max": 14.2
+      },
+      "instructions": {
+        "median": 274886533881,
+        "min": 274866307408,
+        "max": 274930175926
+      },
+      "cycles": {
+        "median": 50877639045,
+        "min": 50785514404,
+        "max": 51067428546
+      },
+      "peakRssBytes": {
+        "median": 5308416,
+        "min": 5259264,
+        "max": 5324800
+      },
+      "work": {
+        "median": 51523395,
+        "min": 51523395,
+        "max": 51523395
+      },
+      "processElapsedSeconds": {
+        "median": 14.15701145795174,
+        "min": 14.082211917033419,
+        "max": 14.412953374907374
+      },
+      "initializationSeconds": {
+        "median": 0.000903542,
+        "min": 0.000834333,
+        "max": 0.001043083
+      },
+      "tableBytes": [
+        3186688
+      ],
+      "leafCalls": {
+        "median": 25495246,
+        "min": 25495246,
+        "max": 25495246
+      },
+      "cacheHits": {
+        "median": 1426,
+        "min": 1426,
+        "max": 1426
+      }
+    },
+    {
+      "group": "parallel-w2-g1",
+      "arm": "private",
+      "repeats": 5,
+      "searchSeconds": {
+        "median": 5.655911085,
+        "min": 5.635821458,
+        "max": 5.708403541
+      },
+      "processCpuSeconds": {
+        "median": 11.1,
+        "min": 11.08,
+        "max": 11.15
+      },
+      "instructions": {
+        "median": 213090890321,
+        "min": 213048350116,
+        "max": 213136396616
+      },
+      "cycles": {
+        "median": 39885522106,
+        "min": 39773633065,
+        "max": 39914663134
+      },
+      "peakRssBytes": {
+        "median": 5160960,
+        "min": 5144576,
+        "max": 5177344
+      },
+      "work": {
+        "median": 39699072,
+        "min": 39684239,
+        "max": 39699968
+      },
+      "processElapsedSeconds": {
+        "median": 5.662278082920238,
+        "min": 5.641512208152562,
+        "max": 5.715468709124252
+      },
+      "initializationSeconds": {
+        "median": 0.000528625,
+        "min": 0.00052246,
+        "max": 0.000537583
+      },
+      "tableBytes": [
+        3145728
+      ],
+      "leafCalls": {
+        "median": 19579140,
+        "min": 19571797,
+        "max": 19579588
+      },
+      "cacheHits": {
+        "median": 129926,
+        "min": 129870,
+        "max": 129932
+      }
+    },
+    {
+      "group": "parallel-w2-g1",
+      "arm": "shared",
+      "repeats": 5,
+      "searchSeconds": {
+        "median": 5.489913958,
+        "min": 5.4776246660000005,
+        "max": 5.675756291
+      },
+      "processCpuSeconds": {
+        "median": 10.81,
+        "min": 10.8,
+        "max": 10.950000000000001
+      },
+      "instructions": {
+        "median": 207899156109,
+        "min": 207890658913,
+        "max": 207943459530
+      },
+      "cycles": {
+        "median": 38875504159,
+        "min": 38813115609,
+        "max": 39101033709
+      },
+      "peakRssBytes": {
+        "median": 5455872,
+        "min": 5308416,
+        "max": 5472256
+      },
+      "work": {
+        "median": 38347995,
+        "min": 38346623,
+        "max": 38348387
+      },
+      "processElapsedSeconds": {
+        "median": 5.496512042125687,
+        "min": 5.48414370813407,
+        "max": 5.682257791981101
+      },
+      "initializationSeconds": {
+        "median": 0.000882876,
+        "min": 0.000849917,
+        "max": 0.00091746
+      },
+      "tableBytes": [
+        3186688
+      ],
+      "leafCalls": {
+        "median": 18907546,
+        "min": 18906860,
+        "max": 18907742
+      },
+      "cacheHits": {
+        "median": 135909,
+        "min": 135900,
+        "max": 135950
+      }
+    },
+    {
+      "group": "parallel-w2-g2",
+      "arm": "private",
+      "repeats": 5,
+      "searchSeconds": {
+        "median": 7.443337125,
+        "min": 7.3110293340000005,
+        "max": 7.644868874999999
+      },
+      "processCpuSeconds": {
+        "median": 14.59,
+        "min": 14.370000000000001,
+        "max": 14.77
+      },
+      "instructions": {
+        "median": 278201965479,
+        "min": 277989279522,
+        "max": 278349591744
+      },
+      "cycles": {
+        "median": 51776708725,
+        "min": 51575175372,
+        "max": 52288809785
+      },
+      "peakRssBytes": {
+        "median": 5128192,
+        "min": 5013504,
+        "max": 5177344
+      },
+      "work": {
+        "median": 52357767,
+        "min": 52318959,
+        "max": 52357767
+      },
+      "processElapsedSeconds": {
+        "median": 7.450116749852896,
+        "min": 7.318209249991924,
+        "max": 7.651960333110765
+      },
+      "initializationSeconds": {
+        "median": 0.000581249,
+        "min": 0.000526042,
+        "max": 0.000666584
+      },
+      "tableBytes": [
+        3145728
+      ],
+      "leafCalls": {
+        "median": 25908218,
+        "min": 25889010,
+        "max": 25908218
+      },
+      "cacheHits": {
+        "median": 1254,
+        "min": 1254,
+        "max": 1262
+      }
+    },
+    {
+      "group": "parallel-w2-g2",
+      "arm": "shared",
+      "repeats": 5,
+      "searchSeconds": {
+        "median": 7.3697251249999995,
+        "min": 7.271057416,
+        "max": 7.49253425
+      },
+      "processCpuSeconds": {
+        "median": 14.45,
+        "min": 14.25,
+        "max": 14.6
+      },
+      "instructions": {
+        "median": 274988414455,
+        "min": 274912901938,
+        "max": 275080204822
+      },
+      "cycles": {
+        "median": 51306149555,
+        "min": 51061868411,
+        "max": 51584514472
+      },
+      "peakRssBytes": {
+        "median": 5406720,
+        "min": 5324800,
+        "max": 5439488
+      },
+      "work": {
+        "median": 51523395,
+        "min": 51523395,
+        "max": 51528246
+      },
+      "processElapsedSeconds": {
+        "median": 7.376737584127113,
+        "min": 7.277916207909584,
+        "max": 7.500454957829788
+      },
+      "initializationSeconds": {
+        "median": 0.000892166,
+        "min": 0.000865168,
+        "max": 0.00096771
+      },
+      "tableBytes": [
+        3186688
+      ],
+      "leafCalls": {
+        "median": 25495246,
+        "min": 25495246,
+        "max": 25497647
+      },
+      "cacheHits": {
+        "median": 1426,
+        "min": 1425,
+        "max": 1426
+      }
+    },
+    {
+      "group": "parallel-w4-g1",
+      "arm": "private",
+      "repeats": 5,
+      "searchSeconds": {
+        "median": 3.108119542,
+        "min": 3.0800594169999997,
+        "max": 3.122287833
+      },
+      "processCpuSeconds": {
+        "median": 11.75,
+        "min": 11.680000000000001,
+        "max": 11.8
+      },
+      "instructions": {
+        "median": 217477401651,
+        "min": 217251167021,
+        "max": 217539551514
+      },
+      "cycles": {
+        "median": 41355521533,
+        "min": 41220869170,
+        "max": 41463251042
+      },
+      "peakRssBytes": {
+        "median": 6029312,
+        "min": 5210112,
+        "max": 6848512
+      },
+      "work": {
+        "median": 40655419,
+        "min": 40622589,
+        "max": 40670805
+      },
+      "processElapsedSeconds": {
+        "median": 3.1150323329493403,
+        "min": 3.0880523750092834,
+        "max": 3.1286453341599554
+      },
+      "initializationSeconds": {
+        "median": 0.0006300419999999999,
+        "min": 0.00058421,
+        "max": 0.000761498
+      },
+      "tableBytes": [
+        3145728
+      ],
+      "leafCalls": {
+        "median": 20055574,
+        "min": 20039110,
+        "max": 20063022
+      },
+      "cacheHits": {
+        "median": 123938,
+        "min": 123610,
+        "max": 124042
+      }
+    },
+    {
+      "group": "parallel-w4-g1",
+      "arm": "shared",
+      "repeats": 5,
+      "searchSeconds": {
+        "median": 3.017273043,
+        "min": 2.992334875,
+        "max": 3.052450832
+      },
+      "processCpuSeconds": {
+        "median": 11.370000000000001,
+        "min": 11.299999999999999,
+        "max": 11.49
+      },
+      "instructions": {
+        "median": 208973601556,
+        "min": 208914534070,
+        "max": 209020837903
+      },
+      "cycles": {
+        "median": 39932338986,
+        "min": 39816663651,
+        "max": 40170278564
+      },
+      "peakRssBytes": {
+        "median": 5537792,
+        "min": 5521408,
+        "max": 5554176
+      },
+      "work": {
+        "median": 38549700,
+        "min": 38545794,
+        "max": 38553228
+      },
+      "processElapsedSeconds": {
+        "median": 3.023562208050862,
+        "min": 2.999641624977812,
+        "max": 3.0591576660517603
+      },
+      "initializationSeconds": {
+        "median": 0.001095084,
+        "min": 0.000987209,
+        "max": 0.001169832
+      },
+      "tableBytes": [
+        3186688
+      ],
+      "leafCalls": {
+        "median": 19007051,
+        "min": 19005049,
+        "max": 19008766
+      },
+      "cacheHits": {
+        "median": 136523,
+        "min": 136503,
+        "max": 136650
+      }
+    },
+    {
+      "group": "parallel-w4-g2",
+      "arm": "private",
+      "repeats": 5,
+      "searchSeconds": {
+        "median": 3.9693108329999998,
+        "min": 3.920692167,
+        "max": 4.05398675
+      },
+      "processCpuSeconds": {
+        "median": 15.05,
+        "min": 14.870000000000001,
+        "max": 15.229999999999999
+      },
+      "instructions": {
+        "median": 279611480507,
+        "min": 279593161295,
+        "max": 279843948865
+      },
+      "cycles": {
+        "median": 52902764267,
+        "min": 52491092299,
+        "max": 53246700742
+      },
+      "peakRssBytes": {
+        "median": 5275648,
+        "min": 5210112,
+        "max": 6832128
+      },
+      "work": {
+        "median": 52629423,
+        "min": 52619721,
+        "max": 52658529
+      },
+      "processElapsedSeconds": {
+        "median": 3.9766337499022484,
+        "min": 3.92680516699329,
+        "max": 4.061137749813497
+      },
+      "initializationSeconds": {
+        "median": 0.0006824169999999999,
+        "min": 0.000577961,
+        "max": 0.0009615419999999999
+      },
+      "tableBytes": [
+        3145728
+      ],
+      "leafCalls": {
+        "median": 26042674,
+        "min": 26037872,
+        "max": 26057080
+      },
+      "cacheHits": {
+        "median": 1198,
+        "min": 1192,
+        "max": 1200
+      }
+    },
+    {
+      "group": "parallel-w4-g2",
+      "arm": "shared",
+      "repeats": 5,
+      "searchSeconds": {
+        "median": 3.956130708,
+        "min": 3.822677582,
+        "max": 3.983289749
+      },
+      "processCpuSeconds": {
+        "median": 14.9,
+        "min": 14.56,
+        "max": 14.959999999999999
+      },
+      "instructions": {
+        "median": 275836205925,
+        "min": 275707243432,
+        "max": 275897134898
+      },
+      "cycles": {
+        "median": 52288789842,
+        "min": 51572989546,
+        "max": 52349268212
+      },
+      "peakRssBytes": {
+        "median": 5521408,
+        "min": 5390336,
+        "max": 5537792
+      },
+      "work": {
+        "median": 51707733,
+        "min": 51698031,
+        "max": 51717435
+      },
+      "processElapsedSeconds": {
+        "median": 3.9629578748717904,
+        "min": 3.8293360001407564,
+        "max": 4.0039115839172155
+      },
+      "initializationSeconds": {
+        "median": 0.000999248,
+        "min": 0.000961584,
+        "max": 0.001040167
+      },
+      "tableBytes": [
+        3186688
+      ],
+      "leafCalls": {
+        "median": 25586484,
+        "min": 25581682,
+        "max": 25591286
+      },
+      "cacheHits": {
+        "median": 1388,
+        "min": 1386,
+        "max": 1390
+      }
+    }
+  ],
+  "parallelComparisons": [
+    {
+      "group": "parallel-w1-g1",
+      "wallSpeedRatio": 0.9936199451222248,
+      "pairedWallSpeedRatios": {
+        "median": 0.9984940016162167,
+        "min": 0.9879804224387662,
+        "max": 1.0005276121414939
+      },
+      "workReductionPercent": 0.0,
+      "instructionReductionPercent": -0.057813704144238365
+    },
+    {
+      "group": "parallel-w1-g2",
+      "wallSpeedRatio": 0.9939746021682854,
+      "pairedWallSpeedRatios": {
+        "median": 0.9961439043421653,
+        "min": 0.9869424954128275,
+        "max": 1.013233434395359
+      },
+      "workReductionPercent": 0.0,
+      "instructionReductionPercent": -0.014371143559377408
+    },
+    {
+      "group": "parallel-w2-g1",
+      "wallSpeedRatio": 1.0302367447413463,
+      "pairedWallSpeedRatios": {
+        "median": 1.0294803426387227,
+        "min": 1.0057520528236508,
+        "max": 1.0368975142525125
+      },
+      "workReductionPercent": 3.40329617780486,
+      "instructionReductionPercent": 2.4363942560750362
+    },
+    {
+      "group": "parallel-w2-g2",
+      "wallSpeedRatio": 1.0099884322347776,
+      "pairedWallSpeedRatios": {
+        "median": 1.015103412693428,
+        "min": 0.995828217275348,
+        "max": 1.0203315220080573
+      },
+      "workReductionPercent": 1.5935973740056508,
+      "instructionReductionPercent": 1.1551144214481002
+    },
+    {
+      "group": "parallel-w4-g1",
+      "wallSpeedRatio": 1.030108809413441,
+      "pairedWallSpeedRatios": {
+        "median": 1.0275055199901575,
+        "min": 1.0228789929285256,
+        "max": 1.0310366707470033
+      },
+      "workReductionPercent": 5.1794300779436035,
+      "instructionReductionPercent": 3.910199418625848
+    },
+    {
+      "group": "parallel-w4-g2",
+      "wallSpeedRatio": 1.0033315696504534,
+      "pairedWallSpeedRatios": {
+        "median": 1.0218970862199743,
+        "min": 0.9887318644064826,
+        "max": 1.0460988780524005
+      },
+      "workReductionPercent": 1.7512827377947904,
+      "instructionReductionPercent": 1.3501858275470568
+    }
+  ],
+  "timedProcessCount": 210,
+  "timedProcessSeconds": 1762.7245474932715,
+  "artifactSha256": {
+    "compare/measurements.jsonl": "1ad1ae77e77f6b39e9149a11f2acd82b56b4a4161fbfd8bf5c21d5125a6d96b9",
+    "leaf-compare/measurements.jsonl": "431903ffbc053fe11fcfd0a8d36161ad07c831a424a3b73f7a0bdd506d06db4c",
+    "parallel/measurements.jsonl": "98faa757f3d6703697fe513c3c5e64acfe6985c8ce4d6d98996f3f1e76b7c7a8",
+    "sweep/measurements.jsonl": "5cfed138429bd53240f508c4997b69c2e8e5df12bb7a2006f4fbf1ec9cfc65bd"
+  },
+  "display": {
+    "searchSpeedRatio": "1.07\u00d7",
+    "searchInstructionReduction": "4.4%",
+    "leafSpeedRatio": "1.17\u00d7",
+    "leafInstructionReduction": "10.7%",
+    "sharedFourWorkerWorkReduction": "5.2%",
+    "sharedFourWorkerSpeedRatio": "1.03\u00d7",
+    "sharedFourWorkerInstructionReduction": "3.9%"
+  },
+  "checks": {
+    "rustReleaseTestsPassed": 40,
+    "leafFeatureStates": 33740,
+    "featuresPerState": 18,
+    "unpackingCases": 1296,
+    "cppLeafRoots": 6,
+    "cppSearchRoots": 6,
+    "cppDepth": 4,
+    "cppStrata": 7,
+    "cppTrajectoryGames": 32,
+    "cppTrajectoryMoves": 575,
+    "cppTrajectoryWaves": 347,
+    "tsTrajectoryGames": 32,
+    "tsTrajectoryMoves": 660,
+    "tsTrajectoryWaves": 431,
+    "finalMismatches": 0,
+    "rootTestsPassed": 144,
+    "rootTestsSkipped": 2,
+    "nativeTsParitySeeds": 256,
+    "nativeTsParityMoves": 6852,
+    "preexistingMissingArtifactErrors": 96,
+    "defaultClangBaselineAndCandidateLeafMismatchesEach": 1,
+    "defaultClangBaselineAndCandidateSearchMismatchesEach": 1,
+    "researchUnitTestsPassed": 6,
+    "webTestsPassed": 70,
+    "chartTestsPassed": 63,
+    "chartTestsFailed": 1,
+    "frontmatterFamilies": 12,
+    "frontmatterApproaches": 114,
+    "mdxFiles": 174,
+    "mdxProblems": 0,
+    "webBuildPassed": true,
+    "webTypecheckPassed": true,
+    "webLintPassed": true,
+    "parallelDecisionsMatched": 360,
+    "webRouteChecks": 728,
+    "webRouteFailures": 1,
+    "noDataChecks": 8,
+    "noDataFailures": 0
+  }
+}

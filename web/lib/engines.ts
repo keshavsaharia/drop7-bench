@@ -187,7 +187,7 @@ export const ENGINES: readonly EngineEntry[] = [
     title: "Rust bitboard engine",
     shortTitle: "Rust",
     language: "Rust",
-    role: "A packed port of the rules, the fair search and the fair leaf, replayed move for move against the C++ engines, with a within-decision parallel scheduler.",
+    role: "A packed Drop7 engine that avoids unused leaf calculations and offers bounded private or shared search caches.",
     roleLabel: "packed port",
     path: "approaches/fair-expectimax/rust-engine/src/lib.rs",
     boardRepresentation:

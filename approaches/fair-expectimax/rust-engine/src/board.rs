@@ -239,9 +239,10 @@ impl Board {
         Some(board)
     }
 
-    /// Expand to the references' 49-byte row-major array.  One PDEP per
-    /// column spreads the seven nibbles into the low nibbles of seven bytes;
-    /// the stores place them at their row-major positions.  The leaf
+    /// Expand to the references' 49-byte row-major array. On BMI2 targets,
+    /// one PDEP per column spreads nibbles into the low nibbles of bytes.
+    /// Other targets extract the seven nibbles directly, avoiding the
+    /// generic bit-by-bit PDEP fallback for this fixed layout. The leaf
     /// evaluator reads cells many times, so it works on this byte view --
     /// the same random-access cost the C++ leaf pays -- while the engine
     /// keeps the packed words for gravity.
@@ -249,11 +250,22 @@ impl Board {
     pub fn to_bytes(&self) -> [u8; CELL_COUNT] {
         let mut out = [0u8; CELL_COUNT];
         for col in 0..BOARD_SIZE {
-            let spread = pdep64(self.cols[col] as u64, 0x0F0F_0F0F_0F0F_0F0F);
-            for nibble in 0..BOARD_SIZE {
-                // nibble n of the column word is row (6 - n).
-                out[(BOARD_SIZE - 1 - nibble) * BOARD_SIZE + col] =
-                    (spread >> (8 * nibble)) as u8 & 0xF;
+            #[cfg(all(target_arch = "x86_64", target_feature = "bmi2"))]
+            {
+                let spread = pdep64(self.cols[col] as u64, 0x0F0F_0F0F_0F0F_0F0F);
+                for nibble in 0..BOARD_SIZE {
+                    // nibble n of the column word is row (6 - n).
+                    out[(BOARD_SIZE - 1 - nibble) * BOARD_SIZE + col] =
+                        (spread >> (8 * nibble)) as u8 & 0xF;
+                }
+            }
+            #[cfg(not(all(target_arch = "x86_64", target_feature = "bmi2")))]
+            {
+                let word = self.cols[col];
+                for nibble in 0..BOARD_SIZE {
+                    out[(BOARD_SIZE - 1 - nibble) * BOARD_SIZE + col] =
+                        (word >> (4 * nibble)) as u8 & 0xF;
+                }
             }
         }
         out
@@ -577,5 +589,47 @@ mod tests {
         assert_eq!(scan.col_mask[1].count_ones(), 2);
         assert_eq!(scan.row_mask[6].count_ones(), 2);
         assert_eq!(scan.row_mask[0].count_ones(), 1);
+    }
+
+    fn assert_unpacked_cells(board: Board) {
+        let actual = board.to_bytes();
+        let mut previous = [0u8; CELL_COUNT];
+        for column in 0..BOARD_SIZE {
+            let spread = pdep64(board.cols[column] as u64, 0x0F0F_0F0F_0F0F_0F0F);
+            for nibble in 0..BOARD_SIZE {
+                previous[(BOARD_SIZE - 1 - nibble) * BOARD_SIZE + column] =
+                    (spread >> (8 * nibble)) as u8 & 0xF;
+            }
+        }
+        assert_eq!(actual, previous, "original PDEP expansion: {board:?}");
+        for (index, &value) in actual.iter().enumerate() {
+            assert_eq!(value, board.get(index / BOARD_SIZE, index % BOARD_SIZE));
+        }
+    }
+
+    #[test]
+    fn unpack_matches_cells_and_original_pdep_expansion() {
+        // Every nibble encoding in every cell, including unused encodings:
+        // conversion preserves representation even before value validation.
+        for index in 0..CELL_COUNT {
+            for value in 0..=15 {
+                let mut board = Board::empty();
+                board.set(index / BOARD_SIZE, index % BOARD_SIZE, value);
+                assert_unpacked_cells(board);
+            }
+        }
+        // Mixed columns, holes, and nonzero unused high nibbles make sure
+        // all seven cell positions are extracted without cross-cell bleed.
+        for pattern in 0..512u32 {
+            let board = Board {
+                cols: std::array::from_fn(|column| {
+                    pattern
+                        .wrapping_mul(0x9E37_79B9)
+                        .rotate_left(column as u32 * 4)
+                        ^ 0x89AB_CDEFu32.rotate_right(column as u32 * 3)
+                }),
+            };
+            assert_unpacked_cells(board);
+        }
     }
 }

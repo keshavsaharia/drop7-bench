@@ -1,0 +1,49 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260905T192431Z-4e8df10b",
+  "actor": {
+    "kind": "model",
+    "platform": "Codex",
+    "model": "gpt-6",
+    "agentId": "cache_implementation"
+  },
+  "level": "L2",
+  "roles": [
+    {
+      "role": "software",
+      "degree": "substantial"
+    }
+  ],
+  "summary": "Implemented early depth gating before key construction, decision-scoped shared striped full-key memoization with nonblocking synchronized access, memory projection and CLI controls; preserved cumulative root-column metrics API while fixing scheduler hit aggregation.",
+  "theoryIds": [
+    "TH-20260905-rust-bitboard-improvements-1c56b072"
+  ],
+  "experimentIds": [
+    "EX-20260905-rust-bitboard-improvements-check-c68c07b7"
+  ],
+  "runIds": [],
+  "artifactPaths": [
+    "approaches/fair-expectimax/rust-engine/src/search.rs",
+    "approaches/fair-expectimax/rust-engine/src/shared_table.rs",
+    "approaches/fair-expectimax/rust-engine/src/parallel.rs",
+    "approaches/fair-expectimax/rust-engine/src/bin/decide.rs",
+    "approaches/fair-expectimax/rust-engine/src/bin/analyze.rs",
+    "approaches/fair-expectimax/rust-engine/src/bin/plan.rs"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "cargo check --all-targets passed before final stripe/accounting correction; coordinator owns final integrated rebuild.",
+    "cargo test --release --lib shared -- --test-threads=1 passed 7 tests before striped mutex correction, including 72 scheduler/cache/gate/worker configurations and concurrent full-key collision tests.",
+    "cargo test --release --lib search::tests -- --test-threads=1 passed 7 tests before restoring existing cumulative root-column hit API; final scheduler-delta tests added for coordinator.",
+    "plan, analyze and decide private/shared gate-2 CLI smoke checks passed before final striped mutex accounting correction; no gameplay cohort or timing runs executed by this agent."
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed.",
+    "Shared table memory is a conservative projection including 128 bytes per stripe for runtime lock allocation; allocator metadata and thread stacks are excluded.",
+    "Final striped mutex implementation, restored cumulative-hit API, and added tests await coordinator validation; no performance claim is made by this contribution."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-09-05T19:24:31Z"
+}

@@ -15,12 +15,13 @@ use crate::engine::{play_move_sampled, MinimalWaveSink, State};
 use crate::rng::{sampled_next_disc, scenario_seed_for_state, StratifiedRandom};
 use crate::search::{
     canonical_state, DepthTable, FairLeaf, Leaf, SearchMetrics, SearchParams, Searcher,
-    COLUMN_ORDER,
+    TranspositionTable, COLUMN_ORDER,
 };
 
+use crate::shared_table::SharedStorage;
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::{Barrier, Mutex};
+use std::sync::{Barrier, Mutex, OnceLock};
 use std::time::Instant;
 
 const SHALLOW_TASKS_PER_WORKER: usize = 32;
@@ -34,10 +35,41 @@ pub enum ParallelScheduler {
     CentralFrontier,
 }
 
+/// Cache ownership within one decision. A shared cache is always discarded
+/// before the next root, parameter set, or leaf configuration is searched.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum TableScope {
+    Private,
+    Shared,
+}
+
+impl TableScope {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Private => "private",
+            Self::Shared => "shared",
+        }
+    }
+}
+
+impl std::str::FromStr for TableScope {
+    type Err = String;
+    fn from_str(value: &str) -> Result<Self, Self::Err> {
+        match value {
+            "private" => Ok(Self::Private),
+            "shared" => Ok(Self::Shared),
+            _ => Err("--tt-scope must be private or shared".into()),
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug)]
 pub struct ParallelConfig {
     pub threads: usize,
+    /// Entries per worker in private mode; total entries in shared mode.
+    /// Rounded up to a power of two; the resource plan reports actual bytes.
     pub table_capacity_per_worker: usize,
+    pub table_scope: TableScope,
     pub table_from_depth: i32,
     /// None chooses the shallowest split with an adaptive queueing cushion:
     /// 32 tasks/worker for shallow continuations and 4 for expensive d5+ work.
@@ -51,6 +83,7 @@ impl Default for ParallelConfig {
         Self {
             threads: std::thread::available_parallelism().map_or(1, |n| n.get()),
             table_capacity_per_worker: 262_144,
+            table_scope: TableScope::Private,
             table_from_depth: 1,
             split_plies: None,
             max_frontier_tasks: DEFAULT_MAX_FRONTIER_TASKS,
@@ -91,7 +124,13 @@ pub struct ParallelMetrics {
     pub leaf_calls: u64,
     pub move_calls: u64,
     pub cache_hits: u64,
+    pub table_scope: TableScope,
+    pub table_from_depth: i32,
+    /// Heap payload owned by each worker; zero when the table is shared.
     pub table_bytes_per_worker: usize,
+    /// Entry payload across all tables; excludes shared stripe/lock overhead.
+    pub table_entry_bytes: usize,
+    /// Private payload, or shared payload + stripes + runtime lock allowance.
     pub projected_table_bytes: usize,
     pub projected_plan_bytes: usize,
     pub initialization_seconds: f64,
@@ -117,7 +156,13 @@ pub struct ParallelResourcePlan {
     pub requested_threads: usize,
     pub split_plies: usize,
     pub worst_case_frontier_tasks: usize,
+    pub table_scope: TableScope,
+    pub table_from_depth: i32,
+    /// Heap payload owned by each worker; zero when the table is shared.
     pub table_bytes_per_worker: usize,
+    /// Entry payload across all tables; excludes shared stripe/lock overhead.
+    pub table_entry_bytes: usize,
+    /// Private payload, or shared payload + stripes + runtime lock allowance.
     pub projected_table_bytes: usize,
     pub projected_plan_bytes: usize,
     pub projected_total_bytes: usize,
@@ -410,7 +455,10 @@ fn reduce_node(
     value
 }
 
-fn checked_table_bytes(config: ParallelConfig, workers: usize) -> Result<(usize, usize), String> {
+fn checked_table_bytes(
+    config: ParallelConfig,
+    workers: usize,
+) -> Result<(usize, usize, usize), String> {
     if config.threads == 0 {
         return Err("--threads must be at least 1".into());
     }
@@ -420,18 +468,38 @@ fn checked_table_bytes(config: ParallelConfig, workers: usize) -> Result<(usize,
     if config.max_frontier_tasks == 0 {
         return Err("--max-frontier-tasks must be at least 1".into());
     }
-    let per_worker = DepthTable::projected_bytes(config.table_capacity_per_worker)
-        .ok_or_else(|| "transposition-table capacity overflows usize".to_string())?;
-    let total = per_worker
-        .checked_mul(workers)
-        .ok_or_else(|| "projected transposition-table memory overflows usize".to_string())?;
+    if config.table_from_depth < 1 {
+        return Err("--tt-from-depth must be at least 1".into());
+    }
+    let (per_worker, entries, total) = match config.table_scope {
+        TableScope::Private => {
+            let per_worker = DepthTable::projected_bytes(config.table_capacity_per_worker)
+                .ok_or_else(|| "transposition-table capacity overflows usize".to_string())?;
+            let total = per_worker.checked_mul(workers).ok_or_else(|| {
+                "projected transposition-table memory overflows usize".to_string()
+            })?;
+            (per_worker, total, total)
+        }
+        TableScope::Shared => {
+            let total = SharedStorage::projected_bytes(config.table_capacity_per_worker)
+                .ok_or_else(|| "shared transposition-table capacity overflows usize".to_string())?;
+            (
+                0,
+                SharedStorage::entry_bytes(config.table_capacity_per_worker)
+                    .ok_or_else(|| "shared entry payload overflows usize".to_string())?,
+                total,
+            )
+        }
+    };
     if total > config.max_host_bytes {
         return Err(format!(
-            "worker tables need {} bytes ({} x {}), above the declared {}-byte host budget",
-            total, workers, per_worker, config.max_host_bytes
+            "{} tables need {} bytes, above the declared {}-byte host budget",
+            config.table_scope.as_str(),
+            total,
+            config.max_host_bytes
         ));
     }
-    Ok((per_worker, total))
+    Ok((per_worker, entries, total))
 }
 
 pub fn recommended_split_plies(
@@ -482,6 +550,9 @@ pub fn plan_parallel_resources(
     params: SearchParams,
     config: ParallelConfig,
 ) -> Result<ParallelResourcePlan, String> {
+    if params.depth < 1 || params.chance_samples < 1 {
+        return Err("depth and chance samples must both be at least 1".into());
+    }
     let split_plies = match config.split_plies {
         Some(split) => split,
         None => recommended_split_plies(
@@ -515,7 +586,8 @@ pub fn plan_parallel_resources(
         ));
     }
     let workers = config.threads.min(tasks).max(1);
-    let (table_bytes_per_worker, projected_table_bytes) = checked_table_bytes(config, workers)?;
+    let (table_bytes_per_worker, table_entry_bytes, projected_table_bytes) =
+        checked_table_bytes(config, workers)?;
     let projected_plan_bytes = tasks
         .checked_mul(1024)
         .ok_or_else(|| "projected plan memory overflows usize".to_string())?;
@@ -532,7 +604,10 @@ pub fn plan_parallel_resources(
         requested_threads: config.threads,
         split_plies,
         worst_case_frontier_tasks: tasks,
+        table_scope: config.table_scope,
+        table_from_depth: config.table_from_depth,
         table_bytes_per_worker,
+        table_entry_bytes,
         projected_table_bytes,
         projected_plan_bytes,
         projected_total_bytes,
@@ -587,6 +662,8 @@ pub fn choose_action_frontier_parallel(
     choose_action_frontier_parallel_with_leaf(source, params, config, FairLeaf::default)
 }
 
+/// `make_leaf` must produce the same deterministic state-to-value function for
+/// every worker. Scratch/counters may differ; evaluator weights must not.
 pub fn choose_action_frontier_parallel_with_leaf<L, F>(
     source: &State,
     params: SearchParams,
@@ -596,6 +673,52 @@ pub fn choose_action_frontier_parallel_with_leaf<L, F>(
 where
     L: Leaf + Send,
     F: Fn() -> L + Sync,
+{
+    // The factory must construct the same deterministic value function for
+    // every worker. Stateful counters/scratch are fine; worker-specific values
+    // would violate cache independence and shared-cache correctness.
+    match config.table_scope {
+        TableScope::Private => choose_action_frontier_parallel_with_leaf_and_table(
+            source,
+            params,
+            config,
+            make_leaf,
+            || DepthTable::new(config.table_capacity_per_worker, config.table_from_depth),
+        ),
+        TableScope::Shared => {
+            let storage = OnceLock::new();
+            choose_action_frontier_parallel_with_leaf_and_table(
+                source,
+                params,
+                config,
+                make_leaf,
+                || {
+                    storage
+                        .get_or_init(|| {
+                            SharedStorage::new(
+                                config.table_capacity_per_worker,
+                                config.table_from_depth,
+                            )
+                        })
+                        .worker()
+                },
+            )
+        }
+    }
+}
+
+fn choose_action_frontier_parallel_with_leaf_and_table<L, F, T, G>(
+    source: &State,
+    params: SearchParams,
+    config: ParallelConfig,
+    make_leaf: F,
+    make_table: G,
+) -> Result<ParallelDecision, String>
+where
+    L: Leaf + Send,
+    F: Fn() -> L + Sync,
+    T: TranspositionTable,
+    G: Fn() -> T + Sync,
 {
     let total_start = Instant::now();
     if source.game_over {
@@ -637,7 +760,7 @@ where
     // the plan is already a constant tree. The single worker below claims no
     // tasks and the reduction proceeds over constants alone.
     let worker_count = config.threads.min(planner.tasks.len()).max(1);
-    let (table_bytes_per_worker, projected_table_bytes) =
+    let (table_bytes_per_worker, table_entry_bytes, projected_table_bytes) =
         checked_table_bytes(config, worker_count)?;
     let projected_plan_bytes = planner.projected_bytes();
     if projected_table_bytes.saturating_add(projected_plan_bytes) > config.max_host_bytes {
@@ -664,12 +787,9 @@ where
             let barrier = &barrier;
             let results = &results;
             let make_leaf = &make_leaf;
+            let make_table = &make_table;
             handles.push(scope.spawn(move || -> Result<WorkerMetrics, String> {
-                let mut searcher = Searcher::new(
-                    params,
-                    make_leaf(),
-                    DepthTable::new(config.table_capacity_per_worker, config.table_from_depth),
-                );
+                let mut searcher = Searcher::new(params, make_leaf(), make_table());
                 searcher.begin_parallel_decision();
                 barrier.wait();
                 let mut summary = WorkerMetrics {
@@ -774,7 +894,10 @@ where
         leaf_calls,
         move_calls,
         cache_hits,
+        table_scope: config.table_scope,
+        table_from_depth: config.table_from_depth,
         table_bytes_per_worker,
+        table_entry_bytes,
         projected_table_bytes,
         projected_plan_bytes,
         initialization_seconds,
@@ -801,6 +924,9 @@ pub fn choose_action_root_parallel(
     choose_action_root_parallel_with_leaf(source, params, config, FairLeaf::default)
 }
 
+/// `make_leaf` must produce the same deterministic state-to-value function for
+/// every worker. Fresh shared storage scopes all cached values to this call's
+/// search parameters and evaluator, including policy seed and terminal utility.
 pub fn choose_action_root_parallel_with_leaf<L, F>(
     source: &State,
     params: SearchParams,
@@ -810,6 +936,52 @@ pub fn choose_action_root_parallel_with_leaf<L, F>(
 where
     L: Leaf + Send,
     F: Fn() -> L + Sync,
+{
+    // The factory must construct the same deterministic value function for
+    // every worker. Stateful counters/scratch are fine; worker-specific values
+    // would violate cache independence and shared-cache correctness.
+    match config.table_scope {
+        TableScope::Private => choose_action_root_parallel_with_leaf_and_table(
+            source,
+            params,
+            config,
+            make_leaf,
+            || DepthTable::new(config.table_capacity_per_worker, config.table_from_depth),
+        ),
+        TableScope::Shared => {
+            let storage = OnceLock::new();
+            choose_action_root_parallel_with_leaf_and_table(
+                source,
+                params,
+                config,
+                make_leaf,
+                || {
+                    storage
+                        .get_or_init(|| {
+                            SharedStorage::new(
+                                config.table_capacity_per_worker,
+                                config.table_from_depth,
+                            )
+                        })
+                        .worker()
+                },
+            )
+        }
+    }
+}
+
+fn choose_action_root_parallel_with_leaf_and_table<L, F, T, G>(
+    source: &State,
+    params: SearchParams,
+    config: ParallelConfig,
+    make_leaf: F,
+    make_table: G,
+) -> Result<ParallelDecision, String>
+where
+    L: Leaf + Send,
+    F: Fn() -> L + Sync,
+    T: TranspositionTable,
+    G: Fn() -> T + Sync,
 {
     let total_start = Instant::now();
     if source.game_over {
@@ -825,7 +997,7 @@ where
         return Err("cannot search a state with no legal columns".into());
     }
     let worker_count = config.threads.min(legal.len()).max(1);
-    let (table_bytes_per_worker, projected_table_bytes) =
+    let (table_bytes_per_worker, table_entry_bytes, projected_table_bytes) =
         checked_table_bytes(config, worker_count)?;
     let init_start = Instant::now();
     let barrier = Barrier::new(worker_count + 1);
@@ -843,12 +1015,9 @@ where
             let canonical = &canonical;
             let barrier = &barrier;
             let make_leaf = &make_leaf;
+            let make_table = &make_table;
             handles.push(scope.spawn(move || -> Result<_, String> {
-                let mut searcher = Searcher::new(
-                    params,
-                    make_leaf(),
-                    DepthTable::new(config.table_capacity_per_worker, config.table_from_depth),
-                );
+                let mut searcher = Searcher::new(params, make_leaf(), make_table());
                 searcher.begin_parallel_decision();
                 barrier.wait();
                 let mut out = Vec::new();
@@ -856,6 +1025,7 @@ where
                     worker,
                     ..WorkerMetrics::default()
                 };
+                let mut previous_hits = 0;
                 for column in lane {
                     let busy_start = Instant::now();
                     let value = searcher
@@ -868,7 +1038,8 @@ where
                     summary.nodes += metrics.nodes;
                     summary.leaf_calls += metrics.leaf_calls;
                     summary.move_calls += metrics.move_calls;
-                    summary.cache_hits += metrics.cache_hits;
+                    summary.cache_hits += metrics.cache_hits.saturating_sub(previous_hits);
+                    previous_hits = metrics.cache_hits;
                     out.push((column, value, metrics));
                 }
                 Ok((out, summary))
@@ -930,7 +1101,10 @@ where
         leaf_calls,
         move_calls,
         cache_hits,
+        table_scope: config.table_scope,
+        table_from_depth: config.table_from_depth,
         table_bytes_per_worker,
+        table_entry_bytes,
         projected_table_bytes,
         projected_plan_bytes: 0,
         initialization_seconds,
@@ -1014,9 +1188,8 @@ mod tests {
         // gauntlet-01 crash position: the rise clock is 2 and every column but
         // one is stacked to the top row, so all continuations terminate inside
         // the split prefix and the planner registers zero frontier tasks.
-        let board =
-            Board::from_serialized("0511020019921001889910388888018888809888889888888")
-                .expect("board");
+        let board = Board::from_serialized("0511020019921001889910388888018888809888889888888")
+            .expect("board");
         let state = State {
             board,
             next_disc: 1,
@@ -1055,5 +1228,186 @@ mod tests {
         )
         .expect_err("oversized tables must fail");
         assert!(error.contains("host budget"));
+    }
+
+    fn constructed_state() -> State {
+        State {
+            board: Board {
+                cols: [0x98, 0x652, 0x79, 0x389, 0x64, 0x8, 0x295],
+            },
+            next_disc: 3,
+            moves_remaining: 2,
+            score: 0,
+            level: 1,
+            moves_played: 0,
+            game_over: false,
+        }
+    }
+
+    fn assert_same_values(actual: &ParallelDecision, expected: &ParallelDecision) {
+        assert_eq!(actual.action, expected.action);
+        assert_eq!(actual.column_values.len(), expected.column_values.len());
+        for ((ac, av), (ec, ev)) in actual.column_values.iter().zip(&expected.column_values) {
+            assert_eq!(ac, ec);
+            assert_eq!(av.to_bits(), ev.to_bits());
+        }
+    }
+
+    #[test]
+    fn shared_private_gates_collisions_and_worker_counts_preserve_value_bits() {
+        let state = constructed_state();
+        let params = params(3, 3);
+        let expected = choose_action_root_parallel(&state, params, config(1, Some(0))).unwrap();
+        // The one-entry arm deliberately forces replacement collisions.
+        for capacity in [1, 1024] {
+            for gate in [1, 2, 3] {
+                for threads in [1, 2, 4] {
+                    for scope in [TableScope::Private, TableScope::Shared] {
+                        let cfg = ParallelConfig {
+                            table_capacity_per_worker: capacity,
+                            table_from_depth: gate,
+                            table_scope: scope,
+                            ..config(threads, Some(0))
+                        };
+                        let root = choose_action_root_parallel(&state, params, cfg).unwrap();
+                        assert_same_values(&root, &expected);
+                        let frontier = choose_action_frontier_parallel(
+                            &state,
+                            params,
+                            ParallelConfig {
+                                split_plies: Some(1),
+                                ..cfg
+                            },
+                        )
+                        .unwrap();
+                        assert_same_values(&frontier, &expected);
+                        assert_eq!(
+                            frontier.metrics.frontier_tasks,
+                            frontier.metrics.completed_tasks
+                        );
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn shared_memory_is_allocated_once_and_checked_before_allocation() {
+        let cfg = ParallelConfig {
+            table_scope: TableScope::Shared,
+            ..config(4, Some(0))
+        };
+        let plan = plan_parallel_resources(params(3, 3), cfg).unwrap();
+        assert_eq!(plan.table_bytes_per_worker, 0);
+        assert_eq!(
+            plan.projected_table_bytes,
+            SharedStorage::projected_bytes(1024).unwrap()
+        );
+        let one =
+            plan_parallel_resources(params(3, 3), ParallelConfig { threads: 1, ..cfg }).unwrap();
+        assert_eq!(plan.projected_table_bytes, one.projected_table_bytes);
+        let actual = choose_action_root_parallel(&constructed_state(), params(2, 1), cfg).unwrap();
+        assert_eq!(
+            actual.metrics.projected_table_bytes,
+            plan.projected_table_bytes
+        );
+        assert_eq!(actual.metrics.table_bytes_per_worker, 0);
+        assert!(choose_action_root_parallel(
+            &constructed_state(),
+            params(2, 1),
+            ParallelConfig {
+                max_host_bytes: plan.projected_table_bytes - 1,
+                ..cfg
+            }
+        )
+        .is_err());
+        assert!(plan_parallel_resources(
+            params(3, 3),
+            ParallelConfig {
+                table_from_depth: 0,
+                ..cfg
+            }
+        )
+        .is_err());
+        assert!(plan_parallel_resources(
+            params(3, 3),
+            ParallelConfig {
+                table_capacity_per_worker: usize::MAX,
+                ..cfg
+            }
+        )
+        .is_err());
+    }
+
+    #[test]
+    fn shared_decision_scope_separates_seed_strata_terminal_and_leaf_configs() {
+        struct ConstantLeaf(f64);
+        impl Leaf for ConstantLeaf {
+            fn value(&mut self, _: &State) -> f64 {
+                self.0
+            }
+        }
+        let state = constructed_state();
+        let cfg = config(4, Some(0));
+        for (strata, seed, terminal, leaf) in [
+            (1, 0xd707_5eed, -1_000_000.0, 17.0),
+            (3, 0xd707_5eed, -1_000_000.0, 17.0),
+            (3, 0x1234_5678, -1_000_000.0, 17.0),
+            (3, 0x1234_5678, -7_777.0, 17.0),
+            (3, 0x1234_5678, -7_777.0, -913.0),
+        ] {
+            let params = SearchParams {
+                policy_seed: seed,
+                terminal_utility: terminal,
+                ..params(3, strata)
+            };
+            let expected =
+                choose_action_root_parallel_with_leaf(&state, params, cfg, || ConstantLeaf(leaf))
+                    .unwrap();
+            let shared = ParallelConfig {
+                table_scope: TableScope::Shared,
+                ..cfg
+            };
+            let actual = choose_action_root_parallel_with_leaf(&state, params, shared, || {
+                ConstantLeaf(leaf)
+            })
+            .unwrap();
+            assert_same_values(&actual, &expected);
+            let frontier = choose_action_frontier_parallel_with_leaf(
+                &state,
+                params,
+                ParallelConfig {
+                    split_plies: Some(1),
+                    ..shared
+                },
+                || ConstantLeaf(leaf),
+            )
+            .unwrap();
+            assert_same_values(&frontier, &expected);
+        }
+    }
+
+    #[test]
+    fn root_scheduler_sums_cumulative_hit_counters_as_deltas() {
+        let state = constructed_state();
+        let params = params(3, 3);
+        let cfg = config(1, Some(0));
+        let canonical = canonical_state(&state).0;
+        let mut searcher = Searcher::new(
+            params,
+            FairLeaf::default(),
+            DepthTable::new(cfg.table_capacity_per_worker, cfg.table_from_depth),
+        );
+        searcher.begin_parallel_decision();
+        let mut final_hits = 0;
+        for &column in &COLUMN_ORDER {
+            searcher
+                .evaluate_root_column(&canonical, column, params.depth)
+                .unwrap();
+            final_hits = searcher.last_metrics().cache_hits;
+        }
+        let decision = choose_action_root_parallel(&state, params, cfg).unwrap();
+        assert_eq!(decision.metrics.cache_hits, final_hits);
+        assert_eq!(decision.metrics.workers[0].cache_hits, final_hits);
     }
 }

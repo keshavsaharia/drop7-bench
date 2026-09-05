@@ -1,0 +1,81 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260905-rust-bitboard-improvements-check-c68c07b7",
+  "theoryIds": [
+    "TH-20260905-rust-bitboard-improvements-1c56b072"
+  ],
+  "title": "Rust exact leaf and cache efficiency checks",
+  "classification": "engineering",
+  "hypothesis": "Exact leaf work avoidance and early cache depth gating improve completed-search latency; shared full-key tables may reduce duplicate worker work within bounded memory.",
+  "candidate": {
+    "name": "rust-bitboard-improvements",
+    "entryPoint": "approaches/fair-expectimax/rust-engine/src/search.rs",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "Rust dev at 7adb6b36412b4bbef25623183dac1a905570cd1a",
+    "entryPoint": "approaches/fair-expectimax/rust-engine/src/search.rs",
+    "manifestRef": null
+  },
+  "informationBoundary": "public-policy",
+  "benchmarkTier": "CHECK",
+  "data": {
+    "role": "no-gameplay",
+    "seedLeaseRefs": [],
+    "datasetRefs": [],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "CHECK only: constructed public boards and existing Rust unit/parity fixture domains 0xa5276000-0xa5277fff already opened by the original engine check. No new gameplay cohort, protected/final data, or strength evaluation."
+  },
+  "metrics": {
+    "primary": "Bit-exact leaf and legal root-column values; descriptive paired wall and process CPU latency on identical constructed public roots",
+    "secondary": [
+      "move/leaf calls, nodes, cache hits",
+      "allocated table bytes, peak process RSS",
+      "five alternating-order repeats; microbenchmark CPU and search time",
+      "private gates 1,2,3; capacities 1024,16384,262144; shared/private tables at equal total entries; 1,2,4 workers"
+    ],
+    "statisticalUnit": "root",
+    "uncertaintyMethod": "Report every repeat, median and min/max of paired ratios. Constructed roots are mechanics diagnostics; no game confidence interval or population claim."
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "Zero f64 value-bit, selected-action, event or trace mismatches on paired completed-depth checks and existing tests. Cache choices may change realized work, and bounded-work fallback parity is claimed only for identical cache configuration.",
+      "Retain exact leaf and early depth-gate changes when the five-repeat median completed-search speed ratio exceeds 1.03; otherwise record negative and retain as optional or revert.",
+      "Shared cache compares full keys under synchronized nonblocking access, has bounded allocation and decision/configuration scope, and never exposes an incomplete value; keep opt-in unless all measured configurations favor it.",
+      "Run Cargo release checks, native/TypeScript parity, research validation and web build/MDX/figure tests; disclose pre-existing missing historical artifacts."
+    ],
+    "failureAction": "Retain negative/partial measurements and reject exact failing configuration; open no cohort.",
+    "passAction": "Publish CHECK engineering result and reviewable PR only; no strength claim or automatic cloud run."
+  },
+  "resources": {
+    "wallSeconds": 14400,
+    "cpuThreads": 4,
+    "maxHostBytes": 4294967296,
+    "maxGpuBytes": null,
+    "gpuDevices": []
+  },
+  "stopConditions": [
+    "Stop on any semantic mismatch and investigate before timing that arm.",
+    "Stop individual benchmark process after 120 seconds; total benchmark budget 1800 seconds; record partial arms without silently changing configuration.",
+    "One benchmark process at a time, no agent builds/tests during timed batches; fixed 1/2/4 worker sweep, no nested pools. Host is an interactive macOS workstation without hard affinity/isolation; report timings as shared-host diagnostics, never exclusive-machine throughput.",
+    "Stop at 4 GiB requested engine memory; no system settings, cloud resources or new game seeds."
+  ],
+  "expectedArtifacts": [
+    "approaches/fair-expectimax/rust-engine/experiments/optimization-check/",
+    "runs/<run-id>/",
+    "artifacts/results/<experiment-id>/<run-id>/",
+    "research/system-profiles/<machine-id>.json"
+  ],
+  "lifecycle": "preregistered",
+  "protocolSha256": "6321f52f7e8d74a1395d7703a10b874ef3a1cbcc3c673f8a8bd9037cbc0cdf4e",
+  "amendments": [],
+  "createdBy": {
+    "platform": "Codex",
+    "model": "gpt-6",
+    "agentId": "root"
+  },
+  "createdAt": "2026-09-05T19:15:31Z",
+  "updatedAt": "2026-09-05T19:15:58Z"
+}

@@ -28,13 +28,13 @@
 // bit-identical to recomputation, so threads change no root value or action.
 // `--scheduler root` retains the earlier coarse-grained implementation as a
 // measured fallback. `--cache` remains one aggregate entry budget, partitioned
-// across private worker tables so increasing the thread count cannot multiply
-// the caller's memory request.
+// across private worker tables, or assigned once to a shared decision table.
+// Increasing the thread count cannot multiply the caller's entry request.
 
 use drop7_rs::board::{Board, BOARD_SIZE};
 use drop7_rs::engine::State;
 use drop7_rs::parallel::{
-    choose_action_frontier_parallel, choose_action_root_parallel, ParallelConfig,
+    choose_action_frontier_parallel, choose_action_root_parallel, ParallelConfig, TableScope,
     DEFAULT_MAX_FRONTIER_TASKS, DEFAULT_MAX_HOST_BYTES,
 };
 use drop7_rs::search::{work_bound_for, SearchParams};
@@ -50,6 +50,8 @@ fn main() {
     let mut cache = 1_048_576usize;
     let mut threads = 0usize; // 0 = all CPUs visible to this process
     let mut scheduler = String::from("frontier");
+    let mut table_scope = TableScope::Private;
+    let mut table_from_depth = 1i32;
     let mut split_plies = None;
     let mut max_frontier_tasks = DEFAULT_MAX_FRONTIER_TASKS;
     let mut max_host_bytes = DEFAULT_MAX_HOST_BYTES;
@@ -57,7 +59,8 @@ fn main() {
     let mut i = 1;
     while i < args.len() {
         if args[i] == "--help" || args[i] == "-h" {
-            eprintln!("usage: decide --board BOARD --next 1-7 --rise 1-5 [--depth N] [--chance-samples N] [--cache N] [--threads N] [--scheduler frontier|root] [--split-plies auto|N] [--max-frontier-tasks N] [--max-host-bytes N]");
+            eprintln!("usage: decide --board BOARD --next 1-7 --rise 1-5 [--depth N] [--chance-samples N] [--cache N] [--tt-scope private|shared] [--tt-from-depth N] [--threads N] [--scheduler frontier|root] [--split-plies auto|N] [--max-frontier-tasks N] [--max-host-bytes N]");
+            eprintln!("--cache is an aggregate entry budget in both scopes; --tt-from-depth defaults to 1.");
             return;
         }
         if i + 1 >= args.len() {
@@ -71,6 +74,12 @@ fn main() {
             "--depth" => depth = args[i + 1].parse().expect("--depth"),
             "--chance-samples" => strata = args[i + 1].parse().expect("--chance-samples"),
             "--cache" => cache = args[i + 1].parse().expect("--cache"),
+            "--tt-scope" => {
+                table_scope = args[i + 1]
+                    .parse()
+                    .expect("--tt-scope must be private or shared")
+            }
+            "--tt-from-depth" => table_from_depth = args[i + 1].parse().expect("--tt-from-depth"),
             "--threads" => threads = args[i + 1].parse().expect("--threads"),
             "--scheduler" => scheduler = args[i + 1].clone(),
             "--split-plies" => {
@@ -140,11 +149,18 @@ fn main() {
     // DepthTable rounds to powers of two. Partition the aggregate cache budget
     // before constructing ParallelConfig so all private worker tables together
     // remain at or below the caller's requested entry count.
-    let worker_count = requested_threads.min(cache);
-    let worker_cache = cache_entries_per_worker(cache, worker_count);
+    let (worker_count, worker_cache) = match table_scope {
+        TableScope::Private => {
+            let workers = requested_threads.min(cache);
+            (workers, cache_entries_per_worker(cache, workers))
+        }
+        TableScope::Shared => (requested_threads, cache_entries_per_worker(cache, 1)),
+    };
     let config = ParallelConfig {
         threads: worker_count,
         table_capacity_per_worker: worker_cache,
+        table_scope,
+        table_from_depth,
         split_plies,
         max_frontier_tasks,
         max_host_bytes,
@@ -171,9 +187,13 @@ fn main() {
     };
     println!("bestmove {}", decision.action);
     let metrics = decision.metrics;
-    let allocated_cache_entries = worker_cache * metrics.worker_threads;
+    let allocated_cache_entries = worker_cache
+        * match table_scope {
+            TableScope::Private => metrics.worker_threads,
+            TableScope::Shared => 1,
+        };
     println!(
-        "info depth {} scheduler {} threads {} tasks {} split {} work {} nodes {} busy {:.4} wall {:.6} cache-entries {} table-bytes {} frozen 1",
+        "info depth {} scheduler {} threads {} tasks {} split {} work {} nodes {} busy {:.4} wall {:.6} cache-entries {} table-bytes {} table-entry-bytes {} tt-scope {} tt-from-depth {} frozen 1",
         depth,
         scheduler,
         metrics.worker_threads,
@@ -185,6 +205,9 @@ fn main() {
         metrics.wall_seconds,
         allocated_cache_entries,
         metrics.projected_table_bytes,
+        metrics.table_entry_bytes,
+        table_scope.as_str(),
+        table_from_depth,
     );
 }
 
