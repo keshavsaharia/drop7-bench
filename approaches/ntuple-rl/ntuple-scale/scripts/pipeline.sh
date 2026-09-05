@@ -81,8 +81,12 @@ case "$stage" in
     done
     ;;
   select-arm)
-    "$PY" "$HERE/analyze.py" --run "$RUN_ID" --root "$ROOT" --select-arm > "$OUT/pilot/selection.json"
-    log "select-arm: $(cat "$OUT/pilot/selection.json")"
+    # Written through a temporary file: the analysis script reads the pilot
+    # directory, and a redirection would create an empty selection.json
+    # before the script runs (this aborted the first chain on 2026-09-05).
+    "$PY" "$HERE/analyze.py" --run "$RUN_ID" --root "$ROOT" --select-arm > "$OUT/pilot/selection.json.tmp"
+    mv "$OUT/pilot/selection.json.tmp" "$OUT/pilot/selection.json"
+    log "select-arm: $(tr -d '\n' < "$OUT/pilot/selection.json" | cut -c1-200)"
     ;;
   main)
     sel="$OUT/pilot/selection.json"

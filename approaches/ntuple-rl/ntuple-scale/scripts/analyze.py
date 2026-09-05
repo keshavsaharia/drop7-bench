@@ -41,6 +41,14 @@ def load_json(path):
         return json.load(handle)
 
 
+def load_json_if_complete(path):
+    """A JSON artifact, or None when the file is absent or still empty (a
+    shell redirection creates the target before its producer writes)."""
+    if not os.path.exists(path) or os.path.getsize(path) == 0:
+        return None
+    return load_json(path)
+
+
 def load_jsonl(path):
     rows = []
     with open(path, encoding="utf-8") as handle:
@@ -118,7 +126,7 @@ def training_summary(directory):
     progress_path = os.path.join(directory, "progress.jsonl")
     if not os.path.exists(progress_path):
         return None
-    config = load_json(os.path.join(directory, "config.json")) if os.path.exists(os.path.join(directory, "config.json")) else None
+    config = load_json_if_complete(os.path.join(directory, "config.json"))
     rows = load_jsonl(progress_path)
     curve = []
     for row in rows:
@@ -156,7 +164,7 @@ def training_summary(directory):
         validations.append(entry)
     illegal = sum(sum(i["illegalDecisions"] for i in load_json(p)["individuals"]) for p in glob.glob(os.path.join(directory, "val-*.json")))
     incomplete = sum(sum(i["incompleteDecisions"] for i in load_json(p)["individuals"]) for p in glob.glob(os.path.join(directory, "val-*.json")))
-    best = load_json(os.path.join(directory, "best.json")) if os.path.exists(os.path.join(directory, "best.json")) else None
+    best = load_json_if_complete(os.path.join(directory, "best.json"))
     return {
         "config": config,
         "chunks": len(rows),
@@ -188,7 +196,7 @@ def pilot_summary(out):
     selection_path = os.path.join(out, "pilot", "selection.json")
     return {
         "arms": arms,
-        "selection": load_json(selection_path) if os.path.exists(selection_path) else None,
+        "selection": load_json_if_complete(selection_path),
         "rule": "the arm whose final validation point has the largest paired mean margin of ntuple-d3s7 over fair-d3s7; ties by fewer table entries",
     }
 
