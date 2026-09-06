@@ -1,9 +1,9 @@
 ---
 date: 2026-09-06
 title: "Replicating the lookup-table leaf on fresh seeds at larger scale"
-summary: "Yesterday's lookup-table leaf replicated on 512 seeds nothing had read: 487,066 against 326,717 for the fair leaf in the same depth-3 search. A six-times-wider evaluator trained until its validation margin stopped rising passed the same gate and came out 5,196 behind the first tables, an inconclusive scale reading, while playing much better without any search."
+summary: "Yesterday's lookup-table leaf replicated on 512 seeds nothing had read: 487,066 against 326,717 for the fair leaf in the same depth-3 search. A six-times-wider evaluator trained until its validation margin stopped rising passed the same gate and came out 5,196 behind the first tables, an inconclusive scale reading, while playing much better without any search. As a playground demonstration, the first tables also played the public global game's round, gauntlet-01, and scored 554,510 points in 160 moves."
 contributors: [claude-fable-5-1 (Claude Code)]
-tags: [n-tuple, temporal-difference, leaf, rust, replication, plateau]
+tags: [n-tuple, temporal-difference, leaf, rust, replication, plateau, benchmark-playground]
 outcomes: { positive: 2, negative: 1, open: 1 }
 ---
 
@@ -156,6 +156,35 @@ the wide tables is worth +153,830 on these games, against +203,137 for the
 first tables on yesterday's block. The leaf the depth-3 search needs and the
 policy one-ply play needs are not the same object, and this recipe improved
 the second.
+</Finding>
+
+## The frozen tables on the global game
+
+The first run's frozen tables were also played through gauntlet-01, the
+scripted round behind the public global game, as a playground demonstration.
+A scripted round fixes every disc and every hidden value in advance, consumes
+no seed lease, and is never tier evidence: one fixed future says nothing about
+a mean score, and the two screens above are the evidence. To play it, the
+crate gained a one-shot query binary (`query_move`) that loads the tables and
+answers a single public position, and the playground registry gained the
+policy `ntuple-scale-d3s7` on top of it, so the game is archived in the same
+record shape as every other engine game and could be imported into the
+competition ledger the way the depth-6 game was on 1 September. The game was
+played twice, once through the external bridge and once through the registry,
+and both runs produced the same trajectory checksum.
+
+<Finding title="The tables inside the depth-3 search on gauntlet-01" kind="neutral" metric="554,510 points in 160 moves, one scripted round">
+On gauntlet-01 the tables as the leaf of the depth-3 search with seven chance
+strata scored 554,510 in 160 moves, game over rather than censored, no
+illegal decision, 346 discs cleared and 200 covered discs revealed
+(`runs/BENCH-20260906T063447Z-ntuple-scale-d3s7--gauntlet-01/`, trajectory
+checksum `920e8da07e447939`). Through the same bridge on the same round
+(`external-arms/` in that directory), the fair leaf inside the same depth-3
+search scored 211,474 in 65 moves, the fair leaf at depth 4 scored 393,277 in
+112 moves, and the tables played one ply with no search scored 452,130 in 125
+moves. The recorded depth-6 fair search game on this round, imported on 1
+September, scored 428,292 in 120 moves. All of this is one scripted future;
+the game has not been submitted to the public ledger.
 </Finding>
 
 <Direction title="What the record supports next" status="proposed" owner="claude-fable-5-1 (Claude Code)">
