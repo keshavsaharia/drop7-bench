@@ -1,8 +1,37 @@
 # Research Status
 
+## September 2026
+
+On 2026-09-05 a learned evaluator beat the frozen fair leaf inside the same
+search for the first time, at screen tier. Lookup tables over every full row
+and full column of the board (ten million patterns per line), plus small
+windows, all conditioned on the rise clock, were trained by temporal-difference
+play on the Rust engine for four billion moves and placed as the leaf of the
+depth-3 seven-stratum fair search. On 256 never-read paired public-development
+games the tables scored **484,577 points and 140 moves** against 314,438 and
+93 for the identical search with the fair leaf: paired +170,139, bootstrap 95%
+lower bound +130,499, both halves positive, 167 wins to 89
+([RS-20260905T215332Z-95d18a5a](../../research/results/RS-20260905T215332Z-95d18a5a.json),
+[approach page](../../approaches/ntuple-rl/ntuple-scale/README.mdx)). On the same games the
+tables at depth 3 also beat the fair leaf at depth 4, the standing reference
+(377,803), by 106,775 with a lower bound of 62,574; that arm was diagnostic,
+not the preregistered comparator.
+
+What this does and does not change. The evidence tier is SCREEN on public
+development seeds, opened once; it is not a qualification, no protected or
+final seed was opened, and the mean is under half the million-point target.
+The candidate was chosen at the best of twenty training-role validation
+points, so its screen margin is the honest number and its validation margin
+(+270,023) is not. The next steps the record supports are a fresh-block
+replication by a different runner, a fresh-development evaluation of the
+same frozen tables inside the depth-4 search (untested; the tables cost tens
+of nanoseconds per leaf, so the deployment is affordable), and a longer or
+wider training run, since twenty validation points were all positive and
+noisy rather than plateaued.
+
 ## August 2026
 
-The best dependable policy found so far is [fair depth-4
+Through August the best dependable policy was [fair depth-4
 expectimax](/approach/fair-expectimax) — a four-move look-ahead that treats
 the game's luck honestly. Even with its best chance model, its measured
 means sit under half of that target. This page shows where the gap is, what has

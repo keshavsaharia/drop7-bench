@@ -1,0 +1,25 @@
+{
+  "$schema": "../schemas/seed-lease-v1.schema.json",
+  "format": "drop7-seed-lease-v1",
+  "seedLeaseId": "SL-20260905T191317Z-549265de",
+  "experimentId": "EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620",
+  "rngAlgorithm": "mulberry32 with mix32 domain separation (src/core/native/engine.hpp); headless disc stream kNextDiscDomain, reveal stream kRevealDomain; Rust bitboard engine bit-identical (RS-20260824T075451Z-e89ea128)",
+  "domain": "environment",
+  "role": "training",
+  "rangeStartHex": "0xa52f2240",
+  "rangeEndExclusiveHex": "0xa52f2280",
+  "cohortManifestSha256": null,
+  "state": "opened",
+  "reservedAt": "2026-09-05T19:25:02Z",
+  "openedAt": "2026-09-05T19:30:06Z",
+  "closedAt": null,
+  "protocolSha256": "ee8eabb0512f459bb0acbb717e335d5e6953d2ac7ec57400f2a35b9f1c76b65d",
+  "runIds": [
+    "RUN-20260905T193006Z-4fbeb4e5"
+  ],
+  "notes": [
+    "Conservative import 2026-09-05: every 8-hex-digit constant under docs/, approaches/, src/, research/, artifacts/, web/content/ and scripts/ was enumerated (grep -rhoE '0x[0-9a-fA-F]{8}'); the only constants with prefix 0xa53 or 0xa54 are the allocator-pool boundary 0xa5300000 quoted in a lease note and the hash constant 0xa54ff53a (a SHA-256 initial value in several C++ sources, not a seed); the pool 0xa52c0000-0xa5300000 is used up to 0xa52f2140 exclusive (SL-20260903T190000Z-a52f2100). No range below overlaps an existing lease record or a protected (0x7d) or final (0xd7) prefix.",
+    "Validation block, 64 seeds, training role: the paired training-curve line-up (tables inside d3s7, tables played one ply, frozen fair leaf inside d3s7) is replayed on these 64 games at every validation point of the pilot arms and the main run, and the pilot's configuration selection and the main run's checkpoint selection read them. Re-read many times by design; never confirmation evidence.",
+    "Opened 2026-09-05T19:30:06Z by run RUN-20260905T193006Z-4fbeb4e5 for the paired validation line-up at every validation point."
+  ]
+}
