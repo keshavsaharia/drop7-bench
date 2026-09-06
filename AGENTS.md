@@ -31,6 +31,17 @@ drive a policy over the D7P wire protocol, or generate scripted rounds, read
 leaderboard number: scripted rounds are a playground and are never tier
 evidence.
 
+To upload a generated corpus, checkpoint, trace, replay bundle, per-game table,
+or other large run artifact, read
+`.agents/skills/drop7-artifact-publishing/SKILL.md` before publishing it.
+
+To publish an existing policy result to the AWS competition ledger, read
+`.agents/skills/drop7-competition-publishing/SKILL.md` after the benchmark
+playground skill. Direct DynamoDB writes are never the publishing workflow.
+
+To inspect website analytics or validated mobile-game history through AWS
+Athena, read `.agents/skills/drop7-athena-analytics/SKILL.md` before querying.
+
 To prepare, configure, launch, or scale a large training or simulation run
 (a multi-GPU machine, SLURM, Kubernetes, Ray, or a cloud pool), read
 `.agents/skills/drop7-scale-out/SKILL.md`. It sequences the work into gated
@@ -133,6 +144,32 @@ proves it can rank all legal siblings on disjoint whole-origin data.
   Frozen protocols and promoted results are immutable.
 - Expensive timing runs need an exclusive or explicitly isolated resource
   lease. Avoid nested CPU, OpenMP, BLAS, and GPU oversubscription.
+
+## Remote research artifacts
+
+- Keep compact source, protocols, manifests, summaries, hashes, and evidence
+  records in Git. Put generated corpora, checkpoints, per-game rows, replay
+  bundles, detailed traces, and any other artifact over 10 MiB in
+  `s3://drop7-bench-data/` instead of version control.
+- Use immutable run-scoped keys under `runs/<run-id>/...`; never overwrite an
+  existing key. Record the SHA-256 digest and the public HTTPS reference
+  `https://data.drop7.dev/runs/<run-id>/...#sha256=<digest>` in the run,
+  result, dataset, or contribution record. Upload and verify the object before
+  finalizing the record that cites it. Use
+  `npm run artifact:publish -- --run-id <run-id> --file <path> --public` for
+  the normal hash/upload/verification flow.
+- `drop7-bench-data` is publicly readable. Never upload credentials, secrets,
+  protected or final seed material, sealed cohort identities, privileged
+  hidden-state data, or anything else that has not been explicitly classified
+  for public release.
+- The `drop7-research` machine identity may upload artifacts and use the
+  repository competition CLI, and may run read-only queries through the
+  repository Athena helper. It must never write the DynamoDB competition ledger
+  directly: use `npm run competition -- seed ... --write`, which independently
+  replays the game and conditionally inserts the immutable policy-score record.
+  Scripted-round scores remain playground evidence. Athena source data and raw
+  game tapes are private; do not publish them to the public artifact bucket
+  without an explicit release classification.
 
 ## Attribution and commits
 
