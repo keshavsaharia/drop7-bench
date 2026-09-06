@@ -113,8 +113,37 @@ export interface PilotStage {
   rule: string;
 }
 
-/** The screen with the replication's two extra readings on top of the shared shape. */
+/** One paired reading copied from analyze.py (a contrast or the interaction series). */
+export interface DepthReading {
+  meanDelta: number;
+  bootstrapLower95: number;
+  bootstrapUpper95: number;
+  studentTLower95: number;
+  detectionFloor: number;
+  wtl: [number, number, number];
+  halves: [number, number];
+}
+
+/** The depth-4 experiment's readings: the frozen tables one ply deeper. */
+export interface DepthStage {
+  /** The contrast the preregistered gate reads (prior-d4s7-vs-prior-d3s7). */
+  primary: string;
+  /** The fourth ply's paired gain on the tables (the gate contrast). */
+  tablesStep: DepthReading;
+  /** The fourth ply's paired gain on the fair leaf on the same seeds. */
+  fairStep: DepthReading | null;
+  /** prior-d4s7 against fair-d4s7 under the same four criteria as the gate. */
+  persistence: { checks: GateCheck[]; allPassed: boolean } | null;
+  /** Per game, (tables d4 minus tables d3) minus (fair d4 minus fair d3): the preregistered verdict. */
+  interaction: DepthReading & { verdict: "larger" | "smaller" | "inconclusive" };
+}
+
+/** The screen with the replication's two extra readings, and the depth experiment's, on top of the shared shape. */
 export interface NTupleScreenStage extends ScreenStage {
+  /** Which paired contrast the gate reads; candidate-d3s7-vs-fair-d3s7 for the first two experiments. */
+  primaryContrast: string;
+  /** The depth-4 experiment's readings, null for the training experiments. */
+  depth: DepthStage | null;
   /** The first experiment's frozen tables against the fair leaf on this fresh block. */
   replication: { checks: GateCheck[]; allPassed: boolean } | null;
   /** The wider candidate against the first candidate: the preregistered verdict. */
