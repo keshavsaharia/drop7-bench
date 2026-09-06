@@ -9,14 +9,17 @@
   "rangeStartHex": "0xa52f2280",
   "rangeEndExclusiveHex": "0xa52f2380",
   "cohortManifestSha256": null,
-  "state": "reserved",
+  "state": "opened",
   "reservedAt": "2026-09-06T01:32:22Z",
-  "openedAt": null,
+  "openedAt": "2026-09-06T01:44:14Z",
   "closedAt": null,
   "protocolSha256": "0284abf064ef24fe47ae1ee1b3a7d63245b9f470bdcdcbf00976576bb1d67df8",
-  "runIds": [],
+  "runIds": [
+    "RUN-20260906T013222Z-ba0ee34f"
+  ],
   "notes": [
     "Conservative import 2026-09-06: every 8-hex-digit constant under docs/, approaches/, src/, research/, artifacts/, web/content/ and scripts/ was enumerated (grep -rhoE '0x[0-9a-fA-F]{8}'); no constant has prefix 0xa55 or 0xa56, and the only constant in 0xa52f2280-0xa52f2580 is 0xa52f2280 itself, which is the exclusive end boundary of the first experiment's validation lease SL-20260905T191317Z-549265de and is never read there. The pool 0xa52c0000-0xa5300000 (the ./do-research allocator's) is used up to 0xa52f2280 exclusive by earlier leases; the ranges below start there and overlap no existing lease record and no protected (0x7d) or final (0xd7) prefix. The first experiment's blocks (training 0xa5300000-0xa54f0000, validation 0xa52f2240-0xa52f2280, screen 0xa52f2140-0xa52f2240) are disjoint from all three.",
-    "256-game paired validation block, training role: re-read at every validation point of the main run by the line-up ntuple-d3s7 / ntuple-1ply / fair-d3s7 on identical seeds; drives the plateau stop rule and the choice of the candidate checkpoint, and therefore cannot confirm anything. Four times the size of the first experiment's validation block so that the plateau rule reads a margin whose standard error is about half as large."
+    "256-game paired validation block, training role: re-read at every validation point of the main run by the line-up ntuple-d3s7 / ntuple-1ply / fair-d3s7 on identical seeds; drives the plateau stop rule and the choice of the candidate checkpoint, and therefore cannot confirm anything. Four times the size of the first experiment's validation block so that the plateau rule reads a margin whose standard error is about half as large.",
+    "Opened 2026-09-06T01:44:14Z by run RUN-20260906T013222Z-ba0ee34f for the main run's validation line-up (the fair-d3s7 control is played at process start and the tables are validated every 5e8 moves)."
   ]
 }

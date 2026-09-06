@@ -1,0 +1,55 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260906T013222Z-ba0ee34f",
+  "experimentId": "EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a",
+  "lifecycle": "running",
+  "runValidity": "partial",
+  "startedAt": "2026-09-06T01:34:00Z",
+  "endedAt": null,
+  "protocolSha256": "0284abf064ef24fe47ae1ee1b3a7d63245b9f470bdcdcbf00976576bb1d67df8",
+  "machineProfileRef": "research/system-profiles/MACH-20260906T014136Z-58c2ebe0.json",
+  "sourceState": {
+    "gitCommit": "16e7c992c34e4c36b5b3fb19dead2582cb16c8e0",
+    "dirty": false,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "approaches/ntuple-rl/ntuple-scale/build.sh (branch claude/n-tuple-scale-replication)",
+    "cargo test --release (11 unit tests)",
+    "RUN_ID=RUN-20260906T013222Z-ba0ee34f EXPERIMENT_ID=EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a SCREEN_LEASE=research/seeds/leases/SL-20260906T013222Z-f34b23c0.json THREADS=32 approaches/ntuple-rl/ntuple-scale/scripts/pipeline2.sh gates; then smoke (2026-09-06T01:34:00Z-01:39:19Z, before the protocol was frozen; both read only the already-open probe block 0xa5277000)",
+    "RUN_ID=RUN-20260906T013222Z-ba0ee34f EXPERIMENT_ID=EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a SCREEN_LEASE=research/seeds/leases/SL-20260906T013222Z-f34b23c0.json THREADS=32 approaches/ntuple-rl/ntuple-scale/scripts/pipeline2.sh chain (main -> freeze -> screen -> compare -> analyze), launched with nohup after the protocol freeze; stdout/stderr in runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/chain.nohup"
+  ],
+  "seedLeaseRefs": [
+    "SL-20260906T013222Z-ce319097",
+    "SL-20260906T013222Z-6cce6192",
+    "SL-20260906T013222Z-f34b23c0"
+  ],
+  "resourceLimits": {
+    "wallSeconds": 57600,
+    "cpuThreads": 32,
+    "maxHostBytes": 103079215104,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": null,
+    "cpuSeconds": null,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "Gates 01:34:00Z: the first gate invocation ended in a panic (exit 101, rusage row retained) because the information-boundary gate values terminal states whose rise phase is 0 and the wide layout's 64-bit index then left the table; the phase is now clamped in features() (commit 16e7c99) and the second invocation passed all 19 gates (9.8 s wall, 23.6 GB peak RSS from the frozen wide tables). Smoke run 01:38:37Z-01:39:19Z: 4.0e7 moves, 42.5 s wall, 970 CPU-s, peak RSS 42.7 GB, 1.27e6 moves/s steady. Main run and screen: to be filled from rusage.jsonl at completion."
+  },
+  "exitCode": null,
+  "stopReason": null,
+  "artifactRefs": [
+    "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/gates.log",
+    "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/smoke/{config.json,progress.jsonl,DONE}",
+    "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/main/{config.json,progress.jsonl,val-*.json,best.json,stop.json,candidate-weights.sha256,prior-weights.sha256,best-weights.bin,latest-weights.bin,checkpoint.bin,DONE}",
+    "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/screen/heldout.json",
+    "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/screen/compare-*.json",
+    "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/{analysis.json,analysis.md,rusage.jsonl,pipeline.log,prep.nohup,chain.nohup}"
+  ],
+  "contributionIds": [
+    "CT-20260906T014308Z-21df88ae"
+  ]
+}
