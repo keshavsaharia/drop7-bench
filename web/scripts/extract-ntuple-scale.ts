@@ -67,6 +67,7 @@ const experiment = experimentId ? readJson<{ theoryIds?: string[] }>(join(root, 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function trainingRun(name: string, summary: any, dir: string): TrainingRun {
   sources.push(relative(root, join(dir, "progress.jsonl")));
+  if (summary.config) sources.push(relative(root, join(dir, "config.json")));
   const chunks: ChunkRow[] = (summary.curve ?? []).map((c: Record<string, unknown>) => ({
     chunk: c.chunk as number,
     movesTotal: c.movesTotal as number,
@@ -111,14 +112,18 @@ function trainingRun(name: string, summary: any, dir: string): TrainingRun {
       pairedDeltaDirect: one ? one.meanDelta : null,
       touchedEntries: touchedByMoves.get(v.movesTrained) ?? null,
       isBest: bestMoves !== null && v.movesTrained === bestMoves,
+      plateau: v.plateau
+        ? { points: v.plateau.points, window: v.plateau.window, recentMean: v.plateau.recentMean, previousMean: v.plateau.previousMean, stop: Boolean(v.plateau.stop) }
+        : null,
     };
   });
-  return {
+  const run: TrainingRun = {
     name,
     layout: summary.config?.layout ?? summary.layout ?? "",
     alpha: summary.config?.alpha ?? summary.alpha ?? 0,
     entries: summary.config?.entries ?? 0,
     activePerState: summary.config?.activePerState ?? 0,
+    validateGames: summary.validateGames ?? summary.config?.validateGames ?? 64,
     movesTotal: summary.movesTotal,
     gamesTotal: summary.gamesTotal,
     wallSeconds: summary.wallSeconds,
@@ -132,7 +137,20 @@ function trainingRun(name: string, summary: any, dir: string): TrainingRun {
     anyPositiveMargin: Boolean(summary.anyPositiveMargin),
     illegalDecisions: summary.artifactIntegrity?.illegalDecisions ?? 0,
     incompleteDecisions: summary.artifactIntegrity?.incompleteDecisions ?? 0,
+    stop: summary.stop
+      ? {
+          reason: summary.stop.reason,
+          movesTotal: summary.stop.movesTotal,
+          validationPoints: summary.stop.validationPoints,
+          plateauWindow: summary.stop.plateauWindow,
+          recentWindowMean: summary.stop.recentWindowMean ?? null,
+          previousWindowMean: summary.stop.previousWindowMean ?? null,
+          bestMargin: summary.stop.bestMargin ?? null,
+        }
+      : null,
   };
+  if (summary.stop) sources.push(relative(root, join(dir, "stop.json")));
+  return run;
 }
 
 /* ---- gates ------------------------------------------------------------- */
@@ -150,6 +168,9 @@ if (analysis.pilot) {
   pilot = { arms, selection: analysis.pilot.selection ?? null, rule: analysis.pilot.rule };
 }
 
+/* ---- smoke ------------------------------------------------------------- */
+const smoke: NTupleSnapshot["smoke"] = analysis.smoke ? trainingRun("smoke", analysis.smoke, join(runDir, "smoke")) : null;
+
 /* ---- main -------------------------------------------------------------- */
 const main: NTupleSnapshot["main"] = analysis.main ? trainingRun("main", analysis.main, join(runDir, "main")) : null;
 
@@ -159,6 +180,11 @@ const hashPath = join(runDir, "main", "candidate-weights.sha256");
 if (existsSync(hashPath)) {
   sources.push(relative(root, hashPath));
   freeze = { candidateSha256: readFileSync(hashPath, "utf8").split(/\s+/)[0] || null };
+  const priorPath = join(runDir, "main", "prior-weights.sha256");
+  if (existsSync(priorPath)) {
+    sources.push(relative(root, priorPath));
+    freeze.priorSha256 = readFileSync(priorPath, "utf8").split(/\s+/)[0] || null;
+  }
 }
 
 /* ---- screen ------------------------------------------------------------ */
@@ -214,6 +240,7 @@ if (analysis.screen) {
     if (existsSync(report)) sources.push(relative(root, report));
   }
   const primary = paired["candidate-d3s7-vs-fair-d3s7"];
+  const scale = analysis.screen.scale;
   screen = {
     config: analysis.screen.config,
     seedStartHex: analysis.screen.seedStartHex,
@@ -221,6 +248,10 @@ if (analysis.screen) {
     paired,
     gate: analysis.screen.gate && primary
       ? { checks: analysis.screen.gate.checks, allPassed: analysis.screen.gate.passed, meanDelta: primary.meanDelta, pairedSd: primary.pairedSd, detectionFloor: primary.detectionFloor, wtl: primary.wtl }
+      : null,
+    replication: analysis.screen.replication ? { checks: analysis.screen.replication.checks, allPassed: analysis.screen.replication.passed } : null,
+    scale: scale
+      ? { verdict: scale.verdict, meanDelta: scale.meanDelta, bootstrapLower95: scale.bootstrapLower95, bootstrapUpper95: scale.bootstrapUpper95, studentTLower95: scale.studentTLower95, detectionFloor: scale.detectionFloor, wtl: [scale.wins, scale.ties, scale.losses] }
       : null,
   };
 }
@@ -235,6 +266,7 @@ const snapshot: NTupleSnapshot = {
   sources: [...new Set(sources)],
   derived,
   gates,
+  smoke,
   pilot,
   main,
   freeze,
@@ -247,5 +279,5 @@ mkdirSync(outDir, { recursive: true });
 const outPath = join(outDir, `${runId}.json`);
 writeFileSync(outPath, `${JSON.stringify(snapshot, null, 2)}\n`);
 console.log(
-  `wrote ${relative(root, outPath)}: gates ${gates ? (gates.passed ? "passed" : "failed") : "absent"}, pilot ${pilot ? `${Object.keys(pilot.arms).length} arms` : "absent"}, main ${main ? `${main.movesTotal} moves, ${main.validations.length} validation points` : "absent"}, freeze ${freeze ? "present" : "absent"}, screen ${screen ? "present" : "absent"}`,
+  `wrote ${relative(root, outPath)}: gates ${gates ? (gates.passed ? "passed" : "failed") : "absent"}, smoke ${smoke ? `${smoke.movesTotal} moves` : "absent"}, pilot ${pilot ? `${Object.keys(pilot.arms).length} arms` : "absent"}, main ${main ? `${main.movesTotal} moves, ${main.validations.length} validation points` : "absent"}, freeze ${freeze ? "present" : "absent"}, screen ${screen ? "present" : "absent"}`,
 );

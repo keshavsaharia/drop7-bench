@@ -122,6 +122,67 @@ About 99 million of the billion table entries had been updated at that point.
 
 <NTupleGateTable run="RUN-20260905T193006Z-4fbeb4e5" />
 
+### The replication at larger scale
+
+The first run left two questions open: whether the margin holds on seeds
+nothing has ever read, and whether more scale helps. A second experiment,
+[EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a](/experiments/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a),
+asks both on the same screen. It trains a wider evaluator from scratch on a
+fresh training block: the same rows, columns and small windows as before,
+plus 2-by-4 and 4-by-2 windows with a hundred million patterns each, 5.8
+billion table entries in all. There is no fixed move budget. Every five
+hundred million moves the tables are dropped into the depth-3 search and
+played on a fresh block of 256 training-role games against the fair leaf,
+and training stops once the mean margin of the last four validation points
+is no longer above the mean of the four before them. The frozen candidate
+then plays 512 held-out games beside the first run's frozen tables on the
+identical seeds, so one screen reads the replication of the first result
+and the effect of the extra scale at the same time.
+
+<NTupleStatus run="RUN-20260906T013222Z-ba0ee34f" />
+
+The result came in two parts. On the 512 fresh games, the first run's frozen
+tables, unchanged, scored 487,066 as the depth-3 leaf against 326,717 for the
+fair leaf in the same search: a paired margin of 160,349 with a bootstrap 95%
+lower bound of 129,753, both halves positive, 330 wins to 182 and a higher
+lower quartile
+([RS-20260906T040113Z-6ba93171](/results/RS-20260906T040113Z-6ba93171), run
+valid, outcome pass, screen tier on public development seeds). The first
+result replicates on seeds nothing had read, within a few thousand points of
+its own screen.
+
+The wider tables passed the same gate on the same games, 481,869 against
+326,717, a margin of 155,153 with a lower bound of 126,819. Against the first
+run's tables they came out 5,196 behind, with bootstrap bounds from minus
+40,535 to plus 29,158 and 267 wins to 244, so the preregistered scale verdict
+is inconclusive. Six times the entries, and a run that stopped on its own,
+bought nothing this screen could see. Both sets of tables beat the fair leaf
+at depth 4 on these games by more than 84,000.
+
+One thing did move with scale. Played directly, one move ahead and with no
+search at all, the wide tables averaged 328,039, level with the fair leaf's
+depth-3 search (a margin of 1,323 with bounds either side of zero), where the
+first run's tables lost to that search by 32,394 on the same games. The extra
+windows made a better one-ply player and the same leaf.
+
+<NTupleTrainingFigure run="RUN-20260906T013222Z-ba0ee34f" caption="Stage B of the replication. The wide layout trained from scratch on the fresh training block. The solid line is the tables as the leaf of the depth-3 search on the 256 fresh validation games; the dashed line is the frozen fair leaf in the same search on the same games; the thin lines are the tables played directly and the training games themselves. The plateau rule reads the solid line's margin over the dashed one from the eighth point on." />
+
+The main run stopped itself at the ninth validation point, 4.5 billion
+moves, when the last four margins averaged 165,666 against 173,783 for the
+four before them. The candidate is the fourth point, 2 billion moves, where
+the margin on the 256 fresh validation games was 187,500. All nine points
+beat the fair leaf; the curve rose for the first two billion moves and then
+wandered between 142,000 and 188,000. About 231 million of the 5.8 billion
+entries had been updated at the candidate's point.
+
+<NTupleScreenFigure run="RUN-20260906T013222Z-ba0ee34f" caption="Stage D of the replication, the primary contrast. One bar per held-out game: the wide candidate as the depth-3 leaf minus the frozen fair leaf in the same search on the same seed, in seed order, 512 games." />
+
+<NTupleScreenFigure run="RUN-20260906T013222Z-ba0ee34f" contrast="prior-d3s7-vs-fair-d3s7" caption="The replication reading. The first run's frozen tables, unchanged, as the depth-3 leaf minus the fair leaf in the same search, on the same 512 fresh games." />
+
+<NTupleScreenFigure run="RUN-20260906T013222Z-ba0ee34f" contrast="candidate-d3s7-vs-prior-d3s7" caption="The scale reading. The wide candidate minus the first run's tables, both as the depth-3 leaf, on the same 512 games." />
+
+<NTupleGateTable run="RUN-20260906T013222Z-ba0ee34f" />
+
 ## What we learned
 
 The evaluator was the bottleneck, and a lookup table can be a better one than
@@ -133,13 +194,23 @@ the engine's own returns at a scale of billions of moves, and then placed
 inside the fair chance-averaging search, which turned a one-ply policy that
 trails the fair leaf into a leaf that beats the depth-4 reference.
 
-The result is a screen-tier finding on 256 public development games. It is
-not a qualification, and a mean near 485,000 is still less than half the
-million-point target. The candidate also won on the training-role block by
-more than it won on the screen, which is the selection bias the screen
-exists to measure. The open question is how far the same tables carry when
-the search around them goes one ply deeper, and whether a fresh block played
-by a different runner reproduces the margin.
+The result is a screen-tier finding, now on two blocks of public development
+games, 256 and then 512, with the same frozen tables ahead of the fair leaf
+by 170,139 and then 160,349. It is not a qualification, and a mean near
+485,000 is still less than half the million-point target. Both candidates
+won on their training-role validation blocks by more than they won on the
+screens, which is the selection bias the screens exist to measure.
+
+The replication also drew a line under scale, at least in this direction.
+Six times the entries, trained until a 256-game validation curve stopped
+rising, produced a leaf the 512-game screen could not tell apart from the
+first one, while the same tables played without any search improved by
+about 34,000 on the same games. The value function got better at the thing
+the search does for it and no better at the thing the search needs from it.
+The open question is what the depth-3 search is failing to extract from a
+leaf that already plays as well as the search does on its own: whether the
+same tables one ply deeper keep their margin, and whether a leaf tuned for
+the search's use, rather than for one-ply play, is the next lever.
 
 <AgentContext summary="Records and provenance">
 
@@ -150,6 +221,26 @@ experiment
 (frozen protocol SHA-256 `ee8eabb0512f459bb0acbb717e335d5e6953d2ac7ec57400f2a35b9f1c76b65d`),
 run `RUN-20260905T193006Z-4fbeb4e5`, machine profile
 `MACH-20260905T192901Z-83559f62`, contribution `CT-20260905T192505Z-c487efca`.
+
+Replication at larger scale: experiment
+[EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a](/experiments/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a)
+(frozen protocol SHA-256 `0284abf064ef24fe47ae1ee1b3a7d63245b9f470bdcdcbf00976576bb1d67df8`),
+run `RUN-20260906T013222Z-ba0ee34f` on branch
+`claude/n-tuple-scale-replication`, machine profile
+`MACH-20260906T014136Z-58c2ebe0`, contribution `CT-20260906T014308Z-21df88ae`.
+Its seed leases: training `SL-20260906T013222Z-ce319097` (`0xa5500000` to
+`0xa56f0000`, read in order and wrapped), validation
+`SL-20260906T013222Z-6cce6192` (`0xa52f2280`, 256 games, training role,
+re-read at every validation point), screen `SL-20260906T013222Z-f34b23c0`
+(`0xa52f2380`, 512 games, public development, opened once). All three are
+disjoint from every block the first experiment read. Stage driver
+`approaches/ntuple-rl/ntuple-scale/scripts/pipeline2.sh`; artifacts under
+`runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/` (gitignored); web snapshot
+`web/content/figures/ntuple-scale/RUN-20260906T013222Z-ba0ee34f.json`. The
+wide layout is `rows,cols,win23,win32,win24,win42,phase=all`: 5.8 x 10^9
+entries, 122 active per state, 23.2 GB of weights and 69.6 GB with the
+coherence accumulators; table files stay on the workstation with their
+SHA-256 in the result record.
 
 Seed leases: training `SL-20260905T191317Z-09895ea2` (`0xa5300000`
 to `0xa54f0000`, read in order and wrapped; wrap counts in each
@@ -173,6 +264,10 @@ Reproduce:
 approaches/ntuple-rl/ntuple-scale/build.sh
 cd approaches/ntuple-rl/ntuple-scale && cargo test --release
 RUN_ID=RUN-... THREADS=32 scripts/pipeline.sh chain
+# the replication (fresh blocks, wide layout, plateau rule):
+RUN_ID=RUN-... EXPERIMENT_ID=EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a \
+  SCREEN_LEASE=research/seeds/leases/SL-20260906T013222Z-f34b23c0.json THREADS=32 \
+  scripts/pipeline2.sh gates && scripts/pipeline2.sh smoke && scripts/pipeline2.sh chain
 ```
 
 </AgentContext>
@@ -217,6 +312,41 @@ moves, all with a positive paired margin (116,000 to 270,023); the candidate
 is the point at 1,400,240,319 moves (607,633 vs 337,611 on the block, 47-17),
 SHA-256 `0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b`.
 
+Replication at larger scale, held-out screen, 512 paired games on
+`0xa52f2380`, 2,000-move cap, from `screen/heldout.json` and the compare.py
+reports of `RUN-20260906T013222Z-ba0ee34f`
+([RS-20260906T040113Z-6ba93171](/results/RS-20260906T040113Z-6ba93171)):
+
+| arm | mean | median | Q25 | max | moves | clears/move | reveals/move |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| candidate-d3s7 (wide) | 481,869 | 393,375 | 241,610 | 2,487,485 | 139.39 | 2.1088 | 1.1927 |
+| candidate-1ply (wide) | 328,039 | 282,096 | 178,990 | 1,224,664 | 97.27 | 1.9762 | 1.0946 |
+| prior-d3s7 (first run's tables) | 487,066 | 385,960 | 232,825 | 3,236,265 | 140.83 | 2.1123 | 1.1949 |
+| prior-1ply (first run's tables) | 294,323 | 247,261 | 173,121 | 1,270,003 | 87.91 | 1.9353 | 1.0665 |
+| fair-d3s7 | 326,717 | 269,648 | 192,040 | 1,714,793 | 95.87 | 2.0033 | 1.1138 |
+| fair-d4s7 | 397,154 | 320,815 | 202,360 | 1,707,841 | 114.55 | 2.0598 | 1.1550 |
+
+| contrast | paired delta | bootstrap LB95 | t LB95 | UB95 | W-T-L | halves | floor |
+| --- | ---: | ---: | ---: | ---: | ---: | --- | --- | ---: |
+| candidate-d3s7 minus fair-d3s7 (gate) | +155,153 | +126,819 | +126,919 | +183,307 | 333-0-179 | +159,105 / +151,201 | 28,185 |
+| prior-d3s7 minus fair-d3s7 (replication) | +160,349 | +129,753 | +129,626 | +191,264 | 330-0-182 | +133,349 / +187,349 | 30,670 |
+| candidate-d3s7 minus prior-d3s7 (scale, inconclusive) | -5,196 | -40,535 | -40,060 | +29,158 | 267-1-244 | +25,756 / -36,148 | 34,803 |
+| candidate-d3s7 minus fair-d4s7 | +84,716 | +54,794 | +54,672 | +114,355 | 298-0-214 | +92,759 / +76,672 | 29,992 |
+| prior-d3s7 minus fair-d4s7 | +89,912 | +58,243 | +58,255 | +121,567 | 290-0-222 | +67,003 / +112,821 | 31,602 |
+| fair-d4s7 minus fair-d3s7 | +70,437 | +46,917 | +47,196 | +93,486 | 302-0-210 | +66,346 / +74,528 | 23,201 |
+| candidate-1ply minus fair-d3s7 | +1,323 | -17,545 | -17,456 | +20,096 | 268-0-244 | -21,521 / +24,166 | 18,746 |
+| prior-1ply minus fair-d3s7 | -32,394 | -51,190 | -51,084 | -13,948 | 219-0-293 | -50,576 / -14,211 | 18,658 |
+| candidate-d3s7 minus candidate-1ply | +153,830 | +127,665 | +127,508 | +180,357 | 333-0-179 | +180,625 / +127,035 | 26,277 |
+
+Replication main run (wide layout, 5.8 x 10^9 entries): 4,500,370,590 moves,
+47,477,538 games, 4,462 s wall at a mean 1,184,973 moves per second, nine
+validation points every 5 x 10^8 moves on the 256-game block (fair-d3s7 mean
+337,539): paired margins +154,572, +145,989, +177,860, +187,500, +183,785,
++186,631, +172,106, +142,514, +161,412; the plateau rule fired at the ninth
+point (last four +165,666, previous four +173,783); the candidate is the
+fourth point at 2,000,153,332 moves (525,039 vs 337,539, 168-88), SHA-256
+`824b0a39a90d8a5aae63438c1538d4c5022f0e0f09c75fb7e2d758a1d6c6fb8a`.
+
 </AgentContext>
 
 <AgentContext summary="Validity, gates and limitations">
@@ -242,6 +372,24 @@ one-shot screen is 256 games, whose detection floor for this contrast is
 recorded in the analysis; the candidate is chosen at the validation point with
 the best margin, which is an upward-biased estimate the screen exists to
 correct.
+
+Replication gates (19, all pass, `gates.log` of the second run): the same
+list with feature-index references for the 2x4 and 4x2 families and the wide
+layout. The first invocation of that gate binary panicked: the
+information-boundary gate values terminal states, a state whose rise ended
+the game carries a rise phase of 0, and the wide layout's 64-bit index then
+left the table. The phase is now clamped inside the feature function; the
+search never values a terminal state (it returns the terminal utility
+first), training and the direct policy guard the same way, so no recorded
+game is affected. In the first experiment the same gate read an in-range
+entry of the phase-conditioned column tables for those terminal states
+because its 32-bit index wrapped; the gate's conclusion (hidden fields leave
+the value unchanged) held because the wrong entry was the same wrong entry
+for every perturbation. The replication's validation block is 256 games
+(the rule that stops training reads it, so it selects and cannot confirm);
+its screen is 512 games opened once; the replication arm is the first
+experiment's exact frozen tables, verified by SHA-256 before the screen
+lease opened.
 
 </AgentContext>
 

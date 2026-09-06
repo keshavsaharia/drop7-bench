@@ -5,6 +5,10 @@
 // failure.
 //
 // Usage: gate [--probe-start 0xa5277000] [--layout SPEC]
+//
+// The default candidate layout is the wide one of the replication experiment
+// (rows, cols, win23, win32, win24, win42, phase=all); the first experiment's
+// layout is covered by the feature-index gate list.
 
 use std::sync::Arc;
 use std::time::Instant;
@@ -69,6 +73,7 @@ fn features_ref(layout: &Layout, board: &Board, moves_remaining: i32) -> Vec<u64
     let mut base = 0u64;
     let line = 10_000_000u64;
     let window = 1_000_000u64;
+    let wide = 100_000_000u64;
     let phases_all = layout.phase == drop7_ntuple_scale::model::PhaseMode::All;
     let phases_cols = layout.phase != drop7_ntuple_scale::model::PhaseMode::None;
     if layout.rows {
@@ -125,6 +130,40 @@ fn features_ref(layout: &Layout, board: &Board, moves_remaining: i32) -> Vec<u64
                 placement += 1;
             }
         }
+        base += 30 * size;
+    }
+    if layout.win24 {
+        // never phase-conditioned: 2 columns x 4 rows, rows top..top+4 with
+        // top+3 least significant, the right column scaled by 10^4.
+        let mut placement = 0u64;
+        for c in 0..BOARD_SIZE - 1 {
+            for top in 0..=3usize {
+                let mut left = 0u64;
+                let mut right = 0u64;
+                for r in 0..4 {
+                    left = left * 10 + get(top + r, c);
+                    right = right * 10 + get(top + r, c + 1);
+                }
+                out.push(base + placement * wide + left + 10_000 * right);
+                placement += 1;
+            }
+        }
+        base += 24 * wide;
+    }
+    if layout.win42 {
+        // never phase-conditioned: 4 columns x 2 rows, each column two
+        // digits (top, top+1) scaled by 100^k for column offset k.
+        let mut placement = 0u64;
+        for c in 0..BOARD_SIZE - 3 {
+            for top in 0..=5usize {
+                let mut code = 0u64;
+                for k in 0..4 {
+                    code += (get(top, c + k) * 10 + get(top + 1, c + k)) * 100u64.pow(k as u32);
+                }
+                out.push(base + placement * wide + code);
+                placement += 1;
+            }
+        }
     }
     out
 }
@@ -132,7 +171,7 @@ fn features_ref(layout: &Layout, board: &Board, moves_remaining: i32) -> Vec<u64
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let mut probe_start = 0xa527_7000u32;
-    let mut layout_spec = "rows,cols,win23,win32,phase=cols".to_string();
+    let mut layout_spec = "rows,cols,win23,win32,win24,win42,phase=all".to_string();
     let mut i = 1;
     while i + 1 < args.len() {
         match args[i].as_str() {
@@ -173,10 +212,10 @@ fn main() {
     }
 
     // 3. Feature indices against the independent reference, every layout.
-    for spec in ["rows", "cols", "win23", "win32", "rows,cols,win23,win32,phase=none", "rows,cols,win23,win32,phase=cols", "rows,cols,win23,win32,phase=all"] {
+    for spec in ["rows", "cols", "win23", "win32", "win24", "win42", "rows,cols,win23,win32,phase=none", "rows,cols,win23,win32,phase=cols", "rows,cols,win23,win32,phase=all", "rows,cols,win23,win32,win24,win42,phase=all"] {
         let layout = Layout::parse(spec).unwrap();
         let model = Model::new(layout, 1.0, false);
-        let mut out = [0u32; MAX_ACTIVE];
+        let mut out = [0u64; MAX_ACTIVE];
         let mut mismatches = 0usize;
         let mut duplicates = 0usize;
         let mut out_of_range = 0usize;
@@ -184,7 +223,7 @@ fn main() {
             for mtr in 1..=5 {
                 let n = model.features(&state.board, mtr, &mut out);
                 let expected = features_ref(&layout, &state.board, mtr);
-                let got: Vec<u64> = out[..n].iter().map(|&x| x as u64).collect();
+                let got: Vec<u64> = out[..n].to_vec();
                 if got != expected {
                     mismatches += 1;
                 }
@@ -215,7 +254,7 @@ fn main() {
     // not change the direct decision.
     {
         let mut leaf = NTupleLeaf::new(model.clone());
-        let mut scratch = [0u32; MAX_ACTIVE];
+        let mut scratch = [0u64; MAX_ACTIVE];
         let mut value_changes = 0usize;
         let mut action_changes = 0usize;
         for state in &states {
@@ -243,7 +282,7 @@ fn main() {
     // 5. Reflection: mirrored boards share the value; decisions mirror when
     // the best column is unique.
     {
-        let mut scratch = [0u32; MAX_ACTIVE];
+        let mut scratch = [0u64; MAX_ACTIVE];
         let mut value_mismatch = 0usize;
         let mut decision_mismatch = 0usize;
         let mut checked = 0usize;
@@ -270,7 +309,7 @@ fn main() {
 
     // 6. Direct-policy legality.
     {
-        let mut scratch = [0u32; MAX_ACTIVE];
+        let mut scratch = [0u64; MAX_ACTIVE];
         let mut illegal = 0usize;
         let mut terminal = 0usize;
         for state in &states {
@@ -313,9 +352,9 @@ fn main() {
         let mut fingerprints = Vec::new();
         for _ in 0..2 {
             let trained = Model::new(small, 20.0, true);
-            let mut scratch = [0u32; MAX_ACTIVE];
-            let mut prev = [0u32; MAX_ACTIVE];
-            let mut next = [0u32; MAX_ACTIVE];
+            let mut scratch = [0u64; MAX_ACTIVE];
+            let mut prev = [0u64; MAX_ACTIVE];
+            let mut next = [0u64; MAX_ACTIVE];
             let mut stats = UpdateStats::default();
             let mut sink = FullWaveSink::new();
             for game in 0..12u32 {
@@ -346,7 +385,7 @@ fn main() {
             fingerprints.push((trained.fingerprint(), stats.updates, trained.touched_entries()));
         }
         let fresh = Model::new(small, 20.0, false);
-        let mut scratch = [0u32; MAX_ACTIVE];
+        let mut scratch = [0u64; MAX_ACTIVE];
         let start_value = fresh.value(&Board::initial(), 5, &mut scratch);
         gates.report(
             "serial-training-determinism",
@@ -358,7 +397,7 @@ fn main() {
     // 9. Finiteness under random weights and the memory/time profile of the
     // candidate layout (informational timings).
     {
-        let mut scratch = [0u32; MAX_ACTIVE];
+        let mut scratch = [0u64; MAX_ACTIVE];
         let finite = states.iter().all(|s| model.value(&s.board, s.moves_remaining, &mut scratch).is_finite());
         let started = Instant::now();
         let mut sink = 0u64;

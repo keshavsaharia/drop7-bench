@@ -1,0 +1,22 @@
+[2026-09-06T01:38:27Z] gates: /home/keshav/Developer/drop7-bench/approaches/ntuple-rl/ntuple-scale/target/release/gate --probe-start 0xa5277000 --layout rows,cols,win23,win32,win24,win42,phase=all
+gate: probe block 0xa5277000, candidate layout rows,cols,win23,win32,win24,win42,phase=all
+PASS codec-vs-horner: 2000000 random line words, 0 mismatches; max index 9999999
+sampled 553 public states by random play on 64 probe seeds
+PASS row-words-vs-accessor: 553 states, 0 mismatches
+PASS features-vs-reference[rows]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 70000000 entries
+PASS features-vs-reference[cols]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 70000000 entries
+PASS features-vs-reference[win23]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 30000000 entries
+PASS features-vs-reference[win32]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 30000000 entries
+PASS features-vs-reference[win24]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 2400000000 entries
+PASS features-vs-reference[win42]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 2400000000 entries
+PASS features-vs-reference[rows,cols,win23,win32,phase=none]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 200000000 entries
+PASS features-vs-reference[rows,cols,win23,win32,phase=cols]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 480000000 entries
+PASS features-vs-reference[rows,cols,win23,win32,phase=all]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 1000000000 entries
+PASS features-vs-reference[rows,cols,win23,win32,win24,win42,phase=all]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 5800000000 entries
+PASS information-boundary: 553 states x 4 hidden-field perturbations: 0 leaf-value changes, 0 decision changes
+PASS reflection: 553 states: 0 value mismatches; 534 live states, 0 decision mismatches under mirroring
+PASS direct-policy-legality: 553 states (19 terminal), 0 illegal or missing decisions
+PASS leaf-in-search-determinism: 4 games x (1, 4, 4 workers): identical true, illegal/incomplete-free true; mean 124834 over 80-move caps
+PASS serial-training-determinism: two 12-game single-thread runs: fingerprints b5c5f9335b6b26dc / b5c5f9335b6b26dc, 435 updates, 3177 touched entries; fresh initial-board value 20.0000 (declared 20)
+PASS finite-and-profile: values finite true; 5800000000 entries = 23.20 GB frozen, 69.60 GB trainable; per state: features 65 ns, value 149 ns (untrained tables, hot); direct decision 9.1 us (14.8 simulations) [sink 639171920617200 2212000.2]
+ALL GATES PASSED

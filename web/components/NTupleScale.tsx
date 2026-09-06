@@ -24,6 +24,8 @@ const RUN = /^RUN-[A-Za-z0-9-]+$/;
 const ARM_LABELS: Record<string, string> = {
   "candidate-d3s7": "tables as the depth-3 leaf",
   "candidate-1ply": "tables played directly, one ply",
+  "prior-d3s7": "first run's tables as the depth-3 leaf",
+  "prior-1ply": "first run's tables played directly, one ply",
   "fair-d3s7": "fair leaf in the depth-3 search",
   "fair-d4s7": "fair leaf in the depth-4 search",
 };
@@ -34,6 +36,10 @@ const CONTRAST_LABELS: Record<string, string> = {
   "candidate-d3s7-vs-fair-d4s7": "tables as the depth-3 leaf minus the fair leaf in the depth-4 search",
   "fair-d4s7-vs-fair-d3s7": "fair leaf at depth 4 minus fair leaf at depth 3",
   "candidate-d3s7-vs-candidate-1ply": "tables as the depth-3 leaf minus the same tables played directly",
+  "prior-d3s7-vs-fair-d3s7": "first run's tables as the depth-3 leaf minus the fair leaf in the same search",
+  "candidate-d3s7-vs-prior-d3s7": "wider tables minus the first run's tables, both as the depth-3 leaf",
+  "prior-d3s7-vs-fair-d4s7": "first run's tables as the depth-3 leaf minus the fair leaf in the depth-4 search",
+  "prior-1ply-vs-fair-d3s7": "first run's tables played directly minus the fair leaf in the depth-3 search",
 };
 
 function loadSnapshot(run: string): NTupleSnapshot | null {
@@ -121,26 +127,64 @@ type StageState = "done" | "running" | "pending";
 
 /* ============================================================ status strip */
 
+function plateauDetail(main: TrainingRun): string {
+  const last = main.validations[main.validations.length - 1];
+  if (main.stop) {
+    if (main.stop.reason === "plateau" && main.stop.recentWindowMean !== null && main.stop.previousWindowMean !== null) {
+      return `; stopped by the plateau rule at point ${main.stop.validationPoints}: last ${main.stop.plateauWindow} points mean ${formatSigned(Math.round(main.stop.recentWindowMean))}, the ${main.stop.plateauWindow} before ${formatSigned(Math.round(main.stop.previousWindowMean))}`;
+    }
+    return `; stopped by the ${main.stop.reason} rule`;
+  }
+  if (last?.plateau) {
+    return `; plateau rule at point ${last.plateau.points}: last ${last.plateau.window} points mean ${formatSigned(Math.round(last.plateau.recentMean))}, previous ${formatSigned(Math.round(last.plateau.previousMean))} (training continues while the last window is above the previous one)`;
+  }
+  return "";
+}
+
 export function NTupleStatus({ run }: { run: string }) {
   const snapshot = loadSnapshot(run);
   if (!snapshot) return <Absent run={run} stage="whole" />;
-  const { gates, pilot, main, freeze, screen } = snapshot;
+  const { gates, smoke, pilot, main, freeze, screen } = snapshot;
   const pilotArms = pilot ? Object.values(pilot.arms) : [];
   const pilotDone = pilotArms.filter((a) => a.done).length;
+  const replication = !pilot && (smoke !== null || Boolean(screen?.replication) || Boolean(main?.stop));
+  const stageA = replication
+    ? {
+        name: "A · throughput smoke",
+        state: (smoke ? (smoke.done ? "done" : "running") : "pending") as StageState,
+        detail: smoke ? `${formatValue(smoke.movesTotal)} moves on the probe block at ${formatValue(Math.round(smoke.meanMovesPerSecond ?? 0))} moves per second, ${formatValue(smoke.entries)} table entries; tables discarded` : "waits for the gates",
+      }
+    : {
+        name: "A · pilot arms",
+        state: (pilot ? (pilotDone === 6 ? "done" : "running") : "pending") as StageState,
+        detail: pilot ? `${pilotDone} of 6 arms trained for ${formatValue(pilotArms[0]?.movesTotal ?? 0)} moves${pilot.selection ? `; arm ${pilot.selection.arm} selected` : ""}` : "waits for the gates",
+      };
   const stages: { name: string; state: StageState; detail: string }[] = [
     { name: "0 · CHECK gates", state: gates ? "done" : "pending", detail: gates ? (gates.passed ? `${gates.gates.length} gates passed on the probe block` : "a gate failed") : "not run" },
+    stageA,
     {
-      name: "A · pilot arms",
-      state: pilot ? (pilotDone === 6 ? "done" : "running") : "pending",
-      detail: pilot ? `${pilotDone} of 6 arms trained for ${formatValue(pilotArms[0]?.movesTotal ?? 0)} moves${pilot.selection ? `; arm ${pilot.selection.arm} selected` : ""}` : "waits for the gates",
-    },
-    {
-      name: "B · main run",
+      name: replication ? "B · main run, until the margins plateau" : "B · main run",
       state: main ? (main.done ? "done" : "running") : "pending",
-      detail: main ? `${formatValue(main.movesTotal)} moves, ${main.validations.length} validation points${main.best ? `; best margin ${formatSigned(main.best.pairedDeltaD3)} at ${formatValue(main.best.moves)} moves` : ""}` : "waits for the pilot selection",
+      detail: main
+        ? `${formatValue(main.movesTotal)} moves, ${main.validations.length} validation points on ${main.validateGames} paired games${main.best ? `; best margin ${formatSigned(Math.round(main.best.pairedDeltaD3))} at ${formatValue(main.best.moves)} moves` : ""}${replication ? plateauDetail(main) : ""}`
+        : replication
+          ? "waits for the smoke run"
+          : "waits for the pilot selection",
     },
-    { name: "C · freeze", state: freeze?.candidateSha256 ? "done" : "pending", detail: freeze?.candidateSha256 ? `candidate frozen, SHA-256 ${freeze.candidateSha256.slice(0, 12)}…` : "waits for the main run" },
-    { name: "D · held-out screen", state: screen ? "done" : "pending", detail: screen ? (screen.gate ? `preregistered gate ${screen.gate.allPassed ? "passed" : "not passed"}` : "played; contrasts pending") : "opens once, after the candidate is frozen" },
+    {
+      name: "C · freeze",
+      state: freeze?.candidateSha256 ? "done" : "pending",
+      detail: freeze?.candidateSha256 ? `candidate frozen, SHA-256 ${freeze.candidateSha256.slice(0, 12)}…${freeze.priorSha256 ? `; first run's tables verified, SHA-256 ${freeze.priorSha256.slice(0, 12)}…` : ""}` : "waits for the main run",
+    },
+    {
+      name: "D · held-out screen",
+      state: screen ? "done" : "pending",
+      detail: screen
+        ? screen.gate
+          ? `preregistered gate ${screen.gate.allPassed ? "passed" : "not passed"}${screen.replication ? `; replication of the first run ${screen.replication.allPassed ? "passed" : "not passed"}` : ""}${screen.scale ? `; scale verdict ${screen.scale.verdict}` : ""}`
+          : "played; contrasts pending"
+        : "opens once, after the candidate is frozen",
+    },
   ];
   return (
     <Frame run={run} className="evo-status">
@@ -189,11 +233,14 @@ function trainingStats(run: TrainingRun) {
           { label: "latest validation, fair leaf", value: formatValue(Math.round(last.fairD3Mean)) },
           { label: "latest paired margin", value: `${formatSigned(Math.round(last.pairedDeltaD3))} (lower bound ${formatSigned(Math.round(last.bootstrapLower95))})` },
           { label: "wins / ties / losses", value: last.wtl.join(" / ") },
+          ...(last.plateau ? [{ label: `plateau rule, mean of the last ${last.plateau.window} points / the ${last.plateau.window} before`, value: `${formatSigned(Math.round(last.plateau.recentMean))} / ${formatSigned(Math.round(last.plateau.previousMean))}${last.plateau.stop ? " (stopped)" : ""}` }] : []),
           ...(last.directMean !== null ? [{ label: "latest validation, direct play", value: formatValue(Math.round(last.directMean)) }] : []),
           ...(last.touchedEntries !== null ? [{ label: "table entries updated at least once", value: formatValue(last.touchedEntries) }] : []),
         ]
       : []),
     ...(run.best ? [{ label: "best validation point", value: `${formatSigned(Math.round(run.best.pairedDeltaD3))} at ${formatValue(run.best.moves)} moves` }] : []),
+    ...(run.stop ? [{ label: "stopped by", value: `the ${run.stop.reason} rule after ${run.stop.validationPoints} validation points` }] : []),
+    { label: "validation block", value: `${run.validateGames} paired games, training role` },
     { label: "illegal / incomplete decisions", value: `${run.illegalDecisions} / ${run.incompleteDecisions}` },
   ];
 }
@@ -315,6 +362,38 @@ export function NTupleGateTable({ run }: { run: string }) {
             <span className="evo-gate-mark">{screen.gate.allPassed ? "pass" : "fail"}</span> every criterion
           </li>
         </ul>
+      )}
+      {screen.replication && (
+        <>
+          <h4 className="rchart-title">Replication: the first run&apos;s frozen tables on this fresh block</h4>
+          <ul className="evo-gate">
+            {screen.replication.checks.map((check) => (
+              <li key={check.criterion} className={check.passed ? "is-pass" : "is-fail"}>
+                <span className="evo-gate-mark">{check.passed ? "pass" : "fail"}</span> {check.criterion}
+                {check.observed !== undefined && check.observed !== null && check.observed !== "" ? <> · observed {typeof check.observed === "number" ? formatSigned(check.observed) : JSON.stringify(check.observed)}</> : null}
+              </li>
+            ))}
+            <li className={screen.replication.allPassed ? "is-pass" : "is-fail"}>
+              <span className="evo-gate-mark">{screen.replication.allPassed ? "pass" : "fail"}</span> every replication criterion
+            </li>
+          </ul>
+        </>
+      )}
+      {screen.scale && (
+        <>
+          <h4 className="rchart-title">Scale: the wider tables against the first run&apos;s tables, same seeds</h4>
+          <Stats
+            items={[
+              { label: "preregistered verdict", value: screen.scale.verdict },
+              { label: "paired mean difference", value: `${formatSigned(screen.scale.meanDelta)} points` },
+              { label: "bootstrap 95% lower bound", value: formatSigned(screen.scale.bootstrapLower95) },
+              { label: "Student-t 95% lower bound", value: formatSigned(screen.scale.studentTLower95) },
+              { label: "bootstrap 95% upper bound", value: formatSigned(screen.scale.bootstrapUpper95) },
+              { label: "detection floor", value: formatValue(screen.scale.detectionFloor) },
+              { label: "wins / ties / losses", value: screen.scale.wtl.join(" / ") },
+            ]}
+          />
+        </>
       )}
     </Frame>
   );

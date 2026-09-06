@@ -23,36 +23,44 @@ function millions(moves: number): number {
 
 /** Validation line-up by training moves: the tables inside the depth-3 search,
  * the tables played directly, and the fair leaf inside the same search on the
- * same 64 games, with the training games' own mean as context. */
+ * same validation games, with the training games' own mean as context. */
 export function TrainingCurve({ run, source = FALLBACK_SOURCE }: { run: TrainingRun; source?: string }) {
   const v = run.validations;
+  const n = run.validateGames;
   const quick = run.chunks.filter((c) => typeof c.quickDirectMean === "number");
   const spec: FigureSpec = {
     title: `Validation scores by training moves (${run.name}: ${run.layout}, alpha ${run.alpha})`,
     kind: "line",
     x: { label: "training moves", unit: "millions" },
-    y: { label: "mean score of 64 paired games", unit: "points" },
+    y: { label: `mean score of ${n} paired games`, unit: "points" },
     series: [
       {
         name: "tables as the depth-3 leaf",
         role: "primary",
         sourceRecord: source,
         sourceField: `${run.name}.validations[].ntupleD3Mean`,
-        points: v.map((p) => ({ x: millions(p.movesTrained), y: p.ntupleD3Mean, n: 64, wtl: p.wtl, label: `paired margin over the fair leaf ${p.pairedDeltaD3 >= 0 ? "+" : ""}${Math.round(p.pairedDeltaD3).toLocaleString()} (bootstrap lower bound ${Math.round(p.bootstrapLower95).toLocaleString()})${p.isBest ? "; frozen as the candidate" : ""}`, sourceRecord: source })),
+        points: v.map((p) => ({
+          x: millions(p.movesTrained),
+          y: p.ntupleD3Mean,
+          n,
+          wtl: p.wtl,
+          label: `paired margin over the fair leaf ${p.pairedDeltaD3 >= 0 ? "+" : ""}${Math.round(p.pairedDeltaD3).toLocaleString()} (bootstrap lower bound ${Math.round(p.bootstrapLower95).toLocaleString()})${p.plateau ? `; plateau rule: last ${p.plateau.window} points mean ${Math.round(p.plateau.recentMean).toLocaleString()}, previous ${Math.round(p.plateau.previousMean).toLocaleString()}${p.plateau.stop ? ", stopped" : ""}` : ""}${p.isBest ? "; frozen as the candidate" : ""}`,
+          sourceRecord: source,
+        })),
       },
       {
         name: "fair leaf in the same search (same games)",
         role: "control",
         sourceRecord: source,
         sourceField: `${run.name}.validations[].fairD3Mean`,
-        points: v.map((p) => ({ x: millions(p.movesTrained), y: p.fairD3Mean, n: 64, sourceRecord: source })),
+        points: v.map((p) => ({ x: millions(p.movesTrained), y: p.fairD3Mean, n, sourceRecord: source })),
       },
       {
         name: "tables played directly, one ply",
         role: "context",
         sourceRecord: source,
         sourceField: `${run.name}.chunks[].quickDirectMean`,
-        points: quick.map((c) => ({ x: millions(c.movesTotal), y: c.quickDirectMean as number, n: 64, sourceRecord: source })),
+        points: quick.map((c) => ({ x: millions(c.movesTotal), y: c.quickDirectMean as number, n, sourceRecord: source })),
       },
       {
         name: "training games (one-ply play, mean per chunk)",
@@ -91,7 +99,7 @@ export function PilotArms({ pilot, source = FALLBACK_SOURCE }: { pilot: PilotSta
             hi: last.bootstrapUpper95,
             floor: last.detectionFloor,
             wtl: last.wtl,
-            n: 64,
+            n: arm.validateGames,
             label: `${arm.entries.toLocaleString()} table entries; ${last.movesTrained.toLocaleString()} training moves${pilot.selection?.arm === name ? "; selected for the main run" : ""}`,
             sourceRecord: source,
           };

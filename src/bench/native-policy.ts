@@ -98,3 +98,84 @@ export function nativeDecide(
   if (!match) throw new Error(`native decision binary returned no bestmove: ${output.slice(0, 200)}`);
   return match[1] === "none" ? null : Number(match[1]);
 }
+
+/**
+ * The n-tuple crate's one-shot decision binary (cargo release build). It
+ * loads a frozen lookup-table file and plays the tables as the leaf of the
+ * deployed depth-3 seven-stratum search, or directly one ply, printing the
+ * chosen column as a bare integer.
+ */
+export const NTUPLE_QUERY_BINARY = join(
+  REPO_ROOT,
+  "approaches",
+  "ntuple-rl",
+  "ntuple-scale",
+  "target",
+  "release",
+  "query_move",
+);
+export const NTUPLE_BUILD_HINT = "approaches/ntuple-rl/ntuple-scale/build.sh --bin query_move";
+
+/**
+ * The frozen tables of the first n-tuple-scale run (RUN-20260905T193006Z-4fbeb4e5,
+ * SHA-256 0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b in
+ * its artifact manifest). The 4 GB file is a run artifact retained under
+ * runs/ and never committed; DROP7_NTUPLE_WEIGHTS points at another copy or
+ * another Model::save output.
+ */
+export const NTUPLE_FROZEN_WEIGHTS =
+  "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/best-weights.bin";
+
+export interface NTupleQueryOptions {
+  /** Path to a Model::save output; defaults to DROP7_NTUPLE_WEIGHTS, then the frozen tables. */
+  weights?: string;
+  /** "ntuple-d3" (the tables as the d3s7 leaf) or "direct" (one ply, no search). */
+  arm?: "ntuple-d3" | "direct";
+  binary?: string;
+  timeoutMs?: number;
+}
+
+export function ntupleWeightsPath(weights?: string): string {
+  const path = weights ?? process.env.DROP7_NTUPLE_WEIGHTS ?? NTUPLE_FROZEN_WEIGHTS;
+  return path.startsWith("/") ? path : join(REPO_ROOT, path);
+}
+
+export function ntupleAvailable(options: NTupleQueryOptions = {}): boolean {
+  return (
+    existsSync(options.binary ?? NTUPLE_QUERY_BINARY) &&
+    existsSync(ntupleWeightsPath(options.weights))
+  );
+}
+
+export function ntupleDecide(
+  state: GameState,
+  options: NTupleQueryOptions = {},
+): number | null {
+  if (state.gameOver) return null;
+  const binary = options.binary ?? NTUPLE_QUERY_BINARY;
+  if (!existsSync(binary)) {
+    throw new Error(`n-tuple policy needs ${binary}; build it with ${NTUPLE_BUILD_HINT}`);
+  }
+  const weights = ntupleWeightsPath(options.weights);
+  if (!existsSync(weights)) {
+    throw new Error(
+      `n-tuple policy needs its frozen tables at ${weights} (a run artifact under runs/, not committed); set DROP7_NTUPLE_WEIGHTS to a Model::save file`,
+    );
+  }
+  const output = execFileSync(
+    binary,
+    [
+      "--arm", options.arm ?? "ntuple-d3",
+      "--weights", weights,
+      "--board", serializeBoard(state.board),
+      "--next", String(state.nextDisc),
+      "--rise", String(state.movesRemaining),
+    ],
+    { encoding: "utf8", timeout: options.timeoutMs ?? DEFAULT_TIMEOUT_MS },
+  );
+  const column = Number.parseInt(output.trim(), 10);
+  if (!Number.isInteger(column) || column < 0 || column >= 7) {
+    throw new Error(`n-tuple query binary returned no column: ${output.slice(0, 200)}`);
+  }
+  return column;
+}

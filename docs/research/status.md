@@ -22,12 +22,31 @@ development seeds, opened once; it is not a qualification, no protected or
 final seed was opened, and the mean is under half the million-point target.
 The candidate was chosen at the best of twenty training-role validation
 points, so its screen margin is the honest number and its validation margin
-(+270,023) is not. The next steps the record supports are a fresh-block
-replication by a different runner, a fresh-development evaluation of the
-same frozen tables inside the depth-4 search (untested; the tables cost tens
-of nanoseconds per leaf, so the deployment is affordable), and a longer or
-wider training run, since twenty validation points were all positive and
-noisy rather than plateaued.
+(+270,023) is not.
+
+On 2026-09-06 the result replicated on a second, disjoint block. The same
+frozen tables (SHA-256 verified) played 512 never-read public-development
+games as the depth-3 leaf and scored **487,066 against 326,717** for the
+fair leaf in the same search: paired +160,349, bootstrap 95% lower bound
++129,753, both halves positive, 330 wins to 182
+([RS-20260906T040113Z-6ba93171](../../research/results/RS-20260906T040113Z-6ba93171.json)).
+The same experiment trained a six-times-wider evaluator (2x4 and 4x2 window
+families added, 5.8 x 10^9 entries) on fresh training seeds until a
+256-game validation margin stopped rising (a window-of-four plateau rule,
+which fired at 4.5 x 10^9 moves); that candidate passed the same gate on the
+same 512 games (481,869, paired +155,153, lower bound +126,819) and came out
+5,196 behind the first tables with bounds from -40,535 to +29,158, so the
+preregistered scale verdict is inconclusive: no gain larger than about
+35,000 in either direction. Played directly with no search the wide tables
+averaged 328,039 against 294,323 for the first tables on the same games,
+level with the fair leaf's depth-3 search; the extra scale improved the
+one-ply policy and left the leaf where it was. Both candidates beat the
+fair leaf at depth 4 on these games by more than 84,000. The first tables
+now have two passing screens on disjoint blocks and are the candidate to
+carry forward; the next steps the record supports are those tables as the
+leaf of the depth-4 search on a fresh development block, a STANDARD-tier
+evaluation on fresh development seeds, and a study of why a better one-ply
+evaluator is not a better leaf.
 
 ## August 2026
 

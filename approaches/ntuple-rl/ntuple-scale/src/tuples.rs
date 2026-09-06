@@ -13,8 +13,9 @@
 // Row tuples need the seven cells of one row, one nibble from each column
 // word; row_words gathers them into seven row words of the same nibble layout
 // (nibble c = column c) so the same line codec applies.  Window tuples read
-// two or three consecutive nibbles from adjacent column words and use the
-// small codecs directly.
+// two, three or four consecutive nibbles from adjacent column words and use
+// the small codecs directly (the four-nibble codec is the line codec's own
+// low table).
 
 use drop7_rs::board::BOARD_SIZE;
 
@@ -23,6 +24,8 @@ pub const CELL_VALUES: u32 = 10;
 pub const LINE_PATTERNS: usize = 10_000_000;
 /// 10^6: patterns of one six-cell window.
 pub const WINDOW_PATTERNS: usize = 1_000_000;
+/// 10^8: patterns of one eight-cell window (2x4 or 4x2).
+pub const WIDE_WINDOW_PATTERNS: usize = 100_000_000;
 
 /// Base-10 index of the low `nibbles` nibbles of `word`, nibble 0 as the
 /// least-significant digit.  The reference the codec tables are checked
@@ -97,6 +100,12 @@ impl Codec {
     pub fn nib2(&self, bits: u32) -> u32 {
         self.b2[(bits & 0xFF) as usize] as u32
     }
+
+    /// Index of four nibbles in 0..10_000.
+    #[inline(always)]
+    pub fn nib4(&self, bits: u32) -> u32 {
+        self.lo[(bits & 0xFFFF) as usize] as u32
+    }
 }
 
 /// Gather the seven row words from the seven column words.  Row word r has
@@ -134,6 +143,11 @@ pub fn row_words_ref(board: &drop7_rs::board::Board) -> [u32; BOARD_SIZE] {
 /// 2-tall window at (c, r) covers rows r..r+2 of columns c..c+3: 5 x 6 = 30.
 pub const WIN23_PLACEMENTS: usize = 30;
 pub const WIN32_PLACEMENTS: usize = 30;
+/// A 2-wide x 4-tall window at (c, r) covers rows r..r+4 of columns c and
+/// c+1: 6 x 4 = 24 placements.  A 4-wide x 2-tall window at (c, r) covers
+/// rows r..r+2 of columns c..c+4: 4 x 6 = 24 placements.
+pub const WIN24_PLACEMENTS: usize = 24;
+pub const WIN42_PLACEMENTS: usize = 24;
 
 /// Three consecutive nibbles of a column word for rows r..r+3 (r in 0..=4):
 /// rows r, r+1, r+2 are nibbles 6-r, 5-r, 4-r, so the chunk starts at nibble
@@ -147,6 +161,14 @@ pub fn chunk3(word: u32, top_row: usize) -> u32 {
 #[inline(always)]
 pub fn chunk2(word: u32, top_row: usize) -> u32 {
     (word >> (4 * (5 - top_row))) & 0xFF
+}
+
+/// Four consecutive nibbles for rows r..r+4 (r in 0..=3): nibbles 6-r down
+/// to 3-r, so the chunk starts at nibble 3-r; the least-significant nibble
+/// is the lowest row (r+3).
+#[inline(always)]
+pub fn chunk4(word: u32, top_row: usize) -> u32 {
+    (word >> (4 * (3 - top_row))) & 0xFFFF
 }
 
 #[cfg(test)]
@@ -173,6 +195,7 @@ mod tests {
             assert_eq!(codec.line(word), base10_ref(word, 7));
             assert_eq!(codec.nib3(word & 0xFFF), base10_ref(word & 0xFFF, 3));
             assert_eq!(codec.nib2(word & 0xFF), base10_ref(word & 0xFF, 2));
+            assert_eq!(codec.nib4(word & 0xFFFF), base10_ref(word & 0xFFFF, 4));
         }
         assert_eq!(codec.line(0), 0);
         assert_eq!(codec.line(0x0999_9999), LINE_PATTERNS as u32 - 1);
@@ -208,6 +231,13 @@ mod tests {
                 let chunk = chunk2(word, top);
                 assert_eq!(chunk & 0xF, board.get(top + 1, 0) as u32);
                 assert_eq!((chunk >> 4) & 0xF, board.get(top, 0) as u32);
+            }
+            for top in 0..=3 {
+                let chunk = chunk4(word, top);
+                assert_eq!(chunk & 0xF, board.get(top + 3, 0) as u32);
+                assert_eq!((chunk >> 4) & 0xF, board.get(top + 2, 0) as u32);
+                assert_eq!((chunk >> 8) & 0xF, board.get(top + 1, 0) as u32);
+                assert_eq!((chunk >> 12) & 0xF, board.get(top, 0) as u32);
             }
         }
     }
