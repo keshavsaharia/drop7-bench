@@ -1,0 +1,49 @@
+[2026-09-06T02:58:39Z] main: done ({"reason":"plateau","movesTotal":4500370590,"gamesTotal":47477538,"wallSeconds":4462.4,"validationPoints":9,"plateauWindow":4,"recentWindowMean":165665.8408203125,"previousWindowMean":173783.3173828125,"bestMargin":187500.078125})
+824b0a39a90d8a5aae63438c1538d4c5022f0e0f09c75fb7e2d758a1d6c6fb8a  /home/keshav/Developer/drop7-bench/runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/main/best-weights.bin
+[2026-09-06T02:58:53Z] freeze: 824b0a39a90d8a5aae63438c1538d4c5022f0e0f09c75fb7e2d758a1d6c6fb8a  /home/keshav/Developer/drop7-bench/runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/main/best-weights.bin
+0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b  /home/keshav/Developer/drop7-bench/runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/best-weights.bin
+[2026-09-06T02:58:55Z] freeze: prior tables verified (0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b)
+[2026-09-06T02:58:55Z] screen: opening the held-out lease
+opened research/seeds/leases/SL-20260906T013222Z-f34b23c0.json 2026-09-06T02:58:55Z
+[2026-09-06T03:59:47Z] screen: done
+candidate-d3s7 - fair-d3s7 on 512 paired games (seeds 0xa52f2380+):
+  score       481869 vs     326717  delta   +155153  LB95   +126819  UB95   +183307  W-T-L 333-0-179  floor 28185
+  moves       139.39 vs      95.87  delta    +43.52  LB95    +35.72
+  halves    +159105 /   +151201   q25 delta    +49570   max 2487485 vs 1714793
+  flow    clears/move 2.1088 vs 2.0033  reveals/move 1.1927 vs 1.1138  occupancy 22.97 vs 24.10
+prior-d3s7 - fair-d3s7 on 512 paired games (seeds 0xa52f2380+):
+  score       487066 vs     326717  delta   +160349  LB95   +129753  UB95   +191264  W-T-L 330-0-182  floor 30670
+  moves       140.83 vs      95.87  delta    +44.97  LB95    +36.53
+  halves    +133349 /   +187349   q25 delta    +40786   max 3236265 vs 1714793
+  flow    clears/move 2.1123 vs 2.0033  reveals/move 1.1949 vs 1.1138  occupancy 23.08 vs 24.10
+candidate-d3s7 - prior-d3s7 on 512 paired games (seeds 0xa52f2380+):
+  score       481869 vs     487066  delta     -5196  LB95    -40535  UB95    +29158  W-T-L 267-1-244  floor 34803
+  moves       139.39 vs     140.83  delta     -1.45  LB95    -11.22
+  halves     +25756 /    -36148   q25 delta     +8784   max 2487485 vs 3236265
+  flow    clears/move 2.1088 vs 2.1123  reveals/move 1.1927 vs 1.1949  occupancy 22.97 vs 23.08
+candidate-d3s7 - fair-d4s7 on 512 paired games (seeds 0xa52f2380+):
+  score       481869 vs     397154  delta    +84716  LB95    +54794  UB95   +114355  W-T-L 298-0-214  floor 29992
+  moves       139.39 vs     114.55  delta    +24.84  LB95    +16.64
+  halves     +92759 /    +76672   q25 delta    +39250   max 2487485 vs 1707841
+  flow    clears/move 2.1088 vs 2.0598  reveals/move 1.1927 vs 1.1550  occupancy 22.97 vs 23.76
+prior-d3s7 - fair-d4s7 on 512 paired games (seeds 0xa52f2380+):
+  score       487066 vs     397154  delta    +89912  LB95    +58243  UB95   +121567  W-T-L 290-0-222  floor 31602
+  moves       140.83 vs     114.55  delta    +26.29  LB95    +17.60
+  halves     +67003 /   +112821   q25 delta    +30465   max 3236265 vs 1707841
+  flow    clears/move 2.1123 vs 2.0598  reveals/move 1.1949 vs 1.1550  occupancy 23.08 vs 23.76
+fair-d4s7 - fair-d3s7 on 512 paired games (seeds 0xa52f2380+):
+  score       397154 vs     326717  delta    +70437  LB95    +46917  UB95    +93486  W-T-L 302-0-210  floor 23201
+  moves       114.55 vs      95.87  delta    +18.68  LB95    +12.30
+  halves     +66346 /    +74528   q25 delta    +10320   max 1707841 vs 1714793
+  flow    clears/move 2.0598 vs 2.0033  reveals/move 1.1550 vs 1.1138  occupancy 23.76 vs 24.10
+candidate-1ply - fair-d3s7 on 512 paired games (seeds 0xa52f2380+):
+  score       328039 vs     326717  delta     +1323  LB95    -17545  UB95    +20096  W-T-L 268-0-244  floor 18746
+  moves        97.27 vs      95.87  delta     +1.40  LB95     -3.78
+  halves     -21521 /    +24166   q25 delta    -13050   max 1224664 vs 1714793
+  flow    clears/move 1.9762 vs 2.0033  reveals/move 1.0946 vs 1.1138  occupancy 24.14 vs 24.10
+candidate-d3s7 - candidate-1ply on 512 paired games (seeds 0xa52f2380+):
+  score       481869 vs     328039  delta   +153830  LB95   +127665  UB95   +180357  W-T-L 333-0-179  floor 26277
+  moves       139.39 vs      97.27  delta    +42.12  LB95    +34.86
+  halves    +180625 /   +127035   q25 delta    +62620   max 2487485 vs 1224664
+  flow    clears/move 2.1088 vs 1.9762  reveals/move 1.1927 vs 1.0946  occupancy 22.97 vs 24.14
+[2026-09-06T03:59:50Z] analyze: written /home/keshav/Developer/drop7-bench/runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/analysis.md

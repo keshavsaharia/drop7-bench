@@ -19,9 +19,12 @@ import { validateScriptedRound } from "./rounds.ts";
 import { parsePosition, stateFromPosition } from "./d7p-server.ts";
 import {
   NATIVE_DECIDE_BINARY,
+  NTUPLE_QUERY_BINARY,
   RUST_DECIDE_BINARY,
   nativeBinaryAvailable,
   nativeDecide,
+  ntupleAvailable,
+  ntupleWeightsPath,
 } from "./native-policy.ts";
 
 const BENCH_DIR = dirname(fileURLToPath(import.meta.url));
@@ -258,5 +261,31 @@ test(
         }),
       /exceeded its 0s budget at depth 4/,
     );
+  },
+);
+
+test(
+  "the n-tuple query binary, when built with its frozen tables present, answers a public position deterministically",
+  {
+    skip:
+      !ntupleAvailable() &&
+      `${NTUPLE_QUERY_BINARY} is not built or ${ntupleWeightsPath()} is absent`,
+  },
+  () => {
+    const state: GameState = stateFromPosition(
+      parsePosition(["startpos", "next", "4", "rise", "5"]),
+    );
+    const policy = getPolicy("ntuple-scale-d3s7");
+    const first = policy.chooseColumn(state);
+    const second = policy.chooseColumn(state);
+    assert.equal(first, second, "same public state, same column");
+    assert.ok(
+      first !== null && first >= 0 && first < BOARD_SIZE,
+      "n-tuple policy answered with a column",
+    );
+    assert.equal(policy.publicInformation, true);
+    assert.equal(policy.family, "ntuple-rl");
+    assert.equal(policy.slow, true);
+    assert.equal(policy.chooseColumn({ ...state, gameOver: true }), null);
   },
 );

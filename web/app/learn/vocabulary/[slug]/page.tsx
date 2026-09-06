@@ -3,7 +3,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArticleLayout } from "@/components/ArticleLayout";
 import { Button } from "@/components/Button";
-import { LessonMotionToggle } from "@/components/LearnCards";
 import { Mdx } from "@/components/Mdx";
 import { PageHeader } from "@/components/PageHeader";
 import { LessonArt } from "@/components/technique-art/LessonArt";
@@ -23,14 +22,13 @@ export default async function VocabularyTopicPage({ params }: Props) {
   const topic = vocabularyTopic(slug);
   if (!topic) notFound();
   const terms = vocabularyTerms(slug);
-  return <div className="vocabulary-page learn-motion-scope">
+  return <div className="vocabulary-page">
     <PageHeader crumbs={[{ href: "/learn", label: "learn the game" }, { href: "/learn/vocabulary", label: "vocabulary" }]} title={topic.title} lead={topic.summary} />
     <nav className="learn-topic-nav" aria-label="Vocabulary topics">
       {VOCABULARY_TOPICS.map((item) => <Link key={item.slug} href={`/learn/vocabulary/${item.slug}`} aria-current={item.slug === slug ? "page" : undefined}>{item.title}</Link>)}
     </nav>
     <ArticleLayout toc={terms.map((term) => ({ id: term.id, text: term.title, depth: 2 }))} tocTitle="Terms on this page"
       aside={<div className="aside-block"><span className="label">See it in action</span><p className="learn-aside-note"><Link href={`/learn/concepts/${topic.lesson}`}>Explore a related lesson →</Link></p></div>}>
-      <div className="learn-tools"><LessonMotionToggle /></div>
       <div className="vocabulary-illustration"><LessonArt name={topic.art} mode="loop" /></div>
       {terms.length ? <dl className="vocabulary-definitions">{terms.map((term) => <div key={term.id} id={term.id} className="vocabulary-term">
         <dt><a href={`#${term.id}`} aria-label={`Link to ${term.title}`}>{term.title}<span aria-hidden="true">#</span></a></dt>

@@ -1,0 +1,18 @@
+[package]
+name = "drop7-ntuple-scale"
+version = "0.1.0"
+edition = "2021"
+description = "Row-and-column n-tuple network trained by temporal-coherence TD on the Rust bitboard engine, deployed as the leaf of the depth-3 fair expectimax (TH-20260905-ntuple-line-tuples-tc-td-leaf-bcb25133)"
+license = "MIT"
+
+# Std-only on purpose, matching the drop7-rs engine crate: the approach builds
+# hermetically with no network fetch.
+[dependencies]
+drop7-rs = { path = "../../fair-expectimax/rust-engine" }
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "unwind"
+debug = 1

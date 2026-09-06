@@ -49,6 +49,12 @@ constants anywhere in the repository are `0xa511e9b3`, `0xa54ff53a` and
 | `SL-20260823T215000Z-a5216000` | `0xa5216000`–`0xa52191ff` | 2,816 used of 12,800 | **training**, CHECK | P-SOL-1 sibling-outcome corpus: G0 ladder 0xa5216000–0xa52160ff, main corpus 0xa5217000–0xa52177ff, gate set 0xa5219000–0xa52191ff (gate origins development-read on use) | reserved |
 | `SL-20260825T063000Z-a52e0300` | `0xa52e0300`–`0xa52e12ff` | 4,096 | **training** | NNUE-evolution: teacher corpus 0xa52e0300–0xa52e04ff (512 d5s7 games), evolution fitness 0xa52e0500–0xa52e0c7f (60 generations × 32 paired games), elite re-selection 0xa52e0c80–0xa52e0cff (128 games); remainder reserved | reserved |
 | `SL-20260825T063000Z-a52e1300` | `0xa52e1300`–`0xa52e14ff` | 512 | public-development, held-out SCREEN | NNUE-evolution held-out paired screen (first 64 seeds, read once after the candidate is frozen); remainder reserved for a replication | reserved |
+| `SL-20260905T191317Z-09895ea2` | `0xa5300000`–`0xa54effff` | 2,031,616 | **training** | ntuple-scale TD training games (pilot arms and main run), read in order and wrapped | opened |
+| `SL-20260905T191317Z-549265de` | `0xa52f2240`–`0xa52f227f` | 64 | **training**, validation | ntuple-scale paired validation line-up at every validation point; chose the configuration and the candidate | opened |
+| `SL-20260905T191317Z-c25f58cd` | `0xa52f2140`–`0xa52f223f` | 256 | public-development, held-out SCREEN | ntuple-scale one-shot screen, four arms on identical seeds | opened |
+| `SL-20260906T013222Z-ce319097` | `0xa5500000`–`0xa56effff` | 2,031,616 | **training** | ntuple-scale replication at larger scale: TD training games of the wide layout, read in order and wrapped; stops below the historical `0xa5700000` block | opened |
+| `SL-20260906T013222Z-6cce6192` | `0xa52f2280`–`0xa52f237f` | 256 | **training**, validation | ntuple-scale replication: paired validation line-up at every validation point; drives the plateau stop rule and the candidate choice | opened |
+| `SL-20260906T013222Z-f34b23c0` | `0xa52f2380`–`0xa52f257f` | 512 | public-development, held-out SCREEN | ntuple-scale replication one-shot screen, six arms on identical seeds including the first experiment's frozen tables | opened |
 
 Training and evaluation ranges are disjoint by construction: evaluation lives
 under `0xa51d`, training under `0xa52`. No model trained on `SEEDLEASE-A52` has

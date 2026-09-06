@@ -1,0 +1,647 @@
+{
+  "format": "drop7-artifact-manifest-v1",
+  "experimentId": "EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620",
+  "runId": "RUN-20260905T193006Z-4fbeb4e5",
+  "createdAt": "2026-09-05T21:55:18Z",
+  "note": "Compact evidence promoted from the ignored runs/ directory. Every file is a byte copy of the run artifact named in sourcePath; sha256 is of the promoted copy and matches the source. Table files are retained on the workstation only.",
+  "files": [
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/gates.log",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/gates.log",
+      "sha256": "0a1f87558dcf40347fbc44744ce6ee83ae75cf48ce5c2021f103829e6aaeb4a0",
+      "bytes": 2295,
+      "description": "CHECK gate lines on the probe block (re-run identically by the relaunch)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pipeline.log",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pipeline.log",
+      "sha256": "313edda60fc1bfee14633a35528e415722d5e26d19fea5d1cd32dae7299b50fb",
+      "bytes": 6935,
+      "description": "stage launch and completion log"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/rusage.jsonl",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/rusage.jsonl",
+      "sha256": "9ab3887fb6c6b3aabd8f721f401fcff3d3e3b19ccb112338ea49a660bbc326b3",
+      "bytes": 7150,
+      "description": "per-stage wall, CPU and peak-RSS usage"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/analysis.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/analysis.json",
+      "sha256": "abc9f7c070ec4b8a9cc8eec4b756d0d52bb325ae31a6e5cf88e9b46bbbf4baab",
+      "bytes": 433501,
+      "description": "analyze.py summary of every stage"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/analysis.md",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/analysis.md",
+      "sha256": "ecb7860c24a09a3f49a7707519415f20891dcade7d7b4e318412007e72f03c46",
+      "bytes": 7066,
+      "description": "human-readable analysis"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/selection.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/selection.json",
+      "sha256": "01f38b5a912ba017288a0900973c16f2c1d04038f5826b71224af3fa79fd0c1f",
+      "bytes": 835,
+      "description": "pilot arm selection by the preregistered rule"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/A/config.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/A/config.json",
+      "sha256": "1748f618e7b477ee48f261d965c1774aa91657538818f6c957cc7e2cca1ee50c",
+      "bytes": 588,
+      "description": "pilot arm A configuration"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/A/progress.jsonl",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/A/progress.jsonl",
+      "sha256": "0e86340cdeabbd9367ccd73c630d849d3d5ac102dc0465b3d11b005d83d48074",
+      "bytes": 9947,
+      "description": "pilot arm A progress rows (one per 10M-move chunk)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/A/best.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/A/best.json",
+      "sha256": "46bee6faa0f35df4a6e3bd97d9e3dd3b23d744bac08e5ff4cd4b32acfaad5829",
+      "bytes": 136,
+      "description": "pilot arm A best validation point"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/A/val-000050013622.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/A/val-000050013622.json",
+      "sha256": "8052e8e87ca68c3c27c3eb743b83212c19134b59184b2cd6ccca6ebc1c71c9bf",
+      "bytes": 48751,
+      "description": "pilot arm A validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/A/val-000100030499.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/A/val-000100030499.json",
+      "sha256": "45bfe996d8e18eae2f1edc60b0e20f3a4cddf71c30a981f8ee1ae418db996b16",
+      "bytes": 48919,
+      "description": "pilot arm A validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/A/val-000150047792.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/A/val-000150047792.json",
+      "sha256": "69832126ecfe0f751bb369e5ecd92fa215672a95c91c95ea5f3e063410276bbe",
+      "bytes": 48870,
+      "description": "pilot arm A validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/A/val-000200003947.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/A/val-000200003947.json",
+      "sha256": "b2ed567b1e88ff595530cee6f1c84a81d101b04322af9e2830ffffae7410e45b",
+      "bytes": 48880,
+      "description": "pilot arm A validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/B/config.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/B/config.json",
+      "sha256": "7d11b4b1219c3f29bf96e984253be4d8821a34b1747ec51b5af5365588a8de43",
+      "bytes": 588,
+      "description": "pilot arm B configuration"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/B/progress.jsonl",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/B/progress.jsonl",
+      "sha256": "ad957918480fe295e474fe98527a70d1e398d098a2ffbc5c97cb1108c3a2a273",
+      "bytes": 9921,
+      "description": "pilot arm B progress rows (one per 10M-move chunk)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/B/best.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/B/best.json",
+      "sha256": "044d1f56a5215f202302e89f259435102e0f0b5464bc8c420cd60fcb699fc07c",
+      "bytes": 137,
+      "description": "pilot arm B best validation point"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/B/val-000050008766.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/B/val-000050008766.json",
+      "sha256": "f9b5a785095cf9a018410d82735b425e900218f0d3913dc08e74744ccfe5278a",
+      "bytes": 48631,
+      "description": "pilot arm B validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/B/val-000100018759.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/B/val-000100018759.json",
+      "sha256": "b3c69316336df8198e3eae1e23028ff42d8c75a0b9904ec72765c1f504603ed9",
+      "bytes": 48679,
+      "description": "pilot arm B validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/B/val-000150029502.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/B/val-000150029502.json",
+      "sha256": "dab11a7f0e9ca7f75e46dfe3bba24d1dd92df813ed494a60972bc743eededaa4",
+      "bytes": 48769,
+      "description": "pilot arm B validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/B/val-000200002183.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/B/val-000200002183.json",
+      "sha256": "ec56c5637cc58a27fe94adb00654667080d70e8e0784f257325cec3e67f7ba76",
+      "bytes": 48562,
+      "description": "pilot arm B validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/C/config.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/C/config.json",
+      "sha256": "1fc55beb3a8d3db3d5d28b6f18686de5f16655a106e51e4adc402ed97b7feb60",
+      "bytes": 588,
+      "description": "pilot arm C configuration"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/C/progress.jsonl",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/C/progress.jsonl",
+      "sha256": "f4285d6f682f3a1db988332e283863928c8f6817cf2f7c050a5956b4867bd4c8",
+      "bytes": 9917,
+      "description": "pilot arm C progress rows (one per 10M-move chunk)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/C/best.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/C/best.json",
+      "sha256": "55cbbc8716ee2448de57adc711b559187f93dd5a96dd5dcc94aab2c315bbe7d0",
+      "bytes": 140,
+      "description": "pilot arm C best validation point"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/C/val-000050009591.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/C/val-000050009591.json",
+      "sha256": "454cfe801386349463282418cf2c2cd2c8641665aa560685b2a471593593ddd2",
+      "bytes": 48714,
+      "description": "pilot arm C validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/C/val-000100022675.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/C/val-000100022675.json",
+      "sha256": "62267c3e63187b65cee53317b56963c8773f2e4098528a243c270f1a375e69cb",
+      "bytes": 48932,
+      "description": "pilot arm C validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/C/val-000150036213.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/C/val-000150036213.json",
+      "sha256": "70d00611fb8be694c70e91ced442fbc84768464e0cedfd2d1a8ee20d1e8ce3bf",
+      "bytes": 48850,
+      "description": "pilot arm C validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/C/val-000200002957.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/C/val-000200002957.json",
+      "sha256": "70d6be74820706acd9df7a16cad223d207c611dc9d936e59e68f8430ec20debd",
+      "bytes": 48756,
+      "description": "pilot arm C validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/D/config.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/D/config.json",
+      "sha256": "b370db453fcaec17f4c76fdff7d228a772c117412a29a57f45743832a592d9fe",
+      "bytes": 576,
+      "description": "pilot arm D configuration"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/D/progress.jsonl",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/D/progress.jsonl",
+      "sha256": "7df08b6e505d660ad5ec3a9c721529eb1fceaa2ae220bbbb920077c2094e2514",
+      "bytes": 9899,
+      "description": "pilot arm D progress rows (one per 10M-move chunk)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/D/best.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/D/best.json",
+      "sha256": "b45a67fa1ba9d7884518c8dc7a092e37d8733c9ed68a9fcee9aca48d460cf6c1",
+      "bytes": 135,
+      "description": "pilot arm D best validation point"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/D/val-000050009273.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/D/val-000050009273.json",
+      "sha256": "c0565e05c0d50c525308348019140146643e2ac7f82f5911b09ad27d8c921c0d",
+      "bytes": 48564,
+      "description": "pilot arm D validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/D/val-000100019839.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/D/val-000100019839.json",
+      "sha256": "d2684b01dea0b80582f300d630363f4488e4eee5254b31c7a3cd12b500edd009",
+      "bytes": 48779,
+      "description": "pilot arm D validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/D/val-000150030873.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/D/val-000150030873.json",
+      "sha256": "8ed1713461007b9bcbc71ef7ac6e91d281a1cf0cb48ade8f4f5cd4740f9293ce",
+      "bytes": 48794,
+      "description": "pilot arm D validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/D/val-000200002392.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/D/val-000200002392.json",
+      "sha256": "0465c5faf93b72c2ba84f277653c5994b173e60c7273d7866628f67e1bb4f754",
+      "bytes": 48640,
+      "description": "pilot arm D validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/E/config.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/E/config.json",
+      "sha256": "e26c2636c64c522c9d37b3553f74d34cad4453c80629f5ef35b3235a5fad724f",
+      "bytes": 577,
+      "description": "pilot arm E configuration"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/E/progress.jsonl",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/E/progress.jsonl",
+      "sha256": "e88a11b98abd9d15857bfcc9157b0d15ef8dda3253096922ec29b9b2b4fbb5c0",
+      "bytes": 9941,
+      "description": "pilot arm E progress rows (one per 10M-move chunk)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/E/best.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/E/best.json",
+      "sha256": "9e55338dffe6c1c70997ed055b1c205db54f634715274b31b1031974a8aca061",
+      "bytes": 136,
+      "description": "pilot arm E best validation point"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/E/val-000050007312.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/E/val-000050007312.json",
+      "sha256": "ac7412237c401488da8b9141e7e9a2eafb4ad47bab40e6cdbd700c12f987fba5",
+      "bytes": 48654,
+      "description": "pilot arm E validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/E/val-000100016374.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/E/val-000100016374.json",
+      "sha256": "cfacfa21e5dc6c049eaab706f7a25e75abcbcf02939c142bfc25b23b32a3dc25",
+      "bytes": 48641,
+      "description": "pilot arm E validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/E/val-000150025673.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/E/val-000150025673.json",
+      "sha256": "2d19877fcc0605966909cc8159fdb26df402d71d55b84720f5e72570b643e198",
+      "bytes": 48735,
+      "description": "pilot arm E validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/E/val-000200001766.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/E/val-000200001766.json",
+      "sha256": "a9b32ddc86f9992c301e4330cc2d14ff1b4802d61b1a41f99ac74669c6b7866d",
+      "bytes": 48625,
+      "description": "pilot arm E validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/F/config.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/F/config.json",
+      "sha256": "e2b923283a8c5ee054926fb7bb0ea0be3a6f741afaae2c9b01f9744ba554dbd2",
+      "bytes": 591,
+      "description": "pilot arm F configuration"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/F/progress.jsonl",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/F/progress.jsonl",
+      "sha256": "c2cda230aa4adb045d31682c0ca5c5f51451aebfb3b0ee9292c044c18780d33f",
+      "bytes": 9921,
+      "description": "pilot arm F progress rows (one per 10M-move chunk)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/F/best.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/F/best.json",
+      "sha256": "24a4ad66c78d3892f898f13bd99fc3bd2bd1f5404c2d2919252be7fbd64e75c2",
+      "bytes": 140,
+      "description": "pilot arm F best validation point"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/F/val-000050010817.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/F/val-000050010817.json",
+      "sha256": "96949edfef595c9fb0f33c0715225f0aeb9d9752dac2a0952b5b51da2b042bfd",
+      "bytes": 48804,
+      "description": "pilot arm F validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/F/val-000100024537.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/F/val-000100024537.json",
+      "sha256": "e4fe637fc6cdff58a8ca5d6951c05e9421ae254d44ecb64f49de2c5e437bd545",
+      "bytes": 48855,
+      "description": "pilot arm F validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/F/val-000150038586.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/F/val-000150038586.json",
+      "sha256": "c092f4e572f7d90097fe0516ae14fb3f62291f3c9b47683b55932010b5bfe30a",
+      "bytes": 48747,
+      "description": "pilot arm F validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/pilot/F/val-000200003528.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/F/val-000200003528.json",
+      "sha256": "14e670c81ca195ae7f38a61f4f2b1444907d3b77329efb18f358be85f2cb43e2",
+      "bytes": 48788,
+      "description": "pilot arm F validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/main/config.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/config.json",
+      "sha256": "3c6100c982053092a42277f60e1e86d463cd287b46c28e08ab054d6bcbc17bb0",
+      "bytes": 593,
+      "description": "main run configuration"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/main/progress.jsonl",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/progress.jsonl",
+      "sha256": "7e5e0fd96e44a635efabf3f0ab09b7b0740580113a27c9288039caf4261843c0",
+      "bytes": 95571,
+      "description": "main run progress rows (one per 20M-move chunk)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/main/best.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/best.json",
+      "sha256": "aa19ee2199ba99ce871353e58a6ef10556b5d1b5d647734aef638ab8568b24f3",
+      "bytes": 137,
+      "description": "main run best validation point (the candidate)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/main/candidate-weights.sha256",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/candidate-weights.sha256",
+      "sha256": "b4e3cf00a47e8929ad257dfe149503095e4f60af99d5d09a1287bd8c2f4c3030",
+      "bytes": 171,
+      "description": "SHA-256 of best-weights.bin, recorded before the screen lease opened"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/main/val-000200027819.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/val-000200027819.json",
+      "sha256": "5401ccc2a5a6985996a94f1802e01313ffd9901ba313482955d6a8282ed47563",
+      "bytes": 48759,
+      "description": "main run validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/main/val-000400060957.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/val-000400060957.json",
+      "sha256": "f4f3c93045b65f5934ce69ec75823f4d48f303844efbd9cd471669f5c0bb8fff",
+      "bytes": 48750,
+      "description": "main run validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/main/val-000600095322.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/val-000600095322.json",
+      "sha256": "f491f12dcc6c69c2fba1d2d535a1b1849f291dcae6d147ef4209120b0d143fc9",
+      "bytes": 48950,
+      "description": "main run validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/main/val-000800131078.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/val-000800131078.json",
+      "sha256": "357da82e289d1b0382c4a22d2a486304b695576a8d13f394a6e1c7b707c54446",
+      "bytes": 48777,
+      "description": "main run validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/main/val-001000167066.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/val-001000167066.json",
+      "sha256": "020ca6ed4a2ddde1b4bbf9a5e85e7b49a0895437dfacd247836fb1f8a8236d51",
+      "bytes": 48876,
+      "description": "main run validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/main/val-001200203606.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/val-001200203606.json",
+      "sha256": "57514afbf3d453608acddda306cf3d2208f21e6b49522ad91ca96f81d06fcc73",
+      "bytes": 49016,
+      "description": "main run validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/main/val-001400240319.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/val-001400240319.json",
+      "sha256": "9da12ea4270afb456b872f157eb1b847ea24b915622563b135082130923c8b99",
+      "bytes": 49060,
+      "description": "main run validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/main/val-001600277123.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/val-001600277123.json",
+      "sha256": "a80fcaa6d57b73c8bce212fc2a82195a9ee9b4ada6972b83e828497c26df8cc5",
+      "bytes": 48934,
+      "description": "main run validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/main/val-001800315771.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/val-001800315771.json",
+      "sha256": "f9d46bb728850761b233d7308036ca438a7ac4ba116264ea140145d7f00df1b8",
+      "bytes": 49020,
+      "description": "main run validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/main/val-002000352773.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/val-002000352773.json",
+      "sha256": "5419f0a564df11ecdc0a4a78002df13e64495997f9e7f21f473993ac6c953f31",
+      "bytes": 49114,
+      "description": "main run validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/main/val-002200391703.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/val-002200391703.json",
+      "sha256": "efb8f28f31ae909272c4ba5aee5f2bfd60056445baafff0d60e4ab589e867a01",
+      "bytes": 48994,
+      "description": "main run validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/main/val-002400429413.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/val-002400429413.json",
+      "sha256": "7daeb6ac0f2fde3ec640539d97d8ba4cfab35ff4847fe060d2c9419a7baba0d4",
+      "bytes": 48884,
+      "description": "main run validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/main/val-002600469503.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/val-002600469503.json",
+      "sha256": "2240b75f5f458fe15c8711f8dc0375862f00ae9a4edf2a5c45158c64cdb3fa28",
+      "bytes": 48962,
+      "description": "main run validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/main/val-002800506807.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/val-002800506807.json",
+      "sha256": "182d3511b8c124bf74da1bf57b443fc608f92c6927f8be997d947a5ebb5ea4ef",
+      "bytes": 48911,
+      "description": "main run validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/main/val-003000545916.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/val-003000545916.json",
+      "sha256": "3e35cf18be285a37174513a137dc478d7851e674454ccd4c0dae5027c9e24c2c",
+      "bytes": 48873,
+      "description": "main run validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/main/val-003200585530.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/val-003200585530.json",
+      "sha256": "6fbcf4dec68eeb70fed6195beecbf020dd96c443a5d453116af0c8ff77bd9dd3",
+      "bytes": 49053,
+      "description": "main run validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/main/val-003400627531.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/val-003400627531.json",
+      "sha256": "6ddd7a2a4990efc88676bce2dcb6e4b4b408e3400b3f6ff0725a37c4bebf3f43",
+      "bytes": 48902,
+      "description": "main run validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/main/val-003600668274.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/val-003600668274.json",
+      "sha256": "0b5f6a1723df8408d9622d17dd1b4d926a9a5c2d7a7fc626d5283745e69853bd",
+      "bytes": 48972,
+      "description": "main run validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/main/val-003800707333.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/val-003800707333.json",
+      "sha256": "721407fa0a5b302cd546161ab2e6014efdaf38f75a547de8065519998d4d7e0c",
+      "bytes": 49045,
+      "description": "main run validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/main/val-004000004271.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/val-004000004271.json",
+      "sha256": "565edbb61c56cb476112308c9ae3a80c51646b6b0bedb3b8a53ccd6a10e38a8b",
+      "bytes": 48908,
+      "description": "main run validation line-up artifact (64 paired games, training role)"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/screen/heldout.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/screen/heldout.json",
+      "sha256": "912eedc986299a3bf0727cb589e6e350067ac0db0132c7d57a29c859e3f34789",
+      "bytes": 258524,
+      "description": "per-game rows of the held-out screen: four arms x 256 games on 0xa52f2140"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/screen/compare-1ply-vs-fair-d3s7.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/screen/compare-1ply-vs-fair-d3s7.json",
+      "sha256": "b394ac86124735d0eb5fda4f4835f26c02a0759b4fe58bc213389b22fea5c33a",
+      "bytes": 4596,
+      "description": "compare.py paired report"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/screen/compare-candidate-vs-1ply.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/screen/compare-candidate-vs-1ply.json",
+      "sha256": "f9fcf678e8d1f684f0eda66fc94ca2183f9c0dfafe64a95f4d6d368b869e0e9f",
+      "bytes": 4553,
+      "description": "compare.py paired report"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/screen/compare-candidate-vs-fair-d3s7.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/screen/compare-candidate-vs-fair-d3s7.json",
+      "sha256": "e9206c7ce3d8b63118f28a34b48b1ac48bc8379cde1aef7fe7a129fb724a74be",
+      "bytes": 4547,
+      "description": "compare.py paired report"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/screen/compare-candidate-vs-fair-d4s7.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/screen/compare-candidate-vs-fair-d4s7.json",
+      "sha256": "4b44ea5f98ceb099cbfaa8fe43e759138af4dcaaedb60253b7250b0a4ddca928",
+      "bytes": 4534,
+      "description": "compare.py paired report"
+    },
+    {
+      "path": "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/screen/compare-fair-d4s7-vs-fair-d3s7.json",
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/screen/compare-fair-d4s7-vs-fair-d3s7.json",
+      "sha256": "597520a498480815cfb7775fb54ccfa0ac91860d063a8a12d4283d3d6a281b3f",
+      "bytes": 4548,
+      "description": "compare.py paired report"
+    }
+  ],
+  "retainedLocally": [
+    {
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/best-weights.bin",
+      "sha256": "0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b",
+      "bytes": 4000000052,
+      "description": "the frozen candidate tables (weights only), 1,000,000,000 f32 entries"
+    },
+    {
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/latest-weights.bin",
+      "sha256": null,
+      "bytes": 4000000052,
+      "description": "the tables at the end of the 4e9-move budget (weights only)"
+    },
+    {
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/checkpoint.bin",
+      "sha256": null,
+      "bytes": 12000000052,
+      "description": "final checkpoint with temporal-coherence accumulators"
+    },
+    {
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/A/best-weights.bin",
+      "sha256": null,
+      "bytes": 1920000053,
+      "description": "pilot arm A best-weights.bin (weights only)"
+    },
+    {
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/A/latest-weights.bin",
+      "sha256": null,
+      "bytes": 1920000053,
+      "description": "pilot arm A latest-weights.bin (weights only)"
+    },
+    {
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/B/best-weights.bin",
+      "sha256": null,
+      "bytes": 800000053,
+      "description": "pilot arm B best-weights.bin (weights only)"
+    },
+    {
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/B/latest-weights.bin",
+      "sha256": null,
+      "bytes": 800000053,
+      "description": "pilot arm B latest-weights.bin (weights only)"
+    },
+    {
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/C/best-weights.bin",
+      "sha256": null,
+      "bytes": 4000000052,
+      "description": "pilot arm C best-weights.bin (weights only)"
+    },
+    {
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/C/latest-weights.bin",
+      "sha256": null,
+      "bytes": 4000000052,
+      "description": "pilot arm C latest-weights.bin (weights only)"
+    },
+    {
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/D/best-weights.bin",
+      "sha256": null,
+      "bytes": 1680000041,
+      "description": "pilot arm D best-weights.bin (weights only)"
+    },
+    {
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/D/latest-weights.bin",
+      "sha256": null,
+      "bytes": 1680000041,
+      "description": "pilot arm D latest-weights.bin (weights only)"
+    },
+    {
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/E/best-weights.bin",
+      "sha256": null,
+      "bytes": 240000043,
+      "description": "pilot arm E best-weights.bin (weights only)"
+    },
+    {
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/E/latest-weights.bin",
+      "sha256": null,
+      "bytes": 240000043,
+      "description": "pilot arm E latest-weights.bin (weights only)"
+    },
+    {
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/F/best-weights.bin",
+      "sha256": null,
+      "bytes": 1920000053,
+      "description": "pilot arm F best-weights.bin (weights only)"
+    },
+    {
+      "sourcePath": "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pilot/F/latest-weights.bin",
+      "sha256": null,
+      "bytes": 1920000053,
+      "description": "pilot arm F latest-weights.bin (weights only)"
+    }
+  ]
+}

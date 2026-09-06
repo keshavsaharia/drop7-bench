@@ -1,0 +1,103 @@
+{
+  "title": "Cache capacity and search time",
+  "kind": "line",
+  "x": {
+    "label": "Allocated private table bytes",
+    "unit": "bytes",
+    "scale": "log"
+  },
+  "y": {
+    "label": "Median seconds per six-root batch",
+    "unit": "s"
+  },
+  "notes": "Six constructed public roots per repeat, five alternating-order repeats on an interactive Apple M3 Pro. Depth 4, seven chance strata, completed searches with exact value checks. Whiskers show the minimum and maximum repeat times, not confidence intervals. CHECK mechanics evidence; these roots and elapsed times do not measure playing strength. The table view lists the plotted values and their sources.",
+  "series": [
+    {
+      "name": "Cache from depth 1",
+      "points": [
+        {
+          "x": 49152,
+          "y": 13.765320706999999,
+          "lo": 12.900046083,
+          "hi": 15.87003029,
+          "sourceRecord": "RS-20260905T193830Z-9733627a",
+          "sourceField": "metrics.cacheSweep[0].searchSeconds.median"
+        },
+        {
+          "x": 786432,
+          "y": 11.305829207,
+          "lo": 10.863634457,
+          "hi": 13.915851373999999,
+          "sourceRecord": "RS-20260905T193830Z-9733627a",
+          "sourceField": "metrics.cacheSweep[1].searchSeconds.median"
+        },
+        {
+          "x": 12582912,
+          "y": 10.844751666,
+          "lo": 10.567564667000001,
+          "hi": 15.703921667,
+          "sourceRecord": "RS-20260905T193830Z-9733627a",
+          "sourceField": "metrics.cacheSweep[2].searchSeconds.median"
+        }
+      ]
+    },
+    {
+      "name": "Cache from depth 2",
+      "points": [
+        {
+          "x": 49152,
+          "y": 14.552607167,
+          "lo": 14.22443475,
+          "hi": 19.221573707,
+          "sourceRecord": "RS-20260905T193830Z-9733627a",
+          "sourceField": "metrics.cacheSweep[3].searchSeconds.median"
+        },
+        {
+          "x": 786432,
+          "y": 14.691235999,
+          "lo": 14.226332792000001,
+          "hi": 18.742962541,
+          "sourceRecord": "RS-20260905T193830Z-9733627a",
+          "sourceField": "metrics.cacheSweep[4].searchSeconds.median"
+        },
+        {
+          "x": 12582912,
+          "y": 14.636157542000001,
+          "lo": 14.264442209,
+          "hi": 19.334200167,
+          "sourceRecord": "RS-20260905T193830Z-9733627a",
+          "sourceField": "metrics.cacheSweep[5].searchSeconds.median"
+        }
+      ]
+    },
+    {
+      "name": "Cache from depth 3",
+      "points": [
+        {
+          "x": 49152,
+          "y": 16.145632625,
+          "lo": 16.093131833,
+          "hi": 20.142076583,
+          "sourceRecord": "RS-20260905T193830Z-9733627a",
+          "sourceField": "metrics.cacheSweep[6].searchSeconds.median"
+        },
+        {
+          "x": 786432,
+          "y": 16.163902168,
+          "lo": 15.8311245,
+          "hi": 16.791400042,
+          "sourceRecord": "RS-20260905T193830Z-9733627a",
+          "sourceField": "metrics.cacheSweep[7].searchSeconds.median"
+        },
+        {
+          "x": 12582912,
+          "y": 16.042083918,
+          "lo": 15.574642708,
+          "hi": 16.474896875,
+          "sourceRecord": "RS-20260905T193830Z-9733627a",
+          "sourceField": "metrics.cacheSweep[8].searchSeconds.median"
+        }
+      ]
+    }
+  ]
+}

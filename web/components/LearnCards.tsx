@@ -21,7 +21,3 @@ export function VocabularyCards({ heading = "h3" }: { heading?: "h2" | "h3" }) {
     </li>)}
   </ul>;
 }
-
-export function LessonMotionToggle() {
-  return <label className="learn-motion-toggle"><input type="checkbox" />Pause illustrations</label>;
-}

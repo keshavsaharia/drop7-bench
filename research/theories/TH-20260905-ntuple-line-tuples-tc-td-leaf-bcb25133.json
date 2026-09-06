@@ -1,0 +1,47 @@
+{
+  "$schema": "../schemas/theory-v1.schema.json",
+  "format": "drop7-theory-v1",
+  "theoryId": "TH-20260905-ntuple-line-tuples-tc-td-leaf-bcb25133",
+  "title": "A row-and-column n-tuple network trained by temporal-coherence TD on a billion engine moves beats the frozen fair leaf inside the same depth-3 search",
+  "claim": "An n-tuple value function over the public board, made of absolute-position seven-cell row tuples, seven-cell column tuples (rise-phase conditioned) and two-by-three and three-by-two window tuples (about 4.8 x 10^8 table entries), trained on-policy by TD(0) with temporal-coherence step sizes from at least 10^9 engine moves of one-ply chance-state play on the Rust bitboard engine, and deployed as the leaf of the stock depth-3 seven-stratum fair expectimax, achieves a higher mean whole-game score than the identical search with the frozen fair leaf on never-read paired development games.",
+  "mechanism": "(1) Representation. A numbered disc clears exactly when the contiguous occupied run through it in its row or its column equals its value. A full-row or full-column tuple sees every cell of that line, so the clear condition, the run lengths a drop would create, and the values sitting in a line are a direct table lookup instead of something eighteen linear terms must approximate; the leaf-swing diagnostic (2026-09-02, nnue-evolution) measured the leaf term carrying about 97% of the spread between columns at every depth, so evaluator quality is the axis with headroom. The recorded n-tuple attempts used four-cell windows (optimistic-phase: 184 windows, 50M moves) or five/six-cell windows with 10^4 games (temporal-coherence: ~9.3M weights, 10,000 games), never a full line, and were 7,000-point scored. (2) Training signal. TD on the engine's own returns fits the deployed quantity (expected remaining score, 94% of which is rise bonus, r = 0.9995 with lifetime per finding-01) rather than a proxy label, which is where the leaf-reweight (finding-14) and treestrap (RS-20260903T013022Z-b0937bf9) refits lost; and a chance-state value is action-free, so every column's afterstate is scored by the same table and no sibling is left unlabelled (the sibling trap that sank the family's supervised students). This is the recipe that reached strong 2048 play (Szubert & Jaskowski 2014; Jaskowski 2018: n-tuple networks of 10^8 weights, temporal-coherence learning, 10^9+ training moves, shallow expectimax at play time); Drop7 is the same problem class, a single-player fully-observed stochastic MDP with chance nodes, because covered values are i.i.d. and only ever revealed, never inferred, so the public state is Markov. (3) Deployment. Previous n-tuple policies were evaluated standalone or under a representative-outcome search that averaged nothing; here the tables are the leaf of the fair chance-averaging search, which is where the leaf's influence is multiplied. (4) Cost. A lookup evaluator costs tens of nanoseconds per state (two L2 table lookups per column word, a nibble gather per row), far under the leaf budget, so the deployed configuration is exactly the frozen fair leaf's d3s7 search with the evaluator swapped.",
+  "falsificationCriteria": [
+    "Training-signal check (pilot tier, training-role seeds): if at no validation point during the main training run does the paired mean score of the tables inside d3s7 exceed the frozen fair leaf inside d3s7 on the 64-game training-role validation block, TD is not producing a leaf that helps the search and the claim fails without opening the screen.",
+    "Primary falsifier: the frozen candidate's held-out 256-game paired screen against the frozen fair leaf at the identical d3s7 configuration fails any pass criterion of EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620 (bootstrap 95% LB of the paired score delta <= 0, Student-t LB <= 0, a negative half, or a lower-quartile regression).",
+    "Mechanism ablation (pilot tier): if a windows-only layout (no row or column tuples) trained with the same budget on the same seeds reaches a validation paired margin at least as large as the full layout's, the full-line leg of the mechanism is not supported even if the candidate stands.",
+    "Direct-play diagnostic: the tables played directly one ply are reported on the screen; if they beat the fair d3s7 search while the tables as its leaf do not, the search is compounding the evaluator's errors (the optimistic-phase failure mode) and the deployment leg of the mechanism is refuted."
+  ],
+  "informationClass": "public-policy",
+  "lifecycle": "assessed",
+  "assessment": "supported-as-tested",
+  "evidenceTier": "public-development",
+  "dependencies": [
+    "TH-20260825-evolved-nnue-leaf-d3-0f47e46c",
+    "TH-20260824-rust-bitboard-engine-f68fcbfd"
+  ],
+  "evidenceRefs": [
+    "approaches/ntuple-rl/temporal-coherence/README.mdx",
+    "approaches/ntuple-rl/optimistic-phase/README.mdx",
+    "docs/research/history.md",
+    "docs/exploratory/finding-01-score-is-survival.md",
+    "docs/exploratory/finding-14-leaf-reweight.md",
+    "research/results/RS-20260903T013022Z-b0937bf9.json",
+    "research/results/RS-20260824T075451Z-e89ea128.json",
+    "web/content/log/2026-09-02.mdx",
+    "research/results/RS-20260905T215332Z-95d18a5a.json",
+    "research/runs/RUN-20260905T193006Z-4fbeb4e5.json",
+    "research/experiments/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620.json",
+    "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/manifest.json",
+    "research/results/RS-20260906T040113Z-6ba93171.json",
+    "research/runs/RUN-20260906T013222Z-ba0ee34f.json",
+    "research/experiments/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a.json",
+    "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/manifest.json"
+  ],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5-1",
+    "agentId": "claude-code-ntuple-scale-experiment"
+  },
+  "createdAt": "2026-09-05T19:10:57Z",
+  "updatedAt": "2026-09-06T04:01:14Z"
+}

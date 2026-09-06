@@ -1,0 +1,319 @@
+---
+date: 2026-09-05
+title: "Full-row lookup tables and a leaner Rust evaluator"
+summary: "Two threads landed today. A lookup-table leaf trained by temporal-difference play became the first learned evaluator to pass its screen against the fair leaf. Separately, the Rust search completed the same constructed-root decisions faster after avoiding unused leaf work, while a simpler portable unpacking routine produced no credible independent speedup."
+contributors: [claude-fable-5-1 (Claude Code), unknown (Codex)]
+tags: [n-tuple, temporal-difference, leaf, rust, pomdp, pilot, engines, transposition-table, optimization, mechanics]
+outcomes: { positive: 5, negative: 3, open: 2 }
+---
+
+## Is it a POMDP?
+
+The owner asked whether the Drop7 decision problem had been framed as a
+partially observable Markov decision process anywhere in the program, and
+what the literature on solving such problems offers. The answer from the
+record is narrower than the question. The flow-ceiling findings do describe
+the fair planner as a determinized, hindsight-optimization controller with
+strategy-fusion bias, which is POMDP vocabulary, and recommend a belief-state
+search. But Kimi's direct-policy program argued the public state is a
+sufficient statistic, and audit 01 found the base engine draws a covered
+disc's value at the moment it is revealed: covered values are independent,
+uniform and only ever observed by being revealed. The belief over them never
+sharpens, so the belief-MDP is the public-state MDP and the fair search with
+an exact reveal quadrature already solves it. What the POMDP literature
+does offer is a name for the fair planner's bias (DESPOT keeps one action
+per belief node across sampled scenarios, where hindsight optimization
+plans each scenario separately) and a literature on students imitating
+privileged teachers, which is the shape of the program's oracle failures.
+
+<Direction title="Which open directions have the best odds" status="closed" owner="claude-fable-5-1 (Claude Code)">
+Ranked for the owner: evolve a zero-initialised residual on top of the fair
+leaf rather than a distilled replacement; row and column n-tuples at 2048
+scale trained by temporal-difference play; play the finding-11 blend;
+re-run the survival-leaf blend at seven strata with low-noise labels; and,
+as the one measurement that decides between search and evaluator work, a
+scenario-tree fair search at seven plies. The owner chose the n-tuple
+direction.
+</Direction>
+
+## The experiment
+
+The recorded n-tuple attempts used four-cell windows, or five- and six-cell
+windows on ten thousand games, were played standalone or under a
+representative-outcome search, and were scored on the old 7,000-point
+scale. This one reads every full row and full column as a seven-cell pattern
+(ten million patterns per line), adds two-by-three and three-by-two windows,
+splits the column tables by the rise clock, and trains the resulting 480
+million entries by TD(0) with temporal-coherence step sizes from one-ply play
+on the Rust bitboard engine. The tables are then the leaf of the depth-3,
+seven-stratum fair search. Theory
+`TH-20260905-ntuple-line-tuples-tc-td-leaf-bcb25133`, experiment
+`EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620`, run
+`RUN-20260905T193006Z-4fbeb4e5`, all on branch
+`claude/n-tuple-scale-experiment`.
+
+<Finding title="Pattern indices come straight from the packed column words" kind="neutral" metric="44 ns per board for 74 patterns">
+The engine stores each column as one 32-bit word with four bits per cell. A
+column's pattern number is two small table lookups on that word (the low
+four nibbles and the high three), with no unpacking. Rows need one nibble
+from each of the seven words; windows read two or three adjacent nibbles of
+neighbouring words. The gate binary measured feature extraction at 44
+nanoseconds per board and a direct one-ply decision at about 5 microseconds
+with the reveal-sample shortcut, which skips the remaining samples when the
+first one revealed nothing.
+</Finding>
+
+<Finding title="The trainer runs at 1.4 million moves per second on 32 threads" kind="neutral" metric="4 million-move smoke run, 5.8 GB of tables">
+A four-million-move smoke run on the already-open probe block measured
+1.4 million training moves per second with the full 480-million-entry
+layout, so a billion training moves is about twelve minutes. Training-game
+mean score rose from 117,500 to 162,186 over the four chunks of that run
+(one-ply play, no search).
+</Finding>
+
+## The pilot
+
+Six configurations each trained for two hundred million moves on the same
+seed order and were placed as the leaf of the depth-3 search on the 64-game
+training-role validation block. Run `RUN-20260905T193006Z-4fbeb4e5`, pilot
+artifacts under `pilot/<arm>/`.
+
+<ArmTable
+  caption="Pilot arms after two hundred million training moves: paired margin of the tables inside the depth-3 search over the frozen fair leaf in the same search, 64 training-role games. From analysis.json of the run."
+  columns={[
+    { key: "arm", label: "arm" },
+    { key: "layout", label: "layout" },
+    { key: "alpha", label: "step size", numeric: true },
+    { key: "entries", label: "table entries", numeric: true },
+    { key: "final", label: "final margin", numeric: true, delta: true },
+    { key: "best", label: "best margin", numeric: true, delta: true },
+  ]}
+  rows={[
+    { arm: "A", layout: "rows, columns, windows; phase on columns", alpha: "1.0", entries: "480,000,000", final: "+95,051", best: "+170,874" },
+    { arm: "B", layout: "rows, columns, windows; no phase", alpha: "1.0", entries: "200,000,000", final: "-70,587", best: "-35,091" },
+    { arm: "C", layout: "rows, columns, windows; phase on all", alpha: "1.0", entries: "1,000,000,000", final: "+123,950", best: "+123,950", highlight: true },
+    { arm: "D", layout: "rows and columns only; phase on columns", alpha: "1.0", entries: "420,000,000", final: "+26,951", best: "+94,015" },
+    { arm: "E", layout: "windows only; no phase", alpha: "1.0", entries: "60,000,000", final: "-83,261", best: "-80,696" },
+    { arm: "F", layout: "rows, columns, windows; phase on columns", alpha: "0.25", entries: "480,000,000", final: "+73,116", best: "+112,886" },
+  ]}
+/>
+
+<Finding title="Full rows and columns are what matters, and the rise clock has to be in the tables" kind="positive" metric="windows only -83,261; no phase -70,587; full layout with phase +95,051 to +123,950">
+The windows-only arm, the mechanism ablation, lost to the fair leaf on the
+validation block, and so did the arm whose column tables ignored the rise
+clock. Every arm with full rows and columns and phase-conditioned column
+tables beat the fair leaf. The preregistered rule picked arm C, every family
+conditioned on the rise clock, at a final margin of 123,950.
+</Finding>
+
+<DeadEnd title="The chain stalled for 52 minutes on an empty file" cost="52 min of wall time, no seed" verdict="closed">
+The stage that picks the arm redirected its output to selection.json, which
+created the file empty before the analysis script read it, and the script
+crashed parsing it. Nothing was re-read and no artifact was rewritten; the
+stage now writes through a temporary file and the chain was relaunched from
+the selection.
+</DeadEnd>
+
+## The main run and the screen
+
+Arm C trained from scratch for four billion moves in 42 minutes at about
+two million moves per second, about 46 million one-ply games, with a
+validation point every two hundred million moves.
+
+<Finding title="All twenty validation points beat the fair leaf" kind="positive" metric="margins from +115,925 to +270,023; candidate at 1.4 billion moves">
+Every validation point of the main run had the tables ahead of the fair leaf
+inside the same depth-3 search on the 64 training-role games. The margins
+were noisy from point to point and did not settle; the largest, 270,023 at
+1.4 billion moves (607,633 against 337,611, 47 wins to 17), was frozen as the
+candidate, SHA-256 recorded before the screen lease opened. About 99 million
+of the billion table entries had been updated by then.
+</Finding>
+
+<Finding title="The screen passes: 484,577 against 314,438 on 256 held-out games" kind="positive" metric="+170,139 paired, bootstrap lower bound +130,499, 167-0-89">
+On the 256 never-read public-development games (`0xa52f2140`), the tables as
+the depth-3 leaf averaged 484,577 points and 140.21 moves; the identical
+search with the frozen fair leaf averaged 314,438 and 92.58. The paired
+difference is 170,139 with a bootstrap 95% lower bound of 130,499 and a
+Student-t lower bound of 130,560, both halves positive (198,575 and
+141,704), lower quartile 212,820 against 175,832, and no illegal or
+incomplete decision in any arm. Every preregistered criterion passes
+(`RS-20260905T215332Z-95d18a5a`, run valid, outcome pass, screen tier).
+</Finding>
+
+<Finding title="It also beats the depth-4 reference on the same games" kind="positive" metric="+106,775 paired against fair-d4s7, lower bound +62,574">
+The fair leaf at depth 4, the program's standing reference, averaged 377,803
+on the same seeds, and the tables at depth 3 beat it by 106,775 (bootstrap
+lower bound 62,574, 160 wins to 96). This arm was diagnostic and never part
+of the gate. On these seeds fair-d4s7 itself beat fair-d3s7 by 63,365.
+</Finding>
+
+<Finding title="The tables need the search: played directly they lose" kind="negative" metric="281,441 one ply, -32,997 against fair-d3s7">
+The same tables played directly one ply averaged 281,441 and lost to the fair
+leaf's depth-3 search by 32,997. The search over the tables is worth 203,137
+paired on these games. This is the opposite of the optimistic-phase result
+of an earlier n-tuple, where search made the network worse; the difference is
+that this search averages over chance instead of following one guessed
+outcome.
+</Finding>
+
+<Direction title="What the record supports next" status="proposed" owner="claude-fable-5-1 (Claude Code)">
+A fresh-block replication by a different runner; the same frozen tables
+inside the depth-4 search on a fresh development block, which the leaf cost
+makes affordable and which was never run; and a longer or wider training run,
+since the validation margins were still noisy rather than plateaued. None of
+these opens a protected or final seed. The
+[approach page](/approach/ntuple-rl/ntuple-scale) carries the run's figures
+and the full results table.
+</Direction>
+
+## Leaf computation
+
+The Rust engine already packs the board into columns for drops and gravity.
+Its fair leaf, the function that scores a board when look-ahead stops, converts
+those columns into row-major bytes because it reads cells and neighbours
+repeatedly. Today's check kept the evaluator's answers unchanged and looked
+for calculations it could avoid.
+
+The leaf was gathering possible support from other numbered discs even when
+the occupied run was already short enough for the target disc. That release
+term must then be zero. It now checks the run length first. Solid covered
+discs also select only their two strongest neighbouring supports, while
+cracked discs preserve the sorted multiplication order required for identical
+floating-point values.
+
+<Finding title="The completed search uses fewer instructions" kind="positive" metric="1.07× search speedup">
+
+On six constructed root positions over five alternating repeats, the
+depth-4 search with seven chance samples fell from 12.052394167 to
+11.257799041 median seconds. It kept the same completed-search values,
+selected actions, and logical work, while retiring 4.4384% fewer instructions.
+The leaf batch, with 1.2M calls per repeat over the same five repeats, ran
+1.16989× faster and retired 10.6541% fewer instructions. These are local
+mechanics measurements on an interactive Apple M3 Pro workstation. The
+[optimization result](/results/RS-20260905T193830Z-9733627a) records their scope;
+they do not measure stronger play.
+
+</Finding>
+
+## Portable unpacking
+
+<DeadEnd title="Direct nibble extraction did not show an independent speed gain" verdict="configuration-rejected">
+
+The portable byte conversion used a general-purpose bit-scatter helper with a
+constant mask. Replacing it with direct nibble shifts made the source shorter,
+but the unpack batch retired almost the same number of instructions:
+109,784,960 before and 109,720,197 after, across 1.2M conversions per repeat
+and five repeats. It also showed no credible latency improvement. This
+suggests the compiler already simplified the old constant-mask operation.
+The clearer expression is retained without a standalone speed claim. This
+negative result is recorded alongside the useful leaf changes in the
+[same result](/results/RS-20260905T193830Z-9733627a).
+
+</DeadEnd>
+
+## Cache controls
+
+The search now checks whether a position is deep enough to cache before
+packing or hashing its key. Its minimum cache depth and entry count can be
+adjusted separately. Raising the depth threshold avoids shallow bookkeeping;
+reducing capacity changes allocated memory. Each adjustment can also lose
+useful hits, so the measurements track completed-search time and work together.
+
+An optional shared cache lets workers reuse one another's completed results
+within a decision. A bounded set of stripe locks protects full keys and
+values. Workers try the lock once and keep searching on contention, so they
+can still duplicate work before either has published its answer. Storage is
+fresh for each decision, keeping evaluator and parameter changes separate.
+Private worker tables remain the default.
+
+The capacity sweep found useful shallow hits: at gate 1, the 16,384-entry
+private table used 786,432 bytes and completed the six roots in 11.305829207
+median seconds. The 262,144-entry table used 12,582,912 bytes and took
+10.844751666 seconds. Larger capacity removed relatively little additional
+work, while deeper-only caching lost shallow hits and did more computation.
+The result retains every setting, including the cache-free comparison.
+
+At four workers with the same aggregate entry budget, shared storage reduced
+median work by 5.2% and instructions by 3.9%, with a 1.03× ratio of latency
+medians. It was slightly slower with one worker. These modest gains keep it
+optional. All 210 timed processes completed inside the registered budget;
+the new charts show the full repeat ranges alongside their medians.
+
+The [Rust engine page](/engine/rust) and its
+[approach page](/approach/fair-expectimax/rust-engine) now explain these paths
+with live source excerpts and a diagram. The historical measurements remain
+available with their original machines, workloads, and limitations.
+
+## Verification
+
+Codex implemented and checked the leaf changes, cache controls, and shared
+storage, then updated the explanatory pages. The check compares raw value
+bits and complete decisions, with native floating-point contraction disabled
+where necessary. It preserves the established canonical search behavior;
+it does not establish a new raw-board reflection guarantee.
+
+<AgentContext summary="Records and verification">
+
+The theory is
+[TH-20260905-rust-bitboard-improvements-1c56b072](/theories/TH-20260905-rust-bitboard-improvements-1c56b072),
+the experiment is
+[EX-20260905-rust-bitboard-improvements-check-c68c07b7](/experiments/EX-20260905-rust-bitboard-improvements-check-c68c07b7),
+and the result is
+[RS-20260905T193830Z-9733627a](/results/RS-20260905T193830Z-9733627a).
+The comparison summary is retained at
+`artifacts/results/EX-20260905-rust-bitboard-improvements-check-c68c07b7/RUN-20260905T191558Z-f9e6cb1d/summary.json` and the profile at
+`research/system-profiles/MACH-20260905T191558Z-4a61bc91.json`.
+
+The before/after depth-4 arm uses cache gate 1 and 16,384 entries. Both arms
+retain 39,288,466 logical work units on the six constructed roots. The host
+had Chrome, WindowServer, and Codex active, with no exclusive CPU allocation
+or affinity control; the check paused its own builds and tests while timing.
+
+All 40 Rust release tests passed. The native gates compared six leaf values
+and six depth-4/seven-stratum root decisions with `-ffp-contract=off`.
+The C++ trajectory arm compared 575 moves across 32 fixtures; the TypeScript
+arm compared 660 moves across 32 fixtures. Both reported zero mismatches.
+The root npm suite passed 144 tests with two skips. `make -k test` passed its
+native and TypeScript gates but failed on 96 pre-existing missing historical
+artifact errors. Those missing files were not reconstructed or relabelled. The web build, typecheck, lint and
+70 web tests pass; the separate chart library retains one pre-existing stale
+snapshot assertion (63/64 pass). The route sweep passes 727/728, with only
+`/compete` blocked by absent local authentication configuration. Both Rust
+pages and cards pass, as do all eight missing-data render checks.
+
+No new gameplay cohort was opened. This is a CHECK engineering contribution;
+the public-information boundary and the frozen qualification standard remain
+unchanged. Shared-cache schedules may change work counts, so exact
+completed-depth values do not imply the same bounded-work fallback across
+different cache configurations.
+
+</AgentContext>
+
+## Review corrections
+
+The model attribution originally used a family name without a retained exact
+runtime identifier. Codex corrected the contribution records and this entry
+to mark the model as unknown. The named agents and their individual work
+remain recorded.
+
+Review also questioned whether a family README could be mistaken for an
+approach. The existing test passes: the matcher accepts lowercase directory
+names, which excludes the uppercase README filename. Dedicated regression
+tests now cover that exclusion and keep links to an approach's own README.
+
+<AgentContext summary="Attribution correction and review scope">
+
+The correction applies to the `actor.model` fields in
+`CT-20260905T191837Z-e4c168cf`, `CT-20260905T192431Z-4e8df10b`,
+`CT-20260905T192431Z-fc562fcd`, and `CT-20260905T195626Z-d598d2a3`.
+Each contribution record includes an explanation. The frozen experiment
+retains its original metadata and hash; its `gpt-6` attribution should be
+read with this correction. The measured engine source and promoted result
+artifacts are unchanged. This maintenance review collected no new gameplay
+or performance measurements.
+
+The focused regression tests are in `web/lib/records.test.ts`. The discussion
+and validation summary are retained on
+[PR #26](https://github.com/keshavsaharia/drop7-bench/pull/26).
+
+</AgentContext>

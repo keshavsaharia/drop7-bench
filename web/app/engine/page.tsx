@@ -60,26 +60,14 @@ export default function EnginesPage() {
       <PageHeader
         crumbs={[{ href: "/research", label: "research" }]}
         title="Engines"
-        lead="Several implementations of the same rules, each proven to play the same game as the C++ reference."
+        lead="These are the various implementations of a Drop7 game that are used in the research."
       />
 
       <div className="prose-drop7">
         <p>
-          An engine here is the code that plays the game: it places a disc, finds the discs that pop, resolves the
-          chain, applies gravity, raises the gray row every fifth move and deals the next disc (the rules are on{" "}
-          <Link href="/learn/rules">the rules page</Link>). Every strategy on this site runs on one of them, and every
-          board drawn on this site comes out of one. There are several because the work asks different things of the
-          same rules: one is written to be read and tested, one plays hundreds of thousands of games, one holds a
-          fixed hidden board so a position can be solved exactly, and one packs the board into seven integers. The one
-          rule for admitting a new engine is that it passes its own gates first and then replays whole games against
-          the C++ reference, and any difference at all is a failure.
-        </p>
-        <p>
-          Two facts frame every number on this page. Every timing was taken on one shared workstation under
-          background load, so the trustworthy quantity is the ratio between arms measured back to back; an absolute
-          nanosecond figure depends on the load at the time. And the run artifacts behind the benchmarks are kept
-          outside version control, so what survives is the result record that summarises each run, and every figure
-          here cites that record.
+          An *engine* is the code that plays{" "}<Link href="/learn/rules">the game</Link>. The TypeScript engine is
+          generally used for scripting and low-throughput scenarios, while the <Link href="/engine/rust">Rust engine</Link>
+          enables high-performance computing and massive parallelism.
         </p>
       </div>
 
@@ -106,8 +94,7 @@ export default function EnginesPage() {
       <section className="engine-section" aria-labelledby="side-by-side">
         <h2 id="side-by-side">Side by side</h2>
         <p className="engine-note">
-          One table for everything the records say about the engines. Rows about the code (board bytes, latent mode)
-          hold facts; rows about speed hold values quoted from the result record or finding named in the last column.
+          Here is a full table that combines all the records about the various engine measurements, so they can easily be compared side by side.
         </p>
         <div className="engine-compare">
           <table className="data-table" aria-describedby="engine-compare-caption">
@@ -150,12 +137,11 @@ export default function EnginesPage() {
           </table>
         </div>
         <p className="engine-caveat" id="engine-compare-caption">
-          Every cell is a recorded value or a fact about the code, and a cell reading &ldquo;not recorded&rdquo; means
-          the measurement was not retained. The record behind the speed columns says of itself: &ldquo;
+          The record behind the latency columns notes: &ldquo;
           {MACHINE_CAVEAT}&rdquo; (<SourceRef source={RS_RUST} />).
         </p>
         <p className="engine-caveat">
-          No engine number has ever been taken on an idle host, and nothing in this table qualifies as a clean
+          Nothing in this table qualifies as a clean
           performance baseline under <Link href="/docs/benchmarks">the benchmark rules</Link>. A clean measurement
           would need exclusive resources, three repeats and a scaling preflight.
         </p>

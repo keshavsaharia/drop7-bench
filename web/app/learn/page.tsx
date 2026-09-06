@@ -1,7 +1,7 @@
 import "./learn.css";
 import Link from "next/link";
 import { Card } from "@/components/Card";
-import { LessonMotionToggle, ConceptCards, VocabularyCards } from "@/components/LearnCards";
+import { ConceptCards, VocabularyCards } from "@/components/LearnCards";
 import { PageHeader } from "@/components/PageHeader";
 import { LessonArt } from "@/components/technique-art/LessonArt";
 import { TechniqueArt } from "@/components/technique-art/TechniqueArt";
@@ -20,9 +20,8 @@ export default function LearnPage() {
   const techniques = listTechniques();
   const guides = pages.filter((page) => ["benchmarking", "protocol"].includes(page.slug));
   return (
-    <div className="learn-hub learn-motion-scope">
+    <div className="learn-hub">
       <PageHeader title="Learn the game" lead={LEARN_DESCRIPTION} />
-      <div className="learn-tools"><LessonMotionToggle /></div>
       <section className="learn-section learn-start" aria-label="Start playing Drop7">
         <div className="learn-card-grid learn-card-grid--start">
           <Card href="/learn/rules" className="learn-featured" heading="h2" art={<LessonArt name="rules" mode="loop" />}

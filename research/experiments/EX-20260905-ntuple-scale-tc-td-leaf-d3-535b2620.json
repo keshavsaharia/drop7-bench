@@ -1,0 +1,99 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620",
+  "theoryIds": [
+    "TH-20260905-ntuple-line-tuples-tc-td-leaf-bcb25133"
+  ],
+  "title": "Row-and-column n-tuple network trained by temporal-coherence TD on the Rust engine, screened as the leaf of the depth-3 seven-stratum fair search",
+  "classification": "algorithmic",
+  "hypothesis": "Candidate: the stock fair expectimax search at depth 3, seven chance strata, terminal utility -1,000,000, policy seed 0xd7075eed, completion-guaranteeing work bound work_bound_for(3,7)+1, 64k-entry direct-mapped table (the nnue-evolution deployment configuration), with an n-tuple lookup-table leaf: the sum, over the active patterns of the reflection-canonical board, of learned f32 entries in rise units (x 17,000 points), the layout chosen by the pilot from {rows, cols, win23, win32} x {phase=none, cols, all} where rows/cols are absolute-position seven-cell line tuples (10^7 entries each), win23/win32 are absolute-position 2x3 and 3x2 window tuples (30 placements each, 10^6 entries each) and phase conditions a family on the moves remaining until the rise (x5). The visible next disc is not an input. Weights: fresh tables initialised to 20 rise units spread over the active entries, trained on-policy by TD(0) with temporal-coherence per-entry step sizes (alpha x |E|/A, alpha = 1.0 unless the pilot selects 0.25; error clamped to +-30 rise units) from complete games played by the greedy one-ply chance-state policy over the same tables (seven stratified reveal samples per column from the public sampler, epsilon 0) on the Rust bitboard engine, 32 asynchronous workers sharing the tables without locks (Hogwild; a lost update is tolerated and training is therefore not bit-reproducible across runs, disclosed as a limitation; the gate binary proves the serial update rule is deterministic). Stage 0 (CHECK): gate --probe-start 0xa5277000 on the already-opened Rust-engine probe block; all gates must pass before the first leased seed is read. Stage A (PILOT, training-role seeds): six configuration arms trained from scratch for 2 x 10^8 moves each on SL-20260905T191317Z-09895ea2 read in order from 0xa5300000 (every arm reads the same seed order), validated every 5 x 10^7 moves on the 64-game training-role validation block SL-20260905T191317Z-549265de (0xa52f2240) with the paired line-up ntuple-d3s7 / ntuple-1ply / fair-d3s7 on identical seeds: A rows,cols,win23,win32,phase=cols alpha 1.0; B rows,cols,win23,win32,phase=none alpha 1.0; C rows,cols,win23,win32,phase=all alpha 1.0; D rows,cols,phase=cols alpha 1.0 (lines only); E win23,win32,phase=none alpha 1.0 (windows only, the mechanism ablation); F rows,cols,win23,win32,phase=cols alpha 0.25. Selection rule, fixed here: the arm whose final validation point (2 x 10^8 moves) has the largest paired mean score margin of ntuple-d3s7 over fair-d3s7; ties by fewer table entries. Stage B (main run, training-role seeds): the selected configuration trained from fresh tables for 4 x 10^9 moves or 18,000 s of wall time, whichever comes first, on the same training lease and seed order, chunk 2 x 10^7 moves, validation every 2 x 10^8 moves on the same validation block, checkpoint at every validation point; the candidate is the tables at the validation point with the largest paired margin (best-weights.bin; ties to the later point). Stage C (freeze): SHA-256 of best-weights.bin recorded as candidate-weights.sha256 before the screen lease opens. Stage D (SCREEN, public-development, one-shot): 256 paired games on SL-20260905T191317Z-c25f58cd (0xa52f2140-0xa52f2240) with four arms on identical seeds: candidate-d3s7 (the candidate), candidate-1ply (the same tables played directly, diagnostic), fair-d3s7 (the comparator: the identical search with the frozen fair leaf) and fair-d4s7 (the program's standing reference, diagnostic). Every stage runs through approaches/ntuple-rl/ntuple-scale/scripts/pipeline.sh, which hard-codes the leased sub-blocks and records per-stage wall, CPU and peak-RSS usage. Timing measured on the 2026-09-05 smoke run: 1.4 x 10^6 training moves per second on 32 threads with the arm-A layout (4.8 x 10^8 entries, 5.76 GB trainable), so the pilot costs about 15 minutes and the main run about 50 minutes of training plus validation.",
+  "candidate": {
+    "name": "d3s7-ntuple-scale-leaf",
+    "entryPoint": "approaches/ntuple-rl/ntuple-scale/src/bin/train.rs",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "fair-d3s7",
+    "entryPoint": "approaches/fair-expectimax/rust-engine/src/leaf.rs",
+    "manifestRef": "research/benchmarks/baselines-v1.json"
+  },
+  "informationBoundary": "public-policy",
+  "benchmarkTier": "SCREEN",
+  "data": {
+    "role": "public-development",
+    "seedLeaseRefs": [
+      "SL-20260905T191317Z-09895ea2",
+      "SL-20260905T191317Z-549265de",
+      "SL-20260905T191317Z-c25f58cd"
+    ],
+    "datasetRefs": [],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "CHECK gates and the throughput smoke run read only the already-opened development probe block 0xa5276000-0xa5277fff (the Rust engine's gate/benchmark range); no new seed is opened for mechanics or timing. Training (pilot arms and main run) reads the training lease 0xa5300000-0xa54f0000 in order and wraps when the block is exhausted (wrap counts recorded per run); the validation block 0xa52f2240-0xa52f2280 (training role) is re-read at every validation point and drives configuration and checkpoint selection; the held-out screen opens 0xa52f2140-0xa52f2240 exactly once, after the candidate is frozen. Training, validation and screen ranges are disjoint by construction."
+  },
+  "metrics": {
+    "primary": "paired mean whole-game score delta, candidate-d3s7 minus fair-d3s7, both at the identical d3s7 configuration, 256 held-out games",
+    "secondary": [
+      "paired mean moves delta; numbered clears per move and cover reveals per move; mean occupied cells",
+      "lower quartile, median, maximum score; W-T-L; first-half (seeds 0-127) and second-half (128-255) paired mean deltas",
+      "diagnostic arm on the same seeds: candidate-1ply (the tables played directly one ply, seven reveal strata)",
+      "reference arm on the same seeds: fair-d4s7 (the program's standing reference configuration), diagnostic only",
+      "training-curve diagnostics: per-validation-point paired margin of ntuple-d3s7 and ntuple-1ply over fair-d3s7 on the training-role validation block, training-game mean score and length, mean |TD error|, mean coherence, touched table entries",
+      "pilot diagnostics: the six arms' validation curves, including the windows-only mechanism ablation"
+    ],
+    "statisticalUnit": "whole-game",
+    "uncertaintyMethod": "one-sided 95% percentile bootstrap over whole games, 20,000 resamples, RNG seed 0xb0071eaf (the unchanged compare.py of the leaf-evolution screen), plus a one-sided 95% Student-t lower bound; detection floor 1.645*sd/sqrt(n) reported"
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "All CHECK gates passed before the first training seed was read: codec against Horner, row gather against the cell accessor, feature indices against the independent reference for every layout, information-boundary blindness (score/level/moves_played/next_disc), reflection consistency of values and decisions, direct-policy legality, leaf-in-search determinism and worker-count independence, serial training determinism, finiteness.",
+      "Every validation artifact and the screen artifact have illegalDecisions 0 and incompleteDecisions 0; censored games are reported as censored.",
+      "Held-out screen, 256 paired games on 0xa52f2140-0xa52f223f, candidate-d3s7 vs fair-d3s7: bootstrap 95% lower bound of the paired score delta > 0 AND Student-t 95% lower bound > 0.",
+      "Held-out screen: paired mean score delta > 0 in both halves (seeds 0-127 and 128-255).",
+      "Held-out screen: candidate-d3s7 lower-quartile score >= fair-d3s7 lower-quartile score.",
+      "The screened candidate is the exact frozen best-weights.bin of the main run (candidate-weights.sha256 recorded before the screen lease opens); no other table is screened."
+    ],
+    "failureAction": "Record a valid run with scientific outcome fail for this exact configuration (tuple layout, phase conditioning, optimiser, budget, deployment depth); do not adopt the tables; the diagnostic and reference arms and the pilot curves are reported as diagnostics; open no further cohort for this candidate.",
+    "passAction": "Freeze best-weights.bin with its SHA-256; register a fresh-block replication by a different runner and a fresh-development STANDARD evaluation as successors; do not open protected or final seeds."
+  },
+  "resources": {
+    "wallSeconds": 43200,
+    "cpuThreads": 32,
+    "maxHostBytes": 34359738368,
+    "maxGpuBytes": null,
+    "gpuDevices": []
+  },
+  "stopConditions": [
+    "Stop on any rules, information-boundary, legality, determinism, or parity failure.",
+    "A pilot arm stops at 2 x 10^8 moves; the main run stops at 4 x 10^9 moves or 18,000 s of training wall time, whichever comes first, or when a STOP file appears in the run directory; the candidate is then the best validation point so far.",
+    "A validation or screen artifact with any illegal or incomplete decision voids the run (invalid), not the candidate.",
+    "The screen is evaluated exactly once; no re-run on the same or a different held-out block without a new experiment record.",
+    "The theory's training-signal falsifier (no validation point with a positive paired margin) is evaluated and reported separately; the screen is opened once on the frozen candidate regardless."
+  ],
+  "expectedArtifacts": [
+    "runs/<run-id>/ntuple-scale/gates.log (CHECK)",
+    "runs/<run-id>/ntuple-scale/pilot/<arm>/{config.json,progress.jsonl,val-*.json,best.json,best-weights.bin,latest-weights.bin} (stage A) and pilot/selection.json",
+    "runs/<run-id>/ntuple-scale/main/{config.json,progress.jsonl,val-*.json,best.json,best-weights.bin,latest-weights.bin,checkpoint.bin,DONE} (stage B)",
+    "runs/<run-id>/ntuple-scale/main/candidate-weights.sha256 (stage C)",
+    "runs/<run-id>/ntuple-scale/screen/heldout.json + compare-*.json (stage D)",
+    "runs/<run-id>/ntuple-scale/{pipeline.log,rusage.jsonl,analysis.json,analysis.md}",
+    "artifacts emitted by train and screen carry this experiment id in their config field; table files are too large for the repository and are retained on the workstation with their SHA-256 in the result record"
+  ],
+  "lifecycle": "completed",
+  "protocolSha256": "4a867db795eec7e5e0858e58d6f59b14a13ed8ec03629cd155ce37a4b174b718",
+  "amendments": [
+    {
+      "timestamp": "2026-09-05T21:55:18Z",
+      "beforeControlledData": false,
+      "reason": "lifecycle advanced running -> completed after run RUN-20260905T193006Z-4fbeb4e5 and result RS-20260905T215332Z-95d18a5a were written; protocol content otherwise unchanged (frozen hash ee8eabb0512f459bb0acbb717e335d5e6953d2ac7ec57400f2a35b9f1c76b65d retained in the run and lease records). Operational note: the pipeline's select-arm stage aborted on an empty output file between the pilot and the main run (fixed in commit bd87dba); the relaunch changed no block, gate, stage order or artifact."
+    }
+  ],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5-1",
+    "agentId": "claude-code-ntuple-scale-experiment"
+  },
+  "createdAt": "2026-09-05T19:13:17Z",
+  "updatedAt": "2026-09-05T21:55:18Z"
+}

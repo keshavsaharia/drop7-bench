@@ -1,0 +1,302 @@
+{
+  "format": "drop7-artifact-manifest-v1",
+  "experimentId": "EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a",
+  "runId": "RUN-20260906T013222Z-ba0ee34f",
+  "createdAt": "2026-09-06T04:01:14Z",
+  "note": "Compact evidence promoted from the ignored runs/ directory. Every file is a byte copy of the run artifact named in sourcePath; sha256 is of the promoted copy and matches the source. Table files are retained on the workstation only.",
+  "files": [
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/gates.log",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/gates.log",
+      "sha256": "51a636bed0bae6e049652d7536a6d8a11aed95a1fdc26699b1abd65a193a02bb",
+      "bytes": 2795,
+      "description": "CHECK gate lines on the probe block (second invocation; the first panicked on terminal states, see the run record)"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/pipeline.log",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/pipeline.log",
+      "sha256": "cecf7de679d6ab0f59b8ffbc3e214751248cb6061b7cadfc12a4f2fb20d12a27",
+      "bytes": 3283,
+      "description": "stage launch and completion log"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/rusage.jsonl",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/rusage.jsonl",
+      "sha256": "b4bd3bc344e80962f4fa0b10ad3a9336bfb9d0db850838ca06abff73a65d0893",
+      "bytes": 3356,
+      "description": "per-stage wall, CPU and peak-RSS rows, including the panicked first gate invocation"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/prep.nohup",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/prep.nohup",
+      "sha256": "dd5e338d7a4357958d7977936d14693a01342d0cb4baf4e026525fe0510b1bb7",
+      "bytes": 239,
+      "description": "stdout/stderr of the gates and smoke launch"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/chain.nohup",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/chain.nohup",
+      "sha256": "b584bf74e6081ed3c6fa1f0b9f2b2b35c85121fdff68c8c04c8a830dd435838d",
+      "bytes": 4636,
+      "description": "stdout/stderr of the main -> freeze -> screen -> compare -> analyze chain"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/smoke/config.json",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/smoke/config.json",
+      "sha256": "d319354a65fa42e7505bb8f25c73fdc226cf6baa428fd14dd8c5096ce3e891b9",
+      "bytes": 653,
+      "description": "throughput smoke run configuration (probe block, tables discarded)"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/smoke/progress.jsonl",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/smoke/progress.jsonl",
+      "sha256": "2d2070393c3a9f780639c225e1d066584c5d07918d168bb783abb6548d5f61f6",
+      "bytes": 1590,
+      "description": "throughput smoke run progress rows"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/smoke/DONE",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/smoke/DONE",
+      "sha256": "6162300186ac0ad46ed71fb603f28b0500a0e48cd5f5c521e9bba5c074395924",
+      "bytes": 51,
+      "description": "smoke completion marker"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/main/config.json",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/main/config.json",
+      "sha256": "8972852aff1fab4cf5247774294682ea4d3d640dff08536c4aeefb55aa8c3610",
+      "bytes": 679,
+      "description": "main run configuration"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/main/progress.jsonl",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/main/progress.jsonl",
+      "sha256": "f0ada99d1e104f9c27203387c90a506ff31babda497afc58926cae7ea131e814",
+      "bytes": 44924,
+      "description": "main run progress rows: one per 5e7-move chunk with the quick checks, validation summaries and plateau readings"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/main/best.json",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/main/best.json",
+      "sha256": "54b8ba04d4258d425c00e350c8ebc3dc8a2c16950bc319ba0923cb835b7219c6",
+      "bytes": 146,
+      "description": "the validation point frozen as the candidate"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/main/stop.json",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/main/stop.json",
+      "sha256": "d18d0848da096b9d5a3f651c47613a3d280ad7ed96e43001dcd3e72fd6c075be",
+      "bytes": 230,
+      "description": "why and where the main run stopped"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/main/DONE",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/main/DONE",
+      "sha256": "f21b8c4e5b8c241563198b6c2cb0450ae0b420cd66cd24d932bbc32cea631f2b",
+      "bytes": 57,
+      "description": "main completion marker"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/main/candidate-weights.sha256",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/main/candidate-weights.sha256",
+      "sha256": "e176972afbdbfea26fef3f5ebc1130122737d1aa9078d9b9f42f6b14e084c362",
+      "bytes": 171,
+      "description": "SHA-256 of best-weights.bin, recorded before the screen lease opened"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/main/prior-weights.sha256",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/main/prior-weights.sha256",
+      "sha256": "b4e3cf00a47e8929ad257dfe149503095e4f60af99d5d09a1287bd8c2f4c3030",
+      "bytes": 171,
+      "description": "SHA-256 of the first experiment's frozen tables, verified before the screen lease opened"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/main/train.log",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/main/train.log",
+      "sha256": "6f8d5b3948933c22b036a4f54afc592276d173815254513a3bd01d7a10c0fd44",
+      "bytes": 640,
+      "description": "main run stdout"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/main/train.err",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/main/train.err",
+      "sha256": "83c141b2dcb870b75cd130c816732b4b6f37539aa4e1151a7dc3ba66c3091939",
+      "bytes": 9207,
+      "description": "main run stderr (chunk, quick and validation lines)"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/screen/heldout.json",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/screen/heldout.json",
+      "sha256": "7396b656ba400381a1be6d942821a8cd8e8a6d1cf85efb2a8e8718a427cfb646",
+      "bytes": 773133,
+      "description": "the one-shot 512-game screen: six arms, per-game rows"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/screen.log",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/screen.log",
+      "sha256": "6305409692c2fcc02f48c3d3defb23abc84fb34ed783b47a7aaba039bf9a8de6",
+      "bytes": 606,
+      "description": "screen stdout"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/screen.err",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/screen.err",
+      "sha256": "0b1ea5987e3fe5132ca34700ffada3086e3a07453d09b5220a0b31b4365593ad",
+      "bytes": 502,
+      "description": "screen stderr (per-arm means and timings)"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/analysis.json",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/analysis.json",
+      "sha256": "66c09dbe122c61869295cea1c8f180d82e0e690727b065a57584571284cde4ce",
+      "bytes": 125014,
+      "description": "analyze.py summary of every stage"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/analysis.md",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/analysis.md",
+      "sha256": "3325efe4e3b10aa84b161fae55fd2dd95a023d46ba8ff42101e98ff3ff8eeadc",
+      "bytes": 7427,
+      "description": "analyze.py summary, readable"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/main/val-000500034572.json",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/main/val-000500034572.json",
+      "sha256": "62dbd683e84253972e0c3b3abe39ccc045fadb87cf0bd06d3390cb8806e429ce",
+      "bytes": 193576,
+      "description": "validation line-up artifact (ntuple-d3s7, ntuple-1ply, fair-d3s7 on the 256-game block)"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/main/val-001000072627.json",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/main/val-001000072627.json",
+      "sha256": "87e42fbcd1cd43a082f0ad044e7d24c4fb6867029c900ec9df331d9434e8e3ee",
+      "bytes": 193153,
+      "description": "validation line-up artifact (ntuple-d3s7, ntuple-1ply, fair-d3s7 on the 256-game block)"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/main/val-001500111255.json",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/main/val-001500111255.json",
+      "sha256": "3dad321fda939d8426fb5aa0097ea1f72178f94ae968e3236a0c37c717cbea34",
+      "bytes": 193496,
+      "description": "validation line-up artifact (ntuple-d3s7, ntuple-1ply, fair-d3s7 on the 256-game block)"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/main/val-002000153332.json",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/main/val-002000153332.json",
+      "sha256": "1a625467dcea149f07149afa5447ced3aac9f7453fdcf89106b7cb0e4c31ff81",
+      "bytes": 193623,
+      "description": "validation line-up artifact (ntuple-d3s7, ntuple-1ply, fair-d3s7 on the 256-game block)"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/main/val-002500198069.json",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/main/val-002500198069.json",
+      "sha256": "fb945af7fbc63fe4e05995e6d2fe0a5b1ec194cf27dcd87aae22bf0f7fc10457",
+      "bytes": 193538,
+      "description": "validation line-up artifact (ntuple-d3s7, ntuple-1ply, fair-d3s7 on the 256-game block)"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/main/val-003000240102.json",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/main/val-003000240102.json",
+      "sha256": "687ab0fdee0f1eea5d1a1035c3aa25b6154385d01c9e5d86793d95858d880a83",
+      "bytes": 193460,
+      "description": "validation line-up artifact (ntuple-d3s7, ntuple-1ply, fair-d3s7 on the 256-game block)"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/main/val-003500281390.json",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/main/val-003500281390.json",
+      "sha256": "779279f3df06f40d123e8dc1f65822c13fac1d8d1f91aa88041329188283d0d4",
+      "bytes": 193576,
+      "description": "validation line-up artifact (ntuple-d3s7, ntuple-1ply, fair-d3s7 on the 256-game block)"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/main/val-004000326496.json",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/main/val-004000326496.json",
+      "sha256": "e5b1d360a4250989bbe8e5005d600ab223addb9fd3536f211fc05aa1a5c9ead0",
+      "bytes": 193555,
+      "description": "validation line-up artifact (ntuple-d3s7, ntuple-1ply, fair-d3s7 on the 256-game block)"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/main/val-004500370590.json",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/main/val-004500370590.json",
+      "sha256": "b14ff4c235f2c38296bcd5f0331ccc835964057e584f47d9dedcefe5a107f4b6",
+      "bytes": 193629,
+      "description": "validation line-up artifact (ntuple-d3s7, ntuple-1ply, fair-d3s7 on the 256-game block)"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/screen/compare-candidate-1ply-vs-fair-d3s7.json",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/screen/compare-candidate-1ply-vs-fair-d3s7.json",
+      "sha256": "136f77b086e39d5fc1b17595008777dc8d6f90e76bc49c0dfe2a8df92770bcda",
+      "bytes": 4635,
+      "description": "compare.py paired report"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/screen/compare-candidate-d3s7-vs-candidate-1ply.json",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/screen/compare-candidate-d3s7-vs-candidate-1ply.json",
+      "sha256": "acbc9f3aebf4575c613736102485cb766c2504b5f883a478edd0136ff6101ad6",
+      "bytes": 4647,
+      "description": "compare.py paired report"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/screen/compare-candidate-d3s7-vs-fair-d3s7.json",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/screen/compare-candidate-d3s7-vs-fair-d3s7.json",
+      "sha256": "2826c969e333051d17835cfbe1c63b209f1f2975261062c3d5ce3748a97c13a1",
+      "bytes": 4644,
+      "description": "compare.py paired report"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/screen/compare-candidate-d3s7-vs-fair-d4s7.json",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/screen/compare-candidate-d3s7-vs-fair-d4s7.json",
+      "sha256": "ac7653ef2b3916d74e45f63f933597f0e5d852eed5fa07d50c66b1ed8e8e3928",
+      "bytes": 4625,
+      "description": "compare.py paired report"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/screen/compare-candidate-d3s7-vs-prior-d3s7.json",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/screen/compare-candidate-d3s7-vs-prior-d3s7.json",
+      "sha256": "69a35e8c090a9a6ffb7170e1a545d62e994e3a1436564dd93c163da615acba4a",
+      "bytes": 4667,
+      "description": "compare.py paired report"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/screen/compare-fair-d4s7-vs-fair-d3s7.json",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/screen/compare-fair-d4s7-vs-fair-d3s7.json",
+      "sha256": "b9db7c7abfa7190f19f0be3440283c87b9ba54c5c8ffc4a027fb8feb0dcbe094",
+      "bytes": 4622,
+      "description": "compare.py paired report"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/screen/compare-prior-d3s7-vs-fair-d3s7.json",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/screen/compare-prior-d3s7-vs-fair-d3s7.json",
+      "sha256": "3a8de327a38c4f13bd7f3f12d5106324ce9416def8276d123feb44113c9d1da6",
+      "bytes": 4617,
+      "description": "compare.py paired report"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/screen/compare-prior-d3s7-vs-fair-d4s7.json",
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/screen/compare-prior-d3s7-vs-fair-d4s7.json",
+      "sha256": "7e1292ec10ec0de3953bdd24cff5eeec384af1da47c2763de5f8893716aa4451",
+      "bytes": 4636,
+      "description": "compare.py paired report"
+    }
+  ],
+  "retainedLocally": [
+    {
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/main/best-weights.bin",
+      "bytes": 23200000064,
+      "sha256": "824b0a39a90d8a5aae63438c1538d4c5022f0e0f09c75fb7e2d758a1d6c6fb8a",
+      "description": "the frozen candidate (weights only); retained on the workstation only"
+    },
+    {
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/main/latest-weights.bin",
+      "bytes": 23200000064,
+      "sha256": "1ad531e4794bf9f88133dec2076adfc4805c51adc3fcf4dd626e33b1f23f6230",
+      "description": "the tables at the last chunk (weights only); retained on the workstation only"
+    },
+    {
+      "sourcePath": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/main/checkpoint.bin",
+      "bytes": 69600000064,
+      "sha256": "37b3a2f6dfbb0360f7c68b3c3e44393d720e7acf90166d38f7962a52d95a8683",
+      "description": "weights plus coherence accumulators at the last checkpoint; retained on the workstation only"
+    }
+  ]
+}

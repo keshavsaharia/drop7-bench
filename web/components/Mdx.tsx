@@ -19,6 +19,7 @@ import { AgentContext, Reveal, TechnicalDetails, TechnicalRecord } from "./Revea
 import { ArmTable, DeadEnd, Direction, Finding, LogQuote, Timeline } from "./ResearchLog";
 import { RepoDocAnchor } from "./RepoDocAnchor";
 import * as Evolution from "./Evolution";
+import * as NTupleScale from "./NTupleScale";
 import * as Primers from "./primers";
 import {
   RustExplosionBitplanesFigure,
@@ -49,6 +50,7 @@ const components = {
   ...ConceptsB,
   ...ConceptsC,
   ...Evolution,
+  ...NTupleScale,
   ...Primers,
   RustExplosionBitplanesFigure,
   RustPackedBoardFigure,

@@ -1,0 +1,51 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260905T191558Z-f9e6cb1d",
+  "experimentId": "EX-20260905-rust-bitboard-improvements-check-c68c07b7",
+  "lifecycle": "completed",
+  "runValidity": "valid",
+  "startedAt": "2026-09-05T19:15:58Z",
+  "endedAt": "2026-09-05T20:06:49Z",
+  "protocolSha256": "6321f52f7e8d74a1395d7703a10b874ef3a1cbcc3c673f8a8bd9037cbc0cdf4e",
+  "machineProfileRef": "research/system-profiles/MACH-20260905T191558Z-4a61bc91.json",
+  "sourceState": {
+    "gitCommit": "7adb6b36412b4bbef25623183dac1a905570cd1a",
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": "8bd937909de0f0c997bde837f1243db4d0bed1d09d5a903c702da4fdda967112"
+  },
+  "command": [
+    "RUSTFLAGS='-C target-cpu=native' RUST_TEST_THREADS=1 CARGO_TARGET_DIR=build/rust-bitboard-improvements/candidate cargo test --release --jobs 4 --manifest-path approaches/fair-expectimax/rust-engine/Cargo.toml",
+    "python3 approaches/fair-expectimax/rust-engine/experiments/optimization-check/measure.py --phase compare --baseline build/rust-bitboard-improvements/baseline/target/release/optimization_check --candidate build/rust-bitboard-improvements/leaf-only/target/release/optimization_check --roots approaches/fair-expectimax/rust-engine/experiments/optimization-check/roots.txt --output runs/RUN-20260905T191558Z-f9e6cb1d/leaf-compare --repeats 5",
+    "python3 approaches/fair-expectimax/rust-engine/experiments/optimization-check/measure.py --phase compare --baseline build/rust-bitboard-improvements/baseline/target/release/optimization_check --candidate build/rust-bitboard-improvements/candidate/release/optimization_check --roots approaches/fair-expectimax/rust-engine/experiments/optimization-check/roots.txt --output runs/RUN-20260905T191558Z-f9e6cb1d/compare --repeats 5",
+    "python3 approaches/fair-expectimax/rust-engine/experiments/optimization-check/measure.py --phase sweep --baseline build/rust-bitboard-improvements/baseline/target/release/optimization_check --candidate build/rust-bitboard-improvements/candidate/release/optimization_check --roots approaches/fair-expectimax/rust-engine/experiments/optimization-check/roots.txt --output runs/RUN-20260905T191558Z-f9e6cb1d/sweep --repeats 5",
+    "python3 approaches/fair-expectimax/rust-engine/experiments/optimization-check/measure.py --phase parallel --baseline build/rust-bitboard-improvements/baseline/target/release/optimization_check --candidate build/rust-bitboard-improvements/candidate/release/optimization_check --analyzer build/rust-bitboard-improvements/candidate/release/analyze --roots approaches/fair-expectimax/rust-engine/experiments/optimization-check/roots.txt --output runs/RUN-20260905T191558Z-f9e6cb1d/parallel --repeats 5"
+  ],
+  "seedLeaseRefs": [],
+  "resourceLimits": {
+    "wallSeconds": 14400,
+    "cpuThreads": 4,
+    "maxHostBytes": 4294967296,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": 3051.806438,
+    "cpuSeconds": 2047.2,
+    "peakHostBytes": 14172160,
+    "peakGpuBytes": null,
+    "measurementNotes": "Wall is run-record span including setup/checks. CPU and peak RSS are measured benchmark children only, not compiler/browser/agent usage.210 processes sum 1762.724547493 elapsed seconds; no parallel task builds/tests during timing, at most 4 search workers. Interactive shared host without exclusive CPU/affinity. Table projection is separately bounded; allocator metadata and thread stacks are excluded from it. Compiler metadata retained from all three Cargo build caches: rustc 1.96.0 (ac68faa20 2026-05-25), aarch64-apple-darwin, LLVM 22.1.2, native target features."
+  },
+  "exitCode": 0,
+  "stopReason": "All registered timed arms completed; validation limitations disclosed.",
+  "artifactRefs": [
+    "artifacts/results/EX-20260905-rust-bitboard-improvements-check-c68c07b7/RUN-20260905T191558Z-f9e6cb1d/manifest.json",
+    "artifacts/results/EX-20260905-rust-bitboard-improvements-check-c68c07b7/RUN-20260905T191558Z-f9e6cb1d/summary.json"
+  ],
+  "contributionIds": [
+    "CT-20260905T191837Z-e4c168cf",
+    "CT-20260905T192431Z-4e8df10b",
+    "CT-20260905T192431Z-fc562fcd",
+    "CT-20260905T195626Z-d598d2a3"
+  ]
+}

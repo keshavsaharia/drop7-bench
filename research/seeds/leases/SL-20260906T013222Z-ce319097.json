@@ -1,0 +1,25 @@
+{
+  "$schema": "../schemas/seed-lease-v1.schema.json",
+  "format": "drop7-seed-lease-v1",
+  "seedLeaseId": "SL-20260906T013222Z-ce319097",
+  "experimentId": "EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a",
+  "rngAlgorithm": "mulberry32 with mix32 domain separation (src/core/native/engine.hpp); headless disc stream kNextDiscDomain, reveal stream kRevealDomain; Rust bitboard engine bit-identical (RS-20260824T075451Z-e89ea128)",
+  "domain": "environment",
+  "role": "training",
+  "rangeStartHex": "0xa5500000",
+  "rangeEndExclusiveHex": "0xa56f0000",
+  "cohortManifestSha256": null,
+  "state": "opened",
+  "reservedAt": "2026-09-06T01:32:22Z",
+  "openedAt": "2026-09-06T01:44:14Z",
+  "closedAt": null,
+  "protocolSha256": "0284abf064ef24fe47ae1ee1b3a7d63245b9f470bdcdcbf00976576bb1d67df8",
+  "runIds": [
+    "RUN-20260906T013222Z-ba0ee34f"
+  ],
+  "notes": [
+    "Conservative import 2026-09-06: every 8-hex-digit constant under docs/, approaches/, src/, research/, artifacts/, web/content/ and scripts/ was enumerated (grep -rhoE '0x[0-9a-fA-F]{8}'); no constant has prefix 0xa55 or 0xa56, and the only constant in 0xa52f2280-0xa52f2580 is 0xa52f2280 itself, which is the exclusive end boundary of the first experiment's validation lease SL-20260905T191317Z-549265de and is never read there. The pool 0xa52c0000-0xa5300000 (the ./do-research allocator's) is used up to 0xa52f2280 exclusive by earlier leases; the ranges below start there and overlap no existing lease record and no protected (0x7d) or final (0xd7) prefix. The first experiment's blocks (training 0xa5300000-0xa54f0000, validation 0xa52f2240-0xa52f2280, screen 0xa52f2140-0xa52f2240) are disjoint from all three.",
+    "TD training games of the replication's main run: 2,031,616 never-read seeds read in order from 0xa5500000, wrapping to the block start when exhausted; the wrap count is recorded in progress.jsonl (seedWraps). Training-role data: re-reading is permitted and disclosed; nothing trained on it can be evaluated on it. The block stops at 0xa56f0000, below the historical gameplay block at 0xa5700000.",
+    "Opened 2026-09-06T01:44:14Z by run RUN-20260906T013222Z-ba0ee34f for the main run's training games."
+  ]
+}

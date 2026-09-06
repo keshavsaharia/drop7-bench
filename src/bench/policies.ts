@@ -12,6 +12,7 @@ import { evaluateRiskSensitiveMoves } from "../core/typescript/risk-sensitive-pl
 import { evaluateRobustOpenLoopBeam } from "../core/typescript/robust-open-loop-beam.ts";
 import {
   nativeDecide,
+  ntupleDecide,
   RUST_BUILD_HINT,
   RUST_DECIDE_BINARY,
 } from "./native-policy.ts";
@@ -274,6 +275,17 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
         // overran a two-hour budget, so the limit is four hours.
         timeoutMs: 14_400_000,
       }),
+  }),
+  define({
+    id: "ntuple-scale-d3s7",
+    name: "N-tuple tables, fair D3, 7 strata",
+    family: "ntuple-rl",
+    description:
+      "The frozen lookup tables of the first n-tuple-scale run as the leaf of the Rust engine's completed depth-3 search with seven chance strata, through the crate's one-shot query binary (approaches/ntuple-rl/ntuple-scale/build.sh --bin query_move); the 4 GB table file is a run artifact under runs/, or DROP7_NTUPLE_WEIGHTS.",
+    researchPath: "/approach/ntuple-rl/ntuple-scale",
+    publicInformation: true,
+    slow: true,
+    chooseColumn: (state) => ntupleDecide(publicOnly(state)),
   }),
 ];
 

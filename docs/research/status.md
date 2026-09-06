@@ -1,8 +1,56 @@
 # Research Status
 
+## September 2026
+
+On 2026-09-05 a learned evaluator beat the frozen fair leaf inside the same
+search for the first time, at screen tier. Lookup tables over every full row
+and full column of the board (ten million patterns per line), plus small
+windows, all conditioned on the rise clock, were trained by temporal-difference
+play on the Rust engine for four billion moves and placed as the leaf of the
+depth-3 seven-stratum fair search. On 256 never-read paired public-development
+games the tables scored **484,577 points and 140 moves** against 314,438 and
+93 for the identical search with the fair leaf: paired +170,139, bootstrap 95%
+lower bound +130,499, both halves positive, 167 wins to 89
+([RS-20260905T215332Z-95d18a5a](../../research/results/RS-20260905T215332Z-95d18a5a.json),
+[approach page](../../approaches/ntuple-rl/ntuple-scale/README.mdx)). On the same games the
+tables at depth 3 also beat the fair leaf at depth 4, the standing reference
+(377,803), by 106,775 with a lower bound of 62,574; that arm was diagnostic,
+not the preregistered comparator.
+
+What this does and does not change. The evidence tier is SCREEN on public
+development seeds, opened once; it is not a qualification, no protected or
+final seed was opened, and the mean is under half the million-point target.
+The candidate was chosen at the best of twenty training-role validation
+points, so its screen margin is the honest number and its validation margin
+(+270,023) is not.
+
+On 2026-09-06 the result replicated on a second, disjoint block. The same
+frozen tables (SHA-256 verified) played 512 never-read public-development
+games as the depth-3 leaf and scored **487,066 against 326,717** for the
+fair leaf in the same search: paired +160,349, bootstrap 95% lower bound
++129,753, both halves positive, 330 wins to 182
+([RS-20260906T040113Z-6ba93171](../../research/results/RS-20260906T040113Z-6ba93171.json)).
+The same experiment trained a six-times-wider evaluator (2x4 and 4x2 window
+families added, 5.8 x 10^9 entries) on fresh training seeds until a
+256-game validation margin stopped rising (a window-of-four plateau rule,
+which fired at 4.5 x 10^9 moves); that candidate passed the same gate on the
+same 512 games (481,869, paired +155,153, lower bound +126,819) and came out
+5,196 behind the first tables with bounds from -40,535 to +29,158, so the
+preregistered scale verdict is inconclusive: no gain larger than about
+35,000 in either direction. Played directly with no search the wide tables
+averaged 328,039 against 294,323 for the first tables on the same games,
+level with the fair leaf's depth-3 search; the extra scale improved the
+one-ply policy and left the leaf where it was. Both candidates beat the
+fair leaf at depth 4 on these games by more than 84,000. The first tables
+now have two passing screens on disjoint blocks and are the candidate to
+carry forward; the next steps the record supports are those tables as the
+leaf of the depth-4 search on a fresh development block, a STANDARD-tier
+evaluation on fresh development seeds, and a study of why a better one-ply
+evaluator is not a better leaf.
+
 ## August 2026
 
-The best dependable policy found so far is [fair depth-4
+Through August the best dependable policy was [fair depth-4
 expectimax](/approach/fair-expectimax) — a four-move look-ahead that treats
 the game's luck honestly. Even with its best chance model, its measured
 means sit under half of that target. This page shows where the gap is, what has
@@ -201,6 +249,7 @@ caption: Every closed direction whose headline is a points number, one row each,
 | The `suite-h9-v1` scenario benchmark as a strength measure | Ranked policies backwards, Spearman −0.257 ([finding-10](../exploratory/finding-10-suite-validation.md)) | A validated longer horizon; it remains usable as a diagnostic |
 | A depth-5-distilled NNUE leaf refined by whole-game evolution inside the depth-3 search | Rejected at this budget: −106,964 paired on 64 held-out games (LB −146,580, floor 38,357), 14-0-50; the training-signal falsifier failed (0 of the last 10 generations above the fair control). Evolution did beat its own warm start by +35,375 (LB +16,899) ([RS-20260903T025751Z-6577b33e](../../research/results/RS-20260903T025751Z-6577b33e.json)) | A warm start that holds the teacher's ordering (the 0.441 top-1 probe is near the zero-leaf level), a larger teacher corpus than the 177 games the slow depth-5 teacher produced, or a continuation from the generation-60 population to see where the still-rising curve plateaus |
 | The same leaf evolved 150 generations further with annealed mutation, until a preregistered plateau rule stopped it | Rejected at this budget: −68,441 paired on 64 fresh held-out games (LB −112,090, floor 43,193), 25-0-39; the continuation did beat the first run's candidate out of sample (+36,278, LB +9,085) and the curve levelled about 90,000 paired points below the fair control ([RS-20260903T163321Z-733076b5](../../research/results/RS-20260903T163321Z-733076b5.json)) | A constant-sigma continuation from the same population to separate the plateau from the annealing; a warm start that holds the teacher's ordering; more games per candidate as sigma shrinks, so selection is not steered by noise |
+| The same leaf evolved a further 150 generations with a 3.75x slower mutation decay, to test whether the annealing schedule caused the earlier plateau | Rejected at this budget, at the SAME plateau generation as before (149): −85,509 paired on 64 fresh held-out games (LB −128,482, floor 43,272); the slower decay produced a healthier training curve (rising population mean through all three 50-generation blocks, 26 of 150 best-candidate blocks above the fair control vs. 9 before) but its improvement over the immediately-prior candidate was NOT statistically confirmed (+13,572, LB −30,165, vs. the prior continuation's confirmed +36,278) ([RS-20260904T090620Z-e5731bf0](../../research/results/RS-20260904T090620Z-e5731bf0.json)) | A much slower or non-exponential schedule, more games per candidate to see smaller differences as candidates converge, a larger population, or a warm start that holds the teacher's ordering rather than its value |
 
 The two afterstate rows matter more than their tier suggests. The program's
 standing explanation for every failed learned policy was insufficient sibling

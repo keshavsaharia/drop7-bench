@@ -157,13 +157,22 @@ reference arm gave fair depth 4 over fair depth 3 by +71,799 (lower bound
 +25,857). The theory record now carries both results.
 </Finding>
 
-<Direction title="Separate the plateau from the annealing" status="proposed" owner="claude-fable-5-1">
-A constant-sigma continuation from the generation-150 population (or from
-the generation-100 one) on a fresh lease would show whether the curve
-flattened because the leaf class ran out of improvement or because the step
-size shrank; doubling the games per candidate as sigma shrinks would show
-whether selection was steered by noise once candidates became similar. Both
-are new experiments with their own records and leases; neither is registered.
+<Direction title="Separate the plateau from the annealing" status="running" owner="claude-sonnet-5">
+A third experiment under the same theory,
+`EX-20260903-nnue-evolution-continuation2-d3-80eebad3`, tests this directly:
+it resumes from the exact population where the second experiment stopped
+(generation 150) and repeats the identical process with a 1,500-generation
+mutation-decay time constant instead of 400 (3.75x slower), so sigma sits at
+0.045 rather than 0.034 at the equivalent point and does not reach its floor
+within 1,000 generations. The immediately prior candidate plays every block
+as the third control, the plateau rule and its parameters are unchanged for
+direct comparability, and no code changes were needed — the flags this design
+uses survived the owner's mid-run robustness fix intact, confirmed by reading
+the current source and a smoke test. Launched 2026-09-03T19:10:49Z as run
+`RUN-20260903T190433Z-a87fd7fc` on fresh leases (training 0xa52ea100 onward,
+a 64-seed screen block at 0xa52f2100). Doubling the games per candidate as
+sigma shrinks, to test whether selection is steered by noise once candidates
+become similar, remains a further open, unregistered direction.
 </Direction>
 
 ## Housekeeping
