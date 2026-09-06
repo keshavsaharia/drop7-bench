@@ -37,7 +37,7 @@
     "cpuSeconds": 149820.4,
     "peakHostBytes": 10050740224,
     "peakGpuBytes": null,
-    "measurementNotes": "Launched 2026-09-05T19:30:06Z from commit 146abdb (clean tree); gates 19:30:07-19:30:11; pilot arms A-F 19:30:11-19:48:21 (109-224 s wall each, 32 threads); the first chain then aborted because the select-arm stage's shell redirection created an empty selection.json before analyze.py read it (fixed in commit bd87dba, no artifact rewritten, no seed re-read); relaunched 20:41:03 with the same RUN_ID; main run 20:41:03-21:22:41 (2,497 s wall, 70,945 CPU-s, peak RSS 10.05 GB, 1,956,636 moves/s mean over 4,000,004,271 moves); freeze 21:22:41; screen 21:22:43-21:52:46 (1,803 s wall, 48,774 CPU-s, four arms x 256 games); compare and analysis 21:52:47. Wall 8,561 s from launch to analysis including the 3,162 s stall. CPU seconds and peak RSS are the sums and maximum of the per-stage kernel rusage rows in rusage.jsonl (gates counted twice, once per launch). The web console was built concurrently at nice 15 for about a minute of the main run; timings are not timing-grade, ratios between arms on identical seeds are the trustworthy quantity."
+    "measurementNotes": "Launched 2026-09-05T19:30:06Z from commit 146abdb (clean tree); gates 19:30:07-19:30:11; pilot arms A-F 19:30:11-19:48:21 (109-224 s wall each, 32 threads); the first chain then aborted because the select-arm stage's shell redirection created an empty selection.json before analyze.py read it (fixed in commit bd87dba, no artifact rewritten, no seed re-read); relaunched 20:41:03 with the same RUN_ID; main run 20:41:03-21:22:41 (2,497 s wall, 70,945 CPU-s, peak RSS 10.05 GB, 1,956,636 moves/s mean over 4,000,004,271 moves); freeze 21:22:41; screen 21:22:43-21:52:46 (1,803 s wall, 48,774 CPU-s, four arms x 256 games); compare and analysis 21:52:47. Wall 8,561 s from launch to analysis including the 3,162 s stall. CPU seconds and peak RSS are the sums and maximum of the per-stage kernel rusage rows in rusage.jsonl (gates counted twice, once per launch). The web console was built concurrently at nice 15 for about a minute of the main run; timings are not timing-grade, ratios between arms on identical seeds are the trustworthy quantity. Published 2026-09-06 to the public research archive (immutable run-scoped keys under runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/, digests in the reference fragments; runs/RUN-20260905T193006Z-4fbeb4e5/published.jsonl): ntuple-scale/gates.log, ntuple-scale/main/best-weights.bin.zst, ntuple-scale/screen/heldout.json. The best-weights.bin.zst object is the zstd -12 compression of the frozen best-weights.bin whose SHA-256 is recorded in the result record; decompress with zstd -d and verify before loading."
   },
   "exitCode": 0,
   "stopReason": "completed: main run spent its 4e9-move budget (20 validation points), candidate frozen at the best validation point (1,400,240,319 moves), held-out screen played once, compare and analysis written",
@@ -53,7 +53,10 @@
     "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/rusage.jsonl",
     "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/pipeline.log",
     "runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/chain.nohup",
-    "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/manifest.json"
+    "artifacts/results/EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620/RUN-20260905T193006Z-4fbeb4e5/manifest.json",
+    "https://data.drop7.dev/runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/gates.log#sha256=0a1f87558dcf40347fbc44744ce6ee83ae75cf48ce5c2021f103829e6aaeb4a0",
+    "https://data.drop7.dev/runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/best-weights.bin.zst#sha256=d86cd7a783f9fbfe03e18e1c69999fcadda2df601cfcfabde6730bcdff52939f",
+    "https://data.drop7.dev/runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/screen/heldout.json#sha256=912eedc986299a3bf0727cb589e6e350067ac0db0132c7d57a29c859e3f34789"
   ],
   "contributionIds": [
     "CT-20260905T192505Z-c487efca"

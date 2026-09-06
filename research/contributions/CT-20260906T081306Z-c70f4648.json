@@ -64,13 +64,24 @@
     "research/experiments/EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3.json",
     "research/seeds/leases/SL-20260906T081306Z-1aaec419.json",
     "research/runs/RUN-20260906T081306Z-e62d9837.json",
-    "research/system-profiles/MACH-20260906T081306Z-e87b3f5a.json"
+    "research/system-profiles/MACH-20260906T081306Z-e87b3f5a.json",
+    "research/results/RS-20260906T171746Z-1623f833.json",
+    "artifacts/results/EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3/RUN-20260906T081306Z-e62d9837/manifest.json",
+    "approaches/ntuple-rl/ntuple-scale/scripts/write-depth-result-record.py",
+    "web/content/figures/ntuple-scale/RUN-20260906T081306Z-e62d9837.json",
+    "web/lib/charts/ntuple-scale.ts",
+    "web/scripts/extract-ntuple-scale.ts",
+    "web/components/NTupleScale.tsx",
+    "scripts/publish-research-artifact.sh"
   ],
   "commitShas": [],
   "validationPerformed": [
     "cargo test --release (12 unit tests, including the depth-4 arm's legality, determinism and work ordering)",
     "gate binary on the frozen tables (gate --weights): all CHECK gates including leaf-in-d4-search-determinism (gates.log)",
-    "make research-validate"
+    "make research-validate",
+    "analyze.py evaluated the preregistered gate, the persistence criteria and the interaction verdict from the screen artifact; compare.py reports written for six contrasts",
+    "node --experimental-strip-types --test src/bench/bench.test.ts (the two n-tuple playground policies), npx tsc --noEmit and npm run lint under web/",
+    "the screen's per-game artifact, analysis, gate log and resource log were published to the public research archive and verified (runs/RUN-20260906T081306Z-e62d9837/published.jsonl)"
   ],
   "limitations": [
     "Self-reported contribution; not yet independently reviewed.",

@@ -76,14 +76,20 @@
     "runs/<run-id>/ntuple-scale/{pipeline.log,rusage.jsonl,screen.log,screen.err,analysis.json,analysis.md}",
     "artifacts emitted by the screen carry this experiment id in their config field; the 4 GB table file is the retained artifact of RUN-20260905T193006Z-4fbeb4e5 and is not committed"
   ],
-  "lifecycle": "preregistered",
-  "protocolSha256": "18733b1875bd5fe93f8625a22d617e6aa77a611b88b306d62c64e5d9196091bb",
-  "amendments": [],
+  "lifecycle": "completed",
+  "protocolSha256": "163a44c36910ddd0c242512600c9bc35bfd3a76a8e12f2f4b3da622ffb822ab8",
+  "amendments": [
+    {
+      "timestamp": "2026-09-06T17:29:15Z",
+      "beforeControlledData": false,
+      "reason": "lifecycle advanced preregistered -> completed after run RUN-20260906T081306Z-e62d9837 and result RS-20260906T171746Z-1623f833 were written; protocol content otherwise unchanged (frozen hash 18733b1875bd5fe93f8625a22d617e6aa77a611b88b306d62c64e5d9196091bb retained in the run and lease records)."
+    }
+  ],
   "createdBy": {
     "platform": "Claude Code",
     "model": "claude-fable-5-1",
     "agentId": "claude-code-ntuple-continuation-4-ply"
   },
   "createdAt": "2026-09-06T08:13:06Z",
-  "updatedAt": "2026-09-06T08:18:51Z"
+  "updatedAt": "2026-09-06T17:29:15Z"
 }

@@ -1,0 +1,35 @@
+{
+  "$schema": "../schemas/dataset-v1.schema.json",
+  "format": "drop7-dataset-v1",
+  "datasetId": "DS-20260906-ntuple-scale-frozen-tables-ff977178",
+  "title": "Frozen row-and-column n-tuple tables of RUN-20260905T193006Z-4fbeb4e5 (layout rows,cols,win23,win32,phase=all, 10^9 entries, the validation point at 1.4 x 10^9 training moves): the candidate that passed the screens RS-20260905T215332Z-95d18a5a, RS-20260906T040113Z-6ba93171 and RS-20260906T171746Z-1623f833",
+  "dataRole": "training",
+  "informationClass": "public-only",
+  "originUnit": "whole-game",
+  "originCount": 0,
+  "rowCount": 1000000000,
+  "wholeOriginSplit": true,
+  "seedLeaseRefs": [
+    "SL-20260905T191317Z-09895ea2"
+  ],
+  "parentDatasetRefs": [],
+  "fields": [
+    "D7NTUP01 lookup-table file written by Model::save (approaches/ntuple-rl/ntuple-scale/src/model.rs): header, layout spec 'rows,cols,win23,win32,phase=all', then 1,000,000,000 little-endian f32 entries in rise units (x 17,000 points); read with Model::load(path, trainable=false)",
+    "value(board, moves_remaining) = sum of the active entries of the reflection-canonical board; the visible next disc, score, level and move number are not inputs (information-boundary gate)",
+    "published object: zstd -12 compression of the file; decompressed SHA-256 0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b, 4,000,000,052 bytes",
+    "note: Trained by temporal-coherence TD(0) on one-ply play with seven reveal strata over 1.4 x 10^9 engine moves from public information only (EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620); lock-free asynchronous updates, so the training run is not bit-reproducible, and the file's SHA-256 is the identity that every record cites.",
+    "note: Download: curl -fL -o best-weights.bin.zst https://data.drop7.dev/runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/best-weights.bin.zst; sha256sum against the fragment digest; zstd -d; sha256sum best-weights.bin against 0ade9d4e...; then Model::load. The playground bridge reads it from DROP7_NTUPLE_WEIGHTS."
+  ],
+  "privilegedFields": [],
+  "allowedConsumers": [
+    "any public-information deployment or diagnostic of the tables as a search leaf or a one-ply policy (query_move, screen --arm/--arm-d4, Arm::NTupleD3/NTupleD4)",
+    "warm start or teacher for further training under a new experiment record with fresh leases; the tables have read training block 0xa5300000-0xa54f0000, validation block 0xa52f2240-0xa52f2280 and, through screens, 0xa52f2140-0xa52f2240, 0xa52f2380-0xa52f2580 and 0xa52f2580-0xa52f2780, which no later evaluation of them may reuse",
+    "never evaluation evidence on their own: whole-game screens on never-read blocks are the evidence"
+  ],
+  "artifact": {
+    "path": "https://data.drop7.dev/runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/best-weights.bin.zst#sha256=d86cd7a783f9fbfe03e18e1c69999fcadda2df601cfcfabde6730bcdff52939f",
+    "sha256": "d86cd7a783f9fbfe03e18e1c69999fcadda2df601cfcfabde6730bcdff52939f",
+    "bytes": 378269809
+  },
+  "createdAt": "2026-09-06T17:29:15Z"
+}
