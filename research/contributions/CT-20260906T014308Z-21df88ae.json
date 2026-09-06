@@ -1,0 +1,39 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260906T014308Z-21df88ae",
+  "actor": {
+    "kind": "model",
+    "platform": "Claude Code",
+    "model": "claude-fable-5-1",
+    "agentId": "claude-code-ntuple-scale-replication"
+  },
+  "level": "L3",
+  "roles": [
+    {
+      "role": "software",
+      "degree": "lead"
+    }
+  ],
+  "summary": "Fresh-block replication of the n-tuple leaf at larger scale: added the 2x4 and 4x2 window families with 64-bit pattern indices, a plateau stop rule and lazily zeroed accumulators to the ntuple-scale crate; wrote the successor pipeline, the preregistered experiment and its three fresh leases; ran the gates, the smoke run, the main run and the one-shot screen; wrote the result record, the approach page section, the web figures and the log entry.",
+  "theoryIds": [
+    "TH-20260905-ntuple-line-tuples-tc-td-leaf-bcb25133"
+  ],
+  "experimentIds": [
+    "EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a"
+  ],
+  "runIds": [],
+  "artifactPaths": [
+    "approaches/ntuple-rl/ntuple-scale/"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "cargo test --release (11 unit tests)"
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-09-06T01:43:08Z"
+}

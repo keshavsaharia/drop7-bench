@@ -1,0 +1,95 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a",
+  "theoryIds": [
+    "TH-20260905-ntuple-line-tuples-tc-td-leaf-bcb25133"
+  ],
+  "title": "Fresh-block replication of the row-and-column n-tuple leaf at larger scale: wider tables trained until the validation margins plateau, screened beside the first candidate",
+  "classification": "algorithmic",
+  "hypothesis": "Candidate: the stock fair expectimax search at depth 3, seven chance strata, terminal utility -1,000,000, policy seed 0xd7075eed, completion-guaranteeing work bound work_bound_for(3,7)+1, 64k-entry direct-mapped table (the deployment configuration of EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620, unchanged), with the n-tuple lookup-table leaf of that experiment made wider: the sum, over the active patterns of the reflection-canonical board, of learned f32 entries in rise units (x 17,000 points) from the layout rows,cols,win23,win32,win24,win42,phase=all, that is the first experiment's selected layout (absolute-position seven-cell row and column tuples, 10^7 patterns each, and the thirty 2x3 and thirty 3x2 window tuples, 10^6 patterns each, every one of these families conditioned on the moves remaining until the rise, x5) plus two new families that are never phase-conditioned: win24, the 24 absolute placements of a 2-wide x 4-tall window (10^8 patterns each), and win42, the 24 placements of a 4-wide x 2-tall window (10^8 patterns each). 5.8 x 10^9 table entries, 122 active per state, 23.2 GB frozen and 69.6 GB with the coherence accumulators. The visible next disc is not an input. Weights: fresh tables initialised to 20 rise units spread over the active entries, trained on-policy by TD(0) with temporal-coherence per-entry step sizes (alpha 1.0 x |E|/A, error clamped to +-30 rise units) from complete games played by the greedy one-ply chance-state policy over the same tables (seven stratified reveal samples per column from the public sampler, epsilon 0) on the Rust bitboard engine, 32 asynchronous workers sharing the tables without locks (Hogwild; not bit-reproducible across runs, disclosed; the gate binary proves the serial update rule is deterministic). Pattern indices are 64-bit (the wide layout exceeds 2^32 entries). Stage 0 (CHECK, no leased seed): gate --probe-start 0xa5277000 --layout <the wide layout> on the already-opened Rust-engine probe block, 19 gates including feature-index references for win24 and win42 (all passed 2026-09-06T01:38Z before any leased seed was read), and a 4 x 10^7-move throughput smoke run on the same probe block with the tables discarded, which measured 1.27 x 10^6 training moves per second on 32 threads and a peak resident set of 42.7 GB after 4 x 10^7 moves (the accumulators' pages become resident as they are touched; the bound is 69.6 GB of tables plus working memory). No pilot: the configuration is fixed here from the first experiment's pilot and its widening is the treatment. Stage B (main run, training-role seeds): the wide layout trained from fresh tables on the never-read training lease SL-20260906T013222Z-ce319097 (0xa5500000, 2,031,616 seeds read in order, wrapping, wrap count recorded), chunk 5 x 10^7 moves, a validation point every 5 x 10^8 moves on the never-read 256-game training-role validation block SL-20260906T013222Z-6cce6192 (0xa52f2280) with the paired line-up ntuple-d3s7 / ntuple-1ply / fair-d3s7 on identical seeds, a quick direct-play check every 10^8 moves, a checkpoint every fourth validation point and at the end. Stop rule, fixed here: the run stops at the first validation point k (counting from 1) with k >= 8 at which the mean paired margin (ntuple-d3s7 minus fair-d3s7) of the last four points is not above the mean of the four points before them (train.rs plateau_check, window 4, minimum 8 points); or at 4 x 10^10 moves; or at 43,200 s of training wall time; or when a STOP file appears in the run directory (an operator abort, recorded as such). The candidate is best-weights.bin, the tables at the validation point with the largest paired margin (ties to the later point). Stage C (freeze): SHA-256 of best-weights.bin recorded as candidate-weights.sha256, and the SHA-256 of the first experiment's frozen candidate (runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/best-weights.bin) verified equal to 0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b and recorded as prior-weights.sha256, both before the screen lease opens. Stage D (SCREEN, public-development, one-shot): 512 paired games on SL-20260906T013222Z-f34b23c0 (0xa52f2380-0xa52f2580) with six arms on identical seeds: candidate-d3s7 (the wide candidate as the leaf), candidate-1ply (the same tables played directly, diagnostic), prior-d3s7 (the first experiment's frozen tables as the same leaf: the fresh-block replication arm), prior-1ply (diagnostic), fair-d3s7 (the comparator: the identical search with the frozen fair leaf) and fair-d4s7 (the program's standing reference, diagnostic). Three readings are fixed here: the candidate gate (candidate-d3s7 vs fair-d3s7, the pass criteria below), the replication (prior-d3s7 vs fair-d3s7, the same four statistical criteria, reported as pass or fail beside the candidate gate and not folded into it) and the scale verdict (candidate-d3s7 vs prior-d3s7: supported when both the bootstrap and the Student-t 95% lower bounds are above zero, refuted when the bootstrap 95% upper bound is below zero, inconclusive otherwise; reported, not a gate). Every stage runs through approaches/ntuple-rl/ntuple-scale/scripts/pipeline2.sh, which hard-codes the leased sub-blocks and records per-stage wall, CPU and peak-RSS usage; scripts/pipeline.sh, the first experiment's driver, is not touched. Expected cost from the smoke run: about 6.6 minutes of training per validation interval plus about a minute of validation, so the eight-point minimum is about an hour and the 4 x 10^10-move cap about eleven hours; the screen's fair-d4s7 arm is about 50 minutes.",
+  "candidate": {
+    "name": "d3s7-ntuple-scale-wide-leaf",
+    "entryPoint": "approaches/ntuple-rl/ntuple-scale/src/bin/train.rs",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "fair-d3s7",
+    "entryPoint": "approaches/fair-expectimax/rust-engine/src/leaf.rs",
+    "manifestRef": "research/benchmarks/baselines-v1.json"
+  },
+  "informationBoundary": "public-policy",
+  "benchmarkTier": "SCREEN",
+  "data": {
+    "role": "public-development",
+    "seedLeaseRefs": [
+      "SL-20260906T013222Z-ce319097",
+      "SL-20260906T013222Z-6cce6192",
+      "SL-20260906T013222Z-f34b23c0"
+    ],
+    "datasetRefs": [],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "CHECK gates and the throughput smoke run read only the already-opened development probe block 0xa5276000-0xa5277fff (the Rust engine's gate/benchmark range); no new seed is opened for mechanics or timing. Training reads the never-read training lease 0xa5500000-0xa56f0000 in order and wraps when the block is exhausted (wrap counts recorded); the never-read validation block 0xa52f2280-0xa52f2380 (training role) is re-read at every validation point and drives the plateau rule and the candidate choice; the held-out screen opens 0xa52f2380-0xa52f2580 exactly once, after both candidate hashes are recorded. All three ranges are disjoint from each other and from every block the first experiment read (training 0xa5300000-0xa54f0000, validation 0xa52f2240-0xa52f2280, screen 0xa52f2140-0xa52f2240), so the prior arm's tables have never seen any seed of this experiment. The prior tables themselves are re-used as a frozen artifact (SHA-256 verified), not re-trained."
+  },
+  "metrics": {
+    "primary": "paired mean whole-game score delta, candidate-d3s7 minus fair-d3s7, both at the identical d3s7 configuration, 512 held-out games",
+    "secondary": [
+      "replication: paired mean score delta prior-d3s7 minus fair-d3s7 on the same 512 games, with the same bounds, halves, W-T-L and lower quartile",
+      "scale: paired mean score delta candidate-d3s7 minus prior-d3s7 on the same 512 games, with bootstrap and Student-t bounds, detection floor and W-T-L, and the fixed three-way verdict",
+      "paired mean moves delta; numbered clears per move and cover reveals per move; mean occupied cells; lower quartile, median, maximum score; first-half (seeds 0-255) and second-half (256-511) paired mean deltas",
+      "diagnostic arms on the same seeds: candidate-1ply and prior-1ply (the tables played directly one ply, seven reveal strata) and fair-d4s7 (the standing reference)",
+      "training-curve diagnostics: per-validation-point paired margin of ntuple-d3s7 and ntuple-1ply over fair-d3s7 on the 256-game training-role block with bootstrap bounds, the plateau rule's two window means at every point from the eighth, training-game mean score and length, mean |TD error|, mean coherence, touched table entries, moves per second, seed wraps",
+      "resource observations: per-stage wall, CPU and peak resident set; the smoke run's throughput"
+    ],
+    "statisticalUnit": "whole-game",
+    "uncertaintyMethod": "one-sided 95% percentile bootstrap over whole games, 20,000 resamples, RNG seed 0xb0071eaf (the unchanged compare.py of the leaf-evolution screen), plus a one-sided 95% Student-t lower bound; detection floor 1.645*sd/sqrt(n) reported; the same statistics for the replication and scale contrasts"
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "All CHECK gates passed before the first leased seed was read: codec against Horner, row gather against the cell accessor, feature indices against the independent reference for every layout including win24, win42 and the wide layout, information-boundary blindness (score/level/moves_played/next_disc), reflection consistency of values and decisions, direct-policy legality, leaf-in-search determinism and worker-count independence, serial training determinism, finiteness.",
+      "Every validation artifact and the screen artifact have illegalDecisions 0 and incompleteDecisions 0; censored games are reported as censored.",
+      "Held-out screen, 512 paired games on 0xa52f2380-0xa52f257f, candidate-d3s7 vs fair-d3s7: bootstrap 95% lower bound of the paired score delta > 0 AND Student-t 95% lower bound > 0.",
+      "Held-out screen: candidate-d3s7 minus fair-d3s7 paired mean score delta > 0 in both halves (seeds 0-255 and 256-511).",
+      "Held-out screen: candidate-d3s7 lower-quartile score >= fair-d3s7 lower-quartile score.",
+      "The screened candidate is the exact frozen best-weights.bin of the main run (candidate-weights.sha256 recorded before the screen lease opens) and the prior arm is the exact frozen candidate of the first experiment (prior-weights.sha256 verified before the screen lease opens); no other table is screened.",
+      "Reported beside the gate, not part of it: the replication passes when prior-d3s7 vs fair-d3s7 meets the same four statistical criteria on the same 512 games; the scale verdict is supported / refuted / inconclusive as defined in the protocol."
+    ],
+    "failureAction": "Record a valid run with scientific outcome fail for this exact configuration (wide layout, optimiser, plateau rule, budget, deployment depth); do not adopt the tables; report the replication and scale readings and the diagnostic arms as recorded; if the replication also fails, mark the theory's assessment as not replicated on a fresh block; open no further cohort for this candidate.",
+    "passAction": "Freeze best-weights.bin with its SHA-256; record the replication and scale readings; register a fresh-development STANDARD evaluation of whichever frozen candidate the scale verdict favours (the first when inconclusive) as the successor; do not open protected or final seeds."
+  },
+  "resources": {
+    "wallSeconds": 57600,
+    "cpuThreads": 32,
+    "maxHostBytes": 103079215104,
+    "maxGpuBytes": null,
+    "gpuDevices": []
+  },
+  "stopConditions": [
+    "Stop on any rules, information-boundary, legality, determinism, or parity failure.",
+    "The main run stops by the plateau rule (window 4, from the eighth validation point, last-four mean not above the previous-four mean), at 4 x 10^10 moves, at 43,200 s of training wall time, or on a STOP file, whichever comes first; the reason is written to stop.json and the candidate is then the best validation point so far.",
+    "A validation or screen artifact with any illegal or incomplete decision voids the run (invalid), not the candidate.",
+    "The screen is evaluated exactly once; no re-run on the same or a different held-out block without a new experiment record.",
+    "The theory's training-signal falsifier (no validation point with a positive paired margin) is evaluated and reported separately; the screen is opened once on the frozen candidate regardless.",
+    "Host memory above the declared bound (96 GiB resident) aborts the main run through the operating system or the operator; such a run is recorded as interrupted with its artifacts."
+  ],
+  "expectedArtifacts": [
+    "runs/<run-id>/ntuple-scale/gates.log (CHECK)",
+    "runs/<run-id>/ntuple-scale/smoke/{config.json,progress.jsonl,DONE} (CHECK throughput; tables discarded)",
+    "runs/<run-id>/ntuple-scale/main/{config.json,progress.jsonl,val-*.json,best.json,best-weights.bin,latest-weights.bin,checkpoint.bin,stop.json,DONE} (stage B)",
+    "runs/<run-id>/ntuple-scale/main/{candidate-weights.sha256,prior-weights.sha256} (stage C)",
+    "runs/<run-id>/ntuple-scale/screen/heldout.json + compare-*.json (stage D)",
+    "runs/<run-id>/ntuple-scale/{pipeline.log,rusage.jsonl,analysis.json,analysis.md}",
+    "artifacts emitted by train and screen carry this experiment id in their config field; table files (23.2 GB weights, 69.6 GB checkpoint) are too large for the repository and are retained on the workstation with their SHA-256 in the result record"
+  ],
+  "lifecycle": "preregistered",
+  "protocolSha256": "0284abf064ef24fe47ae1ee1b3a7d63245b9f470bdcdcbf00976576bb1d67df8",
+  "amendments": [],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5-1",
+    "agentId": "claude-code-ntuple-scale-replication"
+  },
+  "createdAt": "2026-09-06T01:33:36Z",
+  "updatedAt": "2026-09-06T01:42:38Z"
+}

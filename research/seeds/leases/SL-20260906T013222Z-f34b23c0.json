@@ -1,0 +1,22 @@
+{
+  "$schema": "../schemas/seed-lease-v1.schema.json",
+  "format": "drop7-seed-lease-v1",
+  "seedLeaseId": "SL-20260906T013222Z-f34b23c0",
+  "experimentId": "EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a",
+  "rngAlgorithm": "mulberry32 with mix32 domain separation (src/core/native/engine.hpp); headless disc stream kNextDiscDomain, reveal stream kRevealDomain; Rust bitboard engine bit-identical (RS-20260824T075451Z-e89ea128)",
+  "domain": "environment",
+  "role": "public-development",
+  "rangeStartHex": "0xa52f2380",
+  "rangeEndExclusiveHex": "0xa52f2580",
+  "cohortManifestSha256": null,
+  "state": "reserved",
+  "reservedAt": "2026-09-06T01:32:22Z",
+  "openedAt": null,
+  "closedAt": null,
+  "protocolSha256": "0284abf064ef24fe47ae1ee1b3a7d63245b9f470bdcdcbf00976576bb1d67df8",
+  "runIds": [],
+  "notes": [
+    "Conservative import 2026-09-06: every 8-hex-digit constant under docs/, approaches/, src/, research/, artifacts/, web/content/ and scripts/ was enumerated (grep -rhoE '0x[0-9a-fA-F]{8}'); no constant has prefix 0xa55 or 0xa56, and the only constant in 0xa52f2280-0xa52f2580 is 0xa52f2280 itself, which is the exclusive end boundary of the first experiment's validation lease SL-20260905T191317Z-549265de and is never read there. The pool 0xa52c0000-0xa5300000 (the ./do-research allocator's) is used up to 0xa52f2280 exclusive by earlier leases; the ranges below start there and overlap no existing lease record and no protected (0x7d) or final (0xd7) prefix. The first experiment's blocks (training 0xa5300000-0xa54f0000, validation 0xa52f2240-0xa52f2280, screen 0xa52f2140-0xa52f2240) are disjoint from all three.",
+    "Held-out screen, 512 never-read public-development seeds, opened exactly once by scripts/pipeline2.sh screen after candidate-weights.sha256 and prior-weights.sha256 are recorded, with six arms on identical seeds: candidate-d3s7, candidate-1ply, prior-d3s7 and prior-1ply (the first experiment's frozen tables, SHA-256 0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b), fair-d3s7 and fair-d4s7. A second opening requires a new experiment record."
+  ]
+}

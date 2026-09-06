@@ -86,7 +86,7 @@ pub fn column_value(
     state: &State,
     column: usize,
     params: &PolicyParams,
-    scratch: &mut [u32; MAX_ACTIVE],
+    scratch: &mut [u64; MAX_ACTIVE],
     simulations: &mut u32,
 ) -> Option<f32> {
     if state.board.get(0, column) != EMPTY {
@@ -135,7 +135,7 @@ pub fn choose(
     model: &Model,
     state: &State,
     params: &PolicyParams,
-    scratch: &mut [u32; MAX_ACTIVE],
+    scratch: &mut [u64; MAX_ACTIVE],
 ) -> Decision {
     let mut decision = Decision {
         action: -1,
@@ -164,14 +164,14 @@ pub fn choose(
 /// its rise phase, in points.  The visible next disc is not read.
 pub struct NTupleLeaf {
     pub model: Arc<Model>,
-    scratch: [u32; MAX_ACTIVE],
+    scratch: [u64; MAX_ACTIVE],
 }
 
 impl NTupleLeaf {
     pub fn new(model: Arc<Model>) -> NTupleLeaf {
         NTupleLeaf {
             model,
-            scratch: [0u32; MAX_ACTIVE],
+            scratch: [0u64; MAX_ACTIVE],
         }
     }
 }
@@ -192,7 +192,7 @@ mod tests {
     fn choose_returns_a_legal_column_and_is_deterministic() {
         let model = Model::new(Layout::parse("cols,win32").unwrap(), 5.0, false);
         let params = PolicyParams::default();
-        let mut scratch = [0u32; MAX_ACTIVE];
+        let mut scratch = [0u64; MAX_ACTIVE];
         let state = State::initial_headless(0xa527_7001);
         let a = choose(&model, &state, &params, &mut scratch);
         let b = choose(&model, &state, &params, &mut scratch);

@@ -10,13 +10,22 @@
  * snapshot says so in `derived`. Shared by server and client code, so this
  * module imports nothing from Node.
  */
-import type { PairedContrast, Rusage, ScreenStage } from "./evolution";
+import type { GateCheck, PairedContrast, Rusage, ScreenStage } from "./evolution";
 
 export const SNAPSHOT_FORMAT = "drop7-ntuple-scale-snapshot-v1";
 
 export type { PairedContrast, Rusage, ScreenStage };
 
-/** One validation point: the paired line-up on the 64-game training-role block. */
+/** The plateau rule's reading at one validation point (the replication run). */
+export interface PlateauReading {
+  points: number;
+  window: number;
+  recentMean: number;
+  previousMean: number;
+  stop: boolean;
+}
+
+/** One validation point: the paired line-up on the training-role validation block. */
 export interface ValidationPoint {
   movesTrained: number;
   artifact: string;
@@ -36,6 +45,7 @@ export interface ValidationPoint {
   pairedDeltaDirect: number | null;
   touchedEntries: number | null;
   isBest: boolean;
+  plateau: PlateauReading | null;
 }
 
 /** One training chunk's progress row. */
@@ -63,6 +73,8 @@ export interface TrainingRun {
   alpha: number;
   entries: number;
   activePerState: number;
+  /** Games in the paired validation block (64 in the first experiment, 256 in the replication). */
+  validateGames: number;
   movesTotal: number;
   gamesTotal: number;
   wallSeconds: number;
@@ -76,6 +88,16 @@ export interface TrainingRun {
   anyPositiveMargin: boolean;
   illegalDecisions: number;
   incompleteDecisions: number;
+  /** Why the run stopped, from stop.json (the replication run). */
+  stop: {
+    reason: string;
+    movesTotal: number;
+    validationPoints: number;
+    plateauWindow: number;
+    recentWindowMean: number | null;
+    previousWindowMean: number | null;
+    bestMargin: number | null;
+  } | null;
 }
 
 export interface PilotStage {
@@ -91,6 +113,22 @@ export interface PilotStage {
   rule: string;
 }
 
+/** The screen with the replication's two extra readings on top of the shared shape. */
+export interface NTupleScreenStage extends ScreenStage {
+  /** The first experiment's frozen tables against the fair leaf on this fresh block. */
+  replication: { checks: GateCheck[]; allPassed: boolean } | null;
+  /** The wider candidate against the first candidate: the preregistered verdict. */
+  scale: {
+    verdict: "supported" | "refuted" | "inconclusive";
+    meanDelta: number;
+    bootstrapLower95: number;
+    bootstrapUpper95: number;
+    studentTLower95: number;
+    detectionFloor: number;
+    wtl: [number, number, number];
+  } | null;
+}
+
 export interface NTupleSnapshot {
   format: typeof SNAPSHOT_FORMAT;
   runId: string;
@@ -102,9 +140,11 @@ export interface NTupleSnapshot {
   sources: string[];
   derived: string[];
   gates: { passed: boolean; gates: string[] } | null;
+  /** The throughput smoke run on the probe block (the replication run); tables discarded. */
+  smoke: TrainingRun | null;
   pilot: PilotStage | null;
   main: TrainingRun | null;
-  freeze: { candidateSha256: string | null } | null;
-  screen: ScreenStage | null;
+  freeze: { candidateSha256: string | null; priorSha256?: string | null } | null;
+  screen: NTupleScreenStage | null;
   rusage: Rusage[] | null;
 }

@@ -18,7 +18,16 @@
 //   best.json            which validation point best-weights.bin came from
 //   latest-weights.bin   the tables at the last completed chunk (weights only)
 //   checkpoint.bin       weights plus coherence accumulators, for --resume
-//   DONE                 written when the move budget or the wall budget is spent
+//   stop.json            why the run stopped (moves, wall, plateau, stop-file)
+//   DONE                 written when the run stops
+//
+// STOPPING.  The run stops when the move budget or the wall budget is spent,
+// when a file named STOP appears in --out, or, with --plateau-window W, when
+// the validation margins have plateaued: at the first validation point k
+// (counting from 1) with k >= --plateau-min-points and k >= 2W at which the
+// mean paired margin of the last W points is not above the mean of the W
+// points before them.  Checkpoints are written every --checkpoint-every
+// validation points and at the end.
 //
 // SEEDS.  Training games take seeds in order from [--seeds-start,
 // --seeds-start + --seeds-count), wrapping to the start when the block is
@@ -61,10 +70,15 @@ struct Config {
     move_cap: i32,
     train_seed: u32,
     experiment_id: String,
-    /// Write checkpoint.bin (weights plus coherence accumulators) at every
-    /// validation point and at the end.  Off for pilot arms, whose tables
-    /// are never resumed.
+    /// Write checkpoint.bin (weights plus coherence accumulators) every
+    /// `checkpoint_every` validation points and at the end.  Off for pilot
+    /// and smoke arms, whose tables are never resumed.
     checkpoint: bool,
+    checkpoint_every: usize,
+    /// Plateau rule window W (0 = no plateau rule) and the minimum number of
+    /// validation points before the rule may fire.
+    plateau_window: usize,
+    plateau_min_points: usize,
 }
 
 fn parse_hex(text: &str, what: &str) -> Result<u32, String> {
@@ -95,6 +109,9 @@ fn parse_args() -> Result<Config, String> {
         train_seed: 0x7d0c_5eed,
         experiment_id: "EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620".into(),
         checkpoint: true,
+        checkpoint_every: 1,
+        plateau_window: 0,
+        plateau_min_points: 8,
     };
     let args: Vec<String> = std::env::args().collect();
     let mut i = 1;
@@ -132,6 +149,9 @@ fn parse_args() -> Result<Config, String> {
             "--move-cap" => config.move_cap = value.parse().map_err(|_| "bad --move-cap")?,
             "--train-seed" => config.train_seed = parse_hex(value, "--train-seed")?,
             "--experiment-id" => config.experiment_id = value.to_string(),
+            "--checkpoint-every" => config.checkpoint_every = value.parse().map_err(|_| "bad --checkpoint-every")?,
+            "--plateau-window" => config.plateau_window = value.parse().map_err(|_| "bad --plateau-window")?,
+            "--plateau-min-points" => config.plateau_min_points = value.parse().map_err(|_| "bad --plateau-min-points")?,
             other => return Err(format!("unknown argument {other}")),
         }
         i += 2;
@@ -145,12 +165,18 @@ fn parse_args() -> Result<Config, String> {
     if config.validate_every > 0 && config.validate_start == 0 {
         return Err("--validate-start is required when validation is on".into());
     }
+    if config.checkpoint_every == 0 {
+        return Err("--checkpoint-every must be positive".into());
+    }
+    if config.plateau_window > 0 && config.validate_every == 0 {
+        return Err("--plateau-window needs validation".into());
+    }
     Ok(config)
 }
 
 fn config_json(config: &Config, layout: &Layout) -> String {
     format!(
-        "{{\"format\":\"drop7-ntuple-scale-train-config-v1\",\"experiment\":\"{}\",\"layout\":\"{}\",\"entries\":{},\"activePerState\":{},\"seedsStartHex\":\"0x{:08x}\",\"seedsCount\":{},\"moves\":{},\"chunkMoves\":{},\"threads\":{},\"alpha\":{},\"epsilon\":{},\"optimisticRiseUnits\":{},\"deltaClampRiseUnits\":{},\"revealSamples\":{},\"validateStartHex\":\"0x{:08x}\",\"validateGames\":{},\"validateEvery\":{},\"quickEvery\":{},\"wallSeconds\":{},\"moveCap\":{},\"trainSeedHex\":\"0x{:08x}\",\"valueUnitPoints\":{},\"checkpoint\":{}}}\n",
+        "{{\"format\":\"drop7-ntuple-scale-train-config-v1\",\"experiment\":\"{}\",\"layout\":\"{}\",\"entries\":{},\"activePerState\":{},\"seedsStartHex\":\"0x{:08x}\",\"seedsCount\":{},\"moves\":{},\"chunkMoves\":{},\"threads\":{},\"alpha\":{},\"epsilon\":{},\"optimisticRiseUnits\":{},\"deltaClampRiseUnits\":{},\"revealSamples\":{},\"validateStartHex\":\"0x{:08x}\",\"validateGames\":{},\"validateEvery\":{},\"quickEvery\":{},\"wallSeconds\":{},\"moveCap\":{},\"trainSeedHex\":\"0x{:08x}\",\"valueUnitPoints\":{},\"checkpoint\":{},\"checkpointEvery\":{},\"plateauWindow\":{},\"plateauMinPoints\":{}}}\n",
         config.experiment_id,
         layout.spec(),
         layout.total_entries(),
@@ -174,7 +200,22 @@ fn config_json(config: &Config, layout: &Layout) -> String {
         config.train_seed,
         VALUE_SCALE,
         config.checkpoint,
+        config.checkpoint_every,
+        config.plateau_window,
+        config.plateau_min_points,
     )
+}
+
+/// The plateau rule on the validation margins so far: (recent window mean,
+/// previous window mean, stop).  None while the rule cannot fire yet.
+fn plateau_check(margins: &[f64], window: usize, min_points: usize) -> Option<(f64, f64, bool)> {
+    if window == 0 || margins.len() < min_points || margins.len() < 2 * window {
+        return None;
+    }
+    let k = margins.len();
+    let recent = margins[k - window..].iter().sum::<f64>() / window as f64;
+    let previous = margins[k - 2 * window..k - window].iter().sum::<f64>() / window as f64;
+    Some((recent, previous, recent <= previous))
 }
 
 /// Minimal JSON number reader for our own progress rows: the value after
@@ -218,9 +259,9 @@ fn worker(
     worker_index: usize,
 ) -> ChunkStats {
     let mut stats = ChunkStats::default();
-    let mut scratch_prev = [0u32; MAX_ACTIVE];
-    let mut scratch_next = [0u32; MAX_ACTIVE];
-    let mut scratch_policy = [0u32; MAX_ACTIVE];
+    let mut scratch_prev = [0u64; MAX_ACTIVE];
+    let mut scratch_next = [0u64; MAX_ACTIVE];
+    let mut scratch_policy = [0u64; MAX_ACTIVE];
     let mut sink = FullWaveSink::new();
     let mut rng = Mulberry32::new(
         config.train_seed ^ (worker_index as u32).wrapping_mul(0x9e37_79b9),
@@ -344,6 +385,7 @@ fn main() -> Result<(), String> {
     let mut wall_offset = 0.0f64;
     let mut cursor_start = 0u64;
     let mut best_margin = f64::NEG_INFINITY;
+    let mut margins: Vec<f64> = Vec::new();
     let checkpoint_path = config.out.join("checkpoint.bin");
     let model = if config.resume {
         let text = std::fs::read_to_string(&progress_path).unwrap_or_default();
@@ -353,6 +395,16 @@ fn main() -> Result<(), String> {
             games_total = json_number(last, "gamesTotal").unwrap_or(0.0) as u64;
             wall_offset = json_number(last, "wallSeconds").unwrap_or(0.0);
             cursor_start = json_number(last, "seedCursor").unwrap_or(0.0) as u64;
+        }
+        for line in text.lines() {
+            if line.contains("\"validation\":{") {
+                if let Some(margin) = json_number(line, "pairedDeltaD3") {
+                    margins.push(margin);
+                }
+            }
+        }
+        if !margins.is_empty() {
+            eprintln!("resume: {} validation points on record", margins.len());
         }
         if let Ok(best) = std::fs::read_to_string(config.out.join("best.json")) {
             best_margin = json_number(&best, "pairedDeltaD3").unwrap_or(f64::NEG_INFINITY);
@@ -406,14 +458,25 @@ fn main() -> Result<(), String> {
         u64::MAX
     };
 
+    let stop_path = config.out.join("STOP");
+    #[allow(unused_assignments)]
+    let mut stop_reason: Option<String> = None;
+    let mut plateau_state: Option<(f64, f64, bool)> = None;
     loop {
         let elapsed = wall_offset + started.elapsed().as_secs_f64();
         if moves_total >= config.moves {
             eprintln!("move budget spent at {moves_total} moves");
+            stop_reason = Some("moves".into());
             break;
         }
         if config.wall_seconds > 0 && elapsed >= config.wall_seconds as f64 {
             eprintln!("wall budget spent at {moves_total} moves");
+            stop_reason = Some("wall".into());
+            break;
+        }
+        if stop_path.exists() {
+            eprintln!("STOP file present at {moves_total} moves");
+            stop_reason = Some("stop-file".into());
             break;
         }
         let chunk_end = (moves_total + config.chunk_moves).min(config.moves);
@@ -478,10 +541,25 @@ fn main() -> Result<(), String> {
 
         // Full validation: the tables inside the deployment search.
         let mut validation_json = "null".to_string();
+        let mut plateau_stop = false;
         if moves_total >= next_validate {
             let validation = validate(&config, &model, &validate_seeds, &fair_records, moves_total, &mut best_margin)?;
+            margins.push(validation.paired_delta_d3);
+            plateau_state = plateau_check(&margins, config.plateau_window, config.plateau_min_points);
+            let plateau_json = match plateau_state {
+                Some((recent, previous, stop)) => format!(
+                    "{{\"points\":{},\"window\":{},\"recentMean\":{},\"previousMean\":{},\"stop\":{}}}",
+                    margins.len(),
+                    config.plateau_window,
+                    recent,
+                    previous,
+                    stop
+                ),
+                None => "null".to_string(),
+            };
+            plateau_stop = matches!(plateau_state, Some((_, _, true)));
             validation_json = format!(
-                "{{\"moves\":{},\"artifact\":\"{}\",\"ntupleD3Mean\":{},\"directMean\":{},\"fairD3Mean\":{},\"pairedDeltaD3\":{},\"winsD3\":{},\"lossesD3\":{},\"pairedDeltaDirect\":{},\"touchedEntries\":{},\"isBest\":{}}}",
+                "{{\"moves\":{},\"artifact\":\"{}\",\"ntupleD3Mean\":{},\"directMean\":{},\"fairD3Mean\":{},\"pairedDeltaD3\":{},\"winsD3\":{},\"lossesD3\":{},\"pairedDeltaDirect\":{},\"touchedEntries\":{},\"isBest\":{},\"point\":{},\"plateau\":{}}}",
                 validation.moves,
                 validation.artifact,
                 validation.ntuple_d3_mean,
@@ -492,7 +570,9 @@ fn main() -> Result<(), String> {
                 validation.losses_d3,
                 validation.paired_delta_direct,
                 validation.touched,
-                validation.is_best
+                validation.is_best,
+                margins.len(),
+                plateau_json
             );
             eprintln!(
                 "[{:>7.0}s] {:>12} moves  VALIDATION: ntuple-d3s7 {:.0} vs fair-d3s7 {:.0}: {:+.0} (W-L {}-{}), 1-ply {:.0}, touched {} entries{}",
@@ -507,7 +587,16 @@ fn main() -> Result<(), String> {
                 validation.touched,
                 if validation.is_best { "  [best]" } else { "" }
             );
-            if config.checkpoint {
+            if let Some((recent, previous, stop)) = plateau_state {
+                eprintln!(
+                    "plateau rule at point {}: last {} points mean {recent:+.0}, previous {} points mean {previous:+.0}{}",
+                    margins.len(),
+                    config.plateau_window,
+                    config.plateau_window,
+                    if stop { "  -> PLATEAU, stopping after this chunk" } else { "" }
+                );
+            }
+            if config.checkpoint && (margins.len() % config.checkpoint_every == 0 || plateau_stop) {
                 eprintln!("checkpoint...");
                 model.save(&checkpoint_path, true)?;
             }
@@ -560,6 +649,10 @@ fn main() -> Result<(), String> {
             );
         }
         chunk_index += 1;
+        if plateau_stop {
+            stop_reason = Some("plateau".into());
+            break;
+        }
     }
 
     eprintln!("final checkpoint and latest weights...");
@@ -567,9 +660,25 @@ fn main() -> Result<(), String> {
         model.save(&checkpoint_path, true)?;
     }
     model.save(&config.out.join("latest-weights.bin"), false)?;
+    let wall_now = wall_offset + started.elapsed().as_secs_f64();
+    let (recent, previous) = match plateau_state {
+        Some((r, p, _)) => (r.to_string(), p.to_string()),
+        None => ("null".into(), "null".into()),
+    };
+    atomic_write(
+        &config.out.join("stop.json"),
+        format!(
+            "{{\"reason\":\"{}\",\"movesTotal\":{moves_total},\"gamesTotal\":{games_total},\"wallSeconds\":{wall_now:.1},\"validationPoints\":{},\"plateauWindow\":{},\"recentWindowMean\":{recent},\"previousWindowMean\":{previous},\"bestMargin\":{}}}\n",
+            stop_reason.as_deref().unwrap_or("unknown"),
+            margins.len(),
+            config.plateau_window,
+            if best_margin.is_finite() { best_margin.to_string() } else { "null".into() }
+        )
+        .as_bytes(),
+    )?;
     atomic_write(
         &config.out.join("DONE"),
-        format!("movesTotal {moves_total} gamesTotal {games_total}\n").as_bytes(),
+        format!("movesTotal {moves_total} gamesTotal {games_total} reason {}\n", stop_reason.as_deref().unwrap_or("unknown")).as_bytes(),
     )?;
     Ok(())
 }

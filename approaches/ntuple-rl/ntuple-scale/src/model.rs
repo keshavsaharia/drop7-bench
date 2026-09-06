@@ -6,10 +6,15 @@
 //   cols   7 tables x 10^7   (column c of the canonical board)
 //   win23  30 tables x 10^6  (2-wide x 3-tall windows, absolute placement)
 //   win32  30 tables x 10^6  (3-wide x 2-tall windows, absolute placement)
+//   win24  24 tables x 10^8  (2-wide x 4-tall windows, absolute placement)
+//   win42  24 tables x 10^8  (4-wide x 2-tall windows, absolute placement)
 // A family may be conditioned on the rise phase (moves remaining until the
-// next rise, 1..=5), which multiplies its table size by five.  Every active
-// pattern of a state is a distinct table entry by construction (one entry
-// per table per state), so the semi-gradient multiplicity is always one.
+// next rise, 1..=5), which multiplies its table size by five: phase=cols
+// conditions the column tables, phase=all conditions rows, cols, win23 and
+// win32.  The eight-cell windows are never phase-conditioned (their tables
+// are a hundred times larger than the six-cell ones).  Every active pattern
+// of a state is a distinct table entry by construction (one entry per table
+// per state), so the semi-gradient multiplicity is always one.
 //
 // CANONICALISATION.  The board is reflected left-right when its mirror is
 // lexicographically smaller, exactly as the search canonicalises, so the same
@@ -29,12 +34,20 @@ use std::sync::atomic::{AtomicU32, Ordering::Relaxed};
 use drop7_rs::board::{Board, BOARD_SIZE};
 
 use crate::tuples::{
-    chunk2, chunk3, row_words, Codec, LINE_PATTERNS, WIN23_PLACEMENTS, WIN32_PLACEMENTS,
-    WINDOW_PATTERNS,
+    chunk2, chunk3, chunk4, row_words, Codec, LINE_PATTERNS, WIDE_WINDOW_PATTERNS,
+    WIN23_PLACEMENTS, WIN24_PLACEMENTS, WIN32_PLACEMENTS, WIN42_PLACEMENTS, WINDOW_PATTERNS,
 };
 
-/// Upper bound on active entries per state (7 + 7 + 30 + 30).
-pub const MAX_ACTIVE: usize = 74;
+/// Upper bound on active entries per state (7 + 7 + 30 + 30 + 24 + 24).
+pub const MAX_ACTIVE: usize = 122;
+/// Family slots, in feature order.
+const FAMILIES: usize = 6;
+const ROWS: usize = 0;
+const COLS: usize = 1;
+const WIN23: usize = 2;
+const WIN32: usize = 3;
+const WIN24: usize = 4;
+const WIN42: usize = 5;
 /// One row rise, in points: the value unit of the tables.
 pub const VALUE_SCALE: f64 = 17_000.0;
 pub const PHASES: usize = 5;
@@ -54,18 +67,22 @@ pub struct Layout {
     pub cols: bool,
     pub win23: bool,
     pub win32: bool,
+    pub win24: bool,
+    pub win42: bool,
     pub phase: PhaseMode,
 }
 
 impl Layout {
-    /// Parse "rows,cols,win23,win32,phase=cols" (any subset of the families,
-    /// phase in {none, cols, all}; default none).
+    /// Parse "rows,cols,win23,win32,win24,win42,phase=cols" (any subset of
+    /// the families, phase in {none, cols, all}; default none).
     pub fn parse(spec: &str) -> Result<Layout, String> {
         let mut layout = Layout {
             rows: false,
             cols: false,
             win23: false,
             win32: false,
+            win24: false,
+            win42: false,
             phase: PhaseMode::None,
         };
         for item in spec.split(',').map(str::trim).filter(|s| !s.is_empty()) {
@@ -74,13 +91,15 @@ impl Layout {
                 "cols" => layout.cols = true,
                 "win23" => layout.win23 = true,
                 "win32" => layout.win32 = true,
+                "win24" => layout.win24 = true,
+                "win42" => layout.win42 = true,
                 "phase=none" => layout.phase = PhaseMode::None,
                 "phase=cols" => layout.phase = PhaseMode::Columns,
                 "phase=all" => layout.phase = PhaseMode::All,
                 other => return Err(format!("unknown layout item {other:?}")),
             }
         }
-        if !(layout.rows || layout.cols || layout.win23 || layout.win32) {
+        if !(layout.rows || layout.cols || layout.win23 || layout.win32 || layout.win24 || layout.win42) {
             return Err("layout names no tuple family".into());
         }
         Ok(layout)
@@ -100,6 +119,12 @@ impl Layout {
         if self.win32 {
             parts.push("win32");
         }
+        if self.win24 {
+            parts.push("win24");
+        }
+        if self.win42 {
+            parts.push("win42");
+        }
         parts.push(match self.phase {
             PhaseMode::None => "phase=none",
             PhaseMode::Columns => "phase=cols",
@@ -113,6 +138,7 @@ impl Layout {
             (PhaseMode::None, _) => 1,
             (PhaseMode::Columns, "cols") => PHASES,
             (PhaseMode::Columns, _) => 1,
+            (PhaseMode::All, "win24" | "win42") => 1,
             (PhaseMode::All, _) => PHASES,
         }
     }
@@ -131,6 +157,12 @@ impl Layout {
         }
         if self.win32 {
             out.push(("win32", WIN32_PLACEMENTS, WINDOW_PATTERNS * self.phases_for("win32")));
+        }
+        if self.win24 {
+            out.push(("win24", WIN24_PLACEMENTS, WIDE_WINDOW_PATTERNS * self.phases_for("win24")));
+        }
+        if self.win42 {
+            out.push(("win42", WIN42_PLACEMENTS, WIDE_WINDOW_PATTERNS * self.phases_for("win42")));
         }
         out
     }
@@ -154,8 +186,25 @@ fn store(cell: &AtomicU32, value: f32) {
     cell.store(value.to_bits(), Relaxed)
 }
 
+/// A vector of `len` atomics holding `value`.  Zero is allocated with
+/// alloc_zeroed, so the pages of a zero-filled array (the coherence
+/// accumulators) become resident only when they are first written; a
+/// non-zero fill writes every element.
 fn atomic_vec(len: usize, value: f32) -> Vec<AtomicU32> {
     let bits = value.to_bits();
+    if bits == 0 && len > 0 {
+        let layout = std::alloc::Layout::array::<AtomicU32>(len).expect("layout");
+        // SAFETY: AtomicU32 has the same size and alignment as u32 and the
+        // all-zero bit pattern is a valid AtomicU32; the allocation has
+        // exactly the layout Vec will free it with (capacity == len).
+        unsafe {
+            let ptr = std::alloc::alloc_zeroed(layout) as *mut AtomicU32;
+            if ptr.is_null() {
+                std::alloc::handle_alloc_error(layout);
+            }
+            return Vec::from_raw_parts(ptr, len, len);
+        }
+    }
     let mut out = Vec::with_capacity(len);
     out.resize_with(len, || AtomicU32::new(bits));
     out
@@ -176,14 +225,10 @@ pub struct Model {
     /// Temporal-coherence accumulators, present only for a trainable model.
     tc_e: Vec<AtomicU32>,
     tc_a: Vec<AtomicU32>,
-    rows_off: usize,
-    cols_off: usize,
-    win23_off: usize,
-    win32_off: usize,
-    rows_size: usize,
-    cols_size: usize,
-    win23_size: usize,
-    win32_size: usize,
+    /// First entry of each family slot (rows, cols, win23, win32, win24, win42).
+    off: [usize; FAMILIES],
+    /// Entries per table of each family slot.
+    size: [usize; FAMILIES],
 }
 
 impl Model {
@@ -192,21 +237,22 @@ impl Model {
     pub fn new(layout: Layout, optimistic_total: f32, trainable: bool) -> Model {
         let total = layout.total_entries();
         let init = optimistic_total / layout.active_count() as f32;
-        let mut offsets = [0usize; 4];
-        let mut sizes = [0usize; 4];
+        let mut off = [0usize; FAMILIES];
+        let mut size = [0usize; FAMILIES];
         let mut cursor = 0usize;
-        for (index, (name, tables, size)) in layout.families().iter().enumerate() {
-            let slot = match *name {
-                "rows" => 0,
-                "cols" => 1,
-                "win23" => 2,
-                "win32" => 3,
+        for (name, tables, entries) in layout.families() {
+            let slot = match name {
+                "rows" => ROWS,
+                "cols" => COLS,
+                "win23" => WIN23,
+                "win32" => WIN32,
+                "win24" => WIN24,
+                "win42" => WIN42,
                 _ => unreachable!(),
             };
-            let _ = index;
-            offsets[slot] = cursor;
-            sizes[slot] = *size;
-            cursor += tables * size;
+            off[slot] = cursor;
+            size[slot] = entries;
+            cursor += tables * entries;
         }
         debug_assert_eq!(cursor, total);
         Model {
@@ -215,14 +261,8 @@ impl Model {
             weights: atomic_vec(total, init),
             tc_e: if trainable { atomic_vec(total, 0.0) } else { Vec::new() },
             tc_a: if trainable { atomic_vec(total, 0.0) } else { Vec::new() },
-            rows_off: offsets[0],
-            cols_off: offsets[1],
-            win23_off: offsets[2],
-            win32_off: offsets[3],
-            rows_size: sizes[0],
-            cols_size: sizes[1],
-            win23_size: sizes[2],
-            win32_size: sizes[3],
+            off,
+            size,
         }
     }
 
@@ -240,38 +280,41 @@ impl Model {
 
     /// Active table entries of the canonical board at rise phase
     /// `moves_remaining` (1..=5).  Fixed order: rows 0..7, columns 0..7,
-    /// win23 placements column-major, win32 placements column-major.
+    /// win23, win32, win24 and win42 placements, each column-major.
     #[inline]
     pub fn features(
         &self,
         board: &Board,
         moves_remaining: i32,
-        out: &mut [u32; MAX_ACTIVE],
+        out: &mut [u64; MAX_ACTIVE],
     ) -> usize {
-        debug_assert!((1..=5).contains(&moves_remaining));
+        // Live states carry 1..=5 moves until the rise.  A terminal state
+        // reached by a rise that ended the game carries 0; no caller values
+        // such a state on purpose, and clamping keeps every entry index in
+        // range for one that does (the CHECK gate perturbs terminal states).
         let canonical = if board.mirrored_is_smaller() {
             board.mirrored()
         } else {
             *board
         };
         let cols = &canonical.cols;
-        let phase = (moves_remaining - 1) as usize;
+        let phase = (moves_remaining.clamp(1, PHASES as i32) - 1) as usize;
         let layout = self.layout;
         let mut count = 0usize;
         if layout.rows {
             let rows = row_words(cols);
             let phase_offset = if layout.phase == PhaseMode::All { phase * LINE_PATTERNS } else { 0 };
             for (r, &word) in rows.iter().enumerate() {
-                out[count] = (self.rows_off + r * self.rows_size + phase_offset) as u32
-                    + self.codec.line(word);
+                out[count] = (self.off[ROWS] + r * self.size[ROWS] + phase_offset) as u64
+                    + self.codec.line(word) as u64;
                 count += 1;
             }
         }
         if layout.cols {
             let phase_offset = if layout.phase != PhaseMode::None { phase * LINE_PATTERNS } else { 0 };
             for (c, &word) in cols.iter().enumerate() {
-                out[count] = (self.cols_off + c * self.cols_size + phase_offset) as u32
-                    + self.codec.line(word);
+                out[count] = (self.off[COLS] + c * self.size[COLS] + phase_offset) as u64
+                    + self.codec.line(word) as u64;
                 count += 1;
             }
         }
@@ -284,9 +327,9 @@ impl Model {
                 for top in 0..=4usize {
                     let pattern = self.codec.nib3(chunk3(left, top))
                         + 1000 * self.codec.nib3(chunk3(right, top));
-                    out[count] = (self.win23_off + placement * self.win23_size + phase_offset)
-                        as u32
-                        + pattern;
+                    out[count] = (self.off[WIN23] + placement * self.size[WIN23] + phase_offset)
+                        as u64
+                        + pattern as u64;
                     count += 1;
                     placement += 1;
                 }
@@ -303,9 +346,43 @@ impl Model {
                     let pattern = self.codec.nib2(chunk2(a, top))
                         + 100 * self.codec.nib2(chunk2(b, top))
                         + 10_000 * self.codec.nib2(chunk2(d, top));
-                    out[count] = (self.win32_off + placement * self.win32_size + phase_offset)
-                        as u32
-                        + pattern;
+                    out[count] = (self.off[WIN32] + placement * self.size[WIN32] + phase_offset)
+                        as u64
+                        + pattern as u64;
+                    count += 1;
+                    placement += 1;
+                }
+            }
+        }
+        if layout.win24 {
+            // 2 wide x 4 tall: columns c, c+1, rows top..top+4 (top 0..=3).
+            let mut placement = 0usize;
+            for c in 0..BOARD_SIZE - 1 {
+                let left = cols[c];
+                let right = cols[c + 1];
+                for top in 0..=3usize {
+                    let pattern = self.codec.nib4(chunk4(left, top))
+                        + 10_000 * self.codec.nib4(chunk4(right, top));
+                    out[count] = (self.off[WIN24] + placement * self.size[WIN24]) as u64 + pattern as u64;
+                    count += 1;
+                    placement += 1;
+                }
+            }
+        }
+        if layout.win42 {
+            // 4 wide x 2 tall: columns c..c+4, rows top..top+2 (top 0..=5).
+            let mut placement = 0usize;
+            for c in 0..BOARD_SIZE - 3 {
+                let a = cols[c];
+                let b = cols[c + 1];
+                let d = cols[c + 2];
+                let e = cols[c + 3];
+                for top in 0..=5usize {
+                    let pattern = self.codec.nib2(chunk2(a, top))
+                        + 100 * self.codec.nib2(chunk2(b, top))
+                        + 10_000 * self.codec.nib2(chunk2(d, top))
+                        + 1_000_000 * self.codec.nib2(chunk2(e, top));
+                    out[count] = (self.off[WIN42] + placement * self.size[WIN42]) as u64 + pattern as u64;
                     count += 1;
                     placement += 1;
                 }
@@ -316,7 +393,7 @@ impl Model {
 
     /// Sum of the active entries, in rise units, in feature order.
     #[inline]
-    pub fn value_of(&self, active: &[u32]) -> f32 {
+    pub fn value_of(&self, active: &[u64]) -> f32 {
         let mut sum = 0.0f32;
         for &index in active {
             sum += load(&self.weights[index as usize]);
@@ -325,7 +402,7 @@ impl Model {
     }
 
     #[inline]
-    pub fn value(&self, board: &Board, moves_remaining: i32, scratch: &mut [u32; MAX_ACTIVE]) -> f32 {
+    pub fn value(&self, board: &Board, moves_remaining: i32, scratch: &mut [u64; MAX_ACTIVE]) -> f32 {
         let n = self.features(board, moves_remaining, scratch);
         self.value_of(&scratch[..n])
     }
@@ -338,7 +415,7 @@ impl Model {
     #[inline]
     pub fn update(
         &self,
-        active: &[u32],
+        active: &[u64],
         target: f32,
         alpha: f32,
         clamp: f32,
@@ -481,11 +558,19 @@ mod tests {
     #[test]
     fn layouts_size_as_documented() {
         let full = Layout::parse("rows,cols,win23,win32,phase=cols").unwrap();
-        assert_eq!(full.active_count(), MAX_ACTIVE);
+        assert_eq!(full.active_count(), 74);
         assert_eq!(
             full.total_entries(),
             7 * LINE_PATTERNS + 7 * 5 * LINE_PATTERNS + 60 * WINDOW_PATTERNS
         );
+        let wide = Layout::parse("rows,cols,win23,win32,win24,win42,phase=all").unwrap();
+        assert_eq!(wide.active_count(), MAX_ACTIVE);
+        assert_eq!(
+            wide.total_entries(),
+            14 * 5 * LINE_PATTERNS + 60 * 5 * WINDOW_PATTERNS + 48 * WIDE_WINDOW_PATTERNS
+        );
+        assert_eq!(wide.total_entries(), 5_800_000_000);
+        assert_eq!(Layout::parse(&wide.spec()).unwrap(), wide);
         let small = Layout::parse("rows").unwrap();
         assert_eq!(small.total_entries(), 7 * LINE_PATTERNS);
         assert!(Layout::parse("phase=cols").is_err());
@@ -494,26 +579,80 @@ mod tests {
 
     #[test]
     fn features_are_distinct_and_in_range() {
-        let layout = Layout::parse("rows,cols,win23,win32,phase=all").unwrap();
-        let model = Model::new(layout, 1.0, false);
-        let board = Board::initial();
-        let mut out = [0u32; MAX_ACTIVE];
-        for mtr in 1..=5 {
-            let n = model.features(&board, mtr, &mut out);
-            assert_eq!(n, layout.active_count());
-            let mut seen: Vec<u32> = out[..n].to_vec();
-            seen.sort_unstable();
-            seen.dedup();
-            assert_eq!(seen.len(), n, "entries must be distinct");
-            assert!(out[..n].iter().all(|&i| (i as usize) < model.entries()));
+        for spec in ["rows,cols,win23,win32,phase=all", "win24,win42"] {
+            let layout = Layout::parse(spec).unwrap();
+            let model = Model::new(layout, 1.0, false);
+            let mut board = Board::initial();
+            board.place_disc(2, 4);
+            board.place_disc(3, 1);
+            board.place_disc(3, 7);
+            let mut out = [0u64; MAX_ACTIVE];
+            for mtr in 1..=5 {
+                let n = model.features(&board, mtr, &mut out);
+                assert_eq!(n, layout.active_count());
+                let mut seen: Vec<u64> = out[..n].to_vec();
+                seen.sort_unstable();
+                seen.dedup();
+                assert_eq!(seen.len(), n, "entries must be distinct");
+                assert!(out[..n].iter().all(|&i| (i as usize) < model.entries()));
+            }
         }
+    }
+
+    #[test]
+    fn wide_windows_read_the_named_cells() {
+        // One disc of value 5 at (row 6, column 3): every 2x4 or 4x2 window
+        // that covers that cell has pattern 5 * 10^k for that cell's digit
+        // position, and every other window has pattern 0.  A single disc in
+        // the middle column is its own mirror, so canonicalisation is moot.
+        let layout = Layout::parse("win24,win42").unwrap();
+        let model = Model::new(layout, 0.0, false);
+        let mut board = Board { cols: [0u32; BOARD_SIZE] };
+        board.place_disc(3, 5);
+        assert_eq!(board.get(6, 3), 5);
+        let mut out = [0u64; MAX_ACTIVE];
+        let n = model.features(&board, 5, &mut out);
+        assert_eq!(n, 48);
+        let mut nonzero = 0;
+        for (index, &entry) in out[..n].iter().enumerate() {
+            let family_start = if index < 24 { 0usize } else { 24 * WIDE_WINDOW_PATTERNS };
+            let local = entry as usize - family_start;
+            let pattern = local % WIDE_WINDOW_PATTERNS;
+            let placement = local / WIDE_WINDOW_PATTERNS;
+            if index < 24 {
+                // win24: placement = c * 4 + top; columns c, c+1, rows top..top+4.
+                let (c, top) = (placement / 4, placement % 4);
+                let covers = (c == 3 || c + 1 == 3) && top + 3 == 6;
+                if covers {
+                    nonzero += 1;
+                    // the left column's lowest row is the least-significant digit
+                    let digit = if c == 3 { 0 } else { 4 };
+                    assert_eq!(pattern, 5 * 10usize.pow(digit), "win24 placement {placement}");
+                } else {
+                    assert_eq!(pattern, 0, "win24 placement {placement}");
+                }
+            } else {
+                // win42: placement = c * 6 + top; columns c..c+4, rows top..top+2.
+                let (c, top) = (placement / 6, placement % 6);
+                let covers = (c..c + 4).contains(&3) && top + 1 == 6;
+                if covers {
+                    nonzero += 1;
+                    // two digits per column, the lower row least significant
+                    let digit = 2 * (3 - c) as u32;
+                    assert_eq!(pattern, 5 * 10usize.pow(digit), "win42 placement {placement}");
+                } else {
+                    assert_eq!(pattern, 0, "win42 placement {placement}");
+                }
+            }
+        }
+        assert_eq!(nonzero, 2 + 4);
     }
 
     #[test]
     fn value_is_reflection_invariant_and_optimistic_at_start() {
         let layout = Layout::parse("rows,cols,win23,win32,phase=cols").unwrap();
         let model = Model::new(layout, 20.0, false);
-        let mut scratch = [0u32; MAX_ACTIVE];
+        let mut scratch = [0u64; MAX_ACTIVE];
         let mut board = Board::initial();
         board.place_disc(0, 3);
         board.place_disc(1, 5);
@@ -527,7 +666,7 @@ mod tests {
     fn a_single_update_moves_the_prediction_by_alpha_delta() {
         let layout = Layout::parse("rows,cols").unwrap();
         let model = Model::new(layout, 0.0, true);
-        let mut scratch = [0u32; MAX_ACTIVE];
+        let mut scratch = [0u64; MAX_ACTIVE];
         let board = Board::initial();
         let n = model.features(&board, 5, &mut scratch);
         let mut stats = UpdateStats::default();
@@ -552,7 +691,7 @@ mod tests {
     fn save_and_load_round_trip() {
         let layout = Layout::parse("win32").unwrap();
         let model = Model::new(layout, 3.0, true);
-        let mut scratch = [0u32; MAX_ACTIVE];
+        let mut scratch = [0u64; MAX_ACTIVE];
         let board = Board::initial();
         let n = model.features(&board, 2, &mut scratch);
         let mut stats = UpdateStats::default();

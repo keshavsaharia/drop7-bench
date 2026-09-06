@@ -8,6 +8,12 @@ leaf-evolution compare.py (20,000 resamples, seed 0xb0071eaf).  The
 preregistered pass criteria are evaluated from the screen artifact exactly as
 written in the experiment record; nothing here extrapolates.
 
+Two run shapes are understood: the first experiment's (gates, six pilot arms,
+main run, screen with four arms) and the replication's (gates, a throughput
+smoke run on the probe block, a main run with a plateau rule, a screen that
+also carries the first experiment's frozen tables as the prior-* arms).  A
+stage that is absent is reported as absent.
+
 Usage: analyze.py --run RUN_ID [--root REPO_ROOT] [--select-arm]
 
 With --select-arm the script prints (to stdout) the pilot selection JSON:
@@ -165,8 +171,18 @@ def training_summary(directory):
     illegal = sum(sum(i["illegalDecisions"] for i in load_json(p)["individuals"]) for p in glob.glob(os.path.join(directory, "val-*.json")))
     incomplete = sum(sum(i["incompleteDecisions"] for i in load_json(p)["individuals"]) for p in glob.glob(os.path.join(directory, "val-*.json")))
     best = load_json_if_complete(os.path.join(directory, "best.json"))
+    stop = load_json_if_complete(os.path.join(directory, "stop.json"))
+    plateau_by_moves = {}
+    for row in rows:
+        v = row.get("validation")
+        if v and v.get("plateau"):
+            plateau_by_moves[v["moves"]] = v["plateau"]
+    for entry in validations:
+        entry["plateau"] = plateau_by_moves.get(entry["movesTrained"])
     return {
         "config": config,
+        "validateGames": config.get("validateGames") if config else None,
+        "stop": stop,
         "chunks": len(rows),
         "movesTotal": rows[-1]["movesTotal"] if rows else 0,
         "gamesTotal": rows[-1]["gamesTotal"] if rows else 0,
@@ -233,22 +249,49 @@ def screen_summary(out):
     by = {i["name"]: i for i in art["individuals"]}
     arms = {name: arm_summary(ind) for name, ind in by.items()}
     contrasts = {}
-    for cand, ref in [("candidate-d3s7", "fair-d3s7"), ("candidate-1ply", "fair-d3s7"), ("candidate-d3s7", "fair-d4s7"), ("fair-d4s7", "fair-d3s7"), ("candidate-d3s7", "candidate-1ply")]:
+    pairs = [
+        ("candidate-d3s7", "fair-d3s7"), ("candidate-1ply", "fair-d3s7"), ("candidate-d3s7", "fair-d4s7"),
+        ("fair-d4s7", "fair-d3s7"), ("candidate-d3s7", "candidate-1ply"),
+        ("prior-d3s7", "fair-d3s7"), ("candidate-d3s7", "prior-d3s7"), ("prior-d3s7", "fair-d4s7"), ("prior-1ply", "fair-d3s7"),
+    ]
+    for cand, ref in pairs:
         if cand in by and ref in by:
             contrasts[f"{cand}-vs-{ref}"] = {"score": paired(by[cand], by[ref]), "moves": paired(by[cand], by[ref], "moves")}
+    integrity_ok = all(i["illegalDecisions"] == 0 and i["incompleteDecisions"] == 0 for i in by.values())
+
+    def gate_checks(label, contrast):
+        return [
+            {"criterion": "screen artifact: illegalDecisions 0 and incompleteDecisions 0 in every arm", "passed": integrity_ok},
+            {"criterion": f"bootstrap 95% lower bound of {label} minus fair-d3s7 > 0", "passed": contrast["bootstrapLower95"] > 0, "observed": contrast["bootstrapLower95"]},
+            {"criterion": "Student-t 95% lower bound > 0", "passed": contrast["studentTLower95"] > 0, "observed": contrast["studentTLower95"]},
+            {"criterion": "paired mean delta > 0 in both halves", "passed": contrast["firstHalfMeanDelta"] > 0 and contrast["secondHalfMeanDelta"] > 0, "observed": [contrast["firstHalfMeanDelta"], contrast["secondHalfMeanDelta"]]},
+            {"criterion": f"{label} Q25 >= fair-d3s7 Q25", "passed": contrast["candidateQ25"] >= contrast["referenceQ25"], "observed": [contrast["candidateQ25"], contrast["referenceQ25"]]},
+        ]
+
     primary = contrasts.get("candidate-d3s7-vs-fair-d3s7", {}).get("score")
     gate = None
     if primary:
-        integrity_ok = all(i["illegalDecisions"] == 0 and i["incompleteDecisions"] == 0 for i in by.values())
-        checks = [
-            {"criterion": "screen artifact: illegalDecisions 0 and incompleteDecisions 0 in every arm", "passed": integrity_ok},
-            {"criterion": "bootstrap 95% lower bound of candidate-d3s7 minus fair-d3s7 > 0", "passed": primary["bootstrapLower95"] > 0, "observed": primary["bootstrapLower95"]},
-            {"criterion": "Student-t 95% lower bound > 0", "passed": primary["studentTLower95"] > 0, "observed": primary["studentTLower95"]},
-            {"criterion": "paired mean delta > 0 in both halves", "passed": primary["firstHalfMeanDelta"] > 0 and primary["secondHalfMeanDelta"] > 0, "observed": [primary["firstHalfMeanDelta"], primary["secondHalfMeanDelta"]]},
-            {"criterion": "candidate-d3s7 Q25 >= fair-d3s7 Q25", "passed": primary["candidateQ25"] >= primary["referenceQ25"], "observed": [primary["candidateQ25"], primary["referenceQ25"]]},
-        ]
+        checks = gate_checks("candidate-d3s7", primary)
         gate = {"checks": checks, "passed": all(c["passed"] for c in checks)}
-    return {"config": art["config"], "seedStartHex": art["seedStartHex"], "arms": arms, "contrasts": contrasts, "gate": gate}
+    # Replication of the first experiment's frozen tables on this fresh block.
+    replication = None
+    prior = contrasts.get("prior-d3s7-vs-fair-d3s7", {}).get("score")
+    if prior:
+        checks = gate_checks("prior-d3s7", prior)
+        replication = {"checks": checks, "passed": all(c["passed"] for c in checks)}
+    # The scale question: the wider, longer-trained tables against the first
+    # candidate on the same seeds.  Three verdicts, fixed in the protocol.
+    scale = None
+    versus = contrasts.get("candidate-d3s7-vs-prior-d3s7", {}).get("score")
+    if versus:
+        if versus["bootstrapLower95"] > 0 and versus["studentTLower95"] > 0:
+            verdict = "supported"
+        elif versus["bootstrapUpper95"] < 0:
+            verdict = "refuted"
+        else:
+            verdict = "inconclusive"
+        scale = {"verdict": verdict, "meanDelta": versus["meanDelta"], "bootstrapLower95": versus["bootstrapLower95"], "bootstrapUpper95": versus["bootstrapUpper95"], "studentTLower95": versus["studentTLower95"], "detectionFloor": versus["detectionFloor"], "wins": versus["wins"], "ties": versus["ties"], "losses": versus["losses"]}
+    return {"config": art["config"], "seedStartHex": art["seedStartHex"], "games": art["config"].get("games"), "arms": arms, "contrasts": contrasts, "gate": gate, "replication": replication, "scale": scale}
 
 
 def gates_summary(out):
@@ -291,18 +334,27 @@ def write_markdown(analysis, path):
         if p.get("selection"):
             lines += ["", f"Selected: arm {p['selection']['arm']} ({p['selection']['layout']}, alpha {p['selection']['alpha']}), rule: {p['rule']}"]
         lines.append("")
+    sm = analysis.get("smoke")
+    if sm:
+        last = sm["curve"][-1] if sm["curve"] else None
+        lines += ["## Throughput smoke run (probe block, tables discarded)", "", f"Layout {sm['config']['layout'] if sm['config'] else 'n/a'}, {fmt(sm['config']['entries'] if sm['config'] else None)} entries, moves {fmt(sm['movesTotal'])}, wall {fmt(sm['wallSeconds'])} s, mean {fmt(sm['meanMovesPerSecond'])} moves/s" + (f", last chunk train mean {fmt(last['trainMeanScore'])} / {last['trainMeanMoves']:.1f} moves" if last else ""), ""]
     m = analysis.get("main")
     if m:
-        lines += ["## Main run", "", f"Moves {fmt(m['movesTotal'])}, games {fmt(m['gamesTotal'])}, wall {fmt(m['wallSeconds'])} s, mean {fmt(m['meanMovesPerSecond'])} moves/s, done {m['done']}", "", "| moves | ntuple-d3s7 | fair-d3s7 | paired delta | LB95 | W-L | 1-ply | touched entries |", "| ---: | ---: | ---: | ---: | ---: | --- | ---: | ---: |"]
-        for v in m["validations"]:
+        games = m.get("validateGames") or 64
+        lines += ["## Main run", "", f"Moves {fmt(m['movesTotal'])}, games {fmt(m['gamesTotal'])}, wall {fmt(m['wallSeconds'])} s, mean {fmt(m['meanMovesPerSecond'])} moves/s, done {m['done']}" + (f", stop reason {m['stop']['reason']}" if m.get("stop") else ""), "", f"Validation line-up on the {games}-game training-role block:", "", "| point | moves | ntuple-d3s7 | fair-d3s7 | paired delta | LB95 | W-L | 1-ply | touched entries | plateau (last / previous window) |", "| ---: | ---: | ---: | ---: | ---: | ---: | --- | ---: | ---: | --- |"]
+        for index, v in enumerate(m["validations"], start=1):
             d = v.get("pairedD3VsFair", {})
-            one = v.get("paired1plyVsFair", {})
             touched = next((c["validation"]["touchedEntries"] for c in m["curve"] if c.get("validation") and c["validation"]["moves"] == v["movesTrained"]), None)
-            lines.append(f"| {fmt(v['movesTrained'])} | {fmt(v['arms']['ntuple-d3s7']['meanScore'])} | {fmt(v['arms']['fair-d3s7']['meanScore'])} | {fmt(d.get('meanDelta'))} | {fmt(d.get('bootstrapLower95'))} | {d.get('wins')}-{d.get('losses')} | {fmt(v['arms']['ntuple-1ply']['meanScore']) if 'ntuple-1ply' in v['arms'] else 'n/a'} | {fmt(touched)} |")
-        lines += ["", f"Best validation point: {json.dumps(m['best'])}", f"Any positive validation margin (theory training-signal check): {m['anyPositiveMargin']}", ""]
+            pl = v.get("plateau")
+            pl_text = f"{fmt(pl['recentMean'])} / {fmt(pl['previousMean'])}{' STOP' if pl.get('stop') else ''}" if pl else ""
+            lines.append(f"| {index} | {fmt(v['movesTrained'])} | {fmt(v['arms']['ntuple-d3s7']['meanScore'])} | {fmt(v['arms']['fair-d3s7']['meanScore'])} | {fmt(d.get('meanDelta'))} | {fmt(d.get('bootstrapLower95'))} | {d.get('wins')}-{d.get('losses')} | {fmt(v['arms']['ntuple-1ply']['meanScore']) if 'ntuple-1ply' in v['arms'] else 'n/a'} | {fmt(touched)} | {pl_text} |")
+        lines += ["", f"Best validation point: {json.dumps(m['best'])}", f"Any positive validation margin (theory training-signal check): {m['anyPositiveMargin']}"]
+        if m.get("stop"):
+            lines.append(f"Stop: {json.dumps(m['stop'])}")
+        lines.append("")
     s = analysis.get("screen")
     if s:
-        lines += ["## Held-out screen (256 paired games, one-shot)", "", "| arm | mean | median | Q25 | max | moves | clears/move | reveals/move |", "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |"]
+        lines += [f"## Held-out screen ({s.get('games') or 'n/a'} paired games, one-shot)", "", "| arm | mean | median | Q25 | max | moves | clears/move | reveals/move |", "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |"]
         for name, a in s["arms"].items():
             lines.append(f"| {name} | {fmt(a['meanScore'])} | {fmt(a['medianScore'])} | {fmt(a['q25Score'])} | {fmt(a['maxScore'])} | {fmt(a['meanMoves'],2)} | {a['numberedClearsPerMove']:.4f} | {a['coverRevealsPerMove']:.4f} |")
         lines += ["", "| contrast | delta | LB95 boot | LB95 t | UB95 | W-T-L | halves | floor |", "| --- | ---: | ---: | ---: | ---: | --- | --- | ---: |"]
@@ -310,7 +362,12 @@ def write_markdown(analysis, path):
             x = c["score"]
             lines.append(f"| {name} | {fmt(x['meanDelta'])} | {fmt(x['bootstrapLower95'])} | {fmt(x['studentTLower95'])} | {fmt(x['bootstrapUpper95'])} | {x['wins']}-{x['ties']}-{x['losses']} | {fmt(x['firstHalfMeanDelta'])} / {fmt(x['secondHalfMeanDelta'])} | {fmt(x['detectionFloor'])} |")
         if s["gate"]:
-            lines += ["", f"Gate passed: {s['gate']['passed']}", ""] + [f"- {'PASS' if c['passed'] else 'FAIL'} {c['criterion']}: {c.get('observed', '')}" for c in s["gate"]["checks"]]
+            lines += ["", f"Gate (candidate-d3s7 vs fair-d3s7) passed: {s['gate']['passed']}", ""] + [f"- {'PASS' if c['passed'] else 'FAIL'} {c['criterion']}: {c.get('observed', '')}" for c in s["gate"]["checks"]]
+        if s.get("replication"):
+            lines += ["", f"Replication (prior-d3s7 vs fair-d3s7, the first experiment's frozen tables on this fresh block) passed: {s['replication']['passed']}", ""] + [f"- {'PASS' if c['passed'] else 'FAIL'} {c['criterion']}: {c.get('observed', '')}" for c in s["replication"]["checks"]]
+        if s.get("scale"):
+            sc = s["scale"]
+            lines += ["", f"Scale (candidate-d3s7 vs prior-d3s7): {sc['verdict']}: delta {fmt(sc['meanDelta'])}, LB95 boot {fmt(sc['bootstrapLower95'])}, LB95 t {fmt(sc['studentTLower95'])}, UB95 {fmt(sc['bootstrapUpper95'])}, W-T-L {sc['wins']}-{sc['ties']}-{sc['losses']}, floor {fmt(sc['detectionFloor'])}"]
         lines.append("")
     with open(path, "w", encoding="utf-8") as handle:
         handle.write("\n".join(lines))
@@ -330,6 +387,7 @@ def main():
         "format": "drop7-ntuple-scale-analysis-v1",
         "runId": args.run,
         "gates": gates_summary(out),
+        "smoke": training_summary(os.path.join(out, "smoke")),
         "pilot": pilot_summary(out),
         "main": training_summary(os.path.join(out, "main")),
         "screen": screen_summary(out),

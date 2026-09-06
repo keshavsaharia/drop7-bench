@@ -44,7 +44,7 @@ impl<L: drop7_rs::search::Leaf> Player for SearchPlayer<L> {
 pub struct DirectPlayer {
     pub model: Arc<Model>,
     pub params: PolicyParams,
-    scratch: [u32; MAX_ACTIVE],
+    scratch: [u64; MAX_ACTIVE],
 }
 
 impl Player for DirectPlayer {
@@ -93,7 +93,7 @@ impl Arm {
             Arm::Direct(model) => Box::new(DirectPlayer {
                 model: model.clone(),
                 params: PolicyParams::default(),
-                scratch: [0u32; MAX_ACTIVE],
+                scratch: [0u64; MAX_ACTIVE],
             }),
         }
     }
