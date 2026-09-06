@@ -69,9 +69,12 @@ npm run artifact:publish -- \
 ```
 
 Run it with `--dry-run` first and read the list: every path it prints will be
-world-readable. Then run it again without `--dry-run`. An object that already
-holds identical bytes is reported as `already-published`, so the command is
-safe to repeat after an interruption; a conflicting object still stops it.
+world-readable. A dry run uploads nothing and writes nothing to the manifest;
+only an object verified in S3 reaches it, as `uploaded` or
+`already-published`. Then run it again without `--dry-run`. An object that
+already holds identical bytes is reported as `already-published`, so the
+command is safe to repeat after an interruption; a conflicting object still
+stops it.
 
 Publish large table or checkpoint files one at a time with `--file`, compressed
 with `zstd` when the file is sparse (a 4 GB lookup table with a tenth of its

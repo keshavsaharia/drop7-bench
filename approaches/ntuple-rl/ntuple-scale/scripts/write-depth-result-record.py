@@ -8,27 +8,26 @@ evaluated them.  The summary paragraph is assembled from those numbers with
 the outcome wording the experiment record prescribes.  Nothing here opens a
 seed or changes a gate.
 
+The per-game artifact is cited by its public archive reference, resolved from
+the run record or the publisher manifest and checked against the local file's
+digest (artifact_refs.py); publish the artifact before writing the record, or
+pass --allow-local-path for an explicitly unfinalized draft.
+
 Usage: write-depth-result-record.py --run RUN_ID --result-id RS-... --root REPO
                                     --experiment EX-... --theory TH-... --machine research/system-profiles/MACH-....json
-                                    --contribution CT-...
+                                    --contribution CT-... [--per-game-ref URL | --allow-local-path]
 """
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import os
+import sys
 import time
 
+from artifact_refs import UnresolvedArtifact, artifact_manifest_ref, citation_limitation, resolve_public_ref, sha256_file
+
 PRIOR_SHA256 = "0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b"
-
-
-def sha256_file(path):
-    h = hashlib.sha256()
-    with open(path, "rb") as handle:
-        for chunk in iter(lambda: handle.read(1 << 20), b""):
-            h.update(chunk)
-    return h.hexdigest()
 
 
 def fmt(x):
@@ -52,6 +51,8 @@ def main():
     parser.add_argument("--theory", required=True)
     parser.add_argument("--machine", required=True)
     parser.add_argument("--contribution", required=True)
+    parser.add_argument("--per-game-ref", default=None, help="public reference of the per-game artifact (https://data.drop7.dev/runs/<run-id>/...#sha256=<digest>); found in the run record or the publisher manifest when omitted")
+    parser.add_argument("--allow-local-path", action="store_true", help="write an unfinalized draft citing the local runs/ path when no verified public reference exists")
     args = parser.parse_args()
     out = os.path.join(args.root, "runs", args.run, "ntuple-scale")
     analysis = json.load(open(os.path.join(out, "analysis.json"), encoding="utf-8"))
@@ -65,6 +66,15 @@ def main():
     passed = bool(gate and gate["passed"])
     integrity_ok = all(a["illegalDecisions"] == 0 and a["incompleteDecisions"] == 0 for a in arms.values())
     heldout = os.path.join(out, "screen", "heldout.json")
+    heldout_relative = os.path.relpath(heldout, args.root)
+    heldout_sha256 = sha256_file(heldout)
+    try:
+        per_game_path = resolve_public_ref(args.root, args.run, heldout_relative, heldout_sha256, args.per_game_ref)
+    except UnresolvedArtifact as error:
+        if not args.allow_local_path:
+            raise SystemExit(f"error: {error}\n(--allow-local-path writes an unfinalized draft that cites {heldout_relative} instead)")
+        print(f"warning: {error}; the draft cites {heldout_relative} and is not finalized", file=sys.stderr)
+        per_game_path = heldout_relative
     hash_path = os.path.join(out, "main", "prior-weights.sha256")
     tables_sha = open(hash_path, encoding="utf-8").read().split()[0] if os.path.exists(hash_path) else None
     step = contrasts["prior-d4s7-vs-prior-d3s7"]
@@ -146,6 +156,7 @@ def main():
         "The fair-d3s7 and fair-d4s7 arms are context for the interaction reading; the preregistered comparator is the identical tables at depth 3.",
         "Wall times were measured on a shared workstation with all four arms run in sequence at 32 threads; logical work and the ratios between arms on the same seeds are the trustworthy cost quantities.",
     ]
+    limitations.append(citation_limitation(per_game_path, heldout_relative))
     record = {
         "$schema": "../schemas/result-v1.schema.json",
         "format": "drop7-result-v1",
@@ -160,9 +171,9 @@ def main():
         "summary": summary,
         "metrics": metrics,
         "gateChecks": checks,
-        "perGameArtifact": {"path": os.path.relpath(heldout, args.root), "sha256": sha256_file(heldout), "recordCount": sum(a["games"] for a in arms.values())},
+        "perGameArtifact": {"path": per_game_path, "sha256": heldout_sha256, "recordCount": sum(a["games"] for a in arms.values())},
         "machineProfileRefs": [args.machine],
-        "artifactManifestRef": None,
+        "artifactManifestRef": artifact_manifest_ref(args.root, args.experiment, args.run),
         "limitations": limitations,
         "contributionIds": [args.contribution],
         "recordedAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),

@@ -16,9 +16,11 @@ Options:
                      basename); with --dir, a prefix directory for the tree
   --exclude GLOB     Skip files whose path relative to DIR matches GLOB
                      (repeatable; with --dir only; e.g. --exclude '*.bin')
-  --manifest FILE    Append one JSON line per object ({"key","bytes","sha256",
-                     "ref","status"}) so a record can cite every reference
+  --manifest FILE    Append one JSON line per verified object ({"key","bytes",
+                     "sha256","ref","status"}, status "uploaded" or
+                     "already-published") so a record can cite every reference
   --dry-run          Hash and list what would be uploaded; touch nothing remote
+                     and write nothing to the manifest
   --profile PROFILE  AWS profile (default: drop7-research)
   --bucket BUCKET    S3 bucket (default: drop7-bench-data)
   --public           Required acknowledgement that the files are safe to publish
@@ -152,7 +154,9 @@ hash_file() {
 
 record_manifest() {
   # $1 key, $2 bytes, $3 sha256, $4 ref, $5 status
-  if [[ -n "${MANIFEST}" ]]; then
+  # Only a verified object reaches the manifest: a record cites it as durable
+  # provenance, so a dry-run preview must never land there.
+  if [[ -n "${MANIFEST}" && "${DRY_RUN}" != "1" ]]; then
     printf '{"key":"%s","bytes":%s,"sha256":"%s","ref":"%s","status":"%s"}\n' \
       "$1" "$2" "$3" "$4" "$5" >> "${MANIFEST}"
   fi
@@ -176,7 +180,6 @@ publish_one() {
 
   if [[ "${DRY_RUN}" == "1" ]]; then
     printf 'dry-run %s bytes %s -> %s\n' "${expected_bytes}" "${source_file}" "${public_ref}"
-    record_manifest "${object_key}" "${expected_bytes}" "${sha256}" "${public_ref}" "dry-run"
     return 0
   fi
 
@@ -251,4 +254,8 @@ if [[ -n "${SOURCE_DIR}" ]]; then
   fi
 else
   publish_one "${SOURCE_FILE}" "${OBJECT_PATH}"
+fi
+
+if [[ "${DRY_RUN}" == "1" && -n "${MANIFEST}" ]]; then
+  echo "dry-run: nothing was uploaded and no line was written to ${MANIFEST}" >&2
 fi
