@@ -9,14 +9,17 @@
   "rangeStartHex": "0xa52f2380",
   "rangeEndExclusiveHex": "0xa52f2580",
   "cohortManifestSha256": null,
-  "state": "reserved",
+  "state": "opened",
   "reservedAt": "2026-09-06T01:32:22Z",
-  "openedAt": null,
+  "openedAt": "2026-09-06T02:58:55Z",
   "closedAt": null,
   "protocolSha256": "0284abf064ef24fe47ae1ee1b3a7d63245b9f470bdcdcbf00976576bb1d67df8",
-  "runIds": [],
+  "runIds": [
+    "RUN-20260906T013222Z-ba0ee34f"
+  ],
   "notes": [
     "Conservative import 2026-09-06: every 8-hex-digit constant under docs/, approaches/, src/, research/, artifacts/, web/content/ and scripts/ was enumerated (grep -rhoE '0x[0-9a-fA-F]{8}'); no constant has prefix 0xa55 or 0xa56, and the only constant in 0xa52f2280-0xa52f2580 is 0xa52f2280 itself, which is the exclusive end boundary of the first experiment's validation lease SL-20260905T191317Z-549265de and is never read there. The pool 0xa52c0000-0xa5300000 (the ./do-research allocator's) is used up to 0xa52f2280 exclusive by earlier leases; the ranges below start there and overlap no existing lease record and no protected (0x7d) or final (0xd7) prefix. The first experiment's blocks (training 0xa5300000-0xa54f0000, validation 0xa52f2240-0xa52f2280, screen 0xa52f2140-0xa52f2240) are disjoint from all three.",
-    "Held-out screen, 512 never-read public-development seeds, opened exactly once by scripts/pipeline2.sh screen after candidate-weights.sha256 and prior-weights.sha256 are recorded, with six arms on identical seeds: candidate-d3s7, candidate-1ply, prior-d3s7 and prior-1ply (the first experiment's frozen tables, SHA-256 0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b), fair-d3s7 and fair-d4s7. A second opening requires a new experiment record."
+    "Held-out screen, 512 never-read public-development seeds, opened exactly once by scripts/pipeline2.sh screen after candidate-weights.sha256 and prior-weights.sha256 are recorded, with six arms on identical seeds: candidate-d3s7, candidate-1ply, prior-d3s7 and prior-1ply (the first experiment's frozen tables, SHA-256 0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b), fair-d3s7 and fair-d4s7. A second opening requires a new experiment record.",
+    "Opened 2026-09-06T02:58:55Z by run RUN-20260906T013222Z-ba0ee34f for the one-shot screen (0xa52f2380 to 0xa52f2580 exclusive); candidate SHA-256 recorded beforehand in runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/main/candidate-weights.sha256: 824b0a39a90d8a5aae63438c1538d4c5022f0e0f09c75fb7e2d758a1d6c6fb8a"
   ]
 }
