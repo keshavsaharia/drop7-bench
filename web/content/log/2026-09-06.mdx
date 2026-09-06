@@ -1,0 +1,88 @@
+---
+date: 2026-09-06
+title: "Replicating the lookup-table leaf on fresh seeds at larger scale"
+summary: "The row-and-column lookup tables beat the fair leaf yesterday on one held-out block. Today's run asks whether that holds on seeds nothing has read, and whether a wider evaluator trained until its validation margin stops improving does better: 5.8 billion table entries, a 256-game validation block with a plateau rule, and a 512-game screen that carries yesterday's frozen tables beside the new ones."
+contributors: [claude-fable-5-1 (Claude Code)]
+tags: [n-tuple, temporal-difference, leaf, rust, replication, plateau]
+outcomes: { positive: 0, negative: 0, open: 1 }
+---
+
+## Two questions from yesterday
+
+Yesterday's screen put the lookup tables 170,139 points ahead of the fair
+leaf inside the same depth-3 search on 256 held-out games
+(`RS-20260905T215332Z-95d18a5a`). Two things it could not say: whether the
+margin survives a block of seeds that nothing has read, and whether the
+evaluator was still improving when its four-billion-move budget ran out.
+The twenty validation margins of that run bounced between 116,000 and
+270,000 on 64 games without settling, which is what a noisy read of a
+still-rising curve looks like, and also what a noisy read of a plateau looks
+like. The owner asked for a fresh-block replication with a longer and wider
+training run that stops when the margins plateau.
+
+## The design
+
+Experiment `EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a`, run
+`RUN-20260906T013222Z-ba0ee34f`, branch `claude/n-tuple-scale-replication`.
+Three never-read seed blocks: a training block at `0xa5500000`, a 256-game
+validation block at `0xa52f2280`, and a 512-game screen block at
+`0xa52f2380`, all disjoint from everything the first experiment touched.
+
+The evaluator is yesterday's selected layout (full rows, full columns,
+2-by-3 and 3-by-2 windows, every family split by the rise clock) plus two
+new families that see more of the board at once: the 24 placements of a
+2-by-4 window and the 24 placements of a 4-by-2 window, a hundred million
+patterns each. That is 5.8 billion table entries against yesterday's one
+billion, and 122 numbers summed per board against 74. The eight-cell windows
+are not split by the rise clock; five copies of them would not fit in
+memory.
+
+There is no move budget. Every five hundred million training moves the
+tables are dropped into the depth-3 search and played on the 256 validation
+games against the fair leaf. From the eighth validation point on, the run
+stops as soon as the mean margin of the last four points is not above the
+mean of the four points before them. The candidate is the point with the
+largest margin. It then plays the 512 held-out games as the depth-3 leaf
+beside five other arms on the identical seeds: the same tables played
+directly, yesterday's frozen tables as the same leaf and played directly,
+the fair leaf in the same search, and the fair leaf at depth 4. The
+protocol fixes three readings: the candidate gate (the wide tables against
+the fair leaf, the same criteria as yesterday), the replication (yesterday's
+tables against the fair leaf on these fresh seeds, the same criteria) and a
+scale verdict (the wide tables against yesterday's tables: supported,
+refuted or inconclusive by the bootstrap bounds).
+
+<Finding title="Five point eight billion entries need 64-bit indices and lazily zeroed accumulators" kind="neutral" metric="1.27 million moves per second on 32 threads, 42.7 GB resident after 40 million moves">
+The wide layout has more entries than a 32-bit index can address, so the
+feature indices are now 64-bit. The two coherence accumulator arrays are
+allocated zeroed rather than filled, so their pages become resident only
+when an entry is first updated. The smoke run on the already-open probe
+block measured 1.27 million training moves per second, about two thirds of
+yesterday's rate, with 42.7 GB resident after 40 million moves; the
+accumulators keep filling in as training touches more entries, up to the
+69.6 GB the three arrays would occupy if every page were touched.
+</Finding>
+
+<Finding title="A terminal state has no rise phase, and the gate found out" kind="neutral" metric="one gate panic, fixed before any leased seed was read">
+The first invocation of the CHECK gates crashed. The information-boundary
+gate values every sampled state, including terminal ones, and a state whose
+rise ended the game carries zero moves until the next rise. The feature
+function turned that into a rise phase of minus one, and with 64-bit indices
+the entry landed outside the table. The phase is now clamped. Nothing
+recorded is affected: the fair search returns its terminal utility before it
+would ever value a terminal board, and training and the direct policy guard
+the same way. In yesterday's run the same gate, with 32-bit indices, read a
+wrong but in-range entry of the column tables for those terminal states,
+the same wrong entry under every perturbation, so its pass was sound. The
+second invocation passed all 19 gates.
+</Finding>
+
+<Direction title="The main run is training" status="open" owner="claude-fable-5-1 (Claude Code)">
+The run started at 01:44 UTC from commit `16e7c99`. Its validation curve,
+the plateau rule's two window means at every point, and later the screen
+and its three readings appear on the
+[approach page](/approach/ntuple-rl/ntuple-scale) as the snapshot is
+refreshed, with every number copied from the run's artifacts. The theory's
+training-signal check and the screen's gate are evaluated once, from the
+artifacts, when the chain finishes.
+</Direction>

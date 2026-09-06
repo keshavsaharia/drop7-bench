@@ -122,6 +122,35 @@ About 99 million of the billion table entries had been updated at that point.
 
 <NTupleGateTable run="RUN-20260905T193006Z-4fbeb4e5" />
 
+### The replication at larger scale
+
+The first run left two questions open: whether the margin holds on seeds
+nothing has ever read, and whether more scale helps. A second experiment,
+[EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a](/experiments/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a),
+asks both on the same screen. It trains a wider evaluator from scratch on a
+fresh training block: the same rows, columns and small windows as before,
+plus 2-by-4 and 4-by-2 windows with a hundred million patterns each, 5.8
+billion table entries in all. There is no fixed move budget. Every five
+hundred million moves the tables are dropped into the depth-3 search and
+played on a fresh block of 256 training-role games against the fair leaf,
+and training stops once the mean margin of the last four validation points
+is no longer above the mean of the four before them. The frozen candidate
+then plays 512 held-out games beside the first run's frozen tables on the
+identical seeds, so one screen reads the replication of the first result
+and the effect of the extra scale at the same time.
+
+<NTupleStatus run="RUN-20260906T013222Z-ba0ee34f" />
+
+<NTupleTrainingFigure run="RUN-20260906T013222Z-ba0ee34f" caption="Stage B of the replication. The wide layout trained from scratch on the fresh training block. The solid line is the tables as the leaf of the depth-3 search on the 256 fresh validation games; the dashed line is the frozen fair leaf in the same search on the same games; the thin lines are the tables played directly and the training games themselves. The plateau rule reads the solid line's margin over the dashed one from the eighth point on." />
+
+<NTupleScreenFigure run="RUN-20260906T013222Z-ba0ee34f" caption="Stage D of the replication, the primary contrast. One bar per held-out game: the wide candidate as the depth-3 leaf minus the frozen fair leaf in the same search on the same seed, in seed order, 512 games." />
+
+<NTupleScreenFigure run="RUN-20260906T013222Z-ba0ee34f" contrast="prior-d3s7-vs-fair-d3s7" caption="The replication reading. The first run's frozen tables, unchanged, as the depth-3 leaf minus the fair leaf in the same search, on the same 512 fresh games." />
+
+<NTupleScreenFigure run="RUN-20260906T013222Z-ba0ee34f" contrast="candidate-d3s7-vs-prior-d3s7" caption="The scale reading. The wide candidate minus the first run's tables, both as the depth-3 leaf, on the same 512 games." />
+
+<NTupleGateTable run="RUN-20260906T013222Z-ba0ee34f" />
+
 ## What we learned
 
 The evaluator was the bottleneck, and a lookup table can be a better one than
@@ -151,6 +180,26 @@ experiment
 run `RUN-20260905T193006Z-4fbeb4e5`, machine profile
 `MACH-20260905T192901Z-83559f62`, contribution `CT-20260905T192505Z-c487efca`.
 
+Replication at larger scale: experiment
+[EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a](/experiments/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a)
+(frozen protocol SHA-256 `0284abf064ef24fe47ae1ee1b3a7d63245b9f470bdcdcbf00976576bb1d67df8`),
+run `RUN-20260906T013222Z-ba0ee34f` on branch
+`claude/n-tuple-scale-replication`, machine profile
+`MACH-20260906T014136Z-58c2ebe0`, contribution `CT-20260906T014308Z-21df88ae`.
+Its seed leases: training `SL-20260906T013222Z-ce319097` (`0xa5500000` to
+`0xa56f0000`, read in order and wrapped), validation
+`SL-20260906T013222Z-6cce6192` (`0xa52f2280`, 256 games, training role,
+re-read at every validation point), screen `SL-20260906T013222Z-f34b23c0`
+(`0xa52f2380`, 512 games, public development, opened once). All three are
+disjoint from every block the first experiment read. Stage driver
+`approaches/ntuple-rl/ntuple-scale/scripts/pipeline2.sh`; artifacts under
+`runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/` (gitignored); web snapshot
+`web/content/figures/ntuple-scale/RUN-20260906T013222Z-ba0ee34f.json`. The
+wide layout is `rows,cols,win23,win32,win24,win42,phase=all`: 5.8 x 10^9
+entries, 122 active per state, 23.2 GB of weights and 69.6 GB with the
+coherence accumulators; table files stay on the workstation with their
+SHA-256 in the result record.
+
 Seed leases: training `SL-20260905T191317Z-09895ea2` (`0xa5300000`
 to `0xa54f0000`, read in order and wrapped; wrap counts in each
 `progress.jsonl`), validation `SL-20260905T191317Z-549265de` (`0xa52f2240`,
@@ -173,6 +222,10 @@ Reproduce:
 approaches/ntuple-rl/ntuple-scale/build.sh
 cd approaches/ntuple-rl/ntuple-scale && cargo test --release
 RUN_ID=RUN-... THREADS=32 scripts/pipeline.sh chain
+# the replication (fresh blocks, wide layout, plateau rule):
+RUN_ID=RUN-... EXPERIMENT_ID=EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a \
+  SCREEN_LEASE=research/seeds/leases/SL-20260906T013222Z-f34b23c0.json THREADS=32 \
+  scripts/pipeline2.sh gates && scripts/pipeline2.sh smoke && scripts/pipeline2.sh chain
 ```
 
 </AgentContext>
@@ -242,6 +295,24 @@ one-shot screen is 256 games, whose detection floor for this contrast is
 recorded in the analysis; the candidate is chosen at the validation point with
 the best margin, which is an upward-biased estimate the screen exists to
 correct.
+
+Replication gates (19, all pass, `gates.log` of the second run): the same
+list with feature-index references for the 2x4 and 4x2 families and the wide
+layout. The first invocation of that gate binary panicked: the
+information-boundary gate values terminal states, a state whose rise ended
+the game carries a rise phase of 0, and the wide layout's 64-bit index then
+left the table. The phase is now clamped inside the feature function; the
+search never values a terminal state (it returns the terminal utility
+first), training and the direct policy guard the same way, so no recorded
+game is affected. In the first experiment the same gate read an in-range
+entry of the phase-conditioned column tables for those terminal states
+because its 32-bit index wrapped; the gate's conclusion (hidden fields leave
+the value unchanged) held because the wrong entry was the same wrong entry
+for every perturbation. The replication's validation block is 256 games
+(the rule that stops training reads it, so it selects and cannot confirm);
+its screen is 512 games opened once; the replication arm is the first
+experiment's exact frozen tables, verified by SHA-256 before the screen
+lease opened.
 
 </AgentContext>
 
