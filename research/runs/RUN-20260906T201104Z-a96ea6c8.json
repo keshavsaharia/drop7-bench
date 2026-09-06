@@ -1,0 +1,53 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260906T201104Z-a96ea6c8",
+  "experimentId": "EX-20260906-ntuple-fill-conditioned-continuation-a9e5cbd3",
+  "lifecycle": "running",
+  "runValidity": "pending",
+  "startedAt": "2026-09-06T20:13:04Z",
+  "endedAt": null,
+  "protocolSha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "machineProfileRef": "research/system-profiles/MACH-20260906T201104Z-c51a782f.json",
+  "sourceState": {
+    "gitCommit": null,
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "approaches/ntuple-rl/ntuple-scale/build.sh (branch claude/n-tuple-fill-conditioned)",
+    "cargo test --release (14 unit tests)",
+    "RUN_ID=RUN-20260906T201104Z-a96ea6c8 EXPERIMENT_ID=EX-20260906-ntuple-fill-conditioned-continuation-a9e5cbd3 SCREEN_LEASE=research/seeds/leases/SL-20260906T201104Z-53350936.json THREADS=32 approaches/ntuple-rl/ntuple-scale/scripts/pipeline4.sh gates && ... edit (20:13:04Z, before the protocol freeze; the gates read only the already-open probe block 0xa5277000 and the edits read only the frozen table file and its checkpoint)",
+    "RUN_ID=RUN-20260906T201104Z-a96ea6c8 EXPERIMENT_ID=EX-20260906-ntuple-fill-conditioned-continuation-a9e5cbd3 SCREEN_LEASE=research/seeds/leases/SL-20260906T201104Z-53350936.json THREADS=32 approaches/ntuple-rl/ntuple-scale/scripts/pipeline4.sh chain (train -> select -> freeze -> screen -> compare -> analyze), launched with nohup after the protocol freeze and the preregistration commit; stdout/stderr in runs/RUN-20260906T201104Z-a96ea6c8/ntuple-scale/chain.nohup"
+  ],
+  "seedLeaseRefs": [
+    "SL-20260906T201104Z-88b984ce",
+    "SL-20260906T201104Z-26371f8b",
+    "SL-20260906T201104Z-53350936"
+  ],
+  "resourceLimits": {
+    "wallSeconds": 36000,
+    "cpuThreads": 32,
+    "maxHostBytes": 85899345920,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": null,
+    "cpuSeconds": null,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "Running; per-stage wall, CPU and peak RSS are appended to runs/<run-id>/ntuple-scale/rusage.jsonl by scripts/with-rusage.py."
+  },
+  "exitCode": null,
+  "stopReason": null,
+  "artifactRefs": [
+    "runs/RUN-20260906T201104Z-a96ea6c8/ntuple-scale/gates.log",
+    "runs/RUN-20260906T201104Z-a96ea6c8/ntuple-scale/gates-hgt5.log",
+    "runs/RUN-20260906T201104Z-a96ea6c8/ntuple-scale/main/edits.json",
+    "runs/RUN-20260906T201104Z-a96ea6c8/ntuple-scale/{pipeline.log,rusage.jsonl}"
+  ],
+  "contributionIds": [
+    "CT-20260906T201547Z-705074a5"
+  ]
+}

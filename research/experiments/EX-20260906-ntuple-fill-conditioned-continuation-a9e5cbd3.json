@@ -1,0 +1,102 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260906-ntuple-fill-conditioned-continuation-a9e5cbd3",
+  "theoryIds": [
+    "TH-20260906-ntuple-fill-conditioned-leaf-28cb0ae2"
+  ],
+  "title": "Fill-conditioned tables warm-started from the frozen n-tuple leaf, beside an unconditioned continuation and two no-training edits of the frozen tables, screened once on a fresh 512-game block at depth 3 and depth 4",
+  "classification": "algorithmic",
+  "hypothesis": "Candidate fill-d3s7: the stock fair expectimax search at depth 3, seven chance strata, terminal utility -1,000,000, policy seed 0xd7075eed, completion-guaranteeing work bound work_bound_for(3,7)+1, 64k-entry direct-mapped table (deployment_params, the configuration every n-tuple screen used, unchanged), with a fill-conditioned n-tuple leaf: the sum, over the 74 active patterns of the reflection-canonical board, of learned f32 entries in rise units (x 17,000 points) from the layout rows,cols,win23,win32,phase=all,fill=occ5 or rows,cols,win23,win32,phase=all,fill=hgt5 (the first experiment's layout with every table multiplied by five fill buckets: occ5 buckets the occupied cells of the canonical board 0-13 / 14-20 / 21-27 / 28-34 / 35-49, hgt5 the tallest column 0-3 / 4 / 5 / 6 / 7; 5 x 10^9 entries, 20 GB frozen, 60 GB trainable; the bucket reads the board alone). Weights: the frozen tables of RUN-20260905T193006Z-4fbeb4e5 (SHA-256 0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b) promoted into every bucket (Model::promote, bit-identical values to the frozen tables before training) with zeroed coherence accumulators, then trained on-policy by TD(0) with temporal-coherence step sizes (alpha 1.0 x |E|/A, error clamped to +-30 rise units) from complete games of the greedy one-ply chance-state policy over the same tables (seven stratified reveal samples, epsilon 0) on the Rust bitboard engine, 32 asynchronous lock-free workers (Hogwild, not bit-reproducible across runs, disclosed; the gate proves the serial update deterministic), reading the training block in order and wrapping. Each fill arm validates every 2 x 10^8 moves on the 256-game training-role block (ntuple-d3s7 and ntuple-1ply against fair-d3s7 on identical seeds) and stops at the first point k >= 6 at which the mean margin of the last three points is not above the mean of the three before, or at 2 x 10^9 moves, or at 5,400 s of wall time; each arm's best point (largest paired margin of ntuple-d3s7 over fair-d3s7) is its frozen table file. Selection rule, fixed here: the candidate is the fill arm (occ5 or hgt5) whose best validation margin is larger, ties to occ5. Comparator prior-d3s7: the unchanged frozen tables (SHA-256 0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b) as the leaf of the identical search. Beside them on the same seeds: control-d3s7, the frozen tables reloaded in their own layout with zeroed accumulators and continued under the identical training rule, its best point frozen the same way (the effect of continued training without conditioning); zeroed-d3s7 and classmean-d3s7, two no-training edits of the frozen tables in which every entry still holding the optimistic starting value bit for bit (20/74 rise units) is replaced by 0.0, or by the mean of the touched entries of the same table, phase slab and pattern-occupancy class (scripts/edit-tables.py; the edit report counts the entries changed and proves no touched entry moved); prior-d4s7, fill-d4s7 and zeroed-d4s7, the same three table files as the leaf of the reference depth-4 search (reference_d4_params: depth 4, seven strata, 1M-entry table); prior-1ply and fill-1ply, the tables played directly one ply; and fair-d3s7, the frozen fair leaf in the deployment search. Stage 0 (CHECK, no leased seed): gate --layout <each fill layout> on the already-opened probe block 0xa5277000 (codec, row gather, feature indices for fourteen layouts including four fill-conditioned ones against an independent accessor reference, fill buckets against an accessor reference on the states and their mirrors with every bucket reached, promotion preserving values bit for bit with fresh accumulators and separable buckets, information boundary, reflection, direct-policy legality, leaf-in-search determinism and worker independence at depth 3 and depth 4, serial training determinism, finiteness), then gate --weights on each of the four new table files before the screen lease opens. Hypothesis: fill-d3s7 beats prior-d3s7 in paired mean whole-game score on 512 never-read public-development games, and beats control-d3s7 on the same games.",
+  "candidate": {
+    "name": "fill-d3s7",
+    "entryPoint": "approaches/ntuple-rl/ntuple-scale/src/game.rs",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "prior-d3s7",
+    "entryPoint": "approaches/ntuple-rl/ntuple-scale/src/game.rs",
+    "manifestRef": null
+  },
+  "informationBoundary": "public-policy",
+  "benchmarkTier": "SCREEN",
+  "data": {
+    "role": "public-development",
+    "seedLeaseRefs": [
+      "SL-20260906T201104Z-88b984ce",
+      "SL-20260906T201104Z-26371f8b",
+      "SL-20260906T201104Z-53350936"
+    ],
+    "datasetRefs": [
+      "DS-20260906-ntuple-scale-frozen-tables-ff977178"
+    ],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "CHECK gates read only the already-opened development probe block 0xa5277000 (SEEDLEASE-A52-FAST); the two table edits read no seed at all (the frozen table file and the checkpoint's accumulators). Training reads the never-read training block 0xa5800000-0xa59f0000 (training role, read in order and wrapped, the same block for all three arms) and the never-read 256-game validation block 0xa52f2780-0xa52f2880 (training role, re-read at every validation point of every arm; it selects each arm's best point and the candidate arm, so it can confirm nothing). The held-out screen opens 0xa52f2880-0xa52f2a80 (512 games) exactly once, after the SHA-256 of every table file it plays is on disk and the gates have passed on each new file. All three blocks are disjoint from every block the earlier n-tuple experiments read (training 0xa5300000-0xa54f0000 and 0xa5500000-0xa56f0000, validation 0xa52f2240-0xa52f2280 and 0xa52f2280-0xa52f2380, screens 0xa52f2140-0xa52f2240, 0xa52f2380-0xa52f2580 and 0xa52f2580-0xa52f2780), and from the historical block 0xa5700000-0xa571869f. The frozen tables were trained on 0xa5300000-0xa54f0000 and selected on 0xa52f2240; nothing here re-reads those blocks. Selection bias: the candidate and control are each the best of up to ten validation points of their arm, and the candidate arm is the better of two, all on the training-role validation block; the screen measures what survives that selection."
+  },
+  "metrics": {
+    "primary": "paired mean whole-game score delta, fill-d3s7 minus prior-d3s7 (the selected fill-conditioned candidate minus the unchanged frozen tables, both as the depth-3 leaf), 512 held-out games",
+    "secondary": [
+      "conditioning: fill-d3s7 minus control-d3s7, with the fixed three-way verdict supported (bootstrap and Student-t 95% lower bounds > 0) / refuted (bootstrap 95% upper bound < 0) / inconclusive, floor reported",
+      "continuation: control-d3s7 minus prior-d3s7 under the same four criteria as the gate and the same three-way verdict",
+      "optimism edits (step 1): zeroed-d3s7 minus prior-d3s7 and classmean-d3s7 minus prior-d3s7, each with the three-way verdict; and each against fair-d3s7",
+      "depth: fill-d4s7 minus prior-d4s7 and zeroed-d4s7 minus prior-d4s7 (three-way verdicts); the depth steps fill-d4s7 minus fill-d3s7, prior-d4s7 minus prior-d3s7 and zeroed-d4s7 minus zeroed-d3s7",
+      "direct play: fill-1ply minus prior-1ply, fill-1ply minus fair-d3s7, prior-1ply minus fair-d3s7 (diagnostic: does conditioning change the one-ply policy)",
+      "replication context: prior-d3s7 minus fair-d3s7 on this fifth block; fill-d3s7 minus fair-d3s7; fill-d4s7 minus fair-d3s7",
+      "training-signal check (pilot tier): each arm's validation curve on the 256-game block (margin of ntuple-d3s7 over fair-d3s7 per point, best point, plateau reading, touched entries, moves per second) and whether either fill arm's best margin exceeds the control arm's",
+      "paired mean moves delta; numbered clears per move and cover reveals per move; mean occupied cells; lower quartile, median, maximum score; first-half (seeds 0-255) and second-half (256-511) paired mean deltas; per-arm logical work and wall seconds per game",
+      "edit report: entries at the starting value in the frozen file, entries changed by each edit, classes with no touched entry, and (from the checkpoint) touched entries that sit exactly at the starting value",
+      "resource observations: per-stage wall, CPU and peak resident set (rusage.jsonl)"
+    ],
+    "statisticalUnit": "whole-game",
+    "uncertaintyMethod": "one-sided 95% percentile bootstrap over whole games, 20,000 resamples, RNG seed 0xb0071eaf (the unchanged compare.py of the leaf-evolution screen; analyze.py's identical paired()), plus a one-sided 95% Student-t lower bound; detection floor 1.645*sd/sqrt(n) reported for every contrast"
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "All CHECK gates passed on the probe block for both fill layouts before any leased seed was read (gates.log, gates-hgt5.log), and gate --weights passed on each of the four new table files (candidate, control, zeroed, classmean) before the screen lease opened (main/gates-*.log).",
+      "The screen artifact has illegalDecisions 0 and incompleteDecisions 0 in every arm; censored games are reported as censored.",
+      "Held-out screen, 512 paired games on 0xa52f2880-0xa52f2a7f, fill-d3s7 vs prior-d3s7: bootstrap 95% lower bound of the paired score delta > 0 AND Student-t 95% lower bound > 0.",
+      "Held-out screen: fill-d3s7 minus prior-d3s7 paired mean score delta > 0 in both halves (seeds 0-255 and 256-511).",
+      "Held-out screen: fill-d3s7 lower-quartile score >= prior-d3s7 lower-quartile score.",
+      "The prior arms are the exact frozen best-weights.bin of RUN-20260905T193006Z-4fbeb4e5 (SHA-256 0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b, verified and written to main/prior-weights.sha256 before any stage that reads it); the candidate, control, zeroed and class-mean files have their SHA-256 written to main/*.sha256 before the screen lease opens, and the candidate arm is the one selection.json names by the fixed rule.",
+      "Reported beside the gate, not part of it: the conditioning verdict (fill-d3s7 vs control-d3s7), the continuation reading (control-d3s7 vs prior-d3s7 under the same four criteria), the two edit verdicts (zeroed-d3s7 and classmean-d3s7 vs prior-d3s7), the two depth-4 verdicts (fill-d4s7 and zeroed-d4s7 vs prior-d4s7), each 'supported' when the bootstrap and Student-t 95% lower bounds are > 0, 'refuted' when the bootstrap 95% upper bound is < 0, 'inconclusive' otherwise (floor reported); and the pilot-tier training-signal check (a fill arm's best validation margin above the control arm's)."
+    ],
+    "failureAction": "Record a valid run with scientific outcome fail for this exact configuration (five fill buckets warm-started from the frozen tables under this training rule); keep prior-d4s7 as the candidate to carry forward; report the conditioning, continuation, edit and depth readings as recorded, including any edit or continuation arm that passes its own four criteria (which is a finding beside the gate, not a candidate promotion: promoting it needs a new experiment whose gate names it); mark the theory not supported as tested (refuted if the primary falsifier's upper bound is below zero, inconclusive if the bounds straddle zero); open no further cohort for this candidate.",
+    "passAction": "Adopt fill-d3s7 as the candidate to carry forward at depth 3, and fill-d4s7 at depth 4 when its depth-4 verdict is 'supported'; record the conditioning verdict (a pass with an inconclusive or refuted conditioning verdict is recorded as a gain the screen cannot attribute to the buckets); register as successors a seven-bucket study and a STANDARD or fresh-development evaluation of the unchanged candidate; do not open protected or final seeds."
+  },
+  "resources": {
+    "wallSeconds": 36000,
+    "cpuThreads": 32,
+    "maxHostBytes": 85899345920,
+    "maxGpuBytes": null,
+    "gpuDevices": []
+  },
+  "stopConditions": [
+    "Stop on any rules, information-boundary, legality, determinism, or parity failure.",
+    "Each training arm stops at its plateau rule (window 3 from the sixth validation point), at 2 x 10^9 moves, or at 5,400 s of wall time, whichever comes first; an arm stopped by wall time keeps its best point and the fact is recorded.",
+    "A screen artifact with any illegal or incomplete decision voids the run (invalid), not the candidate.",
+    "The screen is evaluated exactly once; no re-run on the same or a different held-out block without a new experiment record. The screen binary rewrites the artifact after every completed arm; an interrupted screen is recorded as interrupted with the arms that completed, and the gate is not evaluated on a partial artifact.",
+    "The whole run is stopped at 36,000 s of wall time; such a run is recorded as interrupted with whatever stages completed.",
+    "Host memory above the declared bound (80 GiB resident) aborts the stage through the operating system or the operator; such a run is recorded as interrupted with its artifacts. A STOP file in a training arm's directory ends that arm at the next chunk (recorded as stop-file)."
+  ],
+  "expectedArtifacts": [
+    "runs/<run-id>/ntuple-scale/gates.log and gates-hgt5.log (CHECK, both fill layouts, probe block only)",
+    "runs/<run-id>/ntuple-scale/main/{zeroed,classmean}-weights.bin (+ .sha256), edits.json, edit.log (the two no-training edits; the table files are not committed)",
+    "runs/<run-id>/ntuple-scale/pilot/{control,occ5,hgt5}/{config.json,progress.jsonl,val-*.json,best.json,best-weights.bin,stop.json,train.log,train.err,DONE} (the three warm-started arms; table files not committed)",
+    "runs/<run-id>/ntuple-scale/pilot/selection.json (the fixed selection rule's output)",
+    "runs/<run-id>/ntuple-scale/main/{prior,candidate,control,zeroed,classmean}-weights.sha256 and main/gates-{candidate,control,zeroed,classmean}.log (freeze)",
+    "runs/<run-id>/ntuple-scale/screen/heldout.json + compare-*.json (the one-shot screen, eleven arms)",
+    "runs/<run-id>/ntuple-scale/{pipeline.log,rusage.jsonl,screen.log,screen.err,analysis.json,analysis.md}",
+    "artifacts emitted by the trainer and the screen carry this experiment id in their config field; the frozen candidate table file (20 GB) is retained on the workstation with its SHA-256 in the result record and published compressed to the research archive"
+  ],
+  "lifecycle": "preregistered",
+  "protocolSha256": "974bdae371b7dab5835003c8b62e26b4ab303f01761e5846880c6b10eee1aa14",
+  "amendments": [],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5-1",
+    "agentId": "claude-code-ntuple-fill-conditioned"
+  },
+  "createdAt": "2026-09-06T20:12:13Z",
+  "updatedAt": "2026-09-06T20:17:51Z"
+}

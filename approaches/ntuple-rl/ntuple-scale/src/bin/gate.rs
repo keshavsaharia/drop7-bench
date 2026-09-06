@@ -19,7 +19,7 @@ use std::sync::Arc;
 use std::time::Instant;
 
 use drop7_ntuple_scale::game::{evaluate_arm, Arm};
-use drop7_ntuple_scale::model::{Layout, Model, UpdateStats, MAX_ACTIVE};
+use drop7_ntuple_scale::model::{FillMode, Layout, Model, UpdateStats, MAX_ACTIVE};
 use drop7_ntuple_scale::policy::{choose, NTupleLeaf, PolicyParams};
 use drop7_ntuple_scale::tuples::{base10_ref, row_words, row_words_ref, Codec};
 use drop7_rs::board::{Board, BOARD_SIZE};
@@ -68,12 +68,37 @@ fn sample_states(probe_start: u32, games: u32, per_game: usize) -> Vec<State> {
     states
 }
 
+/// Independent fill bucket from the cell accessor: occupied cells counted
+/// one by one, the tallest column as the highest occupied row.
+fn fill_bucket_ref(layout: &Layout, canonical: &Board) -> u64 {
+    let mut occupied = 0u64;
+    let mut tallest = 0u64;
+    for c in 0..BOARD_SIZE {
+        let mut height = 0u64;
+        for r in 0..BOARD_SIZE {
+            if canonical.get(r, c) != 0 {
+                occupied += 1;
+                // row 0 is the top: a disc at row r means height >= 7 - r.
+                height = height.max(7 - r as u64);
+            }
+        }
+        tallest = tallest.max(height);
+    }
+    match layout.fill {
+        FillMode::None => 0,
+        FillMode::Occupancy5 => [13u64, 20, 27, 34].iter().filter(|&&edge| occupied > edge).count() as u64,
+        FillMode::Height5 => [3u64, 4, 5, 6].iter().filter(|&&edge| tallest > edge).count() as u64,
+    }
+}
+
 /// Reference feature construction through the cell accessor and Horner
 /// base-10 codes, mirroring model.rs's documented layout independently.
 fn features_ref(layout: &Layout, board: &Board, moves_remaining: i32) -> Vec<u64> {
     let canonical = if board.mirrored_is_smaller() { board.mirrored() } else { *board };
     let get = |r: usize, c: usize| canonical.get(r, c) as u64;
     let phase = (moves_remaining - 1) as u64;
+    let bucket = fill_bucket_ref(layout, &canonical);
+    let buckets = if layout.fill == FillMode::None { 1u64 } else { 5 };
     let mut out = Vec::new();
     let mut base = 0u64;
     let line = 10_000_000u64;
@@ -81,33 +106,37 @@ fn features_ref(layout: &Layout, board: &Board, moves_remaining: i32) -> Vec<u64
     let wide = 100_000_000u64;
     let phases_all = layout.phase == drop7_ntuple_scale::model::PhaseMode::All;
     let phases_cols = layout.phase != drop7_ntuple_scale::model::PhaseMode::None;
+    // A table is buckets x phase slabs x patterns, bucket-major; the offset
+    // of one state's slab within it.
+    let slab = |conditioned: bool, patterns: u64| -> u64 {
+        let phases = if conditioned { 5 } else { 1 };
+        (bucket * phases + if conditioned { phase } else { 0 }) * patterns
+    };
     if layout.rows {
-        let size = if phases_all { 5 * line } else { line };
+        let size = (if phases_all { 5 * line } else { line }) * buckets;
         for r in 0..BOARD_SIZE {
             let mut code = 0u64;
             for c in (0..BOARD_SIZE).rev() {
                 code = code * 10 + get(r, c);
             }
-            let off = if phases_all { phase * line } else { 0 };
-            out.push(base + r as u64 * size + off + code);
+            out.push(base + r as u64 * size + slab(phases_all, line) + code);
         }
         base += 7 * size;
     }
     if layout.cols {
-        let size = if phases_cols { 5 * line } else { line };
+        let size = (if phases_cols { 5 * line } else { line }) * buckets;
         for c in 0..BOARD_SIZE {
             // nibble n = row 6-n is the least significant digit.
             let mut code = 0u64;
             for r in 0..BOARD_SIZE {
                 code = code * 10 + get(r, c);
             }
-            let off = if phases_cols { phase * line } else { 0 };
-            out.push(base + c as u64 * size + off + code);
+            out.push(base + c as u64 * size + slab(phases_cols, line) + code);
         }
         base += 7 * size;
     }
     if layout.win23 {
-        let size = if phases_all { 5 * window } else { window };
+        let size = (if phases_all { 5 * window } else { window }) * buckets;
         let mut placement = 0u64;
         for c in 0..BOARD_SIZE - 1 {
             for top in 0..=4usize {
@@ -115,23 +144,21 @@ fn features_ref(layout: &Layout, board: &Board, moves_remaining: i32) -> Vec<u64
                 // significant; the right column is scaled by 1000.
                 let left = get(top, c) * 100 + get(top + 1, c) * 10 + get(top + 2, c);
                 let right = get(top, c + 1) * 100 + get(top + 1, c + 1) * 10 + get(top + 2, c + 1);
-                let off = if phases_all { phase * window } else { 0 };
-                out.push(base + placement * size + off + left + 1000 * right);
+                out.push(base + placement * size + slab(phases_all, window) + left + 1000 * right);
                 placement += 1;
             }
         }
         base += 30 * size;
     }
     if layout.win32 {
-        let size = if phases_all { 5 * window } else { window };
+        let size = (if phases_all { 5 * window } else { window }) * buckets;
         let mut placement = 0u64;
         for c in 0..BOARD_SIZE - 2 {
             for top in 0..=5usize {
                 let a = get(top, c) * 10 + get(top + 1, c);
                 let b = get(top, c + 1) * 10 + get(top + 1, c + 1);
                 let d = get(top, c + 2) * 10 + get(top + 1, c + 2);
-                let off = if phases_all { phase * window } else { 0 };
-                out.push(base + placement * size + off + a + 100 * b + 10_000 * d);
+                out.push(base + placement * size + slab(phases_all, window) + a + 100 * b + 10_000 * d);
                 placement += 1;
             }
         }
@@ -171,6 +198,10 @@ fn features_ref(layout: &Layout, board: &Board, moves_remaining: i32) -> Vec<u64
         }
     }
     out
+}
+
+fn params_default() -> PolicyParams {
+    PolicyParams::default()
 }
 
 fn main() {
@@ -224,7 +255,7 @@ fn main() {
     }
 
     // 3. Feature indices against the independent reference, every layout.
-    for spec in ["rows", "cols", "win23", "win32", "win24", "win42", "rows,cols,win23,win32,phase=none", "rows,cols,win23,win32,phase=cols", "rows,cols,win23,win32,phase=all", "rows,cols,win23,win32,win24,win42,phase=all"] {
+    for spec in ["rows", "cols", "win23", "win32", "win24", "win42", "rows,cols,win23,win32,phase=none", "rows,cols,win23,win32,phase=cols", "rows,cols,win23,win32,phase=all", "rows,cols,win23,win32,win24,win42,phase=all", "cols,fill=occ5", "rows,win23,phase=none,fill=hgt5", "rows,cols,win23,win32,phase=all,fill=occ5", "rows,cols,win23,win32,phase=all,fill=hgt5"] {
         let layout = Layout::parse(spec).unwrap();
         let model = Model::new(layout, 1.0, false);
         let mut out = [0u64; MAX_ACTIVE];
@@ -255,6 +286,111 @@ fn main() {
             mismatches == 0 && duplicates == 0 && out_of_range == 0,
             format!("{} states x 5 phases: {mismatches} mismatches, {duplicates} duplicate/short sets, {out_of_range} out of range; {} entries", states.len(), model.entries()),
         );
+    }
+
+    // 3b. Fill buckets against the accessor reference, both modes, on the
+    // sampled states and on their mirrors (the bucket must be
+    // reflection-invariant); and every bucket of both modes is reached by
+    // random play, so the promotion gate below exercises all of them.
+    for (mode, name) in [(FillMode::Occupancy5, "occ5"), (FillMode::Height5, "hgt5")] {
+        let layout = Layout::parse(&format!("cols,fill={name}")).unwrap();
+        let mut mismatches = 0usize;
+        let mut mirror_mismatches = 0usize;
+        let mut seen = [0usize; 5];
+        for state in &states {
+            let canonical = if state.board.mirrored_is_smaller() { state.board.mirrored() } else { state.board };
+            let got = mode.bucket(&state.board);
+            if got as u64 != fill_bucket_ref(&layout, &canonical) {
+                mismatches += 1;
+            }
+            if got != mode.bucket(&state.board.mirrored()) {
+                mirror_mismatches += 1;
+            }
+            seen[got] += 1;
+        }
+        let all_reached = seen.iter().all(|&n| n > 0);
+        gates.report(
+            &format!("fill-bucket-vs-reference[{name}]"),
+            mismatches == 0 && mirror_mismatches == 0 && all_reached,
+            format!("{} states: {mismatches} mismatches, {mirror_mismatches} mirror mismatches; states per bucket {seen:?} (all reached {all_reached})", states.len()),
+        );
+    }
+
+    // 3c. Promotion preserves the value: a small model trained for a few
+    // games, promoted into each fill mode, values every sampled state at
+    // every phase bit-identically; the promoted model has five times the
+    // entries, fresh accumulators, and moves apart under one update.
+    {
+        let small = Layout::parse("rows,win32,phase=cols").unwrap();
+        let trained = Model::new(small, 20.0, true);
+        {
+            let mut scratch = [0u64; MAX_ACTIVE];
+            let mut prev = [0u64; MAX_ACTIVE];
+            let mut next = [0u64; MAX_ACTIVE];
+            let mut stats = UpdateStats::default();
+            let mut sink = FullWaveSink::new();
+            for game in 0..6u32 {
+                let seed = probe_start.wrapping_add(0x300 + game);
+                let mut state = State::initial_headless(seed);
+                let mut n_prev = trained.features(&state.board, state.moves_remaining, &mut prev);
+                while !state.game_over && state.moves_played < 120 {
+                    let d = choose(&trained, &state, &params_default(), &mut scratch);
+                    if d.action < 0 {
+                        break;
+                    }
+                    sink.clear();
+                    let Some(result) = play_headless_move(&mut state, seed, d.action as usize, &mut sink) else { break };
+                    let reward = result.score_delta as f32 / 17_000.0;
+                    let target = if state.game_over {
+                        reward
+                    } else {
+                        let n = trained.features(&state.board, state.moves_remaining, &mut next);
+                        reward + trained.value_of(&next[..n])
+                    };
+                    trained.update(&prev[..n_prev], target, 1.0, 30.0, &mut stats);
+                    if !state.game_over {
+                        std::mem::swap(&mut prev, &mut next);
+                        n_prev = small.active_count();
+                    }
+                }
+            }
+        }
+        for name in ["occ5", "hgt5"] {
+            let layout = Layout::parse(&format!("rows,win32,phase=cols,fill={name}")).unwrap();
+            let promoted = Model::promote(&trained, layout).expect("promotion");
+            let mut scratch = [0u64; MAX_ACTIVE];
+            let mut mismatches = 0usize;
+            for state in &states {
+                for mtr in 1..=5 {
+                    if promoted.value(&state.board, mtr, &mut scratch).to_bits() != trained.value(&state.board, mtr, &mut scratch).to_bits() {
+                        mismatches += 1;
+                    }
+                }
+            }
+            let five_times = promoted.entries() == 5 * trained.entries();
+            let fresh = promoted.touched_entries() == 0 && promoted.trainable();
+            // One update in the bucket of the first sampled state moves that
+            // state and leaves a sampled state of another bucket unchanged.
+            let first = &states[0];
+            let other = states.iter().find(|s| layout.fill.bucket(&s.board) != layout.fill.bucket(&first.board));
+            let separated = match other {
+                Some(other) => {
+                    let before_other = promoted.value(&other.board, 3, &mut scratch).to_bits();
+                    let before_first = promoted.value(&first.board, 3, &mut scratch);
+                    let n = promoted.features(&first.board, 3, &mut scratch);
+                    let mut stats = UpdateStats::default();
+                    promoted.update(&scratch[..n], before_first + 5.0, 1.0, 100.0, &mut stats);
+                    promoted.value(&other.board, 3, &mut scratch).to_bits() == before_other
+                        && promoted.value(&first.board, 3, &mut scratch) > before_first
+                }
+                None => false,
+            };
+            gates.report(
+                &format!("promotion-preserves-value[{name}]"),
+                mismatches == 0 && five_times && fresh && separated,
+                format!("{} states x 5 phases: {mismatches} value mismatches after promotion; entries x5 {five_times}; fresh accumulators {fresh}; buckets separate under one update {separated}", states.len()),
+            );
+        }
     }
 
     let layout = Layout::parse(&layout_spec).unwrap();
