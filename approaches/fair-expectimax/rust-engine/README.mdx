@@ -1,314 +1,458 @@
 ---
 title: Rust bitboard engine
 family: fair-expectimax
-summary: A packed Rust Drop7 engine with a deterministic central-frontier scheduler, exact depth/strata/leaf analytics, and a bounded workflow for large x86 CPU runs.
+summary: A packed Drop7 engine that avoids unused leaf calculations and offers bounded private or shared search caches.
 status: completed
 evidence: reproduced
 reads: public
 kind: engine
 ---
 
-## Building an efficient bitboard
+## The problem
 
-A Drop7 board is 49 cells with ten possible states (empty, number 1-7, or a 
-gray disc in two states), so each cell fits into four bits. Other engine implementations
-use one byte per cell, and walk them with loops. This engine packs them as seven 32-bit 
-words in a column-wise layout with the bottom row in the least-significant nibble.
+Looking ahead means simulating many possible drops before choosing a column.
+The same small operations repeat throughout the search: move discs, evaluate
+the resulting board, and check whether an earlier branch already solved it.
+An unnecessary scan or memory access in those operations repeats too.
 
-This packed representation some key advantages:
-- Gravity in a column becomes a single bit-gather instruction
-- a row rise becomes a single shift-and-or per column
-- the whole board state is 28 bytes that fit in a handful of registers
+The engine already stores columns in packed words. The next question is where
+that compact representation helps, where another layout is cheaper to read,
+and when remembering an answer saves more work than maintaining the cache.
 
-On top of that packed core sits the fair expectimax search with a pluggable leaf evaluator,
-and a depth-preferred direct-mapped transposition table.
+## Proposed solution
 
-<div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 12, margin: "1rem 0" }}>
-  <Stat label="single core throughput" value="12.8M moves/s" hint="2x the C++ engine, 20x TypeScript" />
-  <Stat label="board size" value="28 bytes" hint="43% more compact" />
-  <Stat label="searcher memory" value="≈2.5 KB + table" hint="C++ engine uses a 16.2 MB table" />
-</div>
+Keep the packed columns for drops and gravity, prepare one byte view for the
+board evaluator, and avoid calculations whose result is already known. Let
+workers reuse completed search values through a bounded cache whose ownership
+and minimum depth can be chosen independently.
+
+The policy reads only the visible board, visible next disc, moves until the
+next rise, and terminal state.
+
+<Diagram
+  name="rust-search-work-avoidance"
+  caption="The source separates board conversion, useful leaf work, and cache access. Each early check removes work before a larger operation begins; this diagram shows control flow, with no timing scale."
+/>
+
+## How it works
+
+1. Store each column in a machine word. Each cell occupies a nibble, a group
+   of four bits, with the bottom cell at the low end. A rise shifts the word
+   and inserts a covered disc. Gravity gathers the surviving nibbles in their
+   existing order. On an x86 build with BMI2 instructions, that gather uses
+   `PEXT`; other targets use an equivalent portable implementation.
 
 <RustPackedBoardFigure />
 
-## Packed columns
-
-Columns are stored as a 32-bit word of seven [nibbles](https://en.wikipedia.org/wiki/Nibble), with the bottom row in the least-significant nibble. Two invariants make everything cheap:
-
-- A column's height is the popcount of its non-zero nibbles, and a dropped
-  disc lands in the first zero nibble — so a drop is `word |= disc << 4*h` and
-  a legality check is one mask test against the top nibble.
-- Because columns stay bottom-packed, gravity is a stable compaction of
-  non-zero nibbles toward the least significant nibble. This is exactly what the BMI2 `PEXT` instruction does: `pext(word, mask)` extracts the nibbles selected by `mask`
-  and packs them, in order, at the bottom.
-
-<RustPextGravityFigure />
-
-A row rise is also simplified by this packing: shifting every cell up one
-row and laying a fresh gray row underneath is `(word << 4) | SOLID` per column, so seven shift-ors replace what is typically a 49 cell copy.
+2. At a [leaf](/learn/glossary#searching), where look-ahead stops and the board is
+   scored, unpack the columns into a row-major byte array. The fair evaluator
+   reads cells and neighbours repeatedly, so this conversion happens once per
+   evaluation. BMI2 builds use `PDEP` to spread a column's nibbles into bytes.
+   Portable builds now extract those nibbles with direct shifts, avoiding the
+   general-purpose bit-scatter loop. The feature definitions and their
+   floating-point accumulation order stay the same. This makes the portable
+   conversion explicit; a shorter source path alone does not establish fewer
+   machine instructions.
 
 <CodeSnippet
   path="approaches/fair-expectimax/rust-engine/src/board.rs"
-  startLine={112}
-  endLine={131}
-  title="Nibble flags and PEXT gravity"
-  caption="The live implementation turns each nonzero nibble into a four-bit mask, then gathers the surviving nibbles toward the bottom of the column."
+  startLine={250}
+  endLine={272}
+  title="A byte view suited to the target CPU"
+  caption="Both architecture paths produce the same row-major cells. The packed columns remain the engine's stored board."
 />
 
-## Cascade bitboards
-
-Explosion detection and cover hits want a different shape — row-major bitboards —
-and the engine derives them from the column words on each wave with SWAR
-nibble tests and `PDEP` scatters (about 70 bit operations, versus the
-reference's ~1,300 board reads per wave):
-
-- **Explosions** come from the same 128-entry run-length table the proven C++ fast
-  engine uses: a disc explodes when its value equals the contiguous occupied run
-  through it in its row or its column, and the run length is a table lookup on
-  the row/column occupancy mask.
-- **Cover hits** are counted for the whole board at once. The explosion bitboard
-  is shifted in the four cardinal directions, and the four resulting bitboards
-  are summed with a bitwise parallel counter (ones/twos/fours planes). A solid
-  gray reveals exactly when its two-or-more-hits plane is set, while a cracked gray
-  reveals when any plane is set.
+3. Build a release-support list only when the disc needs one. The leaf estimates
+   whether other discs could clear and shorten a run that is too long for its
+   number. When the run is already short enough, this release term is zero.
+   Checking that condition before scanning neighbours avoids building and
+   discarding a list. Solid covered discs also need only their two strongest
+   neighbouring supports, which can be selected without sorting the full list.
+   Cracked discs retain their sorted multiplication order so their value bits
+   stay unchanged.
 
 <CodeSnippet
-  path="approaches/fair-expectimax/rust-engine/src/board.rs"
-  startLine={385}
-  endLine={407}
-  title="Parallel cover-hit counter"
-  caption="Four shifted explosion masks become ones, twos and fours bitplanes. Those planes identify every crack and reveal across the board at once."
+  path="approaches/fair-expectimax/rust-engine/src/leaf.rs"
+  startLine={476}
+  endLine={496}
+  title="Check whether release support can contribute"
+  caption="The horizontal support scan runs only when the occupied run exceeds the disc's value. The vertical scan applies the same check."
 />
 
-<RustExplosionBitplanesFigure />
-
-## Static leaf dispatch
-
-The search is generic over a `Leaf` trait, so the fair leaf is one monomorphised instantiation and a different evaluator costs no branching in the hot path. Because the leaf reads cells many times in row-major order, it works on a byte view of the board that
-costs seven `PDEP`s to produce — the engine keeps the packed words for the
-mechanics, the leaf pays array-load prices for the reads.
-
-## Transposition table
-
-The fair search carries a transposition table so a state reached two different
-ways is evaluated once. The C++ fast search uses a packed-key, open-addressed,
-strict-LRU table.
-
-For the C++ reference engine, the transposition table's node hit rate
-is **1.3 %** at depth 4 and **1.36 %** at depth 5, which suggested that the table
-is almost never useful. However, after calculating the work it prunes, an effective TT strategy was found which attempts to eliminate the largest possible nested game trees (around 49<sup>depth</sup> expansions). Measured work per decision (move + leaf evaluations):
-
-<AttributionBar
-  title="Work per decision eliminated by memoization (no-table = 100%)"
-  segments={[
-    { label: "recomputed anyway (no-table does all of it)", share: 53, detail: "d4s7: 11.9M work units with no table" },
-    { label: "pruned by the table at d4s7", share: 47, detail: "11.9M → 6.3M with the cheap table; C++ LRU reaches 6.0M" },
-  ]}
-  caption="At depth 4 the table eliminates ~47 % of all work despite a 1.3 % node hit rate. At depth 5 it eliminates ~90 % (582.7M → 59.5M): the deeper the search, the more each rare hit prunes. A 1.3 % hit rate and a 47–90 % work reduction are the same measurement, seen from two directions."
-/>
-
-**The expensive part of the original transposition table was the bookkeeping.**
-The C++ table pays for a hash, a probe, and LRU linked-list maintenance on
-*every* interior node to earn its hit rate. This engine replaces it with a
-direct-mapped, depth-preferred table: one slot per hash index, no probe
-chain, no LRU list, replace-on-collision when the new node is at least as deep.
-It finds nearly the same hits (27.5k vs the LRU's 29.9k per decision at d4s7),
-but with a much lower per-operation cost and a fifth of the memory.
-
-Caching only depth ≥ 2 captures the rare deep hits but misses the numerous shallow ones and recovers only ~25 % of the work reduction, so the shipped configuration caches every depth (`gate ≥ 1`) with the cheap table. The table is a compile-time strategy
-parameter — the `NoTable` arm compiles to nothing — and the values gate proves
-the choice changes no per-column value, only speed and memory.
+4. Check the cache's depth threshold before building a key. A
+   [transposition table](/learn/glossary#searching) remembers the
+   value of a position reached through another branch. The threshold is the
+   remaining search depth at that position. Raising it skips shallow cache
+   accesses, including key packing and hashing, while allowing deeper results
+   to be reused. Capacity controls allocated memory separately: raising the
+   threshold does not shrink an already allocated table.
 
 <CodeSnippet
   path="approaches/fair-expectimax/rust-engine/src/search.rs"
-  startLine={224}
-  endLine={255}
-  title="Direct-mapped cache"
-  caption="Lookup is one masked index. On collision, the slot keeps the deeper entry because that hit can prune more future work."
+  startLine={428}
+  endLine={438}
+  title="Reject shallow cache work before hashing"
+  caption="The search constructs and hashes a packed key only after the table accepts this remaining depth. A cache-free search rejects every depth."
 />
 
-## Parallel frontier
-
-The first parallel decision driver assigned one legal root column to one
-worker. Since a particular game usually has seven legal columns to evaluate, an
-individual deep decision could never use an eighth CPU. Uneven column trees
-also left a long idle tail after the shorter columns finished.
-
-The central-frontier scheduler expands a deterministic prefix of the same
-max/chance tree and interns equal public continuation states. Each remaining
-subtree is registered in one atomic work queue, workers claim tasks dynamically
-with private transposition tables, and publish their results into fixed slots.
-The coordinator then reduces those slots in the original column and chance
-sample order. This keeps floating-point accumulation and tie-breaking exact
-while exposing tens to thousands of tasks from one decision. The old root-only
-scheduler remains available as `--scheduler root` for direct comparison.
+5. Choose who owns the table. Private tables let workers access their own
+   memory without locks. The optional shared table lets a worker reuse another
+   worker's completed result during the same decision. Slots are grouped into
+   stripes, with one lock protecting each group's full keys and values. A
+   worker tries the lock once; a busy stripe
+   becomes a cache miss, so the worker continues its own search. Two workers
+   can still compute the same subtree before either has published a result.
+   Grouping slots bounds the number of locks, including runtime lock
+   allocations on platforms that need them.
 
 <CodeSnippet
-  path="approaches/fair-expectimax/rust-engine/src/parallel.rs"
-  startLine={651}
-  endLine={704}
-  title="Dynamic frontier queue"
-  caption="Workers claim deterministic task IDs atomically, evaluate with private bounded tables and publish into fixed result slots for ordered reduction."
+  path="approaches/fair-expectimax/rust-engine/src/shared_table.rs"
+  startLine={111}
+  endLine={127}
+  title="Reuse only a complete matching entry"
+  caption="A nonblocking lookup compares the entire position key while holding its stripe lock. A busy stripe or a different key returns a miss."
 />
 
-Granularity is adaptive. Cheap shallow continuations need a wider queue to
-amortize scheduling; expensive depth-5-and-deeper continuations use a smaller
-queueing cushion to preserve transposition-table reuse. When measuring an 
-over-expanded D5/S7 prefix, it reached 99.63%
-task-phase occupancy but created about 41% more logical work and delivered only
-1.0102× speedup. The bounded prefix retained 88.23% occupancy and improved the
-three-repeat median from 22.034955 s to 19.410905 s (1.1352×) on the retained
-12-logical-CPU arm64 profile.
+6. Reduce finished tasks in the original order. A central work queue distributes
+   continuation subtrees across workers. Results go into fixed slots, then the
+   coordinator combines them in the same column and chance-sample order as
+   the sequential search. Shared storage is created afresh for each decision,
+   so results cannot survive a change of evaluator or search settings. Private
+   tables remain the default.
 
-## Performance
+## What happened
 
-All speeds are fixed-work, complete-depth decisions on the **same 105 harvested
-root positions**, every arm computing bit-identical per-column values (proven
-by the gates below).
+The updated search ran 1.07× faster on six constructed root positions over
+five alternating repeats, comparing the two batch medians, with identical
+completed-search values and actions.
+This is mechanics-only CHECK evidence from an interactive Apple M3 Pro
+workstation. The leaf batch also used fewer instructions. The [optimization
+result](/results/RS-20260905T193830Z-9733627a) retains the configuration, every
+repeat, and the limits of this local measurement.
 
-<SpeedupBars
-  title="Engine move throughput, single core (whole games, best of 3)"
-  max={21}
-  rows={[
-    { label: "TypeScript engine", value: 1.0, note: "0.65M moves/s · 1,540 ns/move" },
-    { label: "C++ reference engine", value: 10.5, note: "6.8M moves/s · 147 ns/move" },
-    { label: "C++ fast engine", value: 10.0, note: "6.5M moves/s · 154 ns/move" },
-    { label: "Rust packed engine", value: 19.8, note: "12.8M moves/s · 78 ns/move" },
-  ]}
-  caption="Pure mechanics: place, cascade, rise, repeat, over 32,768 complete center-policy games with identical trajectories (same seeds, same mean score). The two C++ engines are within run-to-run noise of each other on this simple workload; the packed representation is where the Rust engine's ~2× comes from."
+The portable unpacking rewrite produced no credible standalone speedup. Its
+nearly unchanged instruction count suggests the compiler already simplified
+the old constant-mask scatter. The direct shifts remain a clearer expression
+of the fixed conversion.
+
+The capacity sweep shows diminishing returns: the middle-sized table already
+removed most of the work saved by the largest tested table. Raising the minimum
+cached depth lost useful shallow hits without reducing allocated table memory.
+The default remains private storage with a minimum depth of one.
+
+<Figure
+  name="rust-cache-capacity"
+  caption="The constructed-root cache sweep compares capacity and minimum remaining depth. The recorded timings and memory describe these search configurations, with no game-score comparison."
 />
 
-<SpeedupBars
-  title="Fair search, depth 4 / 7 strata (21 decisions, best of 3)"
-  max={4}
-  rows={[
-    { label: "C++ reference storage", value: 1.0, note: "3,248 ms/decision · string-keyed LRU" },
-    { label: "Rust, no table", value: 2.0, note: "1,633 ms · does all 11.9M work units, 0 bytes" },
-    { label: "C++ fast, packed LRU 200k", value: 3.0, note: "1,071 ms · 16.2 MB table" },
-    { label: "Rust, direct-mapped 64k", value: 3.6, note: "908 ms · 3.1 MB table" },
-  ]}
-  caption="Speedup over the C++ reference storage. The Rust cheap-table arm is the fastest *and* uses a fifth of the C++ fast table's memory; the no-table arm is the fastest per unit of work (137 vs 177 ns) but does 1.9× the work, which is exactly the memoization payoff."
+Sharing helped modestly when several workers searched the same decision. At
+four workers and the shallow cache threshold, it reduced median logical work
+by 5.2% and retired instructions by 3.9%, with a 1.03× ratio of latency medians.
+The one-worker shared arms were slightly slower. Both scopes had the same
+total entry budget; shared storage also needed its bounded lock allowance.
+
+<Figure
+  name="rust-shared-cache"
+  caption="Private and shared caches are compared at equal total entry capacity across worker counts. Shared-table memory includes its lock allowance; the result records the cost as well as the saved work."
 />
 
-At depth 5 / 7 strata, the C++ fast
-search takes 7,817 ms per decision, the Rust cheap table at 256k entries ties
-it (7,788 ms), and at 1M entries pulls ahead to 7,047 ms (1.11×) — while the
-no-table arm, doing all 582.7M work units, takes 63,325 ms. Depth 5 is where
-memoization stops being optional, and where the Rust engine's per-work cost
-(113 vs 134 ns/work) still wins once the tables are comparably sized.
+## What we learned
 
-Whole-game scaling remains shared-nothing: an atomic game cursor, one game
-per worker, and no shared mutable state. That mode measured 12.6M → 129.5M
-moves/s from 1 to 16 physical cores. It is useful when many independent games
-are ready, but it does not solve one deep decision's seven-column ceiling.
+A column layout suits gravity, while a byte view suits the fair leaf's repeated
+cell reads. Avoiding the conversion would require making those reads cheaper
+elsewhere. The current changes instead preserve the evaluator and remove work
+that cannot contribute to its answer.
 
-Within-decision scaling now uses the central frontier above. At D4/S7 on
-eight retained roots, 12 workers improved the three-repeat median from 4.077
-s to 3.232 s (1.26×), with 99.51% task-phase occupancy and no value,
-action, or exactly-once task mismatches. 
+Cache hit rate alone leaves out the size of the subtree saved by each hit.
+Depth, table capacity, and worker ownership therefore need to be measured
+together with elapsed time, CPU use, and memory. Shared caching offers another
+trade-off: more opportunities for reuse, plus lock traffic and contention.
 
-<AgentContext summary="Allocation-free D7/S7 plan for 192 workers">
-The allocation-free D7/S7 plan for 192
-workers selects one internal split ply (at most 2,401 frontier tasks) and
-projects 2,418,377,728 bytes for 192 private 262,144-entry tables plus the plan,
-under an 8 GiB guard. The old 16,777,216-entry-per-worker setting is rejected
-before allocation at 154,618,822,656 bytes. That plan has not yet been executed
-on x86 (`RS-20260825T052959Z-57698687`).
+Chess engines suggest further experiments. Stockfish groups entries and uses
+depth and age when choosing replacements. Its compact signatures and racy
+multi-field updates have a different correctness contract from the complete
+key comparisons and synchronized values used here; copying that storage
+scheme would require changing this engine's exact-value guarantee. See
+[Stockfish's table implementation](https://github.com/official-stockfish/Stockfish/blob/master/src/tt.cpp).
+
+[Profile-guided optimization](https://doc.rust-lang.org/rustc/profile-guided-optimization.html)
+is another unmeasured option: representative execution profiles can guide
+inlining, code layout, and register allocation. Which of clustered full-key
+storage or compiler profiling saves more time on the intended CPU remains an
+open question.
+
+<AgentContext summary="Records and provenance">
+
+The current engineering check is
+[EX-20260905-rust-bitboard-improvements-check-c68c07b7](/experiments/EX-20260905-rust-bitboard-improvements-check-c68c07b7),
+under theory
+[TH-20260905-rust-bitboard-improvements-1c56b072](/theories/TH-20260905-rust-bitboard-improvements-1c56b072).
+Its comparator is the Rust implementation at
+`7adb6b36412b4bbef25623183dac1a905570cd1a`. It opens no new gameplay cohort and
+makes no policy-strength claim.
+
+The current result is
+[RS-20260905T193830Z-9733627a](/results/RS-20260905T193830Z-9733627a).
+The comparison summary is
+`artifacts/results/EX-20260905-rust-bitboard-improvements-check-c68c07b7/RUN-20260905T191558Z-f9e6cb1d/summary.json`;
+the machine profile is
+`research/system-profiles/MACH-20260905T191558Z-4a61bc91.json`.
+The host ran macOS on Apple M3 Pro with Chrome, WindowServer, and Codex active.
+The check serialized its own measurements and paused its own builds and
+tests; it had no exclusive CPU or affinity guarantee. These are local
+engineering measurements, with no claim of maximum machine throughput.
+
+The historical packed-engine result is
+[RS-20260824T075451Z-e89ea128](/results/RS-20260824T075451Z-e89ea128),
+recorded as `valid + pass`, mechanics-only evidence from the CHECK experiment
+[EX-20260824-rust-engine-parity-throughput-4036a91f](/experiments/EX-20260824-rust-engine-parity-throughput-4036a91f).
+Its timing host was the shared AMD Ryzen AI MAX+ 395 workstation. The result
+retains metric summaries; its original local files under
+`runs/RUN-20260824T052018Z-b88c3e22/rust-engine/` may be absent from a clean
+checkout. The historical table below transcribes the result and does not
+claim that those missing artifacts were regenerated by the current check.
+
+The historical frontier result is
+[RS-20260825T052959Z-1b3ed9a5](/results/RS-20260825T052959Z-1b3ed9a5),
+recorded as `valid + pass`, mechanics-only CHECK evidence on a shared
+12-logical-CPU arm64 machine. Its theory is
+[TH-20260825-central-frontier-scheduler-e4f547e0](/theories/TH-20260825-central-frontier-scheduler-e4f547e0).
+
+The search-matrix and resource-planning result is
+[RS-20260825T052959Z-57698687](/results/RS-20260825T052959Z-57698687).
+It covers the bounded launch workflow and allocation-free plans. No EC2
+resource was created by that check, and its large-worker plans are not timing
+measurements.
+
 </AgentContext>
 
-## Parity
+<AgentContext summary="Full results table">
 
-Every gate replays identical inputs through the Rust engine and a reference and
-fails on any difference. The columns in the trajectory gates are chosen once
-from the reference state and handed to both engines, isolating engine semantics
-from policy semantics.
+Current before/after measurements from
+[RS-20260905T193830Z-9733627a](/results/RS-20260905T193830Z-9733627a),
+using the same six constructed roots and five alternating repeats per arm:
 
-<GateLadder
-  gates={[
-    {
-      name: "trajectory × 3 drivers",
-      compares: "board, next disc, score, score delta, level, moves remaining, terminal flag, board-clear and level-advance flags, and the complete wave list, entry by entry",
-      scope: "512 games center policy + 256 games under a depth-3 search (C++ headless driver) + 256 games under the TypeScript driver — 36,427 moves, 40,286 waves",
-      result: "0 mismatches",
-    },
-    {
-      name: "bit-exact leaf",
-      compares: "the fair leaf's return value as raw 64-bit patterns against the C++ fastFairLeaf",
-      scope: "150,854 real states, harvested both as search leaves and as visited game positions",
-      result: "0 mismatches",
-    },
-    {
-      name: "search values",
-      compares: "per-column f64 bit patterns and the chosen action at fixed depth/strata",
-      scope: "105 real roots at depth 4 / 7 strata, 10 roots at depth 5 / 7 strata",
-      result: "0 mismatches",
-    },
-    {
-      name: "cache independence",
-      compares: "the values gate re-run with the direct-mapped table enabled",
-      scope: "105 roots, depth 4 / 7 strata",
-      result: "0 mismatches — the table changes speed and memory, never a value",
-    },
-    {
-      name: "search metrics",
-      compares: "chosen action and completed depth against the C++ FastSearch",
-      scope: "105 roots, depth 4 / 7 strata",
-      result: "0 mismatches",
-    },
-  ]}
-  caption="The TypeScript trajectory arm deserves a note: it drives the Rust engine with the TypeScript engine's exact draw pattern (one long-lived Mulberry32 stream) and reproduces engine.ts's board and score evolution move for move — three independent implementations of one game."
-/>
+| Workload | Baseline median seconds | Updated median seconds | Ratio of batch medians | Recorded instruction reduction |
+| --- | ---: | ---: | --- | --- |
+| Depth 4, seven strata, gate 1, 16,384 entries | 12.052394167 | 11.257799041 | 1.07058× | 4.4384% |
+| Leaf batch, 1.2M calls per repeat | 0.604415917 | 0.516645375 | 1.16989× | 10.6541% |
+| Unpack batch, 1.2M calls per repeat | 0.004975042 | 0.005177292 | No credible gain | About 0.059%; effectively unchanged |
 
-## Conclusion
+The depth-4 gate-1 comparison also had a 1.0678604115× median paired speed
+ratio, with repeat ratios from 1.0582717724× to 1.1158545109×. The table above
+uses ratios of batch medians.
 
-- **The representation is the win.** Packing the board column-wise into seven
-  words turned gravity, drops, rises and legality into single bit operations,
-  and made the whole board small enough to live in registers. Doubling the engine
-  throughput enables deeper and faster searches in the same amount of time.
-- **Measure a cache by the work it eliminates, not the hits it records.** A
-  1.3 % node hit rate sounded like the table was overhead; it was actually
-  eliminating most of the work, because hits prune subtrees. The repository's
-  own fast-engine finding had measured the table's *storage* cost (0.6 % of
-  runtime) but never its *work* value; this is the complementary measurement.
-- **The cheap table beats the careful table.** Direct-mapped with
-  depth-preferred replacement finds ~92 % of the strict-LRU table's hits at
-  lower per-operation cost and a fifth of the memory.
+The complete depth-4 search retained 39,288,466 logical work units in each
+arm. Its median process CPU time fell from 11.93 to 11.15 seconds. Median
+retired instructions fell from 222,843,607,698 to 212,952,842,410; the leaf
+batch fell from 10,346,642,712 to 9,244,298,981. These counts cover the timed
+process and its harness. They do not imply the same gain on other CPUs or
+board distributions. The unpack batch's CPU time is near the host's printed
+timer resolution and cannot support a precise CPU-time claim.
 
-Still open: a two- or four-way set-associative table should close the remaining
-hit-rate gap to the LRU at depth 5 (748k vs 911k hits per decision) without the
-LRU's bookkeeping; the leaf is within 1.2× of the C++ leaf but not yet faster
-than it on dense late-game states; and the engine has no GPU or latent-mode
-variant, so scripted-round and native-scenario duties stay with the existing
-engines.
+The unpack batch recorded 109,784,960 versus 109,720,197 median instructions.
+Its source rewrite did not demonstrate a useful instruction saving or a
+latency improvement. The combined leaf and search measurements support the
+retained optimization package; they do not isolate the contribution of every
+changed leaf branch.
 
-<TechnicalDetails title="Records, artifacts, and reproduction">
+The capacity sweep's gate-1 rows, each using five repetitions of six roots:
 
-- Theory `TH-20260824-rust-bitboard-engine-f68fcbfd`, experiment
-  `EX-20260824-rust-engine-parity-throughput-4036a91f` (engineering, CHECK tier).
-- Fine-grained scheduler: theory
-  `TH-20260825-central-frontier-scheduler-e4f547e0`, experiment
-  `EX-20260825-central-frontier-scheduler-check-df116702`, result
-  `RS-20260825T052959Z-1b3ed9a5`.
-- Search-matrix and EC2 workflow: theory
-  `TH-20260825-rust-search-matrix-ec2-6fc9f806`, experiment
-  `EX-20260825-rust-search-matrix-ec2-check-eb821565`, result
-  `RS-20260825T052959Z-57698687`. No EC2 resource was created by that check.
-- Artifacts: `runs/RUN-20260824T052018Z-b88c3e22/rust-engine/{gates.log,bench.log,benchmark.json,machine-profile.json}`.
-- Source: `approaches/fair-expectimax/rust-engine/` (std-only cargo crate, no
-  dependencies). Build with `./build.sh` (sets `target-cpu=native` for
-  single-instruction PEXT/PDEP; a bit-identical portable loop compiles without
-  BMI2). Gates: `target/release/gate_{trajectory,leaf,search}` against the
-  C++ emitters in `cpp/` and the TypeScript driver in `ts/`.
-- Reproduce the benchmark: `./bench_all.sh <run-dir> <roots-file> 3`.
-- Reproduce the within-decision comparison with `target/release/bench parallel`;
-  run a depth/strata/leaf matrix with `cluster/run-matrix.sh`; inspect the full
-  package/plan/launch/monitor/collect procedure in `cluster/README.md`. The
-  reusable cloud entry point is
-  `AWS_PROFILE=<profile> just run-matrix gauntlet-01 --budget <cents>`; add
-  `--plan` for a no-upload, no-launch rehearsal. A live launch always needs a
-  new registered run and explicit operator budget.
-- Seed discipline: sub-blocks `0xa5276000`–`0xa5277fff` of the already-opened
-  `SEEDLEASE-A52-FAST` development lease; zero new seeds opened; no strength
-  claim.
+| Entries | Allocated table bytes | Median search seconds | Logical work units |
+| ---: | ---: | ---: | ---: |
+| 1,024 | 49,152 | 13.765320707 | 47,250,952 |
+| 16,384 | 786,432 | 11.305829207 | 39,288,466 |
+| 262,144 | 12,582,912 | 10.844751666 | 38,002,223 |
+| No table | 0 | 17.604948875 | 64,858,647 |
 
-</TechnicalDetails>
+At four workers, gate 1 and 65,536 aggregate entries, private and shared
+median decision times were 3.108119542 and 3.017273043 seconds. Median process
+CPU times were 11.75 and 11.37 seconds. Their table projections were 3,145,728
+and 3,186,688 bytes, respectively; the shared difference covers stripes and
+runtime locks. The corresponding median peak process RSS values were
+6,029,312 and 5,537,792 bytes. RSS includes the harness and runtime and is
+reported separately from the layout projection.
+
+Sequential search timers exclude table allocation. Parallel decision timers
+include planning, allocation, execution, and reduction; do not compare those
+two timing definitions as a direct scheduler speed ratio. Counter measurements
+include the whole process. Chart whiskers show minimum and maximum repeat
+times, not confidence intervals. All 210 timed processes completed within the
+registered 1,800-second measurement budget.
+
+Historical packed-engine measurements from
+[RS-20260824T075451Z-e89ea128](/results/RS-20260824T075451Z-e89ea128):
+
+| Measurement | TypeScript | C++ reference | C++ fast | Rust packed |
+| --- | ---: | ---: | ---: | ---: |
+| Engine moves/s | 649,471 | 6,799,180 | 6,511,760 | 12,838,933 |
+| Leaf ns/evaluation | not recorded | not recorded | 187.5 | 155.6 |
+| Depth 4, seven strata, ms/decision | not recorded | 3,247.8 | 1,071.5 | 907.6 with 64k entries |
+| Depth 5, seven strata, ms/decision | not recorded | 23,992.6 | 7,817.3 | 7,047.1 with 1M entries |
+| Engine moves/s, 16 game workers | not recorded | not recorded | 82,364,000 | 129,483,860 |
+
+The retained result's depth-4 timing used 21 decisions, best of three;
+depth-5 timing used three decisions in one repeat. The move-throughput game's
+exact count and the leaf timing's evaluation count are not carried in the
+retained metric summary. The parity panels below are separate workloads and
+must not be used as the timing sample counts.
+
+| Historical Rust cache arm | Depth 4, seven strata, ms/decision | Depth 5, seven strata, ms/decision |
+| --- | ---: | ---: |
+| No table | 1,633.4 | 63,325.4 |
+| Direct mapped, 64k entries | 907.6 | not recorded |
+| Direct mapped, 256k entries | not recorded | 7,787.9 |
+| Direct mapped, 1M entries | not recorded | 7,047.1 |
+| Direct mapped, 4M entries | not recorded | 6,748.4 |
+
+The same historical result records work falling from 11.9M to 6.3M units at
+depth 4 (47%) and from 582.7M to 59.5M at depth 5 (90%). Its reported node hit
+rates are 1.3% and 1.36%, respectively. These summaries describe the original
+measurement configurations.
+
+| Historical allocation | Bytes recorded |
+| --- | ---: |
+| Rust board | 28 |
+| Rust searcher excluding table | 2,496 |
+| Rust table, 64k entries | 3,145,728 |
+| C++ fast table | 16,194,304 |
+
+Historical scheduler measurements from
+[RS-20260825T052959Z-1b3ed9a5](/results/RS-20260825T052959Z-1b3ed9a5):
+
+| Configuration | Roots per repeat | Repeats | Root median seconds | Frontier median seconds | Recorded speedup | Task-phase busy fraction |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Depth 4, seven strata, 12 workers | 8 | 3 | 4.076978 | 3.232507 | 1.2612× | 0.9951 |
+| Depth 5, seven strata, 12 workers, bounded split | 3 | 3 | 22.034955 | 19.410905 | 1.1352× | 0.8823 |
+| Depth 5, seven strata, over-expanded split | not separately recorded | not separately recorded | 24.959552 | 24.707506 | 1.0102× | 0.9963 |
+
+The over-expanded split increased logical work from 381,642,037 to
+539,523,663. Its higher worker occupancy did not meet the speed gate.
+
+The historical allocation-free depth-7, seven-stratum plan for 192 workers
+selected one internal split ply, at most 2,401 frontier tasks, and projected
+2,418,377,728 bytes under an 8 GiB guard. The old 16,777,216-entry table per
+worker was rejected before allocation at 154,618,822,656 bytes. These are plans
+from [RS-20260825T052959Z-57698687](/results/RS-20260825T052959Z-57698687),
+with private tables under that version's layout; the current shared-table
+layout must be planned again.
+
+</AgentContext>
+
+<AgentContext summary="Validity, gates and limitations">
+
+The current leaf regression test compares every feature's raw `f64` bits
+against a preserved test-only copy of the pre-change evaluator on constructed
+public boards, including sparse positions, dense positions, holes, solids,
+and cracked discs. The unpacking test compares direct extraction with the
+original PDEP expansion and scalar cell reads. These mechanics checks do not
+measure playing strength.
+
+The current result records 40 passing Rust release tests, six C++ leaf
+comparisons, and six complete depth-4/seven-stratum root comparisons. Native
+bit parity uses `-ffp-contract=off`. The C++ trajectory check compared 575 moves
+across 32 fixtures, and the TypeScript check compared 660 moves across 32
+fixtures, with zero mismatches. The root npm suite passed 144 tests with two
+skips. `make -k test` passed its native and TypeScript gates but failed the
+aggregate target on 96 errors for missing historical artifacts. The web build, typecheck, lint and 70 web tests pass. The separate chart
+library retains one pre-existing stale snapshot assertion (63/64 pass); the
+route sweep passes 727/728, with `/compete` lacking local authentication
+configuration. All eight missing-data render checks pass. These
+checkout limitations remain disclosed in
+[RS-20260905T193830Z-9733627a](/results/RS-20260905T193830Z-9733627a).
+
+Completed searches must retain identical legal-column values and actions.
+Different cache settings can change realized work counts, especially when
+shared-table access depends on scheduling. A fixed work limit can therefore
+stop configurations at different depths. Claims about unchanged bounded-work
+fallback require the same cache configuration.
+
+Every shared-table entry belongs to one decision with one parameter set and
+one deterministic leaf definition. A hit compares the full packed board,
+next disc, moves until rise, and remaining depth. Terminal states return
+before lookup. The hash only selects a slot. All workers must produce the
+same leaf value for the same public state; each worker's scratch memory is
+private. A shared table does not persist across games or evaluator changes.
+
+The exact comparison covers the canonical search view and its established
+column order. The inherited floating-point leaf accumulation and tied-action
+rules are preserved; this check does not establish bitwise reflection
+equivalence of independently evaluated raw, mirrored boards.
+
+The original packed-engine result records these separate parity panels:
+
+| Historical check | Scope recorded | Mismatches recorded |
+| --- | --- | ---: |
+| C++ and TypeScript trajectories | 512 center-policy games, 256 search-policy games, 256 TypeScript-driver games; 36,427 moves and 40,286 waves | 0 |
+| Fair leaf | 150,854 states | 0 |
+| Search values and actions | 105 depth-4/seven-stratum roots and 10 depth-5/seven-stratum roots | 0 |
+| Cache independence | 105 depth-4/seven-stratum roots with the direct-mapped table | 0 |
+
+These are recorded outcomes from
+[RS-20260824T075451Z-e89ea128](/results/RS-20260824T075451Z-e89ea128).
+The frontier record separately retains exact root/frontier values, actions,
+and completed-task counts on its diagnostic roots. It also reports missing
+historical artifacts that prevented the aggregate validation target from
+finishing in that checkout, and native floating-point contraction that
+required `-ffp-contract=off` for exact parity on arm64. Those limitations are
+preserved in
+[RS-20260825T052959Z-1b3ed9a5](/results/RS-20260825T052959Z-1b3ed9a5).
+
+The engine has no GPU, latent-mode, or native-scenario variant. Scripted-round
+and scenario work continues to use the existing engines. A simpler leaf,
+selective search, or ordinary chess alpha-beta pruning would change the
+algorithm and needs a separate protocol; Drop7 chance outcomes are averaged.
+
+</AgentContext>
+
+<AgentContext summary="Source files">
+
+The source browser below lists this std-only crate. The current control flow
+is in `src/board.rs`, `src/leaf.rs`, `src/search.rs`, `src/shared_table.rs`,
+and `src/parallel.rs` under `approaches/fair-expectimax/rust-engine/`.
+
+The analyzer accepts the following cache controls:
+
+| Option | Meaning |
+| --- | --- |
+| `--tt-from-depth N` | Cache only nodes with at least N remaining decision plies; this does not change allocated capacity. |
+| `--cache N` | Entries per worker with private scope; total entries with shared scope. Capacity rounds up to a power of two. |
+| `--tt-scope private` | Each worker owns its table; the default. |
+| `--tt-scope shared` | Workers share one fresh table for this decision. |
+| `--threads N` | Worker count; compare scopes at equal total capacity as well as equal wall budget. |
+| `--max-host-bytes N` | Reject a table and frontier plan above the configured memory allowance before allocating it. |
+
+For sequential cache experiments, `bench search --tt gate2 --tt-capacity N`
+sets the depth threshold and entry count; `--tt none` disables caching.
+`analyze` emits cache scope, threshold, entry count, and projected memory in its
+plan and decision output.
+
+`./build.sh` selects `target-cpu=native`. The trajectory, leaf, and search gates
+compare against the emitters under `cpp/` and the TypeScript driver under
+`ts/`. `bench_all.sh` is the original timing harness; the optimization-check
+harness follows the current registered comparison.
+
+The existing gravity and cover-hit diagrams show the packed operations that
+precede leaf evaluation. Their examples come from the engine fixtures named
+in their captions.
+
+<RustPextGravityFigure />
+
+<RustExplosionBitplanesFigure />
+
+The bounded matrix workflow is documented in `cluster/README.md`. Its
+allocation-free plan is available before any upload or launch. A live cloud
+run needs its own registered experiment, resource lease, and operator budget.
+
+</AgentContext>
+
+<AgentContext summary="Scoring mode">
+
+The engine preserves corrected five-move Hardcore scoring, including the
+17,000-point rise award. Historical mechanics checks opened no new leased
+seeds: the original packed-engine experiment used the already-opened
+`SEEDLEASE-A52-FAST` diagnostic sub-blocks and probe block documented in its
+protocol. The current optimization check also opens no new gameplay cohort.
+Timing improvements do not establish an improvement in mean game score.
+
+</AgentContext>

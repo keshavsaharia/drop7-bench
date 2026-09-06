@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 680" width="100%" role="img" aria-labelledby="rust-work-title rust-work-description" font-family="var(--font-sans)">
+  <title id="rust-work-title">Avoiding unused work in the Rust search</title>
+  <desc id="rust-work-description">The fair leaf converts packed columns once to row-major bytes, using PDEP on BMI2 or direct shifts on portable targets. It gathers release support only when the run exceeds the disc value. Search checks cache depth before packing or hashing a key. An optional shared cache returns complete full-key matches under a stripe lock; a busy stripe returns a miss so the worker continues.</desc>
+  <defs>
+    <marker id="rust-work-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--color-ink-3)"/></marker>
+  </defs>
+  <g fill="var(--color-surface)" stroke="var(--color-rule)">
+    <rect x="16" y="16" width="568" height="176" rx="12"/>
+    <rect x="16" y="208" width="568" height="204" rx="12"/>
+    <rect x="16" y="428" width="568" height="236" rx="12"/>
+  </g>
+  <g fill="var(--color-ink)" font-size="21" font-weight="600">
+    <text x="38" y="53">One conversion for repeated cell reads</text>
+    <text x="38" y="246">Gather support only when it contributes</text>
+    <text x="38" y="466">Check depth before touching the cache</text>
+  </g>
+  <g fill="var(--color-raised)" stroke="var(--color-rule-strong)">
+    <rect x="38" y="78" width="214" height="55" rx="8"/>
+    <rect x="336" y="78" width="226" height="55" rx="8"/>
+    <rect x="38" y="272" width="524" height="46" rx="8"/>
+    <rect x="38" y="352" width="214" height="42" rx="8"/>
+    <rect x="336" y="352" width="226" height="42" rx="8"/>
+    <rect x="38" y="491" width="214" height="48" rx="8"/>
+    <rect x="336" y="491" width="226" height="48" rx="8"/>
+  </g>
+  <g stroke="var(--color-ink-3)" stroke-width="2" fill="none" marker-end="url(#rust-work-arrow)">
+    <path d="M265 106H322"/>
+    <path d="M145 319V347"/>
+    <path d="M449 319V347"/>
+    <path d="M265 515H322"/>
+  </g>
+  <g fill="var(--color-ink-1)" font-size="19" text-anchor="middle">
+    <text x="145" y="112">Packed columns</text>
+    <text x="449" y="112">Row-major bytes</text>
+    <text x="300" y="303">Run length exceeds the disc value?</text>
+    <text x="145" y="379">Gather and rank</text>
+    <text x="449" y="379">Release is zero</text>
+    <text x="145" y="522">Eligible depth</text>
+    <text x="449" y="522">Pack, hash, look up</text>
+  </g>
+  <g fill="var(--color-ink-2)" font-size="17">
+    <text x="38" y="163">BMI2: PDEP scatter. Portable: direct nibble shifts.</text>
+    <text x="167" y="341">yes</text>
+    <text x="471" y="341">no</text>
+    <text x="38" y="570">Shallow nodes search without creating a cache key.</text>
+  </g>
+  <path d="M38 589H562" stroke="var(--color-rule)"/>
+  <g fill="var(--color-ink-2)" font-size="17">
+    <text x="38" y="618">Stripe free + full key matches: reuse its value.</text>
+    <text x="38" y="644">Stripe busy or key differs: keep searching locally.</text>
+  </g>
+</svg>

@@ -1,0 +1,26 @@
+{
+  "$schema": "../schemas/theory-v1.schema.json",
+  "format": "drop7-theory-v1",
+  "theoryId": "TH-20260905-rust-bitboard-improvements-1c56b072",
+  "title": "Exact Rust leaf and transposition efficiency",
+  "claim": "Avoiding unused leaf work and cache hashing reduces fixed-depth CPU cost without changing any value bits; cache scope and depth expose a measurable memory/work frontier.",
+  "mechanism": "Guard zero-readiness supporter gathering, bypass hashing below table depth, and compare private versus optimistic full-key shared memoization.",
+  "falsificationCriteria": [
+    "Any value-bit mismatch rejects an optimization; a median speed ratio below 1.03 rejects a default performance change."
+  ],
+  "informationClass": "engineering",
+  "lifecycle": "assessed",
+  "assessment": "mixed",
+  "evidenceTier": "mechanics-only",
+  "dependencies": [],
+  "evidenceRefs": [
+    "RS-20260905T193830Z-9733627a"
+  ],
+  "createdBy": {
+    "platform": "Codex",
+    "model": "gpt-6",
+    "agentId": "root"
+  },
+  "createdAt": "2026-09-05T19:15:24Z",
+  "updatedAt": "2026-09-05T19:59:05Z"
+}
