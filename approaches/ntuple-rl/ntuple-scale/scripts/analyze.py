@@ -124,6 +124,7 @@ def arm_summary(ind):
         "illegalDecisions": ind["illegalDecisions"],
         "gamesAtOrAboveMillion": int((s >= 1_000_000).sum()),
         "meanWallSecondsPerGame": float(np.mean([g["wallSeconds"] for g in ind["games"]])),
+        "meanWork": float(np.mean([g["work"] for g in ind["games"]])),
     }
 
 
@@ -253,6 +254,8 @@ def screen_summary(out):
         ("candidate-d3s7", "fair-d3s7"), ("candidate-1ply", "fair-d3s7"), ("candidate-d3s7", "fair-d4s7"),
         ("fair-d4s7", "fair-d3s7"), ("candidate-d3s7", "candidate-1ply"),
         ("prior-d3s7", "fair-d3s7"), ("candidate-d3s7", "prior-d3s7"), ("prior-d3s7", "fair-d4s7"), ("prior-1ply", "fair-d3s7"),
+        # The depth-4 experiment: the same frozen tables one ply deeper.
+        ("prior-d4s7", "prior-d3s7"), ("prior-d4s7", "fair-d4s7"), ("prior-d4s7", "fair-d3s7"),
     ]
     for cand, ref in pairs:
         if cand in by and ref in by:
@@ -291,7 +294,62 @@ def screen_summary(out):
         else:
             verdict = "inconclusive"
         scale = {"verdict": verdict, "meanDelta": versus["meanDelta"], "bootstrapLower95": versus["bootstrapLower95"], "bootstrapUpper95": versus["bootstrapUpper95"], "studentTLower95": versus["studentTLower95"], "detectionFloor": versus["detectionFloor"], "wins": versus["wins"], "ties": versus["ties"], "losses": versus["losses"]}
-    return {"config": art["config"], "seedStartHex": art["seedStartHex"], "games": art["config"].get("games"), "arms": arms, "contrasts": contrasts, "gate": gate, "replication": replication, "scale": scale}
+    # The depth-4 experiment (EX-20260906-ntuple-scale-depth4-frozen-tables-*):
+    # the frozen tables at reference d4s7 against the same tables at d3s7, the
+    # persistence of their margin over the fair leaf at depth 4, and the
+    # interaction: the fourth ply's per-game gain on the tables minus its gain
+    # on the fair leaf, on the same seeds.  Verdicts fixed in the protocol.
+    depth = None
+    primary_contrast = "candidate-d3s7-vs-fair-d3s7"
+    step = contrasts.get("prior-d4s7-vs-prior-d3s7", {}).get("score")
+    if step and all(name in by for name in ("prior-d4s7", "prior-d3s7", "fair-d4s7", "fair-d3s7")):
+        primary_contrast = "prior-d4s7-vs-prior-d3s7"
+
+        def depth_checks(label, reference, contrast):
+            return [
+                {"criterion": "screen artifact: illegalDecisions 0 and incompleteDecisions 0 in every arm", "passed": integrity_ok},
+                {"criterion": f"bootstrap 95% lower bound of {label} minus {reference} > 0", "passed": contrast["bootstrapLower95"] > 0, "observed": contrast["bootstrapLower95"]},
+                {"criterion": "Student-t 95% lower bound > 0", "passed": contrast["studentTLower95"] > 0, "observed": contrast["studentTLower95"]},
+                {"criterion": "paired mean delta > 0 in both halves", "passed": contrast["firstHalfMeanDelta"] > 0 and contrast["secondHalfMeanDelta"] > 0, "observed": [contrast["firstHalfMeanDelta"], contrast["secondHalfMeanDelta"]]},
+                {"criterion": f"{label} Q25 >= {reference} Q25", "passed": contrast["candidateQ25"] >= contrast["referenceQ25"], "observed": [contrast["candidateQ25"], contrast["referenceQ25"]]},
+            ]
+
+        checks = depth_checks("prior-d4s7", "prior-d3s7", step)
+        gate = {"checks": checks, "passed": all(c["passed"] for c in checks)}
+        persistence = None
+        keep = contrasts.get("prior-d4s7-vs-fair-d4s7", {}).get("score")
+        if keep:
+            checks = depth_checks("prior-d4s7", "fair-d4s7", keep)
+            persistence = {"checks": checks, "passed": all(c["passed"] for c in checks)}
+        # Interaction series: per game, (tables d4 - tables d3) - (fair d4 - fair d3).
+        seeds = [g["seedHex"] for g in by["prior-d4s7"]["games"]]
+        assert all([g["seedHex"] for g in by[n]["games"]] == seeds for n in ("prior-d3s7", "fair-d4s7", "fair-d3s7"))
+        series = {"games": [
+            {"seedHex": seed, "score": (a["score"] - b["score"]) - (c["score"] - d["score"])}
+            for seed, a, b, c, d in zip(seeds, by["prior-d4s7"]["games"], by["prior-d3s7"]["games"], by["fair-d4s7"]["games"], by["fair-d3s7"]["games"])
+        ]}
+        zero = {"games": [{"seedHex": seed, "score": 0.0} for seed in seeds]}
+        inter = paired(series, zero)
+        if inter["bootstrapLower95"] > 0 and inter["studentTLower95"] > 0:
+            verdict = "larger"
+        elif inter["bootstrapUpper95"] < 0:
+            verdict = "smaller"
+        else:
+            verdict = "inconclusive"
+        fair_step = contrasts.get("fair-d4s7-vs-fair-d3s7", {}).get("score")
+        depth = {
+            "primary": "prior-d4s7-vs-prior-d3s7",
+            "tablesStep": {k: step[k] for k in ("meanDelta", "bootstrapLower95", "bootstrapUpper95", "studentTLower95", "detectionFloor", "wins", "ties", "losses", "firstHalfMeanDelta", "secondHalfMeanDelta", "candidateQ25", "referenceQ25")},
+            "fairStep": {k: fair_step[k] for k in ("meanDelta", "bootstrapLower95", "bootstrapUpper95", "studentTLower95", "detectionFloor", "wins", "ties", "losses", "firstHalfMeanDelta", "secondHalfMeanDelta")} if fair_step else None,
+            "persistence": persistence,
+            "interaction": {"verdict": verdict, **{k: inter[k] for k in ("n", "meanDelta", "pairedSd", "bootstrapLower95", "bootstrapUpper95", "studentTLower95", "detectionFloor", "wins", "ties", "losses", "firstHalfMeanDelta", "secondHalfMeanDelta")}},
+            "theory": {
+                "primaryFalsifierUpperBoundBelowZero": step["bootstrapUpper95"] < 0,
+                "secondLegUpperBoundBelowZero": inter["bootstrapUpper95"] < 0,
+                "persistenceLowerBoundAtOrBelowZero": (keep["bootstrapLower95"] <= 0) if keep else None,
+            },
+        }
+    return {"config": art["config"], "seedStartHex": art["seedStartHex"], "games": art["config"].get("games"), "arms": arms, "contrasts": contrasts, "primaryContrast": primary_contrast, "gate": gate, "replication": replication, "scale": scale, "depth": depth}
 
 
 def gates_summary(out):
@@ -362,7 +420,13 @@ def write_markdown(analysis, path):
             x = c["score"]
             lines.append(f"| {name} | {fmt(x['meanDelta'])} | {fmt(x['bootstrapLower95'])} | {fmt(x['studentTLower95'])} | {fmt(x['bootstrapUpper95'])} | {x['wins']}-{x['ties']}-{x['losses']} | {fmt(x['firstHalfMeanDelta'])} / {fmt(x['secondHalfMeanDelta'])} | {fmt(x['detectionFloor'])} |")
         if s["gate"]:
-            lines += ["", f"Gate (candidate-d3s7 vs fair-d3s7) passed: {s['gate']['passed']}", ""] + [f"- {'PASS' if c['passed'] else 'FAIL'} {c['criterion']}: {c.get('observed', '')}" for c in s["gate"]["checks"]]
+            lines += ["", f"Gate ({s.get('primaryContrast', 'candidate-d3s7-vs-fair-d3s7').replace('-vs-', ' vs ')}) passed: {s['gate']['passed']}", ""] + [f"- {'PASS' if c['passed'] else 'FAIL'} {c['criterion']}: {c.get('observed', '')}" for c in s["gate"]["checks"]]
+        if s.get("depth"):
+            d = s["depth"]
+            if d.get("persistence"):
+                lines += ["", f"Persistence (prior-d4s7 vs fair-d4s7) passed: {d['persistence']['passed']}", ""] + [f"- {'PASS' if c['passed'] else 'FAIL'} {c['criterion']}: {c.get('observed', '')}" for c in d["persistence"]["checks"]]
+            it = d["interaction"]
+            lines += ["", f"Depth-step interaction ((tables d4 - tables d3) - (fair d4 - fair d3)): {it['verdict']}: delta {fmt(it['meanDelta'])}, LB95 boot {fmt(it['bootstrapLower95'])}, LB95 t {fmt(it['studentTLower95'])}, UB95 {fmt(it['bootstrapUpper95'])}, W-T-L {it['wins']}-{it['ties']}-{it['losses']}, halves {fmt(it['firstHalfMeanDelta'])} / {fmt(it['secondHalfMeanDelta'])}, floor {fmt(it['detectionFloor'])}", f"Theory falsifiers: {json.dumps(d['theory'])}"]
         if s.get("replication"):
             lines += ["", f"Replication (prior-d3s7 vs fair-d3s7, the first experiment's frozen tables on this fresh block) passed: {s['replication']['passed']}", ""] + [f"- {'PASS' if c['passed'] else 'FAIL'} {c['criterion']}: {c.get('observed', '')}" for c in s["replication"]["checks"]]
         if s.get("scale"):

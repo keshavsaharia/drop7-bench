@@ -1,0 +1,82 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260906T081306Z-c70f4648",
+  "actor": {
+    "kind": "model",
+    "platform": "Claude Code",
+    "model": "claude-fable-5-1",
+    "agentId": "claude-code-ntuple-continuation-4-ply"
+  },
+  "level": "L3",
+  "roles": [
+    {
+      "role": "conceptualization",
+      "degree": "lead"
+    },
+    {
+      "role": "methodology",
+      "degree": "lead"
+    },
+    {
+      "role": "software",
+      "degree": "lead"
+    },
+    {
+      "role": "investigation",
+      "degree": "lead"
+    },
+    {
+      "role": "formal-analysis",
+      "degree": "lead"
+    },
+    {
+      "role": "visualization",
+      "degree": "lead"
+    },
+    {
+      "role": "writing",
+      "degree": "lead"
+    },
+    {
+      "role": "compute",
+      "degree": "lead"
+    }
+  ],
+  "summary": "Depth-4 follow-on to the n-tuple leaf: added the depth-4 arm (Arm::NTupleD4) to the ntuple-scale crate, its screen and query binaries and a depth-4 determinism gate on the frozen tables; wrote the theory, the preregistered two-by-two leaf-by-depth experiment and its fresh lease; ran the gates and the one-shot 512-game screen of the unchanged frozen tables at depth 4 beside depth 3 and the fair leaf at both depths; wrote the analysis, the result record, the approach page section, the web figures and the log entry.",
+  "theoryIds": [
+    "TH-20260906-ntuple-leaf-fourth-ply-search-compatible-ace4fe2a"
+  ],
+  "experimentIds": [
+    "EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3"
+  ],
+  "runIds": [
+    "RUN-20260906T081306Z-e62d9837"
+  ],
+  "artifactPaths": [
+    "approaches/ntuple-rl/ntuple-scale/src/game.rs",
+    "approaches/ntuple-rl/ntuple-scale/src/bin/screen.rs",
+    "approaches/ntuple-rl/ntuple-scale/src/bin/gate.rs",
+    "approaches/ntuple-rl/ntuple-scale/src/bin/query_move.rs",
+    "approaches/ntuple-rl/ntuple-scale/scripts/pipeline3.sh",
+    "approaches/ntuple-rl/ntuple-scale/scripts/analyze.py",
+    "research/theories/TH-20260906-ntuple-leaf-fourth-ply-search-compatible-ace4fe2a.json",
+    "research/experiments/EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3.json",
+    "research/seeds/leases/SL-20260906T081306Z-1aaec419.json",
+    "research/runs/RUN-20260906T081306Z-e62d9837.json",
+    "research/system-profiles/MACH-20260906T081306Z-e87b3f5a.json"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "cargo test --release (12 unit tests, including the depth-4 arm's legality, determinism and work ordering)",
+    "gate binary on the frozen tables (gate --weights): all CHECK gates including leaf-in-d4-search-determinism (gates.log)",
+    "make research-validate"
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed.",
+    "The owner chose this direction from the model's written list of follow-ons and asked for the run, the report and a playground submission of the depth-4 policy; the model designed the two-by-two protocol, the gate and the interaction verdict, and ran it on the same workstation as the two earlier experiments."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-09-06T08:13:06Z"
+}

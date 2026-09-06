@@ -1,0 +1,89 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3",
+  "theoryIds": [
+    "TH-20260906-ntuple-leaf-fourth-ply-search-compatible-ace4fe2a"
+  ],
+  "title": "The frozen n-tuple tables as the leaf of the depth-4 fair search: a two-by-two leaf-by-depth screen on a fresh block",
+  "classification": "algorithmic",
+  "hypothesis": "Candidate prior-d4s7: the frozen lookup tables of RUN-20260905T193006Z-4fbeb4e5 (layout rows,cols,win23,win32,phase=all, 10^9 f32 entries, SHA-256 0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b, the candidate that passed the screens of EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620 and EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a, unchanged) as the leaf of the Rust engine's completed full-width depth-4 fair expectimax search with seven chance strata, terminal utility -1,000,000, policy seed 0xd7075eed, work bound work_bound_for(4,7)+1 and a 1M-entry direct-mapped table (reference_d4_params, the configuration of the standing fair-d4s7 reference; Arm::NTupleD4 in approaches/ntuple-rl/ntuple-scale/src/game.rs). Comparator prior-d3s7: the identical tables as the leaf of the deployment depth-3 search (deployment_params, Arm::NTupleD3), the configuration both earlier screens evaluated. Two further arms on the same seeds complete a two-by-two leaf-by-depth design: fair-d3s7 and fair-d4s7, the frozen fair leaf in the same two searches. Hypothesis: prior-d4s7 beats prior-d3s7 in paired mean whole-game score on 512 never-read public-development games, and the fourth ply's paired gain on the tables is not smaller than its gain on the fair leaf on the same seeds. No training, no table is changed, and the screen is the only gameplay.",
+  "candidate": {
+    "name": "prior-d4s7",
+    "entryPoint": "approaches/ntuple-rl/ntuple-scale/src/game.rs",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "prior-d3s7",
+    "entryPoint": "approaches/ntuple-rl/ntuple-scale/src/game.rs",
+    "manifestRef": null
+  },
+  "informationBoundary": "public-policy",
+  "benchmarkTier": "SCREEN",
+  "data": {
+    "role": "public-development",
+    "seedLeaseRefs": [
+      "SL-20260906T081306Z-1aaec419"
+    ],
+    "datasetRefs": [],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "CHECK gates read only the already-opened development probe block 0xa5276000-0xa5277fff (the Rust engine's gate range, SEEDLEASE-A52-FAST); no new seed is opened for mechanics. The held-out screen opens 0xa52f2580-0xa52f2780 (512 games) exactly once, after the frozen tables' SHA-256 has been verified on disk. That block is disjoint from every block the tables' experiment read (training 0xa5300000-0xa54f0000, validation 0xa52f2240-0xa52f2280, screen 0xa52f2140-0xa52f2240) and from every block of the replication (training 0xa5500000-0xa56f0000, validation 0xa52f2280-0xa52f2380, screen 0xa52f2380-0xa52f2580), so no arm has seen any seed of this screen. Nothing is trained or tuned here; the four arms are fixed before the block opens."
+  },
+  "metrics": {
+    "primary": "paired mean whole-game score delta, prior-d4s7 minus prior-d3s7 (the frozen tables as the depth-4 leaf minus the same tables as the depth-3 leaf), 512 held-out games",
+    "secondary": [
+      "persistence: paired mean score delta prior-d4s7 minus fair-d4s7 on the same 512 games, with the same bounds, halves, W-T-L and lower quartile",
+      "depth-step interaction: the per-game difference (prior-d4s7 minus prior-d3s7) minus (fair-d4s7 minus fair-d3s7), its mean, bootstrap and Student-t bounds, detection floor and W-T-L, and the fixed three-way verdict (larger / smaller / inconclusive)",
+      "the fair leaf's own depth step on these seeds: fair-d4s7 minus fair-d3s7; and the tables' depth-3 margin on these seeds: prior-d3s7 minus fair-d3s7, prior-d3s7 minus fair-d4s7, prior-d4s7 minus fair-d3s7",
+      "paired mean moves delta; numbered clears per move and cover reveals per move; mean occupied cells; lower quartile, median, maximum score; first-half (seeds 0-255) and second-half (256-511) paired mean deltas; per-arm logical work and wall seconds per game",
+      "resource observations: per-stage wall, CPU and peak resident set"
+    ],
+    "statisticalUnit": "whole-game",
+    "uncertaintyMethod": "one-sided 95% percentile bootstrap over whole games, 20,000 resamples, RNG seed 0xb0071eaf (the unchanged compare.py of the leaf-evolution screen, and analyze.py's identical paired() for the interaction series), plus a one-sided 95% Student-t lower bound; detection floor 1.645*sd/sqrt(n) reported for every contrast"
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "All CHECK gates passed before the leased seed was read, on the frozen tables themselves (gate --weights): codec, row gather, feature indices for every layout, information-boundary blindness, reflection, direct-policy legality, leaf-in-search determinism and worker-count independence at depth 3 and at depth 4 (with the depth-4 arm doing more work than the depth-3 arm on every gate game), serial training determinism, finiteness.",
+      "The screen artifact has illegalDecisions 0 and incompleteDecisions 0 in every arm; censored games are reported as censored.",
+      "Held-out screen, 512 paired games on 0xa52f2580-0xa52f277f, prior-d4s7 vs prior-d3s7: bootstrap 95% lower bound of the paired score delta > 0 AND Student-t 95% lower bound > 0.",
+      "Held-out screen: prior-d4s7 minus prior-d3s7 paired mean score delta > 0 in both halves (seeds 0-255 and 256-511).",
+      "Held-out screen: prior-d4s7 lower-quartile score >= prior-d3s7 lower-quartile score.",
+      "Every table arm is the exact frozen best-weights.bin of RUN-20260905T193006Z-4fbeb4e5 (SHA-256 0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b, verified and written to main/prior-weights.sha256 and main/candidate-weights.sha256 before the screen lease opens); no other table is screened.",
+      "Reported beside the gate, not part of it: persistence passes when prior-d4s7 vs fair-d4s7 meets the same four statistical criteria on the same 512 games; the depth-step interaction verdict is 'larger' when the bootstrap and Student-t 95% lower bounds of the per-game difference of depth steps are > 0, 'smaller' when its bootstrap 95% upper bound is < 0, and 'inconclusive' otherwise (floor reported)."
+    ],
+    "failureAction": "Record a valid run with scientific outcome fail for this exact configuration (these tables at reference d4s7); keep prior-d3s7 as the candidate to carry forward; report the persistence and interaction readings and the fair-leaf depth step as recorded; mark the theory not supported as tested (refuted if the primary falsifier's upper bound is below zero, inconclusive if the bounds straddle zero); open no further cohort for this candidate.",
+    "passAction": "Adopt prior-d4s7 (the unchanged tables at reference d4s7) as the candidate to carry forward; record the persistence and interaction readings; register a fresh-development STANDARD evaluation of the unchanged candidate as the successor; do not open protected or final seeds."
+  },
+  "resources": {
+    "wallSeconds": 14400,
+    "cpuThreads": 32,
+    "maxHostBytes": 34359738368,
+    "maxGpuBytes": null,
+    "gpuDevices": []
+  },
+  "stopConditions": [
+    "Stop on any rules, information-boundary, legality, determinism, or parity failure.",
+    "A screen artifact with any illegal or incomplete decision voids the run (invalid), not the candidate.",
+    "The screen is evaluated exactly once; no re-run on the same or a different held-out block without a new experiment record.",
+    "The screen process is stopped at 14,400 s of wall time; such a run is recorded as interrupted with whatever arms completed, and the gate is not evaluated on a partial artifact.",
+    "Host memory above the declared bound (32 GiB resident) aborts the screen through the operating system or the operator; such a run is recorded as interrupted with its artifacts."
+  ],
+  "expectedArtifacts": [
+    "runs/<run-id>/ntuple-scale/gates.log (CHECK, on the frozen tables)",
+    "runs/<run-id>/ntuple-scale/main/{candidate-weights.sha256,prior-weights.sha256} (freeze: the same hash, the tables are not retrained)",
+    "runs/<run-id>/ntuple-scale/screen/heldout.json + compare-*.json (the one-shot screen, four arms)",
+    "runs/<run-id>/ntuple-scale/{pipeline.log,rusage.jsonl,screen.log,screen.err,analysis.json,analysis.md}",
+    "artifacts emitted by the screen carry this experiment id in their config field; the 4 GB table file is the retained artifact of RUN-20260905T193006Z-4fbeb4e5 and is not committed"
+  ],
+  "lifecycle": "preregistered",
+  "protocolSha256": "18733b1875bd5fe93f8625a22d617e6aa77a611b88b306d62c64e5d9196091bb",
+  "amendments": [],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5-1",
+    "agentId": "claude-code-ntuple-continuation-4-ply"
+  },
+  "createdAt": "2026-09-06T08:13:06Z",
+  "updatedAt": "2026-09-06T08:18:51Z"
+}

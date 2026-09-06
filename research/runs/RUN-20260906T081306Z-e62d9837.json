@@ -1,0 +1,43 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260906T081306Z-e62d9837",
+  "experimentId": "EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3",
+  "lifecycle": "planned",
+  "runValidity": "pending",
+  "startedAt": null,
+  "endedAt": null,
+  "protocolSha256": "18733b1875bd5fe93f8625a22d617e6aa77a611b88b306d62c64e5d9196091bb",
+  "machineProfileRef": "research/system-profiles/MACH-20260906T081306Z-e87b3f5a.json",
+  "sourceState": {
+    "gitCommit": null,
+    "dirty": null,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "RUN_ID=RUN-20260906T081306Z-e62d9837 EXPERIMENT_ID=EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3 SCREEN_LEASE=research/seeds/leases/SL-20260906T081306Z-1aaec419.json THREADS=32 approaches/ntuple-rl/ntuple-scale/scripts/pipeline3.sh gates; freeze; screen; compare; analyze"
+  ],
+  "seedLeaseRefs": [
+    "SL-20260906T081306Z-1aaec419"
+  ],
+  "resourceLimits": {
+    "wallSeconds": 14400,
+    "cpuThreads": 32,
+    "maxHostBytes": 34359738368,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": null,
+    "cpuSeconds": null,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "Not started."
+  },
+  "exitCode": null,
+  "stopReason": null,
+  "artifactRefs": [],
+  "contributionIds": [
+    "CT-20260906T081306Z-c70f4648"
+  ]
+}
