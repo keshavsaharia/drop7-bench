@@ -1,0 +1,487 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260906T171746Z-1623f833",
+  "theoryIds": [
+    "TH-20260906-ntuple-leaf-fourth-ply-search-compatible-ace4fe2a"
+  ],
+  "experimentId": "EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3",
+  "runIds": [
+    "RUN-20260906T081306Z-e62d9837"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "pass",
+  "assessment": "supported-as-tested",
+  "evidenceTier": "public-development",
+  "summary": "Held-out screen, 512 never-read paired public-development games (0xa52f2580+), four arms on identical seeds, no training. The frozen tables (SHA-256 0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b) as the leaf of the depth-4 seven-stratum fair search averaged 516,155 points and 148.75 moves against 465,675 points and 134.82 moves for the same tables as the depth-3 leaf: paired +50,479 points (bootstrap 95% lower bound +14,707, Student-t lower bound +14,086, upper bound +86,224, detection floor 36,331), W-T-L 284-0-228, halves +67,335 / +33,623, lower quartile 233,182 vs 212,969, moves +13.93. The preregistered gate PASSES. The fair leaf's own fourth ply on these seeds: fair-d4s7 382,567 against fair-d3s7 332,968, fair-d4s7 minus fair-d3s7: paired +49,599 (bootstrap 95% lower bound +25,751, Student-t lower bound +25,578, upper bound +73,244, detection floor 23,979), W-T-L 289-0-223, halves +45,189 / +54,009. Depth-step interaction, per game (tables d4 minus tables d3) minus (fair d4 minus fair d3): +881 (bootstrap LB -40,932, t LB -41,742, UB +42,867, floor 42,550, W-T-L 250-0-262): the preregistered verdict is 'inconclusive'. Persistence: prior-d4s7 minus fair-d4s7: paired +133,588 (bootstrap 95% lower bound +102,051, Student-t lower bound +101,161, upper bound +165,801, detection floor 32,371), W-T-L 314-0-198, halves +137,477 / +129,699. The persistence criteria PASS. The tables' depth-3 margin on these seeds: prior-d3s7 minus fair-d3s7: paired +132,707 (bootstrap 95% lower bound +102,193, Student-t lower bound +101,741, upper bound +163,903, detection floor 30,913), W-T-L 309-0-203, halves +115,331 / +150,084. prior-d4s7 minus fair-d3s7: +183,187 (LB +150,976). Logical work per game: prior-d4s7 795,922,316, prior-d3s7 22,193,672, fair-d4s7 558,924,581, fair-d3s7 15,568,331; mean wall seconds per game on the shared 32-thread workstation: 152.3, 4.1, 175.7, 4.5. Theory falsifiers: primary upper bound below zero False; second leg upper bound below zero False; persistence lower bound at or below zero False.",
+  "metrics": {
+    "screen": {
+      "games": 512,
+      "seedStartHex": "0xa52f2580",
+      "arms": {
+        "prior-d3s7": {
+          "meanScore": 465675.2421875,
+          "medianScore": 352446.5,
+          "q25Score": 212968.75,
+          "minScore": 85472.0,
+          "maxScore": 2674728.0,
+          "sdScore": 362210.7988927232,
+          "meanMoves": 134.8203125,
+          "q25Moves": 65.0,
+          "numberedClearsPerMove": 2.098742539259431,
+          "coverRevealsPerMove": 1.1850698267369764,
+          "meanOccupiedCells": 23.25255160699242,
+          "censoredGames": 0,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "meanWork": 22193672.2421875,
+          "meanWallSecondsPerGame": 4.056867149527344,
+          "games": 512
+        },
+        "prior-d4s7": {
+          "meanScore": 516154.634765625,
+          "medianScore": 392496.5,
+          "q25Score": 233181.75,
+          "minScore": 85682.0,
+          "maxScore": 2716683.0,
+          "sdScore": 402055.66634759033,
+          "meanMoves": 148.74609375,
+          "q25Moves": 70.0,
+          "numberedClearsPerMove": 2.1255416371228235,
+          "coverRevealsPerMove": 1.203261640274167,
+          "meanOccupiedCells": 23.02881910980067,
+          "censoredGames": 0,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "meanWork": 795922316.0429688,
+          "meanWallSecondsPerGame": 152.311819602959,
+          "games": 512
+        },
+        "fair-d3s7": {
+          "meanScore": 332967.8515625,
+          "medianScore": 262338.5,
+          "q25Score": 174598.75,
+          "minScore": 102599.0,
+          "maxScore": 1745301.0,
+          "sdScore": 239092.24084642355,
+          "meanMoves": 97.72265625,
+          "q25Moves": 55.0,
+          "numberedClearsPerMove": 2.011452212495503,
+          "coverRevealsPerMove": 1.1224767158332334,
+          "meanOccupiedCells": 23.954978264844613,
+          "censoredGames": 0,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "meanWork": 15568331.095703125,
+          "meanWallSecondsPerGame": 4.49308196352539,
+          "games": 512
+        },
+        "fair-d4s7": {
+          "meanScore": 382566.54296875,
+          "medianScore": 303015.0,
+          "q25Score": 208481.25,
+          "minScore": 85801.0,
+          "maxScore": 2634604.0,
+          "sdScore": 273944.25968938513,
+          "meanMoves": 110.4453125,
+          "q25Moves": 60.0,
+          "numberedClearsPerMove": 2.0459432694348165,
+          "coverRevealsPerMove": 1.1459821744358776,
+          "meanOccupiedCells": 23.855956987277768,
+          "censoredGames": 0,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "meanWork": 558924581.4179688,
+          "meanWallSecondsPerGame": 175.7454595270781,
+          "games": 512
+        }
+      },
+      "contrasts": {
+        "fair-d4s7-vs-fair-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 49598.69140625,
+            "pairedSd": 329836.4895530267,
+            "bootstrapLower95": 25751.419921875,
+            "bootstrapUpper95": 73244.34580078124,
+            "studentTLower95": 25578.35829588779,
+            "detectionFloor": 23978.92014644966,
+            "wins": 289,
+            "ties": 0,
+            "losses": 223,
+            "firstHalfMeanDelta": 45188.85546875,
+            "secondHalfMeanDelta": 54008.52734375,
+            "q25Delta": 33882.5,
+            "candidateQ25": 208481.25,
+            "referenceQ25": 174598.75
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 12.72265625,
+            "pairedSd": 89.78413574612212,
+            "bootstrapLower95": 6.220703125,
+            "bootstrapUpper95": 19.162402343749996,
+            "studentTLower95": 6.184129079854635,
+            "detectionFloor": 6.527254229487365,
+            "wins": 279,
+            "ties": 18,
+            "losses": 215,
+            "firstHalfMeanDelta": 11.671875,
+            "secondHalfMeanDelta": 13.7734375,
+            "q25Delta": 5.0,
+            "candidateQ25": 60.0,
+            "referenceQ25": 55.0
+          }
+        },
+        "prior-d3s7-vs-fair-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 132707.390625,
+            "pairedSd": 425213.81129792635,
+            "bootstrapLower95": 102193.1853515625,
+            "bootstrapUpper95": 163903.478125,
+            "studentTLower95": 101741.20673084096,
+            "detectionFloor": 30912.795731296093,
+            "wins": 309,
+            "ties": 0,
+            "losses": 203,
+            "firstHalfMeanDelta": 115330.6640625,
+            "secondHalfMeanDelta": 150084.1171875,
+            "q25Delta": 38370.0,
+            "candidateQ25": 212968.75,
+            "referenceQ25": 174598.75
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 37.09765625,
+            "pairedSd": 117.17165153758818,
+            "bootstrapLower95": 28.72451171875,
+            "bootstrapUpper95": 45.69931640625,
+            "studentTLower95": 28.564634009682727,
+            "detectionFloor": 8.518310631594794,
+            "wins": 309,
+            "ties": 13,
+            "losses": 190,
+            "firstHalfMeanDelta": 32.4453125,
+            "secondHalfMeanDelta": 41.75,
+            "q25Delta": 10.0,
+            "candidateQ25": 65.0,
+            "referenceQ25": 55.0
+          }
+        },
+        "prior-d3s7-vs-fair-d4s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 83108.69921875,
+            "pairedSd": 435893.1761269615,
+            "bootstrapLower95": 51348.70185546875,
+            "bootstrapUpper95": 114438.8501953125,
+            "studentTLower95": 51364.79088013022,
+            "detectionFloor": 31689.179316985046,
+            "wins": 282,
+            "ties": 0,
+            "losses": 230,
+            "firstHalfMeanDelta": 70141.80859375,
+            "secondHalfMeanDelta": 96075.58984375,
+            "q25Delta": 4487.5,
+            "candidateQ25": 212968.75,
+            "referenceQ25": 208481.25
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 24.375,
+            "pairedSd": 119.48080768511763,
+            "bootstrapLower95": 15.665625,
+            "bootstrapUpper95": 32.98251953125,
+            "studentTLower95": 15.67381352793668,
+            "detectionFloor": 8.68618493483616,
+            "wins": 277,
+            "ties": 16,
+            "losses": 219,
+            "firstHalfMeanDelta": 20.7734375,
+            "secondHalfMeanDelta": 27.9765625,
+            "q25Delta": 5.0,
+            "candidateQ25": 65.0,
+            "referenceQ25": 60.0
+          }
+        },
+        "prior-d4s7-vs-prior-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 50479.392578125,
+            "pairedSd": 499739.655124456,
+            "bootstrapLower95": 14706.909765625,
+            "bootstrapUpper95": 86224.49199218747,
+            "studentTLower95": 14085.866195359107,
+            "detectionFloor": 36330.78104997574,
+            "wins": 284,
+            "ties": 0,
+            "losses": 228,
+            "firstHalfMeanDelta": 67335.2890625,
+            "secondHalfMeanDelta": 33623.49609375,
+            "q25Delta": 20213.0,
+            "candidateQ25": 233181.75,
+            "referenceQ25": 212968.75
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 13.92578125,
+            "pairedSd": 137.74272779371626,
+            "bootstrapLower95": 4.071972656250001,
+            "bootstrapUpper95": 23.78515625,
+            "studentTLower95": 3.8946709576892555,
+            "detectionFloor": 10.01381586068777,
+            "wins": 278,
+            "ties": 14,
+            "losses": 220,
+            "firstHalfMeanDelta": 18.51171875,
+            "secondHalfMeanDelta": 9.33984375,
+            "q25Delta": 5.0,
+            "candidateQ25": 70.0,
+            "referenceQ25": 65.0
+          }
+        },
+        "prior-d4s7-vs-fair-d4s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 133588.091796875,
+            "pairedSd": 445272.98766153195,
+            "bootstrapLower95": 102050.977734375,
+            "bootstrapUpper95": 165801.3640625,
+            "studentTLower95": 101161.09894605307,
+            "detectionFloor": 32371.086137182552,
+            "wins": 314,
+            "ties": 0,
+            "losses": 198,
+            "firstHalfMeanDelta": 137477.09765625,
+            "secondHalfMeanDelta": 129699.0859375,
+            "q25Delta": 24700.5,
+            "candidateQ25": 233181.75,
+            "referenceQ25": 208481.25
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 38.30078125,
+            "pairedSd": 122.50247555058839,
+            "bootstrapLower95": 29.6404296875,
+            "bootstrapUpper95": 47.21689453125,
+            "studentTLower95": 29.37954190029466,
+            "detectionFloor": 8.905858423822792,
+            "wins": 313,
+            "ties": 16,
+            "losses": 183,
+            "firstHalfMeanDelta": 39.28515625,
+            "secondHalfMeanDelta": 37.31640625,
+            "q25Delta": 10.0,
+            "candidateQ25": 70.0,
+            "referenceQ25": 60.0
+          }
+        },
+        "prior-d4s7-vs-fair-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 183186.783203125,
+            "pairedSd": 452824.9075737897,
+            "bootstrapLower95": 150975.553515625,
+            "bootstrapUpper95": 216399.5734375,
+            "studentTLower95": 150209.8219962821,
+            "detectionFloor": 32920.106304034955,
+            "wins": 345,
+            "ties": 0,
+            "losses": 167,
+            "firstHalfMeanDelta": 182665.953125,
+            "secondHalfMeanDelta": 183707.61328125,
+            "q25Delta": 58583.0,
+            "candidateQ25": 233181.75,
+            "referenceQ25": 174598.75
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 51.0234375,
+            "pairedSd": 124.93353002755813,
+            "bootstrapLower95": 42.154296875,
+            "bootstrapUpper95": 60.1796875,
+            "studentTLower95": 41.92515667612246,
+            "detectionFloor": 9.082594664418618,
+            "wins": 343,
+            "ties": 8,
+            "losses": 161,
+            "firstHalfMeanDelta": 50.95703125,
+            "secondHalfMeanDelta": 51.08984375,
+            "q25Delta": 15.0,
+            "candidateQ25": 70.0,
+            "referenceQ25": 55.0
+          }
+        }
+      },
+      "depth": {
+        "primary": "prior-d4s7-vs-prior-d3s7",
+        "tablesStep": {
+          "meanDelta": 50479.392578125,
+          "bootstrapLower95": 14706.909765625,
+          "bootstrapUpper95": 86224.49199218747,
+          "studentTLower95": 14085.866195359107,
+          "detectionFloor": 36330.78104997574,
+          "wins": 284,
+          "ties": 0,
+          "losses": 228,
+          "firstHalfMeanDelta": 67335.2890625,
+          "secondHalfMeanDelta": 33623.49609375,
+          "candidateQ25": 233181.75,
+          "referenceQ25": 212968.75
+        },
+        "fairStep": {
+          "meanDelta": 49598.69140625,
+          "bootstrapLower95": 25751.419921875,
+          "bootstrapUpper95": 73244.34580078124,
+          "studentTLower95": 25578.35829588779,
+          "detectionFloor": 23978.92014644966,
+          "wins": 289,
+          "ties": 0,
+          "losses": 223,
+          "firstHalfMeanDelta": 45188.85546875,
+          "secondHalfMeanDelta": 54008.52734375
+        },
+        "persistence": {
+          "checks": [
+            {
+              "criterion": "screen artifact: illegalDecisions 0 and incompleteDecisions 0 in every arm",
+              "passed": true
+            },
+            {
+              "criterion": "bootstrap 95% lower bound of prior-d4s7 minus fair-d4s7 > 0",
+              "passed": true,
+              "observed": 102050.977734375
+            },
+            {
+              "criterion": "Student-t 95% lower bound > 0",
+              "passed": true,
+              "observed": 101161.09894605307
+            },
+            {
+              "criterion": "paired mean delta > 0 in both halves",
+              "passed": true,
+              "observed": [
+                137477.09765625,
+                129699.0859375
+              ]
+            },
+            {
+              "criterion": "prior-d4s7 Q25 >= fair-d4s7 Q25",
+              "passed": true,
+              "observed": [
+                233181.75,
+                208481.25
+              ]
+            }
+          ],
+          "passed": true
+        },
+        "interaction": {
+          "verdict": "inconclusive",
+          "n": 512,
+          "meanDelta": 880.701171875,
+          "pairedSd": 585280.6110669033,
+          "bootstrapLower95": -40931.9,
+          "bootstrapUpper95": 42867.4783203125,
+          "studentTLower95": -41742.34293071877,
+          "detectionFloor": 42549.5585860044,
+          "wins": 250,
+          "ties": 0,
+          "losses": 262,
+          "firstHalfMeanDelta": 22146.43359375,
+          "secondHalfMeanDelta": -20385.03125
+        },
+        "theory": {
+          "primaryFalsifierUpperBoundBelowZero": false,
+          "secondLegUpperBoundBelowZero": false,
+          "persistenceLowerBoundAtOrBelowZero": false
+        }
+      }
+    },
+    "tablesSha256": "0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b"
+  },
+  "gateChecks": [
+    {
+      "criterion": "All CHECK gates passed on the frozen tables before the leased seed was read (including leaf-in-d4-search-determinism)",
+      "passed": true,
+      "observed": "19 gate lines"
+    },
+    {
+      "criterion": "screen artifact: illegalDecisions 0 and incompleteDecisions 0 in every arm",
+      "passed": true,
+      "observed": "null"
+    },
+    {
+      "criterion": "bootstrap 95% lower bound of prior-d4s7 minus prior-d3s7 > 0",
+      "passed": true,
+      "observed": "14706.909765625"
+    },
+    {
+      "criterion": "Student-t 95% lower bound > 0",
+      "passed": true,
+      "observed": "14085.866195359107"
+    },
+    {
+      "criterion": "paired mean delta > 0 in both halves",
+      "passed": true,
+      "observed": "[67335.2890625, 33623.49609375]"
+    },
+    {
+      "criterion": "prior-d4s7 Q25 >= prior-d3s7 Q25",
+      "passed": true,
+      "observed": "[233181.75, 212968.75]"
+    },
+    {
+      "criterion": "Every table arm is the exact frozen best-weights.bin of RUN-20260905T193006Z-4fbeb4e5 (SHA-256 verified before the screen lease opened)",
+      "passed": true,
+      "observed": "0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b"
+    },
+    {
+      "criterion": "Persistence (beside the gate): bootstrap 95% lower bound of prior-d4s7 minus fair-d4s7 > 0",
+      "passed": true,
+      "observed": "102050.977734375"
+    },
+    {
+      "criterion": "Persistence (beside the gate): Student-t 95% lower bound > 0",
+      "passed": true,
+      "observed": "101161.09894605307"
+    },
+    {
+      "criterion": "Persistence (beside the gate): paired mean delta > 0 in both halves",
+      "passed": true,
+      "observed": "[137477.09765625, 129699.0859375]"
+    },
+    {
+      "criterion": "Persistence (beside the gate): prior-d4s7 Q25 >= fair-d4s7 Q25",
+      "passed": true,
+      "observed": "[233181.75, 208481.25]"
+    },
+    {
+      "criterion": "Depth-step interaction verdict (beside the gate): larger / smaller / inconclusive",
+      "passed": null,
+      "observed": "{\"verdict\": \"inconclusive\", \"meanDelta\": 880.701171875, \"bootstrapLower95\": -40931.9, \"bootstrapUpper95\": 42867.4783203125}"
+    }
+  ],
+  "perGameArtifact": {
+    "path": "https://data.drop7.dev/runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/screen/heldout.json#sha256=fa54ce8648e25b58ef3dc1aff3047b87c729c3e8cbd54db7d9976882603ff71d",
+    "sha256": "fa54ce8648e25b58ef3dc1aff3047b87c729c3e8cbd54db7d9976882603ff71d",
+    "recordCount": 2048
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260906T081306Z-e87b3f5a.json"
+  ],
+  "artifactManifestRef": "artifacts/results/EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3/RUN-20260906T081306Z-e62d9837/manifest.json",
+  "limitations": [
+    "Public-development SCREEN tier, 512 paired games opened once; nothing here is a qualification claim, and protected and final cohorts stay sealed.",
+    "No table was trained or changed: both table arms are the first experiment's frozen candidate, selected there at the best of twenty training-role validation points; this screen inherits that selection but adds none of its own.",
+    "The depth-4 search is the standing reference configuration (1M-entry table, seven strata, terminal utility -1,000,000); a different terminal utility, table size or stratum count is a different configuration and is not tested here.",
+    "The fair-d3s7 and fair-d4s7 arms are context for the interaction reading; the preregistered comparator is the identical tables at depth 3.",
+    "Wall times were measured on a shared workstation with all four arms run in sequence at 32 threads; logical work and the ratios between arms on the same seeds are the trustworthy cost quantities.",
+    "The per-game artifact is cited by its public archive reference (data.drop7.dev, immutable run-scoped key, digest in the fragment); a byte-identical copy remains under runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/screen/heldout.json on the workstation and a promoted copy under artifacts/results/."
+  ],
+  "contributionIds": [
+    "CT-20260906T081306Z-c70f4648"
+  ],
+  "recordedAt": "2026-09-06T17:17:46Z"
+}

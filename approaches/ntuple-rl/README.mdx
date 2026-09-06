@@ -19,7 +19,10 @@ billions of engine moves and placed as the leaf of the depth-3 fair search,
 beat that reference on 256 held-out games at screen tier, and on 2026-09-06
 the same frozen tables did it again on 512 games from a second block nothing
 had read; a six-times-wider evaluator trained until its validation margin
-stopped rising passed the same gate and was no better than the first. For how this family compares with the other three ways
+stopped rising passed the same gate and was no better than the first. Later
+that day the same tables played one ply deeper, as the leaf of the depth-4
+search, and gained about as much from the fourth ply as the hand-written leaf
+does, keeping their whole margin over it. For how this family compares with the other three ways
 of learning tried here, see
 [four ways a program can learn Drop7](/learn/concepts/learning-from-play).
 
@@ -94,6 +97,7 @@ attempt never got past trying to imitate a one-move search.
 
 | Approach | Recorded mean score | Mean moves | Cohort | Source |
 | --- | ---: | ---: | --- | --- |
+| [Row and column lookup tables as the depth-4 leaf, the same frozen tables one ply deeper](/approach/ntuple-rl/ntuple-scale) | 516,155 | 148.75 | 512 never-read paired development games on a fourth block, screen tier | [RS-20260906T171746Z-1623f833](/results/RS-20260906T171746Z-1623f833) |
 | [Row and column lookup tables as the depth-3 leaf](/approach/ntuple-rl/ntuple-scale) | 484,577 | 140.21 | 256 never-read paired development games, screen tier | [RS-20260905T215332Z-95d18a5a](/results/RS-20260905T215332Z-95d18a5a) |
 | [Row and column lookup tables as the depth-3 leaf, replication of the same frozen tables](/approach/ntuple-rl/ntuple-scale) | 487,066 | 140.83 | 512 never-read paired development games on a second block, screen tier | [RS-20260906T040113Z-6ba93171](/results/RS-20260906T040113Z-6ba93171) |
 | [Wider lookup tables (2x4 and 4x2 windows added) as the depth-3 leaf](/approach/ntuple-rl/ntuple-scale) | 481,869 | 139.39 | the same 512 games, screen tier | [RS-20260906T040113Z-6ba93171](/results/RS-20260906T040113Z-6ba93171) |

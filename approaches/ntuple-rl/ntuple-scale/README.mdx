@@ -183,6 +183,45 @@ entries had been updated at the candidate's point.
 
 <NTupleGateTable run="RUN-20260906T013222Z-ba0ee34f" />
 
+### The fourth ply
+
+Both screens played the tables inside the depth-3 search. A third
+experiment,
+[EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3](/experiments/EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3),
+asks what one more completed ply is worth to this leaf. Nothing is trained:
+the first run's frozen tables, hash-verified, play as the leaf of the
+depth-4 search with seven chance strata (the reference search's exact
+configuration) and as the depth-3 leaf on 512 games from a fourth block
+nothing had read, beside the fair leaf in both searches on the same games.
+The gate reads the tables' own depth step; two readings sit beside it, fixed
+in advance: whether the tables still beat the fair leaf at depth 4, and
+whether the fourth ply is worth more, less or the same on the tables as on
+the fair leaf, from the per-game difference of the two depth steps.
+
+<NTupleStatus run="RUN-20260906T081306Z-e62d9837" />
+
+The fourth ply lifted the tables from 465,675 to 516,155 points and from
+135 to 149 moves on the 512 games, a paired gain of 50,479 with a bootstrap
+95% lower bound of 14,707, both halves positive and a higher lower quartile
+([RS-20260906T171746Z-1623f833](/results/RS-20260906T171746Z-1623f833),
+run valid, outcome pass, screen tier on public development seeds). The gate
+passes. On the same games the fair leaf's fourth ply was worth 49,599, and
+the per-game difference between the two depth steps is 881 points with
+bounds from minus 40,932 to plus 42,867: the preregistered verdict is
+inconclusive, so the tables pay for depth about as well as the hand-written
+leaf does, and no better or worse than this screen can see. At depth 4 the
+tables beat the fair leaf in the same search by 133,588 with a lower bound
+of 102,051, so the margin survives the extra ply intact. The depth-4 search
+costs about 36 times the depth-3 search's logical work on these games.
+
+<NTupleScreenFigure run="RUN-20260906T081306Z-e62d9837" caption="The primary contrast of the depth-4 screen. One bar per held-out game: the frozen tables as the depth-4 leaf minus the same tables as the depth-3 leaf on the same seed, in seed order, 512 games. The dashed line is the recorded paired mean and the divider separates the two halves the gate checks separately." />
+
+<NTupleScreenFigure run="RUN-20260906T081306Z-e62d9837" contrast="fair-d4s7-vs-fair-d3s7" caption="The same depth step for the fair leaf on the same 512 games: the fair leaf at depth 4 minus the fair leaf at depth 3." />
+
+<NTupleScreenFigure run="RUN-20260906T081306Z-e62d9837" contrast="prior-d4s7-vs-fair-d4s7" caption="Persistence: the tables as the depth-4 leaf minus the fair leaf in the same depth-4 search, on the same 512 games." />
+
+<NTupleGateTable run="RUN-20260906T081306Z-e62d9837" />
+
 ## What we learned
 
 The evaluator was the bottleneck, and a lookup table can be a better one than
@@ -207,10 +246,21 @@ rising, produced a leaf the 512-game screen could not tell apart from the
 first one, while the same tables played without any search improved by
 about 34,000 on the same games. The value function got better at the thing
 the search does for it and no better at the thing the search needs from it.
-The open question is what the depth-3 search is failing to extract from a
-leaf that already plays as well as the search does on its own: whether the
-same tables one ply deeper keep their margin, and whether a leaf tuned for
-the search's use, rather than for one-ply play, is the next lever.
+The fourth ply answered one of the two questions the replication left. The
+same frozen tables one ply deeper gained 50,479 points on 512 fresh games,
+the fair leaf gained 49,599 on the same games, and the difference between
+those two steps is inside its detection floor. The learned leaf pays for
+search depth the way the hand-written one does, and it keeps its whole
+margin over the fair leaf at depth 4. Search depth is a lever for this
+evaluator, at the usual price: about 36 times the logical work per game for
+the fourth ply. The tables at depth 4, averaging 516,155 on that block, are
+now the candidate to carry forward.
+
+The open question is what a leaf tuned for the search's use, rather than for
+one-ply play, would add on top of that: whether training on the boards the
+search actually evaluates, or removing the optimistic starting value from
+the nine tenths of the entries that training never touched, moves the leaf
+where more table entries did not.
 
 <AgentContext summary="Records and provenance">
 
@@ -241,6 +291,42 @@ wide layout is `rows,cols,win23,win32,win24,win42,phase=all`: 5.8 x 10^9
 entries, 122 active per state, 23.2 GB of weights and 69.6 GB with the
 coherence accumulators; table files stay on the workstation with their
 SHA-256 in the result record.
+
+The fourth ply: theory
+[TH-20260906-ntuple-leaf-fourth-ply-search-compatible-ace4fe2a](/theories/TH-20260906-ntuple-leaf-fourth-ply-search-compatible-ace4fe2a),
+experiment
+[EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3](/experiments/EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3)
+(frozen protocol SHA-256 `18733b1875bd5fe93f8625a22d617e6aa77a611b88b306d62c64e5d9196091bb`),
+run `RUN-20260906T081306Z-e62d9837` on branch
+`claude/n-tuple-continuation-4-ply`, machine profile
+`MACH-20260906T081306Z-e87b3f5a`, contribution `CT-20260906T081306Z-c70f4648`,
+result
+[RS-20260906T171746Z-1623f833](/results/RS-20260906T171746Z-1623f833).
+One lease, the screen `SL-20260906T081306Z-1aaec419` (`0xa52f2580`, 512
+games, public development, opened once), disjoint from every block the two
+earlier experiments read. No training: the screened tables are the first
+experiment's frozen candidate (SHA-256 verified before the lease opened),
+played through `Arm::NTupleD4` (the reference `d4s7` parameters, 1M-entry
+table) and `Arm::NTupleD3`. Stage driver
+`approaches/ntuple-rl/ntuple-scale/scripts/pipeline3.sh` (gates, freeze,
+screen, compare, analyze); artifacts under
+`runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/` and promoted under
+`artifacts/results/EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3/RUN-20260906T081306Z-e62d9837/`;
+web snapshot
+`web/content/figures/ntuple-scale/RUN-20260906T081306Z-e62d9837.json`.
+
+Published artifacts (the public research archive, immutable run-scoped keys,
+SHA-256 in each reference's fragment; `runs/<run-id>/published.jsonl` lists
+them): the first run's frozen tables as
+`https://data.drop7.dev/runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/best-weights.bin.zst`
+(zstd; the decompressed file's SHA-256 is `0ade9d4e...`, dataset record
+`DS-20260906-ntuple-scale-frozen-tables-ff977178`), the wide tables as
+`https://data.drop7.dev/runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/main/best-weights.bin.zst`
+(decompressed SHA-256 `824b0a39...`, dataset record
+`DS-20260906-ntuple-scale-wide-frozen-tables-c5eb52a6`), and the three
+screens' per-game artifacts (`screen/heldout.json`) and analyses under the
+same run prefixes. Download with plain HTTPS, check the digest, `zstd -d`,
+check the decompressed digest, then `Model::load`.
 
 Seed leases: training `SL-20260905T191317Z-09895ea2` (`0xa5300000`
 to `0xa54f0000`, read in order and wrapped; wrap counts in each
@@ -338,6 +424,31 @@ reports of `RUN-20260906T013222Z-ba0ee34f`
 | prior-1ply minus fair-d3s7 | -32,394 | -51,190 | -51,084 | -13,948 | 219-0-293 | -50,576 / -14,211 | 18,658 |
 | candidate-d3s7 minus candidate-1ply | +153,830 | +127,665 | +127,508 | +180,357 | 333-0-179 | +180,625 / +127,035 | 26,277 |
 
+The fourth ply, held-out screen, 512 paired games on `0xa52f2580`,
+2,000-move cap, four arms on identical seeds, from `screen/heldout.json` and
+the compare.py reports of `RUN-20260906T081306Z-e62d9837`
+([RS-20260906T171746Z-1623f833](/results/RS-20260906T171746Z-1623f833)):
+
+| arm | mean | median | Q25 | max | moves | clears/move | reveals/move | work/game | wall s/game |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| prior-d4s7 (candidate) | 516,155 | 392,496 | 233,182 | 2,716,683 | 148.75 | 2.1255 | 1.2033 | 7.96e8 | 152.3 |
+| prior-d3s7 (comparator) | 465,675 | 352,446 | 212,969 | 2,674,728 | 134.82 | 2.0987 | 1.1851 | 2.22e7 | 4.1 |
+| fair-d4s7 | 382,567 | 303,015 | 208,481 | 2,634,604 | 110.45 | 2.0459 | 1.1460 | 5.59e8 | 175.7 |
+| fair-d3s7 | 332,968 | 262,338 | 174,599 | 1,745,301 | 97.72 | 2.0115 | 1.1225 | 1.56e7 | 4.5 |
+
+| contrast | paired delta | bootstrap LB95 | t LB95 | UB95 | W-T-L | halves | floor |
+| --- | ---: | ---: | ---: | ---: | --- | --- | ---: |
+| prior-d4s7 minus prior-d3s7 (gate) | +50,479 | +14,707 | +14,086 | +86,224 | 284-0-228 | +67,335 / +33,623 | 36,331 |
+| fair-d4s7 minus fair-d3s7 | +49,599 | +25,751 | +25,578 | +73,244 | 289-0-223 | +45,189 / +54,009 | 23,979 |
+| (tables d4 minus d3) minus (fair d4 minus d3), interaction | +881 | -40,932 | -41,742 | +42,867 | 250-0-262 | +22,146 / -20,385 | 42,550 |
+| prior-d4s7 minus fair-d4s7 (persistence) | +133,588 | +102,051 | +101,161 | +165,801 | 314-0-198 | +137,477 / +129,699 | 32,371 |
+| prior-d4s7 minus fair-d3s7 | +183,187 | +150,976 | +150,210 | +216,400 | 345-0-167 | +182,666 / +183,708 | 32,920 |
+| prior-d3s7 minus fair-d3s7 | +132,707 | +102,193 | +101,741 | +163,903 | 309-0-203 | +115,331 / +150,084 | 30,913 |
+| prior-d3s7 minus fair-d4s7 | +83,109 | +51,349 | +51,365 | +114,439 | 282-0-230 | +70,142 / +96,076 | 31,689 |
+
+Wall seconds are observations on a shared workstation (32 threads, the four
+arms in sequence); logical work is the cost quantity.
+
 Replication main run (wide layout, 5.8 x 10^9 entries): 4,500,370,590 moves,
 47,477,538 games, 4,462 s wall at a mean 1,184,973 moves per second, nine
 validation points every 5 x 10^8 moves on the 256-game block (fair-d3s7 mean
@@ -390,6 +501,20 @@ for every perturbation. The replication's validation block is 256 games
 its screen is 512 games opened once; the replication arm is the first
 experiment's exact frozen tables, verified by SHA-256 before the screen
 lease opened.
+
+The fourth ply's gates (20, all pass, `gates.log` of the third run, on the
+frozen tables through `gate --weights`): the same list plus
+`leaf-in-d4-search-determinism`, two probe games over 40-move caps at one
+and two workers, identical scores, moves and work, no illegal or incomplete
+decision, and more work than the depth-3 arm on every game. Limitations,
+fixed before the lease opened: no table was trained or changed, so the
+screen inherits the first experiment's candidate selection and adds none of
+its own; the depth-4 search is the standing reference configuration (1M-entry
+table, seven strata, terminal utility -1,000,000), and a different terminal
+utility, table size or stratum count is a different configuration; the
+fair-leaf arms are context for the interaction reading, whose detection
+floor (42,550) is larger than the depth steps' own floors because it is a
+difference of differences; the screen is 512 games opened once.
 
 </AgentContext>
 

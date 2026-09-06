@@ -1,0 +1,71 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260906T081306Z-e62d9837",
+  "experimentId": "EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3",
+  "lifecycle": "completed",
+  "runValidity": "valid",
+  "startedAt": "2026-09-06T08:16:11Z",
+  "endedAt": "2026-09-06T09:56:37Z",
+  "protocolSha256": "18733b1875bd5fe93f8625a22d617e6aa77a611b88b306d62c64e5d9196091bb",
+  "machineProfileRef": "research/system-profiles/MACH-20260906T081306Z-e87b3f5a.json",
+  "sourceState": {
+    "gitCommit": "ce0f01068d2d373fdad4b6a112595dd52d4abd14",
+    "dirty": false,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "approaches/ntuple-rl/ntuple-scale/build.sh (branch claude/n-tuple-continuation-4-ply, commit ce0f010 for the gates, freeze and screen; the working tree at that commit was clean apart from record files)",
+    "cargo test --release (12 unit tests)",
+    "RUN_ID=RUN-20260906T081306Z-e62d9837 EXPERIMENT_ID=EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3 SCREEN_LEASE=research/seeds/leases/SL-20260906T081306Z-1aaec419.json THREADS=32 approaches/ntuple-rl/ntuple-scale/scripts/pipeline3.sh gates (08:16:11Z, before the protocol freeze; reads only the already-open probe block 0xa5277000)",
+    "RUN_ID=RUN-20260906T081306Z-e62d9837 EXPERIMENT_ID=EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3 SCREEN_LEASE=research/seeds/leases/SL-20260906T081306Z-1aaec419.json approaches/ntuple-rl/ntuple-scale/scripts/pipeline3.sh freeze (08:18:27Z)",
+    "RUN_ID=RUN-20260906T081306Z-e62d9837 EXPERIMENT_ID=EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3 SCREEN_LEASE=research/seeds/leases/SL-20260906T081306Z-1aaec419.json THREADS=32 approaches/ntuple-rl/ntuple-scale/scripts/pipeline3.sh chain (screen -> compare -> analyze), launched with nohup after the protocol freeze and the preregistration commit; stdout/stderr in runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/chain.nohup"
+  ],
+  "seedLeaseRefs": [
+    "SL-20260906T081306Z-1aaec419"
+  ],
+  "resourceLimits": {
+    "wallSeconds": 14400,
+    "cpuThreads": 32,
+    "maxHostBytes": 34359738368,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": 5930,
+    "cpuSeconds": 171699.7,
+    "peakHostBytes": 27202711552,
+    "peakGpuBytes": null,
+    "measurementNotes": "Gates 08:16:11Z-08:17:45Z on the frozen tables: 94.1 s wall, 135.0 CPU-s, peak RSS 27.2 GB (the feature-index gate allocates every layout including the 5.8e9-entry wide one; 20 gates, all PASS; the depth-4 determinism gate's two 40-move games took 82 s). Freeze 08:18:27Z verified the tables' SHA-256 (0ade9d4e...). Screen 08:19:19Z-09:56:35Z: 5,835.9 s wall, 171,490.8 user + 73.9 system CPU-s, peak RSS 5.71 GB, four arms in sequence at 32 threads: prior-d3s7 69 s, prior-d4s7 2,737 s, fair-d3s7 80 s, fair-d4s7 2,949 s (screen.err); mean logical work per game 2.22e7 / 7.96e8 / 1.56e7 / 5.59e8 (analysis.json). The workstation was shared with a low-priority zstd compression of the earlier runs' table files (nice 19, four threads) from about 08:44Z to 09:01Z; wall times are therefore observations, and logical work is the cost quantity. compare 09:56:35Z-09:56:37Z; analyze 09:56:37Z. Every artifact under runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/ was published on 2026-09-06 to the public research archive with the directory publisher (immutable run-scoped keys, digest in each reference's fragment); the complete list is runs/RUN-20260906T081306Z-e62d9837/published.jsonl, copied under artifacts/results/ beside the manifest."
+  },
+  "exitCode": 0,
+  "stopReason": "completed: the four-arm screen played once on 0xa52f2580-0xa52f277f (512 games each, no censored game, no illegal or incomplete decision), compare and analysis written; the preregistered gate passed (prior-d4s7 minus prior-d3s7 +50,479, bootstrap LB +14,707), persistence passed (+133,588 over fair-d4s7), depth-step interaction inconclusive (+881, bounds -40,932 to +42,867)",
+  "artifactRefs": [
+    "runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/gates.log",
+    "runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/main/{candidate-weights.sha256,prior-weights.sha256}",
+    "runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/screen/heldout.json",
+    "runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/screen/compare-*.json",
+    "runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/{analysis.json,analysis.md,rusage.jsonl,pipeline.log,screen.log,screen.err,chain.nohup,published.jsonl}",
+    "artifacts/results/EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3/RUN-20260906T081306Z-e62d9837/manifest.json",
+    "https://data.drop7.dev/runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/analysis.json#sha256=6cdb9773e347ea63bffdfcfe98f851334eaa7a2893124cbd542f547118cf49c8",
+    "https://data.drop7.dev/runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/gates.log#sha256=4026cf96c7383f9d23fd49d12cc2c4e68bf11e611127f4195bb03f14f5197eb9",
+    "https://data.drop7.dev/runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/rusage.jsonl#sha256=1e5c090d3cd9304fc0b133afea3efcee1eda8e3c5d64c208760e91fa1034adef",
+    "https://data.drop7.dev/runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/screen/heldout.json#sha256=fa54ce8648e25b58ef3dc1aff3047b87c729c3e8cbd54db7d9976882603ff71d",
+    "https://data.drop7.dev/runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/analysis.md#sha256=d81a1db9a7598f910aa9e724af18966f2230fff2a09c5d2ba4b34a95d6d35045",
+    "https://data.drop7.dev/runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/chain.nohup#sha256=02fdd83be5e6a1390d351f87add3471a25b55547c368e6d6fd0644717c2afdb9",
+    "https://data.drop7.dev/runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/main/candidate-weights.sha256#sha256=b4e3cf00a47e8929ad257dfe149503095e4f60af99d5d09a1287bd8c2f4c3030",
+    "https://data.drop7.dev/runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/main/prior-weights.sha256#sha256=b4e3cf00a47e8929ad257dfe149503095e4f60af99d5d09a1287bd8c2f4c3030",
+    "https://data.drop7.dev/runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/pipeline.log#sha256=d594419f20ef2d9468d8e8043daa81e0ea9924a7951eee3f305df73bafb68cb2",
+    "https://data.drop7.dev/runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/screen/compare-fair-d4s7-vs-fair-d3s7.json#sha256=9c982242964506b9c0e79708993fd9cdd68966a9816da68c592b65fbd459e55c",
+    "https://data.drop7.dev/runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/screen/compare-prior-d3s7-vs-fair-d3s7.json#sha256=768e5f888b3ec6ae55fba86e71f6f64491ec779f3ede938c4dc2e44d513fd089",
+    "https://data.drop7.dev/runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/screen/compare-prior-d3s7-vs-fair-d4s7.json#sha256=036f666961f723ab4b0d2e2ac9270b13046c57480fd1cfab928c9ffe703c28f2",
+    "https://data.drop7.dev/runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/screen/compare-prior-d4s7-vs-fair-d3s7.json#sha256=160399a6cd27cb61207d1d3d738fece5937c6a0edd8c4afa28d820a89b5cf1b6",
+    "https://data.drop7.dev/runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/screen/compare-prior-d4s7-vs-fair-d4s7.json#sha256=f188c8f1aaf39855e321643d67f3a4e1056736ea34a8aa442f2d16d3fe0a712a",
+    "https://data.drop7.dev/runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/screen/compare-prior-d4s7-vs-prior-d3s7.json#sha256=8bf4acdadad2748ffcedc03485989f540356c7a577da4bd69ae3404042f05113",
+    "https://data.drop7.dev/runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/screen.err#sha256=406c35a8a0a6dbf2019d94715a18af5e49b1d0a59fd470d07a830ad60bb0b8e6",
+    "https://data.drop7.dev/runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/screen.log#sha256=85941288737646f7d4fee4aab806ff837529543480d6ed4a35b98c5bd9c4d06c"
+  ],
+  "contributionIds": [
+    "CT-20260906T081306Z-c70f4648"
+  ]
+}

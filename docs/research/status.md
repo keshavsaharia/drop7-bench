@@ -41,12 +41,38 @@ preregistered scale verdict is inconclusive: no gain larger than about
 averaged 328,039 against 294,323 for the first tables on the same games,
 level with the fair leaf's depth-3 search; the extra scale improved the
 one-ply policy and left the leaf where it was. Both candidates beat the
-fair leaf at depth 4 on these games by more than 84,000. The first tables
-now have two passing screens on disjoint blocks and are the candidate to
-carry forward; the next steps the record supports are those tables as the
-leaf of the depth-4 search on a fresh development block, a STANDARD-tier
-evaluation on fresh development seeds, and a study of why a better one-ply
-evaluator is not a better leaf.
+fair leaf at depth 4 on these games by more than 84,000.
+
+Later on 2026-09-06 the first tables played one ply deeper. Unchanged and
+hash-verified, as the leaf of the reference depth-4 seven-stratum search
+they scored **516,155 against 465,675** for the same tables as the depth-3
+leaf on 512 never-read public-development games from a fourth block: paired
++50,479, bootstrap 95% lower bound +14,707, both halves positive, 284 wins to
+228, a higher lower quartile
+([RS-20260906T171746Z-1623f833](../../research/results/RS-20260906T171746Z-1623f833.json)).
+On the same games the fair leaf's fourth ply was worth +49,599, and the
+per-game difference between the two depth steps is +881 with bounds from
+-40,932 to +42,867 (floor 42,550), so the preregistered interaction verdict
+is inconclusive: the learned leaf pays for depth about as well as the
+hand-written one, and no better or worse than a 512-game screen can see. At
+depth 4 the tables beat the fair leaf in the same search by 133,588 (lower
+bound 102,051); the depth-3 margin on this block was 132,707. The depth-4
+search does about 36 times the depth-3 search's logical work per game. The
+first tables at depth 4 are now the candidate to carry forward; the next
+steps the record supports are a STANDARD-tier evaluation of that unchanged
+candidate on fresh development seeds, and a study of a leaf tuned for the
+search's use rather than for one-ply play (training on the boards the search
+evaluates, or removing the optimistic starting value from never-updated
+entries).
+
+The frozen tables of both training runs, the three screens' per-game rows
+and their analyses are published in the public research archive under their
+run ids (`https://data.drop7.dev/runs/<run-id>/ntuple-scale/...`, digests in
+the references; dataset records
+[DS-20260906-ntuple-scale-frozen-tables-ff977178](../../research/datasets/DS-20260906-ntuple-scale-frozen-tables-ff977178.json)
+and
+[DS-20260906-ntuple-scale-wide-frozen-tables-c5eb52a6](../../research/datasets/DS-20260906-ntuple-scale-wide-frozen-tables-c5eb52a6.json)),
+so another machine can reproduce the screens or continue training from them.
 
 ## August 2026
 

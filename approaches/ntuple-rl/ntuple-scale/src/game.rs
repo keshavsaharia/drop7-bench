@@ -67,6 +67,9 @@ pub enum Arm {
     FairD4,
     /// The tables inside the deployment search (d3s7).
     NTupleD3(Arc<Model>),
+    /// The tables inside the reference search (d4s7): the same frozen tables
+    /// one completed ply deeper, otherwise the fair-d4s7 configuration.
+    NTupleD4(Arc<Model>),
     /// The tables played directly, one ply, seven reveal strata.
     Direct(Arc<Model>),
 }
@@ -90,6 +93,14 @@ impl Arm {
                 ),
                 depth: 3,
             }),
+            Arm::NTupleD4(model) => Box::new(SearchPlayer {
+                searcher: Searcher::new(
+                    reference_d4_params(),
+                    NTupleLeaf::new(model.clone()),
+                    DepthTable::new(REFERENCE_TABLE, 1),
+                ),
+                depth: 4,
+            }),
             Arm::Direct(model) => Box::new(DirectPlayer {
                 model: model.clone(),
                 params: PolicyParams::default(),
@@ -101,7 +112,7 @@ impl Arm {
     pub fn search_params(&self) -> Option<SearchParams> {
         match self {
             Arm::FairD3 | Arm::NTupleD3(_) => Some(deployment_params()),
-            Arm::FairD4 => Some(reference_d4_params()),
+            Arm::FairD4 | Arm::NTupleD4(_) => Some(reference_d4_params()),
             Arm::Direct(_) => None,
         }
     }
@@ -321,5 +332,22 @@ mod tests {
         }
         let direct = evaluate_arm(&Arm::Direct(model), &seeds, 2, 40);
         assert!(direct.iter().all(|g| g.illegal_decisions == 0 && g.moves > 0));
+    }
+
+    #[test]
+    fn ntuple_leaf_at_depth_4_is_legal_deterministic_and_deeper_than_depth_3() {
+        let model = Arc::new(Model::new(Layout::parse("cols,win23").unwrap(), 5.0, false));
+        let seeds = [0xa527_7006u32];
+        let d4 = Arm::NTupleD4(model.clone());
+        assert_eq!(d4.search_params().map(|p| p.depth), Some(4));
+        let one = evaluate_arm(&d4, &seeds, 1, 12);
+        let two = evaluate_arm(&d4, &seeds, 2, 12);
+        assert_eq!(one[0].score, two[0].score);
+        assert_eq!(one[0].moves, two[0].moves);
+        assert_eq!(one[0].work, two[0].work);
+        assert_eq!(one[0].illegal_decisions, 0);
+        assert_eq!(one[0].incomplete_decisions, 0);
+        let d3 = evaluate_arm(&Arm::NTupleD3(model), &seeds, 1, 12);
+        assert!(one[0].work > d3[0].work, "depth 4 must do more work than depth 3");
     }
 }

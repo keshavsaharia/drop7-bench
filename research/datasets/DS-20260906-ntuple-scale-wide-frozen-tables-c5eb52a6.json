@@ -1,0 +1,35 @@
+{
+  "$schema": "../schemas/dataset-v1.schema.json",
+  "format": "drop7-dataset-v1",
+  "datasetId": "DS-20260906-ntuple-scale-wide-frozen-tables-c5eb52a6",
+  "title": "Frozen wide n-tuple tables of RUN-20260906T013222Z-ba0ee34f (layout rows,cols,win23,win32,win24,win42,phase=all, 5.8 x 10^9 entries, the validation point at 2.0 x 10^9 training moves): the candidate of the replication experiment, screened in RS-20260906T040113Z-6ba93171",
+  "dataRole": "training",
+  "informationClass": "public-only",
+  "originUnit": "whole-game",
+  "originCount": 0,
+  "rowCount": 5800000000,
+  "wholeOriginSplit": true,
+  "seedLeaseRefs": [
+    "SL-20260906T013222Z-ce319097"
+  ],
+  "parentDatasetRefs": [],
+  "fields": [
+    "D7NTUP01 lookup-table file written by Model::save (approaches/ntuple-rl/ntuple-scale/src/model.rs): header, layout spec 'rows,cols,win23,win32,win24,win42,phase=all', then 5,800,000,000 little-endian f32 entries in rise units (x 17,000 points); read with Model::load(path, trainable=false)",
+    "value(board, moves_remaining) = sum of the active entries of the reflection-canonical board; the visible next disc, score, level and move number are not inputs (information-boundary gate)",
+    "published object: zstd -12 compression of the file; decompressed SHA-256 824b0a39a90d8a5aae63438c1538d4c5022f0e0f09c75fb7e2d758a1d6c6fb8a, 23,200,000,064 bytes",
+    "note: Trained by the same recipe on a fresh training block with the two eight-cell window families added and a plateau stop rule (EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a); 64-bit feature indices. On the 512-game screen they were 5,196 behind the first run's tables as the depth-3 leaf (inconclusive) and 33,716 ahead of them played one ply.",
+    "note: Download and verify as for the first run's tables; the decompressed file is 23.2 GB and Model::load needs that much memory."
+  ],
+  "privilegedFields": [],
+  "allowedConsumers": [
+    "any public-information deployment or diagnostic of the tables as a search leaf or a one-ply policy",
+    "warm start or teacher for further training under a new experiment record with fresh leases; the tables have read training block 0xa5500000-0xa56f0000, validation block 0xa52f2280-0xa52f2380 and, through the screen, 0xa52f2380-0xa52f2580, which no later evaluation of them may reuse",
+    "never evaluation evidence on their own"
+  ],
+  "artifact": {
+    "path": "https://data.drop7.dev/runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/main/best-weights.bin.zst#sha256=99e543e7b6a2a7c8f41759441d9171b97b0e1bb0d8a5bac5a2df514e091618fa",
+    "sha256": "99e543e7b6a2a7c8f41759441d9171b97b0e1bb0d8a5bac5a2df514e091618fa",
+    "bytes": 910013376
+  },
+  "createdAt": "2026-09-06T17:29:15Z"
+}

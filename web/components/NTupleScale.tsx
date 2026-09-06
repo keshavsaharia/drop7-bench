@@ -26,6 +26,7 @@ const ARM_LABELS: Record<string, string> = {
   "candidate-1ply": "tables played directly, one ply",
   "prior-d3s7": "first run's tables as the depth-3 leaf",
   "prior-1ply": "first run's tables played directly, one ply",
+  "prior-d4s7": "first run's tables as the depth-4 leaf",
   "fair-d3s7": "fair leaf in the depth-3 search",
   "fair-d4s7": "fair leaf in the depth-4 search",
 };
@@ -40,6 +41,9 @@ const CONTRAST_LABELS: Record<string, string> = {
   "candidate-d3s7-vs-prior-d3s7": "wider tables minus the first run's tables, both as the depth-3 leaf",
   "prior-d3s7-vs-fair-d4s7": "first run's tables as the depth-3 leaf minus the fair leaf in the depth-4 search",
   "prior-1ply-vs-fair-d3s7": "first run's tables played directly minus the fair leaf in the depth-3 search",
+  "prior-d4s7-vs-prior-d3s7": "tables as the depth-4 leaf minus the same tables as the depth-3 leaf",
+  "prior-d4s7-vs-fair-d4s7": "tables as the depth-4 leaf minus the fair leaf in the same depth-4 search",
+  "prior-d4s7-vs-fair-d3s7": "tables as the depth-4 leaf minus the fair leaf in the depth-3 search",
 };
 
 function loadSnapshot(run: string): NTupleSnapshot | null {
@@ -148,6 +152,28 @@ export function NTupleStatus({ run }: { run: string }) {
   const pilotArms = pilot ? Object.values(pilot.arms) : [];
   const pilotDone = pilotArms.filter((a) => a.done).length;
   const replication = !pilot && (smoke !== null || Boolean(screen?.replication) || Boolean(main?.stop));
+  const depthOnly = !pilot && !smoke && !main && (Boolean(screen?.depth) || Boolean(freeze?.priorSha256));
+  if (depthOnly) {
+    const depth = screen?.depth ?? null;
+    const stages: { name: string; state: StageState; detail: string }[] = [
+      { name: "0 · CHECK gates", state: gates ? "done" : "pending", detail: gates ? (gates.passed ? `${gates.gates.length} gates passed on the probe block, on the frozen tables` : "a gate failed") : "not run" },
+      {
+        name: "A · freeze",
+        state: freeze?.priorSha256 ? "done" : "pending",
+        detail: freeze?.priorSha256 ? `the first run's tables verified unchanged, SHA-256 ${freeze.priorSha256.slice(0, 12)}…; nothing is trained` : "waits for the gates",
+      },
+      {
+        name: "B · held-out screen, four arms",
+        state: screen ? "done" : "pending",
+        detail: screen
+          ? screen.gate
+            ? `preregistered gate ${screen.gate.allPassed ? "passed" : "not passed"}${depth?.persistence ? `; margin over the fair leaf at depth 4 ${depth.persistence.allPassed ? "kept" : "not kept"}` : ""}${depth ? `; depth-step interaction ${depth.interaction.verdict}` : ""}`
+            : "played; contrasts pending"
+          : "opens once, after the tables are verified",
+      },
+    ];
+    return <StatusFrame run={run} snapshot={snapshot} stages={stages} />;
+  }
   const stageA = replication
     ? {
         name: "A · throughput smoke",
@@ -186,6 +212,10 @@ export function NTupleStatus({ run }: { run: string }) {
         : "opens once, after the candidate is frozen",
     },
   ];
+  return <StatusFrame run={run} snapshot={snapshot} stages={stages} />;
+}
+
+function StatusFrame({ run, snapshot, stages }: { run: string; snapshot: NTupleSnapshot; stages: { name: string; state: StageState; detail: string }[] }) {
   return (
     <Frame run={run} className="evo-status">
       <div className="evo-status-head">
@@ -362,6 +392,32 @@ export function NTupleGateTable({ run }: { run: string }) {
             <span className="evo-gate-mark">{screen.gate.allPassed ? "pass" : "fail"}</span> every criterion
           </li>
         </ul>
+      )}
+      {screen.depth && (
+        <>
+          <h4 className="rchart-title">The fourth ply on the tables and on the fair leaf</h4>
+          <p className="rchart-note">
+            The fourth ply&apos;s paired gain on the tables is {formatSigned(Math.round(screen.depth.tablesStep.meanDelta))} (bounds {formatSigned(Math.round(screen.depth.tablesStep.bootstrapLower95))} to {formatSigned(Math.round(screen.depth.tablesStep.bootstrapUpper95))})
+            {screen.depth.fairStep ? <>, and on the fair leaf on the same games {formatSigned(Math.round(screen.depth.fairStep.meanDelta))} (bounds {formatSigned(Math.round(screen.depth.fairStep.bootstrapLower95))} to {formatSigned(Math.round(screen.depth.fairStep.bootstrapUpper95))})</> : null}
+            . Their per-game difference is {formatSigned(Math.round(screen.depth.interaction.meanDelta))} with bounds {formatSigned(Math.round(screen.depth.interaction.bootstrapLower95))} to {formatSigned(Math.round(screen.depth.interaction.bootstrapUpper95))} and a detection floor of {formatValue(Math.round(screen.depth.interaction.detectionFloor))}; the preregistered verdict is <strong>{screen.depth.interaction.verdict}</strong>.
+          </p>
+          {screen.depth.persistence && (
+            <>
+              <h4 className="rchart-title">Persistence: the tables against the fair leaf, both at depth 4</h4>
+              <ul className="evo-gate">
+                {screen.depth.persistence.checks.map((check) => (
+                  <li key={`persistence-${check.criterion}`} className={check.passed ? "is-pass" : "is-fail"}>
+                    <span className="evo-gate-mark">{check.passed ? "pass" : "fail"}</span> {check.criterion}
+                    {check.observed !== undefined && check.observed !== null && check.observed !== "" ? <> · observed {typeof check.observed === "number" ? formatSigned(check.observed) : JSON.stringify(check.observed)}</> : null}
+                  </li>
+                ))}
+                <li className={screen.depth.persistence.allPassed ? "is-pass" : "is-fail"}>
+                  <span className="evo-gate-mark">{screen.depth.persistence.allPassed ? "pass" : "fail"}</span> every criterion
+                </li>
+              </ul>
+            </>
+          )}
+        </>
       )}
       {screen.replication && (
         <>
