@@ -26,6 +26,9 @@ const deployments = {
   },
 } as const;
 const DROP7_HOSTED_ZONE_ID = "Z06342693O6N64NO6EU5M";
+const DROP7_RESEARCH_DATA_BUCKET = "drop7-bench-data";
+const DROP7_RESEARCH_DATA_DOMAIN = "data.drop7.dev";
+const DROP7_RESEARCH_DATA_REGION = "us-east-2";
 
 export default $config({
   app(input) {
@@ -128,6 +131,279 @@ export default $config({
       );
     }
     const caller = aws.getCallerIdentityOutput({});
+    let researchDataBucket: ReturnType<typeof sst.aws.Bucket.get> | undefined;
+    let researchDataRouter: sst.aws.Router | undefined;
+    let researchAgentUser: aws.iam.User | undefined;
+    let researchAgentPolicy: aws.iam.Policy | undefined;
+    if (isProduction) {
+      // This empty bucket predates SST and lives beside the EC2 research runner in
+      // us-east-2. Reference it instead of importing/deleting it; SST owns the
+      // access, versioning, CDN, DNS, and machine identity added below.
+      const researchDataProvider = new aws.Provider("ResearchDataUsEast2", {
+        region: DROP7_RESEARCH_DATA_REGION,
+      });
+      researchDataBucket = sst.aws.Bucket.get(
+        "ResearchDataBucket",
+        DROP7_RESEARCH_DATA_BUCKET,
+        { provider: researchDataProvider },
+      );
+      new aws.s3.BucketVersioningV2(
+        "ResearchDataBucketVersioning",
+        {
+          bucket: researchDataBucket.name,
+          versioningConfiguration: { status: "Enabled" },
+        },
+        { provider: researchDataProvider },
+      );
+      new aws.s3.BucketPublicAccessBlock(
+        "ResearchDataBucketPublicAccessBlock",
+        {
+          bucket: researchDataBucket.name,
+          blockPublicAcls: true,
+          blockPublicPolicy: true,
+          ignorePublicAcls: true,
+          restrictPublicBuckets: true,
+        },
+        { provider: researchDataProvider },
+      );
+      new aws.s3.BucketCorsConfigurationV2(
+        "ResearchDataBucketCors",
+        {
+          bucket: researchDataBucket.name,
+          corsRules: [
+            {
+              allowedHeaders: ["*"],
+              allowedMethods: ["GET", "HEAD"],
+              allowedOrigins: ["*"],
+              exposeHeaders: ["ETag", "x-amz-version-id"],
+              maxAgeSeconds: 86400,
+            },
+          ],
+        },
+        { provider: researchDataProvider },
+      );
+
+      researchDataRouter = new sst.aws.Router("ResearchDataRouter", {
+        domain: {
+          name: DROP7_RESEARCH_DATA_DOMAIN,
+          dns: sst.aws.dns({ zone: DROP7_HOSTED_ZONE_ID }),
+        },
+      });
+      researchDataRouter.routeBucket("/", researchDataBucket);
+
+      const researchDistributionArn = caller.accountId.apply((accountId) =>
+        researchDataRouter!.distributionID.apply(
+          (distributionId) =>
+            `arn:aws:cloudfront::${accountId}:distribution/${distributionId}`,
+        ),
+      );
+      new aws.s3.BucketPolicy(
+        "ResearchDataBucketPolicy",
+        {
+          bucket: researchDataBucket.name,
+          policy: aws.iam.getPolicyDocumentOutput({
+            statements: [
+              {
+                effect: "Allow",
+                principals: [
+                  {
+                    type: "Service",
+                    identifiers: ["cloudfront.amazonaws.com"],
+                  },
+                ],
+                actions: ["s3:GetObject"],
+                resources: [`arn:aws:s3:::${DROP7_RESEARCH_DATA_BUCKET}/*`],
+                conditions: [
+                  {
+                    test: "StringEquals",
+                    variable: "AWS:SourceArn",
+                    values: [researchDistributionArn],
+                  },
+                ],
+              },
+              {
+                effect: "Deny",
+                principals: [{ type: "*", identifiers: ["*"] }],
+                actions: ["s3:*"],
+                resources: [
+                  `arn:aws:s3:::${DROP7_RESEARCH_DATA_BUCKET}`,
+                  `arn:aws:s3:::${DROP7_RESEARCH_DATA_BUCKET}/*`,
+                ],
+                conditions: [
+                  {
+                    test: "Bool",
+                    variable: "aws:SecureTransport",
+                    values: ["false"],
+                  },
+                ],
+              },
+            ],
+          }).json,
+        },
+        { provider: researchDataProvider },
+      );
+
+      const researchLedgerArns = caller.accountId.apply((accountId) => [
+        `arn:aws:dynamodb:us-east-1:${accountId}:table/drop7-prod-competition-ledger`,
+        `arn:aws:dynamodb:us-east-1:${accountId}:table/drop7-prod-competition-ledger/index/*`,
+        `arn:aws:dynamodb:us-east-1:${accountId}:table/drop7-dev-competition-ledger`,
+        `arn:aws:dynamodb:us-east-1:${accountId}:table/drop7-dev-competition-ledger/index/*`,
+      ]);
+      const competitionArtifactBucketArns = [
+        "arn:aws:s3:::drop7-prod-competition-artifacts",
+        "arn:aws:s3:::drop7-dev-competition-artifacts",
+      ];
+      const researchAnalyticsStages = [
+        {
+          workgroup: "drop7-production-analytics",
+          database: "drop7_production_analytics",
+          analyticsBucket: "drop7-prod-analytics",
+          submissionsBucket: "drop7-prod-game-submissions",
+        },
+        {
+          workgroup: "drop7-dev-analytics",
+          database: "drop7_dev_analytics",
+          analyticsBucket: "drop7-dev-analytics",
+          submissionsBucket: "drop7-dev-game-submissions",
+        },
+      ];
+      const researchAnalyticsWorkgroupArns = caller.accountId.apply((accountId) =>
+        researchAnalyticsStages.map(
+          ({ workgroup }) =>
+            `arn:aws:athena:us-east-1:${accountId}:workgroup/${workgroup}`,
+        ),
+      );
+      const researchAnalyticsGlueArns = caller.accountId.apply((accountId) => [
+        `arn:aws:glue:us-east-1:${accountId}:catalog`,
+        ...researchAnalyticsStages.flatMap(({ database }) => [
+          `arn:aws:glue:us-east-1:${accountId}:database/${database}`,
+          `arn:aws:glue:us-east-1:${accountId}:table/${database}/page_views`,
+          `arn:aws:glue:us-east-1:${accountId}:table/${database}/game_submissions`,
+        ]),
+      ]);
+      const researchAnalyticsBucketArns = researchAnalyticsStages.flatMap(
+        ({ analyticsBucket, submissionsBucket }) => [
+          `arn:aws:s3:::${analyticsBucket}`,
+          `arn:aws:s3:::${submissionsBucket}`,
+        ],
+      );
+      const researchAnalyticsReadObjectArns = researchAnalyticsStages.flatMap(
+        ({ analyticsBucket, submissionsBucket }) => [
+          `arn:aws:s3:::${analyticsBucket}/warehouse/page_views/*`,
+          `arn:aws:s3:::${analyticsBucket}/athena-results/*`,
+          `arn:aws:s3:::${submissionsBucket}/game-submissions/*`,
+        ],
+      );
+      const researchAnalyticsResultArns = researchAnalyticsStages.map(
+        ({ analyticsBucket }) =>
+          `arn:aws:s3:::${analyticsBucket}/athena-results/*`,
+      );
+      researchAgentPolicy = new aws.iam.Policy("ResearchAgentPolicy", {
+        name: "drop7-research",
+        description:
+          "Least-privilege artifact and validated competition-ledger access for Drop7 research machines",
+        policy: aws.iam.getPolicyDocumentOutput({
+          statements: [
+            {
+              effect: "Allow",
+              actions: [
+                "s3:GetBucketLocation",
+                "s3:ListBucket",
+                "s3:ListBucketMultipartUploads",
+              ],
+              resources: [`arn:aws:s3:::${DROP7_RESEARCH_DATA_BUCKET}`],
+            },
+            {
+              effect: "Allow",
+              actions: [
+                "s3:AbortMultipartUpload",
+                "s3:GetObject",
+                "s3:GetObjectVersion",
+                "s3:ListMultipartUploadParts",
+                "s3:PutObject",
+              ],
+              resources: [`arn:aws:s3:::${DROP7_RESEARCH_DATA_BUCKET}/*`],
+            },
+            {
+              effect: "Allow",
+              actions: ["s3:GetBucketLocation", "s3:ListBucket"],
+              resources: competitionArtifactBucketArns,
+            },
+            {
+              effect: "Allow",
+              actions: ["s3:GetObject", "s3:GetObjectVersion"],
+              resources: competitionArtifactBucketArns.map((arn) => `${arn}/*`),
+            },
+            {
+              effect: "Allow",
+              actions: [
+                "dynamodb:DescribeTable",
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:Query",
+              ],
+              resources: researchLedgerArns,
+            },
+            {
+              effect: "Allow",
+              actions: [
+                "athena:GetQueryExecution",
+                "athena:GetQueryResults",
+                "athena:GetWorkGroup",
+                "athena:StartQueryExecution",
+                "athena:StopQueryExecution",
+              ],
+              resources: researchAnalyticsWorkgroupArns,
+            },
+            {
+              effect: "Allow",
+              actions: [
+                "glue:BatchGetPartition",
+                "glue:GetDatabase",
+                "glue:GetPartition",
+                "glue:GetPartitions",
+                "glue:GetTable",
+                "glue:GetTableVersion",
+                "glue:GetTableVersions",
+              ],
+              resources: researchAnalyticsGlueArns,
+            },
+            {
+              effect: "Allow",
+              actions: ["s3:GetBucketLocation", "s3:ListBucket"],
+              resources: researchAnalyticsBucketArns,
+            },
+            {
+              effect: "Allow",
+              actions: ["s3:GetObject"],
+              resources: researchAnalyticsReadObjectArns,
+            },
+            {
+              effect: "Allow",
+              actions: ["s3:AbortMultipartUpload", "s3:PutObject"],
+              resources: researchAnalyticsResultArns,
+            },
+          ],
+        }).json,
+        tags: {
+          Project: "drop7",
+          Purpose: "research-machine",
+        },
+      });
+      researchAgentUser = new aws.iam.User("ResearchAgentUser", {
+        name: "drop7-research",
+        forceDestroy: false,
+        permissionsBoundary: researchAgentPolicy.arn,
+        tags: {
+          Project: "drop7",
+          Purpose: "research-machine",
+        },
+      });
+      new aws.iam.UserPolicyAttachment("ResearchAgentPolicyAttachment", {
+        user: researchAgentUser.name,
+        policyArn: researchAgentPolicy.arn,
+      });
+    }
     const githubSecretArn = caller.accountId.apply(
       (accountId) =>
         "arn:aws:secretsmanager:us-east-1:" +
@@ -755,6 +1031,11 @@ export default $config({
       AnalyticsDatabase: analyticsDatabase.name,
       AnalyticsTable: analyticsTable.name,
       AnalyticsAthenaWorkgroup: analyticsWorkgroup.name,
+      ResearchDataBucket: researchDataBucket?.name,
+      ResearchDataUrl: researchDataRouter?.url,
+      ResearchDataDistributionId: researchDataRouter?.distributionID,
+      ResearchIamUser: researchAgentUser?.name,
+      ResearchIamPolicy: researchAgentPolicy?.arn,
     };
   },
 });

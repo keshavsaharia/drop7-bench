@@ -11,6 +11,26 @@ Each stage also owns a competition ledger and a private, versioned artifact buck
 | production | drop7-prod-competition-ledger | drop7-prod-competition-artifacts |
 | dev | drop7-dev-competition-ledger | drop7-dev-competition-artifacts |
 
+Production also configures the existing `drop7-bench-data` bucket in `us-east-2` as
+the public research-artifact store. The bucket itself keeps S3 public access blocked;
+CloudFront origin access control serves known objects at `https://data.drop7.dev/`.
+SST enables versioning, installs the CloudFront-only bucket policy, creates the DNS
+record and certificate, and creates an IAM user and managed policy both named
+`drop7-research`.
+
+The research policy is intentionally narrower than "all resources whose name starts
+with drop7". It can read and write objects (but not delete them) in
+`drop7-bench-data`, read the immutable production/development competition artifacts,
+and perform only `DescribeTable`, `GetItem`, `PutItem`, and `Query` against the two
+competition ledgers. It can also run bounded Athena queries in the production and dev
+analytics workgroups, read the two analytics tables and their backing data, and write
+only Athena's temporary query results. It cannot deploy the site, ingest or alter
+analytics, read Secrets Manager, manage IAM/EC2, or access protected/final research
+data. The same policy is also the user's permissions boundary, so attaching another
+policy cannot silently broaden the machine's effective access. Use the checked-in
+competition CLI for ledger writes; possession of IAM credentials is not permission to
+bypass its replay validation.
+
 Before each build, `web/scripts/stage-repo-content.mjs` copies the repository-backed
 approach, documentation, research, and optional leaderboard data into `web/build/repo`.
 OpenNext traces that directory into the Lambda bundle, and `web/lib/repo.ts` reads it at
@@ -240,10 +260,56 @@ npm run infra:diff:prod
 npm run infra:prod
 ```
 
-The deploy output includes the site URL, asset bucket, and CloudFront distribution ID.
+The deploy output includes the site URL, asset bucket, website distribution ID, and the
+separate `ResearchDataDistributionId` for `data.drop7.dev`.
 The checked-in SST config pins the existing `drop7.dev` hosted zone
 `Z06342693O6N64NO6EU5M`, so certificate validation and alias records cannot drift to a
 same-named zone in another account.
+
+The `drop7-bench-data` bucket predates SST, so the stack references it rather than
+importing the base bucket. This avoids making removal of the web stack capable of
+deleting research artifacts; SST still owns the bucket's versioning, public-access
+block, CORS, CloudFront policy, distribution, certificate, and DNS record.
+
+The stack deliberately does not create an IAM access key. A Pulumi/SST-managed access
+key would place the long-lived secret in infrastructure state. After the production
+deploy, create one key from **IAM → Users → drop7-research → Security credentials**,
+copy the secret once into the research machine's credential store, and configure a
+dedicated profile:
+
+```sh
+aws configure --profile drop7-research
+# default region: us-east-1 (the competition ledger); EC2 artifact tooling selects us-east-2
+aws sts get-caller-identity --profile drop7-research
+aws s3 cp local-artifact \
+  s3://drop7-bench-data/runs/<run-id>/local-artifact \
+  --profile drop7-research
+```
+
+Agents should normally use the checked-in publisher, which requires an explicit public
+release acknowledgement, refuses a conflicting object key, stores and verifies the
+SHA-256 metadata, and prints the reference to copy into a research record:
+
+```sh
+npm run artifact:publish -- \
+  --run-id RUN-YYYYMMDDTHHMMSSZ-0123abcd \
+  --file runs/RUN-YYYYMMDDTHHMMSSZ-0123abcd/per-game.jsonl \
+  --public
+```
+
+Use the read-only Athena helper for website analytics and validated mobile-game
+history. It defaults to production, rejects non-`SELECT`/`WITH` SQL, caps results at
+500 rows, uses the deployment's 1 GiB scan limit, and defaults to the
+`drop7-research` profile:
+
+```sh
+npm run analytics:query -- --query \
+  'SELECT mode, count(*) AS games FROM game_submissions GROUP BY mode'
+```
+
+Do not commit the key, put it in shell history, or share one key among machines. Attach
+the reusable `drop7-research` policy to a separate workload identity when another
+machine needs access, and rotate or disable unused long-lived keys.
 
 ## Analytics
 
