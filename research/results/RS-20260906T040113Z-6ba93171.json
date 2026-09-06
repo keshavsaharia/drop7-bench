@@ -1,0 +1,750 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260906T040113Z-6ba93171",
+  "theoryIds": [
+    "TH-20260905-ntuple-line-tuples-tc-td-leaf-bcb25133"
+  ],
+  "experimentId": "EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a",
+  "runIds": [
+    "RUN-20260906T013222Z-ba0ee34f"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "pass",
+  "assessment": "supported-as-tested",
+  "evidenceTier": "public-development",
+  "summary": "Held-out screen, 512 never-read paired public-development games (0xa52f2380+): the frozen n-tuple tables as the leaf of the depth-3 seven-stratum fair search averaged 481,869 points and 139.39 moves against 326,717 points and 95.87 moves for the identical search with the frozen fair leaf: paired +155,153 points (bootstrap 95% lower bound +126,819, Student-t lower bound +126,919, upper bound +183,307, detection floor 28,185), W-T-L 333-0-179, halves +159,105 / +151,201, lower quartile 241,610 vs 192,040, moves +43.52. The preregistered gate PASSES. Replication: the first experiment's frozen tables (SHA-256 0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b) as the same leaf on these fresh seeds averaged 487,066 points and 140.83 moves; prior-d3s7 minus fair-d3s7: paired +160,349 (bootstrap 95% lower bound +129,753, Student-t lower bound +129,626, upper bound +191,264, detection floor 30,670), W-T-L 330-0-182, halves +133,349 / +187,349. The replication criteria PASS. Scale: the wider, longer-trained candidate against the first candidate on the same seeds is -5,196 paired (bootstrap LB -40,535, t LB -40,060, UB +29,158, floor 34,803, W-T-L 267-1-244): the preregistered scale verdict is inconclusive. Against the program's standing reference, the fair leaf at depth 4 on the same seeds (397,154 points), the candidate is +84,716 paired (bootstrap LB +54,794, UB +114,355, W-T-L 298-0-214); diagnostic only. The first candidate against fair-d4s7 on these seeds: +89,912 (LB +58,243); diagnostic. The same tables played directly one ply averaged 328,039 points, +1,323 paired against fair-d3s7 (LB -17,545); diagnostic. Fair-d4s7 minus fair-d3s7 on these seeds: +70,437 (LB +46,917). Candidate: the tables of the main run's validation point at 2,000,153,332 training moves (layout rows,cols,win23,win32,win24,win42,phase=all, alpha 1, 5,800,000,000 entries), whose paired margin on the 256-game training-role validation block was +187,500; SHA-256 824b0a39a90d8a5aae63438c1538d4c5022f0e0f09c75fb7e2d758a1d6c6fb8a. Main run: 4,500,370,590 training moves, 47,477,538 games, 9 validation points, mean 1,184,973 moves per second, stopped by the plateau rule (last 4 validation points mean +165,666, the 4 before them +173,783). Training-signal check: at least one validation point of the main run had a positive paired margin.",
+  "metrics": {
+    "screen": {
+      "games": 512,
+      "seedStartHex": "0xa52f2380",
+      "arms": {
+        "candidate-d3s7": {
+          "meanScore": 481869.388671875,
+          "medianScore": 393375.0,
+          "q25Score": 241609.5,
+          "minScore": 85504.0,
+          "maxScore": 2487485.0,
+          "sdScore": 327121.38100175664,
+          "meanMoves": 139.38671875,
+          "q25Moves": 70.75,
+          "numberedClearsPerMove": 2.108763276630328,
+          "coverRevealsPerMove": 1.1927248269484068,
+          "meanOccupiedCells": 22.965699934976822,
+          "censoredGames": 0,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "gamesAtOrAboveMillion": 36,
+          "meanWallSecondsPerGame": 5.411390412851563
+        },
+        "candidate-1ply": {
+          "meanScore": 328039.3203125,
+          "medianScore": 282096.5,
+          "q25Score": 178989.75,
+          "minScore": 85684.0,
+          "maxScore": 1224664.0,
+          "sdScore": 190096.38003925866,
+          "meanMoves": 97.26953125,
+          "q25Moves": 55.0,
+          "numberedClearsPerMove": 1.9762057748684791,
+          "coverRevealsPerMove": 1.0945544355648367,
+          "meanOccupiedCells": 24.143633061738225,
+          "censoredGames": 0,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "gamesAtOrAboveMillion": 2,
+          "meanWallSecondsPerGame": 0.001299617845703125
+        },
+        "prior-d3s7": {
+          "meanScore": 487065.677734375,
+          "medianScore": 385960.5,
+          "q25Score": 232825.0,
+          "minScore": 85504.0,
+          "maxScore": 3236265.0,
+          "sdScore": 381394.41234349663,
+          "meanMoves": 140.833984375,
+          "q25Moves": 70.0,
+          "numberedClearsPerMove": 2.1123469288695964,
+          "coverRevealsPerMove": 1.1948770577059094,
+          "meanOccupiedCells": 23.07571017124395,
+          "censoredGames": 0,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "gamesAtOrAboveMillion": 43,
+          "meanWallSecondsPerGame": 4.250419066425781
+        },
+        "prior-1ply": {
+          "meanScore": 294323.14453125,
+          "medianScore": 247261.0,
+          "q25Score": 173120.75,
+          "minScore": 85362.0,
+          "maxScore": 1270003.0,
+          "sdScore": 179592.47918630764,
+          "meanMoves": 87.912109375,
+          "q25Moves": 54.75,
+          "numberedClearsPerMove": 1.9353047032947501,
+          "coverRevealsPerMove": 1.066494856812779,
+          "meanOccupiedCells": 24.324362261065424,
+          "censoredGames": 0,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "gamesAtOrAboveMillion": 5,
+          "meanWallSecondsPerGame": 0.00091606336328125
+        },
+        "fair-d3s7": {
+          "meanScore": 326716.693359375,
+          "medianScore": 269648.0,
+          "q25Score": 192039.5,
+          "minScore": 103026.0,
+          "maxScore": 1714793.0,
+          "sdScore": 204736.38724863253,
+          "meanMoves": 95.865234375,
+          "q25Moves": 56.75,
+          "numberedClearsPerMove": 2.0032801580995456,
+          "coverRevealsPerMove": 1.1138275981500723,
+          "meanOccupiedCells": 24.09790125031036,
+          "censoredGames": 0,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "gamesAtOrAboveMillion": 7,
+          "meanWallSecondsPerGame": 5.131028782035156
+        },
+        "fair-d4s7": {
+          "meanScore": 397153.818359375,
+          "medianScore": 320815.0,
+          "q25Score": 202359.75,
+          "minScore": 102858.0,
+          "maxScore": 1707841.0,
+          "sdScore": 264186.5566253401,
+          "meanMoves": 114.546875,
+          "q25Moves": 60.0,
+          "numberedClearsPerMove": 2.0597633337880237,
+          "coverRevealsPerMove": 1.1550265993725277,
+          "meanOccupiedCells": 23.758723587886102,
+          "censoredGames": 0,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "gamesAtOrAboveMillion": 19,
+          "meanWallSecondsPerGame": 196.61310052623242
+        }
+      },
+      "contrasts": {
+        "candidate-d3s7-vs-fair-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 155152.6953125,
+            "pairedSd": 387690.27099988173,
+            "bootstrapLower95": 126818.78720703124,
+            "bootstrapUpper95": 183307.37275390624,
+            "studentTLower95": 126919.162189214,
+            "detectionFloor": 28184.856267599356,
+            "wins": 333,
+            "ties": 0,
+            "losses": 179,
+            "firstHalfMeanDelta": 159104.70703125,
+            "secondHalfMeanDelta": 151200.68359375,
+            "q25Delta": 49570.0,
+            "candidateQ25": 241609.5,
+            "referenceQ25": 192039.5
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 43.521484375,
+            "pairedSd": 106.8674010921367,
+            "bootstrapLower95": 35.72060546875,
+            "bootstrapUpper95": 51.2736328125,
+            "studentTLower95": 35.738868884668925,
+            "detectionFloor": 7.769197642503343,
+            "wins": 331,
+            "ties": 9,
+            "losses": 172,
+            "firstHalfMeanDelta": 44.6015625,
+            "secondHalfMeanDelta": 42.44140625,
+            "q25Delta": 14.0,
+            "candidateQ25": 70.75,
+            "referenceQ25": 56.75
+          }
+        },
+        "candidate-1ply-vs-fair-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 1322.626953125,
+            "pairedSd": 257859.8080188119,
+            "bootstrapLower95": -17545.0,
+            "bootstrapUpper95": 20096.109374999996,
+            "studentTLower95": -17456.006341145923,
+            "detectionFloor": 18746.257437559463,
+            "wins": 268,
+            "ties": 0,
+            "losses": 244,
+            "firstHalfMeanDelta": -21520.66015625,
+            "secondHalfMeanDelta": 24165.9140625,
+            "q25Delta": -13049.75,
+            "candidateQ25": 178989.75,
+            "referenceQ25": 192039.5
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 1.404296875,
+            "pairedSd": 71.11801209894594,
+            "bootstrapLower95": -3.78330078125,
+            "bootstrapUpper95": 6.57421875,
+            "studentTLower95": -3.7748703635259773,
+            "detectionFloor": 5.170237942459987,
+            "wins": 263,
+            "ties": 19,
+            "losses": 230,
+            "firstHalfMeanDelta": -4.87890625,
+            "secondHalfMeanDelta": 7.6875,
+            "q25Delta": -1.75,
+            "candidateQ25": 55.0,
+            "referenceQ25": 56.75
+          }
+        },
+        "candidate-d3s7-vs-fair-d4s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 84715.5703125,
+            "pairedSd": 412546.1390006686,
+            "bootstrapLower95": 54794.32392578125,
+            "bootstrapUpper95": 114355.12666015625,
+            "studentTLower95": 54671.90929846675,
+            "detectionFloor": 29991.863353956734,
+            "wins": 298,
+            "ties": 0,
+            "losses": 214,
+            "firstHalfMeanDelta": 92758.7421875,
+            "secondHalfMeanDelta": 76672.3984375,
+            "q25Delta": 39249.75,
+            "candidateQ25": 241609.5,
+            "referenceQ25": 202359.75
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 24.83984375,
+            "pairedSd": 113.22318215314195,
+            "bootstrapLower95": 16.63857421875,
+            "bootstrapUpper95": 32.99033203125,
+            "studentTLower95": 16.59436868197707,
+            "detectionFloor": 8.231259213485654,
+            "wins": 293,
+            "ties": 12,
+            "losses": 207,
+            "firstHalfMeanDelta": 27.140625,
+            "secondHalfMeanDelta": 22.5390625,
+            "q25Delta": 10.75,
+            "candidateQ25": 70.75,
+            "referenceQ25": 60.0
+          }
+        },
+        "fair-d4s7-vs-fair-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 70437.125,
+            "pairedSd": 319133.9625271277,
+            "bootstrapLower95": 46916.5703125,
+            "bootstrapUpper95": 93486.43642578124,
+            "studentTLower95": 47196.203120436185,
+            "detectionFloor": 23200.852682576802,
+            "wins": 302,
+            "ties": 0,
+            "losses": 210,
+            "firstHalfMeanDelta": 66345.96484375,
+            "secondHalfMeanDelta": 74528.28515625,
+            "q25Delta": 10320.25,
+            "candidateQ25": 202359.75,
+            "referenceQ25": 192039.5
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 18.681640625,
+            "pairedSd": 86.79091896798303,
+            "bootstrapLower95": 12.29833984375,
+            "bootstrapUpper95": 24.93564453125,
+            "studentTLower95": 12.361094382858864,
+            "detectionFloor": 6.309649117932625,
+            "wins": 289,
+            "ties": 21,
+            "losses": 202,
+            "firstHalfMeanDelta": 17.4609375,
+            "secondHalfMeanDelta": 19.90234375,
+            "q25Delta": 3.25,
+            "candidateQ25": 60.0,
+            "referenceQ25": 56.75
+          }
+        },
+        "candidate-d3s7-vs-candidate-1ply": {
+          "score": {
+            "n": 512,
+            "meanDelta": 153830.068359375,
+            "pairedSd": 361441.827954244,
+            "bootstrapLower95": 127664.90009765625,
+            "bootstrapUpper95": 180356.54365234374,
+            "studentTLower95": 127508.07736546043,
+            "detectionFloor": 26276.60978882766,
+            "wins": 333,
+            "ties": 0,
+            "losses": 179,
+            "firstHalfMeanDelta": 180625.3671875,
+            "secondHalfMeanDelta": 127034.76953125,
+            "q25Delta": 62619.75,
+            "candidateQ25": 241609.5,
+            "referenceQ25": 178989.75
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 42.1171875,
+            "pairedSd": 100.12580119075213,
+            "bootstrapLower95": 34.85732421875,
+            "bootstrapUpper95": 49.4669921875,
+            "studentTLower95": 34.82552883360155,
+            "detectionFloor": 7.279087267166521,
+            "wins": 330,
+            "ties": 8,
+            "losses": 174,
+            "firstHalfMeanDelta": 49.48046875,
+            "secondHalfMeanDelta": 34.75390625,
+            "q25Delta": 15.75,
+            "candidateQ25": 70.75,
+            "referenceQ25": 55.0
+          }
+        },
+        "prior-d3s7-vs-fair-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 160348.984375,
+            "pairedSd": 421880.1054928163,
+            "bootstrapLower95": 129753.3208984375,
+            "bootstrapUpper95": 191264.11328125,
+            "studentTLower95": 129625.57751269455,
+            "detectionFloor": 30670.43726634633,
+            "wins": 330,
+            "ties": 0,
+            "losses": 182,
+            "firstHalfMeanDelta": 133348.80078125,
+            "secondHalfMeanDelta": 187349.16796875,
+            "q25Delta": 40785.5,
+            "candidateQ25": 232825.0,
+            "referenceQ25": 192039.5
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 44.96875,
+            "pairedSd": 116.361854631607,
+            "bootstrapLower95": 36.52529296875,
+            "bootstrapUpper95": 53.515625,
+            "studentTLower95": 36.49470119667197,
+            "detectionFloor": 8.459438869499344,
+            "wins": 326,
+            "ties": 21,
+            "losses": 165,
+            "firstHalfMeanDelta": 37.6875,
+            "secondHalfMeanDelta": 52.25,
+            "q25Delta": 13.25,
+            "candidateQ25": 70.0,
+            "referenceQ25": 56.75
+          }
+        },
+        "candidate-d3s7-vs-prior-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": -5196.2890625,
+            "pairedSd": 478728.04390298727,
+            "bootstrapLower95": -40535.38154296875,
+            "bootstrapUpper95": 29157.6796875,
+            "studentTLower95": -40059.64544676436,
+            "detectionFloor": 34803.24918620102,
+            "wins": 267,
+            "ties": 1,
+            "losses": 244,
+            "firstHalfMeanDelta": 25755.90625,
+            "secondHalfMeanDelta": -36148.484375,
+            "q25Delta": 8784.5,
+            "candidateQ25": 241609.5,
+            "referenceQ25": 232825.0
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": -1.447265625,
+            "pairedSd": 132.45152402143412,
+            "bootstrapLower95": -11.21689453125,
+            "bootstrapUpper95": 8.060742187499997,
+            "studentTLower95": -11.093044150842896,
+            "detectionFloor": 9.629148436819408,
+            "wins": 261,
+            "ties": 23,
+            "losses": 228,
+            "firstHalfMeanDelta": 6.9140625,
+            "secondHalfMeanDelta": -9.80859375,
+            "q25Delta": 0.75,
+            "candidateQ25": 70.75,
+            "referenceQ25": 70.0
+          }
+        },
+        "prior-d3s7-vs-fair-d4s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 89911.859375,
+            "pairedSd": 434700.2796545965,
+            "bootstrapLower95": 58243.23310546875,
+            "bootstrapUpper95": 121566.87275390624,
+            "studentTLower95": 58254.823688557706,
+            "detectionFloor": 31602.45644016634,
+            "wins": 290,
+            "ties": 0,
+            "losses": 222,
+            "firstHalfMeanDelta": 67002.8359375,
+            "secondHalfMeanDelta": 112820.8828125,
+            "q25Delta": 30465.25,
+            "candidateQ25": 232825.0,
+            "referenceQ25": 202359.75
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 26.287109375,
+            "pairedSd": 119.45776706180767,
+            "bootstrapLower95": 17.59951171875,
+            "bootstrapUpper95": 34.99228515625,
+            "studentTLower95": 17.587600835683673,
+            "detectionFloor": 8.684509894978616,
+            "wins": 285,
+            "ties": 20,
+            "losses": 207,
+            "firstHalfMeanDelta": 20.2265625,
+            "secondHalfMeanDelta": 32.34765625,
+            "q25Delta": 10.0,
+            "candidateQ25": 70.0,
+            "referenceQ25": 60.0
+          }
+        },
+        "prior-1ply-vs-fair-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": -32393.548828125,
+            "pairedSd": 256646.86810373803,
+            "bootstrapLower95": -51189.74921875,
+            "bootstrapUpper95": -13947.658007812508,
+            "studentTLower95": -51083.84980706474,
+            "detectionFloor": 18658.07741416238,
+            "wins": 219,
+            "ties": 0,
+            "losses": 293,
+            "firstHalfMeanDelta": -50575.98828125,
+            "secondHalfMeanDelta": -14211.109375,
+            "q25Delta": -18918.75,
+            "candidateQ25": 173120.75,
+            "referenceQ25": 192039.5
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": -7.953125,
+            "pairedSd": 70.75172095159611,
+            "bootstrapLower95": -13.14462890625,
+            "bootstrapUpper95": -2.8631835937500014,
+            "studentTLower95": -13.105617095982947,
+            "detectionFloor": 5.143608789983389,
+            "wins": 212,
+            "ties": 27,
+            "losses": 273,
+            "firstHalfMeanDelta": -12.9609375,
+            "secondHalfMeanDelta": -2.9453125,
+            "q25Delta": -2.0,
+            "candidateQ25": 54.75,
+            "referenceQ25": 56.75
+          }
+        }
+      },
+      "replication": {
+        "checks": [
+          {
+            "criterion": "screen artifact: illegalDecisions 0 and incompleteDecisions 0 in every arm",
+            "passed": true
+          },
+          {
+            "criterion": "bootstrap 95% lower bound of prior-d3s7 minus fair-d3s7 > 0",
+            "passed": true,
+            "observed": 129753.3208984375
+          },
+          {
+            "criterion": "Student-t 95% lower bound > 0",
+            "passed": true,
+            "observed": 129625.57751269455
+          },
+          {
+            "criterion": "paired mean delta > 0 in both halves",
+            "passed": true,
+            "observed": [
+              133348.80078125,
+              187349.16796875
+            ]
+          },
+          {
+            "criterion": "prior-d3s7 Q25 >= fair-d3s7 Q25",
+            "passed": true,
+            "observed": [
+              232825.0,
+              192039.5
+            ]
+          }
+        ],
+        "passed": true
+      },
+      "scale": {
+        "verdict": "inconclusive",
+        "meanDelta": -5196.2890625,
+        "bootstrapLower95": -40535.38154296875,
+        "bootstrapUpper95": 29157.6796875,
+        "studentTLower95": -40059.64544676436,
+        "detectionFloor": 34803.24918620102,
+        "wins": 267,
+        "ties": 1,
+        "losses": 244
+      }
+    },
+    "main": {
+      "layout": "rows,cols,win23,win32,win24,win42,phase=all",
+      "alpha": 1,
+      "entries": 5800000000,
+      "activePerState": 122,
+      "validateGames": 256,
+      "movesTotal": 4500370590,
+      "gamesTotal": 47477538,
+      "wallSeconds": 4357.8,
+      "meanMovesPerSecond": 1184973.3333333333,
+      "stop": {
+        "reason": "plateau",
+        "movesTotal": 4500370590,
+        "gamesTotal": 47477538,
+        "wallSeconds": 4462.4,
+        "validationPoints": 9,
+        "plateauWindow": 4,
+        "recentWindowMean": 165665.8408203125,
+        "previousWindowMean": 173783.3173828125,
+        "bestMargin": 187500.078125
+      },
+      "best": {
+        "moves": 2000153332,
+        "artifact": "val-002000153332.json",
+        "pairedDeltaD3": 187500.078125,
+        "ntupleD3Mean": 525039.16015625,
+        "fairD3Mean": 337539.08203125
+      },
+      "validations": [
+        {
+          "point": 1,
+          "movesTrained": 500034572,
+          "ntupleD3Mean": 492111.37890625,
+          "directMean": 323747.6328125,
+          "fairD3Mean": 337539.08203125,
+          "pairedDeltaD3": 154572.296875,
+          "bootstrapLower95": 118307.433203125,
+          "wins": 173,
+          "losses": 83,
+          "plateau": null
+        },
+        {
+          "point": 2,
+          "movesTrained": 1000072627,
+          "ntupleD3Mean": 483528.0859375,
+          "directMean": 310861.921875,
+          "fairD3Mean": 337539.08203125,
+          "pairedDeltaD3": 145989.00390625,
+          "bootstrapLower95": 106061.5296875,
+          "wins": 160,
+          "losses": 96,
+          "plateau": null
+        },
+        {
+          "point": 3,
+          "movesTrained": 1500111255,
+          "ntupleD3Mean": 515398.62109375,
+          "directMean": 316633.86328125,
+          "fairD3Mean": 337539.08203125,
+          "pairedDeltaD3": 177859.5390625,
+          "bootstrapLower95": 135891.1138671875,
+          "wins": 171,
+          "losses": 85,
+          "plateau": null
+        },
+        {
+          "point": 4,
+          "movesTrained": 2000153332,
+          "ntupleD3Mean": 525039.16015625,
+          "directMean": 335958.7421875,
+          "fairD3Mean": 337539.08203125,
+          "pairedDeltaD3": 187500.078125,
+          "bootstrapLower95": 144166.2435546875,
+          "wins": 168,
+          "losses": 88,
+          "plateau": null
+        },
+        {
+          "point": 5,
+          "movesTrained": 2500198069,
+          "ntupleD3Mean": 521323.73046875,
+          "directMean": 336159.71484375,
+          "fairD3Mean": 337539.08203125,
+          "pairedDeltaD3": 183784.6484375,
+          "bootstrapLower95": 138928.788671875,
+          "wins": 171,
+          "losses": 85,
+          "plateau": null
+        },
+        {
+          "point": 6,
+          "movesTrained": 3000240102,
+          "ntupleD3Mean": 524169.58984375,
+          "directMean": 338270.4296875,
+          "fairD3Mean": 337539.08203125,
+          "pairedDeltaD3": 186630.5078125,
+          "bootstrapLower95": 142912.5244140625,
+          "wins": 169,
+          "losses": 87,
+          "plateau": null
+        },
+        {
+          "point": 7,
+          "movesTrained": 3500281390,
+          "ntupleD3Mean": 509645.51171875,
+          "directMean": 348955.21484375,
+          "fairD3Mean": 337539.08203125,
+          "pairedDeltaD3": 172106.4296875,
+          "bootstrapLower95": 130275.725,
+          "wins": 167,
+          "losses": 89,
+          "plateau": null
+        },
+        {
+          "point": 8,
+          "movesTrained": 4000326496,
+          "ntupleD3Mean": 480053.3671875,
+          "directMean": 363824.50390625,
+          "fairD3Mean": 337539.08203125,
+          "pairedDeltaD3": 142514.28515625,
+          "bootstrapLower95": 106047.11640625,
+          "wins": 164,
+          "losses": 92,
+          "plateau": {
+            "points": 8,
+            "window": 4,
+            "recentMean": 171258.9677734375,
+            "previousMean": 166480.2294921875,
+            "stop": false
+          }
+        },
+        {
+          "point": 9,
+          "movesTrained": 4500370590,
+          "ntupleD3Mean": 498951.22265625,
+          "directMean": 362132.4140625,
+          "fairD3Mean": 337539.08203125,
+          "pairedDeltaD3": 161412.140625,
+          "bootstrapLower95": 120448.62578125,
+          "wins": 159,
+          "losses": 97,
+          "plateau": {
+            "points": 9,
+            "window": 4,
+            "recentMean": 165665.8408203125,
+            "previousMean": 173783.3173828125,
+            "stop": true
+          }
+        }
+      ],
+      "anyPositiveMargin": true
+    },
+    "candidateSha256": "824b0a39a90d8a5aae63438c1538d4c5022f0e0f09c75fb7e2d758a1d6c6fb8a",
+    "priorSha256": "0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b",
+    "smoke": {
+      "layout": "rows,cols,win23,win32,win24,win42,phase=all",
+      "entries": 5800000000,
+      "movesTotal": 40002639,
+      "wallSeconds": 33.8,
+      "meanMovesPerSecond": 1240481.0
+    }
+  },
+  "gateChecks": [
+    {
+      "criterion": "All CHECK gates passed before the first training seed was read",
+      "passed": true,
+      "observed": "18 gate lines, all PASS"
+    },
+    {
+      "criterion": "Every validation artifact and the screen artifact have illegalDecisions 0 and incompleteDecisions 0",
+      "passed": true,
+      "observed": "main validations illegal 0 / incomplete 0; screen arms candidate-d3s7: 0/0, candidate-1ply: 0/0, prior-d3s7: 0/0, prior-1ply: 0/0, fair-d3s7: 0/0, fair-d4s7: 0/0"
+    },
+    {
+      "criterion": "bootstrap 95% lower bound of candidate-d3s7 minus fair-d3s7 > 0",
+      "passed": true,
+      "observed": "126818.78720703124"
+    },
+    {
+      "criterion": "Student-t 95% lower bound > 0",
+      "passed": true,
+      "observed": "126919.162189214"
+    },
+    {
+      "criterion": "paired mean delta > 0 in both halves",
+      "passed": true,
+      "observed": "[159104.70703125, 151200.68359375]"
+    },
+    {
+      "criterion": "candidate-d3s7 Q25 >= fair-d3s7 Q25",
+      "passed": true,
+      "observed": "[241609.5, 192039.5]"
+    },
+    {
+      "criterion": "The screened candidate is the exact frozen best-weights.bin (SHA-256 recorded before the screen lease opened)",
+      "passed": true,
+      "observed": "824b0a39a90d8a5aae63438c1538d4c5022f0e0f09c75fb7e2d758a1d6c6fb8a"
+    },
+    {
+      "criterion": "Replication: bootstrap 95% lower bound of prior-d3s7 minus fair-d3s7 > 0",
+      "passed": true,
+      "observed": "129753.3208984375"
+    },
+    {
+      "criterion": "Replication: Student-t 95% lower bound > 0",
+      "passed": true,
+      "observed": "129625.57751269455"
+    },
+    {
+      "criterion": "Replication: paired mean delta > 0 in both halves",
+      "passed": true,
+      "observed": "[133348.80078125, 187349.16796875]"
+    },
+    {
+      "criterion": "Replication: prior-d3s7 Q25 >= fair-d3s7 Q25",
+      "passed": true,
+      "observed": "[232825.0, 192039.5]"
+    },
+    {
+      "criterion": "Replication: the prior arm is the first experiment's exact frozen tables (SHA-256 verified before the screen lease opened)",
+      "passed": true,
+      "observed": "0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b"
+    }
+  ],
+  "perGameArtifact": {
+    "path": "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/screen/heldout.json",
+    "sha256": "7396b656ba400381a1be6d942821a8cd8e8a6d1cf85efb2a8e8718a427cfb646",
+    "recordCount": 3072
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260906T014136Z-58c2ebe0.json"
+  ],
+  "artifactManifestRef": null,
+  "limitations": [
+    "Public-development SCREEN tier, 512 paired games opened once; nothing here is a qualification claim, and protected and final cohorts stay sealed.",
+    "The candidate is the validation point with the largest paired margin on a 256-game training-role block that was read at every validation point and drove the plateau stop rule; that selection is upward-biased, which is why the held-out screen exists.",
+    "Training used lock-free asynchronous updates from 32 threads, so the training run is not bit-reproducible; the frozen tables are hashed and every gameplay arm is deterministic and worker-count independent.",
+    "The fair-d4s7 arm is the program's standing reference for context only; the preregistered comparator is the identical depth-3 search with the frozen fair leaf.",
+    "Table files (23.2 GB weights, 69.6 GB with accumulators) are retained on the workstation with their SHA-256 and are not committed.",
+    "Wall times were measured on a shared workstation; ratios between arms on the same seeds are the trustworthy quantity.",
+    "The replication arm re-screens tables frozen by the first experiment on a block that experiment never read; it is a fresh-block replication by the same runner on the same machine, not by an independent runner."
+  ],
+  "contributionIds": [
+    "CT-20260906T014308Z-21df88ae"
+  ],
+  "recordedAt": "2026-09-06T04:01:13Z"
+}

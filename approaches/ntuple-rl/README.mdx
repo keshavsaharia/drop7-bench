@@ -16,7 +16,10 @@ none of them produced a policy stronger than the hand-tuned
 uses as its reference. On 2026-09-05 the
 [row-and-column lookup tables](/approach/ntuple-rl/ntuple-scale), trained from
 billions of engine moves and placed as the leaf of the depth-3 fair search,
-beat that reference on 256 held-out games at screen tier. For how this family compares with the other three ways
+beat that reference on 256 held-out games at screen tier, and on 2026-09-06
+the same frozen tables did it again on 512 games from a second block nothing
+had read; a six-times-wider evaluator trained until its validation margin
+stopped rising passed the same gate and was no better than the first. For how this family compares with the other three ways
 of learning tried here, see
 [four ways a program can learn Drop7](/learn/concepts/learning-from-play).
 
@@ -92,6 +95,8 @@ attempt never got past trying to imitate a one-move search.
 | Approach | Recorded mean score | Mean moves | Cohort | Source |
 | --- | ---: | ---: | --- | --- |
 | [Row and column lookup tables as the depth-3 leaf](/approach/ntuple-rl/ntuple-scale) | 484,577 | 140.21 | 256 never-read paired development games, screen tier | [RS-20260905T215332Z-95d18a5a](/results/RS-20260905T215332Z-95d18a5a) |
+| [Row and column lookup tables as the depth-3 leaf, replication of the same frozen tables](/approach/ntuple-rl/ntuple-scale) | 487,066 | 140.83 | 512 never-read paired development games on a second block, screen tier | [RS-20260906T040113Z-6ba93171](/results/RS-20260906T040113Z-6ba93171) |
+| [Wider lookup tables (2x4 and 4x2 windows added) as the depth-3 leaf](/approach/ntuple-rl/ntuple-scale) | 481,869 | 139.39 | the same 512 games, screen tier | [RS-20260906T040113Z-6ba93171](/results/RS-20260906T040113Z-6ba93171) |
 | [Learned value plus depth-2 search](/approach/ntuple-rl/native-suite) | 232,107.156 | 70.766 | 64-game development probe | ledger |
 | [Optimistic phase n-tuple, direct play](/approach/ntuple-rl/optimistic-phase) | 181,733.422 | 56.359 | 64-game burned gate | ledger |
 | [Primal-dual actor-critic](/approach/ntuple-rl/primal-dual-actor-critic) | 175,834 | 55.006 | 512-game calibration | ledger |

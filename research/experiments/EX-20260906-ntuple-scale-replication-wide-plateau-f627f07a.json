@@ -82,14 +82,20 @@
     "runs/<run-id>/ntuple-scale/{pipeline.log,rusage.jsonl,analysis.json,analysis.md}",
     "artifacts emitted by train and screen carry this experiment id in their config field; table files (23.2 GB weights, 69.6 GB checkpoint) are too large for the repository and are retained on the workstation with their SHA-256 in the result record"
   ],
-  "lifecycle": "preregistered",
-  "protocolSha256": "0284abf064ef24fe47ae1ee1b3a7d63245b9f470bdcdcbf00976576bb1d67df8",
-  "amendments": [],
+  "lifecycle": "completed",
+  "protocolSha256": "940282974d1db2720b64d49fba535f43e3e6099dd41723d506971bb65842d3e8",
+  "amendments": [
+    {
+      "timestamp": "2026-09-06T04:01:14Z",
+      "beforeControlledData": false,
+      "reason": "lifecycle advanced running -> completed after run RUN-20260906T013222Z-ba0ee34f and result RS-20260906T040113Z-6ba93171 were written; protocol content otherwise unchanged (frozen hash 0284abf064ef24fe47ae1ee1b3a7d63245b9f470bdcdcbf00976576bb1d67df8 retained in the run and lease records)."
+    }
+  ],
   "createdBy": {
     "platform": "Claude Code",
     "model": "claude-fable-5-1",
     "agentId": "claude-code-ntuple-scale-replication"
   },
   "createdAt": "2026-09-06T01:33:36Z",
-  "updatedAt": "2026-09-06T01:42:38Z"
+  "updatedAt": "2026-09-06T04:01:14Z"
 }

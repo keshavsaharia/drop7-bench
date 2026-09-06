@@ -11,7 +11,35 @@
   "level": "L3",
   "roles": [
     {
+      "role": "conceptualization",
+      "degree": "lead"
+    },
+    {
+      "role": "methodology",
+      "degree": "lead"
+    },
+    {
       "role": "software",
+      "degree": "lead"
+    },
+    {
+      "role": "investigation",
+      "degree": "lead"
+    },
+    {
+      "role": "formal-analysis",
+      "degree": "lead"
+    },
+    {
+      "role": "visualization",
+      "degree": "lead"
+    },
+    {
+      "role": "writing",
+      "degree": "lead"
+    },
+    {
+      "role": "compute",
       "degree": "lead"
     }
   ],
@@ -22,16 +50,37 @@
   "experimentIds": [
     "EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a"
   ],
-  "runIds": [],
+  "runIds": [
+    "RUN-20260906T013222Z-ba0ee34f"
+  ],
   "artifactPaths": [
-    "approaches/ntuple-rl/ntuple-scale/"
+    "approaches/ntuple-rl/ntuple-scale/",
+    "approaches/ntuple-rl/ntuple-scale/scripts/pipeline2.sh",
+    "research/experiments/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a.json",
+    "research/seeds/leases/SL-20260906T013222Z-ce319097.json",
+    "research/seeds/leases/SL-20260906T013222Z-6cce6192.json",
+    "research/seeds/leases/SL-20260906T013222Z-f34b23c0.json",
+    "research/runs/RUN-20260906T013222Z-ba0ee34f.json",
+    "research/system-profiles/MACH-20260906T014136Z-58c2ebe0.json",
+    "web/components/NTupleScale.tsx",
+    "web/components/charts/NTupleCharts.tsx",
+    "web/scripts/extract-ntuple-scale.ts",
+    "web/lib/charts/ntuple-scale.ts",
+    "web/content/figures/ntuple-scale/RUN-20260906T013222Z-ba0ee34f.json",
+    "web/content/log/2026-09-06.mdx"
   ],
   "commitShas": [],
   "validationPerformed": [
-    "cargo test --release (11 unit tests)"
+    "cargo test --release (11 unit tests, including the 2x4 and 4x2 window cell test)",
+    "gate binary: 19 CHECK gates on the probe block with the wide layout, all PASS (gates.log); the first invocation's panic on terminal states was fixed before any leased seed was read",
+    "throughput smoke run on the probe block (4e7 moves, tables discarded)",
+    "make research-validate (no errors on this experiment's records; pre-existing errors concern other contributors' missing runs/ artifacts)",
+    "node web/scripts/check-mdx.mjs, node scripts/check-approach-frontmatter.mjs, node web/scripts/check-figures.mjs, npx tsc --noEmit, npm run lint, npm run build under web/",
+    "analyze.py evaluated the preregistered candidate gate, the replication criteria and the scale verdict from the screen artifact; compare.py reports written for eight contrasts"
   ],
   "limitations": [
-    "Self-reported contribution; not yet independently reviewed."
+    "Self-reported contribution; not yet independently reviewed.",
+    "The owner asked for a fresh-block replication with a longer and wider training run that stops at a plateau; the model chose the added window families, the plateau rule and the screen design, and ran it on the same workstation as the first experiment, so this is a fresh-block replication by the same runner, not an independent one."
   ],
   "selfReported": true,
   "reviewedBy": null,

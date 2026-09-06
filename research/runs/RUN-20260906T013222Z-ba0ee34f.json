@@ -3,10 +3,10 @@
   "format": "drop7-run-v1",
   "runId": "RUN-20260906T013222Z-ba0ee34f",
   "experimentId": "EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a",
-  "lifecycle": "running",
-  "runValidity": "partial",
+  "lifecycle": "completed",
+  "runValidity": "valid",
   "startedAt": "2026-09-06T01:34:00Z",
-  "endedAt": null,
+  "endedAt": "2026-09-06T03:59:47Z",
   "protocolSha256": "0284abf064ef24fe47ae1ee1b3a7d63245b9f470bdcdcbf00976576bb1d67df8",
   "machineProfileRef": "research/system-profiles/MACH-20260906T014136Z-58c2ebe0.json",
   "sourceState": {
@@ -33,21 +33,22 @@
     "maxGpuBytes": null
   },
   "resourceObserved": {
-    "wallSeconds": null,
-    "cpuSeconds": null,
-    "peakHostBytes": null,
+    "wallSeconds": 8747,
+    "cpuSeconds": 244876.1,
+    "peakHostBytes": 51807035392,
     "peakGpuBytes": null,
-    "measurementNotes": "Gates 01:34:00Z: the first gate invocation ended in a panic (exit 101, rusage row retained) because the information-boundary gate values terminal states whose rise phase is 0 and the wide layout's 64-bit index then left the table; the phase is now clamped in features() (commit 16e7c99) and the second invocation passed all 19 gates (9.8 s wall, 23.6 GB peak RSS from the frozen wide tables). Smoke run 01:38:37Z-01:39:19Z: 4.0e7 moves, 42.5 s wall, 970 CPU-s, peak RSS 42.7 GB, 1.27e6 moves/s steady. Main run and screen: to be filled from rusage.jsonl at completion."
+    "measurementNotes": "Gates 01:34:00Z: the first gate invocation ended in a panic (exit 101, rusage row retained) because the information-boundary gate values terminal states whose rise phase is 0 and the wide layout's 64-bit index then left the table; the phase is now clamped in features() (commit 16e7c99) and the second invocation passed all 19 gates (9.8 s wall, 23.6 GB peak RSS from the frozen wide tables). Smoke run 01:38:37Z-01:39:19Z: 4.0e7 moves, 42.5 s wall, 970 CPU-s, peak RSS 42.7 GB, 1.27e6 moves/s steady. Main run 2026-09-06T01:44:14Z-2026-09-06T02:58:39Z: 4464 s wall, 135833 CPU-s, peak RSS 51.81 GB, 1,184,973 moves/s mean over 4,500,370,590 moves and 47,477,538 games, 9 validation points on 256 paired games. Freeze 2026-09-06T02:58:39Z. Screen 2026-09-06T02:58:55Z-2026-09-06T03:59:47Z: 3652 s wall, 108001 CPU-s, peak RSS 28.91 GB, six arms x 512 games. Wall 8,747 s from the first gate launch to the end of the screen; CPU seconds and peak RSS are the sums and maximum of the per-stage kernel rusage rows in rusage.jsonl (the panicked first gate invocation included). The web console was built once at nice 19 during the screen; timings are not timing-grade, ratios between arms on identical seeds are the trustworthy quantity."
   },
-  "exitCode": null,
-  "stopReason": null,
+  "exitCode": 0,
+  "stopReason": "completed: the main run stopped by the plateau rule at validation point 9 (4,500,370,590 moves; last 4 points mean +165,666, the 4 before +173,783), candidate frozen at the best validation point (2,000,153,332 moves), prior tables verified, held-out screen played once (512 games, six arms), compare and analysis written",
   "artifactRefs": [
     "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/gates.log",
     "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/smoke/{config.json,progress.jsonl,DONE}",
     "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/main/{config.json,progress.jsonl,val-*.json,best.json,stop.json,candidate-weights.sha256,prior-weights.sha256,best-weights.bin,latest-weights.bin,checkpoint.bin,DONE}",
     "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/screen/heldout.json",
     "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/screen/compare-*.json",
-    "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/{analysis.json,analysis.md,rusage.jsonl,pipeline.log,prep.nohup,chain.nohup}"
+    "runs/RUN-20260906T013222Z-ba0ee34f/ntuple-scale/{analysis.json,analysis.md,rusage.jsonl,pipeline.log,prep.nohup,chain.nohup}",
+    "artifacts/results/EX-20260906-ntuple-scale-replication-wide-plateau-f627f07a/RUN-20260906T013222Z-ba0ee34f/manifest.json"
   ],
   "contributionIds": [
     "CT-20260906T014308Z-21df88ae"

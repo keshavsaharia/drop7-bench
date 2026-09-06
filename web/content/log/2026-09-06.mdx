@@ -1,10 +1,10 @@
 ---
 date: 2026-09-06
 title: "Replicating the lookup-table leaf on fresh seeds at larger scale"
-summary: "The row-and-column lookup tables beat the fair leaf yesterday on one held-out block. Today's run asks whether that holds on seeds nothing has read, and whether a wider evaluator trained until its validation margin stops improving does better: 5.8 billion table entries, a 256-game validation block with a plateau rule, and a 512-game screen that carries yesterday's frozen tables beside the new ones."
+summary: "Yesterday's lookup-table leaf replicated on 512 seeds nothing had read: 487,066 against 326,717 for the fair leaf in the same depth-3 search. A six-times-wider evaluator trained until its validation margin stopped rising passed the same gate and came out 5,196 behind the first tables, an inconclusive scale reading, while playing much better without any search."
 contributors: [claude-fable-5-1 (Claude Code)]
 tags: [n-tuple, temporal-difference, leaf, rust, replication, plateau]
-outcomes: { positive: 0, negative: 0, open: 1 }
+outcomes: { positive: 2, negative: 1, open: 1 }
 ---
 
 ## Two questions from yesterday
@@ -77,12 +77,95 @@ the same wrong entry under every perturbation, so its pass was sound. The
 second invocation passed all 19 gates.
 </Finding>
 
-<Direction title="The main run is training" status="open" owner="claude-fable-5-1 (Claude Code)">
-The run started at 01:44 UTC from commit `16e7c99`. Its validation curve,
-the plateau rule's two window means at every point, and later the screen
-and its three readings appear on the
-[approach page](/approach/ntuple-rl/ntuple-scale) as the snapshot is
-refreshed, with every number copied from the run's artifacts. The theory's
-training-signal check and the screen's gate are evaluated once, from the
-artifacts, when the chain finishes.
+## The main run
+
+The run started at 01:44 UTC from commit `16e7c99` and trained at about 1.18
+million moves per second.
+
+<Finding title="The plateau rule fired at 4.5 billion moves" kind="neutral" metric="nine validation points; last four +165,666, previous four +173,783">
+All nine validation points had the wide tables ahead of the fair leaf inside
+the same depth-3 search on the 256 fresh validation games, from +154,572 at
+half a billion moves to +187,500 at two billion. After that the margin
+wandered between 142,514 and 186,631 and the rule stopped the run at the
+ninth point, 74 minutes in. The candidate is the fourth point, two billion
+moves, SHA-256 `824b0a39...`. About 231 million of the 5.8 billion entries
+had been touched by then.
+</Finding>
+
+## The screen
+
+512 never-read public-development games at `0xa52f2380`, six arms on
+identical seeds, opened once after both candidates' hashes were on disk.
+Result record `RS-20260906T040113Z-6ba93171`, run valid, outcome pass,
+screen tier.
+
+<ArmTable
+  caption="The six arms on the 512 fresh games, from the screen artifact and the compare.py reports of RUN-20260906T013222Z-ba0ee34f."
+  columns={[
+    { key: "arm", label: "arm" },
+    { key: "mean", label: "mean score", numeric: true },
+    { key: "moves", label: "moves", numeric: true },
+    { key: "vsfair", label: "paired vs fair-d3s7", numeric: true, delta: true },
+    { key: "lb", label: "bootstrap lower bound", numeric: true, delta: true },
+  ]}
+  rows={[
+    { arm: "first run's tables as the depth-3 leaf", mean: "487,066", moves: "140.83", vsfair: "+160,349", lb: "+129,753", highlight: true },
+    { arm: "wide tables as the depth-3 leaf", mean: "481,869", moves: "139.39", vsfair: "+155,153", lb: "+126,819", highlight: true },
+    { arm: "fair leaf, depth 4 (reference)", mean: "397,154", moves: "114.55", vsfair: "+70,437", lb: "+46,917" },
+    { arm: "wide tables played directly, one ply", mean: "328,039", moves: "97.27", vsfair: "+1,323", lb: "-17,545" },
+    { arm: "fair leaf, depth 3 (comparator)", mean: "326,717", moves: "95.87", vsfair: "", lb: "" },
+    { arm: "first run's tables played directly, one ply", mean: "294,323", moves: "87.91", vsfair: "-32,394", lb: "-51,190" },
+  ]}
+/>
+
+<Finding title="Yesterday's result replicates on fresh seeds" kind="positive" metric="+160,349 paired on 512 games, lower bound +129,753, 330-0-182">
+The first run's frozen tables, unchanged and hash-verified, averaged 487,066
+as the depth-3 leaf against 326,717 for the fair leaf in the same search on
+the 512 fresh games: paired +160,349, bootstrap 95% lower bound +129,753,
+both halves positive (+133,349 and +187,349), lower quartile 232,825 against
+192,040. Every replication criterion passes. Yesterday's screen on a
+different block read +170,139; the two blocks agree within their bounds.
+</Finding>
+
+<Finding title="The wide tables pass the same gate" kind="positive" metric="+155,153 paired, lower bound +126,819, 333-0-179">
+The wide candidate averaged 481,869 on the same 512 games, +155,153 against
+the fair leaf with a lower bound of +126,819, both halves positive, lower
+quartile 241,610, no illegal or incomplete decision in any arm. Against the
+fair leaf at depth 4 (397,154 on these games) it is +84,716 with a lower
+bound of +54,794; the first tables are +89,912 against the same arm.
+</Finding>
+
+<Finding title="Six times the entries did not beat the first tables" kind="negative" metric="-5,196 paired, bounds -40,535 to +29,158, 267-1-244: inconclusive">
+The wide candidate against the first run's tables, both as the depth-3 leaf
+on the same seeds, is 5,196 behind, with a bootstrap interval from minus
+40,535 to plus 29,158 and a detection floor of 34,803. The preregistered
+scale verdict is inconclusive: a difference of more than about 35,000 in
+either direction would have shown, and none did. What this rules out is a
+large gain from the 2-by-4 and 4-by-2 windows and from training past two
+billion moves under this recipe; a gain smaller than the floor is not ruled
+out.
+</Finding>
+
+<Finding title="The wide tables play much better without any search" kind="neutral" metric="one-ply 328,039 against 294,323 for the first tables; level with the fair leaf's depth-3 search">
+Played directly, one move ahead with the seven reveal samples and no search,
+the wide tables averaged 328,039, +1,323 against the fair leaf's depth-3
+search with bounds either side of zero. The first run's tables played the
+same way lost to that search by 32,394. So the extra windows learned a
+better policy and the search extracted nothing more from it: the search over
+the wide tables is worth +153,830 on these games, against +203,137 for the
+first tables on yesterday's block. The leaf the depth-3 search needs and the
+policy one-ply play needs are not the same object, and this recipe improved
+the second.
+</Finding>
+
+<Direction title="What the record supports next" status="proposed" owner="claude-fable-5-1 (Claude Code)">
+The frozen first tables now have two passing screens on disjoint blocks and
+are the candidate to carry forward; the wide tables are retained and hashed
+but add nothing the screen can see. Next: the first tables as the leaf of
+the depth-4 search on a fresh development block (untested, affordable); a
+STANDARD-tier evaluation of the first tables on fresh development seeds; and
+a study of why a better one-ply evaluator is not a better leaf, for instance
+training the tables on the search's own returns instead of one-ply play. The
+[approach page](/approach/ntuple-rl/ntuple-scale) carries both runs' figures
+and the full tables.
 </Direction>
