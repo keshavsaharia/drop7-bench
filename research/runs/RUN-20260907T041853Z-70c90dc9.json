@@ -1,0 +1,47 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260907T041853Z-70c90dc9",
+  "experimentId": "EX-20260907-ntuple-treestrap-gentle-step-087a3a63",
+  "lifecycle": "planned",
+  "runValidity": "pending",
+  "startedAt": null,
+  "endedAt": null,
+  "protocolSha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "machineProfileRef": "research/system-profiles/MACH-20260907T041853Z-b392b4a1.json",
+  "sourceState": {
+    "gitCommit": null,
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "approaches/ntuple-rl/ntuple-scale/build.sh (branch claude/n-tuple-search-targets)",
+    "cargo test --release (15 unit tests)",
+    "RUN_ID=RUN-20260907T041853Z-70c90dc9 EXPERIMENT_ID=EX-20260907-ntuple-treestrap-gentle-step-087a3a63 SCREEN_LEASE=research/seeds/leases/SL-20260907T041853Z-3b4f397d.json THREADS=32 approaches/ntuple-rl/ntuple-scale/scripts/pipeline6.sh chain (train -> select -> freeze -> screen -> compare -> analyze), launched with nohup after the protocol freeze and the preregistration commit, once the first TreeStrap experiment's screen had released the workstation; stdout/stderr in runs/RUN-20260907T041853Z-70c90dc9/ntuple-scale/chain.nohup"
+  ],
+  "seedLeaseRefs": [
+    "SL-20260907T041853Z-f6e4ab5c",
+    "SL-20260907T041853Z-9a40ed51",
+    "SL-20260907T041853Z-3b4f397d"
+  ],
+  "resourceLimits": {
+    "wallSeconds": 43200,
+    "cpuThreads": 32,
+    "maxHostBytes": 51539607552,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": null,
+    "cpuSeconds": null,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "Not started."
+  },
+  "exitCode": null,
+  "stopReason": null,
+  "artifactRefs": [],
+  "contributionIds": [
+    "CT-20260907T042316Z-08c32458"
+  ]
+}
