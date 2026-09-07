@@ -404,7 +404,50 @@ carry a verdict fixed in advance.
 
 <NTupleStatus run="RUN-20260907T012358Z-a00ecdf0" />
 
-{/* TREE-RESULTS */}
+<NTuplePilotFigure run="RUN-20260907T012358Z-a00ecdf0" caption="The two search-actor arms: each bar is an arm's paired margin over the fair leaf on the 256-game training-role block at its final validation point, with bootstrap bounds and detection floor. The warm start's own margin on this block is 174,466; neither arm reached it at any point." />
+
+Both arms fell below the warm start at their first validation point and
+never climbed back. On the validation block the frozen tables are 174,466
+ahead of the fair leaf. The visited-states arm read 101,920 at its first
+point, wandered between 72,053 and 140,529, and stopped by the plateau rule
+at 1.8 million searched moves. The every-tree-node arm read 10,059 at its
+first point, with one-ply play down from 284,964 to 182,700, climbed to
+93,767 at its seventh point and ran to the 100-minute wall at 3.1 million
+moves, 7.2 billion node updates in all. The pilot-tier training-signal
+check reads not passed for both. The shape of both curves is the shape of a
+shock: a fresh coherence accumulator lets every entry's first update run
+at the full step, the internal-node targets differed from the tables'
+values by about eleven rise units at the start, and the search actor makes
+about two thousand times fewer visited-state updates per second than the
+one-ply continuation whose shock healed within seconds.
+
+<NTupleTrainingFigure run="RUN-20260907T012358Z-a00ecdf0" arm="treestrap" caption="The every-tree-node arm. The solid line is the tables as the depth-3 leaf on the 256 fresh validation games; the dashed line is the fair leaf in the same search on the same games; the thin lines are the tables played directly and the training games themselves. The point at 2.1 million searched moves was frozen as the candidate." />
+
+The screen opened the 512-game block once, after the gates had passed
+again on both new table files, and measured the damage.
+
+<NTupleScreenFigure run="RUN-20260907T012358Z-a00ecdf0" caption="The primary contrast. One bar per held-out game: the TreeStrap candidate as the depth-3 leaf minus the frozen tables in the same search on the same seed, in seed order, 512 games." />
+
+The TreeStrap candidate as the depth-3 leaf averaged 375,372 points and
+110 moves against 484,342 and 140 for the frozen tables on the same games:
+108,970 behind, with bootstrap bounds from minus 139,543 to minus 78,715,
+206 wins to 306 and a lower quartile 22,685 lower. Every criterion of the
+gate fails and the upper bound is below zero, so the reading is a
+measurable loss rather than a non-measurement
+([RS-20260907T041853Z-27cb32a3](/results/RS-20260907T041853Z-27cb32a3), run
+valid, outcome fail, screen tier on public development seeds). The
+ablation, search targets at the visited states only, lost 73,150 (bounds
+minus 105,383 to minus 41,675), and the candidate lost a further 35,819 to
+the ablation, so the internal nodes made things worse on top of the search
+targets. Against the one-ply continuation from the same warm start, which
+sits 17,867 below the frozen tables on this block with bounds either side
+of zero, the candidate is 91,103 behind. At depth 4 the candidate is
+101,253 behind the frozen tables and the ablation 77,543 behind; all five
+readings beside the gate are refuted. The one reading that came out the
+same way for every table is the fourth ply, worth 47,932 to the frozen
+tables, 55,648 to the candidate and 43,539 to the ablation on these games.
+
+<NTupleGateTable run="RUN-20260907T012358Z-a00ecdf0" />
 
 ## What we learned
 
@@ -452,11 +495,24 @@ entries to zero, with no training at all, was worth 29,442 points at depth
 3 with a lower bound above zero, by changing only 194 of 512 games. But the
 same edit gave that back at depth 4, and so did the buckets: the deeper
 search reads far more unfamiliar boards, and a pessimistic price for them
-served it worse than the optimistic one. What that leaves open is a leaf
+served it worse than the optimistic one. What that left open was a leaf
 trained on the boards the search evaluates rather than the ones one-ply
-play visits, which is the other half of the question the replication left,
-and a depth-aware version of the edit that prices unfamiliar boards
-between zero and a fresh board's value.
+play visits, and a depth-aware version of the edit that prices unfamiliar
+boards between zero and a fresh board's value.
+
+The fifth experiment tried the first of those and got a clear negative for
+the configuration it tested. With the search as the actor and every
+tree node trained toward its own backup at the full step size from a fresh
+start, the tables lost 108,970 points at depth 3 and 101,253 at depth 4 on
+512 fresh games, and the visited-states-only arm lost 73,150. The shape of
+the validation curves says why: the first updates ran at full strength on
+every entry they touched, and the search actor delivers visited-state
+updates two thousand times more slowly than the one-ply play whose same
+shock healed within seconds in the fill experiment. That is a step-size
+result, and it is the reason the successor tests the same idea at a gentle
+step. What it does not say is whether search-shaped training helps once
+the shock is removed; it does say that warm-starting a good table with
+fresh step sizes and a slow actor is a way to lose it.
 
 <AgentContext summary="Records and provenance">
 
@@ -551,6 +607,37 @@ and published under the run's archive prefix
 `web/content/figures/ntuple-scale/RUN-20260906T201104Z-a96ea6c8.json`. The
 seed-free diagnostic behind the theory is `scripts/touched-by-fill.py`, its
 output retained as `main/touched-by-fill.txt` of the run.
+
+The search-target (TreeStrap) tables: theory
+[TH-20260907-ntuple-search-target-treestrap-leaf-b1c9989f](/theories/TH-20260907-ntuple-search-target-treestrap-leaf-b1c9989f),
+experiment
+[EX-20260907-ntuple-treestrap-warm-start-c33ba880](/experiments/EX-20260907-ntuple-treestrap-warm-start-c33ba880)
+(frozen protocol SHA-256 `305ff6238bee4fa7e9641a75993c263c05c9de8d4c001d3c98775ce84e7b9d7a`),
+run `RUN-20260907T012358Z-a00ecdf0` on branch
+`claude/n-tuple-search-targets` (preregistration commit `83ef6bd`), machine
+profile `MACH-20260907T012358Z-d6aa318d`, contribution
+`CT-20260907T013349Z-44a6fb6a`, result
+[RS-20260907T041853Z-27cb32a3](/results/RS-20260907T041853Z-27cb32a3).
+Leases: training `SL-20260907T012358Z-ff502b09` (`0xa5a00000`, read in
+order), validation `SL-20260907T012358Z-a93f439d` (`0xa52f2a80`, 256 games,
+training role, the warm start's point 0 and every validation point of both
+arms), screen `SL-20260907T012358Z-74d0228f` (`0xa52f2b80`, 512 games,
+public development, opened once). The training-time search is
+`src/search_train.rs` (`TrainSearch`: the deployed search mirrored bit for
+bit, utility and score-only values per node, internal nodes collected as
+targets); the trainer's `--actor search --targets visited|tree
+--validate-at-start`; the gate `train-search-vs-engine`. Table files: the
+candidate (every-tree-node arm, best point, SHA-256
+`1a534b78f466725b...`) and the ablation (`2a7de08abfab4598...`) are
+published compressed under the run's archive prefix for reproduction only
+(`ntuple-scale/pilot/treestrap/best-weights.bin.zst`,
+`ntuple-scale/pilot/searchtd/best-weights.bin.zst`); the one-ply continuation
+is the fill experiment's control file. Stage driver `scripts/pipeline5.sh`;
+artifacts under `runs/RUN-20260907T012358Z-a00ecdf0/ntuple-scale/`
+(gitignored), the compact ones promoted under
+`artifacts/results/EX-20260907-ntuple-treestrap-warm-start-c33ba880/RUN-20260907T012358Z-a00ecdf0/`
+and published under the run's archive prefix; web snapshot
+`web/content/figures/ntuple-scale/RUN-20260907T012358Z-a00ecdf0.json`.
 
 Published artifacts (the public research archive, immutable run-scoped keys,
 SHA-256 in each reference's fragment; `runs/<run-id>/published.jsonl` lists

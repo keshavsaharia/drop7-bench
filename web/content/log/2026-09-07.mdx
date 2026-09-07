@@ -1,0 +1,134 @@
+---
+date: 2026-09-07
+title: "Letting the search write the lookup tables"
+summary: "The lookup-table leaf was trained only on boards that one-ply play visits, toward one-step sampled returns, while the deployed search evaluates about a hundred and twenty thousand imagined boards per move. A fifth experiment let the depth-3 search play the training games and trained every board in its tree toward the tree's own backed-up value, warm-started from the frozen tables with fresh step sizes. Both arms fell below the warm start at once and never recovered, and on a sixth fresh block the TreeStrap candidate lost 108,970 points to the frozen tables at depth 3 and 101,253 at depth 4: a step-size shock, and a clear negative for the full-step warm start. A gentle-step successor was preregistered and launched the same morning."
+contributors: [claude-fable-5-1 (Claude Code)]
+tags: [n-tuple, temporal-difference, treestrap, search, leaf, rust, warm-start, negative-result]
+outcomes: { positive: 0, negative: 2, open: 1 }
+---
+
+## Training on the boards the search evaluates
+
+Yesterday's fill experiment measured the gap between the boards the tables
+were trained on and the boards the deployed search reads: about nine
+tenths of the entries never updated, concentrated on full lines, and the
+one repair that moved the depth-3 leaf without training was a change to
+the price of exactly those unfamiliar boards. The owner asked for the
+obvious next thing: train the leaf on the boards the search evaluates, not
+just the ones one-ply play visits.
+
+Experiment `EX-20260907-ntuple-treestrap-warm-start-c33ba880`, run
+`RUN-20260907T012358Z-a00ecdf0`, branch `claude/n-tuple-search-targets`.
+A training-time copy of the deployed depth-3 seven-stratum search plays
+every training move over the current tables. After each move the board the
+game is on is trained toward the search's own value of it, an expectation
+over seven reveal strata and three plies instead of one sampled step; and
+in the arm the experiment is named for, every internal node of the search
+tree, the boards one and two imagined moves from the root, about 2,250 per
+decision, is trained toward its own backed-up value. Chess programs have
+trained linear evaluations this way under the name TreeStrap. The search
+decides by a utility that adds a million-point penalty at death, and
+training toward that number would fold the penalty into the tables, so the
+training search carries two values per node, the utility that picks the
+move and the score-only value of the same decisions, and trains toward the
+second. Both arms warm-start from the frozen tables with fresh step sizes,
+as the fill experiment's arms did. A second arm, the ablation, uses the
+same actor and root target and touches no internal node.
+
+<Finding title="The training search is the engine's search, bit for bit" kind="neutral" metric="120 sampled states: 0 value mismatches, 0 decision mismatches; 2,226 internal targets per decision">
+The new gate compares the training search's root column values at depth 3
+against the engine's own on 120 live sampled states with the frozen tables
+as the leaf, and its decisions against the engine's deployed decision with
+iterative deepening and the work bound: every value equal bit for bit,
+every decision equal, two decisions on the same state identical, and the
+collected internal targets finite, at depths 1 and 2, at most 2,450. The
+smoke run on the probe block measured 540 to 630 searched moves per second
+on 32 threads with about 2,250 internal targets per decision, about two
+thousand times fewer visited moves per second than one-ply play and about
+the same number of table updates per second.
+</Finding>
+
+Each arm validated the warm start itself before any training move, then
+every three hundred thousand searched moves, on a fresh 256-game block
+(`0xa52f2a80`); training read a fresh block at `0xa5a00000`.
+
+<Finding title="Both arms fell below the warm start at once and never recovered" kind="negative" metric="warm start +174,466 on the validation block; best points +140,529 (visited states only) and +93,767 (every tree node)">
+On the validation block the frozen tables are 174,466 ahead of the fair
+leaf. The visited-states arm read +101,920 at its first point, wandered
+between +72,053 and +140,529, and stopped by the plateau rule at 1.8
+million searched moves after six points. The every-tree-node arm read
++10,059 at its first point, with one-ply play down from 284,964 to 182,700,
+climbed to +93,767 at its seventh point and ran to the 100-minute wall at
+3.1 million moves and ten points, 7.2 billion node updates in all. Neither
+arm's best point reached the warm start, so the pilot-tier training-signal
+check reads not passed for both. The shape of both curves is the shape of
+a shock: a fresh coherence accumulator lets every entry's first update run
+at the full step, the internal-node targets differed from the tables'
+values by about eleven rise units at the start, and the search actor makes
+far too few visited-state updates per second for the annealing that healed
+the fill experiment's one-ply control within seconds.
+</Finding>
+
+## The screen
+
+512 never-read public-development games at `0xa52f2b80`, ten arms on
+identical seeds, opened once after the gates had passed again on both new
+table files. Result record `RS-20260907T041853Z-27cb32a3`, run valid,
+outcome fail, screen tier.
+
+<ArmTable
+  caption="The ten arms on the 512 fresh games, from the screen artifact of RUN-20260907T012358Z-a00ecdf0; paired readings against the frozen tables at the same depth."
+  columns={[
+    { key: "arm", label: "arm" },
+    { key: "mean", label: "mean score", numeric: true },
+    { key: "moves", label: "moves", numeric: true },
+    { key: "vs", label: "paired vs the frozen tables", numeric: true, delta: true },
+    { key: "lb", label: "bootstrap lower bound", numeric: true, delta: true },
+    { key: "ub", label: "upper bound", numeric: true, delta: true },
+  ]}
+  rows={[
+    { arm: "frozen tables as the depth-3 leaf (comparator)", mean: "484,342", moves: "140.16", vs: "", lb: "", ub: "" },
+    { arm: "one-ply continuation (the fill experiment's control) as the depth-3 leaf", mean: "466,475", moves: "135.13", vs: "-17,867", lb: "-51,858", ub: "+15,511" },
+    { arm: "visited-states search targets (ablation) as the depth-3 leaf", mean: "411,191", moves: "119.84", vs: "-73,150", lb: "-105,383", ub: "-41,675" },
+    { arm: "every-tree-node (TreeStrap) candidate as the depth-3 leaf", mean: "375,372", moves: "109.85", vs: "-108,970", lb: "-139,543", ub: "-78,715", highlight: true },
+    { arm: "frozen tables as the depth-4 leaf", mean: "532,273", moves: "153.16", vs: "", lb: "", ub: "" },
+    { arm: "ablation as the depth-4 leaf", mean: "454,730", moves: "132.08", vs: "-77,543", lb: "-113,433", ub: "-42,565" },
+    { arm: "TreeStrap candidate as the depth-4 leaf", mean: "431,020", moves: "125.30", vs: "-101,253", lb: "-135,587", ub: "-66,683", highlight: true },
+    { arm: "frozen tables played directly, one ply", mean: "292,614", moves: "87.42", vs: "", lb: "", ub: "" },
+    { arm: "TreeStrap candidate played directly, one ply", mean: "212,834", moves: "64.91", vs: "-79,779", lb: "-93,803", ub: "-66,238" },
+    { arm: "fair leaf, depth 3", mean: "320,843", moves: "94.22", vs: "", lb: "", ub: "" },
+  ]}
+/>
+
+<Finding title="A measurable loss at both depths, and the internal nodes made it worse" kind="negative" metric="-108,970 at depth 3 (bounds -139,543 to -78,715); -101,253 at depth 4; ablation -73,150 and -77,543">
+The TreeStrap candidate as the depth-3 leaf averaged 375,372 against
+484,342 for the frozen tables on the same games, 108,970 behind with the
+upper bound below zero, 206 wins to 306, both halves negative and a lower
+quartile 22,685 lower: every criterion of the gate fails and the loss is
+measured, not merely unresolved. The ablation lost 73,150, and the
+candidate lost a further 35,819 to the ablation (bounds minus 64,276 to
+minus 7,292), so training the internal nodes hurt on top of the search
+targets at visited states. At depth 4 the candidate is 101,253 behind and
+the ablation 77,543 behind. All five readings beside the gate are refuted.
+The fourth ply was worth about the same to every table (47,932 to the
+frozen tables, 55,648 to the candidate, 43,539 to the ablation), and the
+frozen tables' depth-3 margin over the fair leaf replicated on this fifth
+block at 163,499 (lower bound 133,843). The one-ply continuation from
+yesterday, replayed here, is 17,867 below the frozen tables with bounds
+either side of zero.
+</Finding>
+
+<Direction title="What the record supports next" status="proposed" owner="claude-fable-5-1 (Claude Code)">
+The configuration rejected is the warm start at the full step with fresh
+step-size state, and the validation curves say the step is the problem:
+one-ply training with the same fresh start healed its first-update shock
+in seconds in the fill experiment, and the search actor cannot. The
+successor, preregistered and launched the same morning, runs the same
+TreeStrap and visited-states arms at alpha 0.05 and 0.2, with a 2,048-game
+depth-3 screen so the floor for the primary contrast is about half of
+today's. If the gentle step does not beat the warm start on validation
+either, training toward the search's own backups from this warm start
+will have been tested at three step sizes, and the n-tuple leaf's
+training-target axis joins scale and fill conditioning as tried without a
+measurable gain at this budget.
+</Direction>

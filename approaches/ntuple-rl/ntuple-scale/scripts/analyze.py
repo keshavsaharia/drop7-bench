@@ -80,9 +80,19 @@ def t_quantile_95(df: int) -> float:
 
 
 def paired(cand, ref, key="score"):
-    a = np.array([g[key] for g in cand["games"]], dtype=float)
-    b = np.array([g[key] for g in ref["games"]], dtype=float)
-    assert [g["seedHex"] for g in cand["games"]] == [g["seedHex"] for g in ref["games"]]
+    """Paired statistics on the seeds both arms played, in cohort order (a
+    depth-4 arm may have played only the first --games-d4 seeds of the
+    block; every other arm the whole block).  The seed lists must agree on
+    the shared prefix."""
+    cand_games = cand["games"]
+    ref_games = ref["games"]
+    if len(cand_games) != len(ref_games):
+        n = min(len(cand_games), len(ref_games))
+        cand_games = cand_games[:n]
+        ref_games = ref_games[:n]
+    assert [g["seedHex"] for g in cand_games] == [g["seedHex"] for g in ref_games]
+    a = np.array([g[key] for g in cand_games], dtype=float)
+    b = np.array([g[key] for g in ref_games], dtype=float)
     d = a - b
     n = len(d)
     rng = np.random.default_rng(BOOTSTRAP_SEED)
@@ -243,10 +253,42 @@ def pilot_summary(out):
     selection_path = os.path.join(out, "pilot", "selection.json")
     fill_shaped = any(name in FILL_ARMS or name == "control" for name in arms)
     tree_shaped = any(name in TREE_ARMS for name in arms)
+    gentle_shaped = any(name in ("treestrap05", "treestrap20", "searchtd05") for name in arms)
     return {
         "arms": arms,
         "selection": load_json_if_complete(selection_path),
-        "rule": TREE_RULE if tree_shaped else FILL_RULE if fill_shaped else "the arm whose final validation point has the largest paired mean margin of ntuple-d3s7 over fair-d3s7; ties by fewer table entries",
+        "rule": GENTLE_RULE if gentle_shaped else TREE_RULE if tree_shaped else FILL_RULE if fill_shaped else "the arm whose final validation point has the largest paired mean margin of ntuple-d3s7 over fair-d3s7; ties by fewer table entries",
+    }
+
+
+GENTLE_RULE = "the TreeStrap arm (treestrap05 or treestrap20) whose best validation point has the larger paired mean margin of ntuple-d3s7 over fair-d3s7 on the 256-game training-role block is the candidate, ties to treestrap05; the other is screened at depth 3 as treestrapalt; searchtd05 is the ablation; each arm's point 0 is the warm start's own margin and is never a candidate"
+
+
+def select_gentle_arm(out):
+    """The gentle-step TreeStrap experiment's selection."""
+    pilot = pilot_summary(out)
+    if pilot is None:
+        raise SystemExit("no training arms found")
+    arms = pilot["arms"]
+    for name in ("treestrap05", "treestrap20", "searchtd05"):
+        if name not in arms or not arms[name]["done"] or arms[name]["bestMargin"] is None:
+            raise SystemExit(f"arm {name} is not complete with a validation point")
+    def start_margin(name):
+        start = load_json_if_complete(os.path.join(out, "pilot", name, "start.json"))
+        return start["pairedDeltaD3"] if start else None
+    ranked = sorted(("treestrap05", "treestrap20"), key=lambda n: (-arms[n]["bestMargin"], ("treestrap05", "treestrap20").index(n)))
+    candidate, alternate = ranked
+    return {
+        "candidateArm": candidate,
+        "candidateBestMargin": arms[candidate]["bestMargin"],
+        "candidateBestMoves": arms[candidate]["best"]["moves"] if arms[candidate]["best"] else None,
+        "alternateArm": alternate,
+        "ablationArm": "searchtd05",
+        "ablationBestMargin": arms["searchtd05"]["bestMargin"],
+        "ablationBestMoves": arms["searchtd05"]["best"]["moves"] if arms["searchtd05"]["best"] else None,
+        "arms": {n: {"bestMargin": arms[n]["bestMargin"], "finalMargin": arms[n]["finalMargin"], "bestMoves": arms[n]["best"]["moves"] if arms[n]["best"] else None, "movesTotal": arms[n]["movesTotal"], "validationPoints": len(arms[n]["validations"]), "stop": arms[n]["stop"]["reason"] if arms[n]["stop"] else None, "warmStartMargin": start_margin(n), "alpha": arms[n].get("alpha")} for n in ("treestrap05", "treestrap20", "searchtd05")},
+        "trainingSignal": {"criterion": "the candidate TreeStrap arm's best validation margin exceeds the warm start's own margin on the same block (point 0)", "passed": (arms[candidate]["bestMargin"] > start_margin(candidate)) if start_margin(candidate) is not None else None},
+        "rule": GENTLE_RULE,
     }
 
 
@@ -349,6 +391,7 @@ def screen_summary(out):
         ("treestrap-d4s7", "treestrap-d3s7"), ("searchtd-d4s7", "searchtd-d3s7"),
         ("treestrap-d3s7", "fair-d3s7"), ("searchtd-d3s7", "fair-d3s7"), ("treestrap-d4s7", "fair-d3s7"),
         ("treestrap-1ply", "prior-1ply"), ("treestrap-1ply", "fair-d3s7"),
+        ("treestrapalt-d3s7", "prior-d3s7"), ("treestrap-d3s7", "treestrapalt-d3s7"), ("treestrapalt-d3s7", "fair-d3s7"),
     ]
     for cand, ref in pairs:
         if cand in by and ref in by:
@@ -553,6 +596,8 @@ def screen_summary(out):
             "vsOnePlyContinuation": vs_control,
             "treestrapDepth4": tree_depth,
             "ablationDepth4": ablation_depth,
+            "alternate": reading("treestrapalt-d3s7-vs-prior-d3s7"),
+            "candidateVsAlternate": reading("treestrap-d3s7-vs-treestrapalt-d3s7"),
             "depthSteps": {n: reading(n) for n in ("treestrap-d4s7-vs-treestrap-d3s7", "searchtd-d4s7-vs-searchtd-d3s7", "prior-d4s7-vs-prior-d3s7") if n in contrasts},
             "direct": {n: reading(n) for n in ("treestrap-1ply-vs-prior-1ply", "treestrap-1ply-vs-fair-d3s7", "prior-1ply-vs-fair-d3s7") if n in contrasts},
             "replicationOfPrior": reading("prior-d3s7-vs-fair-d3s7"),
@@ -612,7 +657,7 @@ def write_markdown(analysis, path):
         elif sel and "candidateArm" in sel:
             lines += ["", f"Selected fill candidate: arm {sel['candidateArm']} (best margin {fmt(sel['candidateBestMargin'])} at {fmt(sel['candidateBestMoves'])} moves); control best margin {fmt(sel['controlBestMargin'])} at {fmt(sel['controlBestMoves'])} moves; training-signal check passed: {sel['trainingSignal']['passed']}; rule: {p['rule']}"]
         for name, arm in p["arms"].items():
-            if arm["validations"] and name in ("control", "occ5", "hgt5", "searchtd", "treestrap"):
+            if arm["validations"] and name in ("control", "occ5", "hgt5", "searchtd", "treestrap", "treestrap05", "treestrap20", "searchtd05"):
                 lines += ["", f"Validation curve of arm {name}:", "", "| point | moves | ntuple-d3s7 | fair-d3s7 | paired delta | LB95 | W-L | 1-ply | touched entries | plateau (last / previous window) |", "| ---: | ---: | ---: | ---: | ---: | ---: | --- | ---: | ---: | --- |"]
                 for index, v in enumerate(arm["validations"], start=1):
                     d = v.get("pairedD3VsFair", {})
@@ -671,7 +716,7 @@ def write_markdown(analysis, path):
         if s.get("tree"):
             f = s["tree"]
             lines += ["", "Search-target experiment readings (three-way verdicts: supported / refuted / inconclusive):", ""]
-            for key, label in (("offPathBoards", "off-path boards (treestrap-d3s7 vs searchtd-d3s7)"), ("ablation", "search targets at visited states only (searchtd-d3s7 vs prior-d3s7)"), ("vsOnePlyContinuation", "vs the one-ply continuation (treestrap-d3s7 vs control-d3s7)"), ("treestrapDepth4", "treestrap at depth 4 (treestrap-d4s7 vs prior-d4s7)"), ("ablationDepth4", "searchtd at depth 4 (searchtd-d4s7 vs prior-d4s7)")):
+            for key, label in (("offPathBoards", "off-path boards (treestrap-d3s7 vs searchtd-d3s7)"), ("ablation", "search targets at visited states only (searchtd-d3s7 vs prior-d3s7)"), ("vsOnePlyContinuation", "vs the one-ply continuation (treestrap-d3s7 vs control-d3s7)"), ("alternate", "the other TreeStrap step size (treestrapalt-d3s7 vs prior-d3s7)"), ("candidateVsAlternate", "candidate vs the other step size (treestrap-d3s7 vs treestrapalt-d3s7)"), ("treestrapDepth4", "treestrap at depth 4 (treestrap-d4s7 vs prior-d4s7)"), ("ablationDepth4", "searchtd at depth 4 (searchtd-d4s7 vs prior-d4s7)")):
                 r = f.get(key)
                 if r:
                     extra = f"; four criteria passed: {r['passed']}" if "passed" in r else ""
@@ -697,6 +742,7 @@ def main():
     parser.add_argument("--select-arm", action="store_true")
     parser.add_argument("--select-fill-arm", action="store_true")
     parser.add_argument("--select-tree-arm", action="store_true")
+    parser.add_argument("--select-gentle-arm", action="store_true")
     args = parser.parse_args()
     out = os.path.join(args.root, "runs", args.run, "ntuple-scale")
     if args.select_arm:
@@ -707,6 +753,9 @@ def main():
         return
     if args.select_tree_arm:
         print(json.dumps(select_tree_arm(out), indent=2))
+        return
+    if args.select_gentle_arm:
+        print(json.dumps(select_gentle_arm(out), indent=2))
         return
     analysis = {
         "format": "drop7-ntuple-scale-analysis-v1",

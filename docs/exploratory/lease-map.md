@@ -61,7 +61,7 @@ constants anywhere in the repository are `0xa511e9b3`, `0xa54ff53a` and
 | `SL-20260906T201104Z-53350936` | `0xa52f2880`–`0xa52f2a7f` | 512 | public-development, held-out SCREEN | fill-conditioned leaf one-shot screen, eleven arms on identical seeds (frozen tables, fill candidate, control, two edits, at depth 3 and depth 4) | opened |
 | `SL-20260907T012358Z-ff502b09` | `0xa5a00000`–`0xa5beffff` | 2,031,616 | **training** | search-target (TreeStrap) leaf: training games of the two search-actor arms (searchtd, treestrap), read in order; the search actor plays about a thousand moves per second, so the block is not exhausted | opened |
 | `SL-20260907T012358Z-a93f439d` | `0xa52f2a80`–`0xa52f2b7f` | 256 | **training**, validation | search-target leaf: the warm start's own margin (point 0) and the paired validation line-up at every validation point of both arms; drives each arm's plateau rule and best point | opened |
-| `SL-20260907T012358Z-74d0228f` | `0xa52f2b80`–`0xa52f2d7f` | 512 | public-development, held-out SCREEN | search-target leaf one-shot screen, ten arms on identical seeds (frozen tables, treestrap candidate, searchtd ablation, the fill experiment's one-ply control, at depth 3 and depth 4) | reserved until the screen opens |
+| `SL-20260907T012358Z-74d0228f` | `0xa52f2b80`–`0xa52f2d7f` | 512 | public-development, held-out SCREEN | search-target leaf one-shot screen, ten arms on identical seeds (frozen tables, treestrap candidate, searchtd ablation, the fill experiment's one-ply control, at depth 3 and depth 4) | opened |
 
 Training and evaluation ranges are disjoint by construction: evaluation lives
 under `0xa51d`, training under `0xa52`. No model trained on `SEEDLEASE-A52` has

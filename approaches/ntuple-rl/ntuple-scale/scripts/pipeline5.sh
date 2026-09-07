@@ -14,7 +14,7 @@
 #           value) and treestrap (the same, plus every internal node of the
 #           search tree trained toward its own backup); each validated on the
 #           256-game training-role block at point 0 (the warm start) and every
-#           4e5 visited moves, with a window-of-three plateau rule from the
+#           3e5 visited moves, with a window-of-three plateau rule from the
 #           sixth training point, capped at ARM_MOVES / ARM_WALL
 #   select  records both arms' best points; the candidate is the treestrap
 #           arm by protocol (no selection between arms)

@@ -1,0 +1,33 @@
+{
+  "candidateArm": "treestrap",
+  "candidateBestMargin": 93767.4453125,
+  "candidateBestMoves": 2108358,
+  "ablationArm": "searchtd",
+  "ablationBestMargin": 140529.28125,
+  "ablationBestMoves": 907918,
+  "arms": {
+    "searchtd": {
+      "bestMargin": 140529.28125,
+      "finalMargin": 112357.37109375,
+      "bestMoves": 907918,
+      "movesTotal": 1812910,
+      "validationPoints": 7,
+      "stop": "plateau",
+      "warmStartMargin": 174466.23046875
+    },
+    "treestrap": {
+      "bestMargin": 93767.4453125,
+      "finalMargin": 75707.640625,
+      "bestMoves": 2108358,
+      "movesTotal": 3126439,
+      "validationPoints": 11,
+      "stop": "wall",
+      "warmStartMargin": 174466.23046875
+    }
+  },
+  "trainingSignal": {
+    "criterion": "the treestrap arm's best validation margin exceeds the warm start's own margin on the same block (point 0)",
+    "passed": false
+  },
+  "rule": "the candidate is the treestrap arm's best validation point by protocol (no selection between arms); the searchtd arm's best point is the ablation; each arm's point 0 is the warm start's own margin on the same block and is never a candidate"
+}

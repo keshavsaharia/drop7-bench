@@ -1,0 +1,1525 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260907T041853Z-27cb32a3",
+  "theoryIds": [
+    "TH-20260907-ntuple-search-target-treestrap-leaf-b1c9989f"
+  ],
+  "experimentId": "EX-20260907-ntuple-treestrap-warm-start-c33ba880",
+  "runIds": [
+    "RUN-20260907T012358Z-a00ecdf0"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "fail",
+  "assessment": "not-supported-as-tested",
+  "evidenceTier": "public-development",
+  "summary": "Held-out screen, 512 never-read paired public-development games (0xa52f2b80+), 10 arms on identical seeds. Candidate arm treestrap by protocol (best validation margin 93,767 at 2,108,358 searched moves; the ablation arm searchtd best 140,529 at 907,918; the warm start's own margin on the validation block {\"searchtd\": 174466.23046875, \"treestrap\": 174466.23046875}; training-signal check passed False). The TreeStrap-trained tables (SHA-256 1a534b78f466725bde199e6ac1a7a27437c8a634b86451cb79a4c3f09ba1437c) as the depth-3 leaf averaged 375,372 points and 109.85 moves against 484,342 and 140.16 for the unchanged frozen tables (SHA-256 0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b) in the same search: treestrap-d3s7 minus prior-d3s7: paired -108,970 (bootstrap 95% lower bound -139,543, Student-t lower bound -139,254, upper bound -78,715, detection floor 30,232), W-T-L 206-0-306, halves -126,504 / -91,436, lower quartile 192,729 vs 215,414, moves -30.32. The preregistered gate FAILS. Off-path boards, treestrap-d3s7 minus searchtd-d3s7: paired -35,819 (bootstrap 95% lower bound -64,276, Student-t lower bound -64,106, upper bound -7,292, detection floor 28,237), W-T-L 242-0-270, halves -36,530 / -35,109: verdict 'refuted'. Search targets at visited states only, searchtd-d3s7 minus prior-d3s7: paired -73,150 (bootstrap 95% lower bound -105,383, Student-t lower bound -105,578, upper bound -41,675, detection floor 32,371), W-T-L 224-0-288, halves -89,974 / -56,327: verdict 'refuted' (four criteria FAIL). Against the one-ply continuation, treestrap-d3s7 minus control-d3s7: paired -91,103 (bootstrap 95% lower bound -120,954, Student-t lower bound -120,979, upper bound -60,596, detection floor 29,825), W-T-L 223-0-289, halves -88,171 / -94,035: verdict 'refuted'. At depth 4, treestrap-d4s7 minus prior-d4s7: paired -101,253 (bootstrap 95% lower bound -135,587, Student-t lower bound -136,261, upper bound -66,683, detection floor 34,947), W-T-L 208-0-304, halves -117,855 / -84,652: verdict 'refuted'. At depth 4, searchtd-d4s7 minus prior-d4s7: paired -77,543 (bootstrap 95% lower bound -113,433, Student-t lower bound -113,187, upper bound -42,565, detection floor 35,582), W-T-L 215-0-297, halves -102,221 / -52,865: verdict 'refuted'. treestrap-d3s7 375,372 / 109.85 moves; searchtd-d3s7 411,191 / 119.84 moves; control-d3s7 466,475 / 135.13 moves; prior-d3s7 484,342 / 140.16 moves; prior-d4s7 532,273 / 153.16 moves; treestrap-d4s7 431,020 / 125.30 moves; searchtd-d4s7 454,730 / 132.08 moves; treestrap-1ply 212,834 / 64.91 moves; prior-1ply 292,614 / 87.42 moves; fair-d3s7 320,843 / 94.22 moves; treestrap-d4s7-vs-treestrap-d3s7: +55,648 (LB +27,132, UB +84,408). searchtd-d4s7-vs-searchtd-d3s7: +43,539 (LB +12,093, UB +75,317). prior-d4s7-vs-prior-d3s7: +47,932 (LB +13,648, UB +81,845). control-d3s7-vs-prior-d3s7: -17,867 (LB -51,858, UB +15,511). prior-d3s7-vs-fair-d3s7: +163,499 (LB +133,843, UB +193,865). treestrap-d3s7-vs-fair-d3s7: +54,529 (LB +31,785, UB +77,846). treestrap-1ply-vs-prior-1ply: -79,779 (LB -93,803, UB -66,238). Arm searchtd: 1,812,910 searched moves in 15,150 games, 7 validation points (point 0 = warm start 174,466), best margin 140,529 at 907,918 moves, final 112,357, stop plateau, 684 moves/s, 0 internal-node updates. Arm treestrap: 3,126,439 searched moves in 30,773 games, 11 validation points (point 0 = warm start 174,466), best margin 93,767 at 2,108,358 moves, final 75,708, stop wall, 558 moves/s, 7,203,486,881 internal-node updates. Logical work per game: treestrap-d3s7 17,905,780, prior-d3s7 23,143,445, treestrap-d4s7 658,968,107, prior-d4s7 821,511,414. Theory falsifiers: {\"primaryFalsifierUpperBoundBelowZero\": true, \"offPathUpperBoundBelowZero\": true, \"gainIsSearchTargetNotOffPath\": false, \"depthCompounding\": true}.",
+  "metrics": {
+    "screen": {
+      "games": 512,
+      "seedStartHex": "0xa52f2b80",
+      "arms": {
+        "prior-d3s7": {
+          "meanScore": 484341.6875,
+          "medianScore": 376501.5,
+          "q25Score": 215414.25,
+          "minScore": 102497.0,
+          "maxScore": 2172909.0,
+          "sdScore": 367402.44403458067,
+          "meanMoves": 140.1640625,
+          "q25Moves": 65.0,
+          "numberedClearsPerMove": 2.1109051892313695,
+          "coverRevealsPerMove": 1.1951396243241736,
+          "meanOccupiedCells": 22.932664652500016,
+          "censoredGames": 0,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "meanWork": 23143444.826171875,
+          "meanWallSecondsPerGame": 4.413301989324219,
+          "games": 512
+        },
+        "prior-1ply": {
+          "meanScore": 292613.591796875,
+          "medianScore": 249003.5,
+          "q25Score": 172891.75,
+          "minScore": 85388.0,
+          "maxScore": 1143379.0,
+          "sdScore": 168597.39570152896,
+          "meanMoves": 87.41796875,
+          "q25Moves": 55.0,
+          "numberedClearsPerMove": 1.9261361097457437,
+          "coverRevealsPerMove": 1.0614862147549042,
+          "meanOccupiedCells": 24.4501948466634,
+          "censoredGames": 0,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "meanWork": 1466.517578125,
+          "meanWallSecondsPerGame": 0.00113080396875,
+          "games": 512
+        },
+        "treestrap-d3s7": {
+          "meanScore": 375371.708984375,
+          "medianScore": 301128.0,
+          "q25Score": 192728.75,
+          "minScore": 85701.0,
+          "maxScore": 1826954.0,
+          "sdScore": 260486.2848585249,
+          "meanMoves": 109.845703125,
+          "q25Moves": 60.0,
+          "numberedClearsPerMove": 2.0360591027897796,
+          "coverRevealsPerMove": 1.1411248021905727,
+          "meanOccupiedCells": 24.259067099845552,
+          "censoredGames": 0,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "meanWork": 17905779.798828125,
+          "meanWallSecondsPerGame": 3.6127242487226563,
+          "games": 512
+        },
+        "treestrap-1ply": {
+          "meanScore": 212834.484375,
+          "medianScore": 182473.0,
+          "q25Score": 139614.5,
+          "minScore": 68360.0,
+          "maxScore": 1067474.0,
+          "sdScore": 109366.86025003566,
+          "meanMoves": 64.90625,
+          "q25Moves": 45.0,
+          "numberedClearsPerMove": 1.78978093403948,
+          "coverRevealsPerMove": 0.9672604718343765,
+          "meanOccupiedCells": 25.45494869716383,
+          "censoredGames": 0,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "meanWork": 1136.8046875,
+          "meanWallSecondsPerGame": 0.000768767921875,
+          "games": 512
+        },
+        "searchtd-d3s7": {
+          "meanScore": 411191.189453125,
+          "medianScore": 303296.0,
+          "q25Score": 196306.75,
+          "minScore": 85575.0,
+          "maxScore": 2032455.0,
+          "sdScore": 298267.02854499675,
+          "meanMoves": 119.841796875,
+          "q25Moves": 60.0,
+          "numberedClearsPerMove": 2.066167962320116,
+          "coverRevealsPerMove": 1.160498052445444,
+          "meanOccupiedCells": 23.556365313215153,
+          "censoredGames": 0,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "meanWork": 19551777.357421875,
+          "meanWallSecondsPerGame": 3.679400870591797,
+          "games": 512
+        },
+        "control-d3s7": {
+          "meanScore": 466474.765625,
+          "medianScore": 372346.5,
+          "q25Score": 228490.25,
+          "minScore": 102773.0,
+          "maxScore": 2392977.0,
+          "sdScore": 341474.411260536,
+          "meanMoves": 135.126953125,
+          "q25Moves": 70.0,
+          "numberedClearsPerMove": 2.100166221001662,
+          "coverRevealsPerMove": 1.1868902218689021,
+          "meanOccupiedCells": 22.97403297414273,
+          "censoredGames": 0,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "meanWork": 22287543.275390625,
+          "meanWallSecondsPerGame": 4.241401161896484,
+          "games": 512
+        },
+        "prior-d4s7": {
+          "meanScore": 532273.255859375,
+          "medianScore": 419196.0,
+          "q25Score": 244637.0,
+          "minScore": 86899.0,
+          "maxScore": 3266088.0,
+          "sdScore": 395807.0950790187,
+          "meanMoves": 153.16015625,
+          "q25Moves": 72.25,
+          "numberedClearsPerMove": 2.1348032339513887,
+          "coverRevealsPerMove": 1.2109847228952537,
+          "meanOccupiedCells": 22.701142697546782,
+          "censoredGames": 0,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "meanWork": 821511414.2714844,
+          "meanWallSecondsPerGame": 163.31674506258008,
+          "games": 512
+        },
+        "treestrap-d4s7": {
+          "meanScore": 431019.796875,
+          "medianScore": 336510.5,
+          "q25Score": 194988.75,
+          "minScore": 85567.0,
+          "maxScore": 2584387.0,
+          "sdScore": 324967.6998666243,
+          "meanMoves": 125.296875,
+          "q25Moves": 60.0,
+          "numberedClearsPerMove": 2.084206260132186,
+          "coverRevealsPerMove": 1.1748503554059109,
+          "meanOccupiedCells": 23.94521296739773,
+          "censoredGames": 0,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "meanWork": 658968106.875,
+          "meanWallSecondsPerGame": 132.62990938135547,
+          "games": 512
+        },
+        "searchtd-d4s7": {
+          "meanScore": 454730.49609375,
+          "medianScore": 334313.5,
+          "q25Score": 214485.0,
+          "minScore": 85631.0,
+          "maxScore": 2698321.0,
+          "sdScore": 364662.71551136306,
+          "meanMoves": 132.083984375,
+          "q25Moves": 65.0,
+          "numberedClearsPerMove": 2.0959971608972747,
+          "coverRevealsPerMove": 1.1804900409599717,
+          "meanOccupiedCells": 23.2917708025942,
+          "censoredGames": 0,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "meanWork": 696484956.3691406,
+          "meanWallSecondsPerGame": 136.62518124484376,
+          "games": 512
+        },
+        "fair-d3s7": {
+          "meanScore": 320843.095703125,
+          "medianScore": 264819.5,
+          "q25Score": 174267.75,
+          "minScore": 86627.0,
+          "maxScore": 1464784.0,
+          "sdScore": 203370.1067284865,
+          "meanMoves": 94.22265625,
+          "q25Moves": 55.0,
+          "numberedClearsPerMove": 1.9888478918784462,
+          "coverRevealsPerMove": 1.1040794328593342,
+          "meanOccupiedCells": 24.163354314444604,
+          "censoredGames": 0,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "meanWork": 14911589.6484375,
+          "meanWallSecondsPerGame": 4.31867039408789,
+          "games": 512
+        }
+      },
+      "contrasts": {
+        "prior-d3s7-vs-fair-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 163498.591796875,
+            "pairedSd": 412571.7588553789,
+            "bootstrapLower95": 133842.91982421876,
+            "bootstrapUpper95": 193864.85205078125,
+            "studentTLower95": 133453.0650176403,
+            "detectionFloor": 29993.725902430662,
+            "wins": 322,
+            "ties": 0,
+            "losses": 190,
+            "firstHalfMeanDelta": 198133.28125,
+            "secondHalfMeanDelta": 128863.90234375,
+            "q25Delta": 41146.5,
+            "candidateQ25": 215414.25,
+            "referenceQ25": 174267.75
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 45.94140625,
+            "pairedSd": 114.29602655934887,
+            "bootstrapLower95": 37.73427734375,
+            "bootstrapUpper95": 54.3498046875,
+            "studentTLower95": 37.61780131815394,
+            "detectionFloor": 8.30925437521219,
+            "wins": 318,
+            "ties": 16,
+            "losses": 178,
+            "firstHalfMeanDelta": 55.4140625,
+            "secondHalfMeanDelta": 36.46875,
+            "q25Delta": 10.0,
+            "candidateQ25": 65.0,
+            "referenceQ25": 55.0
+          }
+        },
+        "prior-1ply-vs-fair-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": -28229.50390625,
+            "pairedSd": 259231.80616954702,
+            "bootstrapLower95": -46833.8640625,
+            "bootstrapUpper95": -9595.882714843756,
+            "studentTLower95": -47108.052927407654,
+            "detectionFloor": 18846.000901789685,
+            "wins": 226,
+            "ties": 0,
+            "losses": 286,
+            "firstHalfMeanDelta": -20327.59375,
+            "secondHalfMeanDelta": -36131.4140625,
+            "q25Delta": -1376.0,
+            "candidateQ25": 172891.75,
+            "referenceQ25": 174267.75
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": -6.8046875,
+            "pairedSd": 71.60025020386702,
+            "bootstrapLower95": -11.93388671875,
+            "bootstrapUpper95": -1.6756835937500014,
+            "studentTLower95": -12.01897371500554,
+            "detectionFloor": 5.205296371032119,
+            "wins": 220,
+            "ties": 23,
+            "losses": 269,
+            "firstHalfMeanDelta": -4.66015625,
+            "secondHalfMeanDelta": -8.94921875,
+            "q25Delta": 0.0,
+            "candidateQ25": 55.0,
+            "referenceQ25": 55.0
+          }
+        },
+        "prior-d4s7-vs-prior-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 47931.568359375,
+            "pairedSd": 479750.79913669423,
+            "bootstrapLower95": 13647.7791015625,
+            "bootstrapUpper95": 81845.2453125,
+            "studentTLower95": 12993.729853871417,
+            "detectionFloor": 34877.602894341864,
+            "wins": 289,
+            "ties": 0,
+            "losses": 223,
+            "firstHalfMeanDelta": 33479.6171875,
+            "secondHalfMeanDelta": 62383.51953125,
+            "q25Delta": 29222.75,
+            "candidateQ25": 244637.0,
+            "referenceQ25": 215414.25
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 12.99609375,
+            "pairedSd": 132.81521963947355,
+            "bootstrapLower95": 3.4978515625,
+            "bootstrapUpper95": 22.376953125,
+            "studentTLower95": 3.3238291009633816,
+            "detectionFloor": 9.655588895831082,
+            "wins": 277,
+            "ties": 20,
+            "losses": 215,
+            "firstHalfMeanDelta": 8.96484375,
+            "secondHalfMeanDelta": 17.02734375,
+            "q25Delta": 7.25,
+            "candidateQ25": 72.25,
+            "referenceQ25": 65.0
+          }
+        },
+        "prior-d4s7-vs-fair-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 211430.16015625,
+            "pairedSd": 438838.4951299772,
+            "bootstrapLower95": 180062.90693359374,
+            "bootstrapUpper95": 243551.546484375,
+            "studentTLower95": 179471.75904375737,
+            "detectionFloor": 31903.302288263454,
+            "wins": 343,
+            "ties": 0,
+            "losses": 169,
+            "firstHalfMeanDelta": 231612.8984375,
+            "secondHalfMeanDelta": 191247.421875,
+            "q25Delta": 70369.25,
+            "candidateQ25": 244637.0,
+            "referenceQ25": 174267.75
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 58.9375,
+            "pairedSd": 121.13943705248653,
+            "bootstrapLower95": 50.3044921875,
+            "bootstrapUpper95": 67.81455078125,
+            "studentTLower95": 50.115523890729406,
+            "detectionFloor": 8.806766321106041,
+            "wins": 336,
+            "ties": 15,
+            "losses": 161,
+            "firstHalfMeanDelta": 64.37890625,
+            "secondHalfMeanDelta": 53.49609375,
+            "q25Delta": 17.25,
+            "candidateQ25": 72.25,
+            "referenceQ25": 55.0
+          }
+        },
+        "control-d3s7-vs-prior-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": -17866.921875,
+            "pairedSd": 462075.6821865759,
+            "bootstrapLower95": -51857.59169921875,
+            "bootstrapUpper95": 15510.871972656249,
+            "studentTLower95": -51517.57048383148,
+            "detectionFloor": 33592.63221538395,
+            "wins": 245,
+            "ties": 5,
+            "losses": 262,
+            "firstHalfMeanDelta": -38333.0546875,
+            "secondHalfMeanDelta": 2599.2109375,
+            "q25Delta": 13076.0,
+            "candidateQ25": 228490.25,
+            "referenceQ25": 215414.25
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": -5.037109375,
+            "pairedSd": 128.03655219693027,
+            "bootstrapLower95": -14.46298828125,
+            "bootstrapUpper95": 4.203320312499997,
+            "studentTLower95": -14.361367701421793,
+            "detectionFloor": 9.308182563783147,
+            "wins": 233,
+            "ties": 29,
+            "losses": 250,
+            "firstHalfMeanDelta": -10.65625,
+            "secondHalfMeanDelta": 0.58203125,
+            "q25Delta": 5.0,
+            "candidateQ25": 70.0,
+            "referenceQ25": 65.0
+          }
+        },
+        "control-d3s7-vs-fair-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 145631.669921875,
+            "pairedSd": 380517.00837559154,
+            "bootstrapLower95": 118182.43623046875,
+            "bootstrapUpper95": 173192.228125,
+            "studentTLower95": 117920.52944822292,
+            "detectionFloor": 27663.364264423904,
+            "wins": 329,
+            "ties": 0,
+            "losses": 183,
+            "firstHalfMeanDelta": 159800.2265625,
+            "secondHalfMeanDelta": 131463.11328125,
+            "q25Delta": 54222.5,
+            "candidateQ25": 228490.25,
+            "referenceQ25": 174267.75
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 40.904296875,
+            "pairedSd": 105.17286404674105,
+            "bootstrapLower95": 33.31240234375,
+            "bootstrapUpper95": 48.54111328125,
+            "studentTLower95": 33.24508599752244,
+            "detectionFloor": 7.646005789013128,
+            "wins": 324,
+            "ties": 14,
+            "losses": 174,
+            "firstHalfMeanDelta": 44.7578125,
+            "secondHalfMeanDelta": 37.05078125,
+            "q25Delta": 15.0,
+            "candidateQ25": 70.0,
+            "referenceQ25": 55.0
+          }
+        },
+        "treestrap-d3s7-vs-prior-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": -108969.978515625,
+            "pairedSd": 415846.3861856549,
+            "bootstrapLower95": -139543.174609375,
+            "bootstrapUpper95": -78715.13740234375,
+            "studentTLower95": -139253.97993843877,
+            "detectionFloor": 30231.78939676532,
+            "wins": 206,
+            "ties": 0,
+            "losses": 306,
+            "firstHalfMeanDelta": -126504.26171875,
+            "secondHalfMeanDelta": -91435.6953125,
+            "q25Delta": -22685.5,
+            "candidateQ25": 192728.75,
+            "referenceQ25": 215414.25
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": -30.318359375,
+            "pairedSd": 115.12351154653865,
+            "bootstrapLower95": -38.7677734375,
+            "bootstrapUpper95": -21.94130859375,
+            "studentTLower95": -38.70222587785374,
+            "detectionFloor": 8.369412050480618,
+            "wins": 190,
+            "ties": 22,
+            "losses": 300,
+            "firstHalfMeanDelta": -35.1171875,
+            "secondHalfMeanDelta": -25.51953125,
+            "q25Delta": -5.0,
+            "candidateQ25": 60.0,
+            "referenceQ25": 65.0
+          }
+        },
+        "treestrap-d3s7-vs-searchtd-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": -35819.48046875,
+            "pairedSd": 388412.62994674663,
+            "bootstrapLower95": -64275.85966796875,
+            "bootstrapUpper95": -7292.229492187507,
+            "studentTLower95": -64105.619362102436,
+            "detectionFloor": 28237.371341136004,
+            "wins": 242,
+            "ties": 0,
+            "losses": 270,
+            "firstHalfMeanDelta": -36529.85546875,
+            "secondHalfMeanDelta": -35109.10546875,
+            "q25Delta": -3578.0,
+            "candidateQ25": 192728.75,
+            "referenceQ25": 196306.75
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": -9.99609375,
+            "pairedSd": 107.45916251756988,
+            "bootstrapLower95": -17.88310546875,
+            "bootstrapUpper95": -2.085742187500003,
+            "studentTLower95": -17.821804249558316,
+            "detectionFloor": 7.812218352508595,
+            "wins": 235,
+            "ties": 10,
+            "losses": 267,
+            "firstHalfMeanDelta": -10.23828125,
+            "secondHalfMeanDelta": -9.75390625,
+            "q25Delta": 0.0,
+            "candidateQ25": 60.0,
+            "referenceQ25": 60.0
+          }
+        },
+        "searchtd-d3s7-vs-prior-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": -73150.498046875,
+            "pairedSd": 445274.59160616295,
+            "bootstrapLower95": -105383.378125,
+            "bootstrapUpper95": -41674.816699218754,
+            "studentTLower95": -105577.60770491975,
+            "detectionFloor": 32371.20274302043,
+            "wins": 224,
+            "ties": 0,
+            "losses": 288,
+            "firstHalfMeanDelta": -89974.40625,
+            "secondHalfMeanDelta": -56326.58984375,
+            "q25Delta": -19107.5,
+            "candidateQ25": 196306.75,
+            "referenceQ25": 215414.25
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": -20.322265625,
+            "pairedSd": 123.50657640469656,
+            "bootstrapLower95": -29.251953125,
+            "bootstrapUpper95": -11.581835937500003,
+            "studentTLower95": -29.316628591272938,
+            "detectionFloor": 8.978855969462057,
+            "wins": 215,
+            "ties": 16,
+            "losses": 281,
+            "firstHalfMeanDelta": -24.87890625,
+            "secondHalfMeanDelta": -15.765625,
+            "q25Delta": -5.0,
+            "candidateQ25": 60.0,
+            "referenceQ25": 65.0
+          }
+        },
+        "treestrap-d3s7-vs-control-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": -91103.056640625,
+            "pairedSd": 410244.2461863572,
+            "bootstrapLower95": -120954.07548828125,
+            "bootstrapUpper95": -60595.75976562501,
+            "studentTLower95": -120979.0823749503,
+            "detectionFloor": 29824.517090798105,
+            "wins": 223,
+            "ties": 0,
+            "losses": 289,
+            "firstHalfMeanDelta": -88171.20703125,
+            "secondHalfMeanDelta": -94034.90625,
+            "q25Delta": -35761.5,
+            "candidateQ25": 192728.75,
+            "referenceQ25": 228490.25
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": -25.28125,
+            "pairedSd": 113.35973513510937,
+            "bootstrapLower95": -33.54111328125,
+            "bootstrapUpper95": -16.874609375000006,
+            "studentTLower95": -33.53666953510878,
+            "detectionFloor": 8.241186535519653,
+            "wins": 214,
+            "ties": 16,
+            "losses": 282,
+            "firstHalfMeanDelta": -24.4609375,
+            "secondHalfMeanDelta": -26.1015625,
+            "q25Delta": -10.0,
+            "candidateQ25": 60.0,
+            "referenceQ25": 70.0
+          }
+        },
+        "treestrap-d4s7-vs-prior-d4s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": -101253.458984375,
+            "pairedSd": 480703.2009184533,
+            "bootstrapLower95": -135587.15283203125,
+            "bootstrapUpper95": -66683.35419921875,
+            "studentTLower95": -136260.65612295087,
+            "detectionFloor": 34946.84194761667,
+            "wins": 208,
+            "ties": 0,
+            "losses": 304,
+            "firstHalfMeanDelta": -117854.90625,
+            "secondHalfMeanDelta": -84652.01171875,
+            "q25Delta": -49648.25,
+            "candidateQ25": 194988.75,
+            "referenceQ25": 244637.0
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": -27.86328125,
+            "pairedSd": 132.85393911484786,
+            "bootstrapLower95": -37.3458984375,
+            "bootstrapUpper95": -18.32802734375,
+            "studentTLower95": -37.53836564374591,
+            "detectionFloor": 9.658403779076325,
+            "wins": 199,
+            "ties": 20,
+            "losses": 293,
+            "firstHalfMeanDelta": -32.51171875,
+            "secondHalfMeanDelta": -23.21484375,
+            "q25Delta": -12.25,
+            "candidateQ25": 60.0,
+            "referenceQ25": 72.25
+          }
+        },
+        "searchtd-d4s7-vs-prior-d4s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": -77542.759765625,
+            "pairedSd": 489444.6364515608,
+            "bootstrapLower95": -113432.50556640625,
+            "bootstrapUpper95": -42564.703906250004,
+            "studentTLower95": -113186.55170198245,
+            "detectionFloor": 35582.339205357224,
+            "wins": 215,
+            "ties": 0,
+            "losses": 297,
+            "firstHalfMeanDelta": -102220.61328125,
+            "secondHalfMeanDelta": -52864.90625,
+            "q25Delta": -30152.0,
+            "candidateQ25": 214485.0,
+            "referenceQ25": 244637.0
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": -21.076171875,
+            "pairedSd": 135.41657138933624,
+            "bootstrapLower95": -30.96943359375,
+            "bootstrapUpper95": -11.444921875000006,
+            "studentTLower95": -30.937879892335868,
+            "detectionFloor": 9.844705648702526,
+            "wins": 214,
+            "ties": 13,
+            "losses": 285,
+            "firstHalfMeanDelta": -27.75,
+            "secondHalfMeanDelta": -14.40234375,
+            "q25Delta": -7.25,
+            "candidateQ25": 65.0,
+            "referenceQ25": 72.25
+          }
+        },
+        "treestrap-d4s7-vs-treestrap-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 55648.087890625,
+            "pairedSd": 392364.4987793044,
+            "bootstrapLower95": 27132.11533203125,
+            "bootstrapUpper95": 84407.865625,
+            "studentTLower95": 27074.154260264746,
+            "detectionFloor": 28524.669897137373,
+            "wins": 287,
+            "ties": 0,
+            "losses": 225,
+            "firstHalfMeanDelta": 42128.97265625,
+            "secondHalfMeanDelta": 69167.203125,
+            "q25Delta": 2260.0,
+            "candidateQ25": 194988.75,
+            "referenceQ25": 192728.75
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 15.451171875,
+            "pairedSd": 108.22469540403988,
+            "bootstrapLower95": 7.5798828125,
+            "bootstrapUpper95": 23.375195312499997,
+            "studentTLower95": 7.569711464433156,
+            "detectionFloor": 7.867872146238395,
+            "wins": 272,
+            "ties": 24,
+            "losses": 216,
+            "firstHalfMeanDelta": 11.5703125,
+            "secondHalfMeanDelta": 19.33203125,
+            "q25Delta": 0.0,
+            "candidateQ25": 60.0,
+            "referenceQ25": 60.0
+          }
+        },
+        "searchtd-d4s7-vs-searchtd-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 43539.306640625,
+            "pairedSd": 441212.35993320664,
+            "bootstrapLower95": 12092.69697265625,
+            "bootstrapUpper95": 75317.28466796875,
+            "studentTLower95": 11408.02889034796,
+            "detectionFloor": 32075.880872980524,
+            "wins": 272,
+            "ties": 0,
+            "losses": 240,
+            "firstHalfMeanDelta": 21233.41015625,
+            "secondHalfMeanDelta": 65845.203125,
+            "q25Delta": 18178.25,
+            "candidateQ25": 214485.0,
+            "referenceQ25": 196306.75
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 12.2421875,
+            "pairedSd": 122.19656271289058,
+            "bootstrapLower95": 3.52919921875,
+            "bootstrapUpper95": 21.05283203125,
+            "studentTLower95": 3.3432262441289584,
+            "detectionFloor": 8.883618739193386,
+            "wins": 265,
+            "ties": 17,
+            "losses": 230,
+            "firstHalfMeanDelta": 6.09375,
+            "secondHalfMeanDelta": 18.390625,
+            "q25Delta": 5.0,
+            "candidateQ25": 65.0,
+            "referenceQ25": 60.0
+          }
+        },
+        "treestrap-d3s7-vs-fair-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 54528.61328125,
+            "pairedSd": 315554.5731058861,
+            "bootstrapLower95": 31784.66171875,
+            "bootstrapUpper95": 77845.61005859374,
+            "studentTLower95": 31548.36033600101,
+            "detectionFloor": 22940.633162228067,
+            "wins": 283,
+            "ties": 0,
+            "losses": 229,
+            "firstHalfMeanDelta": 71629.01953125,
+            "secondHalfMeanDelta": 37428.20703125,
+            "q25Delta": 18461.0,
+            "candidateQ25": 192728.75,
+            "referenceQ25": 174267.75
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 15.623046875,
+            "pairedSd": 86.86348296770949,
+            "bootstrapLower95": 9.369140625,
+            "bootstrapUpper95": 22.068554687499997,
+            "studentTLower95": 9.29721616161188,
+            "detectionFloor": 6.314924478331063,
+            "wins": 279,
+            "ties": 19,
+            "losses": 214,
+            "firstHalfMeanDelta": 20.296875,
+            "secondHalfMeanDelta": 10.94921875,
+            "q25Delta": 5.0,
+            "candidateQ25": 60.0,
+            "referenceQ25": 55.0
+          }
+        },
+        "searchtd-d3s7-vs-fair-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 90348.09375,
+            "pairedSd": 358019.26712892053,
+            "bootstrapLower95": 64777.80908203125,
+            "bootstrapUpper95": 116129.8126953125,
+            "studentTLower95": 64275.35065229652,
+            "detectionFloor": 26027.79161580498,
+            "wins": 307,
+            "ties": 0,
+            "losses": 205,
+            "firstHalfMeanDelta": 108158.875,
+            "secondHalfMeanDelta": 72537.3125,
+            "q25Delta": 22039.0,
+            "candidateQ25": 196306.75,
+            "referenceQ25": 174267.75
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 25.619140625,
+            "pairedSd": 99.10614930755399,
+            "bootstrapLower95": 18.55439453125,
+            "bootstrapUpper95": 32.76962890625,
+            "studentTLower95": 18.40173807842692,
+            "detectionFloor": 7.2049591707951395,
+            "wins": 304,
+            "ties": 16,
+            "losses": 192,
+            "firstHalfMeanDelta": 30.53515625,
+            "secondHalfMeanDelta": 20.703125,
+            "q25Delta": 5.0,
+            "candidateQ25": 60.0,
+            "referenceQ25": 55.0
+          }
+        },
+        "treestrap-d4s7-vs-fair-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 110176.701171875,
+            "pairedSd": 358239.1381391644,
+            "bootstrapLower95": 84706.52255859374,
+            "bootstrapUpper95": 136773.716015625,
+            "studentTLower95": 84087.94597401083,
+            "detectionFloor": 26043.77610983201,
+            "wins": 310,
+            "ties": 0,
+            "losses": 202,
+            "firstHalfMeanDelta": 113757.9921875,
+            "secondHalfMeanDelta": 106595.41015625,
+            "q25Delta": 20721.0,
+            "candidateQ25": 194988.75,
+            "referenceQ25": 174267.75
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 31.07421875,
+            "pairedSd": 98.60868897547932,
+            "bootstrapLower95": 24.04287109375,
+            "bootstrapUpper95": 38.39072265625,
+            "studentTLower95": 23.893043738172445,
+            "detectionFloor": 7.168794095199623,
+            "wins": 304,
+            "ties": 13,
+            "losses": 195,
+            "firstHalfMeanDelta": 31.8671875,
+            "secondHalfMeanDelta": 30.28125,
+            "q25Delta": 5.0,
+            "candidateQ25": 60.0,
+            "referenceQ25": 55.0
+          }
+        },
+        "treestrap-1ply-vs-prior-1ply": {
+          "score": {
+            "n": 512,
+            "meanDelta": -79779.107421875,
+            "pairedSd": 191120.92933139292,
+            "bootstrapLower95": -93802.67822265625,
+            "bootstrapUpper95": -66238.45673828125,
+            "studentTLower95": -93697.48374562012,
+            "detectionFloor": 13894.379936444075,
+            "wins": 168,
+            "ties": 0,
+            "losses": 344,
+            "firstHalfMeanDelta": -82967.796875,
+            "secondHalfMeanDelta": -76590.41796875,
+            "q25Delta": -33277.25,
+            "candidateQ25": 139614.5,
+            "referenceQ25": 172891.75
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": -22.51171875,
+            "pairedSd": 53.186926753391624,
+            "bootstrapLower95": -26.412109375,
+            "bootstrapUpper95": -18.74794921875,
+            "studentTLower95": -26.38505520062795,
+            "detectionFloor": 3.866658510654591,
+            "wins": 147,
+            "ties": 32,
+            "losses": 333,
+            "firstHalfMeanDelta": -23.53515625,
+            "secondHalfMeanDelta": -21.48828125,
+            "q25Delta": -10.0,
+            "candidateQ25": 45.0,
+            "referenceQ25": 55.0
+          }
+        },
+        "treestrap-1ply-vs-fair-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": -108008.611328125,
+            "pairedSd": 228563.27350202217,
+            "bootstrapLower95": -124632.9828125,
+            "bootstrapUpper95": -91789.5578125,
+            "studentTLower95": -124653.72531703908,
+            "detectionFloor": 16616.416489101062,
+            "wins": 157,
+            "ties": 0,
+            "losses": 355,
+            "firstHalfMeanDelta": -103295.390625,
+            "secondHalfMeanDelta": -112721.83203125,
+            "q25Delta": -34653.25,
+            "candidateQ25": 139614.5,
+            "referenceQ25": 174267.75
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": -29.31640625,
+            "pairedSd": 62.71110324363818,
+            "bootstrapLower95": -33.87109375,
+            "bootstrapUpper95": -24.86328125,
+            "studentTLower95": -33.88334058668241,
+            "detectionFloor": 4.559060578812061,
+            "wins": 145,
+            "ties": 26,
+            "losses": 341,
+            "firstHalfMeanDelta": -28.1953125,
+            "secondHalfMeanDelta": -30.4375,
+            "q25Delta": -10.0,
+            "candidateQ25": 45.0,
+            "referenceQ25": 55.0
+          }
+        }
+      },
+      "tree": {
+        "primary": "treestrap-d3s7-vs-prior-d3s7",
+        "gate": {
+          "checks": [
+            {
+              "criterion": "screen artifact: illegalDecisions 0 and incompleteDecisions 0 in every arm",
+              "passed": true
+            },
+            {
+              "criterion": "bootstrap 95% lower bound of treestrap-d3s7 minus prior-d3s7 > 0",
+              "passed": false,
+              "observed": -139543.174609375
+            },
+            {
+              "criterion": "Student-t 95% lower bound > 0",
+              "passed": false,
+              "observed": -139253.97993843877
+            },
+            {
+              "criterion": "paired mean delta > 0 in both halves",
+              "passed": false,
+              "observed": [
+                -126504.26171875,
+                -91435.6953125
+              ]
+            },
+            {
+              "criterion": "treestrap-d3s7 Q25 >= prior-d3s7 Q25",
+              "passed": false,
+              "observed": [
+                192728.75,
+                215414.25
+              ]
+            }
+          ],
+          "passed": false
+        },
+        "offPathBoards": {
+          "contrast": "treestrap-d3s7-vs-searchtd-d3s7",
+          "verdict": "refuted",
+          "meanDelta": -35819.48046875,
+          "bootstrapLower95": -64275.85966796875,
+          "bootstrapUpper95": -7292.229492187507,
+          "studentTLower95": -64105.619362102436,
+          "detectionFloor": 28237.371341136004,
+          "wins": 242,
+          "ties": 0,
+          "losses": 270,
+          "firstHalfMeanDelta": -36529.85546875,
+          "secondHalfMeanDelta": -35109.10546875,
+          "candidateQ25": 192728.75,
+          "referenceQ25": 196306.75
+        },
+        "ablation": {
+          "checks": [
+            {
+              "criterion": "screen artifact: illegalDecisions 0 and incompleteDecisions 0 in every arm",
+              "passed": true
+            },
+            {
+              "criterion": "bootstrap 95% lower bound of searchtd-d3s7 minus prior-d3s7 > 0",
+              "passed": false,
+              "observed": -105383.378125
+            },
+            {
+              "criterion": "Student-t 95% lower bound > 0",
+              "passed": false,
+              "observed": -105577.60770491975
+            },
+            {
+              "criterion": "paired mean delta > 0 in both halves",
+              "passed": false,
+              "observed": [
+                -89974.40625,
+                -56326.58984375
+              ]
+            },
+            {
+              "criterion": "searchtd-d3s7 Q25 >= prior-d3s7 Q25",
+              "passed": false,
+              "observed": [
+                196306.75,
+                215414.25
+              ]
+            }
+          ],
+          "passed": false,
+          "contrast": "searchtd-d3s7-vs-prior-d3s7",
+          "verdict": "refuted",
+          "meanDelta": -73150.498046875,
+          "bootstrapLower95": -105383.378125,
+          "bootstrapUpper95": -41674.816699218754,
+          "studentTLower95": -105577.60770491975,
+          "detectionFloor": 32371.20274302043,
+          "wins": 224,
+          "ties": 0,
+          "losses": 288,
+          "firstHalfMeanDelta": -89974.40625,
+          "secondHalfMeanDelta": -56326.58984375,
+          "candidateQ25": 196306.75,
+          "referenceQ25": 215414.25
+        },
+        "vsOnePlyContinuation": {
+          "contrast": "treestrap-d3s7-vs-control-d3s7",
+          "verdict": "refuted",
+          "meanDelta": -91103.056640625,
+          "bootstrapLower95": -120954.07548828125,
+          "bootstrapUpper95": -60595.75976562501,
+          "studentTLower95": -120979.0823749503,
+          "detectionFloor": 29824.517090798105,
+          "wins": 223,
+          "ties": 0,
+          "losses": 289,
+          "firstHalfMeanDelta": -88171.20703125,
+          "secondHalfMeanDelta": -94034.90625,
+          "candidateQ25": 192728.75,
+          "referenceQ25": 228490.25
+        },
+        "treestrapDepth4": {
+          "contrast": "treestrap-d4s7-vs-prior-d4s7",
+          "verdict": "refuted",
+          "meanDelta": -101253.458984375,
+          "bootstrapLower95": -135587.15283203125,
+          "bootstrapUpper95": -66683.35419921875,
+          "studentTLower95": -136260.65612295087,
+          "detectionFloor": 34946.84194761667,
+          "wins": 208,
+          "ties": 0,
+          "losses": 304,
+          "firstHalfMeanDelta": -117854.90625,
+          "secondHalfMeanDelta": -84652.01171875,
+          "candidateQ25": 194988.75,
+          "referenceQ25": 244637.0
+        },
+        "ablationDepth4": {
+          "contrast": "searchtd-d4s7-vs-prior-d4s7",
+          "verdict": "refuted",
+          "meanDelta": -77542.759765625,
+          "bootstrapLower95": -113432.50556640625,
+          "bootstrapUpper95": -42564.703906250004,
+          "studentTLower95": -113186.55170198245,
+          "detectionFloor": 35582.339205357224,
+          "wins": 215,
+          "ties": 0,
+          "losses": 297,
+          "firstHalfMeanDelta": -102220.61328125,
+          "secondHalfMeanDelta": -52864.90625,
+          "candidateQ25": 214485.0,
+          "referenceQ25": 244637.0
+        },
+        "alternate": null,
+        "candidateVsAlternate": null,
+        "depthSteps": {
+          "treestrap-d4s7-vs-treestrap-d3s7": {
+            "contrast": "treestrap-d4s7-vs-treestrap-d3s7",
+            "verdict": "supported",
+            "meanDelta": 55648.087890625,
+            "bootstrapLower95": 27132.11533203125,
+            "bootstrapUpper95": 84407.865625,
+            "studentTLower95": 27074.154260264746,
+            "detectionFloor": 28524.669897137373,
+            "wins": 287,
+            "ties": 0,
+            "losses": 225,
+            "firstHalfMeanDelta": 42128.97265625,
+            "secondHalfMeanDelta": 69167.203125,
+            "candidateQ25": 194988.75,
+            "referenceQ25": 192728.75
+          },
+          "searchtd-d4s7-vs-searchtd-d3s7": {
+            "contrast": "searchtd-d4s7-vs-searchtd-d3s7",
+            "verdict": "supported",
+            "meanDelta": 43539.306640625,
+            "bootstrapLower95": 12092.69697265625,
+            "bootstrapUpper95": 75317.28466796875,
+            "studentTLower95": 11408.02889034796,
+            "detectionFloor": 32075.880872980524,
+            "wins": 272,
+            "ties": 0,
+            "losses": 240,
+            "firstHalfMeanDelta": 21233.41015625,
+            "secondHalfMeanDelta": 65845.203125,
+            "candidateQ25": 214485.0,
+            "referenceQ25": 196306.75
+          },
+          "prior-d4s7-vs-prior-d3s7": {
+            "contrast": "prior-d4s7-vs-prior-d3s7",
+            "verdict": "supported",
+            "meanDelta": 47931.568359375,
+            "bootstrapLower95": 13647.7791015625,
+            "bootstrapUpper95": 81845.2453125,
+            "studentTLower95": 12993.729853871417,
+            "detectionFloor": 34877.602894341864,
+            "wins": 289,
+            "ties": 0,
+            "losses": 223,
+            "firstHalfMeanDelta": 33479.6171875,
+            "secondHalfMeanDelta": 62383.51953125,
+            "candidateQ25": 244637.0,
+            "referenceQ25": 215414.25
+          }
+        },
+        "direct": {
+          "treestrap-1ply-vs-prior-1ply": {
+            "contrast": "treestrap-1ply-vs-prior-1ply",
+            "verdict": "refuted",
+            "meanDelta": -79779.107421875,
+            "bootstrapLower95": -93802.67822265625,
+            "bootstrapUpper95": -66238.45673828125,
+            "studentTLower95": -93697.48374562012,
+            "detectionFloor": 13894.379936444075,
+            "wins": 168,
+            "ties": 0,
+            "losses": 344,
+            "firstHalfMeanDelta": -82967.796875,
+            "secondHalfMeanDelta": -76590.41796875,
+            "candidateQ25": 139614.5,
+            "referenceQ25": 172891.75
+          },
+          "treestrap-1ply-vs-fair-d3s7": {
+            "contrast": "treestrap-1ply-vs-fair-d3s7",
+            "verdict": "refuted",
+            "meanDelta": -108008.611328125,
+            "bootstrapLower95": -124632.9828125,
+            "bootstrapUpper95": -91789.5578125,
+            "studentTLower95": -124653.72531703908,
+            "detectionFloor": 16616.416489101062,
+            "wins": 157,
+            "ties": 0,
+            "losses": 355,
+            "firstHalfMeanDelta": -103295.390625,
+            "secondHalfMeanDelta": -112721.83203125,
+            "candidateQ25": 139614.5,
+            "referenceQ25": 174267.75
+          },
+          "prior-1ply-vs-fair-d3s7": {
+            "contrast": "prior-1ply-vs-fair-d3s7",
+            "verdict": "refuted",
+            "meanDelta": -28229.50390625,
+            "bootstrapLower95": -46833.8640625,
+            "bootstrapUpper95": -9595.882714843756,
+            "studentTLower95": -47108.052927407654,
+            "detectionFloor": 18846.000901789685,
+            "wins": 226,
+            "ties": 0,
+            "losses": 286,
+            "firstHalfMeanDelta": -20327.59375,
+            "secondHalfMeanDelta": -36131.4140625,
+            "candidateQ25": 172891.75,
+            "referenceQ25": 174267.75
+          }
+        },
+        "replicationOfPrior": {
+          "contrast": "prior-d3s7-vs-fair-d3s7",
+          "verdict": "supported",
+          "meanDelta": 163498.591796875,
+          "bootstrapLower95": 133842.91982421876,
+          "bootstrapUpper95": 193864.85205078125,
+          "studentTLower95": 133453.0650176403,
+          "detectionFloor": 29993.725902430662,
+          "wins": 322,
+          "ties": 0,
+          "losses": 190,
+          "firstHalfMeanDelta": 198133.28125,
+          "secondHalfMeanDelta": 128863.90234375,
+          "candidateQ25": 215414.25,
+          "referenceQ25": 174267.75
+        },
+        "theory": {
+          "primaryFalsifierUpperBoundBelowZero": true,
+          "offPathUpperBoundBelowZero": true,
+          "gainIsSearchTargetNotOffPath": false,
+          "depthCompounding": true
+        }
+      }
+    },
+    "selection": {
+      "candidateArm": "treestrap",
+      "candidateBestMargin": 93767.4453125,
+      "candidateBestMoves": 2108358,
+      "ablationArm": "searchtd",
+      "ablationBestMargin": 140529.28125,
+      "ablationBestMoves": 907918,
+      "arms": {
+        "searchtd": {
+          "bestMargin": 140529.28125,
+          "finalMargin": 112357.37109375,
+          "bestMoves": 907918,
+          "movesTotal": 1812910,
+          "validationPoints": 7,
+          "stop": "plateau",
+          "warmStartMargin": 174466.23046875
+        },
+        "treestrap": {
+          "bestMargin": 93767.4453125,
+          "finalMargin": 75707.640625,
+          "bestMoves": 2108358,
+          "movesTotal": 3126439,
+          "validationPoints": 11,
+          "stop": "wall",
+          "warmStartMargin": 174466.23046875
+        }
+      },
+      "trainingSignal": {
+        "criterion": "the treestrap arm's best validation margin exceeds the warm start's own margin on the same block (point 0)",
+        "passed": false
+      },
+      "rule": "the candidate is the treestrap arm's best validation point by protocol (no selection between arms); the searchtd arm's best point is the ablation; each arm's point 0 is the warm start's own margin on the same block and is never a candidate"
+    },
+    "trainingArms": {
+      "searchtd": {
+        "layout": "rows,cols,win23,win32,phase=all",
+        "movesTotal": 1812910,
+        "gamesTotal": 15150,
+        "wallSeconds": 2915.8,
+        "meanMovesPerSecond": 684.1971830985915,
+        "finalMargin": 112357.37109375,
+        "bestMargin": 140529.28125,
+        "best": {
+          "moves": 907918,
+          "artifact": "val-000000907918.json",
+          "pairedDeltaD3": 140529.28125,
+          "ntupleD3Mean": 458213.5625,
+          "fairD3Mean": 317684.28125
+        },
+        "start": {
+          "moves": 0,
+          "artifact": "val-000000000000.json",
+          "pairedDeltaD3": 174466.23046875,
+          "ntupleD3Mean": 492150.51171875,
+          "fairD3Mean": 317684.28125,
+          "directMean": 284964.0625,
+          "pairedDeltaDirect": -32720.21875
+        },
+        "stop": {
+          "reason": "plateau",
+          "movesTotal": 1812910,
+          "gamesTotal": 15150,
+          "wallSeconds": 2954.0,
+          "validationPoints": 6,
+          "plateauWindow": 3,
+          "recentWindowMean": 94557.98697916667,
+          "previousWindowMean": 112808.3125,
+          "bestMargin": 140529.28125
+        },
+        "internalUpdates": 0,
+        "rootUpdates": 1812910,
+        "leafCalls": 197706693874,
+        "validationPoints": [
+          {
+            "movesTrained": 0,
+            "pairedDeltaD3": 174466.23046875,
+            "bootstrapLower95": 132378.387890625,
+            "ntupleD3Mean": 492150.51171875,
+            "directMean": 284964.0625
+          },
+          {
+            "movesTrained": 322336,
+            "pairedDeltaD3": 101919.58203125,
+            "bootstrapLower95": 68384.4970703125,
+            "ntupleD3Mean": 419603.86328125,
+            "directMean": 201777.33984375
+          },
+          {
+            "movesTrained": 601818,
+            "pairedDeltaD3": 95976.07421875,
+            "bootstrapLower95": 60710.2818359375,
+            "ntupleD3Mean": 413660.35546875,
+            "directMean": 195731.1015625
+          },
+          {
+            "movesTrained": 907918,
+            "pairedDeltaD3": 140529.28125,
+            "bootstrapLower95": 104857.15390625,
+            "ntupleD3Mean": 458213.5625,
+            "directMean": 215809.78125
+          },
+          {
+            "movesTrained": 1216725,
+            "pairedDeltaD3": 99263.46875,
+            "bootstrapLower95": 62718.3865234375,
+            "ntupleD3Mean": 416947.75,
+            "directMean": 212896.4296875
+          },
+          {
+            "movesTrained": 1502032,
+            "pairedDeltaD3": 72053.12109375,
+            "bootstrapLower95": 40940.911328125,
+            "ntupleD3Mean": 389737.40234375,
+            "directMean": 212356.07421875
+          },
+          {
+            "movesTrained": 1812910,
+            "pairedDeltaD3": 112357.37109375,
+            "bootstrapLower95": 76626.63984375,
+            "ntupleD3Mean": 430041.65234375,
+            "directMean": 207272.38671875
+          }
+        ]
+      },
+      "treestrap": {
+        "layout": "rows,cols,win23,win32,phase=all",
+        "movesTotal": 3126439,
+        "gamesTotal": 30773,
+        "wallSeconds": 6022.5,
+        "meanMovesPerSecond": 557.9448818897638,
+        "finalMargin": 75707.640625,
+        "bestMargin": 93767.4453125,
+        "best": {
+          "moves": 2108358,
+          "artifact": "val-000002108358.json",
+          "pairedDeltaD3": 93767.4453125,
+          "ntupleD3Mean": 411451.7265625,
+          "fairD3Mean": 317684.28125
+        },
+        "start": {
+          "moves": 0,
+          "artifact": "val-000000000000.json",
+          "pairedDeltaD3": 174466.23046875,
+          "ntupleD3Mean": 492150.51171875,
+          "fairD3Mean": 317684.28125,
+          "directMean": 284964.0625,
+          "pairedDeltaDirect": -32720.21875
+        },
+        "stop": {
+          "reason": "wall",
+          "movesTotal": 3126439,
+          "gamesTotal": 30773,
+          "wallSeconds": 6023.5,
+          "validationPoints": 10,
+          "plateauWindow": 3,
+          "recentWindowMean": 60354.690104166664,
+          "previousWindowMean": 57482.927083333336,
+          "bestMargin": 93767.4453125
+        },
+        "internalUpdates": 7203486881,
+        "rootUpdates": 3126439,
+        "leafCalls": 334630337368,
+        "validationPoints": [
+          {
+            "movesTrained": 0,
+            "pairedDeltaD3": 174466.23046875,
+            "bootstrapLower95": 132378.387890625,
+            "ntupleD3Mean": 492150.51171875,
+            "directMean": 284964.0625
+          },
+          {
+            "movesTrained": 306312,
+            "pairedDeltaD3": 10059.375,
+            "bootstrapLower95": -19599.068945312498,
+            "ntupleD3Mean": 327743.65625,
+            "directMean": 182700.49609375
+          },
+          {
+            "movesTrained": 600263,
+            "pairedDeltaD3": 65253.578125,
+            "bootstrapLower95": 33086.9828125,
+            "ntupleD3Mean": 382937.859375,
+            "directMean": 197662.43359375
+          },
+          {
+            "movesTrained": 921421,
+            "pairedDeltaD3": 22697.74609375,
+            "bootstrapLower95": -7757.9001953125,
+            "ntupleD3Mean": 340382.02734375,
+            "directMean": 192342.6171875
+          },
+          {
+            "movesTrained": 1217550,
+            "pairedDeltaD3": 35092.34765625,
+            "bootstrapLower95": 5089.4453125,
+            "ntupleD3Mean": 352776.62890625,
+            "directMean": 197532.05078125
+          },
+          {
+            "movesTrained": 1515106,
+            "pairedDeltaD3": 49616.53125,
+            "bootstrapLower95": 16801.1802734375,
+            "ntupleD3Mean": 367300.8125,
+            "directMean": 196368.171875
+          },
+          {
+            "movesTrained": 1812847,
+            "pairedDeltaD3": 29064.8046875,
+            "bootstrapLower95": 2547.845117187501,
+            "ntupleD3Mean": 346749.0859375,
+            "directMean": 204989.046875
+          },
+          {
+            "movesTrained": 2108358,
+            "pairedDeltaD3": 93767.4453125,
+            "bootstrapLower95": 58986.808984375,
+            "ntupleD3Mean": 411451.7265625,
+            "directMean": 212020.2421875
+          },
+          {
+            "movesTrained": 2405105,
+            "pairedDeltaD3": 47682.890625,
+            "bootstrapLower95": 14528.9017578125,
+            "ntupleD3Mean": 365367.171875,
+            "directMean": 216394.14453125
+          },
+          {
+            "movesTrained": 2701947,
+            "pairedDeltaD3": 57673.5390625,
+            "bootstrapLower95": 25154.2158203125,
+            "ntupleD3Mean": 375357.8203125,
+            "directMean": 209233.45703125
+          },
+          {
+            "movesTrained": 3002242,
+            "pairedDeltaD3": 75707.640625,
+            "bootstrapLower95": 42553.8244140625,
+            "ntupleD3Mean": 393391.921875,
+            "directMean": 210439.65234375
+          }
+        ]
+      }
+    },
+    "smoke": {
+      "movesTotal": 64059,
+      "gamesTotal": 924,
+      "wallSeconds": 111.6,
+      "meanMovesPerSecond": 587.8
+    },
+    "tablesSha256": {
+      "prior": "0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b",
+      "candidate": "1a534b78f466725bde199e6ac1a7a27437c8a634b86451cb79a4c3f09ba1437c",
+      "searchtd": "2a7de08abfab4598ea7e5a899b8a7bbfeff05875090b39c6a36daee2e71a0509",
+      "control": "92dd1cb2d2a74b026270606c18c5f0d6e4f4ccc74e64c3c4e0f0d2043cdddd90"
+    }
+  },
+  "gateChecks": [
+    {
+      "criterion": "All CHECK gates passed on the frozen tables on the probe block before any leased seed was read, including train-search-vs-engine",
+      "passed": true,
+      "observed": "28 gate lines"
+    },
+    {
+      "criterion": "gate --weights passed on each of the two new table files before the screen lease opened",
+      "passed": false,
+      "observed": "{\"candidate\": true}"
+    },
+    {
+      "criterion": "screen artifact: illegalDecisions 0 and incompleteDecisions 0 in every arm",
+      "passed": true,
+      "observed": "null"
+    },
+    {
+      "criterion": "bootstrap 95% lower bound of treestrap-d3s7 minus prior-d3s7 > 0",
+      "passed": false,
+      "observed": "-139543.174609375"
+    },
+    {
+      "criterion": "Student-t 95% lower bound > 0",
+      "passed": false,
+      "observed": "-139253.97993843877"
+    },
+    {
+      "criterion": "paired mean delta > 0 in both halves",
+      "passed": false,
+      "observed": "[-126504.26171875, -91435.6953125]"
+    },
+    {
+      "criterion": "treestrap-d3s7 Q25 >= prior-d3s7 Q25",
+      "passed": false,
+      "observed": "[192728.75, 215414.25]"
+    },
+    {
+      "criterion": "The prior arms are the exact frozen best-weights.bin of RUN-20260905T193006Z-4fbeb4e5 and the control arm the fill experiment's control file (SHA-256 verified before any stage read them); the candidate and searchtd files' SHA-256 were written before the screen lease opened",
+      "passed": true,
+      "observed": "{\"prior\": \"0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b\", \"candidate\": \"1a534b78f466725bde199e6ac1a7a27437c8a634b86451cb79a4c3f09ba1437c\", \"searchtd\": \"2a7de08abfab4598ea7e5a899b8a7bbfeff05875090b39c6a36daee2e71a0509\", \"control\": \"92dd1cb2d2a74b026270606c18c5f0d6e4f4ccc74e64c3c4e0f0d2043cdddd90\"}"
+    },
+    {
+      "criterion": "Beside the gate: off-path verdict (treestrap-d3s7 vs searchtd-d3s7): supported / refuted / inconclusive",
+      "passed": null,
+      "observed": "{\"verdict\": \"refuted\", \"meanDelta\": -35819.48046875, \"bootstrapLower95\": -64275.85966796875, \"bootstrapUpper95\": -7292.229492187507}"
+    },
+    {
+      "criterion": "Beside the gate: ablation reading (searchtd-d3s7 vs prior-d3s7): supported / refuted / inconclusive",
+      "passed": null,
+      "observed": "{\"verdict\": \"refuted\", \"meanDelta\": -73150.498046875, \"bootstrapLower95\": -105383.378125, \"bootstrapUpper95\": -41674.816699218754}"
+    },
+    {
+      "criterion": "Beside the gate: one-ply reference (treestrap-d3s7 vs control-d3s7): supported / refuted / inconclusive",
+      "passed": null,
+      "observed": "{\"verdict\": \"refuted\", \"meanDelta\": -91103.056640625, \"bootstrapLower95\": -120954.07548828125, \"bootstrapUpper95\": -60595.75976562501}"
+    },
+    {
+      "criterion": "Beside the gate: treestrap at depth 4 verdict (vs prior-d4s7): supported / refuted / inconclusive",
+      "passed": null,
+      "observed": "{\"verdict\": \"refuted\", \"meanDelta\": -101253.458984375, \"bootstrapLower95\": -135587.15283203125, \"bootstrapUpper95\": -66683.35419921875}"
+    },
+    {
+      "criterion": "Beside the gate: searchtd at depth 4 verdict (vs prior-d4s7): supported / refuted / inconclusive",
+      "passed": null,
+      "observed": "{\"verdict\": \"refuted\", \"meanDelta\": -77542.759765625, \"bootstrapLower95\": -113432.50556640625, \"bootstrapUpper95\": -42564.703906250004}"
+    },
+    {
+      "criterion": "Beside the gate: training-signal check (the treestrap arm's best validation margin exceeds the warm start's own margin on the same block)",
+      "passed": null,
+      "observed": "{\"criterion\": \"the treestrap arm's best validation margin exceeds the warm start's own margin on the same block (point 0)\", \"passed\": false}"
+    }
+  ],
+  "perGameArtifact": {
+    "path": "https://data.drop7.dev/runs/RUN-20260907T012358Z-a00ecdf0/ntuple-scale/screen/heldout.json#sha256=09b4afab9e95d92e285105a5a42454fdd484efc2e3e7279d164cc2423796313d",
+    "sha256": "09b4afab9e95d92e285105a5a42454fdd484efc2e3e7279d164cc2423796313d",
+    "recordCount": 5120
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260907T012358Z-d6aa318d.json"
+  ],
+  "artifactManifestRef": "artifacts/results/EX-20260907-ntuple-treestrap-warm-start-c33ba880/RUN-20260907T012358Z-a00ecdf0/manifest.json",
+  "limitations": [
+    "Public-development SCREEN tier, 512 paired games opened once; nothing here is a qualification claim, and protected and final cohorts stay sealed.",
+    "The candidate is the treestrap arm's best validation point and the ablation the searchtd arm's, each chosen on the 256-game training-role validation block; the screen inherits that selection and measures what survives it.",
+    "The training arms are Hogwild (32 lock-free workers) and are not bit-reproducible; a re-run trains different tables from the same warm start and seeds.",
+    "Only one step-size configuration was tested (alpha 1.0 with fresh coherence accumulators on a warm start, the fill experiment's recipe); a gentler step, or carrying the frozen tables' own accumulators, is a different configuration and is the successor this record names.",
+    "The depth-4 arms use the standing reference configuration (1M-entry table, seven strata, terminal utility -1,000,000); the fair-d3s7 arm is context, and the fair leaf at depth 4 was not played on this block.",
+    "Wall times were measured on a shared workstation with every arm run in sequence at 32 threads; logical work and the ratios between arms on the same seeds are the trustworthy cost quantities.",
+    "The per-game artifact is cited by its public archive reference (data.drop7.dev, immutable run-scoped key, digest in the fragment); a byte-identical copy remains under runs/RUN-20260907T012358Z-a00ecdf0/ntuple-scale/screen/heldout.json on the workstation and a promoted copy under artifacts/results/."
+  ],
+  "contributionIds": [
+    "CT-20260907T013349Z-44a6fb6a"
+  ],
+  "recordedAt": "2026-09-07T06:31:00Z"
+}

@@ -66,13 +66,30 @@
     "research/seeds/leases/SL-20260907T012358Z-a93f439d.json",
     "research/seeds/leases/SL-20260907T012358Z-74d0228f.json",
     "research/runs/RUN-20260907T012358Z-a00ecdf0.json",
-    "research/system-profiles/MACH-20260907T012358Z-d6aa318d.json"
+    "research/system-profiles/MACH-20260907T012358Z-d6aa318d.json",
+    "approaches/ntuple-rl/ntuple-scale/scripts/write-tree-result-record.py",
+    "approaches/ntuple-rl/ntuple-scale/scripts/pipeline6.sh",
+    "research/results/RS-20260907T041853Z-27cb32a3.json",
+    "artifacts/results/EX-20260907-ntuple-treestrap-warm-start-c33ba880/RUN-20260907T012358Z-a00ecdf0/manifest.json",
+    "approaches/ntuple-rl/ntuple-scale/README.mdx",
+    "web/content/log/2026-09-07.mdx",
+    "web/content/figures/ntuple-scale/RUN-20260907T012358Z-a00ecdf0.json",
+    "web/lib/charts/ntuple-scale.ts",
+    "web/scripts/extract-ntuple-scale.ts",
+    "web/components/NTupleScale.tsx",
+    "web/components/charts/NTupleCharts.tsx",
+    "docs/research/status.md",
+    "docs/research/experiment-index.md",
+    "docs/exploratory/lease-map.md"
   ],
   "commitShas": [],
   "validationPerformed": [
     "cargo test --release (15 unit tests, including the training search matching the engine's column values bit for bit and collecting internal nodes)",
     "gate binary on the frozen tables (gate --weights): all CHECK gates including train-search-vs-engine (gates.log), and gate --weights on each of the two new table files before the screen lease opened",
-    "make research-validate"
+    "make research-validate",
+    "analyze.py evaluated the preregistered gate and the readings beside it from the screen artifact; compare.py reports written for eighteen contrasts",
+    "npx tsc --noEmit, npm run lint, check-mdx, check-figures and check-tokens under web/",
+    "every compact artifact of the run and the two screened table files (zstd) were published to the public research archive and verified (runs/RUN-20260907T012358Z-a00ecdf0/published.jsonl)"
   ],
   "limitations": [
     "Self-reported contribution; not yet independently reviewed.",
@@ -80,5 +97,5 @@
   ],
   "selfReported": true,
   "reviewedBy": null,
-  "recordedAt": "2026-09-07T01:33:49Z"
+  "recordedAt": "2026-09-07T06:31:11Z"
 }

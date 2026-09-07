@@ -89,14 +89,20 @@
     "runs/<run-id>/ntuple-scale/{pipeline.log,rusage.jsonl,screen.log,screen.err,analysis.json,analysis.md}",
     "artifacts emitted by the trainer and the screen carry this experiment id in their config field; the candidate and ablation table files (4 GB each) are retained on the workstation with their SHA-256 in the result record and published compressed to the research archive"
   ],
-  "lifecycle": "preregistered",
-  "protocolSha256": "305ff6238bee4fa7e9641a75993c263c05c9de8d4c001d3c98775ce84e7b9d7a",
-  "amendments": [],
+  "lifecycle": "completed",
+  "protocolSha256": "804524568f8da6ee82690fd2cad668303bd585d25d08577b6aab0db4764ba77d",
+  "amendments": [
+    {
+      "timestamp": "2026-09-07T06:31:11Z",
+      "beforeControlledData": false,
+      "reason": "lifecycle advanced preregistered -> completed after run RUN-20260907T012358Z-a00ecdf0 and result RS-20260907T041853Z-27cb32a3 were written; protocol content otherwise unchanged (frozen protocol SHA-256 305ff6238bee4fa7e9641a75993c263c05c9de8d4c001d3c98775ce84e7b9d7a, the hash every lease and the run record cite)"
+    }
+  ],
   "createdBy": {
     "platform": "Claude Code",
     "model": "claude-fable-5-1",
     "agentId": "claude-code-ntuple-search-targets"
   },
   "createdAt": "2026-09-07T01:23:58Z",
-  "updatedAt": "2026-09-07T01:36:58Z"
+  "updatedAt": "2026-09-07T06:31:11Z"
 }
