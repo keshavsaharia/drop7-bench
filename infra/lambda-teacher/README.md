@@ -96,22 +96,22 @@ build and this AL2023 container build.
 | --- | ---: | ---: | ---: |
 | 4 | 0.59 s (different board, not compared) | 1.04 s | — |
 | 5 | 11.46 s | 20.9 s | 1.82x |
-| 6 | 194 s | 480.8 s and 412.2 s (two runs, same board) | 2.13x-2.48x |
+| 6 | 194 s | 480.8 s, 476.3 s, 412.2 s (three runs, same board) | 2.13x-2.48x |
 
 Lambda ran this workload at roughly 1.8-2.5x the wall-clock time of a
 single thread on this workstation's Ryzen AI MAX+ 395 — slower, as expected
-for a shared cloud vCPU, and the two depth-6 runs (identical board, depth,
-and parameters) landed 480.8 s and 412.2 s apart by about 15%, which is
-real noisy-neighbor variance on shared hardware rather than a fixed
-constant to plan against. Both are comfortably inside the 900 s function
-timeout with 45-55% of the budget to spare; depth 6 is genuinely viable
-here, not a tight fit.
+for a shared cloud vCPU, and the three depth-6 runs (identical board,
+depth, and parameters) spread across 412-481 s, about 14% between the
+fastest and slowest, which is real noisy-neighbor variance on shared
+hardware rather than a fixed constant to plan against. All three are
+comfortably inside the 900 s function timeout with 45-55% of the budget to
+spare; depth 6 is genuinely viable here, not a tight fit.
 
-The 480.8 s and 412.2 s readings exist because of the CLI-retry incident
-below: two of the three concurrent depth-6 invocations it caused completed
-and are cited here as real data rather than discarded, since they cost
-real money already and are valid same-input measurements regardless of how
-they were triggered.
+The three depth-6 readings exist because of the CLI-retry incident below:
+all three concurrent invocations it caused completed successfully and are
+cited here as real data rather than discarded, since they cost real money
+already and are valid same-input measurements regardless of how they were
+triggered.
 
 Cost at 2048 MB: about $0.0000333/GB-second-equivalent (`2 GB x
 $0.0000166667`). A depth-5 decision (~21 s) costs about $0.0007; a depth-6
@@ -120,7 +120,8 @@ consistent with the pre-deployment estimate that an $80 compute budget buys
 on the order of 90,000 depth-5 examples or 5,000-6,000 depth-6 examples —
 cost is not the binding constraint at either depth. Total AWS spend for
 every invocation in this pilot, including the accidental triple depth-6
-run, was about 3-5 cents.
+run, was about $0.047 (1.2 s + 41.8 s + 1,369.4 s of total billed duration
+at 2 GB, across five successful invocations).
 
 ## What was deployed, and how to find it again
 
