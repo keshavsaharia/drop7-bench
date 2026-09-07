@@ -9,14 +9,18 @@
   "rangeStartHex": "0xa52f2880",
   "rangeEndExclusiveHex": "0xa52f2a80",
   "cohortManifestSha256": null,
-  "state": "reserved",
+  "state": "opened",
   "reservedAt": "2026-09-06T20:14:10Z",
-  "openedAt": null,
+  "openedAt": "2026-09-06T21:25:32Z",
   "closedAt": null,
-  "protocolSha256": null,
-  "runIds": [],
+  "protocolSha256": "974bdae371b7dab5835003c8b62e26b4ab303f01761e5846880c6b10eee1aa14",
+  "runIds": [
+    "RUN-20260906T201104Z-a96ea6c8"
+  ],
   "notes": [
     "Conservative import 2026-09-06: every 8-hex-digit constant under docs/, approaches/, src/, research/, artifacts/, web/content/ and scripts/ was enumerated (grep -rhoE '0x[0-9a-fA-F]{8}'). Between 0xa52f2780 and 0xa5300000 the only constants are 0xa52f2780 itself (the exclusive end boundary of the depth-4 screen lease SL-20260906T081306Z-1aaec419, never read there) and 0xa52fffff (the allocator pool's end); no constant lies in 0xa5720000-0xa6000000 (the historical native throughput block is 0xa5700000-0xa571869f and stays untouched). The pool 0xa52c0000-0xa5300000 (the ./do-research allocator's) is used up to 0xa52f2780 exclusive by earlier leases. The ranges reserved here overlap no existing lease record and no protected (0x7d) or final (0xd7) prefix, and are disjoint from every block the n-tuple experiments read (training 0xa5300000-0xa54f0000 and 0xa5500000-0xa56f0000, validation 0xa52f2240-0xa52f2280 and 0xa52f2280-0xa52f2380, screens 0xa52f2140-0xa52f2240, 0xa52f2380-0xa52f2580 and 0xa52f2580-0xa52f2780).",
-    "Held-out screen, 512 never-read public-development seeds, opened exactly once by scripts/pipeline4.sh screen after the SHA-256 of every table file the screen plays (the frozen tables 0ade9d4e..., the selected fill candidate, the control candidate, the zeroed and class-mean edits) has been written under main/*.sha256 and the CHECK gates have passed on each new file, with eleven arms on identical seeds: prior-d3s7, prior-1ply, prior-d4s7 (the frozen tables), fill-d3s7, fill-1ply, fill-d4s7 (the candidate), control-d3s7, zeroed-d3s7, zeroed-d4s7, classmean-d3s7 and fair-d3s7. A second opening requires a new experiment record."
+    "Held-out screen, 512 never-read public-development seeds, opened exactly once by scripts/pipeline4.sh screen after the SHA-256 of every table file the screen plays (the frozen tables 0ade9d4e..., the selected fill candidate, the control candidate, the zeroed and class-mean edits) has been written under main/*.sha256 and the CHECK gates have passed on each new file, with eleven arms on identical seeds: prior-d3s7, prior-1ply, prior-d4s7 (the frozen tables), fill-d3s7, fill-1ply, fill-d4s7 (the candidate), control-d3s7, zeroed-d3s7, zeroed-d4s7, classmean-d3s7 and fair-d3s7. A second opening requires a new experiment record.",
+    "Opened 2026-09-06T21:25:32Z by run RUN-20260906T201104Z-a96ea6c8 for the one-shot screen (0xa52f2880 to 0xa52f2a80 exclusive); candidate SHA-256 recorded beforehand in runs/RUN-20260906T201104Z-a96ea6c8/ntuple-scale/main/candidate-weights.sha256: 4f2e7ccf5c14fed8dd19563965e3937e8784b487f2de9eb70fe0e86830edae24",
+    "Run RUN-20260906T201104Z-a96ea6c8 completed 2026-09-06T23:47:38Z: played once by the eleven arms; the run's screen artifact heldout.json is the only read."
   ]
 }

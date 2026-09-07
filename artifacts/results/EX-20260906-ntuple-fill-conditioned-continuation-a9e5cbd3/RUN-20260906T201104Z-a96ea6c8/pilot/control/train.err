@@ -1,0 +1,40 @@
+layout rows,cols,win23,win32,phase=all : 1000000000 entries (4.00 GB weights, 12.00 GB with coherence), 74 active per state
+warm start: loading /home/keshav/Developer/drop7-bench/runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/best-weights.bin as trainable tables with fresh accumulators
+warm start ready in 1.4 s (source fingerprint 782828b76cfd4971)
+fair-d3s7 control on the validation block (256 games)...
+fair-d3s7 mean 312767 / 91.96 moves
+[     49s] chunk    0      20003706 moves     252607 games   2096490 moves/s  train mean   263219 /   79.2 moves  |delta| 0.674  beta 0.079
+[     88s]    100018927 moves  quick: 1-ply 293418 (87.5 moves) vs fair-d3s7 312767: -19348
+[     88s] chunk    4     100018927 moves    1184505 games   2056884 moves/s  train mean   289975 /   86.6 moves  |delta| 0.688  beta 0.027
+[    127s] chunk    8     180033260 moves    2100018 games   2039548 moves/s  train mean   294063 /   87.8 moves  |delta| 0.695  beta 0.021
+[    137s]    200037439 moves  quick: 1-ply 294995 (88.2 moves) vs fair-d3s7 312767: -17771
+[    137s]    200037439 moves  VALIDATION: ntuple-d3s7 490933 vs fair-d3s7 312767: +178167 (W-L 172-84), 1-ply 294995, touched 56868429 entries  [best]
+[    209s] chunk   12     260048013 moves    3007192 games   2035192 moves/s  train mean   296449 /   88.4 moves  |delta| 0.700  beta 0.018
+[    229s]    300054599 moves  quick: 1-ply 292432 (87.4 moves) vs fair-d3s7 312767: -20334
+[    248s] chunk   16     340062583 moves    3909804 games   2035148 moves/s  train mean   297472 /   88.7 moves  |delta| 0.702  beta 0.016
+[    278s]    400073347 moves  quick: 1-ply 300748 (89.8 moves) vs fair-d3s7 312767: -12019
+[    278s]    400073347 moves  VALIDATION: ntuple-d3s7 489114 vs fair-d3s7 312767: +176348 (W-L 166-90), 1-ply 300748, touched 69834683 entries
+[    328s] chunk   20     420078076 moves    4808083 games   2041043 moves/s  train mean   299220 /   89.2 moves  |delta| 0.705  beta 0.015
+[    368s]    500093575 moves  quick: 1-ply 295242 (88.0 moves) vs fair-d3s7 312767: -17525
+[    368s] chunk   24     500093575 moves    5702921 games   2026819 moves/s  train mean   300022 /   89.4 moves  |delta| 0.708  beta 0.014
+[    407s] chunk   28     580108233 moves    6594119 games   2033363 moves/s  train mean   301829 /   89.9 moves  |delta| 0.710  beta 0.013
+[    417s]    600112060 moves  quick: 1-ply 305466 (90.9 moves) vs fair-d3s7 312767: -7300
+[    417s]    600112060 moves  VALIDATION: ntuple-d3s7 523757 vs fair-d3s7 312767: +210990 (W-L 176-80), 1-ply 305466, touched 77712858 entries  [best]
+[    489s] chunk   32     660123469 moves    7481857 games   2029418 moves/s  train mean   303430 /   90.4 moves  |delta| 0.713  beta 0.013
+[    509s]    700131277 moves  quick: 1-ply 307103 (91.5 moves) vs fair-d3s7 312767: -5663
+[    528s] chunk   36     740138360 moves    8367696 games   2034109 moves/s  train mean   304368 /   90.6 moves  |delta| 0.716  beta 0.012
+[    558s]    800150452 moves  quick: 1-ply 302770 (90.1 moves) vs fair-d3s7 312767: -9996
+[    558s]    800150452 moves  VALIDATION: ntuple-d3s7 484146 vs fair-d3s7 312767: +171380 (W-L 162-94), 1-ply 302770, touched 83407539 entries
+[    609s] chunk   40     820154901 moves    9251165 games   2011738 moves/s  train mean   304593 /   90.7 moves  |delta| 0.718  beta 0.012
+[    649s]    900170083 moves  quick: 1-ply 314519 (93.4 moves) vs fair-d3s7 312767: +1752
+[    649s] chunk   44     900170083 moves   10133622 games   1986861 moves/s  train mean   304357 /   90.6 moves  |delta| 0.718  beta 0.012
+[    690s] chunk   48     980185565 moves   11012730 games   1987734 moves/s  train mean   305726 /   91.0 moves  |delta| 0.720  beta 0.011
+[    700s]   1000189400 moves  quick: 1-ply 302340 (90.1 moves) vs fair-d3s7 312767: -10427
+[    700s]   1000189400 moves  VALIDATION: ntuple-d3s7 472869 vs fair-d3s7 312767: +160102 (W-L 166-90), 1-ply 302340, touched 87863373 entries
+[    769s] chunk   52    1060200663 moves   11889696 games   1984409 moves/s  train mean   306538 /   91.2 moves  |delta| 0.722  beta 0.011
+[    789s]   1100208844 moves  quick: 1-ply 301418 (89.7 moves) vs fair-d3s7 312767: -11349
+[    809s] chunk   56    1140215787 moves   12764403 games   1980398 moves/s  train mean   308307 /   91.7 moves  |delta| 0.725  beta 0.011
+[    839s]   1200228265 moves  quick: 1-ply 302966 (90.1 moves) vs fair-d3s7 312767: -9800
+[    839s]   1200228265 moves  VALIDATION: ntuple-d3s7 510536 vs fair-d3s7 312767: +197769 (W-L 174-82), 1-ply 302966, touched 91509124 entries
+plateau rule at point 6: last 3 points mean +176417, previous 3 points mean +188502  -> PLATEAU, stopping after this chunk
+final checkpoint and latest weights...

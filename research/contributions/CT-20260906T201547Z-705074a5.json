@@ -69,13 +69,30 @@
     "research/seeds/leases/SL-20260906T201104Z-26371f8b.json",
     "research/seeds/leases/SL-20260906T201104Z-53350936.json",
     "research/runs/RUN-20260906T201104Z-a96ea6c8.json",
-    "research/system-profiles/MACH-20260906T201104Z-c51a782f.json"
+    "research/system-profiles/MACH-20260906T201104Z-c51a782f.json",
+    "approaches/ntuple-rl/ntuple-scale/scripts/promote-artifacts.py",
+    "research/results/RS-20260906T234914Z-a3fae1a9.json",
+    "research/datasets/DS-20260906-ntuple-fill-conditioned-candidate-tables-860c310b.json",
+    "artifacts/results/EX-20260906-ntuple-fill-conditioned-continuation-a9e5cbd3/RUN-20260906T201104Z-a96ea6c8/manifest.json",
+    "approaches/ntuple-rl/ntuple-scale/README.mdx",
+    "web/content/log/2026-09-06.mdx",
+    "web/content/figures/ntuple-scale/RUN-20260906T201104Z-a96ea6c8.json",
+    "web/lib/charts/ntuple-scale.ts",
+    "web/scripts/extract-ntuple-scale.ts",
+    "web/components/NTupleScale.tsx",
+    "web/components/charts/NTupleCharts.tsx",
+    "docs/research/status.md",
+    "docs/research/experiment-index.md",
+    "docs/exploratory/lease-map.md"
   ],
   "commitShas": [],
   "validationPerformed": [
     "cargo test --release (14 unit tests, including layout sizes with fill buckets, bucket edges, promotion preserving values bit for bit and separating buckets under one update)",
     "gate binary on the probe block for both fill layouts (gates.log, gates-hgt5.log) and gate --weights on each of the four new table files before the screen lease opened",
-    "make research-validate"
+    "make research-validate",
+    "analyze.py evaluated the preregistered gate and the six readings beside it from the screen artifact; compare.py reports written for nineteen contrasts",
+    "npm test (the repository TypeScript suite) after the change; npx tsc --noEmit, npm run lint, check-mdx, check-figures and check-tokens under web/",
+    "every compact artifact of the run and the two screened table files (zstd) were published to the public research archive and verified (runs/RUN-20260906T201104Z-a96ea6c8/published.jsonl)"
   ],
   "limitations": [
     "Self-reported contribution; not yet independently reviewed.",
@@ -83,5 +100,5 @@
   ],
   "selfReported": true,
   "reviewedBy": null,
-  "recordedAt": "2026-09-06T20:15:47Z"
+  "recordedAt": "2026-09-06T23:59:02Z"
 }

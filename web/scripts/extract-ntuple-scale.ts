@@ -123,6 +123,7 @@ function trainingRun(name: string, summary: any, dir: string): TrainingRun {
     alpha: summary.config?.alpha ?? summary.alpha ?? 0,
     entries: summary.config?.entries ?? 0,
     activePerState: summary.config?.activePerState ?? 0,
+    initFrom: summary.config?.initFrom ?? null,
     validateGames: summary.validateGames ?? summary.config?.validateGames ?? 64,
     movesTotal: summary.movesTotal,
     gamesTotal: summary.gamesTotal,
@@ -184,6 +185,13 @@ if (existsSync(hashPath)) {
   if (existsSync(priorPath)) {
     sources.push(relative(root, priorPath));
     freeze.priorSha256 = readFileSync(priorPath, "utf8").split(/\s+/)[0] || null;
+  }
+  for (const name of ["control", "zeroed", "classmean"] as const) {
+    const path = join(runDir, "main", `${name}-weights.sha256`);
+    if (existsSync(path)) {
+      sources.push(relative(root, path));
+      freeze[`${name}Sha256`] = readFileSync(path, "utf8").split(/\s+/)[0] || null;
+    }
   }
 }
 
@@ -262,6 +270,34 @@ if (analysis.screen) {
       }
     : null;
   if (depth) derived.push("screen.depth.interaction = per game, (prior-d4s7 minus prior-d3s7) minus (fair-d4s7 minus fair-d3s7), bootstrapped by analyze.py");
+  const fillRaw = analysis.screen.fill;
+  const fillReading = (r: Analysis | null) =>
+    r
+      ? {
+          ...reading(r),
+          contrast: r.contrast as string,
+          verdict: r.verdict as "supported" | "refuted" | "inconclusive",
+          candidateQ25: r.candidateQ25 as number,
+          referenceQ25: r.referenceQ25 as number,
+          ...(r.checks ? { checks: r.checks, allPassed: Boolean(r.passed) } : {}),
+        }
+      : null;
+  const fillMap = (m: Record<string, Analysis> | null | undefined) => Object.fromEntries(Object.entries(m ?? {}).map(([k, v]) => [k, fillReading(v)!]));
+  const fill = fillRaw
+    ? {
+        primary: fillRaw.primary as string,
+        conditioning: fillReading(fillRaw.conditioning),
+        continuation: fillReading(fillRaw.continuation),
+        zeroed: fillReading(fillRaw.zeroed),
+        classmean: fillReading(fillRaw.classmean),
+        fillDepth4: fillReading(fillRaw.fillDepth4),
+        zeroedDepth4: fillReading(fillRaw.zeroedDepth4),
+        depthSteps: fillMap(fillRaw.depthSteps),
+        direct: fillMap(fillRaw.direct),
+        replicationOfPrior: fillReading(fillRaw.replicationOfPrior),
+        theory: fillRaw.theory as Record<string, boolean | null>,
+      }
+    : null;
   screen = {
     config: analysis.screen.config,
     seedStartHex: analysis.screen.seedStartHex,
@@ -269,6 +305,7 @@ if (analysis.screen) {
     paired,
     primaryContrast,
     depth,
+    fill,
     gate: analysis.screen.gate && primary
       ? { checks: analysis.screen.gate.checks, allPassed: analysis.screen.gate.passed, meanDelta: primary.meanDelta, pairedSd: primary.pairedSd, detectionFloor: primary.detectionFloor, wtl: primary.wtl }
       : null,
@@ -289,6 +326,9 @@ const snapshot: NTupleSnapshot = {
   sources: [...new Set(sources)],
   derived,
   gates,
+  gatesHgt5: analysis.gatesHgt5 ? { passed: Boolean(analysis.gatesHgt5.passed), gates: analysis.gatesHgt5.gates } : null,
+  frozenGates: analysis.frozenGates ?? null,
+  edits: analysis.edits ? { entries: analysis.edits.entries, optimisticStart: analysis.edits.optimisticStart, untouchedEntries: analysis.edits.untouchedEntries, touchedEntries: analysis.edits.touchedEntries, classesWithNoTouchedEntry: analysis.edits.classesWithNoTouchedEntry, outputs: analysis.edits.outputs } : null,
   smoke,
   pilot,
   main,
@@ -296,6 +336,10 @@ const snapshot: NTupleSnapshot = {
   screen,
   rusage: analysis.rusage ?? null,
 };
+if (analysis.gatesHgt5) sources.push(relative(root, join(runDir, "gates-hgt5.log")));
+if (analysis.edits) sources.push(relative(root, join(runDir, "main", "edits.json")));
+for (const name of Object.keys(analysis.frozenGates ?? {})) sources.push(relative(root, join(runDir, "main", `gates-${name}.log`)));
+snapshot.sources = [...new Set(sources)];
 
 const outDir = join(import.meta.dirname, "..", "content", "figures", "ntuple-scale");
 mkdirSync(outDir, { recursive: true });

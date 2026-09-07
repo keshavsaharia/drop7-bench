@@ -89,14 +89,20 @@
     "runs/<run-id>/ntuple-scale/{pipeline.log,rusage.jsonl,screen.log,screen.err,analysis.json,analysis.md}",
     "artifacts emitted by the trainer and the screen carry this experiment id in their config field; the frozen candidate table file (20 GB) is retained on the workstation with its SHA-256 in the result record and published compressed to the research archive"
   ],
-  "lifecycle": "preregistered",
-  "protocolSha256": "974bdae371b7dab5835003c8b62e26b4ab303f01761e5846880c6b10eee1aa14",
-  "amendments": [],
+  "lifecycle": "completed",
+  "protocolSha256": "d4e59a14f6ca86931c918d70b5bd3818f5985812bc075763f5e2c8937a58b0aa",
+  "amendments": [
+    {
+      "timestamp": "2026-09-06T23:59:02Z",
+      "beforeControlledData": false,
+      "reason": "lifecycle advanced preregistered -> completed after run RUN-20260906T201104Z-a96ea6c8 and result RS-20260906T234914Z-a3fae1a9 were written; protocol content otherwise unchanged (frozen protocol SHA-256 974bdae371b7dab5835003c8b62e26b4ab303f01761e5846880c6b10eee1aa14, the hash every lease and the run record cite)"
+    }
+  ],
   "createdBy": {
     "platform": "Claude Code",
     "model": "claude-fable-5-1",
     "agentId": "claude-code-ntuple-fill-conditioned"
   },
   "createdAt": "2026-09-06T20:12:13Z",
-  "updatedAt": "2026-09-06T20:17:51Z"
+  "updatedAt": "2026-09-06T23:59:02Z"
 }
