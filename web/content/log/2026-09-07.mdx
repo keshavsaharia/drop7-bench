@@ -1,10 +1,10 @@
 ---
 date: 2026-09-07
-title: "Letting the search write the lookup tables"
-summary: "The lookup-table leaf was trained only on boards that one-ply play visits, toward one-step sampled returns, while the deployed search evaluates about a hundred and twenty thousand imagined boards per move. A fifth experiment let the depth-3 search play the training games and trained every board in its tree toward the tree's own backed-up value, warm-started from the frozen tables with fresh step sizes. Both arms fell below the warm start at once and never recovered, and on a sixth fresh block the TreeStrap candidate lost 108,970 points to the frozen tables at depth 3 and 101,253 at depth 4: a step-size shock, and a clear negative for the full-step warm start. A gentle-step successor was preregistered and launched the same morning."
+title: "Letting the search write the lookup tables, twice"
+summary: "The lookup-table leaf was trained only on boards that one-ply play visits, toward one-step sampled returns, while the deployed search evaluates about a hundred and twenty thousand imagined boards per move. A fifth experiment let the depth-3 search play the training games and trained every board in its tree toward the tree's own backed-up value, warm-started from the frozen tables with fresh step sizes. Both arms fell below the warm start at once and never recovered, and on a sixth fresh block the TreeStrap candidate lost 108,970 points to the frozen tables at depth 3 and 101,253 at depth 4: a step-size shock, and a clear negative for the full-step warm start. A gentle-step successor was preregistered and launched the same morning. A gentle-step successor avoided the collapse but still lost 21,422 to the frozen tables on a wider 2,048-game screen, with one clear positive inside the loss: training the imagined tree nodes beat training the visited board alone by 85,394 points."
 contributors: [claude-fable-5-1 (Claude Code)]
-tags: [n-tuple, temporal-difference, treestrap, search, leaf, rust, warm-start, negative-result]
-outcomes: { positive: 0, negative: 2, open: 1 }
+tags: [n-tuple, temporal-difference, treestrap, search, leaf, rust, warm-start, negative-result, step-size]
+outcomes: { positive: 1, negative: 3, open: 1 }
 ---
 
 ## Training on the boards the search evaluates
@@ -131,4 +131,92 @@ either, training toward the search's own backups from this warm start
 will have been tested at three step sizes, and the n-tuple leaf's
 training-target axis joins scale and fill conditioning as tried without a
 measurable gain at this budget.
+</Direction>
+
+## A gentle step, and one clear positive inside a second loss
+
+The full-step arms fell below their warm start at their first validation
+point and never recovered; the shape said the step, not the idea, was the
+problem. A second experiment,
+[EX-20260907-ntuple-treestrap-gentle-step-087a3a63](/experiments/EX-20260907-ntuple-treestrap-gentle-step-087a3a63),
+run `RUN-20260907T041853Z-70c90dc9`, warm-started the frozen tables again
+and trained two TreeStrap arms at a twentieth and a fifth of the earlier
+step, plus a visited-states ablation, each validated against its own
+warm-start reading (188,854 on the fresh 256-game block) before any
+training move.
+
+<Finding title="Neither arm collapsed, and neither climbed above its own warm start" kind="neutral" metric="best points: alpha 0.05 +166,414 at 1.8e6 moves; alpha 0.2 +168,523 at 9.0e5 moves; visited-only +83,875 at 1.5e6 moves">
+Both TreeStrap arms wandered within a band below the warm start and
+stopped by the plateau rule after six or seven validation points, 60 to 75
+minutes each. The visited-states ablation never got past half the warm
+start's margin. The candidate, chosen by the larger of the two TreeStrap
+arms' best points, is the alpha-0.2 arm.
+</Finding>
+
+The screen widened to 2,048 games, so a gain of about 20,000 points would
+be visible where the earlier 512-game screen's floor was closer to 35,000.
+
+<ArmTable
+  caption="The depth-3 arms on the 2,048 fresh games, from the screen artifact of RUN-20260907T041853Z-70c90dc9; paired readings against the frozen tables in the same search."
+  columns={[
+    { key: "arm", label: "arm" },
+    { key: "mean", label: "mean score", numeric: true },
+    { key: "moves", label: "moves", numeric: true },
+    { key: "vsprior", label: "paired vs frozen tables", numeric: true, delta: true },
+    { key: "lb", label: "bootstrap lower bound", numeric: true, delta: true },
+    { key: "ub", label: "upper bound", numeric: true, delta: true },
+  ]}
+  rows={[
+    { arm: "one-ply continuation (yesterday's fill-experiment control)", mean: "493,481", moves: "142.65", vsprior: "+4,160", lb: "-13,667", ub: "+21,862" },
+    { arm: "the other TreeStrap step size (alpha 0.05, screened as treestrapalt)", mean: "485,343", moves: "140.32", vsprior: "-3,978", lb: "-22,126", ub: "+13,794" },
+    { arm: "frozen tables (comparator)", mean: "489,321", moves: "141.46", vsprior: "", lb: "", ub: "" },
+    { arm: "TreeStrap candidate (alpha 0.2)", mean: "467,899", moves: "135.61", vsprior: "-21,422", lb: "-38,785", ub: "-4,294", highlight: true },
+    { arm: "visited-states ablation (searchtd05)", mean: "382,505", moves: "111.99", vsprior: "-106,816", lb: "-122,276", ub: "-91,479" },
+  ]}
+/>
+
+<Finding title="A smaller loss than the full step, still a measured loss, with the interior mechanism confirmed" kind="negative" metric="candidate -21,422 (bounds -38,785 to -4,294); candidate vs ablation +85,394 (LB +70,489)">
+The candidate averaged 467,899 against 489,321 for the frozen tables at
+depth 3: 21,422 behind, both halves negative, the whole interval under
+zero. The preregistered gate fails, a fifth the size of the full-step
+run's loss. The reading that separates this result from a flat rejection
+of the whole idea: the candidate beat the visited-states ablation by
+85,394 with a lower bound of 70,489. Training the imagined tree nodes is
+doing real, statistically solid work relative to training only the
+visited board; it has not yet been enough work to close the gap to the
+leaf it started from. The ablation itself lost 106,816 to the frozen
+tables, the worst arm on this screen.
+</Finding>
+
+<Finding title="The selection rule picked the arm that screened worse" kind="negative" metric="alpha-0.05 arm -3,978 (inconclusive) vs the selected alpha-0.2 arm's -21,422 (a measured loss)">
+Chosen by its single best validation point, the alpha-0.2 arm's peak
+(168,523) narrowly beat the alpha-0.05 arm's (166,414). On the screen the
+order reversed: the smaller step landed close to neutral, the larger step
+did not, though the two arms' own difference is itself inconclusive
+(bounds -35,160 to +56). A one-point selection rule on a noisy curve is a
+weak way to choose between two close arms, and this run is direct evidence
+of that.
+</Finding>
+
+<Finding title="Depth 4 is inconclusive here, not a clear loss" kind="neutral" metric="-25,344 (bounds -64,719 to +14,253); the candidate's own fourth ply +39,537 (LB +4,671)">
+Unlike the full-step candidate, which lost measurably at depth 4, the
+gentle-step candidate's depth-4 reading straddles zero on the 512-seed
+subset. The candidate's own fourth ply is a real gain on top of its depth-3
+score, the same size as the frozen tables' usual fourth-ply value.
+</Finding>
+
+<Direction title="What the record supports next" status="proposed" owner="claude-fable-5-1 (Claude Code)">
+Three step sizes have now been tried on this depth-3 warm start (full,
+one fifth, one twentieth), and every one of them still loses to the
+frozen tables on a held-out screen, while every one of them confirms that
+training the imagined tree nodes beats training the visited board alone.
+That combination, a confirmed mechanism and a still-negative outcome,
+points at two untested axes rather than a fourth step size: training for
+longer without an automatic short-window stop that can end a session on a
+local dip, and a depth-4 search as teacher, which sees one more exact ply
+of chance-averaged play per training example than anything tried so far.
+A prompt for that combined next step, built to run for days on this
+workstation with checkpointing instead of a plateau rule, is at
+`approaches/ntuple-rl/ntuple-scale/prompts/treestrap-d4-continuation.md`
+and has not yet been run.
 </Direction>

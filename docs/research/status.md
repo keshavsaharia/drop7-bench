@@ -123,6 +123,31 @@ frozen tables at depth 4 remain the candidate to carry forward, and their
 depth-3 margin over the fair leaf replicated on a fifth block (+163,499,
 lower bound +133,843).
 
+A gentle-step successor
+([EX-20260907-ntuple-treestrap-gentle-step-087a3a63](../../research/experiments/EX-20260907-ntuple-treestrap-gentle-step-087a3a63.json))
+avoided the collapse: two TreeStrap arms at a twentieth and a fifth of the
+full step, plus a visited-states ablation, trained for six to seven
+validation points each without falling below their own warm start. Neither
+climbed above it either (warm start +188,854 on the validation block; best
+points +166,414 and +168,523). On a 2,048-game screen the alpha-0.2
+candidate scored **467,899 against 489,321** for the frozen tables at
+depth 3, paired -21,422 with bounds -38,785 to -4,294, a measured loss a
+fifth the size of the full-step run's
+([RS-20260907T170344Z-17af2044](../../research/results/RS-20260907T170344Z-17af2044.json)).
+One reading is a clear positive: the candidate beat the visited-states
+ablation by 85,394 (lower bound +70,489), so training the imagined tree
+nodes helps relative to training the visited board alone; it is not
+enough to close the gap to the frozen tables. The other step size came
+close to neutral (-3,978, inconclusive) and screened better than the
+selected candidate, so the best-single-validation-point selection rule
+picked the weaker arm by this screen's reading. At depth 4 the loss is
+inconclusive rather than clear (-25,344, bounds -64,719 to +14,253), and
+the candidate's own fourth ply is a real gain (+39,537). The theory is
+reassessed mixed. A depth-4-teacher, long-duration, checkpointed
+successor is specified at
+`approaches/ntuple-rl/ntuple-scale/prompts/treestrap-d4-continuation.md`
+but not yet run.
+
 The frozen tables of both training runs, the three screens' per-game rows
 and their analyses are published in the public research archive under their
 run ids (`https://data.drop7.dev/runs/<run-id>/ntuple-scale/...`, digests in

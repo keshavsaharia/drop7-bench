@@ -762,7 +762,7 @@ def main():
         "runId": args.run,
         "gates": gates_summary(out),
         "gatesHgt5": gates_summary(out, "gates-hgt5.log"),
-        "frozenGates": {name: gates_summary(os.path.join(out, "main"), f"gates-{name}.log") for name in ("candidate", "control", "zeroed", "classmean") if os.path.exists(os.path.join(out, "main", f"gates-{name}.log"))} or None,
+        "frozenGates": {os.path.basename(p)[len("gates-"):-len(".log")]: gates_summary(os.path.join(out, "main"), os.path.basename(p)) for p in glob.glob(os.path.join(out, "main", "gates-*.log"))} or None,
         "edits": load_json_if_complete(os.path.join(out, "main", "edits.json")),
         "smoke": training_summary(os.path.join(out, "smoke")),
         "pilot": pilot_summary(out),

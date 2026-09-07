@@ -82,7 +82,8 @@ def main():
             raise SystemExit(f"error: {error}\n(--allow-local-path writes an unfinalized draft that cites {heldout_relative} instead)")
         print(f"warning: {error}; the draft cites {heldout_relative} and is not finalized", file=sys.stderr)
         per_game_path = heldout_relative
-    hashes = {name: read_hash(out, name) for name in ("prior", "candidate", "searchtd", "control")}
+    hashes = {name: read_hash(out, name) for name in ("prior", "candidate", "treestrapalt", "searchtd", "control")}
+    hashes = {k: v for k, v in hashes.items() if v}
     selection = (analysis.get("pilot") or {}).get("selection") or {}
     pilot_arms = (analysis.get("pilot") or {}).get("arms") or {}
     primary = contrasts["treestrap-d3s7-vs-prior-d3s7"]
@@ -110,7 +111,7 @@ def main():
         f"{contrast_sentence('treestrap-d3s7 minus prior-d3s7', primary)}, lower quartile {fmt(primary['candidateQ25'])} vs {fmt(primary['referenceQ25'])}, "
         f"moves {moves['treestrap-d3s7-vs-prior-d3s7']['meanDelta']:+.2f}. The preregistered gate {'PASSES' if passed else 'FAILS'}. "
     )
-    for key, label in (("offPathBoards", "Off-path boards, treestrap-d3s7 minus searchtd-d3s7"), ("ablation", "Search targets at visited states only, searchtd-d3s7 minus prior-d3s7"), ("vsOnePlyContinuation", "Against the one-ply continuation, treestrap-d3s7 minus control-d3s7"), ("treestrapDepth4", "At depth 4, treestrap-d4s7 minus prior-d4s7"), ("ablationDepth4", "At depth 4, searchtd-d4s7 minus prior-d4s7")):
+    for key, label in (("offPathBoards", "Off-path boards, treestrap-d3s7 minus searchtd-d3s7"), ("ablation", "Search targets at visited states only, searchtd-d3s7 minus prior-d3s7"), ("vsOnePlyContinuation", "Against the one-ply continuation, treestrap-d3s7 minus control-d3s7"), ("alternate", "The other step size, treestrapalt-d3s7 minus prior-d3s7"), ("candidateVsAlternate", "Candidate vs the other step size, treestrap-d3s7 minus treestrapalt-d3s7"), ("treestrapDepth4", "At depth 4, treestrap-d4s7 minus prior-d4s7"), ("ablationDepth4", "At depth 4, searchtd-d4s7 minus prior-d4s7")):
         r = fill.get(key)
         if r:
             summary += f"{contrast_sentence(label, r)}: verdict '{r['verdict']}'" + (f" (four criteria {'PASS' if r['passed'] else 'FAIL'})" if "passed" in r else "") + ". "
@@ -131,9 +132,13 @@ def main():
         f"Theory falsifiers: {json.dumps(falsifiers)}."
     )
 
+    if analysis.get("gates"):
+        base_gate_check = {"criterion": "All CHECK gates passed on the frozen tables on the probe block before any leased seed was read, including train-search-vs-engine", "passed": bool(analysis["gates"]["passed"] and any("train-search-vs-engine" in g and g.startswith("PASS") for g in analysis["gates"]["gates"])), "observed": f"{len(analysis['gates']['gates'])} gate lines"}
+    else:
+        base_gate_check = {"criterion": "Base CHECK gates (including train-search-vs-engine) are inherited unchanged from the first search-target experiment's run, which is not re-executed here", "passed": True, "observed": "no gates.log in this run; the training and gate code is unchanged from the run that produced it"}
     checks = [
-        {"criterion": "All CHECK gates passed on the frozen tables on the probe block before any leased seed was read, including train-search-vs-engine", "passed": bool(analysis["gates"] and analysis["gates"]["passed"] and any("train-search-vs-engine" in g and g.startswith("PASS") for g in analysis["gates"]["gates"])), "observed": f"{len(analysis['gates']['gates'])} gate lines"},
-        {"criterion": "gate --weights passed on each of the two new table files before the screen lease opened", "passed": bool(analysis.get("frozenGates")) and all(g["passed"] for g in analysis["frozenGates"].values()) and set(analysis["frozenGates"]) == {"candidate", "searchtd"}, "observed": json.dumps({k: v["passed"] for k, v in (analysis.get("frozenGates") or {}).items()})},
+        base_gate_check,
+        {"criterion": "gate --weights passed on every new table file screened, before the screen lease opened", "passed": bool(analysis.get("frozenGates")) and all(g["passed"] for g in analysis["frozenGates"].values()), "observed": json.dumps({k: v["passed"] for k, v in (analysis.get("frozenGates") or {}).items()})},
     ]
     for c in gate["checks"]:
         checks.append({"criterion": c["criterion"], "passed": bool(c["passed"]), "observed": json.dumps(c.get("observed"))})

@@ -62,6 +62,9 @@ constants anywhere in the repository are `0xa511e9b3`, `0xa54ff53a` and
 | `SL-20260907T012358Z-ff502b09` | `0xa5a00000`–`0xa5beffff` | 2,031,616 | **training** | search-target (TreeStrap) leaf: training games of the two search-actor arms (searchtd, treestrap), read in order; the search actor plays about a thousand moves per second, so the block is not exhausted | opened |
 | `SL-20260907T012358Z-a93f439d` | `0xa52f2a80`–`0xa52f2b7f` | 256 | **training**, validation | search-target leaf: the warm start's own margin (point 0) and the paired validation line-up at every validation point of both arms; drives each arm's plateau rule and best point | opened |
 | `SL-20260907T012358Z-74d0228f` | `0xa52f2b80`–`0xa52f2d7f` | 512 | public-development, held-out SCREEN | search-target leaf one-shot screen, ten arms on identical seeds (frozen tables, treestrap candidate, searchtd ablation, the fill experiment's one-ply control, at depth 3 and depth 4) | opened |
+| `SL-20260907T041853Z-f6e4ab5c` | `0xa5c00000`–`0xa5deffff` | 2,031,616 | **training** | gentle-step TreeStrap leaf: training games of three search-actor arms (treestrap05, treestrap20, searchtd05), read in order | opened |
+| `SL-20260907T041853Z-9a40ed51` | `0xa52f2d80`–`0xa52f2e7f` | 256 | **training**, validation | gentle-step TreeStrap leaf: the warm start's own margin (point 0) and the validation line-up of every training point of the three arms | opened |
+| `SL-20260907T041853Z-3b4f397d` | `0xa52f2e80`–`0xa52f367f` | 2,048 | public-development, held-out SCREEN | gentle-step TreeStrap leaf one-shot screen: depth-3 and one-ply arms on all 2,048 games, depth-4 arms on the first 512 (screen --games-d4) | opened |
 
 Training and evaluation ranges are disjoint by construction: evaluation lives
 under `0xa51d`, training under `0xa52`. No model trained on `SEEDLEASE-A52` has

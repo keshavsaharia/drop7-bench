@@ -9,14 +9,18 @@
   "rangeStartHex": "0xa5c00000",
   "rangeEndExclusiveHex": "0xa5df0000",
   "cohortManifestSha256": null,
-  "state": "reserved",
+  "state": "opened",
   "reservedAt": "2026-09-07T04:20:34Z",
-  "openedAt": null,
+  "openedAt": "2026-09-07T06:31:51Z",
   "closedAt": null,
-  "protocolSha256": null,
-  "runIds": [],
+  "protocolSha256": "a880e8f091be35f7452517c0908ff1ee82e0fa08c783917deb6dc92574dad1d5",
+  "runIds": [
+    "RUN-20260907T041853Z-70c90dc9"
+  ],
   "notes": [
     "Conservative import 2026-09-07: every 8-hex-digit constant under docs/, approaches/, src/, research/, artifacts/, web/content/ and scripts/ was enumerated (grep -rhoE '0x[0-9a-fA-F]{8}'). Between 0xa52f2d80 and 0xa5300000 the only constants are 0xa52f2d80 itself (the exclusive end boundary of the first TreeStrap experiment's screen lease SL-20260907T012358Z-74d0228f, never read there) and 0xa52fffff (the allocator pool's end); no constant lies in 0xa5c00000-0xa6000000. The ranges reserved here overlap no existing lease record and no protected (0x7d) or final (0xd7) prefix, and are disjoint from every block the n-tuple experiments read (training 0xa5300000-0xa54f0000, 0xa5500000-0xa56f0000, 0xa5800000-0xa59f0000 and 0xa5a00000-0xa5bf0000; validation 0xa52f2240-0xa52f2280, 0xa52f2280-0xa52f2380, 0xa52f2780-0xa52f2880 and 0xa52f2a80-0xa52f2b80; screens 0xa52f2140-0xa52f2240, 0xa52f2380-0xa52f2580, 0xa52f2580-0xa52f2780, 0xa52f2880-0xa52f2a80 and 0xa52f2b80-0xa52f2d80) and from the historical block 0xa5700000-0xa571869f.",
-    "Training games of the three search-actor arms (treestrap05, treestrap20, searchtd05), each reading seeds in order from 0xa5c00000 (about 30,000 games per 90-minute arm, so the 2,031,616-seed block is not exhausted; wrap counts are recorded in each arm's progress.jsonl if it is). Training-role data: re-reading is permitted and disclosed; nothing trained on it can be evaluated on it."
+    "Training games of the three search-actor arms (treestrap05, treestrap20, searchtd05), each reading seeds in order from 0xa5c00000 (about 30,000 games per 90-minute arm, so the 2,031,616-seed block is not exhausted; wrap counts are recorded in each arm's progress.jsonl if it is). Training-role data: re-reading is permitted and disclosed; nothing trained on it can be evaluated on it.",
+    "Opened 2026-09-07T06:31:51Z by run RUN-20260907T041853Z-70c90dc9 for the three search-actor arms' training games (treestrap05, treestrap20, searchtd05; read in order); preregistration commit 85447c8, protocol a880e8f091be...",
+    "Run RUN-20260907T041853Z-70c90dc9 completed 2026-09-07T11:37:22Z: the three arms read 16,041 + 13,384 + 16,579 games from the block, no wrap."
   ]
 }

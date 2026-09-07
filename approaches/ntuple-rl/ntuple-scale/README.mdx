@@ -449,6 +449,69 @@ tables, 55,648 to the candidate and 43,539 to the ablation on these games.
 
 <NTupleGateTable run="RUN-20260907T012358Z-a00ecdf0" />
 
+
+### A gentle step size
+
+The full-step shock pointed at one fix: the same idea, corrected less
+aggressively per update. A second experiment,
+[EX-20260907-ntuple-treestrap-gentle-step-087a3a63](/experiments/EX-20260907-ntuple-treestrap-gentle-step-087a3a63),
+warm-started the frozen tables again and trained two TreeStrap arms at a
+twentieth and a fifth of the earlier step size, plus a visited-states
+ablation, each validated against its own warm-start reading before any
+training move. Neither TreeStrap arm collapsed this time. Both climbed for
+a while, wandered, and plateaued below the warm start's own margin on the
+validation block (188,854): the smaller step's best point reached 166,414
+at 1.8 million searched moves, the larger step's 168,523 at 900,000. The
+candidate, chosen by the larger of those two best points, is the alpha-0.2
+arm.
+
+<NTuplePilotFigure run="RUN-20260907T041853Z-70c90dc9" caption="The three gentle-step arms: each bar is an arm's paired margin over the fair leaf on the 256-game training-role block at its best validation point. The warm start's own margin on this block, 188,854, is the bar every arm needed to clear and none did." />
+
+The screen, widened to 2,048 games so a gain of about 20,000 points would
+be visible, read a smaller loss than the full-step run but still a loss.
+
+<NTupleScreenFigure run="RUN-20260907T041853Z-70c90dc9" caption="The primary contrast. One bar per held-out game: the gentle-step candidate as the depth-3 leaf minus the frozen tables in the same search on the same seed, in seed order, 2,048 games." />
+
+The candidate averaged 467,899 against 489,321 for the frozen tables at
+depth 3: 21,422 behind, with bootstrap bounds from minus 38,785 to minus
+4,294. Both halves are negative and the whole interval sits under zero, so
+the gate fails with a measured loss rather than a non-measurement, even
+though the loss is a fifth the size of the full-step run's. One reading
+came out clearly positive: the candidate beat the visited-states ablation
+by 85,394 points with a lower bound of 70,489, so training the imagined
+tree nodes is doing real work relative to training the visited board
+alone, it just is not enough work to close the gap to the frozen tables.
+The ablation itself lost 106,816 to the frozen tables, worse than either
+TreeStrap arm. The other step size, alpha 0.05, came far closer to
+neutral: 485,343, a loss of only 3,978 with bounds from minus 22,126 to
+plus 13,794, inconclusive rather than a loss, and the two step sizes'
+own difference is inconclusive too (bounds minus 35,160 to plus 56). The
+rule that picked the larger step by its single best validation point
+picked the arm that screened worse; the two arms landed close enough that
+this run cannot say the larger step is really the better one.
+
+At depth 4 the candidate lost 25,344 to the frozen tables with bounds from
+minus 64,719 to plus 14,253: inconclusive, not the clear loss the
+full-step candidate showed at depth 4. The candidate's own fourth ply is
+worth 39,537 with a lower bound of 4,671, still a real gain.
+
+<NTupleGateTable run="RUN-20260907T041853Z-70c90dc9" />
+
+<Direction title="What the record supports next" status="proposed" owner="claude-fable-5-1 (Claude Code)">
+Two step sizes and a full step have now been tried on this warm start at
+depth 3, and none has beaten the frozen tables; the mechanism itself
+(training the imagined tree nodes) is confirmed to help relative to
+training only the visited board, on every step size tried, but that gain
+has not yet been large enough to close the gap to the leaf it started
+from. The record has not tested whether a longer, checkpointed run of the
+same recipe keeps climbing past where these hour-long arms stopped, or
+whether a depth-4 search as teacher, which was not tried at any step size
+this experiment, does better; the prompt at
+`approaches/ntuple-rl/ntuple-scale/prompts/treestrap-d4-continuation.md`
+specifies both as one preregistered next step, built to run for days
+without an automatic short-window rule ending a session on a local dip.
+</Direction>
+
 ## What we learned
 
 The evaluator was the bottleneck, and a lookup table can be a better one than
@@ -608,7 +671,7 @@ and published under the run's archive prefix
 seed-free diagnostic behind the theory is `scripts/touched-by-fill.py`, its
 output retained as `main/touched-by-fill.txt` of the run.
 
-The search-target (TreeStrap) tables: theory
+The search-target (TreeStrap) tables, full step: theory
 [TH-20260907-ntuple-search-target-treestrap-leaf-b1c9989f](/theories/TH-20260907-ntuple-search-target-treestrap-leaf-b1c9989f),
 experiment
 [EX-20260907-ntuple-treestrap-warm-start-c33ba880](/experiments/EX-20260907-ntuple-treestrap-warm-start-c33ba880)
@@ -638,6 +701,29 @@ artifacts under `runs/RUN-20260907T012358Z-a00ecdf0/ntuple-scale/`
 `artifacts/results/EX-20260907-ntuple-treestrap-warm-start-c33ba880/RUN-20260907T012358Z-a00ecdf0/`
 and published under the run's archive prefix; web snapshot
 `web/content/figures/ntuple-scale/RUN-20260907T012358Z-a00ecdf0.json`.
+
+Gentle step: experiment
+[EX-20260907-ntuple-treestrap-gentle-step-087a3a63](/experiments/EX-20260907-ntuple-treestrap-gentle-step-087a3a63)
+(frozen protocol SHA-256 `a880e8f091be35f7452517c0908ff1ee82e0fa08c783917deb6dc92574dad1d5`),
+run `RUN-20260907T041853Z-70c90dc9` on the same branch (preregistration
+commit `85447c8`), machine profile `MACH-20260907T041853Z-b392b4a1`,
+contribution `CT-20260907T042316Z-08c32458`, result
+[RS-20260907T170344Z-17af2044](/results/RS-20260907T170344Z-17af2044).
+Leases: training `SL-20260907T041853Z-f6e4ab5c` (`0xa5c00000`),
+validation `SL-20260907T041853Z-9a40ed51` (`0xa52f2d80`, 256 games,
+training role), screen `SL-20260907T041853Z-3b4f397d` (`0xa52f2e80`, 2,048
+games at depth 3, the first 512 also at depth 4, public development,
+opened once). The screen binary gained `--games-d4` for this run (a
+smaller depth-4 cohort sharing the larger depth-3 block); analyze.py gains
+seed-aligned pairing and the alternate-step-size readings. Table files:
+the candidate (alpha 0.2, SHA-256 `03a63610934bb1e0...`) and the alternate
+(alpha 0.05, SHA-256 `63e62f11bbd050ac...`) are published compressed
+(dataset record `DS-20260907-ntuple-treestrap-gentle-candidate-tables-7000f60d`);
+the ablation stays on the workstation. The base CHECK gates, including
+`train-search-vs-engine`, are unchanged from the full-step run and were
+not re-executed; `gate --weights` ran again on each of this run's three
+new table files. Continuation prompt for the next step:
+`prompts/treestrap-d4-continuation.md`.
 
 Published artifacts (the public research archive, immutable run-scoped keys,
 SHA-256 in each reference's fragment; `runs/<run-id>/published.jsonl` lists

@@ -1,0 +1,39 @@
+{
+  "$schema": "../schemas/dataset-v1.schema.json",
+  "format": "drop7-dataset-v1",
+  "datasetId": "DS-20260907-ntuple-treestrap-gentle-candidate-tables-7000f60d",
+  "title": "Gentle-step TreeStrap n-tuple tables of RUN-20260907T041853Z-70c90dc9 (alpha 0.2 candidate and alpha 0.05 alternate, layout rows,cols,win23,win32,phase=all, 10^9 entries): both FAILED or came near-neutral on the held-out screen RS-20260907T170344Z-17af2044, published for reproduction",
+  "dataRole": "training",
+  "informationClass": "public-only",
+  "originUnit": "whole-game",
+  "originCount": 0,
+  "rowCount": 1000000000,
+  "wholeOriginSplit": true,
+  "seedLeaseRefs": [
+    "SL-20260907T041853Z-f6e4ab5c",
+    "SL-20260907T041853Z-9a40ed51",
+    "SL-20260907T041853Z-3b4f397d",
+    "SL-20260905T191317Z-09895ea2"
+  ],
+  "parentDatasetRefs": [
+    "DS-20260906-ntuple-scale-frozen-tables-ff977178"
+  ],
+  "fields": [
+    "D7NTUP01 lookup-table file (see approaches/ntuple-rl/ntuple-scale/src/model.rs): header, layout 'rows,cols,win23,win32,phase=all', 1,000,000,000 little-endian f32 entries in rise units, weights only.",
+    "published objects (zstd -12): candidate (alpha 0.2, best validation point at 900,377 searched moves), decompressed SHA-256 03a63610934bb1e0aa2f83c1c0770a5b6761c51be8df082bf659552008364f5c; alternate (alpha 0.05, best point at 2,120,050 searched moves), decompressed SHA-256 63e62f11bbd050ac6a861d7d75288744b5aa1d9b09a928416a2ecc41a56a7ab1.",
+    "note: On the held-out screen (RS-20260907T170344Z-17af2044, 2,048 paired games) the candidate scored 467,899 as the depth-3 leaf against 489,321 for the frozen tables (paired -21,422, bounds -38,785 to -4,294: the gate FAILS with a measurable loss). The alternate scored 485,343 (paired -3,978, bounds -22,126 to +13,794: inconclusive). Neither is a candidate to carry forward; the frozen tables at depth 4 remain the reference.",
+    "note: Download: curl -fL -o best-weights.bin.zst <reference without the fragment>; sha256sum against the fragment digest; zstd -d; sha256sum against the decompressed digest; then Model::load."
+  ],
+  "privilegedFields": [],
+  "allowedConsumers": [
+    "reproduction of the screened result and diagnosis of why internal-node training helped relative to visited-states-only but did not close the gap to the frozen tables",
+    "warm start for further training under a new experiment record with fresh leases; these tables have read every training block the frozen tables and the fill-conditioned control tables read, plus 0xa5c00000-0xa5df0000, which no later evaluation of them may reuse",
+    "never evaluation evidence on their own: this candidate and alternate both failed or came near-neutral on their one screen"
+  ],
+  "artifact": {
+    "path": "https://data.drop7.dev/runs/RUN-20260907T041853Z-70c90dc9/ntuple-scale/pilot/treestrap20/best-weights.bin.zst#sha256=f1ecc720499519c8bfb538d5ab0fe72b4d8300248b0af7a847090374f958de29",
+    "sha256": "f1ecc720499519c8bfb538d5ab0fe72b4d8300248b0af7a847090374f958de29",
+    "bytes": 403081611
+  },
+  "createdAt": "2026-09-07T17:07:22Z"
+}

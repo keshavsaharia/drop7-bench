@@ -62,13 +62,23 @@
     "research/seeds/leases/SL-20260907T041853Z-9a40ed51.json",
     "research/seeds/leases/SL-20260907T041853Z-3b4f397d.json",
     "research/runs/RUN-20260907T041853Z-70c90dc9.json",
-    "research/system-profiles/MACH-20260907T041853Z-b392b4a1.json"
+    "research/system-profiles/MACH-20260907T041853Z-b392b4a1.json",
+    "approaches/ntuple-rl/ntuple-scale/scripts/write-tree-result-record.py",
+    "research/results/RS-20260907T170344Z-17af2044.json",
+    "research/datasets/DS-20260907-ntuple-treestrap-gentle-candidate-tables-7000f60d.json",
+    "artifacts/results/EX-20260907-ntuple-treestrap-gentle-step-087a3a63/RUN-20260907T041853Z-70c90dc9/manifest.json",
+    "approaches/ntuple-rl/ntuple-scale/README.mdx",
+    "web/content/log/2026-09-07.mdx",
+    "web/content/figures/ntuple-scale/RUN-20260907T041853Z-70c90dc9.json",
+    "approaches/ntuple-rl/ntuple-scale/prompts/treestrap-d4-continuation.md"
   ],
   "commitShas": [],
   "validationPerformed": [
     "cargo test --release (15 unit tests) after the screen binary change",
     "gate --weights on each of the three new table files before the screen lease opened",
-    "make research-validate"
+    "make research-validate",
+    "analyze.py evaluated the preregistered gate and the readings beside it (fixed a frozenGates scan that missed the treestrapalt/searchtd arm names, regression-checked against the fill and first-treestrap runs' shapes); compare.py reports written for eighteen contrasts",
+    "every compact artifact of the run and the candidate/alternate table files (zstd) were published and verified (runs/RUN-20260907T041853Z-70c90dc9/published.jsonl)"
   ],
   "limitations": [
     "Self-reported contribution; not yet independently reviewed.",
@@ -76,5 +86,5 @@
   ],
   "selfReported": true,
   "reviewedBy": null,
-  "recordedAt": "2026-09-07T04:23:16Z"
+  "recordedAt": "2026-09-07T17:07:22Z"
 }
