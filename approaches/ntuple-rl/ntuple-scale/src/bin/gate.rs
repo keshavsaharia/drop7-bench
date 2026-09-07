@@ -21,7 +21,10 @@ use std::time::Instant;
 use drop7_ntuple_scale::game::{evaluate_arm, Arm};
 use drop7_ntuple_scale::model::{FillMode, Layout, Model, UpdateStats, MAX_ACTIVE};
 use drop7_ntuple_scale::policy::{choose, NTupleLeaf, PolicyParams};
+use drop7_ntuple_scale::search_train::TrainSearch;
 use drop7_ntuple_scale::tuples::{base10_ref, row_words, row_words_ref, Codec};
+use drop7_ntuple_scale::{deployment_params, DEPLOYMENT_TABLE};
+use drop7_rs::search::{DepthTable, SearchParams, Searcher};
 use drop7_rs::board::{Board, BOARD_SIZE};
 use drop7_rs::engine::{play_headless_move, FullWaveSink, State};
 use drop7_rs::rng::Mulberry32;
@@ -518,6 +521,114 @@ fn main() {
                 "{tables_label}, 2 games x (1, 2, 2 workers) over 40-move caps: identical {same}, illegal/incomplete-free {clean}, more work than depth 3 on every game {deeper}; work {} vs {} at depth 3; {:.0} s",
                 one.iter().map(|g| g.work).sum::<u64>(),
                 shallow.iter().map(|g| g.work).sum::<u64>(),
+                started.elapsed().as_secs_f64()
+            ),
+        );
+    }
+
+    // 7c. The training-time search against the engine's search: on the
+    // frozen tables when given, else on a small model trained for a few
+    // games (a constant leaf would tie everywhere), the root column values
+    // at depth 3 must match Searcher::column_values bit for bit, the
+    // decision must match Searcher::choose_action (the deployed decision
+    // with iterative deepening and the completion-guaranteeing work bound),
+    // two decisions must be identical, and the collected internal targets
+    // must be finite, at depths 1 and 2 only, and at most 49 + 49 x 49.
+    {
+        let started = Instant::now();
+        let search_model: Arc<Model> = frozen.clone().unwrap_or_else(|| {
+            let small = Layout::parse("rows,cols,win23,phase=cols").unwrap();
+            let trained = Model::new(small, 20.0, true);
+            let mut scratch = [0u64; MAX_ACTIVE];
+            let mut prev = [0u64; MAX_ACTIVE];
+            let mut next = [0u64; MAX_ACTIVE];
+            let mut stats = UpdateStats::default();
+            let mut sink = FullWaveSink::new();
+            for game in 0..8u32 {
+                let seed = probe_start.wrapping_add(0x400 + game);
+                let mut state = State::initial_headless(seed);
+                let mut n_prev = trained.features(&state.board, state.moves_remaining, &mut prev);
+                while !state.game_over && state.moves_played < 150 {
+                    let d = choose(&trained, &state, &params_default(), &mut scratch);
+                    if d.action < 0 {
+                        break;
+                    }
+                    sink.clear();
+                    let Some(result) = play_headless_move(&mut state, seed, d.action as usize, &mut sink) else { break };
+                    let reward = result.score_delta as f32 / 17_000.0;
+                    let target = if state.game_over {
+                        reward
+                    } else {
+                        let n = trained.features(&state.board, state.moves_remaining, &mut next);
+                        reward + trained.value_of(&next[..n])
+                    };
+                    trained.update(&prev[..n_prev], target, 1.0, 30.0, &mut stats);
+                    if !state.game_over {
+                        std::mem::swap(&mut prev, &mut next);
+                        n_prev = small.active_count();
+                    }
+                }
+            }
+            Arc::new(trained)
+        });
+        let params = deployment_params();
+        // Searcher::column_values never resets the work counter, so the
+        // column-value comparison runs the engine without a budget (values
+        // are budget-independent); choose_action resets it and keeps the
+        // deployed bound.
+        let mut engine = Searcher::new(SearchParams { maximum_work: u64::MAX, ..params }, NTupleLeaf::new(search_model.clone()), DepthTable::new(DEPLOYMENT_TABLE, 1));
+        let mut deployed_engine = Searcher::new(params, NTupleLeaf::new(search_model.clone()), DepthTable::new(DEPLOYMENT_TABLE, 1));
+        let mut train = TrainSearch::new(&search_model, params);
+        let live: Vec<&State> = states.iter().filter(|s| !s.game_over).take(120).collect();
+        let mut value_mismatches = 0usize;
+        let mut column_set_mismatches = 0usize;
+        let mut action_mismatches = 0usize;
+        let mut decision_mismatches = 0usize;
+        let mut repeat_mismatches = 0usize;
+        let mut bad_targets = 0usize;
+        let mut targets_total = 0usize;
+        let mut targets_max = 0usize;
+        for state in &live {
+            let (engine_values, engine_action) = engine.column_values(state, params.depth);
+            let (train_values, train_action) = train.column_values(state, params.depth);
+            if engine_values.len() != train_values.len() || engine_values.iter().zip(train_values.iter()).any(|(a, b)| a.0 != b.0) {
+                column_set_mismatches += 1;
+            } else if engine_values.iter().zip(train_values.iter()).any(|(a, b)| a.1.to_bits() != b.1.to_bits()) {
+                value_mismatches += 1;
+            }
+            if engine_action != train_action {
+                action_mismatches += 1;
+            }
+            let (deployed, _) = deployed_engine.choose_action(state);
+            let first = train.decide(state, true);
+            if deployed != first.action {
+                decision_mismatches += 1;
+            }
+            let n = train.targets.len();
+            targets_total += n;
+            targets_max = targets_max.max(n);
+            if n > 49 + 49 * 49
+                || !first.root_score.is_finite()
+                || !first.root_utility.is_finite()
+                || train.targets.iter().any(|t| !t.value.is_finite() || !(t.depth == 1 || t.depth == 2) || t.moves_remaining < 1 || t.moves_remaining > 5)
+            {
+                bad_targets += 1;
+            }
+            let first_targets: Vec<(u32, f32)> = train.targets.iter().map(|t| (t.board.cols[0], t.value)).collect();
+            let again = train.decide(state, true);
+            let again_targets: Vec<(u32, f32)> = train.targets.iter().map(|t| (t.board.cols[0], t.value)).collect();
+            if again.action != first.action || again.root_score.to_bits() != first.root_score.to_bits() || again.leaf_calls != first.leaf_calls || again_targets != first_targets {
+                repeat_mismatches += 1;
+            }
+        }
+        gates.report(
+            "train-search-vs-engine",
+            column_set_mismatches == 0 && value_mismatches == 0 && action_mismatches == 0 && decision_mismatches == 0 && repeat_mismatches == 0 && bad_targets == 0 && !live.is_empty(),
+            format!(
+                "{tables_label}, {} live states at depth {}: column sets {column_set_mismatches}, values (bit-for-bit) {value_mismatches}, column_values actions {action_mismatches}, choose_action decisions {decision_mismatches}, repeat {repeat_mismatches} mismatches; internal targets mean {:.0} per decision, max {targets_max}, malformed {bad_targets}; {:.0} s",
+                live.len(),
+                params.depth,
+                targets_total as f64 / live.len().max(1) as f64,
                 started.elapsed().as_secs_f64()
             ),
         );

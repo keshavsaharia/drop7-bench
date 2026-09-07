@@ -124,6 +124,7 @@ function trainingRun(name: string, summary: any, dir: string): TrainingRun {
     entries: summary.config?.entries ?? 0,
     activePerState: summary.config?.activePerState ?? 0,
     initFrom: summary.config?.initFrom ?? null,
+    start: summary.start ?? null,
     validateGames: summary.validateGames ?? summary.config?.validateGames ?? 64,
     movesTotal: summary.movesTotal,
     gamesTotal: summary.gamesTotal,
@@ -186,7 +187,7 @@ if (existsSync(hashPath)) {
     sources.push(relative(root, priorPath));
     freeze.priorSha256 = readFileSync(priorPath, "utf8").split(/\s+/)[0] || null;
   }
-  for (const name of ["control", "zeroed", "classmean"] as const) {
+  for (const name of ["control", "zeroed", "classmean", "searchtd"] as const) {
     const path = join(runDir, "main", `${name}-weights.sha256`);
     if (existsSync(path)) {
       sources.push(relative(root, path));
@@ -298,6 +299,21 @@ if (analysis.screen) {
         theory: fillRaw.theory as Record<string, boolean | null>,
       }
     : null;
+  const treeRaw = analysis.screen.tree;
+  const tree = treeRaw
+    ? {
+        primary: treeRaw.primary as string,
+        offPathBoards: fillReading(treeRaw.offPathBoards),
+        ablation: fillReading(treeRaw.ablation),
+        vsOnePlyContinuation: fillReading(treeRaw.vsOnePlyContinuation),
+        treestrapDepth4: fillReading(treeRaw.treestrapDepth4),
+        ablationDepth4: fillReading(treeRaw.ablationDepth4),
+        depthSteps: fillMap(treeRaw.depthSteps),
+        direct: fillMap(treeRaw.direct),
+        replicationOfPrior: fillReading(treeRaw.replicationOfPrior),
+        theory: treeRaw.theory as Record<string, boolean | null>,
+      }
+    : null;
   screen = {
     config: analysis.screen.config,
     seedStartHex: analysis.screen.seedStartHex,
@@ -306,6 +322,7 @@ if (analysis.screen) {
     primaryContrast,
     depth,
     fill,
+    tree,
     gate: analysis.screen.gate && primary
       ? { checks: analysis.screen.gate.checks, allPassed: analysis.screen.gate.passed, meanDelta: primary.meanDelta, pairedSd: primary.pairedSd, detectionFloor: primary.detectionFloor, wtl: primary.wtl }
       : null,

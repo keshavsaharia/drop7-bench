@@ -69,6 +69,8 @@ export interface ChunkRow {
 
 export interface TrainingRun {
   name: string;
+  /** The warm start's own validation point before any training move (the search-target experiment), else null. */
+  start?: { moves: number; artifact: string; pairedDeltaD3: number; ntupleD3Mean: number; fairD3Mean: number; directMean: number; pairedDeltaDirect: number } | null;
   layout: string;
   alpha: number;
   entries: number;
@@ -124,14 +126,31 @@ export interface FillSelection {
   rule: string;
 }
 
-export interface PilotStage {
-  arms: Record<string, TrainingRun>;
-  selection: PilotSelection | FillSelection | null;
+/** The search-target experiment's selection: the treestrap arm by protocol, beside the searchtd ablation and each arm's warm-start margin. */
+export interface TreeSelection {
+  candidateArm: string;
+  candidateBestMargin: number;
+  candidateBestMoves: number | null;
+  ablationArm: string;
+  ablationBestMargin: number;
+  ablationBestMoves: number | null;
+  arms: Record<string, { bestMargin: number; finalMargin: number | null; bestMoves: number | null; movesTotal: number; validationPoints: number; stop: string | null; warmStartMargin: number | null }>;
+  trainingSignal: { criterion: string; passed: boolean | null };
   rule: string;
 }
 
-export function isFillSelection(selection: PilotSelection | FillSelection | null): selection is FillSelection {
-  return selection !== null && "candidateArm" in selection;
+export interface PilotStage {
+  arms: Record<string, TrainingRun>;
+  selection: PilotSelection | FillSelection | TreeSelection | null;
+  rule: string;
+}
+
+export function isTreeSelection(selection: PilotSelection | FillSelection | TreeSelection | null): selection is TreeSelection {
+  return selection !== null && "ablationArm" in selection;
+}
+
+export function isFillSelection(selection: PilotSelection | FillSelection | TreeSelection | null): selection is FillSelection {
+  return selection !== null && "candidateArm" in selection && !("ablationArm" in selection);
 }
 
 /** One paired reading copied from analyze.py (a contrast or the interaction series). */
@@ -186,6 +205,20 @@ export interface FillStage {
   theory: Record<string, boolean | null>;
 }
 
+/** The search-target experiment's readings beside its gate (the same reading shape as the fill experiment's). */
+export interface TreeStage {
+  primary: string;
+  offPathBoards: FillReading | null;
+  ablation: FillReading | null;
+  vsOnePlyContinuation: FillReading | null;
+  treestrapDepth4: FillReading | null;
+  ablationDepth4: FillReading | null;
+  depthSteps: Record<string, FillReading>;
+  direct: Record<string, FillReading>;
+  replicationOfPrior: FillReading | null;
+  theory: Record<string, boolean | null>;
+}
+
 /** The screen with the replication's two extra readings, and the depth experiment's, on top of the shared shape. */
 export interface NTupleScreenStage extends ScreenStage {
   /** Which paired contrast the gate reads; candidate-d3s7-vs-fair-d3s7 for the first two experiments. */
@@ -194,6 +227,8 @@ export interface NTupleScreenStage extends ScreenStage {
   depth: DepthStage | null;
   /** The fill-conditioned experiment's readings, null elsewhere. */
   fill: FillStage | null;
+  /** The search-target (TreeStrap) experiment's readings, null elsewhere. */
+  tree: TreeStage | null;
   /** The first experiment's frozen tables against the fair leaf on this fresh block. */
   replication: { checks: GateCheck[]; allPassed: boolean } | null;
   /** The wider candidate against the first candidate: the preregistered verdict. */
@@ -235,7 +270,7 @@ export interface NTupleSnapshot {
   smoke: TrainingRun | null;
   pilot: PilotStage | null;
   main: TrainingRun | null;
-  freeze: { candidateSha256: string | null; priorSha256?: string | null; controlSha256?: string | null; zeroedSha256?: string | null; classmeanSha256?: string | null } | null;
+  freeze: { candidateSha256: string | null; priorSha256?: string | null; controlSha256?: string | null; zeroedSha256?: string | null; classmeanSha256?: string | null; searchtdSha256?: string | null } | null;
   screen: NTupleScreenStage | null;
   rusage: Rusage[] | null;
 }

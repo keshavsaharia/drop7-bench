@@ -1,0 +1,52 @@
+{
+  "$schema": "../schemas/run-v1.schema.json",
+  "format": "drop7-run-v1",
+  "runId": "RUN-20260907T012358Z-a00ecdf0",
+  "experimentId": "EX-20260907-ntuple-treestrap-warm-start-c33ba880",
+  "lifecycle": "running",
+  "runValidity": "pending",
+  "startedAt": "2026-09-07T01:29:38Z",
+  "endedAt": null,
+  "protocolSha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "machineProfileRef": "research/system-profiles/MACH-20260907T012358Z-d6aa318d.json",
+  "sourceState": {
+    "gitCommit": null,
+    "dirty": true,
+    "diffSha256": null,
+    "sourceArchiveSha256": null
+  },
+  "command": [
+    "approaches/ntuple-rl/ntuple-scale/build.sh (branch claude/n-tuple-search-targets)",
+    "cargo test --release (15 unit tests)",
+    "RUN_ID=RUN-20260907T012358Z-a00ecdf0 EXPERIMENT_ID=EX-20260907-ntuple-treestrap-warm-start-c33ba880 SCREEN_LEASE=research/seeds/leases/SL-20260907T012358Z-74d0228f.json THREADS=32 approaches/ntuple-rl/ntuple-scale/scripts/pipeline5.sh gates, then the search-actor smoke run on the probe block (01:29:38Z, before the protocol freeze; a first gate invocation at 01:29Z was stopped by the operator at 01:32Z before its training-search gate ran, after the unit test exposed a work-budget panic in the engine's column_values helper; the comparison engine was given an unbounded budget and the gates re-run from 01:32:31Z, the only invocation in rusage.jsonl)",
+    "RUN_ID=RUN-20260907T012358Z-a00ecdf0 EXPERIMENT_ID=EX-20260907-ntuple-treestrap-warm-start-c33ba880 SCREEN_LEASE=research/seeds/leases/SL-20260907T012358Z-74d0228f.json THREADS=32 approaches/ntuple-rl/ntuple-scale/scripts/pipeline5.sh chain (train -> select -> freeze -> screen -> compare -> analyze), launched with nohup after the protocol freeze and the preregistration commit; stdout/stderr in runs/RUN-20260907T012358Z-a00ecdf0/ntuple-scale/chain.nohup"
+  ],
+  "seedLeaseRefs": [
+    "SL-20260907T012358Z-ff502b09",
+    "SL-20260907T012358Z-a93f439d",
+    "SL-20260907T012358Z-74d0228f"
+  ],
+  "resourceLimits": {
+    "wallSeconds": 43200,
+    "cpuThreads": 32,
+    "maxHostBytes": 51539607552,
+    "maxGpuBytes": null
+  },
+  "resourceObserved": {
+    "wallSeconds": null,
+    "cpuSeconds": null,
+    "peakHostBytes": null,
+    "peakGpuBytes": null,
+    "measurementNotes": "Running; per-stage wall, CPU and peak RSS are appended to runs/<run-id>/ntuple-scale/rusage.jsonl by scripts/with-rusage.py."
+  },
+  "exitCode": null,
+  "stopReason": null,
+  "artifactRefs": [
+    "runs/RUN-20260907T012358Z-a00ecdf0/ntuple-scale/gates.log",
+    "runs/RUN-20260907T012358Z-a00ecdf0/ntuple-scale/smoke/progress.jsonl",
+    "runs/RUN-20260907T012358Z-a00ecdf0/ntuple-scale/{pipeline.log,rusage.jsonl}"
+  ],
+  "contributionIds": [
+    "CT-20260907T013349Z-44a6fb6a"
+  ]
+}

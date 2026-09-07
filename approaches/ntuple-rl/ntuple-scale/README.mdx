@@ -349,6 +349,63 @@ at depth 4 stay the candidate to carry forward.
 
 <NTupleGateTable run="RUN-20260906T201104Z-a96ea6c8" />
 
+### Tables trained on the boards the search evaluates
+
+Every earlier run trained the tables the same way: one-ply play visits a
+board, and the board it just left is nudged toward the points the move
+scored plus the value of the board it reached. Every update lands on a board
+that one-ply play visits. The deployed search values about a hundred and
+twenty thousand boards per move, most of them one to three imagined moves
+off that path, and decides by comparing them. The fill experiment measured
+how far apart the two sets are (about nine tenths of the entries never
+updated, concentrated on full lines) and found that the one repair which
+moved the depth-3 leaf without training was one that changed the price of
+exactly those unfamiliar boards.
+
+A fifth experiment,
+[EX-20260907-ntuple-treestrap-warm-start-c33ba880](/experiments/EX-20260907-ntuple-treestrap-warm-start-c33ba880),
+lets the search generate the training data. A training-time copy of the
+deployed depth-3 search plays every training move over the current tables
+(a gate proves its column values equal the engine's bit for bit), and after
+each move two kinds of update happen. The board the game is on moves toward
+the search's own value of it, an expectation over seven reveal strata and
+three imagined plies instead of a single sampled step. And, in the arm the
+experiment is named for, every internal node of the search tree, the boards
+one and two imagined moves from the root, about 2,450 of them per decision,
+moves toward its own backed-up value. Chess programs have trained linear
+evaluations this way under the name TreeStrap; the site's earlier attempt
+to refit the eighteen-term fair leaf to depth-4 values lost badly, because
+eighteen weights absorbed four plies of expected score and the fit dropped
+the positions near death. The tables have the capacity that leaf lacked,
+and every target here is a board's own expected remaining score under the
+search's play, in the units the tables already carry, with nothing dropped.
+One detail matters: the search decides by a utility that adds a
+million-point penalty at death, and training toward that number would fold
+the penalty into the tables. The training search therefore carries two
+values per node, the utility that picks the move and the score-only value
+of the same decisions, and trains toward the second.
+
+Both arms warm-start from the frozen tables with fresh step sizes, as the
+fill experiment did. The search actor plays about a thousand moves per
+second on 32 threads against two million for one-ply play, so each arm
+validates every four hundred thousand searched moves on a fresh 256-game
+block, after a validation of the warm start itself before any training
+move, and stops by the same plateau rule. The second arm, the ablation,
+uses the same actor and the same root target but touches no internal node,
+so the screen can tell the off-path boards from the search-shaped
+distribution and the lower-variance root target. The fill experiment's
+one-ply continuation, already frozen, is replayed as the one-ply reference.
+The screen plays ten arms on a fresh 512-game block: the frozen tables, the
+TreeStrap candidate, the ablation and the one-ply continuation at depth 3;
+the first three at depth 4; the frozen and the TreeStrap tables played
+directly; and the fair leaf at depth 3. The gate reads the TreeStrap
+candidate against the frozen tables at depth 3, and five readings beside it
+carry a verdict fixed in advance.
+
+<NTupleStatus run="RUN-20260907T012358Z-a00ecdf0" />
+
+{/* TREE-RESULTS */}
+
 ## What we learned
 
 The evaluator was the bottleneck, and a lookup table can be a better one than
