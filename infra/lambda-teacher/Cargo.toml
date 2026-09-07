@@ -1,0 +1,26 @@
+[package]
+name = "drop7-lambda-teacher"
+version = "0.1.0"
+edition = "2021"
+description = "AWS Lambda pilot: one search decision at a given depth, over the reference Rust engine. Viability test for horizontally scaling teacher-label generation; not a production data pipeline. See infra/lambda-teacher/README.md."
+publish = false
+
+[[bin]]
+name = "bootstrap"
+path = "src/main.rs"
+
+[dependencies]
+drop7-rs = { path = "../../approaches/fair-expectimax/rust-engine" }
+lambda_runtime = "0.13"
+tokio = { version = "1", features = ["macros"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "unwind"
+# Deliberately NOT built with target-cpu=native (unlike the workstation's
+# build.sh): this binary runs on Lambda's own CPU, which this workstation
+# has no control over and must not assume matches.
