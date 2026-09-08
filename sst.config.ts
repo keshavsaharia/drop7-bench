@@ -44,6 +44,12 @@ export default $config({
     };
   },
   async run() {
+    // A missing value used to silently remove the owner's analytics access on
+    // deployment. Fail before changing resources, including for local deploys.
+    const adminGithubUsername = process.env.ADMIN_GITHUB_USERNAME?.trim();
+    if (!adminGithubUsername) {
+      throw new Error("ADMIN_GITHUB_USERNAME is required to deploy the analytics viewer.");
+    }
     const { createHash } = await import("node:crypto");
     const { readFileSync } = await import("node:fs");
     const competitionCatalog = JSON.parse(
@@ -924,7 +930,7 @@ export default $config({
         DROP7_ANALYTICS_ATHENA_WORKGROUP: analyticsWorkgroup.name,
         DROP7_GAME_SUBMISSIONS_FIREHOSE_STREAM: gameSubmissionFirehose.name,
         DROP7_GAME_SUBMISSIONS_TABLE: gameSubmissionsTable.name,
-        ADMIN_GITHUB_USERNAME: process.env.ADMIN_GITHUB_USERNAME?.trim() ?? "",
+        ADMIN_GITHUB_USERNAME: adminGithubUsername,
       },
       permissions: [
         {
