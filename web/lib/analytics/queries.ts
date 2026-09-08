@@ -7,8 +7,9 @@ import type {
   IosDashboardData,
   IosDashboardPoint,
 } from "@/lib/analytics/types";
+import { fillTimeBuckets } from "./timeline.ts";
 
-const RANGE_CONFIG: Record<
+export const RANGE_CONFIG: Record<
   AnalyticsRange,
   { durationMs: number; truncation: "hour" | "day" | "week" }
 > = {
@@ -25,13 +26,17 @@ const BREAKDOWN_SECTIONS = [
   "countries",
   "devices",
   "browsers",
+  "systems",
+  "agents",
 ] as const;
 
 export function isAnalyticsRange(value: unknown): value is AnalyticsRange {
-  return typeof value === "string" && value in RANGE_CONFIG;
+  return typeof value === "string" && Object.hasOwn(RANGE_CONFIG, value);
 }
 
-export function isAnalyticsAudience(value: unknown): value is AnalyticsAudience {
+export function isAnalyticsAudience(
+  value: unknown,
+): value is AnalyticsAudience {
   return value === "humans" || value === "all" || value === "bots";
 }
 
@@ -68,7 +73,9 @@ WITH filtered AS (
     referrer_channel,
     country_code,
     device_type,
-    browser_family
+    browser_family,
+    os_family,
+    user_agent
   FROM "${database}"."${table}"
   WHERE event_name = 'page_view'
     AND occurred_at_ms >= ${startMs}
@@ -107,8 +114,8 @@ pages AS (
       CAST(0 AS bigint) AS paths
     FROM filtered
     GROUP BY 2
-    ORDER BY views DESC
-    LIMIT 12
+    ORDER BY views DESC, label ASC
+    LIMIT 40
   )
 ),
 channels AS (
@@ -122,8 +129,8 @@ channels AS (
       CAST(0 AS bigint) AS paths
     FROM filtered
     GROUP BY 2
-    ORDER BY views DESC
-    LIMIT 12
+    ORDER BY views DESC, label ASC
+    LIMIT 40
   )
 ),
 referrers AS (
@@ -137,8 +144,8 @@ referrers AS (
       CAST(0 AS bigint) AS paths
     FROM filtered
     GROUP BY 2
-    ORDER BY views DESC
-    LIMIT 12
+    ORDER BY views DESC, label ASC
+    LIMIT 40
   )
 ),
 countries AS (
@@ -152,8 +159,8 @@ countries AS (
       CAST(0 AS bigint) AS paths
     FROM filtered
     GROUP BY 2
-    ORDER BY views DESC
-    LIMIT 12
+    ORDER BY views DESC, label ASC
+    LIMIT 40
   )
 ),
 devices AS (
@@ -167,8 +174,8 @@ devices AS (
       CAST(0 AS bigint) AS paths
     FROM filtered
     GROUP BY 2
-    ORDER BY views DESC
-    LIMIT 12
+    ORDER BY views DESC, label ASC
+    LIMIT 40
   )
 ),
 browsers AS (
@@ -182,9 +189,21 @@ browsers AS (
       CAST(0 AS bigint) AS paths
     FROM filtered
     GROUP BY 2
-    ORDER BY views DESC
-    LIMIT 12
+    ORDER BY views DESC, label ASC
+    LIMIT 40
   )
+),
+systems AS (
+  SELECT 'systems' AS section, coalesce(nullif(os_family, ''), 'Unknown') AS label,
+    '' AS bucket, count(*) AS views, approx_distinct(visitor_id) AS visitors,
+    CAST(0 AS bigint) AS paths
+  FROM filtered GROUP BY 2 ORDER BY views DESC, label ASC LIMIT 40
+),
+agents AS (
+  SELECT 'agents' AS section, coalesce(nullif(user_agent, ''), 'Unknown') AS label,
+    '' AS bucket, count(*) AS views, approx_distinct(visitor_id) AS visitors,
+    CAST(0 AS bigint) AS paths
+  FROM filtered GROUP BY 2 ORDER BY views DESC, label ASC LIMIT 40
 )
 SELECT * FROM summary
 UNION ALL SELECT * FROM time_series
@@ -194,6 +213,8 @@ UNION ALL SELECT * FROM referrers
 UNION ALL SELECT * FROM countries
 UNION ALL SELECT * FROM devices
 UNION ALL SELECT * FROM browsers
+UNION ALL SELECT * FROM systems
+UNION ALL SELECT * FROM agents
 `.trim();
 }
 
@@ -255,7 +276,7 @@ modes AS (
     SELECT 'modes' AS section, mode AS label, '' AS bucket,
       count(*) AS games, coalesce(sum(verified_moves), 0) AS moves,
       coalesce(avg(verified_score), 0) AS average_score
-    FROM filtered GROUP BY 2 ORDER BY games DESC LIMIT 12
+    FROM filtered GROUP BY 2 ORDER BY games DESC LIMIT 40
   )
 ),
 versions AS (
@@ -263,7 +284,7 @@ versions AS (
     SELECT 'versions' AS section, app_version AS label, '' AS bucket,
       count(*) AS games, coalesce(sum(verified_moves), 0) AS moves,
       coalesce(avg(verified_score), 0) AS average_score
-    FROM filtered GROUP BY 2 ORDER BY games DESC LIMIT 12
+    FROM filtered GROUP BY 2 ORDER BY games DESC LIMIT 40
   )
 )
 SELECT * FROM summary
@@ -279,7 +300,9 @@ export function buildReadOnlyCustomSql(sql: string): string {
     throw new Error("Query must contain between 1 and 10,000 characters.");
   }
   if (trimmed.includes(";")) {
-    throw new Error("Run one read-only statement at a time, without a semicolon.");
+    throw new Error(
+      "Run one read-only statement at a time, without a semicolon.",
+    );
   }
 
   const withoutComments = trimmed
@@ -300,7 +323,11 @@ export function buildReadOnlyCustomSql(sql: string): string {
   return `SELECT * FROM (${trimmed}) AS admin_query LIMIT 500`;
 }
 
-export function parseDashboardResult(result: AthenaQueryResult): DashboardData {
+export function parseDashboardResult(
+  result: AthenaQueryResult,
+  range?: AnalyticsRange,
+  now = new Date(),
+): DashboardData {
   const points = result.rows.map((row) => ({
     section: row.section ?? "",
     label: row.label ?? "",
@@ -325,12 +352,21 @@ export function parseDashboardResult(result: AthenaQueryResult): DashboardData {
       .sort((left, right) => right.views - left.views);
   }
 
+  const timeSeries = points
+    .filter((point) => point.section === "time_series")
+    .map(withoutSection)
+    .sort((left, right) => left.bucket.localeCompare(right.bucket));
   return {
     summary: withoutSection(summary),
-    timeSeries: points
-      .filter((point) => point.section === "time_series")
-      .map(withoutSection)
-      .sort((left, right) => left.bucket.localeCompare(right.bucket)),
+    timeSeries: range
+      ? fillTimeBuckets(timeSeries, range, now, (bucket) => ({
+          label: "",
+          bucket,
+          views: 0,
+          visitors: 0,
+          paths: 0,
+        }))
+      : timeSeries,
     breakdowns,
     query: {
       queryExecutionId: result.queryExecutionId,
@@ -340,7 +376,11 @@ export function parseDashboardResult(result: AthenaQueryResult): DashboardData {
   };
 }
 
-export function parseIosDashboardResult(result: AthenaQueryResult): IosDashboardData {
+export function parseIosDashboardResult(
+  result: AthenaQueryResult,
+  range?: AnalyticsRange,
+  now = new Date(),
+): IosDashboardData {
   const points = result.rows.map((row) => ({
     section: row.section ?? "",
     label: row.label ?? "",
@@ -364,15 +404,30 @@ export function parseIosDashboardResult(result: AthenaQueryResult): IosDashboard
     moves: point.moves,
     averageScore: point.averageScore,
   });
+  const timeSeries = points
+    .filter((point) => point.section === "time_series")
+    .map(clean)
+    .sort((left, right) => left.bucket.localeCompare(right.bucket));
   return {
     summary: clean(summary),
-    timeSeries: points.filter((point) => point.section === "time_series")
-      .map(clean).sort((left, right) => left.bucket.localeCompare(right.bucket)),
+    timeSeries: range
+      ? fillTimeBuckets(timeSeries, range, now, (bucket) => ({
+          label: "",
+          bucket,
+          games: 0,
+          moves: 0,
+          averageScore: 0,
+        }))
+      : timeSeries,
     breakdowns: {
-      modes: points.filter((point) => point.section === "modes")
-        .map(clean).sort((left, right) => right.games - left.games),
-      versions: points.filter((point) => point.section === "versions")
-        .map(clean).sort((left, right) => right.games - left.games),
+      modes: points
+        .filter((point) => point.section === "modes")
+        .map(clean)
+        .sort((left, right) => right.games - left.games),
+      versions: points
+        .filter((point) => point.section === "versions")
+        .map(clean)
+        .sort((left, right) => right.games - left.games),
     },
     query: {
       queryExecutionId: result.queryExecutionId,
@@ -403,7 +458,10 @@ function numberValue(value: string | null): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-function analyticsIdentifier(name: string, value: string | undefined): string {
+export function analyticsIdentifier(
+  name: string,
+  value: string | undefined,
+): string {
   if (!value || !/^[a-z0-9_]+$/i.test(value)) {
     throw new Error(`${name} is not configured with a valid Glue identifier.`);
   }

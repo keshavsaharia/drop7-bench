@@ -82,7 +82,7 @@ if [[ "${FIRST_WORD}" != "select" && "${FIRST_WORD}" != "with" ]]; then
   exit 2
 fi
 for keyword in insert update delete merge create drop alter truncate unload call optimize vacuum grant revoke prepare execute msck; do
-  if [[ "${LOWER_QUERY}" =~ (^|[^a-z_])${keyword}([^a-z_]|$) ]]; then
+  if [[ "${LOWER_QUERY}" =~ (^|[^a-z0-9_])${keyword}([^a-z0-9_]|$) ]]; then
     echo "query contains forbidden keyword: ${keyword}" >&2
     exit 2
   fi
@@ -158,7 +158,7 @@ for _ in {1..120}; do
       ;;
     FAILED|CANCELLED)
       trap - INT TERM
-      echo "Athena query ${QUERY_STATE,,}: ${STATE_REASON}" >&2
+      printf 'Athena query %s (%s): %s\n' "${QUERY_EXECUTION_ID}" "${QUERY_STATE}" "${STATE_REASON}" >&2
       exit 1
       ;;
   esac

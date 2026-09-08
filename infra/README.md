@@ -357,8 +357,8 @@ address is discarded before the event is sent. Mobile interaction rows do not ha
 
 `/analytics` and `/api/analytics/query` both require a GitHub Auth.js session whose handle
 matches `ADMIN_GITHUB_USERNAME`. Other signed-in users receive a 404. The page offers
-aggregate time series and page, acquisition, referrer, country, device, and browser
-breakdowns, plus a separate iOS-app view backed by validated completed-game submissions and
+aggregate time series and page, acquisition, referrer, country, device, browser, OS, and
+user-agent breakdowns (five visible rows, expandable up to the top 40), plus a separate iOS-app view backed by validated completed-game submissions and
 a read-only SQL workspace. The iOS view reports completed games, moves, score averages,
 mode mix, and app-version mix without joining to an account or device identifier. Custom SQL
 accepts one `SELECT` or `WITH`
@@ -366,6 +366,18 @@ statement, returns at most 500 rows, and runs in a dedicated Athena engine-v3 wo
 that enforces its result location and a 1 GiB per-query scan ceiling. The site Lambda role
 can read only the analytics Glue resources and S3 bucket, write only Athena results, run
 queries only in that workgroup, and put records only into the stage analytics stream.
+
+The navigation canvas groups existing page views into inferred sessions after 30 minutes
+of inactivity. It deduplicates event deliveries, keeps each full route prefix separate,
+and returns aggregate counts for the first six pages of the 400 most frequent sequences.
+Coverage is shown against all inferred sessions in the selected period; conditional edge
+percentages describe the represented subset. The time window can cut across a session,
+shared visitor hashes or tabs can mix paths, and missing events can omit steps. A missing
+next page is an observed endpoint, not proof of an exit. No new tracking is collected.
+
+Deployments require a non-empty `ADMIN_GITHUB_USERNAME` and stop before changing
+resources if it is missing. The GitHub workflow checks the repository variable before
+installing dependencies; local SST deployments must pass the same value explicitly.
 
 For a local UI build, only `ADMIN_GITHUB_USERNAME` is needed; Firehose collection is a
 no-op when `DROP7_ANALYTICS_FIREHOSE_STREAM` is absent. To exercise live analytics locally,

@@ -1,8 +1,8 @@
 "use client";
 
-import "../app/app.css";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import type { FormEvent, ReactNode } from "react";
+import { useId, useMemo, useState } from "react";
+import type { FormEvent } from "react";
+import { AnalyticsNavigation } from "./analytics/AnalyticsNavigation";
 import type {
   AnalyticsAudience,
   AnalyticsRange,
@@ -11,23 +11,33 @@ import type {
   DashboardPoint,
   IosDashboardData,
 } from "@/lib/analytics/types";
+import {
+  analyticsQuery,
+  useAnalyticsQuery,
+  PanelHeading,
+  QueryFootnote,
+  ErrorNotice,
+  EmptyState,
+  percentage,
+} from "./analytics/shared";
+import "./analytics/analytics.css";
 
-const RANGE_OPTIONS: { value: AnalyticsRange; label: string }[] = [
+const RANGES: { value: AnalyticsRange; label: string }[] = [
   { value: "24h", label: "Last 24 hours" },
   { value: "7d", label: "Last 7 days" },
   { value: "30d", label: "Last 30 days" },
   { value: "90d", label: "Last 90 days" },
 ];
-
 const BREAKDOWNS = [
-  { key: "pages", title: "Popular pages" },
-  { key: "channels", title: "Acquisition channels" },
-  { key: "referrers", title: "Referrer hosts" },
-  { key: "countries", title: "Countries" },
-  { key: "devices", title: "Devices" },
-  { key: "browsers", title: "Browsers" },
-] as const;
-
+  ["pages", "Popular pages", "Where people spend their page views"],
+  ["referrers", "Referrers", "Sites that send traffic here"],
+  ["channels", "Acquisition channels", "How people discover the site"],
+  ["countries", "Countries", "Traffic by country"],
+  ["devices", "Devices", "The screens people use"],
+  ["browsers", "Browsers", "Browser families"],
+  ["systems", "Operating systems", "Platforms behind the visits"],
+  ["agents", "User agents", "Reported browser and client strings"],
+];
 const DEFAULT_SQL = `SELECT
   date(from_unixtime(occurred_at_ms / 1000.0)) AS day,
   count(*) AS page_views,
@@ -35,6 +45,7 @@ const DEFAULT_SQL = `SELECT
 FROM page_views
 WHERE event_name = 'page_view'
   AND is_bot = false
+  AND occurred_at_ms >= CAST(to_unixtime(current_timestamp - INTERVAL '7' DAY) * 1000 AS bigint)
 GROUP BY 1
 ORDER BY 1 DESC
 LIMIT 30`;
@@ -43,312 +54,252 @@ export function AnalyticsDashboard() {
   const [view, setView] = useState<"site" | "ios">("site");
   const [range, setRange] = useState<AnalyticsRange>("30d");
   const [audience, setAudience] = useState<AnalyticsAudience>("humans");
-  const [dashboard, setDashboard] = useState<DashboardData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [iosDashboard, setIosDashboard] = useState<IosDashboardData | null>(null);
-  const [iosLoading, setIosLoading] = useState(false);
-  const [iosError, setIosError] = useState<string | null>(null);
-  const [sql, setSql] = useState(DEFAULT_SQL);
-  const [customResult, setCustomResult] = useState<AthenaQueryResult | null>(null);
-  const [customLoading, setCustomLoading] = useState(false);
-  const [customError, setCustomError] = useState<string | null>(null);
-
-  const loadDashboard = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch("/api/analytics/query", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ mode: "dashboard", range, audience }),
-      });
-      const payload = (await response.json()) as {
-        data?: DashboardData;
-        error?: string;
-      };
-      if (!response.ok || !payload.data) {
-        throw new Error(payload.error ?? "The analytics query failed.");
-      }
-      setDashboard(payload.data);
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "The analytics query failed.");
-    } finally {
-      setLoading(false);
-    }
-  }, [audience, range]);
-
-  const loadIosDashboard = useCallback(async () => {
-    setIosLoading(true);
-    setIosError(null);
-    try {
-      const response = await fetch("/api/analytics/query", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ mode: "ios-dashboard", range }),
-      });
-      const payload = (await response.json()) as {
-        data?: IosDashboardData;
-        error?: string;
-      };
-      if (!response.ok || !payload.data) {
-        throw new Error(payload.error ?? "The iOS analytics query failed.");
-      }
-      setIosDashboard(payload.data);
-    } catch (caught) {
-      setIosError(caught instanceof Error ? caught.message : "The iOS analytics query failed.");
-    } finally {
-      setIosLoading(false);
-    }
-  }, [range]);
-
-  useEffect(() => {
-    const timer = window.setTimeout(
-      () => void (view === "ios" ? loadIosDashboard() : loadDashboard()),
-      0,
-    );
-    return () => window.clearTimeout(timer);
-  }, [loadDashboard, loadIosDashboard, view]);
-
-  async function runCustomQuery(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setCustomLoading(true);
-    setCustomError(null);
-    setCustomResult(null);
-    try {
-      const response = await fetch("/api/analytics/query", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ mode: "custom", sql }),
-      });
-      const payload = (await response.json()) as {
-        data?: AthenaQueryResult;
-        error?: string;
-      };
-      if (!response.ok || !payload.data) {
-        throw new Error(payload.error ?? "The Athena query failed.");
-      }
-      setCustomResult(payload.data);
-    } catch (caught) {
-      setCustomError(caught instanceof Error ? caught.message : "The Athena query failed.");
-    } finally {
-      setCustomLoading(false);
-    }
-  }
-
+  const [refresh, setRefresh] = useState(0);
   return (
-    <div className="space-y-8">
-      <section className="flex flex-col gap-5 border-b border-rule pb-7 lg:flex-row lg:items-end lg:justify-between">
-        <div className="max-w-prose">
-          <p className="label">Admin · first-party analytics</p>
-          <h1 className="mt-2 text-h1 font-display font-bold text-ink">
-            {view === "ios" ? "iOS app analytics" : "Site analytics"}
-          </h1>
-          <p className="mt-3 text-ink-2">
-            {view === "ios"
-              ? "Server-validated completed games submitted by the iOS app. The raw move and game tapes stay in the hourly S3 archive. Times are UTC."
-              : "Aggregate server-side page views from the Firehose-backed Iceberg table. The table normally trails live traffic by about five minutes. Times are UTC."}
+    <div className="analytics-dashboard">
+      <header className="analytics-heading">
+        <div>
+          <p className="analytics-eyebrow">Workspace / Analytics</p>
+          <h1>{view === "site" ? "Site analytics" : "iOS app analytics"}</h1>
+          <p>
+            {view === "site"
+              ? "Understand who visits, what gets read, and where people go next."
+              : "Completed games and play activity from validated iOS submissions."}
           </p>
         </div>
-        <div className="flex flex-wrap items-end gap-3">
-          <div className="flex rounded-md border border-rule p-1" aria-label="Analytics view">
-            <ViewButton active={view === "site"} onClick={() => setView("site")}>Website</ViewButton>
-            <ViewButton active={view === "ios"} onClick={() => setView("ios")}>iOS app</ViewButton>
-          </div>
-          <label className="analytics-control">
-            <span>Window</span>
-            <select value={range} onChange={(event) => setRange(event.target.value as AnalyticsRange)}>
-              {RANGE_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          {view === "site" ? (
-            <label className="analytics-control">
+        <span className="analytics-private">
+          <span aria-hidden="true">◈</span> Admin access
+        </span>
+      </header>
+      <div className="analytics-toolbar">
+        <div
+          className="analytics-tabs"
+          role="group"
+          aria-label="Analytics view"
+        >
+          <button
+            aria-pressed={view === "site"}
+            onClick={() => setView("site")}
+          >
+            Website
+          </button>
+          <button aria-pressed={view === "ios"} onClick={() => setView("ios")}>
+            iOS app
+          </button>
+        </div>
+        <div className="analytics-filters">
+          {view === "site" && (
+            <label className="analytics-filter">
               <span>Audience</span>
               <select
+                aria-label="Audience"
                 value={audience}
-                onChange={(event) => setAudience(event.target.value as AnalyticsAudience)}
+                onChange={(e) =>
+                  setAudience(e.target.value as AnalyticsAudience)
+                }
               >
                 <option value="humans">People only</option>
                 <option value="all">People and bots</option>
                 <option value="bots">Bots only</option>
               </select>
             </label>
-          ) : null}
-          <button
-            type="button"
-            className="analytics-run-button"
-            onClick={() => void (view === "ios" ? loadIosDashboard() : loadDashboard())}
-            disabled={view === "ios" ? iosLoading : loading}
-          >
-            {(view === "ios" ? iosLoading : loading) ? "Querying…" : "Refresh"}
-          </button>
-        </div>
-      </section>
-
-      {view === "site" && error ? <ErrorNotice message={error} /> : null}
-      {view === "ios" && iosError ? <ErrorNotice message={iosError} /> : null}
-      {view === "site" && loading && !dashboard ? <DashboardSkeleton /> : null}
-      {view === "ios" && iosLoading && !iosDashboard ? <DashboardSkeleton /> : null}
-
-      {view === "site" && dashboard ? (
-        <>
-          <section className="grid gap-3 sm:grid-cols-3">
-            <MetricCard label="Page views" value={dashboard.summary.views} />
-            <MetricCard label="Approx. visitors" value={dashboard.summary.visitors} />
-            <MetricCard label="Pages viewed" value={dashboard.summary.paths} />
-          </section>
-
-          <section className="analytics-panel">
-            <div className="mb-5 flex flex-wrap items-baseline justify-between gap-2">
-              <div>
-                <h2 className="text-h3 font-display font-semibold text-ink">Traffic over time</h2>
-                <p className="mt-1 text-small text-ink-2">Page views per reporting bucket</p>
-              </div>
-              <span className="text-caption text-ink-3">
-                {loading ? "Refreshing…" : `${dashboard.timeSeries.length} buckets`}
-              </span>
-            </div>
-            <TimeSeriesChart points={dashboard.timeSeries} metricLabel="page views" />
-          </section>
-
-          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {BREAKDOWNS.map(({ key, title }) => (
-              <BreakdownCard
-                key={key}
-                title={title}
-                points={dashboard.breakdowns[key] ?? []}
-              />
-            ))}
-          </section>
-
-          <QueryFootnote
-            dataScannedBytes={dashboard.query.dataScannedBytes}
-            engineExecutionMs={dashboard.query.engineExecutionMs}
-            queryExecutionId={dashboard.query.queryExecutionId}
-          />
-        </>
-      ) : null}
-
-      {view === "ios" && iosDashboard ? (
-        <>
-          <section className="grid gap-3 sm:grid-cols-3">
-            <MetricCard label="Completed games" value={iosDashboard.summary.games} />
-            <MetricCard label="Moves collected" value={iosDashboard.summary.moves} />
-            <MetricCard label="Average score" value={Math.round(iosDashboard.summary.averageScore)} />
-          </section>
-          <section className="analytics-panel">
-            <div className="mb-5 flex flex-wrap items-baseline justify-between gap-2">
-              <div>
-                <h2 className="text-h3 font-display font-semibold text-ink">Completed games over time</h2>
-                <p className="mt-1 text-small text-ink-2">Validated iOS submissions per reporting bucket</p>
-              </div>
-              <span className="text-caption text-ink-3">
-                {iosLoading ? "Refreshing…" : `${iosDashboard.timeSeries.length} buckets`}
-              </span>
-            </div>
-            <TimeSeriesChart
-              points={iosDashboard.timeSeries.map((point) => ({
-                label: point.label,
-                bucket: point.bucket,
-                views: point.games,
-                visitors: point.moves,
-                paths: point.averageScore,
-              }))}
-              metricLabel="completed games"
-            />
-          </section>
-          <section className="grid gap-4 md:grid-cols-2">
-            <BreakdownCard
-              title="Game modes"
-              points={(iosDashboard.breakdowns.modes ?? []).map((point) => ({
-                label: point.label, bucket: point.bucket, views: point.games,
-                visitors: point.moves, paths: point.averageScore,
-              }))}
-            />
-            <BreakdownCard
-              title="App versions"
-              points={(iosDashboard.breakdowns.versions ?? []).map((point) => ({
-                label: point.label, bucket: point.bucket, views: point.games,
-                visitors: point.moves, paths: point.averageScore,
-              }))}
-            />
-          </section>
-          <QueryFootnote
-            dataScannedBytes={iosDashboard.query.dataScannedBytes}
-            engineExecutionMs={iosDashboard.query.engineExecutionMs}
-            queryExecutionId={iosDashboard.query.queryExecutionId}
-          />
-        </>
-      ) : null}
-
-      <section className="analytics-panel">
-        <div className="max-w-prose">
-          <p className="label">Athena workspace</p>
-          <h2 className="mt-2 text-h3 font-display font-semibold text-ink">Run a read-only query</h2>
-          <p className="mt-2 text-small text-ink-2">
-            SELECT and WITH queries run in the analytics workgroup and return at most 500 rows.
-            The workgroup enforces its S3 result location and a 1 GiB scan ceiling.
-          </p>
-        </div>
-        <form className="mt-5 space-y-3" onSubmit={runCustomQuery}>
-          <label className="block">
-            <span className="sr-only">Athena SQL query</span>
-            <textarea
-              className="analytics-sql"
-              value={sql}
-              onChange={(event) => setSql(event.target.value)}
-              spellCheck={false}
-              rows={11}
-            />
+          )}
+          <label className="analytics-filter">
+            <span>Period</span>
+            <select
+              aria-label="Period"
+              value={range}
+              onChange={(e) => setRange(e.target.value as AnalyticsRange)}
+            >
+              {RANGES.map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
           </label>
-          <button type="submit" className="analytics-run-button" disabled={customLoading}>
-            {customLoading ? "Running in Athena…" : "Run query"}
+          <button
+            className="analytics-button"
+            onClick={() => setRefresh((n) => n + 1)}
+          >
+            <span aria-hidden="true">↻</span> Refresh
           </button>
-        </form>
-
-        {customError ? <div className="mt-4"><ErrorNotice message={customError} /></div> : null}
-        {customResult ? <CustomResultTable result={customResult} /> : null}
-      </section>
+        </div>
+      </div>
+      <div className="analytics-freshness">
+        <span className="analytics-status-dot" /> First-party data{" "}
+        <span>Usually about 5 minutes behind · All times UTC</span>
+      </div>
+      {view === "site" ? (
+        <SiteContent
+          key={`site-${range}-${audience}-${refresh}`}
+          range={range}
+          audience={audience}
+        />
+      ) : (
+        <IosContent key={`ios-${range}-${refresh}`} range={range} />
+      )}
+      <SqlWorkspace />
     </div>
   );
 }
 
-function MetricCard({ label, value }: { label: string; value: number }) {
+function SiteContent({
+  range,
+  audience,
+}: {
+  range: AnalyticsRange;
+  audience: AnalyticsAudience;
+}) {
+  const { data, error } = useAnalyticsQuery<DashboardData>({
+    mode: "dashboard",
+    range,
+    audience,
+  });
+  if (error) return <ErrorNotice message={error} />;
+  if (!data) return <DashboardSkeleton />;
   return (
-    <article className="rounded-lg border border-rule bg-surface p-5">
-      <p className="label">{label}</p>
-      <p className="mt-2 font-display text-h1 font-bold tabular-nums text-ink">
-        {value.toLocaleString()}
-      </p>
-    </article>
+    <>
+      <section className="analytics-metrics" aria-label="Traffic summary">
+        <MetricCard
+          label="Page views"
+          value={data.summary.views}
+          note="Total recorded page views"
+          icon="↗"
+        />
+        <MetricCard
+          label="Visitors"
+          value={data.summary.visitors}
+          note="Approximate unique visitors"
+          icon="◎"
+        />
+        <MetricCard
+          label="Pages viewed"
+          value={data.summary.paths}
+          note="Approximate unique paths"
+          icon="▤"
+        />
+      </section>
+      <section className="analytics-card analytics-traffic">
+        <PanelHeading
+          title="Traffic over time"
+          description="Page views across the selected period"
+        >
+          <span className="analytics-legend">Page views</span>
+        </PanelHeading>
+        <TimeSeriesChart points={data.timeSeries} metricLabel="page views" />
+      </section>
+      <AnalyticsNavigation range={range} audience={audience} />
+      <div className="analytics-section-heading">
+        <h2>Traffic breakdown</h2>
+        <span>Ranked by page views · Top 40 per category</span>
+      </div>
+      <section className="analytics-breakdowns" aria-label="Traffic breakdown">
+        {BREAKDOWNS.map(([key, title, description]) => (
+          <BreakdownCard
+            key={key}
+            title={title}
+            description={description}
+            points={data.breakdowns[key] ?? []}
+            total={data.summary.views}
+            category={key}
+          />
+        ))}
+      </section>
+      <QueryFootnote query={data.query} />
+    </>
   );
 }
 
-function ViewButton({
-  active,
-  children,
-  onClick,
+function IosContent({ range }: { range: AnalyticsRange }) {
+  const { data, error } = useAnalyticsQuery<IosDashboardData>({
+    mode: "ios-dashboard",
+    range,
+  });
+  if (error) return <ErrorNotice message={error} />;
+  if (!data) return <DashboardSkeleton />;
+  const convert = (point: IosDashboardData["summary"]): DashboardPoint => ({
+    label: point.label,
+    bucket: point.bucket,
+    views: point.games,
+    visitors: point.moves,
+    paths: point.averageScore,
+  });
+  return (
+    <>
+      <section className="analytics-metrics" aria-label="App summary">
+        <MetricCard
+          label="Completed games"
+          value={data.summary.games}
+          note="Server-validated submissions"
+          icon="▦"
+        />
+        <MetricCard
+          label="Moves collected"
+          value={data.summary.moves}
+          note="Moves in completed games"
+          icon="↗"
+        />
+        <MetricCard
+          label="Average score"
+          value={Math.round(data.summary.averageScore)}
+          note="Across completed games"
+          icon="◎"
+        />
+      </section>
+      <section className="analytics-card analytics-traffic">
+        <PanelHeading
+          title="Completed games over time"
+          description="Validated iOS submissions across the selected period"
+        />
+        <TimeSeriesChart
+          points={data.timeSeries.map(convert)}
+          metricLabel="completed games"
+        />
+      </section>
+      <section className="analytics-breakdowns">
+        <BreakdownCard
+          title="Game modes"
+          description="Completed games by mode"
+          points={(data.breakdowns.modes ?? []).map(convert)}
+          total={data.summary.games}
+          metric="Games"
+        />
+        <BreakdownCard
+          title="App versions"
+          description="Completed games by release"
+          points={(data.breakdowns.versions ?? []).map(convert)}
+          total={data.summary.games}
+          metric="Games"
+        />
+      </section>
+      <QueryFootnote query={data.query} />
+    </>
+  );
+}
+
+function MetricCard({
+  label,
+  value,
+  note,
+  icon,
 }: {
-  active: boolean;
-  children: ReactNode;
-  onClick: () => void;
+  label: string;
+  value: number;
+  note: string;
+  icon: string;
 }) {
   return (
-    <button
-      type="button"
-      aria-pressed={active}
-      onClick={onClick}
-      className={
-        "rounded-sm px-3 py-2 text-caption font-semibold transition-colors motion-reduce:transition-none " +
-        (active ? "bg-hover text-ink" : "text-ink-3 hover:text-ink-1")
-      }
-    >
-      {children}
-    </button>
+    <article className="analytics-card analytics-metric">
+      <div>
+        <span>{label}</span>
+        <span className="analytics-metric-icon" aria-hidden="true">
+          {icon}
+        </span>
+      </div>
+      <strong>{value.toLocaleString("en")}</strong>
+      <p>{note}</p>
+    </article>
   );
 }
 
@@ -359,225 +310,323 @@ function TimeSeriesChart({
   points: DashboardPoint[];
   metricLabel: string;
 }) {
-  const geometry = useMemo(() => {
-    const width = 900;
-    const height = 260;
-    const left = 48;
-    const right = 16;
-    const top = 12;
-    const bottom = 34;
-    const chartWidth = width - left - right;
-    const chartHeight = height - top - bottom;
-    const max = Math.max(1, ...points.map((point) => point.views));
-    const step = points.length > 1 ? chartWidth / (points.length - 1) : chartWidth;
-    const coordinates = points.map((point, index) => ({
-      x: left + (points.length === 1 ? chartWidth / 2 : index * step),
-      y: top + chartHeight - (point.views / max) * chartHeight,
-      point,
-    }));
-    return { width, height, left, right, top, bottom, chartWidth, chartHeight, max, coordinates };
-  }, [points]);
-
-  if (points.length === 0) {
-    return <EmptyState label={`No ${metricLabel} in this window.`} />;
-  }
-
-  const line = geometry.coordinates.map(({ x, y }) => `${x},${y}`).join(" ");
-  const area = [
-    `${geometry.left},${geometry.height - geometry.bottom}`,
-    line,
-    `${geometry.width - geometry.right},${geometry.height - geometry.bottom}`,
-  ].join(" ");
-  const labelIndexes = Array.from(
-    new Set([0, Math.floor((points.length - 1) / 2), points.length - 1]),
+  const id = useId();
+  const max = Math.max(1, ...points.map((p) => p.views));
+  if (!points.length || points.every((point) => point.views === 0))
+    return <EmptyState label={`No ${metricLabel} in this period.`} />;
+  const dates = points.map((point) =>
+    Date.parse(`${point.bucket.replace(/Z$/, "")}Z`),
   );
-
+  const span = dates[dates.length - 1] - dates[0];
+  const coordinates = points.map((point, i) => ({
+    x: 52 + (span > 0 ? (dates[i] - dates[0]) / span : 0.5) * 1020,
+    y: 210 - (point.views / max) * 182,
+    point,
+  }));
+  const line = coordinates.map(({ x, y }) => `${x},${y}`).join(" ");
   return (
-    <div className="overflow-x-auto">
-      <svg
-        viewBox={`0 0 ${geometry.width} ${geometry.height}`}
-        className="min-w-[42rem]"
-        role="img"
-        aria-label={`${metricLabel} time series with ${points.length} buckets and a maximum of ${geometry.max}`}
-      >
-        {[0, 0.5, 1].map((fraction) => {
-          const y = geometry.top + geometry.chartHeight * fraction;
-          const value = Math.round(geometry.max * (1 - fraction));
-          return (
+    <>
+      <div className="analytics-chart">
+        <svg
+          viewBox="0 0 1100 252"
+          role="img"
+          aria-label={`${metricLabel} over time. Exact values are available in the table below.`}
+        >
+          <defs>
+            <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+              <stop
+                offset="0%"
+                stopColor="var(--color-series-1)"
+                stopOpacity="0.24"
+              />
+              <stop
+                offset="100%"
+                stopColor="var(--color-series-1)"
+                stopOpacity="0.02"
+              />
+            </linearGradient>
+          </defs>
+          {[0, 0.25, 0.5, 0.75, 1].map((fraction) => (
             <g key={fraction}>
               <line
-                x1={geometry.left}
-                x2={geometry.width - geometry.right}
-                y1={y}
-                y2={y}
+                x1="52"
+                x2="1072"
+                y1={210 - fraction * 182}
+                y2={210 - fraction * 182}
                 stroke="var(--color-rule)"
-                strokeWidth="1"
+                strokeDasharray="3 5"
               />
-              <text x={geometry.left - 9} y={y + 4} textAnchor="end" fill="var(--color-ink-3)" fontSize="11">
-                {value.toLocaleString()}
+              <text
+                x="40"
+                y={214 - fraction * 182}
+                textAnchor="end"
+                fill="var(--color-ink-3)"
+                fontSize="11"
+              >
+                {Math.round(max * fraction).toLocaleString("en")}
               </text>
             </g>
-          );
-        })}
-        <polygon points={area} fill="var(--color-series-1)" fillOpacity="0.14" />
-        <polyline
-          points={line}
-          fill="none"
-          stroke="var(--color-series-1)"
-          strokeWidth="3"
-          strokeLinejoin="round"
-          strokeLinecap="round"
-        />
-        {geometry.coordinates.map(({ x, y, point }) => (
-          <circle key={point.bucket} cx={x} cy={y} r="3" fill="var(--color-bg)" stroke="var(--color-series-1)" strokeWidth="2">
-            <title>{`${formatBucket(point.bucket)}: ${point.views.toLocaleString()} ${metricLabel}`}</title>
-          </circle>
-        ))}
-        {labelIndexes.map((index) => {
-          const coordinate = geometry.coordinates[index];
-          if (!coordinate) return null;
-          return (
+          ))}
+          <polygon
+            points={`${coordinates[0].x},210 ${line} ${coordinates.at(-1)!.x},210`}
+            fill={`url(#${id})`}
+          />
+          <polyline
+            points={line}
+            fill="none"
+            stroke="var(--color-series-1)"
+            strokeWidth="2.5"
+            strokeLinejoin="round"
+          />
+          {coordinates.map(({ x, y, point }) => (
+            <circle
+              key={point.bucket}
+              cx={x}
+              cy={y}
+              r="3"
+              fill="var(--color-series-1)"
+            >
+              <title>{`${formatBucket(point.bucket)}: ${point.views.toLocaleString("en")} ${metricLabel}`}</title>
+            </circle>
+          ))}
+          {[
+            ...new Set([
+              0,
+              Math.floor((points.length - 1) / 2),
+              points.length - 1,
+            ]),
+          ].map((i) => (
             <text
-              key={index}
-              x={coordinate.x}
-              y={geometry.height - 8}
-              textAnchor={index === 0 ? "start" : index === points.length - 1 ? "end" : "middle"}
+              key={i}
+              x={coordinates[i].x}
+              y="242"
+              textAnchor={
+                i === 0 ? "start" : i === points.length - 1 ? "end" : "middle"
+              }
               fill="var(--color-ink-3)"
               fontSize="11"
             >
-              {formatBucket(coordinate.point.bucket)}
+              {formatBucket(points[i].bucket)}
             </text>
-          );
-        })}
-      </svg>
-    </div>
+          ))}
+        </svg>
+      </div>
+      <details className="analytics-details">
+        <summary>View data table</summary>
+        <div className="analytics-table-scroll">
+          <table className="analytics-table">
+            <thead>
+              <tr>
+                <th>Time (UTC)</th>
+                <th>{metricLabel}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {points.map((p) => (
+                <tr key={p.bucket}>
+                  <td>{formatBucket(p.bucket)}</td>
+                  <td>{p.views.toLocaleString("en")}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </>
   );
 }
 
-function BreakdownCard({ title, points }: { title: string; points: DashboardPoint[] }) {
-  const max = Math.max(1, ...points.map((point) => point.views));
+function BreakdownCard({
+  title,
+  description,
+  points,
+  total,
+  category,
+  metric = "Views",
+}: {
+  title: string;
+  description: string;
+  points: DashboardPoint[];
+  total: number;
+  category?: string;
+  metric?: string;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const id = useId();
+  const sorted = useMemo(
+    () =>
+      [...points].sort(
+        (a, b) => b.views - a.views || a.label.localeCompare(b.label),
+      ),
+    [points],
+  );
+  const visible = expanded ? sorted : sorted.slice(0, 5);
+  const max = Math.max(1, ...sorted.map((p) => p.views));
   return (
-    <article className="analytics-panel min-w-0">
-      <h2 className="text-body font-display font-semibold text-ink">{title}</h2>
-      {points.length === 0 ? (
-        <div className="mt-4"><EmptyState label="No data in this window." /></div>
+    <article className="analytics-card analytics-breakdown">
+      <PanelHeading title={title} description={description} />
+      <div className="analytics-list-heading">
+        <span>{category === "pages" ? "Page" : "Name"}</span>
+        <span>{metric} / Share</span>
+      </div>
+      {!points.length ? (
+        <EmptyState label="No data in this period." />
       ) : (
-        <ol className="mt-4 space-y-3">
-          {points.map((point) => (
+        <ol id={id} className="analytics-ranked-list">
+          {visible.map((point, index) => (
             <li key={point.label}>
-              <div className="flex items-baseline justify-between gap-3 text-sm">
-                <span className="truncate text-ink-1" title={point.label}>{point.label}</span>
-                <span className="shrink-0 tabular-nums text-ink-3">
-                  {point.views.toLocaleString()}
+              <span className="analytics-rank">{index + 1}</span>
+              <div className="analytics-row-main">
+                <span
+                  className="analytics-row-bar"
+                  style={{ width: `${(point.views / max) * 100}%` }}
+                />
+                <span className="analytics-row-label" title={point.label}>
+                  {category === "countries"
+                    ? countryName(point.label)
+                    : point.label === "/"
+                      ? "/ · Home"
+                      : point.label}
                 </span>
               </div>
-              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-hover">
-                <div
-                  className="h-full rounded-full bg-series-1"
-                  style={{ width: `${Math.max(2, (point.views / max) * 100)}%` }}
-                />
+              <div className="analytics-row-values">
+                <strong>{point.views.toLocaleString("en")}</strong>
+                <span>{percentage(point.views, total)}</span>
               </div>
             </li>
           ))}
         </ol>
       )}
+      {points.length > 5 && (
+        <button
+          className="analytics-show-more"
+          aria-expanded={expanded}
+          aria-controls={id}
+          onClick={() => setExpanded((value) => !value)}
+        >
+          {expanded ? "Show less" : `Show more (${points.length - 5})`}
+          <span aria-hidden="true">{expanded ? "−" : "+"}</span>
+        </button>
+      )}
     </article>
   );
 }
 
-function CustomResultTable({ result }: { result: AthenaQueryResult }) {
+function SqlWorkspace() {
+  const [sql, setSql] = useState(DEFAULT_SQL);
+  const [result, setResult] = useState<AthenaQueryResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  async function run(event: FormEvent) {
+    event.preventDefault();
+    setLoading(true);
+    setError(null);
+    setResult(null);
+    try {
+      setResult(
+        await analyticsQuery<AthenaQueryResult>({ mode: "custom", sql }),
+      );
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "The query failed.");
+    } finally {
+      setLoading(false);
+    }
+  }
   return (
-    <div className="mt-6">
-      <QueryFootnote
-        dataScannedBytes={result.dataScannedBytes}
-        engineExecutionMs={result.engineExecutionMs}
-        queryExecutionId={result.queryExecutionId}
-      />
-      <div className="mt-3 overflow-x-auto rounded-md border border-rule">
-        <table className="w-full min-w-max border-collapse text-left text-sm">
-          <thead className="bg-raised">
-            <tr>
-              {result.columns.map((column) => (
-                <th key={column} className="label border-b border-rule px-3 py-2.5 text-left">
-                  {column}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {result.rows.map((row, rowIndex) => (
-              <tr key={rowIndex} className="border-b border-rule last:border-0">
-                {result.columns.map((column) => (
-                  <td key={column} className="max-w-xl px-3 py-2 font-mono text-caption text-ink-1">
-                    {row[column] ?? <span className="text-ink-4">null</span>}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {result.rows.length === 0 ? <EmptyState label="The query returned no rows." /> : null}
+    <details className="analytics-card analytics-workspace">
+      <summary>
+        <span>
+          <span className="analytics-eyebrow">Advanced</span>
+          <strong>SQL workspace</strong>
+          <span>Explore the data with a read-only query</span>
+        </span>
+        <span aria-hidden="true">＋</span>
+      </summary>
+      <div className="analytics-workspace-body">
+        <p>
+          SELECT and WITH queries return up to 500 rows, with a 1 GiB scan
+          limit.
+        </p>
+        <form onSubmit={run}>
+          <label htmlFor="analytics-sql">Athena SQL</label>
+          <textarea
+            id="analytics-sql"
+            value={sql}
+            onChange={(e) => setSql(e.target.value)}
+            rows={10}
+            spellCheck={false}
+          />
+          <button
+            className="analytics-button analytics-button-primary"
+            disabled={loading}
+          >
+            {loading ? "Running query…" : "Run query"}
+          </button>
+        </form>
+        {error && <ErrorNotice message={error} />}
+        {result && (
+          <>
+            <QueryFootnote query={result} />
+            <div className="analytics-table-scroll">
+              <table className="analytics-table">
+                <thead>
+                  <tr>
+                    {result.columns.map((column) => (
+                      <th key={column}>{column}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {result.rows.map((row, i) => (
+                    <tr key={i}>
+                      {result.columns.map((column) => (
+                        <td key={column}>{row[column] ?? "(null)"}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {!result.rows.length && (
+              <EmptyState label="The query returned no rows." />
+            )}
+          </>
+        )}
       </div>
-    </div>
+    </details>
   );
-}
-
-function QueryFootnote({
-  dataScannedBytes,
-  engineExecutionMs,
-  queryExecutionId,
-}: {
-  dataScannedBytes: number;
-  engineExecutionMs: number;
-  queryExecutionId: string;
-}) {
-  return (
-    <p className="break-all text-caption text-ink-3">
-      Athena scanned {formatBytes(dataScannedBytes)} in {(engineExecutionMs / 1000).toFixed(2)}s · query{" "}
-      {queryExecutionId}
-    </p>
-  );
-}
-
-function ErrorNotice({ message }: { message: string }) {
-  return (
-    <div role="alert" className="app-notice app-notice--error">
-      {message}
-    </div>
-  );
-}
-
-function EmptyState({ label }: { label: string }) {
-  return <p className="py-8 text-center text-small text-ink-3">{label}</p>;
 }
 
 function DashboardSkeleton() {
   return (
-    <div className="space-y-4" aria-label="Loading analytics">
-      <div className="grid gap-3 sm:grid-cols-3">
-        {[0, 1, 2].map((item) => (
-          <div key={item} className="h-28 animate-pulse rounded-lg border border-rule bg-surface motion-reduce:animate-none" />
+    <div role="status" className="analytics-loading">
+      <span className="sr-only">Loading analytics</span>
+      <div className="analytics-metrics">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="analytics-card analytics-skeleton-metric" />
         ))}
       </div>
-      <div className="h-80 animate-pulse rounded-lg border border-rule bg-surface motion-reduce:animate-none" />
+      <div className="analytics-card analytics-skeleton-chart" />
     </div>
   );
 }
-
-function formatBucket(bucket: string): string {
-  const date = new Date(bucket.endsWith("Z") ? bucket : `${bucket}Z`);
-  if (Number.isNaN(date.getTime())) return bucket;
-  return new Intl.DateTimeFormat("en", {
-    month: "short",
-    day: "numeric",
-    hour: bucket.includes(":") ? "numeric" : undefined,
-    timeZone: "UTC",
-  }).format(date);
+function formatBucket(bucket: string) {
+  const date = new Date(`${bucket.replace(/Z$/, "")}Z`);
+  return Number.isNaN(date.getTime())
+    ? bucket
+    : new Intl.DateTimeFormat("en", {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        timeZone: "UTC",
+      }).format(date);
 }
-
-function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KiB`;
-  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MiB`;
-  return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GiB`;
+function countryName(code: string) {
+  try {
+    return /^[A-Z]{2}$/.test(code)
+      ? (new Intl.DisplayNames(["en"], { type: "region" }).of(code) ?? code)
+      : code;
+  } catch {
+    return code;
+  }
 }
