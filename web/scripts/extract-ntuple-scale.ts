@@ -239,13 +239,36 @@ if (analysis.screen) {
     const report = join(runDir, "screen", `compare-${name}.json`);
     if (existsSync(report)) sources.push(relative(root, report));
   }
-  const primary = paired["candidate-d3s7-vs-fair-d3s7"];
+  const primaryContrast: string = analysis.screen.primaryContrast ?? "candidate-d3s7-vs-fair-d3s7";
+  const primary = paired[primaryContrast];
   const scale = analysis.screen.scale;
+  const reading = (r: Analysis) => ({
+    meanDelta: r.meanDelta,
+    bootstrapLower95: r.bootstrapLower95,
+    bootstrapUpper95: r.bootstrapUpper95,
+    studentTLower95: r.studentTLower95,
+    detectionFloor: r.detectionFloor,
+    wtl: [r.wins, r.ties, r.losses] as [number, number, number],
+    halves: [r.firstHalfMeanDelta, r.secondHalfMeanDelta] as [number, number],
+  });
+  const depthRaw = analysis.screen.depth;
+  const depth = depthRaw
+    ? {
+        primary: depthRaw.primary as string,
+        tablesStep: reading(depthRaw.tablesStep),
+        fairStep: depthRaw.fairStep ? reading(depthRaw.fairStep) : null,
+        persistence: depthRaw.persistence ? { checks: depthRaw.persistence.checks, allPassed: depthRaw.persistence.passed } : null,
+        interaction: { ...reading(depthRaw.interaction), verdict: depthRaw.interaction.verdict },
+      }
+    : null;
+  if (depth) derived.push("screen.depth.interaction = per game, (prior-d4s7 minus prior-d3s7) minus (fair-d4s7 minus fair-d3s7), bootstrapped by analyze.py");
   screen = {
     config: analysis.screen.config,
     seedStartHex: analysis.screen.seedStartHex,
     arms,
     paired,
+    primaryContrast,
+    depth,
     gate: analysis.screen.gate && primary
       ? { checks: analysis.screen.gate.checks, allPassed: analysis.screen.gate.passed, meanDelta: primary.meanDelta, pairedSd: primary.pairedSd, detectionFloor: primary.detectionFloor, wtl: primary.wtl }
       : null,

@@ -4,7 +4,12 @@
 // gates did.  Prints one PASS/FAIL line per gate and exits non-zero on any
 // failure.
 //
-// Usage: gate [--probe-start 0xa5277000] [--layout SPEC]
+// Usage: gate [--probe-start 0xa5277000] [--layout SPEC] [--weights FILE]
+//
+// With --weights, the leaf-in-search gates (depth 3 and depth 4) run on the
+// loaded frozen tables instead of a fresh optimistic model, so the exact
+// tables a screen will play are the ones proven legal, complete and
+// deterministic; the layout is then read from the file.
 //
 // The default candidate layout is the wide one of the replication experiment
 // (rows, cols, win23, win32, win24, win42, phase=all); the first experiment's
@@ -172,17 +177,24 @@ fn main() {
     let args: Vec<String> = std::env::args().collect();
     let mut probe_start = 0xa527_7000u32;
     let mut layout_spec = "rows,cols,win23,win32,win24,win42,phase=all".to_string();
+    let mut weights: Option<String> = None;
     let mut i = 1;
     while i + 1 < args.len() {
         match args[i].as_str() {
             "--probe-start" => probe_start = u32::from_str_radix(args[i + 1].trim_start_matches("0x"), 16).expect("hex"),
             "--layout" => layout_spec = args[i + 1].clone(),
+            "--weights" => weights = Some(args[i + 1].clone()),
             other => panic!("unknown argument {other}"),
         }
         i += 2;
     }
+    let frozen: Option<Arc<Model>> = weights.as_deref().map(|path| {
+        let model = Model::load(std::path::Path::new(path), false).expect("--weights loads");
+        layout_spec = model.layout.spec();
+        Arc::new(model)
+    });
     let mut gates = Gates { failures: 0 };
-    println!("gate: probe block 0x{probe_start:08x}, candidate layout {layout_spec}");
+    println!("gate: probe block 0x{probe_start:08x}, candidate layout {layout_spec}{}", if let Some(path) = &weights { format!(", frozen tables {path}") } else { String::new() });
 
     // 1. Codec against Horner on every valid 7-nibble word structure sample.
     {
@@ -330,10 +342,12 @@ fn main() {
     }
 
     // 7. Leaf inside the deployment search: legal, complete, deterministic,
-    // worker-count independent.
+    // worker-count independent.  On the frozen tables when --weights is given.
+    let search_model = frozen.clone().unwrap_or_else(|| model.clone());
+    let tables_label = if frozen.is_some() { "frozen tables" } else { "untrained tables" };
     {
         let seeds: Vec<u32> = (0..4).map(|g| probe_start.wrapping_add(0x100 + g)).collect();
-        let arm = Arm::NTupleD3(model.clone());
+        let arm = Arm::NTupleD3(search_model.clone());
         let one = evaluate_arm(&arm, &seeds, 1, 80);
         let four = evaluate_arm(&arm, &seeds, 4, 80);
         let again = evaluate_arm(&arm, &seeds, 4, 80);
@@ -341,7 +355,36 @@ fn main() {
             a.score == b.score && a.moves == b.moves && a.work == b.work && b.score == c.score && b.work == c.work
         });
         let clean = one.iter().all(|g| g.illegal_decisions == 0 && g.incomplete_decisions == 0);
-        gates.report("leaf-in-search-determinism", same && clean, format!("4 games x (1, 4, 4 workers): identical {same}, illegal/incomplete-free {clean}; mean {:.0} over 80-move caps", one.iter().map(|g| g.score as f64).sum::<f64>() / 4.0));
+        gates.report("leaf-in-search-determinism", same && clean, format!("{tables_label}, 4 games x (1, 4, 4 workers): identical {same}, illegal/incomplete-free {clean}; mean {:.0} over 80-move caps", one.iter().map(|g| g.score as f64).sum::<f64>() / 4.0));
+    }
+
+    // 7b. The same leaf inside the reference depth-4 search: legal, complete
+    // (the d4s7 work bound guarantees completion), deterministic and
+    // worker-count independent; and the depth-4 arm is not the depth-3 arm
+    // (the two searches must differ in work on every game).
+    {
+        let seeds: Vec<u32> = (0..2).map(|g| probe_start.wrapping_add(0x100 + g)).collect();
+        let started = Instant::now();
+        let arm = Arm::NTupleD4(search_model.clone());
+        let one = evaluate_arm(&arm, &seeds, 1, 40);
+        let two = evaluate_arm(&arm, &seeds, 2, 40);
+        let again = evaluate_arm(&arm, &seeds, 2, 40);
+        let same = one.iter().zip(two.iter()).zip(again.iter()).all(|((a, b), c)| {
+            a.score == b.score && a.moves == b.moves && a.work == b.work && b.score == c.score && b.work == c.work
+        });
+        let clean = one.iter().all(|g| g.illegal_decisions == 0 && g.incomplete_decisions == 0);
+        let shallow = evaluate_arm(&Arm::NTupleD3(search_model.clone()), &seeds, 2, 40);
+        let deeper = one.iter().zip(shallow.iter()).all(|(d4, d3)| d4.work > d3.work);
+        gates.report(
+            "leaf-in-d4-search-determinism",
+            same && clean && deeper,
+            format!(
+                "{tables_label}, 2 games x (1, 2, 2 workers) over 40-move caps: identical {same}, illegal/incomplete-free {clean}, more work than depth 3 on every game {deeper}; work {} vs {} at depth 3; {:.0} s",
+                one.iter().map(|g| g.work).sum::<u64>(),
+                shallow.iter().map(|g| g.work).sum::<u64>(),
+                started.elapsed().as_secs_f64()
+            ),
+        );
     }
 
     // 8. Serial training determinism: two identical single-thread runs give

@@ -1,0 +1,128 @@
+{
+  "format": "drop7-artifact-manifest-v1",
+  "experimentId": "EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3",
+  "runId": "RUN-20260906T081306Z-e62d9837",
+  "createdAt": "2026-09-06T17:31:02Z",
+  "note": "Compact evidence promoted from the ignored runs/ directory. Every file is a byte copy of the run artifact named in sourcePath; sha256 is of the promoted copy and matches the source. The screened tables are the first run's frozen candidate, retained on the workstation and published compressed to the public archive (see the first run's record).",
+  "files": [
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3/RUN-20260906T081306Z-e62d9837/gates.log",
+      "sourcePath": "runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/gates.log",
+      "sha256": "4026cf96c7383f9d23fd49d12cc2c4e68bf11e611127f4195bb03f14f5197eb9",
+      "bytes": 3209,
+      "description": "CHECK gate lines on the probe block, on the frozen tables (20 gates, all PASS, including leaf-in-d4-search-determinism)"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3/RUN-20260906T081306Z-e62d9837/pipeline.log",
+      "sourcePath": "runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/pipeline.log",
+      "sha256": "d594419f20ef2d9468d8e8043daa81e0ea9924a7951eee3f305df73bafb68cb2",
+      "bytes": 1353,
+      "description": "stage launch and completion log"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3/RUN-20260906T081306Z-e62d9837/rusage.jsonl",
+      "sourcePath": "runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/rusage.jsonl",
+      "sha256": "1e5c090d3cd9304fc0b133afea3efcee1eda8e3c5d64c208760e91fa1034adef",
+      "bytes": 1330,
+      "description": "wall, CPU and peak RSS of the gates and screen stages"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3/RUN-20260906T081306Z-e62d9837/analysis.json",
+      "sourcePath": "runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/analysis.json",
+      "sha256": "6cdb9773e347ea63bffdfcfe98f851334eaa7a2893124cbd542f547118cf49c8",
+      "bytes": 19679,
+      "description": "analyze.py output: arm summaries, six paired contrasts, the gate, persistence and interaction readings"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3/RUN-20260906T081306Z-e62d9837/analysis.md",
+      "sourcePath": "runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/analysis.md",
+      "sha256": "d81a1db9a7598f910aa9e724af18966f2230fff2a09c5d2ba4b34a95d6d35045",
+      "bytes": 5737,
+      "description": "the same analysis as markdown"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3/RUN-20260906T081306Z-e62d9837/screen.log",
+      "sourcePath": "runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/screen.log",
+      "sha256": "85941288737646f7d4fee4aab806ff837529543480d6ed4a35b98c5bd9c4d06c",
+      "bytes": 619,
+      "description": "screen binary stdout"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3/RUN-20260906T081306Z-e62d9837/screen.err",
+      "sourcePath": "runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/screen.err",
+      "sha256": "406c35a8a0a6dbf2019d94715a18af5e49b1d0a59fd470d07a830ad60bb0b8e6",
+      "bytes": 370,
+      "description": "screen binary stderr: per-arm means and wall times"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3/RUN-20260906T081306Z-e62d9837/main/candidate-weights.sha256",
+      "sourcePath": "runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/main/candidate-weights.sha256",
+      "sha256": "b4e3cf00a47e8929ad257dfe149503095e4f60af99d5d09a1287bd8c2f4c3030",
+      "bytes": 171,
+      "description": "SHA-256 of the screened tables (the first run's frozen candidate)"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3/RUN-20260906T081306Z-e62d9837/main/prior-weights.sha256",
+      "sourcePath": "runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/main/prior-weights.sha256",
+      "sha256": "b4e3cf00a47e8929ad257dfe149503095e4f60af99d5d09a1287bd8c2f4c3030",
+      "bytes": 171,
+      "description": "the same hash under the name the shared tooling expects"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3/RUN-20260906T081306Z-e62d9837/screen/compare-fair-d4s7-vs-fair-d3s7.json",
+      "sourcePath": "runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/screen/compare-fair-d4s7-vs-fair-d3s7.json",
+      "sha256": "9c982242964506b9c0e79708993fd9cdd68966a9816da68c592b65fbd459e55c",
+      "bytes": 4571,
+      "description": "compare.py paired report"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3/RUN-20260906T081306Z-e62d9837/screen/compare-prior-d3s7-vs-fair-d3s7.json",
+      "sourcePath": "runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/screen/compare-prior-d3s7-vs-fair-d3s7.json",
+      "sha256": "768e5f888b3ec6ae55fba86e71f6f64491ec779f3ede938c4dc2e44d513fd089",
+      "bytes": 4569,
+      "description": "compare.py paired report"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3/RUN-20260906T081306Z-e62d9837/screen/compare-prior-d3s7-vs-fair-d4s7.json",
+      "sourcePath": "runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/screen/compare-prior-d3s7-vs-fair-d4s7.json",
+      "sha256": "036f666961f723ab4b0d2e2ac9270b13046c57480fd1cfab928c9ffe703c28f2",
+      "bytes": 4568,
+      "description": "compare.py paired report"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3/RUN-20260906T081306Z-e62d9837/screen/compare-prior-d4s7-vs-fair-d3s7.json",
+      "sourcePath": "runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/screen/compare-prior-d4s7-vs-fair-d3s7.json",
+      "sha256": "160399a6cd27cb61207d1d3d738fece5937c6a0edd8c4afa28d820a89b5cf1b6",
+      "bytes": 4567,
+      "description": "compare.py paired report"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3/RUN-20260906T081306Z-e62d9837/screen/compare-prior-d4s7-vs-fair-d4s7.json",
+      "sourcePath": "runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/screen/compare-prior-d4s7-vs-fair-d4s7.json",
+      "sha256": "f188c8f1aaf39855e321643d67f3a4e1056736ea34a8aa442f2d16d3fe0a712a",
+      "bytes": 4578,
+      "description": "compare.py paired report"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3/RUN-20260906T081306Z-e62d9837/screen/compare-prior-d4s7-vs-prior-d3s7.json",
+      "sourcePath": "runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/screen/compare-prior-d4s7-vs-prior-d3s7.json",
+      "sha256": "8bf4acdadad2748ffcedc03485989f540356c7a577da4bd69ae3404042f05113",
+      "bytes": 4567,
+      "description": "compare.py paired report"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3/RUN-20260906T081306Z-e62d9837/screen/heldout.json",
+      "sourcePath": "runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/screen/heldout.json",
+      "sha256": "fa54ce8648e25b58ef3dc1aff3047b87c729c3e8cbd54db7d9976882603ff71d",
+      "bytes": 520392,
+      "description": "held-out screen: per-game rows of the four arms"
+    },
+    {
+      "path": "artifacts/results/EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3/RUN-20260906T081306Z-e62d9837/published.jsonl",
+      "sourcePath": "runs/RUN-20260906T081306Z-e62d9837/published.jsonl",
+      "sha256": "282942f13260a2a3733eb12c2e82327190bbe8f1ac324045f8978cfecb62da48",
+      "bytes": 7702,
+      "description": "the public archive references of the artifacts published from this run"
+    }
+  ]
+}

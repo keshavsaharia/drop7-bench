@@ -21,13 +21,13 @@ export const LESSON_GUIDES: Record<string, { idea: string; watch: string; vocabu
     vocabulary: "evidence",
   },
   "ranking-siblings": {
-    idea: "The useful question is which available column is best. Predicting one board’s future does not guarantee that the alternatives are ordered correctly.",
-    watch: "All seven alternatives lead back to the same decision. Comparing them brings one choice into focus.",
+    idea: "A player predicts a board's future by scoring each legal column. Those scores are inaccurate expected values, but ranking them is how a drop gets chosen.",
+    watch: "Each numbered box is a legal column from the same board. The highlighted one is the ranking's current pick.",
     vocabulary: "search",
   },
   "oracles-and-teachers": {
     idea: "A teacher can use hidden information to prepare examples. The student must learn to choose using only what a player can see.",
-    watch: "Training examples pass from teacher to student. The hidden information stays on the teacher’s side of the boundary.",
+    watch: "Training examples pass from teacher to student. The hidden information stays on the teacher's side of the boundary.",
     vocabulary: "learning",
   },
   "does-more-compute-help": {
@@ -42,5 +42,5 @@ export const LESSON_GUIDES: Record<string, { idea: string; watch: string; vocabu
   },
 };
 
-export const LEARN_DESCRIPTION = "Learn the rules, explore the ideas behind a good move, and find clear definitions of the game’s vocabulary.";
+export const LEARN_DESCRIPTION = "Learn the rules, explore the ideas behind a good move, and find clear definitions of the game's vocabulary.";
 export const CONCEPTS_DESCRIPTION = "Visual lessons on choosing moves, evaluating boards, learning from play, and understanding results.";

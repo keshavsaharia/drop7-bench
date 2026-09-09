@@ -25,6 +25,14 @@ jobs:
     name: Deploy ${{ github.ref_name }}
     runs-on: ubuntu-latest
     steps:
+      - name: Check analytics admin configuration
+        shell: bash
+        run: |
+          if [[ -z "${ADMIN_GITHUB_USERNAME//[[:space:]]/}" ]]; then
+            echo "Set the ADMIN_GITHUB_USERNAME repository variable before deploying." >&2
+            exit 1
+          fi
+
       - name: Check out repository
         uses: actions/checkout@v7
 

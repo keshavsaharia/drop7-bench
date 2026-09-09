@@ -16,6 +16,7 @@ import shutil
 import subprocess
 import sys
 from typing import Any, Iterable
+from urllib.parse import urlsplit
 
 
 RECORD_SCHEMAS = {
@@ -50,6 +51,24 @@ ID_FIELDS = {
     "drop7-dataset-v1": "datasetId",
     "drop7-seed-lease-v1": "seedLeaseId",
 }
+
+PUBLIC_ARTIFACT_ORIGIN = "https://data.drop7.dev"
+
+
+def is_public_artifact_ref(value: object) -> bool:
+    if not isinstance(value, str):
+        return False
+    parsed = urlsplit(value)
+    return (
+        parsed.scheme == "https"
+        and parsed.netloc == "data.drop7.dev"
+        and parsed.path.startswith("/runs/")
+        and not parsed.query
+    )
+
+
+def has_embedded_artifact_sha256(value: str) -> bool:
+    return bool(re.fullmatch(r"sha256=[a-f0-9]{64}", urlsplit(value).fragment))
 
 
 def repository_root() -> Path:
@@ -664,7 +683,7 @@ def references_in(record: dict[str, Any]) -> Iterable[str]:
 def validate_markdown_links(root: Path) -> list[str]:
     errors: list[str] = []
     link = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
-    excluded = {".git", "build", "node_modules", "runs"}
+    excluded = {".git", ".next", ".open-next", "build", "node_modules", "runs"}
     paths = [
         path
         for path in root.rglob("*.md")
@@ -763,11 +782,24 @@ def validate_records(root: Path) -> list[str]:
             per_game = record.get("perGameArtifact", {})
             artifact_path = per_game.get("path")
             if artifact_path:
-                resolved = root / artifact_path
-                if not resolved.is_file():
-                    errors.append(f"{path.relative_to(root)}: missing per-game artifact {artifact_path}")
-                elif hashlib.sha256(resolved.read_bytes()).hexdigest() != per_game.get("sha256"):
-                    errors.append(f"{path.relative_to(root)}: per-game artifact hash mismatch")
+                if is_public_artifact_ref(artifact_path):
+                    embedded_sha256 = urlsplit(artifact_path).fragment
+                    if not has_embedded_artifact_sha256(artifact_path):
+                        errors.append(
+                            f"{path.relative_to(root)}: remote per-game artifact lacks SHA-256 fragment"
+                        )
+                    elif embedded_sha256.removeprefix("sha256=") != per_game.get(
+                        "sha256"
+                    ):
+                        errors.append(
+                            f"{path.relative_to(root)}: remote per-game artifact digest mismatch"
+                        )
+                else:
+                    resolved = root / artifact_path
+                    if not resolved.is_file():
+                        errors.append(f"{path.relative_to(root)}: missing per-game artifact {artifact_path}")
+                    elif hashlib.sha256(resolved.read_bytes()).hexdigest() != per_game.get("sha256"):
+                        errors.append(f"{path.relative_to(root)}: per-game artifact hash mismatch")
             for machine_ref in record.get("machineProfileRefs", []):
                 if not (root / machine_ref).is_file():
                     errors.append(f"{path.relative_to(root)}: missing machine profile {machine_ref}")
@@ -780,19 +812,46 @@ def validate_records(root: Path) -> list[str]:
             machine_ref = record.get("machineProfileRef")
             if machine_ref and not (root / machine_ref).is_file():
                 errors.append(f"{path.relative_to(root)}: missing machine profile {machine_ref}")
+            for artifact_ref in record.get("artifactRefs", []):
+                if artifact_ref.startswith(("http://", "https://")) and (
+                    not is_public_artifact_ref(artifact_ref)
+                    or not has_embedded_artifact_sha256(artifact_ref)
+                ):
+                    errors.append(
+                        f"{path.relative_to(root)}: remote run artifact must use "
+                        f"{PUBLIC_ARTIFACT_ORIGIN}/runs/<run-id>/...#sha256=<digest>"
+                    )
         if record.get("format") == "drop7-contribution-v1":
             for artifact_path in record.get("artifactPaths", []):
-                if not (root / artifact_path).exists():
+                if is_public_artifact_ref(artifact_path):
+                    if not has_embedded_artifact_sha256(artifact_path):
+                        errors.append(
+                            f"{path.relative_to(root)}: remote attributed artifact lacks SHA-256 fragment"
+                        )
+                elif not (root / artifact_path).exists():
                     errors.append(f"{path.relative_to(root)}: missing attributed artifact {artifact_path}")
         if record.get("format") == "drop7-dataset-v1":
             artifact = record.get("artifact", {})
             artifact_path = artifact.get("path")
             if artifact_path:
-                resolved = root / artifact_path
-                if not resolved.is_file():
-                    errors.append(f"{path.relative_to(root)}: missing dataset artifact {artifact_path}")
-                elif hashlib.sha256(resolved.read_bytes()).hexdigest() != artifact.get("sha256"):
-                    errors.append(f"{path.relative_to(root)}: dataset artifact hash mismatch")
+                if is_public_artifact_ref(artifact_path):
+                    embedded_sha256 = urlsplit(artifact_path).fragment
+                    if not has_embedded_artifact_sha256(artifact_path):
+                        errors.append(
+                            f"{path.relative_to(root)}: remote dataset artifact lacks SHA-256 fragment"
+                        )
+                    elif embedded_sha256.removeprefix("sha256=") != artifact.get(
+                        "sha256"
+                    ):
+                        errors.append(
+                            f"{path.relative_to(root)}: remote dataset artifact digest mismatch"
+                        )
+                else:
+                    resolved = root / artifact_path
+                    if not resolved.is_file():
+                        errors.append(f"{path.relative_to(root)}: missing dataset artifact {artifact_path}")
+                    elif hashlib.sha256(resolved.read_bytes()).hexdigest() != artifact.get("sha256"):
+                        errors.append(f"{path.relative_to(root)}: dataset artifact hash mismatch")
 
     leases = [(path, record) for path, record in records if record.get("format") == "drop7-seed-lease-v1"]
     active: list[tuple[Path, dict[str, Any], int, int]] = []
