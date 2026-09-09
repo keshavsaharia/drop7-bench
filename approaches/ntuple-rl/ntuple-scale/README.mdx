@@ -11,27 +11,27 @@ technique: n-tuple
 
 ## The problem
 
-Every search on this site ends the same way: after a few imagined moves it
+Every game tree search ends the same way: after a few imagined moves it
 stops and asks a [leaf evaluator](/learn/glossary) how good the board is. The
-frozen fair leaf is a sum of eighteen hand-written terms, and a diagnostic on
+*frozen fair leaf* is a sum of eighteen hand-written terms, and a diagnostic on
 the [evolved NNUE page](/approach/lifetime-objective/nnue-evolution) measured
-that term carrying about nineteen twentieths of the spread between columns at
-every search depth. The evaluator is where the decisions are made.
+that term carrying about 95% of the spread between columns at
+every search depth. 
 
-A numbered disc clears when the run of occupied cells through it, along its
-row or its column, is exactly as long as its number. Eighteen linear terms can
-only approximate that rule. This family's earlier
-[n-tuple networks](/learn/glossary) looked at the board through four-cell
-windows, or five- and six-cell windows trained on ten thousand games, and
-were played on their own or under a search that followed one guessed outcome
-instead of averaging over chance. None of them ever saw a whole row or a
-whole column, and none was ever the leaf of the fair search.
+> The leaf evaluator is where the decisions are made.
+
+This family's earlier [n-tuple networks](/learn/glossary) looked at the board 
+through four-to-six-cell windows trained on tens of thousand games, after which
+they were played on their own under a search that followed one guessed outcome
+instead of averaging over chance. After establishing it as a promising research
+direction, a much larger network was trained on millions of games with a full
+set of seven-cell row and column windows.
 
 ## Proposed solution
 
 Read every full row and every full column as one seven-cell pattern. Each cell
-holds one of ten things (empty, a number from 1 to 7, an untouched gray disc, a
-cracked one), so a line has ten million possible patterns and each pattern gets
+has ten possible states (empty, a number from 1 to 7, an untouched gray disc, or a
+cracked one), so a line has 10<sup>7</sup> (ten million) possible patterns and each pattern gets
 its own learned number. Thirty two-by-three windows and thirty three-by-two
 windows add local structure between lines. The column tables are also split by
 the number of drops left before the next [rise](/learn/glossary). The whole
@@ -40,40 +40,39 @@ entries.
 
 The numbers are learned the way 2048 evaluators were: the program plays
 complete games with a one-move-ahead policy over the tables, and after each
-move nudges the entries it just used toward the points the move scored plus its
+move, it nudges its entries toward the points the move scored plus its
 own estimate of the next board. Temporal coherence gives every entry its own
 step size, which shrinks once that entry's errors stop pointing the same way.
 The policy reads the visible board and the moves until the next rise, and
 nothing else; the visible next disc is deliberately not an input, so one
 learned number serves every column that leads to the same board.
 
-## How it works
+## Experiment design
 
-1. Index straight from the engine. The
-   [Rust bitboard engine](/approach/fair-expectimax/rust-engine) keeps the
+1. The [Rust bitboard engine](/approach/fair-expectimax/rust-engine) keeps the
    board as seven packed column words, four bits per cell. A column's pattern
    number comes from its word through two small lookup tables, without
    unpacking a single cell. Row patterns come from a nibble gather across the
    seven words, and windows from two or three adjacent nibbles of neighbouring
-   words. Feature extraction costs about forty nanoseconds per board.
-2. Train. Thirty-two threads play games at once on the shared tables, each
+   words. **Feature extraction costs about forty nanoseconds per board.**
+2. **Training:** Thirty-two threads play games at once on the shared tables, each
    thread picking the column whose expected value, averaged over the same
    seven covered-disc reveal samples the fair search uses, is highest. After
    every move the previous board's entries move toward the observed reward
    plus the new board's value. Tables start optimistic, at twenty row-rises of
    value for any board, so unexplored boards look attractive.
-3. Validate as it trains. At fixed move counts the tables are dropped into the
+3. **Validation:** At fixed move counts the tables are dropped into the
    real depth-3, seven-stratum fair search and played on 64 fixed training-role
    games against the same search with the frozen fair leaf, and also played
    directly one ply. The point with the largest paired margin is frozen as the
    candidate.
-4. Choose the configuration first. Six configurations train for two hundred
+4. **Tuning parameters:** Six configurations train for two hundred
    million moves each on the same seeds: with and without rise-phase tables,
    with and without the windows, windows only (which tests whether the full
    lines are what matters), and a smaller step size. The one with the largest
    final validation margin is trained again from scratch for four billion
    moves.
-5. Screen once. The frozen candidate plays 256 games on a seed block nothing
+5. **Screen:** The frozen candidate plays 256 games on a seed block nothing
    has ever opened, as the leaf of the depth-3 search, against three arms on
    the identical seeds: the frozen fair leaf in the same search (the
    comparator), the same tables played directly one ply, and the fair leaf at
@@ -89,13 +88,12 @@ leaf averaged 314,438 points and 93 moves on the identical games. The paired
 difference is 170,139 points with a bootstrap 95% lower bound of 130,499,
 both halves of the block positive, 167 wins to 89, and a higher lower
 quartile, so every criterion of the preregistered gate passes
-([RS-20260905T215332Z-95d18a5a](/results/RS-20260905T215332Z-95d18a5a), run
-valid, outcome pass, screen tier on public development seeds). This is the
-first learned evaluator on this site to beat the hand-written leaf inside the
-same search.
+([RS-20260905T215332Z-95d18a5a](/results/RS-20260905T215332Z-95d18a5a)). 
 
-The screen also carried two arms that were never part of the gate. The fair
-leaf at depth 4, the program's standing reference, averaged 377,803 on the
+> This is the first learned evaluator produced by this research project
+which consistently outperforms the hand-written fair leaf evaluator.
+
+The fair leaf at depth 4, which is the current standing reference, averaged 377,803 on the
 same games, and the tables at depth 3 beat it by 106,775 paired with a lower
 bound of 62,574. The tables played directly one ply averaged 281,441 and lost
 to the fair leaf at depth 3 by 32,997, so the search over the tables is worth

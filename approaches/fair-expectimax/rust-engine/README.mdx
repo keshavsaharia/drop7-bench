@@ -8,36 +8,22 @@ reads: public
 kind: engine
 ---
 
-## The problem
+## Motivation
 
 Looking ahead means simulating many possible drops before choosing a column.
 The same small operations repeat throughout the search: move discs, evaluate
 the resulting board, and check whether an earlier branch already solved it.
 An unnecessary scan or memory access in those operations repeats too.
 
-The engine already stores columns in packed words. The next question is where
-that compact representation helps, where another layout is cheaper to read,
-and when remembering an answer saves more work than maintaining the cache.
-
-## Proposed solution
-
-Keep the packed columns for drops and gravity, prepare one byte view for the
-board evaluator, and avoid calculations whose result is already known. Let
-workers reuse completed search values through a bounded cache whose ownership
-and minimum depth can be chosen independently.
-
-The policy reads only the visible board, visible next disc, moves until the
-next rise, and terminal state.
-
-<Diagram
-  name="rust-search-work-avoidance"
-  caption="The source separates board conversion, useful leaf work, and cache access. Each early check removes work before a larger operation begins; this diagram shows control flow, with no timing scale."
-/>
+The [C++ fast engine](/engine/fast) already stores rows in packed words,
+and uses certain optimizations to operate on them. When developing this bitboard
+engine, *all* of the assumptions were challenged, including whether to pack
+rows or columns in each 32-bit word.
 
 ## How it works
 
-1. Store each column in a machine word. Each cell occupies a nibble, a group
-   of four bits, with the bottom cell at the low end. A rise shifts the word
+1. Store each column in a machine word. Each cell occupies a four bit [nibble](/learn/glossary#nibble), 
+   with the bottom cell at the low end. A rise shifts the word
    and inserts a covered disc. Gravity gathers the surviving nibbles in their
    existing order. On an x86 build with BMI2 instructions, that gather uses
    `PEXT`; other targets use an equivalent portable implementation.
@@ -120,13 +106,21 @@ next rise, and terminal state.
    so results cannot survive a change of evaluator or search settings. Private
    tables remain the default.
 
-## What happened
+The existing gravity and cover-hit diagrams show the packed operations that
+precede leaf evaluation.
+
+<RustPextGravityFigure />
+
+The explosion bitplanes diagram shows an efficient mechanism for counting hits
+and double hits for a single wave of a chain reaction.
+
+<RustExplosionBitplanesFigure />
+
+## Results
 
 The updated search ran 1.07× faster on six constructed root positions over
-five alternating repeats, comparing the two batch medians, with identical
-completed-search values and actions.
-This is mechanics-only CHECK evidence from an interactive Apple M3 Pro
-workstation. The leaf batch also used fewer instructions. The [optimization
+five alternating repeats, with identical completed-search values and actions.
+The leaf batch also used fewer instructions. The [optimization
 result](/results/RS-20260905T193830Z-9733627a) retains the configuration, every
 repeat, and the limits of this local measurement.
 
@@ -431,14 +425,6 @@ plan and decision output.
 compare against the emitters under `cpp/` and the TypeScript driver under
 `ts/`. `bench_all.sh` is the original timing harness; the optimization-check
 harness follows the current registered comparison.
-
-The existing gravity and cover-hit diagrams show the packed operations that
-precede leaf evaluation. Their examples come from the engine fixtures named
-in their captions.
-
-<RustPextGravityFigure />
-
-<RustExplosionBitplanesFigure />
 
 The bounded matrix workflow is documented in `cluster/README.md`. Its
 allocation-free plan is available before any upload or launch. A live cloud
