@@ -1,0 +1,40 @@
+{
+  "$schema": "../schemas/theory-v1.schema.json",
+  "format": "drop7-theory-v1",
+  "theoryId": "TH-20260906-ntuple-leaf-fourth-ply-search-compatible-ace4fe2a",
+  "title": "The frozen row-and-column n-tuple leaf is search-compatible: a fourth completed ply of the fair search raises its mean score, by at least as much as it raises the fair leaf",
+  "claim": "Placed as the leaf of the completed depth-4 seven-stratum fair expectimax search (the program's reference d4s7 configuration, unchanged: terminal utility -1,000,000, policy seed 0xd7075eed, completion-guaranteeing work bound, 1M-entry direct-mapped table), the frozen lookup tables of RUN-20260905T193006Z-4fbeb4e5 (SHA-256 0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b) score a higher paired mean over complete public-development games than the same tables as the leaf of the depth-3 search (the deployment d3s7 configuration), and the fourth ply's paired gain on the tables is at least as large as the fourth ply's paired gain on the frozen fair leaf measured on the same seeds.",
+  "mechanism": "(1) Backup. The fair search values a column as the seven-stratum expectation of the points scored over the imagined plies plus the leaf value at the horizon (leaf value plus score_delta at every ply, terminal utility on death). The tables were trained by temporal-difference play toward exactly reward plus the value of the next board, so they estimate the remaining score the search is completing, in the same units. A fourth completed ply replaces the leaf's estimate at every ply-3 board with the exact expectation over one more move and the leaf at the ply-4 boards; for a leaf whose errors are not systematically worse on deeper imagined boards, the horizon error shrinks and the depth step is positive. With the frozen fair leaf the fourth ply paid +63,365 on 256 games (RS-20260905T215332Z-95d18a5a) and +70,437 on 512 games (RS-20260906T040113Z-6ba93171) under seven strata, and the depth-by-strata factorial showed the fourth ply pays only under the exact chance model (RS-20260821T205102Z-d89df4b5). (2) The alternative the claim is tested against. The tables were fitted on boards visited by their own one-ply play; about 90% of the billion entries were never updated and keep the optimistic starting value (20 rise units spread over the 74 active entries, about 4,600 points each). Boards four plies deep in imagined play, including those reached through poor moves, are further from that distribution, so a deeper search reads more never-updated entries and can be drawn toward unfamiliar boards; this is the optimistic-phase failure mode (approaches/ntuple-rl/optimistic-phase), where a two-rise rollout over an n-tuple scored less than the network's own one-ply choice, and the replication's reading that six times the entries improved one-ply play by about 34,000 while leaving the depth-3 leaf unchanged keeps this alternative live. If it holds, the fourth ply is worth less on the tables than on the fair leaf, or less than nothing. (3) Deployment. The tables at depth 3 already beat the fair leaf at depth 4 by more than 84,000 on two blocks; the question this theory isolates is whether the learned leaf keeps paying for depth the way the hand-written one does, which decides whether search depth is a lever for this evaluator. The reference d4s7 search costs about 38 times the depth-3 search per game (5.8e8 against 1.5e7 logical work units on the 2026-09-06 screen), which a 512-game paired screen covers in about an hour per depth-4 arm on the 32-thread workstation.",
+  "falsificationCriteria": [
+    "Primary falsifier (held-out screen, 512 paired never-read public-development games, all four arms on identical seeds): the paired whole-game score delta prior-d4s7 minus prior-d3s7 has a one-sided 95% percentile-bootstrap upper bound below zero. The fourth ply then measurably hurts the tables and the compounding alternative is supported. A lower bound at or below zero with an upper bound above zero is a non-measurement at this cohort size (the detection floor is reported), not a refutation; the claim's supported reading requires the bootstrap and Student-t 95% lower bounds above zero, both halves positive and no lower-quartile regression.",
+    "Second leg: the per-game difference of depth steps, (prior-d4s7 minus prior-d3s7) minus (fair-d4s7 minus fair-d3s7) on the same seeds, has a 95% bootstrap upper bound below zero. The fourth ply is then worth measurably less on the tables than on the fair leaf and the 'at least as much' leg of the claim fails even if the primary reading passes.",
+    "Persistence: prior-d4s7 minus fair-d4s7 has a 95% bootstrap lower bound at or below zero. The tables' advantage over the fair leaf then does not survive the fourth ply, which contradicts the mechanism's first leg regardless of the depth step.",
+    "Integrity: any illegal or incomplete decision in any arm, or a failed CHECK gate (legality, completion, determinism and worker-count independence of the depth-4 arm on the frozen tables), voids the run rather than the claim."
+  ],
+  "informationClass": "public-policy",
+  "lifecycle": "assessed",
+  "assessment": "supported-as-tested",
+  "evidenceTier": "public-development",
+  "dependencies": [
+    "TH-20260905-ntuple-line-tuples-tc-td-leaf-bcb25133"
+  ],
+  "evidenceRefs": [
+    "research/results/RS-20260905T215332Z-95d18a5a.json",
+    "research/results/RS-20260906T040113Z-6ba93171.json",
+    "research/results/RS-20260821T205102Z-d89df4b5.json",
+    "approaches/ntuple-rl/ntuple-scale/README.mdx",
+    "approaches/ntuple-rl/optimistic-phase/README.mdx",
+    "web/content/log/2026-09-06.mdx",
+    "research/results/RS-20260906T171746Z-1623f833.json",
+    "research/runs/RUN-20260906T081306Z-e62d9837.json",
+    "research/experiments/EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3.json",
+    "artifacts/results/EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3/RUN-20260906T081306Z-e62d9837/manifest.json"
+  ],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5-1",
+    "agentId": "claude-code-ntuple-continuation-4-ply"
+  },
+  "createdAt": "2026-09-06T08:12:46Z",
+  "updatedAt": "2026-09-06T17:29:15Z"
+}

@@ -1,0 +1,25 @@
+{
+  "$schema": "../schemas/seed-lease-v1.schema.json",
+  "format": "drop7-seed-lease-v1",
+  "seedLeaseId": "SL-20260906T081306Z-1aaec419",
+  "experimentId": "EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3",
+  "rngAlgorithm": "mulberry32 with mix32 domain separation (src/core/native/engine.hpp); headless disc stream kNextDiscDomain, reveal stream kRevealDomain; Rust bitboard engine bit-identical (RS-20260824T075451Z-e89ea128)",
+  "domain": "environment",
+  "role": "public-development",
+  "rangeStartHex": "0xa52f2580",
+  "rangeEndExclusiveHex": "0xa52f2780",
+  "cohortManifestSha256": null,
+  "state": "opened",
+  "reservedAt": "2026-09-06T08:15:03Z",
+  "openedAt": "2026-09-06T08:19:19Z",
+  "closedAt": null,
+  "protocolSha256": "18733b1875bd5fe93f8625a22d617e6aa77a611b88b306d62c64e5d9196091bb",
+  "runIds": [
+    "RUN-20260906T081306Z-e62d9837"
+  ],
+  "notes": [
+    "Conservative import 2026-09-06: every 8-hex-digit constant under docs/, approaches/, src/, research/, artifacts/, web/content/ and scripts/ was enumerated (grep -rhoE '0x[0-9a-fA-F]{8}'); the only constant inside 0xa52f2580-0xa52f2780 is 0xa52f2580 itself, which is the exclusive end boundary of the replication's screen lease SL-20260906T013222Z-f34b23c0 and is never read there; the per-seed constants between 0xa52f2100 and 0xa52f257f are the committed figure snapshots of the two earlier screens. The pool 0xa52c0000-0xa5300000 (the ./do-research allocator's) is used up to 0xa52f2580 exclusive by earlier leases; this range starts there and overlaps no existing lease record and no protected (0x7d) or final (0xd7) prefix. It is disjoint from every block the tables' experiment and the replication read (training 0xa5300000-0xa54f0000 and 0xa5500000-0xa56f0000, validation 0xa52f2240-0xa52f2280 and 0xa52f2280-0xa52f2380, screens 0xa52f2140-0xa52f2240 and 0xa52f2380-0xa52f2580).",
+    "Held-out screen, 512 never-read public-development seeds, opened exactly once by scripts/pipeline3.sh screen after the frozen tables' SHA-256 (0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b) is verified and written to main/prior-weights.sha256 and main/candidate-weights.sha256, with four arms on identical seeds: prior-d4s7 (the candidate), prior-d3s7 (the comparator), fair-d3s7 and fair-d4s7. A second opening requires a new experiment record.",
+    "Opened 2026-09-06T08:19:19Z by run RUN-20260906T081306Z-e62d9837 for the one-shot screen (0xa52f2580 to 0xa52f2780 exclusive); candidate SHA-256 recorded beforehand in runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/main/candidate-weights.sha256: 0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b"
+  ]
+}

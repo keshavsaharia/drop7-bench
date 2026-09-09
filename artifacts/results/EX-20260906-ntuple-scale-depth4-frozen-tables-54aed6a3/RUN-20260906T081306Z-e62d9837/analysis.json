@@ -1,0 +1,556 @@
+{
+  "format": "drop7-ntuple-scale-analysis-v1",
+  "runId": "RUN-20260906T081306Z-e62d9837",
+  "gates": {
+    "passed": true,
+    "gates": [
+      "PASS codec-vs-horner: 2000000 random line words, 0 mismatches; max index 9999999",
+      "PASS row-words-vs-accessor: 553 states, 0 mismatches",
+      "PASS features-vs-reference[rows]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 70000000 entries",
+      "PASS features-vs-reference[cols]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 70000000 entries",
+      "PASS features-vs-reference[win23]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 30000000 entries",
+      "PASS features-vs-reference[win32]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 30000000 entries",
+      "PASS features-vs-reference[win24]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 2400000000 entries",
+      "PASS features-vs-reference[win42]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 2400000000 entries",
+      "PASS features-vs-reference[rows,cols,win23,win32,phase=none]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 200000000 entries",
+      "PASS features-vs-reference[rows,cols,win23,win32,phase=cols]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 480000000 entries",
+      "PASS features-vs-reference[rows,cols,win23,win32,phase=all]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 1000000000 entries",
+      "PASS features-vs-reference[rows,cols,win23,win32,win24,win42,phase=all]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 5800000000 entries",
+      "PASS information-boundary: 553 states x 4 hidden-field perturbations: 0 leaf-value changes, 0 decision changes",
+      "PASS reflection: 553 states: 0 value mismatches; 534 live states, 0 decision mismatches under mirroring",
+      "PASS direct-policy-legality: 553 states (19 terminal), 0 illegal or missing decisions",
+      "PASS leaf-in-search-determinism: frozen tables, 4 games x (1, 4, 4 workers): identical true, illegal/incomplete-free true; mean 252067 over 80-move caps",
+      "PASS leaf-in-d4-search-determinism: frozen tables, 2 games x (1, 2, 2 workers) over 40-move caps: identical true, illegal/incomplete-free true, more work than depth 3 on every game true; work 422072121 vs 14437927 at depth 3; 82 s",
+      "PASS serial-training-determinism: two 12-game single-thread runs: fingerprints b5c5f9335b6b26dc / b5c5f9335b6b26dc, 435 updates, 3177 touched entries; fresh initial-board value 20.0000 (declared 20)",
+      "PASS finite-and-profile: values finite true; 1000000000 entries = 4.00 GB frozen, 12.00 GB trainable; per state: features 41 ns, value 84 ns (untrained tables, hot); direct decision 5.5 us (14.8 simulations) [sink 110341919120400 2211999.8]"
+    ]
+  },
+  "smoke": null,
+  "pilot": null,
+  "main": null,
+  "screen": {
+    "config": {
+      "experiment": "EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3",
+      "screen": true,
+      "games": 512,
+      "moveCap": 2000,
+      "arms": [
+        "prior-d3s7",
+        "prior-d4s7",
+        "fair-d3s7",
+        "fair-d4s7"
+      ]
+    },
+    "seedStartHex": "0xa52f2580",
+    "games": 512,
+    "arms": {
+      "prior-d3s7": {
+        "name": "prior-d3s7",
+        "games": 512,
+        "meanScore": 465675.2421875,
+        "medianScore": 352446.5,
+        "sdScore": 362210.7988927232,
+        "q25Score": 212968.75,
+        "minScore": 85472.0,
+        "maxScore": 2674728.0,
+        "meanMoves": 134.8203125,
+        "q25Moves": 65.0,
+        "numberedClearsPerMove": 2.098742539259431,
+        "coverRevealsPerMove": 1.1850698267369764,
+        "meanOccupiedCells": 23.25255160699242,
+        "censoredGames": 0,
+        "incompleteDecisions": 0,
+        "illegalDecisions": 0,
+        "gamesAtOrAboveMillion": 41,
+        "meanWallSecondsPerGame": 4.056867149527344,
+        "meanWork": 22193672.2421875
+      },
+      "prior-d4s7": {
+        "name": "prior-d4s7",
+        "games": 512,
+        "meanScore": 516154.634765625,
+        "medianScore": 392496.5,
+        "sdScore": 402055.66634759033,
+        "q25Score": 233181.75,
+        "minScore": 85682.0,
+        "maxScore": 2716683.0,
+        "meanMoves": 148.74609375,
+        "q25Moves": 70.0,
+        "numberedClearsPerMove": 2.1255416371228235,
+        "coverRevealsPerMove": 1.203261640274167,
+        "meanOccupiedCells": 23.02881910980067,
+        "censoredGames": 0,
+        "incompleteDecisions": 0,
+        "illegalDecisions": 0,
+        "gamesAtOrAboveMillion": 52,
+        "meanWallSecondsPerGame": 152.311819602959,
+        "meanWork": 795922316.0429688
+      },
+      "fair-d3s7": {
+        "name": "fair-d3s7",
+        "games": 512,
+        "meanScore": 332967.8515625,
+        "medianScore": 262338.5,
+        "sdScore": 239092.24084642355,
+        "q25Score": 174598.75,
+        "minScore": 102599.0,
+        "maxScore": 1745301.0,
+        "meanMoves": 97.72265625,
+        "q25Moves": 55.0,
+        "numberedClearsPerMove": 2.011452212495503,
+        "coverRevealsPerMove": 1.1224767158332334,
+        "meanOccupiedCells": 23.954978264844613,
+        "censoredGames": 0,
+        "incompleteDecisions": 0,
+        "illegalDecisions": 0,
+        "gamesAtOrAboveMillion": 17,
+        "meanWallSecondsPerGame": 4.49308196352539,
+        "meanWork": 15568331.095703125
+      },
+      "fair-d4s7": {
+        "name": "fair-d4s7",
+        "games": 512,
+        "meanScore": 382566.54296875,
+        "medianScore": 303015.0,
+        "sdScore": 273944.25968938513,
+        "q25Score": 208481.25,
+        "minScore": 85801.0,
+        "maxScore": 2634604.0,
+        "meanMoves": 110.4453125,
+        "q25Moves": 60.0,
+        "numberedClearsPerMove": 2.0459432694348165,
+        "coverRevealsPerMove": 1.1459821744358776,
+        "meanOccupiedCells": 23.855956987277768,
+        "censoredGames": 0,
+        "incompleteDecisions": 0,
+        "illegalDecisions": 0,
+        "gamesAtOrAboveMillion": 16,
+        "meanWallSecondsPerGame": 175.7454595270781,
+        "meanWork": 558924581.4179688
+      }
+    },
+    "contrasts": {
+      "fair-d4s7-vs-fair-d3s7": {
+        "score": {
+          "n": 512,
+          "meanDelta": 49598.69140625,
+          "pairedSd": 329836.4895530267,
+          "bootstrapLower95": 25751.419921875,
+          "bootstrapUpper95": 73244.34580078124,
+          "studentTLower95": 25578.35829588779,
+          "detectionFloor": 23978.92014644966,
+          "wins": 289,
+          "ties": 0,
+          "losses": 223,
+          "firstHalfMeanDelta": 45188.85546875,
+          "secondHalfMeanDelta": 54008.52734375,
+          "q25Delta": 33882.5,
+          "candidateQ25": 208481.25,
+          "referenceQ25": 174598.75
+        },
+        "moves": {
+          "n": 512,
+          "meanDelta": 12.72265625,
+          "pairedSd": 89.78413574612212,
+          "bootstrapLower95": 6.220703125,
+          "bootstrapUpper95": 19.162402343749996,
+          "studentTLower95": 6.184129079854635,
+          "detectionFloor": 6.527254229487365,
+          "wins": 279,
+          "ties": 18,
+          "losses": 215,
+          "firstHalfMeanDelta": 11.671875,
+          "secondHalfMeanDelta": 13.7734375,
+          "q25Delta": 5.0,
+          "candidateQ25": 60.0,
+          "referenceQ25": 55.0
+        }
+      },
+      "prior-d3s7-vs-fair-d3s7": {
+        "score": {
+          "n": 512,
+          "meanDelta": 132707.390625,
+          "pairedSd": 425213.81129792635,
+          "bootstrapLower95": 102193.1853515625,
+          "bootstrapUpper95": 163903.478125,
+          "studentTLower95": 101741.20673084096,
+          "detectionFloor": 30912.795731296093,
+          "wins": 309,
+          "ties": 0,
+          "losses": 203,
+          "firstHalfMeanDelta": 115330.6640625,
+          "secondHalfMeanDelta": 150084.1171875,
+          "q25Delta": 38370.0,
+          "candidateQ25": 212968.75,
+          "referenceQ25": 174598.75
+        },
+        "moves": {
+          "n": 512,
+          "meanDelta": 37.09765625,
+          "pairedSd": 117.17165153758818,
+          "bootstrapLower95": 28.72451171875,
+          "bootstrapUpper95": 45.69931640625,
+          "studentTLower95": 28.564634009682727,
+          "detectionFloor": 8.518310631594794,
+          "wins": 309,
+          "ties": 13,
+          "losses": 190,
+          "firstHalfMeanDelta": 32.4453125,
+          "secondHalfMeanDelta": 41.75,
+          "q25Delta": 10.0,
+          "candidateQ25": 65.0,
+          "referenceQ25": 55.0
+        }
+      },
+      "prior-d3s7-vs-fair-d4s7": {
+        "score": {
+          "n": 512,
+          "meanDelta": 83108.69921875,
+          "pairedSd": 435893.1761269615,
+          "bootstrapLower95": 51348.70185546875,
+          "bootstrapUpper95": 114438.8501953125,
+          "studentTLower95": 51364.79088013022,
+          "detectionFloor": 31689.179316985046,
+          "wins": 282,
+          "ties": 0,
+          "losses": 230,
+          "firstHalfMeanDelta": 70141.80859375,
+          "secondHalfMeanDelta": 96075.58984375,
+          "q25Delta": 4487.5,
+          "candidateQ25": 212968.75,
+          "referenceQ25": 208481.25
+        },
+        "moves": {
+          "n": 512,
+          "meanDelta": 24.375,
+          "pairedSd": 119.48080768511763,
+          "bootstrapLower95": 15.665625,
+          "bootstrapUpper95": 32.98251953125,
+          "studentTLower95": 15.67381352793668,
+          "detectionFloor": 8.68618493483616,
+          "wins": 277,
+          "ties": 16,
+          "losses": 219,
+          "firstHalfMeanDelta": 20.7734375,
+          "secondHalfMeanDelta": 27.9765625,
+          "q25Delta": 5.0,
+          "candidateQ25": 65.0,
+          "referenceQ25": 60.0
+        }
+      },
+      "prior-d4s7-vs-prior-d3s7": {
+        "score": {
+          "n": 512,
+          "meanDelta": 50479.392578125,
+          "pairedSd": 499739.655124456,
+          "bootstrapLower95": 14706.909765625,
+          "bootstrapUpper95": 86224.49199218747,
+          "studentTLower95": 14085.866195359107,
+          "detectionFloor": 36330.78104997574,
+          "wins": 284,
+          "ties": 0,
+          "losses": 228,
+          "firstHalfMeanDelta": 67335.2890625,
+          "secondHalfMeanDelta": 33623.49609375,
+          "q25Delta": 20213.0,
+          "candidateQ25": 233181.75,
+          "referenceQ25": 212968.75
+        },
+        "moves": {
+          "n": 512,
+          "meanDelta": 13.92578125,
+          "pairedSd": 137.74272779371626,
+          "bootstrapLower95": 4.071972656250001,
+          "bootstrapUpper95": 23.78515625,
+          "studentTLower95": 3.8946709576892555,
+          "detectionFloor": 10.01381586068777,
+          "wins": 278,
+          "ties": 14,
+          "losses": 220,
+          "firstHalfMeanDelta": 18.51171875,
+          "secondHalfMeanDelta": 9.33984375,
+          "q25Delta": 5.0,
+          "candidateQ25": 70.0,
+          "referenceQ25": 65.0
+        }
+      },
+      "prior-d4s7-vs-fair-d4s7": {
+        "score": {
+          "n": 512,
+          "meanDelta": 133588.091796875,
+          "pairedSd": 445272.98766153195,
+          "bootstrapLower95": 102050.977734375,
+          "bootstrapUpper95": 165801.3640625,
+          "studentTLower95": 101161.09894605307,
+          "detectionFloor": 32371.086137182552,
+          "wins": 314,
+          "ties": 0,
+          "losses": 198,
+          "firstHalfMeanDelta": 137477.09765625,
+          "secondHalfMeanDelta": 129699.0859375,
+          "q25Delta": 24700.5,
+          "candidateQ25": 233181.75,
+          "referenceQ25": 208481.25
+        },
+        "moves": {
+          "n": 512,
+          "meanDelta": 38.30078125,
+          "pairedSd": 122.50247555058839,
+          "bootstrapLower95": 29.6404296875,
+          "bootstrapUpper95": 47.21689453125,
+          "studentTLower95": 29.37954190029466,
+          "detectionFloor": 8.905858423822792,
+          "wins": 313,
+          "ties": 16,
+          "losses": 183,
+          "firstHalfMeanDelta": 39.28515625,
+          "secondHalfMeanDelta": 37.31640625,
+          "q25Delta": 10.0,
+          "candidateQ25": 70.0,
+          "referenceQ25": 60.0
+        }
+      },
+      "prior-d4s7-vs-fair-d3s7": {
+        "score": {
+          "n": 512,
+          "meanDelta": 183186.783203125,
+          "pairedSd": 452824.9075737897,
+          "bootstrapLower95": 150975.553515625,
+          "bootstrapUpper95": 216399.5734375,
+          "studentTLower95": 150209.8219962821,
+          "detectionFloor": 32920.106304034955,
+          "wins": 345,
+          "ties": 0,
+          "losses": 167,
+          "firstHalfMeanDelta": 182665.953125,
+          "secondHalfMeanDelta": 183707.61328125,
+          "q25Delta": 58583.0,
+          "candidateQ25": 233181.75,
+          "referenceQ25": 174598.75
+        },
+        "moves": {
+          "n": 512,
+          "meanDelta": 51.0234375,
+          "pairedSd": 124.93353002755813,
+          "bootstrapLower95": 42.154296875,
+          "bootstrapUpper95": 60.1796875,
+          "studentTLower95": 41.92515667612246,
+          "detectionFloor": 9.082594664418618,
+          "wins": 343,
+          "ties": 8,
+          "losses": 161,
+          "firstHalfMeanDelta": 50.95703125,
+          "secondHalfMeanDelta": 51.08984375,
+          "q25Delta": 15.0,
+          "candidateQ25": 70.0,
+          "referenceQ25": 55.0
+        }
+      }
+    },
+    "primaryContrast": "prior-d4s7-vs-prior-d3s7",
+    "gate": {
+      "checks": [
+        {
+          "criterion": "screen artifact: illegalDecisions 0 and incompleteDecisions 0 in every arm",
+          "passed": true
+        },
+        {
+          "criterion": "bootstrap 95% lower bound of prior-d4s7 minus prior-d3s7 > 0",
+          "passed": true,
+          "observed": 14706.909765625
+        },
+        {
+          "criterion": "Student-t 95% lower bound > 0",
+          "passed": true,
+          "observed": 14085.866195359107
+        },
+        {
+          "criterion": "paired mean delta > 0 in both halves",
+          "passed": true,
+          "observed": [
+            67335.2890625,
+            33623.49609375
+          ]
+        },
+        {
+          "criterion": "prior-d4s7 Q25 >= prior-d3s7 Q25",
+          "passed": true,
+          "observed": [
+            233181.75,
+            212968.75
+          ]
+        }
+      ],
+      "passed": true
+    },
+    "replication": {
+      "checks": [
+        {
+          "criterion": "screen artifact: illegalDecisions 0 and incompleteDecisions 0 in every arm",
+          "passed": true
+        },
+        {
+          "criterion": "bootstrap 95% lower bound of prior-d3s7 minus fair-d3s7 > 0",
+          "passed": true,
+          "observed": 102193.1853515625
+        },
+        {
+          "criterion": "Student-t 95% lower bound > 0",
+          "passed": true,
+          "observed": 101741.20673084096
+        },
+        {
+          "criterion": "paired mean delta > 0 in both halves",
+          "passed": true,
+          "observed": [
+            115330.6640625,
+            150084.1171875
+          ]
+        },
+        {
+          "criterion": "prior-d3s7 Q25 >= fair-d3s7 Q25",
+          "passed": true,
+          "observed": [
+            212968.75,
+            174598.75
+          ]
+        }
+      ],
+      "passed": true
+    },
+    "scale": null,
+    "depth": {
+      "primary": "prior-d4s7-vs-prior-d3s7",
+      "tablesStep": {
+        "meanDelta": 50479.392578125,
+        "bootstrapLower95": 14706.909765625,
+        "bootstrapUpper95": 86224.49199218747,
+        "studentTLower95": 14085.866195359107,
+        "detectionFloor": 36330.78104997574,
+        "wins": 284,
+        "ties": 0,
+        "losses": 228,
+        "firstHalfMeanDelta": 67335.2890625,
+        "secondHalfMeanDelta": 33623.49609375,
+        "candidateQ25": 233181.75,
+        "referenceQ25": 212968.75
+      },
+      "fairStep": {
+        "meanDelta": 49598.69140625,
+        "bootstrapLower95": 25751.419921875,
+        "bootstrapUpper95": 73244.34580078124,
+        "studentTLower95": 25578.35829588779,
+        "detectionFloor": 23978.92014644966,
+        "wins": 289,
+        "ties": 0,
+        "losses": 223,
+        "firstHalfMeanDelta": 45188.85546875,
+        "secondHalfMeanDelta": 54008.52734375
+      },
+      "persistence": {
+        "checks": [
+          {
+            "criterion": "screen artifact: illegalDecisions 0 and incompleteDecisions 0 in every arm",
+            "passed": true
+          },
+          {
+            "criterion": "bootstrap 95% lower bound of prior-d4s7 minus fair-d4s7 > 0",
+            "passed": true,
+            "observed": 102050.977734375
+          },
+          {
+            "criterion": "Student-t 95% lower bound > 0",
+            "passed": true,
+            "observed": 101161.09894605307
+          },
+          {
+            "criterion": "paired mean delta > 0 in both halves",
+            "passed": true,
+            "observed": [
+              137477.09765625,
+              129699.0859375
+            ]
+          },
+          {
+            "criterion": "prior-d4s7 Q25 >= fair-d4s7 Q25",
+            "passed": true,
+            "observed": [
+              233181.75,
+              208481.25
+            ]
+          }
+        ],
+        "passed": true
+      },
+      "interaction": {
+        "verdict": "inconclusive",
+        "n": 512,
+        "meanDelta": 880.701171875,
+        "pairedSd": 585280.6110669033,
+        "bootstrapLower95": -40931.9,
+        "bootstrapUpper95": 42867.4783203125,
+        "studentTLower95": -41742.34293071877,
+        "detectionFloor": 42549.5585860044,
+        "wins": 250,
+        "ties": 0,
+        "losses": 262,
+        "firstHalfMeanDelta": 22146.43359375,
+        "secondHalfMeanDelta": -20385.03125
+      },
+      "theory": {
+        "primaryFalsifierUpperBoundBelowZero": false,
+        "secondLegUpperBoundBelowZero": false,
+        "persistenceLowerBoundAtOrBelowZero": false
+      }
+    }
+  },
+  "rusage": [
+    {
+      "label": "gates",
+      "command": [
+        "/home/keshav/Developer/drop7-bench/approaches/ntuple-rl/ntuple-scale/target/release/gate",
+        "--probe-start",
+        "0xa5277000",
+        "--weights",
+        "/home/keshav/Developer/drop7-bench/runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/best-weights.bin"
+      ],
+      "startedAt": "2026-09-06T08:16:11Z",
+      "endedAt": "2026-09-06T08:17:45Z",
+      "wallSeconds": 94.069,
+      "userSeconds": 131.743,
+      "systemSeconds": 3.301,
+      "peakRssBytes": 27202711552,
+      "exitCode": 0
+    },
+    {
+      "label": "screen",
+      "command": [
+        "/home/keshav/Developer/drop7-bench/approaches/ntuple-rl/ntuple-scale/target/release/screen",
+        "--arm",
+        "prior=/home/keshav/Developer/drop7-bench/runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/best-weights.bin",
+        "--arm-d4",
+        "prior=/home/keshav/Developer/drop7-bench/runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/best-weights.bin",
+        "--skip-direct",
+        "--seeds-start",
+        "0xa52f2580",
+        "--games",
+        "512",
+        "--threads",
+        "32",
+        "--move-cap",
+        "2000",
+        "--out",
+        "/home/keshav/Developer/drop7-bench/runs/RUN-20260906T081306Z-e62d9837/ntuple-scale/screen/heldout.json",
+        "--experiment-id",
+        "EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3"
+      ],
+      "startedAt": "2026-09-06T08:19:19Z",
+      "endedAt": "2026-09-06T09:56:35Z",
+      "wallSeconds": 5835.916,
+      "userSeconds": 171490.804,
+      "systemSeconds": 73.872,
+      "peakRssBytes": 5709733888,
+      "exitCode": 0
+    }
+  ]
+}

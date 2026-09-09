@@ -102,8 +102,8 @@ export function nativeDecide(
 /**
  * The n-tuple crate's one-shot decision binary (cargo release build). It
  * loads a frozen lookup-table file and plays the tables as the leaf of the
- * deployed depth-3 seven-stratum search, or directly one ply, printing the
- * chosen column as a bare integer.
+ * deployed depth-3 seven-stratum search, of the reference depth-4 search, or
+ * directly one ply, printing the chosen column as a bare integer.
  */
 export const NTUPLE_QUERY_BINARY = join(
   REPO_ROOT,
@@ -129,8 +129,12 @@ export const NTUPLE_FROZEN_WEIGHTS =
 export interface NTupleQueryOptions {
   /** Path to a Model::save output; defaults to DROP7_NTUPLE_WEIGHTS, then the frozen tables. */
   weights?: string;
-  /** "ntuple-d3" (the tables as the d3s7 leaf) or "direct" (one ply, no search). */
-  arm?: "ntuple-d3" | "direct";
+  /**
+   * "ntuple-d3" (the tables as the d3s7 leaf), "ntuple-d4" (the same tables as
+   * the leaf of the reference d4s7 search, about forty times the work) or
+   * "direct" (one ply, no search).
+   */
+  arm?: "ntuple-d3" | "ntuple-d4" | "direct";
   binary?: string;
   timeoutMs?: number;
 }

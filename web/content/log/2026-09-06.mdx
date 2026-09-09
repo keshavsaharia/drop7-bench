@@ -1,10 +1,10 @@
 ---
 date: 2026-09-06
-title: "Replicating the lookup-table leaf on fresh seeds at larger scale"
-summary: "Yesterday's lookup-table leaf replicated on 512 seeds nothing had read: 487,066 against 326,717 for the fair leaf in the same depth-3 search. A six-times-wider evaluator trained until its validation margin stopped rising passed the same gate and came out 5,196 behind the first tables, an inconclusive scale reading, while playing much better without any search. As a playground demonstration, the first tables also played the public global game's round, gauntlet-01, and scored 554,510 points in 160 moves."
+title: "Replicating the lookup-table leaf on fresh seeds, then playing it one ply deeper"
+summary: "Yesterday's lookup-table leaf replicated on 512 seeds nothing had read: 487,066 against 326,717 for the fair leaf in the same depth-3 search. A six-times-wider evaluator trained until its validation margin stopped rising passed the same gate and came out 5,196 behind the first tables, an inconclusive scale reading, while playing much better without any search. As a playground demonstration, the first tables also played the public global game's round, gauntlet-01, and scored 554,510 points in 160 moves. In the evening the same frozen tables played as the leaf of the depth-4 search on a fourth fresh block: 516,155 against 465,675 for the depth-3 leaf on 512 games, a fourth ply worth 50,479 points, the same as the fair leaf's fourth ply on the same games. The tables and the screens' per-game rows are now in the public research archive."
 contributors: [claude-fable-5-1 (Claude Code)]
-tags: [n-tuple, temporal-difference, leaf, rust, replication, plateau, benchmark-playground]
-outcomes: { positive: 2, negative: 1, open: 1 }
+tags: [n-tuple, temporal-difference, leaf, rust, replication, plateau, benchmark-playground, search-depth, artifact-archive]
+outcomes: { positive: 4, negative: 1, open: 2 }
 ---
 
 ## Two questions from yesterday
@@ -192,14 +192,112 @@ back and matched the dry-run preview. It enters the public leaderboard above
 the top human entry and the depth-6 game. All of this is one scripted future.
 </Finding>
 
+## The same tables one ply deeper
+
+The owner asked what the fourth ply is worth to this leaf. Nothing was
+trained. The first run's frozen tables, hash-verified, played as the leaf of
+the reference depth-4 search (seven chance strata, the standing fair-d4s7
+configuration) and as the depth-3 leaf on 512 games from a fourth block
+nothing had read, beside the fair leaf in both searches on the same games.
+Experiment
+`EX-20260906-ntuple-scale-depth4-frozen-tables-54aed6a3`, run
+`RUN-20260906T081306Z-e62d9837`, branch `claude/n-tuple-continuation-4-ply`,
+lease `0xa52f2580`. The crate gained the depth-4 arm, a depth-4 determinism
+gate that runs on the frozen tables, and a screen-only stage driver; all 20
+CHECK gates passed before the block opened. The gate reads the tables' own
+depth step. Two readings were fixed beside it: whether the tables still beat
+the fair leaf at depth 4, and whether the fourth ply is worth more, less or
+the same on the tables as on the fair leaf, from the per-game difference of
+the two depth steps.
+
+<ArmTable
+  caption="The four arms on the 512 fresh games, from the screen artifact and the compare.py reports of RUN-20260906T081306Z-e62d9837."
+  columns={[
+    { key: "arm", label: "arm" },
+    { key: "mean", label: "mean score", numeric: true },
+    { key: "moves", label: "moves", numeric: true },
+    { key: "work", label: "logical work per game", numeric: true },
+  ]}
+  rows={[
+    { arm: "first run's tables as the depth-4 leaf", mean: "516,155", moves: "148.75", work: "7.96e8", highlight: true },
+    { arm: "first run's tables as the depth-3 leaf", mean: "465,675", moves: "134.82", work: "2.22e7" },
+    { arm: "fair leaf, depth 4", mean: "382,567", moves: "110.45", work: "5.59e8" },
+    { arm: "fair leaf, depth 3", mean: "332,968", moves: "97.72", work: "1.56e7" },
+  ]}
+/>
+
+<Finding title="The fourth ply is worth 50,479 points to the tables" kind="positive" metric="+50,479 paired on 512 games, lower bound +14,707, 284-0-228">
+The tables at depth 4 averaged 516,155 points and 148.75 moves against
+465,675 and 134.82 for the same tables at depth 3 on the same games: paired
++50,479, bootstrap 95% lower bound +14,707, Student-t lower bound +14,086,
+both halves positive (+67,335 and +33,623), lower quartile 233,182 against
+212,969. Every criterion of the preregistered gate passes
+(`RS-20260906T171746Z-1623f833`, run valid, outcome pass, screen tier). The
+fourth ply costs about 36 times the depth-3 search's logical work per game,
+152 wall seconds per game against 4 on the 32-thread workstation.
+</Finding>
+
+<Finding title="The learned leaf pays for depth the way the hand-written one does" kind="neutral" metric="fair leaf's fourth ply +49,599; difference of the two steps +881, bounds -40,932 to +42,867">
+On the same 512 games the fair leaf gained 49,599 from its fourth ply
+(382,567 against 332,968, lower bound 25,751). The per-game difference
+between the tables' depth step and the fair leaf's is 881 points with
+bootstrap bounds from minus 40,932 to plus 42,867 and a detection floor of
+42,550, 250 wins to 262: the preregistered verdict is inconclusive. What this
+rules out is a large difference either way; the theory's first leg (the
+tables gain from depth) is supported, its second leg (at least as much as the
+fair leaf) is neither refuted nor measurable at this cohort size.
+</Finding>
+
+<Finding title="The margin over the fair leaf survives the fourth ply" kind="positive" metric="+133,588 at depth 4, lower bound +102,051; +132,707 at depth 3 on the same block">
+At depth 4 the tables beat the fair leaf in the same search by 133,588
+paired (lower bound 102,051, 314 wins to 198); at depth 3 on this block the
+margin was 132,707 (lower bound 102,193), a third disjoint block on which
+the tables' depth-3 margin lands where the first two screens put it. The
+tables at depth 4 also beat the fair leaf at depth 3 by 183,187. The first
+tables at depth 4 are now the candidate to carry forward.
+</Finding>
+
+<Finding title="The depth-4 policy on gauntlet-01" kind="neutral" metric="549,050 points in 160 moves, one scripted round">
+As a playground demonstration the same tables at depth 4 played the public
+global game's round through the new registry policy `ntuple-scale-d4s7`
+(`runs/BENCH-20260906T172752Z-ntuple-scale-d4s7--gauntlet-01/`, trajectory
+checksum `5119ef1a32121f78`, 195 seconds): 549,050 in 160 moves, 5,460 below
+the depth-3 policy's 554,510 in the same 160 moves on the same fixed future.
+The record was imported into the production and dev competition ledgers
+under `global#2026-08-v1` with source revision `ea385e8`, so the two depths
+sit side by side on the public board. One scripted future says nothing about
+a mean; the 512-game screen above is the evidence.
+</Finding>
+
+## The tables and the screens in the public archive
+
+The owner asked that the n-tuple data reach the research archive so agents
+on other machines can reproduce the screens and continue training. The
+publisher gained a directory mode with exclude globs, a manifest of
+references, and a dry run. What is published, each under its run id with the
+digest in the reference: the first run's frozen tables (zstd, 378 MB, the
+decompressed file's SHA-256 recorded beside it), the wide tables (zstd, 910
+MB), and the three screens' per-game rows and analyses, with dataset records
+`DS-20260906-ntuple-scale-frozen-tables-ff977178` and
+`DS-20260906-ntuple-scale-wide-frozen-tables-c5eb52a6` naming the file format,
+the leases the tables have read, and the download and verification steps.
+The result record cites the depth-4 screen's per-game rows by their archive
+reference, so a checkout without `runs/` can still verify it. The first run's
+end-of-training checkpoint with its coherence accumulators (1.5 GB
+compressed) and every validation line-up, pilot arm, progress log, gate log
+and compare report of the three runs followed once the owner allowed the
+directory publisher; each run's `published.jsonl` lists every object with
+its digest, and the run records cite the references.
+
 <Direction title="What the record supports next" status="proposed" owner="claude-fable-5-1 (Claude Code)">
-The frozen first tables now have two passing screens on disjoint blocks and
-are the candidate to carry forward; the wide tables are retained and hashed
-but add nothing the screen can see. Next: the first tables as the leaf of
-the depth-4 search on a fresh development block (untested, affordable); a
-STANDARD-tier evaluation of the first tables on fresh development seeds; and
-a study of why a better one-ply evaluator is not a better leaf, for instance
-training the tables on the search's own returns instead of one-ply play. The
-[approach page](/approach/ntuple-rl/ntuple-scale) carries both runs' figures
-and the full tables.
+The first tables at depth 4 have one passing screen and the same tables at
+depth 3 have three; the wide tables are retained, hashed and published but add
+nothing the screens can see. Next: a STANDARD-tier evaluation of the unchanged
+depth-4 candidate on fresh development seeds; a study of a leaf tuned for the
+search's use rather than one-ply play, for instance training on the boards
+the search evaluates or removing the optimistic starting value from the nine
+tenths of the entries that training never touched; and the published tables
+as the teacher or warm start of a search-guided self-play loop. The
+[approach page](/approach/ntuple-rl/ntuple-scale) carries all three runs'
+figures and the full tables.
 </Direction>

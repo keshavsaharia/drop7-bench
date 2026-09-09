@@ -13,29 +13,28 @@ Understands both run shapes analyze.py understands: the first experiment
 the first experiment's frozen tables as the prior-* arms, a replication
 check and a scale verdict).
 
+The per-game artifact is cited by its public archive reference, resolved from
+the run record or the publisher manifest and checked against the local file's
+digest (artifact_refs.py); publish the artifact before writing the record, or
+pass --allow-local-path for an explicitly unfinalized draft.
+
 Usage: write-result-record.py --run RUN_ID --result-id RS-... --root REPO
                               --experiment EX-... --theory TH-... --machine research/system-profiles/MACH-....json
-                              [--contribution CT-...]
+                              [--contribution CT-...] [--per-game-ref URL | --allow-local-path]
 """
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import os
+import sys
 import time
+
+from artifact_refs import UnresolvedArtifact, artifact_manifest_ref, citation_limitation, resolve_public_ref, sha256_file
 
 DEFAULT_THEORY = "TH-20260905-ntuple-line-tuples-tc-td-leaf-bcb25133"
 DEFAULT_EXPERIMENT = "EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620"
 DEFAULT_MACHINE = "research/system-profiles/MACH-20260905T192901Z-83559f62.json"
-
-
-def sha256_file(path):
-    h = hashlib.sha256()
-    with open(path, "rb") as handle:
-        for chunk in iter(lambda: handle.read(1 << 20), b""):
-            h.update(chunk)
-    return h.hexdigest()
 
 
 def fmt(x):
@@ -59,6 +58,8 @@ def main():
     parser.add_argument("--theory", default=DEFAULT_THEORY)
     parser.add_argument("--machine", default=DEFAULT_MACHINE)
     parser.add_argument("--contribution", default="CT-20260905T192505Z-c487efca")
+    parser.add_argument("--per-game-ref", default=None, help="public reference of the per-game artifact (https://data.drop7.dev/runs/<run-id>/...#sha256=<digest>); found in the run record or the publisher manifest when omitted")
+    parser.add_argument("--allow-local-path", action="store_true", help="write an unfinalized draft citing the local runs/ path when no verified public reference exists")
     args = parser.parse_args()
     out = os.path.join(args.root, "runs", args.run, "ntuple-scale")
     analysis = json.load(open(os.path.join(out, "analysis.json"), encoding="utf-8"))
@@ -79,6 +80,15 @@ def main():
     passed = bool(gate and gate["passed"])
     integrity_ok = all(a["illegalDecisions"] == 0 and a["incompleteDecisions"] == 0 for a in arms.values()) and main_run["artifactIntegrity"]["illegalDecisions"] == 0 and main_run["artifactIntegrity"]["incompleteDecisions"] == 0
     heldout = os.path.join(out, "screen", "heldout.json")
+    heldout_relative = os.path.relpath(heldout, args.root)
+    heldout_sha256 = sha256_file(heldout)
+    try:
+        per_game_path = resolve_public_ref(args.root, args.run, heldout_relative, heldout_sha256, args.per_game_ref)
+    except UnresolvedArtifact as error:
+        if not args.allow_local_path:
+            raise SystemExit(f"error: {error}\n(--allow-local-path writes an unfinalized draft that cites {heldout_relative} instead)")
+        print(f"warning: {error}; the draft cites {heldout_relative} and is not finalized", file=sys.stderr)
+        per_game_path = heldout_relative
     hash_path = os.path.join(out, "main", "candidate-weights.sha256")
     candidate_sha = open(hash_path, encoding="utf-8").read().split()[0] if os.path.exists(hash_path) else None
     prior_hash_path = os.path.join(out, "main", "prior-weights.sha256")
@@ -207,6 +217,7 @@ def main():
     if replication:
         limitations.append("The replication arm re-screens tables frozen by the first experiment on a block that experiment never read; it is a fresh-block replication by the same runner on the same machine, not by an independent runner.")
 
+    limitations.append(citation_limitation(per_game_path, heldout_relative))
     record = {
         "$schema": "../schemas/result-v1.schema.json",
         "format": "drop7-result-v1",
@@ -221,9 +232,9 @@ def main():
         "summary": summary,
         "metrics": metrics,
         "gateChecks": checks,
-        "perGameArtifact": {"path": os.path.relpath(heldout, args.root), "sha256": sha256_file(heldout), "recordCount": sum(a["games"] for a in arms.values())},
+        "perGameArtifact": {"path": per_game_path, "sha256": heldout_sha256, "recordCount": sum(a["games"] for a in arms.values())},
         "machineProfileRefs": [args.machine],
-        "artifactManifestRef": None,
+        "artifactManifestRef": artifact_manifest_ref(args.root, args.experiment, args.run),
         "limitations": limitations,
         "contributionIds": [args.contribution],
         "recordedAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),

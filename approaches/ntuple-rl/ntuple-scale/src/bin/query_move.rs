@@ -20,6 +20,7 @@
 // Usage: query_move [--arm ARM] [--weights FILE] --board <49 chars> --next <1-7> --rise <1-5>
 //
 //   --arm      ntuple-d3 (default): the tables as the d3s7 leaf, needs --weights
+//              ntuple-d4:           the tables as the d4s7 leaf, needs --weights
 //              direct:              the tables played one ply, needs --weights
 //              fair-d3:             the frozen fair leaf inside d3s7
 //              fair-d4:             the frozen fair leaf inside d4s7
@@ -88,10 +89,11 @@ fn main() -> Result<(), String> {
     };
     let arm = match arm_name.as_str() {
         "ntuple-d3" => Arm::NTupleD3(load_tables()?),
+        "ntuple-d4" => Arm::NTupleD4(load_tables()?),
         "direct" => Arm::Direct(load_tables()?),
         "fair-d3" => Arm::FairD3,
         "fair-d4" => Arm::FairD4,
-        other => return Err(format!("unknown --arm {other} (ntuple-d3, direct, fair-d3, fair-d4)")),
+        other => return Err(format!("unknown --arm {other} (ntuple-d3, ntuple-d4, direct, fair-d3, fair-d4)")),
     };
     let mut player = arm.player();
     let (action, _work, _depth) = player.decide(&state);

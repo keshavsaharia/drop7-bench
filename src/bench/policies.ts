@@ -287,6 +287,23 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
     slow: true,
     chooseColumn: (state) => ntupleDecide(publicOnly(state)),
   }),
+  define({
+    id: "ntuple-scale-d4s7",
+    name: "N-tuple tables, fair D4, 7 strata",
+    family: "ntuple-rl",
+    description:
+      "The same frozen lookup tables of the first n-tuple-scale run as the leaf of the Rust engine's completed depth-4 search with seven chance strata (the reference search's configuration), through the crate's one-shot query binary (approaches/ntuple-rl/ntuple-scale/build.sh --bin query_move); the 4 GB table file is a run artifact under runs/, or DROP7_NTUPLE_WEIGHTS.",
+    researchPath: "/approach/ntuple-rl/ntuple-scale",
+    publicInformation: true,
+    slow: true,
+    chooseColumn: (state) =>
+      ntupleDecide(publicOnly(state), {
+        arm: "ntuple-d4",
+        // A depth-4 decision costs about a CPU-second on the workstation plus
+        // the table load; a crowded late board can take much longer.
+        timeoutMs: 3_600_000,
+      }),
+  }),
 ];
 
 export const DEFAULT_POLICY_IDS = BENCH_POLICIES.filter(
