@@ -33,6 +33,14 @@
 // --seeds-start + --seeds-count), wrapping to the start when the block is
 // exhausted (a training-role block may be re-read; the wrap count is
 // recorded).  Validation games read [--validate-start, +--validate-games).
+//
+// WARM START.  --init-from FILE starts a fresh run from a frozen table file
+// instead of the optimistic constant: when --layout is the file's own layout
+// the weights are loaded as they are, and when --layout adds fill
+// conditioning to the file's layout the tables are promoted (every bucket a
+// copy of the source, see model.rs).  Either way the coherence accumulators
+// start at zero, so every entry's first update runs at full rate.  The
+// source path is recorded in config.json; the driver records its SHA-256.
 
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicU64, Ordering::Relaxed};
@@ -79,6 +87,9 @@ struct Config {
     /// validation points before the rule may fire.
     plateau_window: usize,
     plateau_min_points: usize,
+    /// Warm start: a frozen table file to load or promote instead of the
+    /// optimistic constant (fresh runs only).
+    init_from: Option<PathBuf>,
 }
 
 fn parse_hex(text: &str, what: &str) -> Result<u32, String> {
@@ -112,6 +123,7 @@ fn parse_args() -> Result<Config, String> {
         checkpoint_every: 1,
         plateau_window: 0,
         plateau_min_points: 8,
+        init_from: None,
     };
     let args: Vec<String> = std::env::args().collect();
     let mut i = 1;
@@ -152,6 +164,7 @@ fn parse_args() -> Result<Config, String> {
             "--checkpoint-every" => config.checkpoint_every = value.parse().map_err(|_| "bad --checkpoint-every")?,
             "--plateau-window" => config.plateau_window = value.parse().map_err(|_| "bad --plateau-window")?,
             "--plateau-min-points" => config.plateau_min_points = value.parse().map_err(|_| "bad --plateau-min-points")?,
+            "--init-from" => config.init_from = Some(PathBuf::from(value)),
             other => return Err(format!("unknown argument {other}")),
         }
         i += 2;
@@ -176,7 +189,7 @@ fn parse_args() -> Result<Config, String> {
 
 fn config_json(config: &Config, layout: &Layout) -> String {
     format!(
-        "{{\"format\":\"drop7-ntuple-scale-train-config-v1\",\"experiment\":\"{}\",\"layout\":\"{}\",\"entries\":{},\"activePerState\":{},\"seedsStartHex\":\"0x{:08x}\",\"seedsCount\":{},\"moves\":{},\"chunkMoves\":{},\"threads\":{},\"alpha\":{},\"epsilon\":{},\"optimisticRiseUnits\":{},\"deltaClampRiseUnits\":{},\"revealSamples\":{},\"validateStartHex\":\"0x{:08x}\",\"validateGames\":{},\"validateEvery\":{},\"quickEvery\":{},\"wallSeconds\":{},\"moveCap\":{},\"trainSeedHex\":\"0x{:08x}\",\"valueUnitPoints\":{},\"checkpoint\":{},\"checkpointEvery\":{},\"plateauWindow\":{},\"plateauMinPoints\":{}}}\n",
+        "{{\"format\":\"drop7-ntuple-scale-train-config-v1\",\"experiment\":\"{}\",\"layout\":\"{}\",\"entries\":{},\"activePerState\":{},\"seedsStartHex\":\"0x{:08x}\",\"seedsCount\":{},\"moves\":{},\"chunkMoves\":{},\"threads\":{},\"alpha\":{},\"epsilon\":{},\"optimisticRiseUnits\":{},\"deltaClampRiseUnits\":{},\"revealSamples\":{},\"validateStartHex\":\"0x{:08x}\",\"validateGames\":{},\"validateEvery\":{},\"quickEvery\":{},\"wallSeconds\":{},\"moveCap\":{},\"trainSeedHex\":\"0x{:08x}\",\"valueUnitPoints\":{},\"checkpoint\":{},\"checkpointEvery\":{},\"plateauWindow\":{},\"plateauMinPoints\":{},\"initFrom\":{}}}\n",
         config.experiment_id,
         layout.spec(),
         layout.total_entries(),
@@ -203,7 +216,43 @@ fn config_json(config: &Config, layout: &Layout) -> String {
         config.checkpoint_every,
         config.plateau_window,
         config.plateau_min_points,
+        match &config.init_from {
+            Some(path) => format!("\"{}\"", path.display().to_string().replace('\\', "\\\\").replace('"', "\\\"")),
+            None => "null".to_string(),
+        },
     )
+}
+
+/// The tables a fresh run starts from: the optimistic constant, or the
+/// frozen file named by --init-from, loaded as-is or promoted into the
+/// fill-conditioned layout.
+fn initial_model(config: &Config, layout: Layout) -> Result<Model, String> {
+    let Some(path) = &config.init_from else {
+        return Ok(Model::new(layout, config.optimistic, true));
+    };
+    let started = Instant::now();
+    let source = Model::load(path, false)?;
+    let model = if source.layout == layout {
+        eprintln!("warm start: loading {} as trainable tables with fresh accumulators", path.display());
+        Model::load(path, true)?
+    } else if source.layout == layout.unconditioned() {
+        eprintln!(
+            "warm start: promoting {} ({}) into {} ({} entries)",
+            path.display(),
+            source.layout.spec(),
+            layout.spec(),
+            layout.total_entries()
+        );
+        Model::promote(&source, layout)?
+    } else {
+        return Err(format!(
+            "--init-from layout {} is neither {} nor its unconditioned form",
+            source.layout.spec(),
+            layout.spec()
+        ));
+    };
+    eprintln!("warm start ready in {:.1} s (source fingerprint {:016x})", started.elapsed().as_secs_f64(), source.fingerprint());
+    Ok(model)
 }
 
 /// The plateau rule on the validation margins so far: (recent window mean,
@@ -414,13 +463,13 @@ fn main() -> Result<(), String> {
             Model::load(&checkpoint_path, true)?
         } else {
             eprintln!("no checkpoint; starting fresh tables");
-            Model::new(layout, config.optimistic, true)
+            initial_model(&config, layout)?
         }
     } else {
         if progress_path.exists() {
             return Err("progress.jsonl exists; pass --resume to continue this run".into());
         }
-        Model::new(layout, config.optimistic, true)
+        initial_model(&config, layout)?
     };
     let model = Arc::new(model);
     let params = PolicyParams {

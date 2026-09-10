@@ -1,0 +1,176 @@
+{
+  "format": "drop7-leaf-evolution-paired-v1",
+  "artifact": "/home/keshav/Developer/drop7-bench/runs/RUN-20260906T201104Z-a96ea6c8/ntuple-scale/screen/heldout.json",
+  "config": {
+    "experiment": "EX-20260906-ntuple-fill-conditioned-continuation-a9e5cbd3",
+    "screen": true,
+    "games": 512,
+    "moveCap": 2000,
+    "arms": [
+      "prior-d3s7",
+      "prior-1ply",
+      "fill-d3s7",
+      "fill-1ply",
+      "control-d3s7",
+      "zeroed-d3s7",
+      "classmean-d3s7",
+      "prior-d4s7",
+      "fill-d4s7",
+      "zeroed-d4s7",
+      "fair-d3s7"
+    ]
+  },
+  "seedStartHex": "0xa52f2880",
+  "candidate": {
+    "name": "fill-d4s7",
+    "games": 512,
+    "score": {
+      "mean": 499324.08203125,
+      "median": 391661.5,
+      "sd": 364035.5921238902,
+      "q25": 242348.75,
+      "min": 85663.0,
+      "max": 2934902.0
+    },
+    "moves": {
+      "mean": 144.08203125,
+      "q25": 70.0
+    },
+    "numberedClearsPerMove": 2.1172292259726175,
+    "coverRevealsPerMove": 1.19640775382947,
+    "maxChainDepth": 14,
+    "meanOccupiedCells": 23.14152519647478,
+    "censoredGames": 0,
+    "incompleteDecisions": 0,
+    "illegalDecisions": 0,
+    "gamesAtOrAboveMillion": 50
+  },
+  "reference": {
+    "name": "fill-d3s7",
+    "games": 512,
+    "score": {
+      "mean": 506494.4609375,
+      "median": 388587.0,
+      "sd": 410994.7149055519,
+      "q25": 229449.5,
+      "min": 85362.0,
+      "max": 2751523.0
+    },
+    "moves": {
+      "mean": 146.326171875,
+      "q25": 70.0
+    },
+    "numberedClearsPerMove": 2.1215579492518586,
+    "coverRevealsPerMove": 1.2010170984663437,
+    "maxChainDepth": 12,
+    "meanOccupiedCells": 23.088345187549738,
+    "censoredGames": 0,
+    "incompleteDecisions": 0,
+    "illegalDecisions": 0,
+    "gamesAtOrAboveMillion": 53
+  },
+  "pairedScore": {
+    "n": 512,
+    "meanDelta": -7170.37890625,
+    "pairedSd": 525924.165910425,
+    "bootstrapLower95": -45565.762109375,
+    "bootstrapUpper95": 31331.34072265625,
+    "studentTLower95": -45470.79155336819,
+    "studentTQuantile": 1.647841008903657,
+    "detectionFloor": 38234.37969080974,
+    "detectionFloorNote": "1.645 * sd / sqrt(n), the z-based floor defined in docs/research/status.md",
+    "wins": 263,
+    "ties": 0,
+    "losses": 249,
+    "firstHalfMeanDelta": 17876.42578125,
+    "secondHalfMeanDelta": -32217.18359375,
+    "q25Delta": 12899.25,
+    "largestSwings": [
+      2742775.0,
+      -2451240.0,
+      -2342653.0,
+      -1884779.0,
+      -1860872.0
+    ],
+    "bootstrapSeedHex": "0xb0071eaf",
+    "resamples": 20000
+  },
+  "pairedMoves": {
+    "n": 512,
+    "meanDelta": -2.244140625,
+    "pairedSd": 145.4101862827986,
+    "bootstrapLower95": -12.84599609375,
+    "bootstrapUpper95": 8.398632812499997,
+    "studentTLower95": -12.833633366951823,
+    "studentTQuantile": 1.647841008903657,
+    "detectionFloor": 10.57123561459394,
+    "detectionFloorNote": "1.645 * sd / sqrt(n), the z-based floor defined in docs/research/status.md",
+    "wins": 252,
+    "ties": 13,
+    "losses": 247,
+    "firstHalfMeanDelta": 4.65234375,
+    "secondHalfMeanDelta": -9.140625,
+    "q25Delta": 0.0,
+    "largestSwings": [
+      760.0,
+      -680.0,
+      -650.0,
+      -520.0,
+      -511.0
+    ],
+    "bootstrapSeedHex": "0xb0071eaf",
+    "resamples": 20000
+  },
+  "pairedNumberedCleared": {
+    "n": 512,
+    "meanDelta": -5.384765625,
+    "pairedSd": 349.19101698469007,
+    "bootstrapLower95": -30.910058593749998,
+    "bootstrapUpper95": 20.13291015625,
+    "studentTLower95": -30.814591653299228,
+    "studentTQuantile": 1.647841008903657,
+    "detectionFloor": 25.385982986540657,
+    "detectionFloorNote": "1.645 * sd / sqrt(n), the z-based floor defined in docs/research/status.md",
+    "wins": 256,
+    "ties": 0,
+    "losses": 256,
+    "firstHalfMeanDelta": 10.953125,
+    "secondHalfMeanDelta": -21.72265625,
+    "q25Delta": 8.75,
+    "largestSwings": [
+      1825.0,
+      -1635.0,
+      -1554.0,
+      -1265.0,
+      -1215.0
+    ],
+    "bootstrapSeedHex": "0xb0071eaf",
+    "resamples": 20000
+  },
+  "pairedCoversRevealed": {
+    "n": 512,
+    "meanDelta": -3.359375,
+    "pairedSd": 203.8135629545468,
+    "bootstrapLower95": -18.2521484375,
+    "bootstrapUpper95": 11.492382812499997,
+    "studentTLower95": -18.20209201172994,
+    "studentTQuantile": 1.647841008903657,
+    "detectionFloor": 14.817126987597186,
+    "detectionFloorNote": "1.645 * sd / sqrt(n), the z-based floor defined in docs/research/status.md",
+    "wins": 256,
+    "ties": 2,
+    "losses": 254,
+    "firstHalfMeanDelta": 6.37109375,
+    "secondHalfMeanDelta": -13.08984375,
+    "q25Delta": 6.0,
+    "largestSwings": [
+      1067.0,
+      -956.0,
+      -901.0,
+      -744.0,
+      -708.0
+    ],
+    "bootstrapSeedHex": "0xb0071eaf",
+    "resamples": 20000
+  }
+}

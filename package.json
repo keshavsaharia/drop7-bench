@@ -15,6 +15,8 @@
     "bench": "node --experimental-strip-types src/bench/cli.ts",
     "bench:rounds": "node --experimental-strip-types src/bench/generate-rounds.ts",
     "competition": "npm --prefix web run competition --",
+    "artifact:publish": "bash scripts/publish-research-artifact.sh",
+    "analytics:query": "bash scripts/query-research-athena.sh",
     "web": "npm --prefix web run dev",
     "infra:dev": "sst deploy --stage dev",
     "infra:prod": "sst deploy --stage production",

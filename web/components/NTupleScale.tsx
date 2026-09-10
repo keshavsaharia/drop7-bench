@@ -15,7 +15,7 @@
 import type { ReactNode } from "react";
 import { readRepoFile } from "@/lib/repo";
 import { formatSigned, formatValue } from "@/lib/charts/spec";
-import { SNAPSHOT_FORMAT, type NTupleSnapshot, type TrainingRun } from "@/lib/charts/ntuple-scale";
+import { SNAPSHOT_FORMAT, isFillSelection, type FillReading, type NTupleSnapshot, type TrainingRun } from "@/lib/charts/ntuple-scale";
 import { ScreenPairs } from "./charts/EvolutionCharts";
 import { PilotArms, TrainingCurve } from "./charts/NTupleCharts";
 
@@ -26,8 +26,16 @@ const ARM_LABELS: Record<string, string> = {
   "candidate-1ply": "tables played directly, one ply",
   "prior-d3s7": "first run's tables as the depth-3 leaf",
   "prior-1ply": "first run's tables played directly, one ply",
+  "prior-d4s7": "first run's tables as the depth-4 leaf",
   "fair-d3s7": "fair leaf in the depth-3 search",
   "fair-d4s7": "fair leaf in the depth-4 search",
+  "fill-d3s7": "fill-conditioned tables as the depth-3 leaf",
+  "fill-1ply": "fill-conditioned tables played directly, one ply",
+  "fill-d4s7": "fill-conditioned tables as the depth-4 leaf",
+  "control-d3s7": "unconditioned continuation as the depth-3 leaf",
+  "zeroed-d3s7": "frozen tables with never-updated entries zeroed, depth-3 leaf",
+  "zeroed-d4s7": "frozen tables with never-updated entries zeroed, depth-4 leaf",
+  "classmean-d3s7": "frozen tables with never-updated entries at the class mean, depth-3 leaf",
 };
 
 const CONTRAST_LABELS: Record<string, string> = {
@@ -40,7 +48,31 @@ const CONTRAST_LABELS: Record<string, string> = {
   "candidate-d3s7-vs-prior-d3s7": "wider tables minus the first run's tables, both as the depth-3 leaf",
   "prior-d3s7-vs-fair-d4s7": "first run's tables as the depth-3 leaf minus the fair leaf in the depth-4 search",
   "prior-1ply-vs-fair-d3s7": "first run's tables played directly minus the fair leaf in the depth-3 search",
+  "prior-d4s7-vs-prior-d3s7": "tables as the depth-4 leaf minus the same tables as the depth-3 leaf",
+  "prior-d4s7-vs-fair-d4s7": "tables as the depth-4 leaf minus the fair leaf in the same depth-4 search",
+  "prior-d4s7-vs-fair-d3s7": "tables as the depth-4 leaf minus the fair leaf in the depth-3 search",
+  "fill-d3s7-vs-prior-d3s7": "fill-conditioned tables minus the frozen tables, both as the depth-3 leaf",
+  "fill-d3s7-vs-control-d3s7": "fill-conditioned tables minus the unconditioned continuation, both as the depth-3 leaf",
+  "control-d3s7-vs-prior-d3s7": "unconditioned continuation minus the frozen tables, both as the depth-3 leaf",
+  "zeroed-d3s7-vs-prior-d3s7": "zeroed edit minus the frozen tables, both as the depth-3 leaf",
+  "classmean-d3s7-vs-prior-d3s7": "class-mean edit minus the frozen tables, both as the depth-3 leaf",
+  "fill-d4s7-vs-prior-d4s7": "fill-conditioned tables minus the frozen tables, both as the depth-4 leaf",
+  "zeroed-d4s7-vs-prior-d4s7": "zeroed edit minus the frozen tables, both as the depth-4 leaf",
+  "fill-d4s7-vs-fill-d3s7": "fill-conditioned tables as the depth-4 leaf minus the same tables as the depth-3 leaf",
+  "zeroed-d4s7-vs-zeroed-d3s7": "zeroed edit as the depth-4 leaf minus the same tables as the depth-3 leaf",
+  "fill-d3s7-vs-fair-d3s7": "fill-conditioned tables as the depth-3 leaf minus the fair leaf in the same search",
+  "fill-1ply-vs-prior-1ply": "fill-conditioned tables played directly minus the frozen tables played directly",
+  "fill-1ply-vs-fair-d3s7": "fill-conditioned tables played directly minus the fair leaf in the depth-3 search",
 };
+
+const FILL_READING_LABELS: [keyof Pick<NonNullable<NTupleSnapshot["screen"]>["fill"] extends infer F ? (F extends null ? never : F) : never, "conditioning" | "continuation" | "zeroed" | "classmean" | "fillDepth4" | "zeroedDepth4">, string][] = [
+  ["conditioning", "conditioning: fill-conditioned tables minus the unconditioned continuation, depth 3"],
+  ["continuation", "continuation: unconditioned continuation minus the frozen tables, depth 3"],
+  ["zeroed", "zeroed edit minus the frozen tables, depth 3"],
+  ["classmean", "class-mean edit minus the frozen tables, depth 3"],
+  ["fillDepth4", "fill-conditioned tables minus the frozen tables, depth 4"],
+  ["zeroedDepth4", "zeroed edit minus the frozen tables, depth 4"],
+];
 
 function loadSnapshot(run: string): NTupleSnapshot | null {
   if (!RUN.test(run)) return null;
@@ -148,6 +180,63 @@ export function NTupleStatus({ run }: { run: string }) {
   const pilotArms = pilot ? Object.values(pilot.arms) : [];
   const pilotDone = pilotArms.filter((a) => a.done).length;
   const replication = !pilot && (smoke !== null || Boolean(screen?.replication) || Boolean(main?.stop));
+  const depthOnly = !pilot && !smoke && !main && (Boolean(screen?.depth) || Boolean(freeze?.priorSha256));
+  const fillShaped = Boolean(pilot && ("occ5" in pilot.arms || "hgt5" in pilot.arms || "control" in pilot.arms));
+  if (fillShaped && pilot) {
+    const selection = isFillSelection(pilot.selection) ? pilot.selection : null;
+    const armNames = Object.keys(pilot.arms);
+    const fill = screen?.fill ?? null;
+    const edits = snapshot.edits ?? null;
+    const stages: { name: string; state: StageState; detail: string }[] = [
+      { name: "0 · CHECK gates", state: gates ? "done" : "pending", detail: gates ? (gates.passed && (snapshot.gatesHgt5?.passed ?? true) ? `${gates.gates.length} gates passed on the probe block for each fill layout` : "a gate failed") : "not run" },
+      {
+        name: "A · two edits of the frozen tables",
+        state: edits ? "done" : "pending",
+        detail: edits ? `${formatValue(edits.untouchedEntries)} of ${formatValue(edits.entries)} entries were never updated; zeroed edit changed ${formatValue(edits.outputs.zeroed?.entriesChanged ?? 0)}, class-mean edit ${formatValue(edits.outputs.classmean?.entriesChanged ?? 0)}` : "waits for the gates",
+      },
+      {
+        name: "B · three warm-started arms",
+        state: (pilotDone === armNames.length && pilotDone > 0 ? "done" : pilotDone > 0 || pilotArms.some((a) => a.chunks.length > 0) ? "running" : "pending") as StageState,
+        detail: `${pilotDone} of ${armNames.length} arms done${pilotArms.map((a) => ` · ${a.name}: ${a.validations.length} validation points${a.bestMargin !== null ? `, best margin ${formatSigned(Math.round(a.bestMargin))}` : ""}${a.stop ? ` (${a.stop.reason})` : ""}`).join("")}`,
+      },
+      {
+        name: "C · selection and freeze",
+        state: freeze?.candidateSha256 ? "done" : selection ? "running" : "pending",
+        detail: selection ? `candidate arm ${selection.candidateArm}, best margin ${formatSigned(Math.round(selection.candidateBestMargin))} against the control arm's ${formatSigned(Math.round(selection.controlBestMargin))}; training-signal check ${selection.trainingSignal.passed ? "passed" : "not passed"}${freeze?.candidateSha256 ? `; candidate SHA-256 ${freeze.candidateSha256.slice(0, 12)}…, gates re-run on every frozen file` : ""}` : "waits for the three arms",
+      },
+      {
+        name: "D · held-out screen, eleven arms",
+        state: screen ? "done" : "pending",
+        detail: screen
+          ? screen.gate
+            ? `preregistered gate ${screen.gate.allPassed ? "passed" : "not passed"}${fill?.conditioning ? `; conditioning ${fill.conditioning.verdict}` : ""}${fill?.zeroed ? `; zeroed edit ${fill.zeroed.verdict}` : ""}${fill?.fillDepth4 ? `; at depth 4 ${fill.fillDepth4.verdict}` : ""}`
+            : "played; contrasts pending"
+          : "opens once, after every table file is hashed and gated",
+      },
+    ];
+    return <StatusFrame run={run} snapshot={snapshot} stages={stages} />;
+  }
+  if (depthOnly) {
+    const depth = screen?.depth ?? null;
+    const stages: { name: string; state: StageState; detail: string }[] = [
+      { name: "0 · CHECK gates", state: gates ? "done" : "pending", detail: gates ? (gates.passed ? `${gates.gates.length} gates passed on the probe block, on the frozen tables` : "a gate failed") : "not run" },
+      {
+        name: "A · freeze",
+        state: freeze?.priorSha256 ? "done" : "pending",
+        detail: freeze?.priorSha256 ? `the first run's tables verified unchanged, SHA-256 ${freeze.priorSha256.slice(0, 12)}…; nothing is trained` : "waits for the gates",
+      },
+      {
+        name: "B · held-out screen, four arms",
+        state: screen ? "done" : "pending",
+        detail: screen
+          ? screen.gate
+            ? `preregistered gate ${screen.gate.allPassed ? "passed" : "not passed"}${depth?.persistence ? `; margin over the fair leaf at depth 4 ${depth.persistence.allPassed ? "kept" : "not kept"}` : ""}${depth ? `; depth-step interaction ${depth.interaction.verdict}` : ""}`
+            : "played; contrasts pending"
+          : "opens once, after the tables are verified",
+      },
+    ];
+    return <StatusFrame run={run} snapshot={snapshot} stages={stages} />;
+  }
   const stageA = replication
     ? {
         name: "A · throughput smoke",
@@ -157,7 +246,7 @@ export function NTupleStatus({ run }: { run: string }) {
     : {
         name: "A · pilot arms",
         state: (pilot ? (pilotDone === 6 ? "done" : "running") : "pending") as StageState,
-        detail: pilot ? `${pilotDone} of 6 arms trained for ${formatValue(pilotArms[0]?.movesTotal ?? 0)} moves${pilot.selection ? `; arm ${pilot.selection.arm} selected` : ""}` : "waits for the gates",
+        detail: pilot ? `${pilotDone} of 6 arms trained for ${formatValue(pilotArms[0]?.movesTotal ?? 0)} moves${pilot.selection && !isFillSelection(pilot.selection) ? `; arm ${pilot.selection.arm} selected` : ""}` : "waits for the gates",
       };
   const stages: { name: string; state: StageState; detail: string }[] = [
     { name: "0 · CHECK gates", state: gates ? "done" : "pending", detail: gates ? (gates.passed ? `${gates.gates.length} gates passed on the probe block` : "a gate failed") : "not run" },
@@ -186,6 +275,10 @@ export function NTupleStatus({ run }: { run: string }) {
         : "opens once, after the candidate is frozen",
     },
   ];
+  return <StatusFrame run={run} snapshot={snapshot} stages={stages} />;
+}
+
+function StatusFrame({ run, snapshot, stages }: { run: string; snapshot: NTupleSnapshot; stages: { name: string; state: StageState; detail: string }[] }) {
   return (
     <Frame run={run} className="evo-status">
       <div className="evo-status-head">
@@ -264,31 +357,45 @@ export function NTuplePilotFigure({ run, caption }: { run: string; caption?: str
   if (!snapshot || !pilot || Object.values(pilot.arms).every((a) => a.validations.length === 0)) return <Absent run={run} stage="pilot" caption={caption} />;
   return (
     <Frame run={run} caption={caption} sources={snapshot.sources.filter((s) => s.includes("/pilot/") || s.endsWith("analysis.json"))}>
-      <h4 className="rchart-title">Six configurations, one budget each</h4>
+      <h4 className="rchart-title">{isFillSelection(pilot.selection) || "control" in pilot.arms ? "Three warm-started arms, one rule each" : "Six configurations, one budget each"}</h4>
       <PilotArms pilot={pilot} source={snapshot.runId} />
       <Stats
         items={[
           ...Object.entries(pilot.arms).map(([name, a]) => ({
             label: `${name}: ${a.layout}, alpha ${a.alpha}`,
-            value: a.finalMargin !== null ? `${formatSigned(Math.round(a.finalMargin))} at ${formatValue(a.movesTotal)} moves${a.done ? "" : " (running)"}` : "no validation point yet",
+            value: a.finalMargin !== null ? `final ${formatSigned(Math.round(a.finalMargin))}${a.bestMargin !== null ? `, best ${formatSigned(Math.round(a.bestMargin))}${a.best ? ` at ${formatValue(a.best.moves)} moves` : ""}` : ""} after ${formatValue(a.movesTotal)} moves${a.done ? "" : " (running)"}` : "no validation point yet",
           })),
-          ...(pilot.selection ? [{ label: "selected", value: `arm ${pilot.selection.arm} (${pilot.selection.layout}, alpha ${pilot.selection.alpha})` }] : []),
+          ...(pilot.selection
+            ? isFillSelection(pilot.selection)
+              ? [
+                  { label: "selected fill candidate", value: `arm ${pilot.selection.candidateArm}, best margin ${formatSigned(Math.round(pilot.selection.candidateBestMargin))} at ${formatValue(pilot.selection.candidateBestMoves ?? 0)} moves` },
+                  { label: "control candidate", value: `best margin ${formatSigned(Math.round(pilot.selection.controlBestMargin))} at ${formatValue(pilot.selection.controlBestMoves ?? 0)} moves` },
+                  { label: "training-signal check", value: pilot.selection.trainingSignal.passed ? "passed: a fill arm beat the control arm's best margin" : "not passed: neither fill arm beat the control arm's best margin" },
+                ]
+              : [{ label: "selected", value: `arm ${pilot.selection.arm} (${pilot.selection.layout}, alpha ${pilot.selection.alpha})` }]
+            : []),
         ]}
       />
     </Frame>
   );
 }
 
-export function NTupleScreenFigure({ run, contrast = "candidate-d3s7-vs-fair-d3s7", caption }: { run: string; contrast?: string; caption?: string }) {
+export function NTupleScreenFigure({ run, contrast, caption }: { run: string; contrast?: string; caption?: string }) {
   const snapshot = loadSnapshot(run);
   const screen = snapshot?.screen;
-  const paired = screen?.paired[contrast];
+  /*
+   * Each experiment gates a different pair, so an unqualified figure follows the
+   * contrast the run itself recorded as primary. The literal is the fallback for
+   * the first two runs, whose snapshots predate the recorded field.
+   */
+  const key = contrast ?? screen?.primaryContrast ?? "candidate-d3s7-vs-fair-d3s7";
+  const paired = screen?.paired[key];
   if (!snapshot || !screen || !paired) return <Absent run={run} stage="held-out screen" caption={caption} />;
   const candidateLabel = ARM_LABELS[paired.candidateArm] ?? paired.candidateArm;
   const referenceLabel = ARM_LABELS[paired.referenceArm] ?? paired.referenceArm;
   return (
     <Frame run={run} caption={caption} sources={snapshot.sources.filter((s) => s.includes("screen"))}>
-      <h4 className="rchart-title">Held-out screen: {CONTRAST_LABELS[contrast] ?? contrast}</h4>
+      <h4 className="rchart-title">Held-out screen: {CONTRAST_LABELS[key] ?? key}</h4>
       {paired.perSeed.length > 0 ? (
         <ScreenPairs contrast={paired} arms={screen.arms} candidateLabel={candidateLabel} referenceLabel={referenceLabel} source={snapshot.runId} />
       ) : (
@@ -362,6 +469,72 @@ export function NTupleGateTable({ run }: { run: string }) {
             <span className="evo-gate-mark">{screen.gate.allPassed ? "pass" : "fail"}</span> every criterion
           </li>
         </ul>
+      )}
+      {screen.depth && (
+        <>
+          <h4 className="rchart-title">The fourth ply on the tables and on the fair leaf</h4>
+          <p className="rchart-note">
+            The fourth ply&apos;s paired gain on the tables is {formatSigned(Math.round(screen.depth.tablesStep.meanDelta))} (bounds {formatSigned(Math.round(screen.depth.tablesStep.bootstrapLower95))} to {formatSigned(Math.round(screen.depth.tablesStep.bootstrapUpper95))})
+            {screen.depth.fairStep ? <>, and on the fair leaf on the same games {formatSigned(Math.round(screen.depth.fairStep.meanDelta))} (bounds {formatSigned(Math.round(screen.depth.fairStep.bootstrapLower95))} to {formatSigned(Math.round(screen.depth.fairStep.bootstrapUpper95))})</> : null}
+            . Their per-game difference is {formatSigned(Math.round(screen.depth.interaction.meanDelta))} with bounds {formatSigned(Math.round(screen.depth.interaction.bootstrapLower95))} to {formatSigned(Math.round(screen.depth.interaction.bootstrapUpper95))} and a detection floor of {formatValue(Math.round(screen.depth.interaction.detectionFloor))}; the preregistered verdict is <strong>{screen.depth.interaction.verdict}</strong>.
+          </p>
+          {screen.depth.persistence && (
+            <>
+              <h4 className="rchart-title">Persistence: the tables against the fair leaf, both at depth 4</h4>
+              <ul className="evo-gate">
+                {screen.depth.persistence.checks.map((check) => (
+                  <li key={`persistence-${check.criterion}`} className={check.passed ? "is-pass" : "is-fail"}>
+                    <span className="evo-gate-mark">{check.passed ? "pass" : "fail"}</span> {check.criterion}
+                    {check.observed !== undefined && check.observed !== null && check.observed !== "" ? <> · observed {typeof check.observed === "number" ? formatSigned(check.observed) : JSON.stringify(check.observed)}</> : null}
+                  </li>
+                ))}
+                <li className={screen.depth.persistence.allPassed ? "is-pass" : "is-fail"}>
+                  <span className="evo-gate-mark">{screen.depth.persistence.allPassed ? "pass" : "fail"}</span> every criterion
+                </li>
+              </ul>
+            </>
+          )}
+        </>
+      )}
+      {screen.fill && (
+        <>
+          <h4 className="rchart-title">The readings beside the gate, each with its preregistered verdict</h4>
+          <div className="evo-table-wrap">
+            <table className="evo-table">
+              <thead>
+                <tr>
+                  <th>reading</th>
+                  <th>verdict</th>
+                  <th>paired mean</th>
+                  <th>bootstrap lower bound</th>
+                  <th>upper bound</th>
+                  <th>detection floor</th>
+                  <th>wins / ties / losses</th>
+                </tr>
+              </thead>
+              <tbody>
+                {FILL_READING_LABELS.map(([key, label]) => {
+                  const r = screen.fill?.[key] as FillReading | null | undefined;
+                  if (!r) return null;
+                  return (
+                    <tr key={key}>
+                      <td>{label}</td>
+                      <td>
+                        <strong>{r.verdict}</strong>
+                        {r.allPassed !== undefined ? ` (four criteria ${r.allPassed ? "passed" : "not passed"})` : ""}
+                      </td>
+                      <td>{formatSigned(Math.round(r.meanDelta))}</td>
+                      <td>{formatSigned(Math.round(r.bootstrapLower95))}</td>
+                      <td>{formatSigned(Math.round(r.bootstrapUpper95))}</td>
+                      <td>{formatValue(Math.round(r.detectionFloor))}</td>
+                      <td>{r.wtl.join(" / ")}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
       {screen.replication && (
         <>

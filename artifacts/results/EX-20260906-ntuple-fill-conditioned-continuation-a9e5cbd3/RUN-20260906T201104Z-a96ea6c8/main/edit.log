@@ -1,0 +1,39 @@
+[2026-09-06T20:15:57Z] edit: /usr/bin/python3 /home/keshav/Developer/drop7-bench/approaches/ntuple-rl/ntuple-scale/scripts/edit-tables.py --source /home/keshav/Developer/drop7-bench/runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/best-weights.bin --checkpoint /home/keshav/Developer/drop7-bench/runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/checkpoint.bin --out-dir /home/keshav/Developer/drop7-bench/runs/RUN-20260906T201104Z-a96ea6c8/ntuple-scale/main
+rows: done at 10 s
+cols: done at 14 s
+win23: done at 16 s
+win32: done at 17 s
+zeroed: 901259321 entries changed, sha256 e9248b1a26f0b6e2d6cac121df9eda48c1adf1ea369287a60546a830b65c058e
+classmean: 877344474 entries changed, sha256 c3f05eeebb6ed573ba176797e7cfa4bdab3b47e042c8877011dd6614ebb54450
+{
+ "format": "drop7-ntuple-scale-edits-v1",
+ "source": "/home/keshav/Developer/drop7-bench/runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/best-weights.bin",
+ "sourceSha256": "0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b",
+ "layout": "rows,cols,win23,win32,phase=all",
+ "entries": 1000000000,
+ "optimisticStart": 0.2702702581882477,
+ "untouchedEntries": 901259321,
+ "touchedEntries": 98740679,
+ "checkpoint": {
+  "path": "/home/keshav/Developer/drop7-bench/runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/checkpoint.bin",
+  "touchedEntriesAtStartValue": 20266847,
+  "neverUpdatedEntriesOffStartValue": 0,
+  "note": "the checkpoint is the end of training, not the candidate's point; an entry touched only after the candidate's point is untouched in the candidate and counted as such"
+ },
+ "classesWithNoTouchedEntry": 7,
+ "outputs": {
+  "zeroed": {
+   "path": "/home/keshav/Developer/drop7-bench/runs/RUN-20260906T201104Z-a96ea6c8/ntuple-scale/main/zeroed-weights.bin",
+   "sha256": "e9248b1a26f0b6e2d6cac121df9eda48c1adf1ea369287a60546a830b65c058e",
+   "entriesChanged": 901259321,
+   "entriesChangedOnlyWhereUntouched": true
+  },
+  "classmean": {
+   "path": "/home/keshav/Developer/drop7-bench/runs/RUN-20260906T201104Z-a96ea6c8/ntuple-scale/main/classmean-weights.bin",
+   "sha256": "c3f05eeebb6ed573ba176797e7cfa4bdab3b47e042c8877011dd6614ebb54450",
+   "entriesChanged": 877344474,
+   "entriesChangedOnlyWhereUntouched": true
+  }
+ },
+ "wallSeconds": 25.3
+}

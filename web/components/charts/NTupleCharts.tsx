@@ -10,7 +10,7 @@
  * line names the run.
  */
 import type { FigureSpec } from "@/lib/charts/spec";
-import type { PilotStage, TrainingRun } from "@/lib/charts/ntuple-scale";
+import { isFillSelection, type PilotStage, type TrainingRun } from "@/lib/charts/ntuple-scale";
 import { LineChart } from "./kinds/LineChart";
 import { ResearchChart } from "./ResearchChart";
 import { SERIES } from "./tokens";
@@ -75,15 +75,17 @@ export function TrainingCurve({ run, source = FALLBACK_SOURCE }: { run: Training
   return <LineChart spec={spec} overrides={overrides} />;
 }
 
-/** The six pilot arms' final paired margins over the fair leaf. */
+/** The pilot arms' final paired margins over the fair leaf (six configurations in the first experiment, three warm-started arms in the fill-conditioned one). */
 export function PilotArms({ pilot, source = FALLBACK_SOURCE }: { pilot: PilotStage; source?: string }) {
   const rows = Object.entries(pilot.arms).filter(([, arm]) => arm.validations.length > 0);
+  const games = rows[0]?.[1].validateGames ?? 64;
+  const selectedArm = pilot.selection ? (isFillSelection(pilot.selection) ? pilot.selection.candidateArm : pilot.selection.arm) : null;
   const spec: FigureSpec = {
-    title: "Pilot arms: paired margin over the fair leaf at the final validation point",
+    title: "Training arms: paired margin over the fair leaf at the final validation point",
     kind: "delta",
     orientation: "horizontal",
     x: { label: "arm" },
-    y: { label: "tables in d3s7 minus fair leaf in d3s7, 64 paired games", unit: "points" },
+    y: { label: `tables in d3s7 minus fair leaf in d3s7, ${games} paired games`, unit: "points" },
     series: [
       {
         name: "final validation margin",
@@ -100,7 +102,7 @@ export function PilotArms({ pilot, source = FALLBACK_SOURCE }: { pilot: PilotSta
             floor: last.detectionFloor,
             wtl: last.wtl,
             n: arm.validateGames,
-            label: `${arm.entries.toLocaleString()} table entries; ${last.movesTrained.toLocaleString()} training moves${pilot.selection?.arm === name ? "; selected for the main run" : ""}`,
+            label: `${arm.entries.toLocaleString()} table entries; ${last.movesTrained.toLocaleString()} training moves${selectedArm === name ? "; selected" : ""}`,
             sourceRecord: source,
           };
         }),

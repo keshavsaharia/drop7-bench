@@ -41,12 +41,70 @@ preregistered scale verdict is inconclusive: no gain larger than about
 averaged 328,039 against 294,323 for the first tables on the same games,
 level with the fair leaf's depth-3 search; the extra scale improved the
 one-ply policy and left the leaf where it was. Both candidates beat the
-fair leaf at depth 4 on these games by more than 84,000. The first tables
-now have two passing screens on disjoint blocks and are the candidate to
-carry forward; the next steps the record supports are those tables as the
-leaf of the depth-4 search on a fresh development block, a STANDARD-tier
-evaluation on fresh development seeds, and a study of why a better one-ply
-evaluator is not a better leaf.
+fair leaf at depth 4 on these games by more than 84,000.
+
+Later on 2026-09-06 the first tables played one ply deeper. Unchanged and
+hash-verified, as the leaf of the reference depth-4 seven-stratum search
+they scored **516,155 against 465,675** for the same tables as the depth-3
+leaf on 512 never-read public-development games from a fourth block: paired
++50,479, bootstrap 95% lower bound +14,707, both halves positive, 284 wins to
+228, a higher lower quartile
+([RS-20260906T171746Z-1623f833](../../research/results/RS-20260906T171746Z-1623f833.json)).
+On the same games the fair leaf's fourth ply was worth +49,599, and the
+per-game difference between the two depth steps is +881 with bounds from
+-40,932 to +42,867 (floor 42,550), so the preregistered interaction verdict
+is inconclusive: the learned leaf pays for depth about as well as the
+hand-written one, and no better or worse than a 512-game screen can see. At
+depth 4 the tables beat the fair leaf in the same search by 133,588 (lower
+bound 102,051); the depth-3 margin on this block was 132,707. The depth-4
+search does about 36 times the depth-3 search's logical work per game. The
+first tables at depth 4 are now the candidate to carry forward; the next
+steps the record supports are a STANDARD-tier evaluation of that unchanged
+candidate on fresh development seeds, and a study of a leaf tuned for the
+search's use rather than for one-ply play (training on the boards the search
+evaluates, or removing the optimistic starting value from never-updated
+entries).
+
+Late on 2026-09-06 a fourth experiment asked whether the leaf should
+change its mind as the board fills. A seed-free pass over the first run's
+saved accumulators found the frozen tables least trained on the fullest
+boards (0.98% of legal seven-high column patterns and 1.06% of five-or-more-disc
+top-row patterns ever updated, the touched full-line entries still at the
+optimistic starting value), so two repairs were preregistered against the
+frozen tables on a fifth never-read 512-game block
+([EX-20260906-ntuple-fill-conditioned-continuation-a9e5cbd3](../../research/experiments/EX-20260906-ntuple-fill-conditioned-continuation-a9e5cbd3.json)):
+five copies of every table keyed to a global fill bucket (occupied cells or
+tallest column), warm-started by copying the frozen tables into every
+bucket and trained on for up to two billion moves beside an unconditioned
+continuation as control; and two no-training edits that replace the
+901,259,321 never-updated entries' starting value with zero or with the
+class mean. The occupied-cells candidate as the depth-3 leaf scored
+**506,494 against 485,455** for the frozen tables: paired +21,039 with
+bounds from -16,864 to +59,230 and a floor of 37,956, so the preregistered
+gate fails as a non-measurement; against the control continuation it is
++15,093 and the control against the frozen tables +5,946, both inconclusive,
+and neither fill arm beat the control's best validation margin
+([RS-20260906T234914Z-a3fae1a9](../../research/results/RS-20260906T234914Z-a3fae1a9.json)).
+The zeroed edit, with nothing trained, scored 514,897 at depth 3: paired
++29,442 over the frozen tables with a lower bound of +5,813, changing only
+194 of the 512 games, the one reading whose fixed verdict is supported. One
+ply deeper both repairs gave their gains back: the fill candidate at depth 4
+was 22,631 behind the frozen tables (bounds -57,779 to +12,806) and the
+zeroed edit 10,592 behind (bounds -32,045 to +11,133), both inconclusive and
+both below their own depth-3 scores, while the frozen tables' fourth ply on
+these games was worth 36,500. The theory is assessed mixed, the frozen
+tables at depth 4 remain the candidate to carry forward, and the record now
+points at a leaf trained on the boards the search evaluates, and at a
+depth-aware price for never-updated entries, rather than at more buckets.
+
+The frozen tables of both training runs, the three screens' per-game rows
+and their analyses are published in the public research archive under their
+run ids (`https://data.drop7.dev/runs/<run-id>/ntuple-scale/...`, digests in
+the references; dataset records
+[DS-20260906-ntuple-scale-frozen-tables-ff977178](../../research/datasets/DS-20260906-ntuple-scale-frozen-tables-ff977178.json)
+and
+[DS-20260906-ntuple-scale-wide-frozen-tables-c5eb52a6](../../research/datasets/DS-20260906-ntuple-scale-wide-frozen-tables-c5eb52a6.json)),
+so another machine can reproduce the screens or continue training from them.
 
 ## August 2026
 

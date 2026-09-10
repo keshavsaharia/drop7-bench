@@ -1,0 +1,46 @@
+{
+  "$schema": "../schemas/theory-v1.schema.json",
+  "format": "drop7-theory-v1",
+  "theoryId": "TH-20260906-ntuple-fill-conditioned-leaf-28cb0ae2",
+  "title": "A fill-conditioned n-tuple leaf: bucketing every table by how full the board is, warm-started from the frozen tables, beats the frozen tables inside the same depth-3 search",
+  "claim": "The frozen row-and-column n-tuple leaf of RUN-20260905T193006Z-4fbeb4e5 (layout rows,cols,win23,win32,phase=all, 10^9 entries, SHA-256 0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b) is least trained exactly on the fullest boards: its coherence accumulators at the end of training show about 1% of legal seven-high column patterns and of top-row patterns with five or more discs ever updated, against 50-100% of patterns with three or fewer discs, and the touched full-line entries still average the optimistic starting value (20/74 rise units, about 4,600 points each). Because the evaluator is an additive sum over lines and windows, no pattern can be worth a different amount when the board around it is nearly full. Claim: an evaluator that keys every table on a five-way global fill bucket of the public board (occupied cells, or the tallest column), built by copying the frozen tables into every bucket (multi-stage weight promotion) and continuing on-policy temporal-coherence TD(0) training from that warm start with fresh accumulators, scores a higher paired mean whole-game score than the unchanged frozen tables as the leaf of the identical depth-3 seven-stratum fair search on never-read public-development games, and higher than the same continuation without buckets, so the gain is the conditioning and not the extra training.",
+  "mechanism": "(1) Representation. The value is the sum of 74 looked-up numbers, one per row, column and small window of the canonical board at the current rise phase. A row or column pattern sees its own seven cells and nothing else; the sum cannot express an interaction between a local pattern and the global state of the board (a two-disc column is a resource on an empty board and a liability under a rise on a full one). The rise clock was added to every family as exactly this kind of global condition and was worth about 150,000 validation points in the first experiment's pilot (arm B without it -70,587 against arm C with it +123,950). Global fill is the next such variable: the game is lost when a column cannot take a disc, and the leaf's job on a nearly full board is survival, on an empty one throughput. (2) Where the frozen tables are weakest. A seed-free pass over the run's checkpoint.bin (weights plus accumulators, 4e9 moves) counted, by family and by the number of occupied cells in the pattern, how many patterns were ever updated: legal column patterns of height 0-7 were touched 100%, 89%, 78%, 68%, 50%, 26%, 6.6%, 0.98%; row patterns with 7 discs 13.5%; top-row patterns with 5 or more discs 1.06%; and the touched entries of full lines average 0.24-0.27 rise units, the starting value. A search that looks three or four plies ahead from a full board reads many never-updated entries, each carrying the value of a fresh board, so the leaf is optimistic exactly where the decision is about dying. (3) The two mechanisms tested, in order of cost. Step 1, no training: replace the starting value of every never-updated entry (identified bit for bit in the frozen file) with zero, which prices an unfamiliar board below a familiar one instead of like a fresh board, or with the mean of the touched entries of the same table, phase and pattern-occupancy class, which prices it like a typical familiar board of the same shape. Step 2, conditioning: five copies of every table keyed on the fill bucket, warm-started by copying the frozen tables into every bucket so the promoted evaluator is bit-identical to the frozen one on every board until training moves the buckets apart; the coherence accumulators start fresh so every entry's first update runs at the full step (the frozen tables' accumulators had annealed the mean step to 0.008 of alpha, which would leave the buckets unable to separate). This is the multi-stage n-tuple recipe of the 2048 literature (Wu et al. 2014, multi-stage TD learning; Jaskowski 2018, multi-stage weight promotion) with a stage variable that is not monotone in time, and the pooled-then-split trick this site's optimistic-phase approach used for the rise phase. (4) The control. The same warm start continued without buckets, under the same rule, separates the effect of more training with fresh accumulators from the effect of conditioning; the screen reads both. (5) Cost. Five buckets multiply the tables to 5e9 entries (20 GB frozen, 60 GB trainable), which the workstation that trained the 5.8e9-entry wide layout can hold; the leaf's per-state cost is unchanged (the bucket is seven column heights).",
+  "falsificationCriteria": [
+    "Primary falsifier (held-out screen, 512 paired never-read public-development games, every arm on identical seeds): the paired whole-game score delta fill-d3s7 minus prior-d3s7 (the selected fill-conditioned candidate minus the unchanged frozen tables, both as the depth-3 leaf) has a one-sided 95% percentile-bootstrap upper bound below zero. A lower bound at or below zero with an upper bound above zero is a non-measurement at this cohort size (the detection floor is reported), not a refutation; the claim's supported reading requires the bootstrap and Student-t 95% lower bounds above zero, both halves positive and no lower-quartile regression.",
+    "Second leg (the gain is the conditioning): the per-game delta fill-d3s7 minus control-d3s7 (the same warm start continued without buckets, selected by the same rule) has a 95% bootstrap upper bound below zero; or the primary reading passes while fill-d3s7 minus control-d3s7 is inconclusive and control-d3s7 minus prior-d3s7 passes the same four criteria, in which case the measured gain is the continued training and the conditioning leg is unsupported.",
+    "Training-signal check (pilot tier, training-role validation block, read before the screen): if neither fill arm reaches a best validation margin (ntuple-d3s7 over fair-d3s7 on the 256-game block) above the control arm's best validation margin, the conditioning adds nothing the validation can see; the screen still runs with the arms fixed by the selection rule, and the mechanism leg is recorded as unsupported at pilot tier regardless of the screen.",
+    "Optimism leg (step 1, no training): if zeroed-d3s7 minus prior-d3s7 has a 95% bootstrap upper bound below zero and classmean-d3s7 minus prior-d3s7 has no lower bound above zero, replacing the never-updated entries' starting value hurts or does nothing, and the reading that the frozen leaf is harmfully optimistic on unfamiliar boards is refuted as tested.",
+    "Depth (compounding): if fill-d4s7 minus prior-d4s7 has a 95% bootstrap upper bound below zero on the same seeds, the conditioned leaf loses under the deeper search what it gained under the shallower one, and the candidate to carry forward stays prior-d4s7.",
+    "Information boundary and integrity: any table that reads anything beyond the public board and the moves until the rise is disqualified (the CHECK gates prove blindness to score, level, move number and the visible next disc); an illegal or incomplete decision in any arm voids the run rather than the claim."
+  ],
+  "informationClass": "public-policy",
+  "lifecycle": "assessed",
+  "assessment": "mixed",
+  "evidenceTier": "public-development",
+  "dependencies": [
+    "TH-20260905-ntuple-line-tuples-tc-td-leaf-bcb25133",
+    "TH-20260906-ntuple-leaf-fourth-ply-search-compatible-ace4fe2a"
+  ],
+  "evidenceRefs": [
+    "research/results/RS-20260905T215332Z-95d18a5a.json",
+    "research/results/RS-20260906T040113Z-6ba93171.json",
+    "research/results/RS-20260906T171746Z-1623f833.json",
+    "research/datasets/DS-20260906-ntuple-scale-frozen-tables-ff977178.json",
+    "approaches/ntuple-rl/ntuple-scale/README.mdx",
+    "approaches/ntuple-rl/optimistic-phase/README.mdx",
+    "approaches/ntuple-rl/ntuple-scale/scripts/touched-by-fill.py",
+    "docs/research/status.md",
+    "research/results/RS-20260906T234914Z-a3fae1a9.json",
+    "research/runs/RUN-20260906T201104Z-a96ea6c8.json",
+    "research/experiments/EX-20260906-ntuple-fill-conditioned-continuation-a9e5cbd3.json",
+    "artifacts/results/EX-20260906-ntuple-fill-conditioned-continuation-a9e5cbd3/RUN-20260906T201104Z-a96ea6c8/manifest.json",
+    "web/content/log/2026-09-06.mdx"
+  ],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5-1",
+    "agentId": "claude-code-ntuple-fill-conditioned"
+  },
+  "createdAt": "2026-09-06T20:12:13Z",
+  "updatedAt": "2026-09-06T23:59:02Z"
+}

@@ -73,6 +73,8 @@ export interface TrainingRun {
   alpha: number;
   entries: number;
   activePerState: number;
+  /** The frozen table file a warm-started arm began from (the fill-conditioned experiment), else null. */
+  initFrom?: string | null;
   /** Games in the paired validation block (64 in the first experiment, 256 in the replication). */
   validateGames: number;
   movesTotal: number;
@@ -100,21 +102,98 @@ export interface TrainingRun {
   } | null;
 }
 
-export interface PilotStage {
-  arms: Record<string, TrainingRun>;
-  selection: {
-    arm: string;
-    layout: string;
-    alpha: number;
-    finalMargin: number;
-    ranking: { arm: string; finalMargin: number; entries: number }[];
-    rule: string;
-  } | null;
+/** The first experiment's selection: the arm with the largest final validation margin. */
+export interface PilotSelection {
+  arm: string;
+  layout: string;
+  alpha: number;
+  finalMargin: number;
+  ranking: { arm: string; finalMargin: number; entries: number }[];
   rule: string;
 }
 
-/** The screen with the replication's two extra readings on top of the shared shape. */
+/** The fill-conditioned experiment's selection: the fill arm with the larger best validation margin, beside the control arm's best point. */
+export interface FillSelection {
+  candidateArm: string;
+  candidateBestMargin: number;
+  candidateBestMoves: number | null;
+  controlBestMargin: number;
+  controlBestMoves: number | null;
+  arms: Record<string, { bestMargin: number; finalMargin: number | null; bestMoves: number | null; movesTotal: number; validationPoints: number; stop: string | null }>;
+  trainingSignal: { criterion: string; passed: boolean };
+  rule: string;
+}
+
+export interface PilotStage {
+  arms: Record<string, TrainingRun>;
+  selection: PilotSelection | FillSelection | null;
+  rule: string;
+}
+
+export function isFillSelection(selection: PilotSelection | FillSelection | null): selection is FillSelection {
+  return selection !== null && "candidateArm" in selection;
+}
+
+/** One paired reading copied from analyze.py (a contrast or the interaction series). */
+export interface DepthReading {
+  meanDelta: number;
+  bootstrapLower95: number;
+  bootstrapUpper95: number;
+  studentTLower95: number;
+  detectionFloor: number;
+  wtl: [number, number, number];
+  halves: [number, number];
+}
+
+/** The depth-4 experiment's readings: the frozen tables one ply deeper. */
+export interface DepthStage {
+  /** The contrast the preregistered gate reads (prior-d4s7-vs-prior-d3s7). */
+  primary: string;
+  /** The fourth ply's paired gain on the tables (the gate contrast). */
+  tablesStep: DepthReading;
+  /** The fourth ply's paired gain on the fair leaf on the same seeds. */
+  fairStep: DepthReading | null;
+  /** prior-d4s7 against fair-d4s7 under the same four criteria as the gate. */
+  persistence: { checks: GateCheck[]; allPassed: boolean } | null;
+  /** Per game, (tables d4 minus tables d3) minus (fair d4 minus fair d3): the preregistered verdict. */
+  interaction: DepthReading & { verdict: "larger" | "smaller" | "inconclusive" };
+}
+
+/** One reading of the fill-conditioned experiment: a paired contrast with the preregistered three-way verdict. */
+export interface FillReading extends DepthReading {
+  contrast: string;
+  verdict: "supported" | "refuted" | "inconclusive";
+  candidateQ25: number;
+  referenceQ25: number;
+  /** Present when the reading is also judged under the gate's four criteria (the continuation reading). */
+  checks?: GateCheck[];
+  allPassed?: boolean;
+}
+
+/** The fill-conditioned experiment's readings beside its gate. */
+export interface FillStage {
+  /** The contrast the gate reads (fill-d3s7-vs-prior-d3s7). */
+  primary: string;
+  conditioning: FillReading | null;
+  continuation: FillReading | null;
+  zeroed: FillReading | null;
+  classmean: FillReading | null;
+  fillDepth4: FillReading | null;
+  zeroedDepth4: FillReading | null;
+  depthSteps: Record<string, FillReading>;
+  direct: Record<string, FillReading>;
+  replicationOfPrior: FillReading | null;
+  theory: Record<string, boolean | null>;
+}
+
+/** The screen with the replication's two extra readings, and the depth experiment's, on top of the shared shape. */
 export interface NTupleScreenStage extends ScreenStage {
+  /** Which paired contrast the gate reads; candidate-d3s7-vs-fair-d3s7 for the first two experiments. */
+  primaryContrast: string;
+  /** The depth-4 experiment's readings, null for the training experiments. */
+  depth: DepthStage | null;
+  /** The fill-conditioned experiment's readings, null elsewhere. */
+  fill: FillStage | null;
   /** The first experiment's frozen tables against the fair leaf on this fresh block. */
   replication: { checks: GateCheck[]; allPassed: boolean } | null;
   /** The wider candidate against the first candidate: the preregistered verdict. */
@@ -140,11 +219,23 @@ export interface NTupleSnapshot {
   sources: string[];
   derived: string[];
   gates: { passed: boolean; gates: string[] } | null;
+  /** The fill-conditioned experiment's second gate run (the hgt5 layout) and the gate runs on each frozen table file before the screen. */
+  gatesHgt5?: { passed: boolean; gates: string[] } | null;
+  frozenGates?: Record<string, { passed: boolean; gates: string[] }> | null;
+  /** The fill-conditioned experiment's no-training edits of the frozen tables (edits.json without the per-family detail). */
+  edits?: {
+    entries: number;
+    optimisticStart: number;
+    untouchedEntries: number;
+    touchedEntries: number;
+    classesWithNoTouchedEntry: number;
+    outputs: Record<string, { sha256: string; entriesChanged: number; entriesChangedOnlyWhereUntouched: boolean }>;
+  } | null;
   /** The throughput smoke run on the probe block (the replication run); tables discarded. */
   smoke: TrainingRun | null;
   pilot: PilotStage | null;
   main: TrainingRun | null;
-  freeze: { candidateSha256: string | null; priorSha256?: string | null } | null;
+  freeze: { candidateSha256: string | null; priorSha256?: string | null; controlSha256?: string | null; zeroedSha256?: string | null; classmeanSha256?: string | null } | null;
   screen: NTupleScreenStage | null;
   rusage: Rusage[] | null;
 }

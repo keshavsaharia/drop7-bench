@@ -1,0 +1,31 @@
+[2026-09-06T20:13:04Z] gates-occ5: /home/keshav/Developer/drop7-bench/approaches/ntuple-rl/ntuple-scale/target/release/gate --probe-start 0xa5277000 --layout rows,cols,win23,win32,phase=all,fill=occ5
+gate: probe block 0xa5277000, candidate layout rows,cols,win23,win32,phase=all,fill=occ5
+PASS codec-vs-horner: 2000000 random line words, 0 mismatches; max index 9999999
+sampled 553 public states by random play on 64 probe seeds
+PASS row-words-vs-accessor: 553 states, 0 mismatches
+PASS features-vs-reference[rows]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 70000000 entries
+PASS features-vs-reference[cols]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 70000000 entries
+PASS features-vs-reference[win23]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 30000000 entries
+PASS features-vs-reference[win32]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 30000000 entries
+PASS features-vs-reference[win24]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 2400000000 entries
+PASS features-vs-reference[win42]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 2400000000 entries
+PASS features-vs-reference[rows,cols,win23,win32,phase=none]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 200000000 entries
+PASS features-vs-reference[rows,cols,win23,win32,phase=cols]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 480000000 entries
+PASS features-vs-reference[rows,cols,win23,win32,phase=all]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 1000000000 entries
+PASS features-vs-reference[rows,cols,win23,win32,win24,win42,phase=all]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 5800000000 entries
+PASS features-vs-reference[cols,fill=occ5]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 350000000 entries
+PASS features-vs-reference[rows,win23,phase=none,fill=hgt5]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 500000000 entries
+PASS features-vs-reference[rows,cols,win23,win32,phase=all,fill=occ5]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 5000000000 entries
+PASS features-vs-reference[rows,cols,win23,win32,phase=all,fill=hgt5]: 553 states x 5 phases: 0 mismatches, 0 duplicate/short sets, 0 out of range; 5000000000 entries
+PASS fill-bucket-vs-reference[occ5]: 553 states: 0 mismatches, 0 mirror mismatches; states per bucket [81, 107, 110, 147, 108] (all reached true)
+PASS fill-bucket-vs-reference[hgt5]: 553 states: 0 mismatches, 0 mirror mismatches; states per bucket [127, 92, 134, 110, 90] (all reached true)
+PASS promotion-preserves-value[occ5]: 553 states x 5 phases: 0 value mismatches after promotion; entries x5 true; fresh accumulators true; buckets separate under one update true
+PASS promotion-preserves-value[hgt5]: 553 states x 5 phases: 0 value mismatches after promotion; entries x5 true; fresh accumulators true; buckets separate under one update true
+PASS information-boundary: 553 states x 4 hidden-field perturbations: 0 leaf-value changes, 0 decision changes
+PASS reflection: 553 states: 0 value mismatches; 534 live states, 0 decision mismatches under mirroring
+PASS direct-policy-legality: 553 states (19 terminal), 0 illegal or missing decisions
+PASS leaf-in-search-determinism: untrained tables, 4 games x (1, 4, 4 workers): identical true, illegal/incomplete-free true; mean 124834 over 80-move caps
+PASS leaf-in-d4-search-determinism: untrained tables, 2 games x (1, 2, 2 workers) over 40-move caps: identical true, illegal/incomplete-free true, more work than depth 3 on every game true; work 352025645 vs 12237891 at depth 3; 74 s
+PASS serial-training-determinism: two 12-game single-thread runs: fingerprints b5c5f9335b6b26dc / b5c5f9335b6b26dc, 435 updates, 3177 touched entries; fresh initial-board value 20.0000 (declared 20)
+PASS finite-and-profile: values finite true; 5000000000 entries = 20.00 GB frozen, 60.00 GB trainable; per state: features 45 ns, value 105 ns (untrained tables, hot); direct decision 6.3 us (14.8 simulations) [sink 551729919120400 2211999.8]
+ALL GATES PASSED

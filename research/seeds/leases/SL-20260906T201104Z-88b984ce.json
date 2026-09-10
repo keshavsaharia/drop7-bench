@@ -1,0 +1,26 @@
+{
+  "$schema": "../schemas/seed-lease-v1.schema.json",
+  "format": "drop7-seed-lease-v1",
+  "seedLeaseId": "SL-20260906T201104Z-88b984ce",
+  "experimentId": "EX-20260906-ntuple-fill-conditioned-continuation-a9e5cbd3",
+  "rngAlgorithm": "mulberry32 with mix32 domain separation (src/core/native/engine.hpp); headless disc stream kNextDiscDomain, reveal stream kRevealDomain; Rust bitboard engine bit-identical (RS-20260824T075451Z-e89ea128)",
+  "domain": "environment",
+  "role": "training",
+  "rangeStartHex": "0xa5800000",
+  "rangeEndExclusiveHex": "0xa59f0000",
+  "cohortManifestSha256": null,
+  "state": "opened",
+  "reservedAt": "2026-09-06T20:14:10Z",
+  "openedAt": "2026-09-06T20:20:21Z",
+  "closedAt": null,
+  "protocolSha256": "974bdae371b7dab5835003c8b62e26b4ab303f01761e5846880c6b10eee1aa14",
+  "runIds": [
+    "RUN-20260906T201104Z-a96ea6c8"
+  ],
+  "notes": [
+    "Conservative import 2026-09-06: every 8-hex-digit constant under docs/, approaches/, src/, research/, artifacts/, web/content/ and scripts/ was enumerated (grep -rhoE '0x[0-9a-fA-F]{8}'). Between 0xa52f2780 and 0xa5300000 the only constants are 0xa52f2780 itself (the exclusive end boundary of the depth-4 screen lease SL-20260906T081306Z-1aaec419, never read there) and 0xa52fffff (the allocator pool's end); no constant lies in 0xa5720000-0xa6000000 (the historical native throughput block is 0xa5700000-0xa571869f and stays untouched). The pool 0xa52c0000-0xa5300000 (the ./do-research allocator's) is used up to 0xa52f2780 exclusive by earlier leases. The ranges reserved here overlap no existing lease record and no protected (0x7d) or final (0xd7) prefix, and are disjoint from every block the n-tuple experiments read (training 0xa5300000-0xa54f0000 and 0xa5500000-0xa56f0000, validation 0xa52f2240-0xa52f2280 and 0xa52f2280-0xa52f2380, screens 0xa52f2140-0xa52f2240, 0xa52f2380-0xa52f2580 and 0xa52f2580-0xa52f2780).",
+    "TD training games of the three warm-started arms (control, occ5, hgt5), each reading 2,031,616 never-read seeds in order from 0xa5800000 and wrapping to the block start when exhausted (wrap counts in each arm's progress.jsonl). Training-role data: re-reading is permitted and disclosed; nothing trained on it can be evaluated on it. Every arm reads the same block, so the three continuations see the same game sequence up to the asynchrony of the workers.",
+    "Opened 2026-09-06T20:20:21Z by run RUN-20260906T201104Z-a96ea6c8 for the three training arms' TD games (control, then occ5, then hgt5; read in order and wrapped); preregistration commit 7aa1db7, protocol 974bdae371b7...",
+    "Run RUN-20260906T201104Z-a96ea6c8 completed 2026-09-06T23:47:38Z: the three arms read 13,419,520 + 18,838,964 + 23,290,336 games from the block (wrap counts in each progress.jsonl)."
+  ]
+}

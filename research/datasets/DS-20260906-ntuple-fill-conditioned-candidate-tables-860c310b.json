@@ -1,0 +1,42 @@
+{
+  "$schema": "../schemas/dataset-v1.schema.json",
+  "format": "drop7-dataset-v1",
+  "datasetId": "DS-20260906-ntuple-fill-conditioned-candidate-tables-860c310b",
+  "title": "Fill-conditioned n-tuple candidate tables of RUN-20260906T201104Z-a96ea6c8 (layout rows,cols,win23,win32,phase=all,fill=occ5, 5 x 10^9 entries, the occupied-cells arm's validation point at 1.4 x 10^9 training moves): the candidate that FAILED the screen RS-20260906T234914Z-a3fae1a9, published for reproduction and as a warm start; the control continuation's tables are published beside it",
+  "dataRole": "training",
+  "informationClass": "public-only",
+  "originUnit": "whole-game",
+  "originCount": 0,
+  "rowCount": 5000000000,
+  "wholeOriginSplit": true,
+  "seedLeaseRefs": [
+    "SL-20260906T201104Z-88b984ce",
+    "SL-20260906T201104Z-26371f8b",
+    "SL-20260906T201104Z-53350936",
+    "SL-20260905T191317Z-09895ea2"
+  ],
+  "parentDatasetRefs": [
+    "DS-20260906-ntuple-scale-frozen-tables-ff977178"
+  ],
+  "fields": [
+    "D7NTUP01 lookup-table file written by Model::save (approaches/ntuple-rl/ntuple-scale/src/model.rs): header, layout spec 'rows,cols,win23,win32,phase=all,fill=occ5', then 5,000,000,000 little-endian f32 entries in rise units (x 17,000 points), each table bucket-major (five occupied-cells buckets 0-13 / 14-20 / 21-27 / 28-34 / 35-49), then phase, then pattern; read with Model::load(path, trainable=false), which reads the layout from the header",
+    "value(board, moves_remaining) = sum of the 74 active entries of the reflection-canonical board in the board's fill bucket; the visible next disc, score, level and move number are not inputs (information-boundary gate)",
+    "published object: zstd -12 compression of the file; decompressed SHA-256 4f2e7ccf5c14fed8dd19563965e3937e8784b487f2de9eb70fe0e86830edae24, 20,000,000,062 bytes",
+    "note: The candidate of EX-20260906-ntuple-fill-conditioned-continuation-a9e5cbd3: the occupied-cells arm's best validation point (1,400,252,568 moves, +203,193 over the fair leaf on the 256-game training-role block; the control arm's best was +210,990). Built by promoting the frozen tables of RUN-20260905T193006Z-4fbeb4e5 (SHA-256 0ade9d4e...) into every bucket and continuing temporal-coherence TD(0) on one-ply play with fresh accumulators (lock-free asynchronous updates, so the run is not bit-reproducible; the file's SHA-256 is the identity every record cites).",
+    "note: On the held-out screen (RS-20260906T234914Z-a3fae1a9) these tables scored 506,494 as the depth-3 leaf against 485,455 for the frozen tables (+21,039, bounds -16,864 to +59,230: the preregistered gate failed as a non-measurement) and 499,324 at depth 4 against 521,956 (-22,631). They are not a candidate to carry forward.",
+    "note: Beside them under the same run prefix, the control continuation's best point (600,112,060 moves, +210,990 on the validation block; screened at 491,401 as the depth-3 leaf): https://data.drop7.dev/runs/RUN-20260906T201104Z-a96ea6c8/ntuple-scale/pilot/control/best-weights.bin.zst#sha256=293fa77b70e8f5f304965386b1bb0e0e01ed41675b2b52218ba6a936a5094810 (408967326 bytes zstd; decompressed SHA-256 92dd1cb2d2a74b026270606c18c5f0d6e4f4ccc74e64c3c4e0f0d2043cdddd90, layout rows,cols,win23,win32,phase=all, 10^9 entries, 4,000,000,052 bytes).",
+    "note: Download: curl -fL -o best-weights.bin.zst <reference without the fragment>; sha256sum against the fragment digest; zstd -d; sha256sum against the decompressed digest; then Model::load. The zeroed and class-mean edits of the frozen tables are reproduced from the first experiment's published tables by scripts/edit-tables.py (SHA-256 e9248b1a... and c3f05eee...) and are not published; the tallest-column arm's tables stay on the workstation."
+  ],
+  "privilegedFields": [],
+  "allowedConsumers": [
+    "any public-information deployment or diagnostic of the tables as a search leaf or a one-ply policy (screen --arm/--arm-d3/--arm-d4, Arm::NTupleD3/NTupleD4; the query_move binary loads any D7NTUP01 file)",
+    "warm start or teacher for further training under a new experiment record with fresh leases; these tables have read training blocks 0xa5300000-0xa54f0000 and 0xa5800000-0xa59f0000, validation blocks 0xa52f2240-0xa52f2280 and 0xa52f2780-0xa52f2880 and, through screens, 0xa52f2140-0xa52f2240, 0xa52f2380-0xa52f2580, 0xa52f2580-0xa52f2780 and 0xa52f2880-0xa52f2a80, which no later evaluation of them may reuse",
+    "never evaluation evidence on their own: whole-game screens on never-read blocks are the evidence, and this candidate's one screen failed its gate"
+  ],
+  "artifact": {
+    "path": "https://data.drop7.dev/runs/RUN-20260906T201104Z-a96ea6c8/ntuple-scale/pilot/occ5/best-weights.bin.zst#sha256=b509ad5ceb7fc4934ea7dd1e49ed2fc1cdf9f178c400448d6662f7121c02614e",
+    "sha256": "b509ad5ceb7fc4934ea7dd1e49ed2fc1cdf9f178c400448d6662f7121c02614e",
+    "bytes": 1949461127
+  },
+  "createdAt": "2026-09-07T00:04:04Z"
+}
