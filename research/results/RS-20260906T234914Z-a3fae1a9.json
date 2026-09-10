@@ -1,0 +1,1679 @@
+{
+  "$schema": "../schemas/result-v1.schema.json",
+  "format": "drop7-result-v1",
+  "resultId": "RS-20260906T234914Z-a3fae1a9",
+  "theoryIds": [
+    "TH-20260906-ntuple-fill-conditioned-leaf-28cb0ae2"
+  ],
+  "experimentId": "EX-20260906-ntuple-fill-conditioned-continuation-a9e5cbd3",
+  "runIds": [
+    "RUN-20260906T201104Z-a96ea6c8"
+  ],
+  "runValidity": "valid",
+  "scientificOutcome": "fail",
+  "assessment": "mixed",
+  "evidenceTier": "public-development",
+  "summary": "Held-out screen, 512 never-read paired public-development games (0xa52f2880+), 11 arms on identical seeds. Candidate arm occ5 (best validation margin 203,193 at 1,400,252,568 moves against the control arm's best 210,990; training-signal check passed False). The fill-conditioned tables (SHA-256 4f2e7ccf5c14fed8dd19563965e3937e8784b487f2de9eb70fe0e86830edae24) as the depth-3 leaf averaged 506,494 points and 146.33 moves against 485,455 and 140.38 for the unchanged frozen tables (SHA-256 0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b) in the same search: fill-d3s7 minus prior-d3s7: paired +21,039 (bootstrap 95% lower bound -16,864, Student-t lower bound -16,982, upper bound +59,230, detection floor 37,956), W-T-L 271-0-241, halves +6,466 / +35,613, lower quartile 229,450 vs 230,374, moves +5.95. The preregistered gate FAILS. Conditioning, fill-d3s7 minus control-d3s7: paired +15,093 (bootstrap 95% lower bound -22,431, Student-t lower bound -22,479, upper bound +52,817, detection floor 37,507), W-T-L 265-2-245, halves +21,802 / +8,385: verdict 'inconclusive'. Continuation, control-d3s7 minus prior-d3s7: paired +5,946 (bootstrap 95% lower bound -29,891, Student-t lower bound -29,937, upper bound +41,989, detection floor 35,821), W-T-L 255-6-251, halves -15,336 / +27,228: verdict 'inconclusive' (four criteria FAIL). Zeroed edit, zeroed-d3s7 minus prior-d3s7: paired +29,442 (bootstrap 95% lower bound +5,813, Student-t lower bound +5,246, upper bound +54,179, detection floor 24,154), W-T-L 102-318-92, halves +12,168 / +46,716: verdict 'supported'. Class-mean edit, classmean-d3s7 minus prior-d3s7: paired +931 (bootstrap 95% lower bound -530, Student-t lower bound -869, upper bound +2,954, detection floor 1,797), W-T-L 4-506-2, halves -690 / +2,551: verdict 'inconclusive'. At depth 4, fill-d4s7 minus prior-d4s7: paired -22,631 (bootstrap 95% lower bound -57,779, Student-t lower bound -58,306, upper bound +12,806, detection floor 35,613), W-T-L 236-0-276, halves +37,523 / -82,786: verdict 'inconclusive'. At depth 4, zeroed-d4s7 minus prior-d4s7: paired -10,592 (bootstrap 95% lower bound -32,045, Student-t lower bound -32,160, upper bound +11,133, detection floor 21,531), W-T-L 93-320-99, halves -16,117 / -5,066: verdict 'inconclusive'. fill-d3s7 506,494 / 146.33 moves; control-d3s7 491,401 / 141.92 moves; zeroed-d3s7 514,897 / 148.50 moves; classmean-d3s7 486,386 / 140.64 moves; prior-d3s7 485,455 / 140.38 moves; prior-d4s7 521,956 / 150.20 moves; fill-d4s7 499,324 / 144.08 moves; zeroed-d4s7 511,364 / 147.36 moves; fill-1ply 298,199 / 88.90 moves; prior-1ply 293,390 / 87.53 moves; fair-d3s7 329,895 / 96.85 moves; fill-d4s7-vs-fill-d3s7: -7,170 (LB -45,566, UB +31,331). prior-d4s7-vs-prior-d3s7: +36,500 (LB -249, UB +72,651). zeroed-d4s7-vs-zeroed-d3s7: -3,534 (LB -43,880, UB +36,834). prior-d3s7-vs-fair-d3s7: +155,561 (LB +123,422, UB +187,991). fill-d3s7-vs-fair-d3s7: +176,600 (LB +143,625, UB +210,258). fill-1ply-vs-prior-1ply: +4,809 (LB -13,189, UB +22,386). Edits: 901,259,321 of 1,000,000,000 entries of the frozen file sit at the starting value 0.27027 rise units; the zeroed edit changed 901,259,321 entries and the class-mean edit 877,344,474, none of them touched entries. Arm control: 1,200,228,265 moves, 6 validation points, best margin 210,990 at 600,112,060 moves, final 197,769, stop plateau, 2,017,917 moves/s. Arm occ5: 1,600,289,700 moves, 8 validation points, best margin 203,193 at 1,400,252,568 moves, final 150,272, stop plateau, 2,125,289 moves/s. Arm hgt5: 2,000,004,221 moves, 10 validation points, best margin 179,760 at 1,600,283,262 moves, final 157,846, stop plateau, 2,153,323 moves/s. Logical work per game: fill-d3s7 24,138,811, prior-d3s7 23,117,640, fill-d4s7 764,278,797, prior-d4s7 803,086,972. Theory falsifiers: {\"primaryFalsifierUpperBoundBelowZero\": false, \"conditioningUpperBoundBelowZero\": false, \"gainIsContinuationNotConditioning\": false, \"optimismLegRefuted\": false, \"depthCompounding\": false}.",
+  "metrics": {
+    "screen": {
+      "games": 512,
+      "seedStartHex": "0xa52f2880",
+      "arms": {
+        "prior-d3s7": {
+          "meanScore": 485455.181640625,
+          "medianScore": 358256.5,
+          "q25Score": 230374.0,
+          "minScore": 85609.0,
+          "maxScore": 3329202.0,
+          "sdScore": 385158.71542237286,
+          "meanMoves": 140.37890625,
+          "q25Moves": 70.0,
+          "numberedClearsPerMove": 2.1096919609316305,
+          "coverRevealsPerMove": 1.1940618304254669,
+          "meanOccupiedCells": 23.053459014280676,
+          "censoredGames": 0,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "meanWork": 23117640.201171875,
+          "meanWallSecondsPerGame": 4.31544215863086,
+          "games": 512
+        },
+        "prior-1ply": {
+          "meanScore": 293390.154296875,
+          "medianScore": 238459.0,
+          "q25Score": 157932.0,
+          "minScore": 85575.0,
+          "maxScore": 1706990.0,
+          "sdScore": 188891.62773411805,
+          "meanMoves": 87.52734375,
+          "q25Moves": 50.0,
+          "numberedClearsPerMove": 1.9309590752889723,
+          "coverRevealsPerMove": 1.0638416566251618,
+          "meanOccupiedCells": 24.408874710886174,
+          "censoredGames": 0,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "meanWork": 1465.615234375,
+          "meanWallSecondsPerGame": 0.0009086489589843751,
+          "games": 512
+        },
+        "fill-d3s7": {
+          "meanScore": 506494.4609375,
+          "medianScore": 388587.0,
+          "q25Score": 229449.5,
+          "minScore": 85362.0,
+          "maxScore": 2751523.0,
+          "sdScore": 410994.7149055519,
+          "meanMoves": 146.326171875,
+          "q25Moves": 70.0,
+          "numberedClearsPerMove": 2.1215579492518586,
+          "coverRevealsPerMove": 1.2010170984663437,
+          "meanOccupiedCells": 23.088345187549738,
+          "censoredGames": 0,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "meanWork": 24138811.2890625,
+          "meanWallSecondsPerGame": 4.658339357220703,
+          "games": 512
+        },
+        "fill-1ply": {
+          "meanScore": 298199.3203125,
+          "medianScore": 262235.0,
+          "q25Score": 190083.75,
+          "minScore": 85521.0,
+          "maxScore": 1165434.0,
+          "sdScore": 165744.90624003956,
+          "meanMoves": 88.904296875,
+          "q25Moves": 56.0,
+          "numberedClearsPerMove": 1.9391902282563325,
+          "coverRevealsPerMove": 1.065313385619192,
+          "meanOccupiedCells": 24.504540688937706,
+          "censoredGames": 0,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "meanWork": 1491.38671875,
+          "meanWallSecondsPerGame": 0.001025469826171875,
+          "games": 512
+        },
+        "control-d3s7": {
+          "meanScore": 491401.080078125,
+          "medianScore": 389192.0,
+          "q25Score": 229196.75,
+          "minScore": 85582.0,
+          "maxScore": 2662558.0,
+          "sdScore": 359048.689251882,
+          "meanMoves": 141.916015625,
+          "q25Moves": 70.0,
+          "numberedClearsPerMove": 2.1128390746067356,
+          "coverRevealsPerMove": 1.1944509434221935,
+          "meanOccupiedCells": 22.99193020125468,
+          "censoredGames": 0,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "meanWork": 23405501.86328125,
+          "meanWallSecondsPerGame": 4.436359562220703,
+          "games": 512
+        },
+        "zeroed-d3s7": {
+          "meanScore": 514897.349609375,
+          "medianScore": 370697.0,
+          "q25Score": 229884.5,
+          "minScore": 85609.0,
+          "maxScore": 3088440.0,
+          "sdScore": 441508.84861974296,
+          "meanMoves": 148.50390625,
+          "q25Moves": 70.0,
+          "numberedClearsPerMove": 2.1262461530367993,
+          "coverRevealsPerMove": 1.2059736433700712,
+          "meanOccupiedCells": 23.01796145956876,
+          "censoredGames": 0,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "meanWork": 24556187.85546875,
+          "meanWallSecondsPerGame": 4.607113017410157,
+          "games": 512
+        },
+        "classmean-d3s7": {
+          "meanScore": 486385.8828125,
+          "medianScore": 358256.5,
+          "q25Score": 230374.0,
+          "minScore": 85609.0,
+          "maxScore": 3329202.0,
+          "sdScore": 386411.0005593548,
+          "meanMoves": 140.638671875,
+          "q25Moves": 70.0,
+          "numberedClearsPerMove": 2.1097948810532308,
+          "coverRevealsPerMove": 1.1939672531837182,
+          "meanOccupiedCells": 23.05278600450108,
+          "censoredGames": 0,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "meanWork": 23163587.677734375,
+          "meanWallSecondsPerGame": 4.4294059892167965,
+          "games": 512
+        },
+        "prior-d4s7": {
+          "meanScore": 521955.521484375,
+          "medianScore": 393322.5,
+          "q25Score": 244331.5,
+          "minScore": 102737.0,
+          "maxScore": 2469625.0,
+          "sdScore": 400627.3752392606,
+          "meanMoves": 150.19921875,
+          "q25Moves": 73.25,
+          "numberedClearsPerMove": 2.1273568957894464,
+          "coverRevealsPerMove": 1.2046760812462616,
+          "meanOccupiedCells": 23.00033961694505,
+          "censoredGames": 0,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "meanWork": 803086972.2734375,
+          "meanWallSecondsPerGame": 160.8415966989258,
+          "games": 512
+        },
+        "fill-d4s7": {
+          "meanScore": 499324.08203125,
+          "medianScore": 391661.5,
+          "q25Score": 242348.75,
+          "minScore": 85663.0,
+          "maxScore": 2934902.0,
+          "sdScore": 364035.5921238902,
+          "meanMoves": 144.08203125,
+          "q25Moves": 70.0,
+          "numberedClearsPerMove": 2.1172292259726175,
+          "coverRevealsPerMove": 1.19640775382947,
+          "meanOccupiedCells": 23.14152519647478,
+          "censoredGames": 0,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "meanWork": 764278797.0019531,
+          "meanWallSecondsPerGame": 154.53916546729297,
+          "games": 512
+        },
+        "zeroed-d4s7": {
+          "meanScore": 511363.70703125,
+          "medianScore": 391800.0,
+          "q25Score": 230407.0,
+          "minScore": 102737.0,
+          "maxScore": 3016304.0,
+          "sdScore": 401541.0760629121,
+          "meanMoves": 147.359375,
+          "q25Moves": 70.0,
+          "numberedClearsPerMove": 2.123913158731842,
+          "coverRevealsPerMove": 1.2032525713073905,
+          "meanOccupiedCells": 22.896230180309516,
+          "censoredGames": 0,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "meanWork": 784054438.0273438,
+          "meanWallSecondsPerGame": 155.4542688808418,
+          "games": 512
+        },
+        "fair-d3s7": {
+          "meanScore": 329894.560546875,
+          "medianScore": 268113.0,
+          "q25Score": 176683.0,
+          "minScore": 85660.0,
+          "maxScore": 1540436.0,
+          "sdScore": 220324.91391265453,
+          "meanMoves": 96.845703125,
+          "q25Moves": 55.0,
+          "numberedClearsPerMove": 2.001734395482505,
+          "coverRevealsPerMove": 1.1140062518906928,
+          "meanOccupiedCells": 24.091088443224248,
+          "censoredGames": 0,
+          "illegalDecisions": 0,
+          "incompleteDecisions": 0,
+          "meanWork": 15319526.041015625,
+          "meanWallSecondsPerGame": 4.428167823986328,
+          "games": 512
+        }
+      },
+      "contrasts": {
+        "prior-d3s7-vs-fair-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 155560.62109375,
+            "pairedSd": 444880.5023216964,
+            "bootstrapLower95": 123421.78505859376,
+            "bootstrapUpper95": 187990.63945312498,
+            "studentTLower95": 123162.21097680496,
+            "detectionFloor": 32342.552682211204,
+            "wins": 329,
+            "ties": 0,
+            "losses": 183,
+            "firstHalfMeanDelta": 175955.66015625,
+            "secondHalfMeanDelta": 135165.58203125,
+            "q25Delta": 53691.0,
+            "candidateQ25": 230374.0,
+            "referenceQ25": 176683.0
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 43.533203125,
+            "pairedSd": 122.86544145370674,
+            "bootstrapLower95": 34.65966796875,
+            "bootstrapUpper95": 52.47080078125,
+            "studentTLower95": 34.585530793569625,
+            "detectionFloor": 8.932245832985899,
+            "wins": 318,
+            "ties": 17,
+            "losses": 177,
+            "firstHalfMeanDelta": 49.1015625,
+            "secondHalfMeanDelta": 37.96484375,
+            "q25Delta": 15.0,
+            "candidateQ25": 70.0,
+            "referenceQ25": 55.0
+          }
+        },
+        "prior-1ply-vs-fair-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": -36504.40625,
+            "pairedSd": 276961.7893059348,
+            "bootstrapLower95": -56473.74482421875,
+            "bootstrapUpper95": -16523.13623046875,
+            "studentTLower95": -56674.140796307605,
+            "detectionFloor": 20134.96032044428,
+            "wins": 225,
+            "ties": 0,
+            "losses": 287,
+            "firstHalfMeanDelta": -43043.03125,
+            "secondHalfMeanDelta": -29965.78125,
+            "q25Delta": -18751.0,
+            "candidateQ25": 157932.0,
+            "referenceQ25": 176683.0
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": -9.318359375,
+            "pairedSd": 76.50822842336088,
+            "bootstrapLower95": -14.828125,
+            "bootstrapUpper95": -3.8124023437500014,
+            "studentTLower95": -14.89006896632877,
+            "detectionFloor": 5.562103521039205,
+            "wins": 220,
+            "ties": 19,
+            "losses": 273,
+            "firstHalfMeanDelta": -11.22265625,
+            "secondHalfMeanDelta": -7.4140625,
+            "q25Delta": -5.0,
+            "candidateQ25": 50.0,
+            "referenceQ25": 55.0
+          }
+        },
+        "prior-d4s7-vs-prior-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 36500.33984375,
+            "pairedSd": 504798.2072760842,
+            "bootstrapLower95": -249.32783203124848,
+            "bootstrapUpper95": 72651.23984375,
+            "studentTLower95": -261.5754577280386,
+            "detectionFloor": 36698.534836904895,
+            "wins": 287,
+            "ties": 0,
+            "losses": 225,
+            "firstHalfMeanDelta": -13180.8046875,
+            "secondHalfMeanDelta": 86181.484375,
+            "q25Delta": 13957.5,
+            "candidateQ25": 244331.5,
+            "referenceQ25": 230374.0
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 9.8203125,
+            "pairedSd": 139.44303151699515,
+            "bootstrapLower95": -0.322265625,
+            "bootstrapUpper95": 19.81259765625,
+            "studentTLower95": -0.334622363319534,
+            "detectionFloor": 10.137426948292013,
+            "wins": 279,
+            "ties": 21,
+            "losses": 212,
+            "firstHalfMeanDelta": -4.00390625,
+            "secondHalfMeanDelta": 23.64453125,
+            "q25Delta": 3.25,
+            "candidateQ25": 73.25,
+            "referenceQ25": 70.0
+          }
+        },
+        "prior-d4s7-vs-fair-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 192060.9609375,
+            "pairedSd": 454969.39737799886,
+            "bootstrapLower95": 158819.9765625,
+            "bootstrapUpper95": 225169.24765625,
+            "studentTLower95": 158927.82732074973,
+            "detectionFloor": 33076.00946029183,
+            "wins": 340,
+            "ties": 0,
+            "losses": 172,
+            "firstHalfMeanDelta": 162774.85546875,
+            "secondHalfMeanDelta": 221347.06640625,
+            "q25Delta": 67648.5,
+            "candidateQ25": 244331.5,
+            "referenceQ25": 176683.0
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 53.353515625,
+            "pairedSd": 125.34985103284608,
+            "bootstrapLower95": 44.20302734375,
+            "bootstrapUpper95": 62.4923828125,
+            "studentTLower95": 44.22491623557683,
+            "detectionFloor": 9.112860958346914,
+            "wins": 335,
+            "ties": 12,
+            "losses": 165,
+            "firstHalfMeanDelta": 45.09765625,
+            "secondHalfMeanDelta": 61.609375,
+            "q25Delta": 18.25,
+            "candidateQ25": 73.25,
+            "referenceQ25": 55.0
+          }
+        },
+        "fill-d3s7-vs-prior-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 21039.279296875,
+            "pairedSd": 522095.5385910357,
+            "bootstrapLower95": -16863.925097656247,
+            "bootstrapUpper95": 59229.53916015625,
+            "studentTLower95": -16982.313672978897,
+            "detectionFloor": 37956.04072083537,
+            "wins": 271,
+            "ties": 0,
+            "losses": 241,
+            "firstHalfMeanDelta": 6465.9375,
+            "secondHalfMeanDelta": 35612.62109375,
+            "q25Delta": -924.5,
+            "candidateQ25": 229449.5,
+            "referenceQ25": 230374.0
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 5.947265625,
+            "pairedSd": 144.73899564869552,
+            "bootstrapLower95": -4.551074218749999,
+            "bootstrapUpper95": 16.50390625,
+            "studentTLower95": -4.593347677828641,
+            "detectionFloor": 10.52244044750975,
+            "wins": 262,
+            "ties": 13,
+            "losses": 237,
+            "firstHalfMeanDelta": 1.90625,
+            "secondHalfMeanDelta": 9.98828125,
+            "q25Delta": 0.0,
+            "candidateQ25": 70.0,
+            "referenceQ25": 70.0
+          }
+        },
+        "fill-d3s7-vs-control-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 15093.380859375,
+            "pairedSd": 515922.4838295599,
+            "bootstrapLower95": -22430.81123046875,
+            "bootstrapUpper95": 52816.74423828125,
+            "studentTLower95": -22478.65957043066,
+            "detectionFloor": 37507.26324510587,
+            "wins": 265,
+            "ties": 2,
+            "losses": 245,
+            "firstHalfMeanDelta": 21801.81640625,
+            "secondHalfMeanDelta": 8384.9453125,
+            "q25Delta": 252.75,
+            "candidateQ25": 229449.5,
+            "referenceQ25": 229196.75
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 4.41015625,
+            "pairedSd": 142.604360571433,
+            "bootstrapLower95": -5.953125,
+            "bootstrapUpper95": 14.851660156249999,
+            "studentTLower95": -5.975002313135063,
+            "detectionFloor": 10.367253724146144,
+            "wins": 258,
+            "ties": 13,
+            "losses": 241,
+            "firstHalfMeanDelta": 6.1640625,
+            "secondHalfMeanDelta": 2.65625,
+            "q25Delta": 0.0,
+            "candidateQ25": 70.0,
+            "referenceQ25": 70.0
+          }
+        },
+        "control-d3s7-vs-prior-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 5945.8984375,
+            "pairedSd": 492726.1596013753,
+            "bootstrapLower95": -29890.52666015625,
+            "bootstrapUpper95": 41989.1677734375,
+            "studentTLower95": -29936.870330301193,
+            "detectionFloor": 35820.90402174477,
+            "wins": 255,
+            "ties": 6,
+            "losses": 251,
+            "firstHalfMeanDelta": -15335.87890625,
+            "secondHalfMeanDelta": 27227.67578125,
+            "q25Delta": -1177.25,
+            "candidateQ25": 229196.75,
+            "referenceQ25": 230374.0
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 1.537109375,
+            "pairedSd": 136.2180772486484,
+            "bootstrapLower95": -8.390625,
+            "bootstrapUpper95": 11.509863281249999,
+            "studentTLower95": -8.382968284083738,
+            "detectionFloor": 9.902974656547602,
+            "wins": 249,
+            "ties": 27,
+            "losses": 236,
+            "firstHalfMeanDelta": -4.2578125,
+            "secondHalfMeanDelta": 7.33203125,
+            "q25Delta": 0.0,
+            "candidateQ25": 70.0,
+            "referenceQ25": 70.0
+          }
+        },
+        "zeroed-d3s7-vs-prior-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 29442.16796875,
+            "pairedSd": 332244.584030011,
+            "bootstrapLower95": 5812.94228515625,
+            "bootstrapUpper95": 54178.72646484375,
+            "studentTLower95": 5246.465445571237,
+            "detectionFloor": 24153.98720845655,
+            "wins": 102,
+            "ties": 318,
+            "losses": 92,
+            "firstHalfMeanDelta": 12167.9296875,
+            "secondHalfMeanDelta": 46716.40625,
+            "q25Delta": -489.5,
+            "candidateQ25": 229884.5,
+            "referenceQ25": 230374.0
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 8.125,
+            "pairedSd": 92.09745540233524,
+            "bootstrapLower95": 1.5875976562500003,
+            "bootstrapUpper95": 14.972753906249999,
+            "studentTLower95": 1.4180053907053525,
+            "detectionFloor": 6.695431217378298,
+            "wins": 97,
+            "ties": 335,
+            "losses": 80,
+            "firstHalfMeanDelta": 3.37109375,
+            "secondHalfMeanDelta": 12.87890625,
+            "q25Delta": 0.0,
+            "candidateQ25": 70.0,
+            "referenceQ25": 70.0
+          }
+        },
+        "classmean-d3s7-vs-prior-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 930.701171875,
+            "pairedSd": 24714.42932910183,
+            "bootstrapLower95": -530.3950195312499,
+            "bootstrapUpper95": 2954.373046875,
+            "studentTLower95": -869.1264515695937,
+            "detectionFloor": 1796.724577534445,
+            "wins": 4,
+            "ties": 506,
+            "losses": 2,
+            "firstHalfMeanDelta": -689.94140625,
+            "secondHalfMeanDelta": 2551.34375,
+            "q25Delta": 0.0,
+            "candidateQ25": 230374.0,
+            "referenceQ25": 230374.0
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 0.259765625,
+            "pairedSd": 6.933349336169923,
+            "bootstrapLower95": -0.150390625,
+            "bootstrapUpper95": 0.8262695312499986,
+            "studentTLower95": -0.24515534614845136,
+            "detectionFloor": 0.504050447252684,
+            "wins": 4,
+            "ties": 506,
+            "losses": 2,
+            "firstHalfMeanDelta": -0.1953125,
+            "secondHalfMeanDelta": 0.71484375,
+            "q25Delta": 0.0,
+            "candidateQ25": 70.0,
+            "referenceQ25": 70.0
+          }
+        },
+        "fill-d4s7-vs-prior-d4s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": -22631.439453125,
+            "pairedSd": 489868.48162733554,
+            "bootstrapLower95": -57778.848046875,
+            "bootstrapUpper95": 12805.626269531243,
+            "studentTLower95": -58306.09790253298,
+            "detectionFloor": 35613.15250208535,
+            "wins": 236,
+            "ties": 0,
+            "losses": 276,
+            "firstHalfMeanDelta": 37523.16796875,
+            "secondHalfMeanDelta": -82786.046875,
+            "q25Delta": -1982.75,
+            "candidateQ25": 242348.75,
+            "referenceQ25": 244331.5
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": -6.1171875,
+            "pairedSd": 135.13245635584076,
+            "bootstrapLower95": -15.7833984375,
+            "bootstrapUpper95": 3.642773437499997,
+            "studentTLower95": -15.958204847981875,
+            "detectionFloor": 9.82405065170742,
+            "wins": 226,
+            "ties": 19,
+            "losses": 267,
+            "firstHalfMeanDelta": 10.5625,
+            "secondHalfMeanDelta": -22.796875,
+            "q25Delta": -3.25,
+            "candidateQ25": 70.0,
+            "referenceQ25": 73.25
+          }
+        },
+        "zeroed-d4s7-vs-prior-d4s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": -10591.814453125,
+            "pairedSd": 296169.0499730056,
+            "bootstrapLower95": -32044.523046875,
+            "bootstrapUpper95": 11133.006640624997,
+            "studentTLower95": -32160.31721936427,
+            "detectionFloor": 21531.316952761914,
+            "wins": 93,
+            "ties": 320,
+            "losses": 99,
+            "firstHalfMeanDelta": -16117.35546875,
+            "secondHalfMeanDelta": -5066.2734375,
+            "q25Delta": -13924.5,
+            "candidateQ25": 230407.0,
+            "referenceQ25": 244331.5
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": -2.83984375,
+            "pairedSd": 81.65407041679622,
+            "bootstrapLower95": -8.759765625,
+            "bootstrapUpper95": 3.16015625,
+            "studentTLower95": -8.78629914032484,
+            "detectionFloor": 5.936203228485297,
+            "wins": 81,
+            "ties": 344,
+            "losses": 87,
+            "firstHalfMeanDelta": -4.37109375,
+            "secondHalfMeanDelta": -1.30859375,
+            "q25Delta": -3.25,
+            "candidateQ25": 70.0,
+            "referenceQ25": 73.25
+          }
+        },
+        "fill-d4s7-vs-fill-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": -7170.37890625,
+            "pairedSd": 525924.165910425,
+            "bootstrapLower95": -45565.762109375,
+            "bootstrapUpper95": 31331.34072265625,
+            "studentTLower95": -45470.79155336819,
+            "detectionFloor": 38234.37969080974,
+            "wins": 263,
+            "ties": 0,
+            "losses": 249,
+            "firstHalfMeanDelta": 17876.42578125,
+            "secondHalfMeanDelta": -32217.18359375,
+            "q25Delta": 12899.25,
+            "candidateQ25": 242348.75,
+            "referenceQ25": 229449.5
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": -2.244140625,
+            "pairedSd": 145.4101862827986,
+            "bootstrapLower95": -12.84599609375,
+            "bootstrapUpper95": 8.398632812499997,
+            "studentTLower95": -12.833633366951823,
+            "detectionFloor": 10.57123561459394,
+            "wins": 252,
+            "ties": 13,
+            "losses": 247,
+            "firstHalfMeanDelta": 4.65234375,
+            "secondHalfMeanDelta": -9.140625,
+            "q25Delta": 0.0,
+            "candidateQ25": 70.0,
+            "referenceQ25": 70.0
+          }
+        },
+        "zeroed-d4s7-vs-zeroed-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": -3533.642578125,
+            "pairedSd": 554286.6328747638,
+            "bootstrapLower95": -43880.10078125,
+            "bootstrapUpper95": 36833.78964843749,
+            "studentTLower95": -43899.55108726344,
+            "detectionFloor": 40296.31447375577,
+            "wins": 270,
+            "ties": 0,
+            "losses": 242,
+            "firstHalfMeanDelta": -41466.08984375,
+            "secondHalfMeanDelta": 34398.8046875,
+            "q25Delta": 522.5,
+            "candidateQ25": 230407.0,
+            "referenceQ25": 229884.5
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": -1.14453125,
+            "pairedSd": 153.15645214944388,
+            "bootstrapLower95": -12.30693359375,
+            "bootstrapUpper95": 10.005859375,
+            "studentTLower95": -12.2981455866559,
+            "detectionFloor": 11.134384618820757,
+            "wins": 261,
+            "ties": 19,
+            "losses": 232,
+            "firstHalfMeanDelta": -11.74609375,
+            "secondHalfMeanDelta": 9.45703125,
+            "q25Delta": 0.0,
+            "candidateQ25": 70.0,
+            "referenceQ25": 70.0
+          }
+        },
+        "fill-d3s7-vs-fair-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 176599.900390625,
+            "pairedSd": 457719.0418940455,
+            "bootstrapLower95": 143625.18525390624,
+            "bootstrapUpper95": 210258.38749999998,
+            "studentTLower95": 143266.52398903298,
+            "detectionFloor": 33275.907010653085,
+            "wins": 325,
+            "ties": 0,
+            "losses": 187,
+            "firstHalfMeanDelta": 182421.59765625,
+            "secondHalfMeanDelta": 170778.203125,
+            "q25Delta": 52766.5,
+            "candidateQ25": 229449.5,
+            "referenceQ25": 176683.0
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 49.48046875,
+            "pairedSd": 126.51067422990322,
+            "bootstrapLower95": 40.37099609375,
+            "bootstrapUpper95": 58.7853515625,
+            "studentTLower95": 40.267332443775004,
+            "detectionFloor": 9.197252126783432,
+            "wins": 312,
+            "ties": 22,
+            "losses": 178,
+            "firstHalfMeanDelta": 51.0078125,
+            "secondHalfMeanDelta": 47.953125,
+            "q25Delta": 15.0,
+            "candidateQ25": 70.0,
+            "referenceQ25": 55.0
+          }
+        },
+        "control-d3s7-vs-fair-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 161506.51953125,
+            "pairedSd": 406359.0010613243,
+            "bootstrapLower95": 132301.3306640625,
+            "bootstrapUpper95": 192037.26259765626,
+            "studentTLower95": 131913.43666429867,
+            "detectionFloor": 29542.062039421602,
+            "wins": 324,
+            "ties": 0,
+            "losses": 188,
+            "firstHalfMeanDelta": 160619.78125,
+            "secondHalfMeanDelta": 162393.2578125,
+            "q25Delta": 52513.75,
+            "candidateQ25": 229196.75,
+            "referenceQ25": 176683.0
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 45.0703125,
+            "pairedSd": 112.05234893416294,
+            "bootstrapLower95": 36.9939453125,
+            "bootstrapUpper95": 53.4767578125,
+            "studentTLower95": 36.91010332834489,
+            "detectionFloor": 8.14614032230186,
+            "wins": 318,
+            "ties": 21,
+            "losses": 173,
+            "firstHalfMeanDelta": 44.84375,
+            "secondHalfMeanDelta": 45.296875,
+            "q25Delta": 15.0,
+            "candidateQ25": 70.0,
+            "referenceQ25": 55.0
+          }
+        },
+        "zeroed-d3s7-vs-fair-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 185002.7890625,
+            "pairedSd": 495259.02721697517,
+            "bootstrapLower95": 149751.99013671876,
+            "bootstrapUpper95": 221463.20625,
+            "studentTLower95": 148935.56428155847,
+            "detectionFloor": 36005.0420180541,
+            "wins": 334,
+            "ties": 0,
+            "losses": 178,
+            "firstHalfMeanDelta": 188123.58984375,
+            "secondHalfMeanDelta": 181881.98828125,
+            "q25Delta": 53201.5,
+            "candidateQ25": 229884.5,
+            "referenceQ25": 176683.0
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 51.658203125,
+            "pairedSd": 136.69496363532193,
+            "bootstrapLower95": 41.91201171875,
+            "bootstrapUpper95": 61.72275390625,
+            "studentTLower95": 41.70339622816813,
+            "detectionFloor": 9.937644018328859,
+            "wins": 322,
+            "ties": 15,
+            "losses": 175,
+            "firstHalfMeanDelta": 52.47265625,
+            "secondHalfMeanDelta": 50.84375,
+            "q25Delta": 15.0,
+            "candidateQ25": 70.0,
+            "referenceQ25": 55.0
+          }
+        },
+        "classmean-d3s7-vs-fair-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 156491.322265625,
+            "pairedSd": 445845.4206310992,
+            "bootstrapLower95": 124333.98935546874,
+            "bootstrapUpper95": 188986.79443359375,
+            "studentTLower95": 124022.64199983272,
+            "detectionFloor": 32412.701679735314,
+            "wins": 329,
+            "ties": 0,
+            "losses": 183,
+            "firstHalfMeanDelta": 175265.71875,
+            "secondHalfMeanDelta": 137716.92578125,
+            "q25Delta": 53691.0,
+            "candidateQ25": 230374.0,
+            "referenceQ25": 176683.0
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 43.79296875,
+            "pairedSd": 123.15241264819552,
+            "bootstrapLower95": 34.92529296875,
+            "bootstrapUpper95": 52.769824218749996,
+            "studentTLower95": 34.824397749371315,
+            "detectionFloor": 8.953108471217051,
+            "wins": 318,
+            "ties": 17,
+            "losses": 177,
+            "firstHalfMeanDelta": 48.90625,
+            "secondHalfMeanDelta": 38.6796875,
+            "q25Delta": 15.0,
+            "candidateQ25": 70.0,
+            "referenceQ25": 55.0
+          }
+        },
+        "fill-1ply-vs-prior-1ply": {
+          "score": {
+            "n": 512,
+            "meanDelta": 4809.166015625,
+            "pairedSd": 246120.8656496695,
+            "bootstrapLower95": -13188.6314453125,
+            "bootstrapUpper95": 22385.68261718749,
+            "studentTLower95": -13114.57912951404,
+            "detectionFloor": 17892.84318356078,
+            "wins": 289,
+            "ties": 0,
+            "losses": 223,
+            "firstHalfMeanDelta": 21419.3515625,
+            "secondHalfMeanDelta": -11801.01953125,
+            "q25Delta": 32151.75,
+            "candidateQ25": 190083.75,
+            "referenceQ25": 157932.0
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 1.376953125,
+            "pairedSd": 68.48926449002992,
+            "bootstrapLower95": -3.6310546875,
+            "bootstrapUpper95": 6.27734375,
+            "studentTLower95": -3.610775642558745,
+            "detectionFloor": 4.979129526636171,
+            "wins": 281,
+            "ties": 21,
+            "losses": 210,
+            "firstHalfMeanDelta": 5.87109375,
+            "secondHalfMeanDelta": -3.1171875,
+            "q25Delta": 6.0,
+            "candidateQ25": 56.0,
+            "referenceQ25": 50.0
+          }
+        },
+        "fill-1ply-vs-fair-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": -31695.240234375,
+            "pairedSd": 265168.83002919436,
+            "bootstrapLower95": -50765.80810546875,
+            "bootstrapUpper95": -12546.5544921875,
+            "studentTLower95": -51006.15285176833,
+            "detectionFloor": 19277.619068812295,
+            "wins": 249,
+            "ties": 0,
+            "losses": 263,
+            "firstHalfMeanDelta": -21623.6796875,
+            "secondHalfMeanDelta": -41766.80078125,
+            "q25Delta": 13400.75,
+            "candidateQ25": 190083.75,
+            "referenceQ25": 176683.0
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": -7.94140625,
+            "pairedSd": 73.26589168847292,
+            "bootstrapLower95": -13.203515625,
+            "bootstrapUpper95": -2.6541992187500014,
+            "studentTLower95": -13.276992759454131,
+            "detectionFloor": 5.326387534129639,
+            "wins": 239,
+            "ties": 34,
+            "losses": 239,
+            "firstHalfMeanDelta": -5.3515625,
+            "secondHalfMeanDelta": -10.53125,
+            "q25Delta": 1.0,
+            "candidateQ25": 56.0,
+            "referenceQ25": 55.0
+          }
+        },
+        "fill-d4s7-vs-fair-d3s7": {
+          "score": {
+            "n": 512,
+            "meanDelta": 169429.521484375,
+            "pairedSd": 406266.0509591574,
+            "bootstrapLower95": 140100.494921875,
+            "bootstrapUpper95": 199457.99638671873,
+            "studentTLower95": 139843.2077060097,
+            "detectionFloor": 29535.304621282434,
+            "wins": 339,
+            "ties": 0,
+            "losses": 173,
+            "firstHalfMeanDelta": 200298.0234375,
+            "secondHalfMeanDelta": 138561.01953125,
+            "q25Delta": 65665.75,
+            "candidateQ25": 242348.75,
+            "referenceQ25": 176683.0
+          },
+          "moves": {
+            "n": 512,
+            "meanDelta": 47.236328125,
+            "pairedSd": 112.07448253991092,
+            "bootstrapLower95": 39.1443359375,
+            "bootstrapUpper95": 55.51767578125,
+            "studentTLower95": 39.07450707412643,
+            "detectionFloor": 8.147749422512401,
+            "wins": 338,
+            "ties": 19,
+            "losses": 155,
+            "firstHalfMeanDelta": 55.66015625,
+            "secondHalfMeanDelta": 38.8125,
+            "q25Delta": 15.0,
+            "candidateQ25": 70.0,
+            "referenceQ25": 55.0
+          }
+        }
+      },
+      "fill": {
+        "primary": "fill-d3s7-vs-prior-d3s7",
+        "gate": {
+          "checks": [
+            {
+              "criterion": "screen artifact: illegalDecisions 0 and incompleteDecisions 0 in every arm",
+              "passed": true
+            },
+            {
+              "criterion": "bootstrap 95% lower bound of fill-d3s7 minus prior-d3s7 > 0",
+              "passed": false,
+              "observed": -16863.925097656247
+            },
+            {
+              "criterion": "Student-t 95% lower bound > 0",
+              "passed": false,
+              "observed": -16982.313672978897
+            },
+            {
+              "criterion": "paired mean delta > 0 in both halves",
+              "passed": true,
+              "observed": [
+                6465.9375,
+                35612.62109375
+              ]
+            },
+            {
+              "criterion": "fill-d3s7 Q25 >= prior-d3s7 Q25",
+              "passed": false,
+              "observed": [
+                229449.5,
+                230374.0
+              ]
+            }
+          ],
+          "passed": false
+        },
+        "conditioning": {
+          "contrast": "fill-d3s7-vs-control-d3s7",
+          "verdict": "inconclusive",
+          "meanDelta": 15093.380859375,
+          "bootstrapLower95": -22430.81123046875,
+          "bootstrapUpper95": 52816.74423828125,
+          "studentTLower95": -22478.65957043066,
+          "detectionFloor": 37507.26324510587,
+          "wins": 265,
+          "ties": 2,
+          "losses": 245,
+          "firstHalfMeanDelta": 21801.81640625,
+          "secondHalfMeanDelta": 8384.9453125,
+          "candidateQ25": 229449.5,
+          "referenceQ25": 229196.75
+        },
+        "continuation": {
+          "checks": [
+            {
+              "criterion": "screen artifact: illegalDecisions 0 and incompleteDecisions 0 in every arm",
+              "passed": true
+            },
+            {
+              "criterion": "bootstrap 95% lower bound of control-d3s7 minus prior-d3s7 > 0",
+              "passed": false,
+              "observed": -29890.52666015625
+            },
+            {
+              "criterion": "Student-t 95% lower bound > 0",
+              "passed": false,
+              "observed": -29936.870330301193
+            },
+            {
+              "criterion": "paired mean delta > 0 in both halves",
+              "passed": false,
+              "observed": [
+                -15335.87890625,
+                27227.67578125
+              ]
+            },
+            {
+              "criterion": "control-d3s7 Q25 >= prior-d3s7 Q25",
+              "passed": false,
+              "observed": [
+                229196.75,
+                230374.0
+              ]
+            }
+          ],
+          "passed": false,
+          "contrast": "control-d3s7-vs-prior-d3s7",
+          "verdict": "inconclusive",
+          "meanDelta": 5945.8984375,
+          "bootstrapLower95": -29890.52666015625,
+          "bootstrapUpper95": 41989.1677734375,
+          "studentTLower95": -29936.870330301193,
+          "detectionFloor": 35820.90402174477,
+          "wins": 255,
+          "ties": 6,
+          "losses": 251,
+          "firstHalfMeanDelta": -15335.87890625,
+          "secondHalfMeanDelta": 27227.67578125,
+          "candidateQ25": 229196.75,
+          "referenceQ25": 230374.0
+        },
+        "zeroed": {
+          "contrast": "zeroed-d3s7-vs-prior-d3s7",
+          "verdict": "supported",
+          "meanDelta": 29442.16796875,
+          "bootstrapLower95": 5812.94228515625,
+          "bootstrapUpper95": 54178.72646484375,
+          "studentTLower95": 5246.465445571237,
+          "detectionFloor": 24153.98720845655,
+          "wins": 102,
+          "ties": 318,
+          "losses": 92,
+          "firstHalfMeanDelta": 12167.9296875,
+          "secondHalfMeanDelta": 46716.40625,
+          "candidateQ25": 229884.5,
+          "referenceQ25": 230374.0
+        },
+        "classmean": {
+          "contrast": "classmean-d3s7-vs-prior-d3s7",
+          "verdict": "inconclusive",
+          "meanDelta": 930.701171875,
+          "bootstrapLower95": -530.3950195312499,
+          "bootstrapUpper95": 2954.373046875,
+          "studentTLower95": -869.1264515695937,
+          "detectionFloor": 1796.724577534445,
+          "wins": 4,
+          "ties": 506,
+          "losses": 2,
+          "firstHalfMeanDelta": -689.94140625,
+          "secondHalfMeanDelta": 2551.34375,
+          "candidateQ25": 230374.0,
+          "referenceQ25": 230374.0
+        },
+        "fillDepth4": {
+          "contrast": "fill-d4s7-vs-prior-d4s7",
+          "verdict": "inconclusive",
+          "meanDelta": -22631.439453125,
+          "bootstrapLower95": -57778.848046875,
+          "bootstrapUpper95": 12805.626269531243,
+          "studentTLower95": -58306.09790253298,
+          "detectionFloor": 35613.15250208535,
+          "wins": 236,
+          "ties": 0,
+          "losses": 276,
+          "firstHalfMeanDelta": 37523.16796875,
+          "secondHalfMeanDelta": -82786.046875,
+          "candidateQ25": 242348.75,
+          "referenceQ25": 244331.5
+        },
+        "zeroedDepth4": {
+          "contrast": "zeroed-d4s7-vs-prior-d4s7",
+          "verdict": "inconclusive",
+          "meanDelta": -10591.814453125,
+          "bootstrapLower95": -32044.523046875,
+          "bootstrapUpper95": 11133.006640624997,
+          "studentTLower95": -32160.31721936427,
+          "detectionFloor": 21531.316952761914,
+          "wins": 93,
+          "ties": 320,
+          "losses": 99,
+          "firstHalfMeanDelta": -16117.35546875,
+          "secondHalfMeanDelta": -5066.2734375,
+          "candidateQ25": 230407.0,
+          "referenceQ25": 244331.5
+        },
+        "depthSteps": {
+          "fill-d4s7-vs-fill-d3s7": {
+            "contrast": "fill-d4s7-vs-fill-d3s7",
+            "verdict": "inconclusive",
+            "meanDelta": -7170.37890625,
+            "bootstrapLower95": -45565.762109375,
+            "bootstrapUpper95": 31331.34072265625,
+            "studentTLower95": -45470.79155336819,
+            "detectionFloor": 38234.37969080974,
+            "wins": 263,
+            "ties": 0,
+            "losses": 249,
+            "firstHalfMeanDelta": 17876.42578125,
+            "secondHalfMeanDelta": -32217.18359375,
+            "candidateQ25": 242348.75,
+            "referenceQ25": 229449.5
+          },
+          "prior-d4s7-vs-prior-d3s7": {
+            "contrast": "prior-d4s7-vs-prior-d3s7",
+            "verdict": "inconclusive",
+            "meanDelta": 36500.33984375,
+            "bootstrapLower95": -249.32783203124848,
+            "bootstrapUpper95": 72651.23984375,
+            "studentTLower95": -261.5754577280386,
+            "detectionFloor": 36698.534836904895,
+            "wins": 287,
+            "ties": 0,
+            "losses": 225,
+            "firstHalfMeanDelta": -13180.8046875,
+            "secondHalfMeanDelta": 86181.484375,
+            "candidateQ25": 244331.5,
+            "referenceQ25": 230374.0
+          },
+          "zeroed-d4s7-vs-zeroed-d3s7": {
+            "contrast": "zeroed-d4s7-vs-zeroed-d3s7",
+            "verdict": "inconclusive",
+            "meanDelta": -3533.642578125,
+            "bootstrapLower95": -43880.10078125,
+            "bootstrapUpper95": 36833.78964843749,
+            "studentTLower95": -43899.55108726344,
+            "detectionFloor": 40296.31447375577,
+            "wins": 270,
+            "ties": 0,
+            "losses": 242,
+            "firstHalfMeanDelta": -41466.08984375,
+            "secondHalfMeanDelta": 34398.8046875,
+            "candidateQ25": 230407.0,
+            "referenceQ25": 229884.5
+          }
+        },
+        "direct": {
+          "fill-1ply-vs-prior-1ply": {
+            "contrast": "fill-1ply-vs-prior-1ply",
+            "verdict": "inconclusive",
+            "meanDelta": 4809.166015625,
+            "bootstrapLower95": -13188.6314453125,
+            "bootstrapUpper95": 22385.68261718749,
+            "studentTLower95": -13114.57912951404,
+            "detectionFloor": 17892.84318356078,
+            "wins": 289,
+            "ties": 0,
+            "losses": 223,
+            "firstHalfMeanDelta": 21419.3515625,
+            "secondHalfMeanDelta": -11801.01953125,
+            "candidateQ25": 190083.75,
+            "referenceQ25": 157932.0
+          },
+          "fill-1ply-vs-fair-d3s7": {
+            "contrast": "fill-1ply-vs-fair-d3s7",
+            "verdict": "refuted",
+            "meanDelta": -31695.240234375,
+            "bootstrapLower95": -50765.80810546875,
+            "bootstrapUpper95": -12546.5544921875,
+            "studentTLower95": -51006.15285176833,
+            "detectionFloor": 19277.619068812295,
+            "wins": 249,
+            "ties": 0,
+            "losses": 263,
+            "firstHalfMeanDelta": -21623.6796875,
+            "secondHalfMeanDelta": -41766.80078125,
+            "candidateQ25": 190083.75,
+            "referenceQ25": 176683.0
+          },
+          "prior-1ply-vs-fair-d3s7": {
+            "contrast": "prior-1ply-vs-fair-d3s7",
+            "verdict": "refuted",
+            "meanDelta": -36504.40625,
+            "bootstrapLower95": -56473.74482421875,
+            "bootstrapUpper95": -16523.13623046875,
+            "studentTLower95": -56674.140796307605,
+            "detectionFloor": 20134.96032044428,
+            "wins": 225,
+            "ties": 0,
+            "losses": 287,
+            "firstHalfMeanDelta": -43043.03125,
+            "secondHalfMeanDelta": -29965.78125,
+            "candidateQ25": 157932.0,
+            "referenceQ25": 176683.0
+          }
+        },
+        "replicationOfPrior": {
+          "contrast": "prior-d3s7-vs-fair-d3s7",
+          "verdict": "supported",
+          "meanDelta": 155560.62109375,
+          "bootstrapLower95": 123421.78505859376,
+          "bootstrapUpper95": 187990.63945312498,
+          "studentTLower95": 123162.21097680496,
+          "detectionFloor": 32342.552682211204,
+          "wins": 329,
+          "ties": 0,
+          "losses": 183,
+          "firstHalfMeanDelta": 175955.66015625,
+          "secondHalfMeanDelta": 135165.58203125,
+          "candidateQ25": 230374.0,
+          "referenceQ25": 176683.0
+        },
+        "theory": {
+          "primaryFalsifierUpperBoundBelowZero": false,
+          "conditioningUpperBoundBelowZero": false,
+          "gainIsContinuationNotConditioning": false,
+          "optimismLegRefuted": false,
+          "depthCompounding": false
+        }
+      }
+    },
+    "selection": {
+      "candidateArm": "occ5",
+      "candidateBestMargin": 203192.953125,
+      "candidateBestMoves": 1400252568,
+      "controlBestMargin": 210990.1796875,
+      "controlBestMoves": 600112060,
+      "arms": {
+        "occ5": {
+          "bestMargin": 203192.953125,
+          "finalMargin": 150272.3125,
+          "bestMoves": 1400252568,
+          "movesTotal": 1600289700,
+          "validationPoints": 8,
+          "stop": "plateau"
+        },
+        "hgt5": {
+          "bestMargin": 179759.7421875,
+          "finalMargin": 157845.90234375,
+          "bestMoves": 1600283262,
+          "movesTotal": 2000004221,
+          "validationPoints": 10,
+          "stop": "plateau"
+        },
+        "control": {
+          "bestMargin": 210990.1796875,
+          "finalMargin": 197769.33984375,
+          "bestMoves": 600112060,
+          "movesTotal": 1200228265,
+          "validationPoints": 6,
+          "stop": "plateau"
+        }
+      },
+      "trainingSignal": {
+        "criterion": "a fill arm's best validation margin exceeds the control arm's best validation margin",
+        "passed": false
+      },
+      "rule": "the fill arm (occ5 or hgt5) whose best validation point has the larger paired mean margin of ntuple-d3s7 over fair-d3s7 on the 256-game training-role block, ties to occ5; the control arm's best point is the control candidate"
+    },
+    "trainingArms": {
+      "control": {
+        "layout": "rows,cols,win23,win32,phase=all",
+        "movesTotal": 1200228265,
+        "gamesTotal": 13419520,
+        "wallSeconds": 839.2,
+        "meanMovesPerSecond": 2017917.3666666667,
+        "finalMargin": 197769.33984375,
+        "bestMargin": 210990.1796875,
+        "best": {
+          "moves": 600112060,
+          "artifact": "val-000600112060.json",
+          "pairedDeltaD3": 210990.1796875,
+          "ntupleD3Mean": 523756.8046875,
+          "fairD3Mean": 312766.625
+        },
+        "stop": {
+          "reason": "plateau",
+          "movesTotal": 1200228265,
+          "gamesTotal": 13419520,
+          "wallSeconds": 882.8,
+          "validationPoints": 6,
+          "plateauWindow": 3,
+          "recentWindowMean": 176417.07682291666,
+          "previousWindowMean": 188501.52864583334,
+          "bestMargin": 210990.1796875
+        },
+        "validationPoints": [
+          {
+            "movesTrained": 200037439,
+            "pairedDeltaD3": 178166.609375,
+            "bootstrapLower95": 137938.3291015625,
+            "ntupleD3Mean": 490933.234375,
+            "directMean": 294995.203125
+          },
+          {
+            "movesTrained": 400073347,
+            "pairedDeltaD3": 176347.796875,
+            "bootstrapLower95": 135424.2798828125,
+            "ntupleD3Mean": 489114.421875,
+            "directMean": 300747.59765625
+          },
+          {
+            "movesTrained": 600112060,
+            "pairedDeltaD3": 210990.1796875,
+            "bootstrapLower95": 165418.0455078125,
+            "ntupleD3Mean": 523756.8046875,
+            "directMean": 305466.265625
+          },
+          {
+            "movesTrained": 800150452,
+            "pairedDeltaD3": 171379.6953125,
+            "bootstrapLower95": 133016.8544921875,
+            "ntupleD3Mean": 484146.3203125,
+            "directMean": 302770.12890625
+          },
+          {
+            "movesTrained": 1000189400,
+            "pairedDeltaD3": 160102.1953125,
+            "bootstrapLower95": 126792.528515625,
+            "ntupleD3Mean": 472868.8203125,
+            "directMean": 302339.7421875
+          },
+          {
+            "movesTrained": 1200228265,
+            "pairedDeltaD3": 197769.33984375,
+            "bootstrapLower95": 158764.9060546875,
+            "ntupleD3Mean": 510535.96484375,
+            "directMean": 302966.19140625
+          }
+        ]
+      },
+      "hgt5": {
+        "layout": "rows,cols,win23,win32,phase=all,fill=hgt5",
+        "movesTotal": 2000004221,
+        "gamesTotal": 23290336,
+        "wallSeconds": 1381.1,
+        "meanMovesPerSecond": 2153323.48,
+        "finalMargin": 157845.90234375,
+        "bestMargin": 179759.7421875,
+        "best": {
+          "moves": 1600283262,
+          "artifact": "val-001600283262.json",
+          "pairedDeltaD3": 179759.7421875,
+          "ntupleD3Mean": 492526.3671875,
+          "fairD3Mean": 312766.625
+        },
+        "stop": {
+          "reason": "plateau",
+          "movesTotal": 2000004221,
+          "gamesTotal": 23290336,
+          "wallSeconds": 1427.4,
+          "validationPoints": 10,
+          "plateauWindow": 3,
+          "recentWindowMean": 165313.96354166666,
+          "previousWindowMean": 169776.82942708334,
+          "bestMargin": 179759.7421875
+        },
+        "validationPoints": [
+          {
+            "movesTrained": 200028295,
+            "pairedDeltaD3": 124708.8828125,
+            "bootstrapLower95": 91008.81015625,
+            "ntupleD3Mean": 437475.5078125,
+            "directMean": 261277.8046875
+          },
+          {
+            "movesTrained": 400060509,
+            "pairedDeltaD3": 137262.44921875,
+            "bootstrapLower95": 103554.13203125,
+            "ntupleD3Mean": 450029.07421875,
+            "directMean": 280088.27734375
+          },
+          {
+            "movesTrained": 600096150,
+            "pairedDeltaD3": 156897.58984375,
+            "bootstrapLower95": 117185.8607421875,
+            "ntupleD3Mean": 469664.21484375,
+            "directMean": 279606.3828125
+          },
+          {
+            "movesTrained": 800131115,
+            "pairedDeltaD3": 135726.80859375,
+            "bootstrapLower95": 101618.86953125,
+            "ntupleD3Mean": 448493.43359375,
+            "directMean": 286336.0078125
+          },
+          {
+            "movesTrained": 1000167008,
+            "pairedDeltaD3": 160216.16015625,
+            "bootstrapLower95": 121481.905078125,
+            "ntupleD3Mean": 472982.78515625,
+            "directMean": 303430.88671875
+          },
+          {
+            "movesTrained": 1200208525,
+            "pairedDeltaD3": 179588.234375,
+            "bootstrapLower95": 142390.043359375,
+            "ntupleD3Mean": 492354.859375,
+            "directMean": 291789.8984375
+          },
+          {
+            "movesTrained": 1400244137,
+            "pairedDeltaD3": 169526.09375,
+            "bootstrapLower95": 130142.8451171875,
+            "ntupleD3Mean": 482292.71875,
+            "directMean": 312632.3828125
+          },
+          {
+            "movesTrained": 1600283262,
+            "pairedDeltaD3": 179759.7421875,
+            "bootstrapLower95": 139911.8376953125,
+            "ntupleD3Mean": 492526.3671875,
+            "directMean": 285265.76953125
+          },
+          {
+            "movesTrained": 1800319931,
+            "pairedDeltaD3": 158336.24609375,
+            "bootstrapLower95": 120472.5197265625,
+            "ntupleD3Mean": 471102.87109375,
+            "directMean": 297038.87890625
+          },
+          {
+            "movesTrained": 2000004221,
+            "pairedDeltaD3": 157845.90234375,
+            "bootstrapLower95": 118844.9162109375,
+            "ntupleD3Mean": 470612.52734375,
+            "directMean": 330794.61328125
+          }
+        ]
+      },
+      "occ5": {
+        "layout": "rows,cols,win23,win32,phase=all,fill=occ5",
+        "movesTotal": 1600289700,
+        "gamesTotal": 18838964,
+        "wallSeconds": 1130.4,
+        "meanMovesPerSecond": 2125289.375,
+        "finalMargin": 150272.3125,
+        "bestMargin": 203192.953125,
+        "best": {
+          "moves": 1400252568,
+          "artifact": "val-001400252568.json",
+          "pairedDeltaD3": 203192.953125,
+          "ntupleD3Mean": 515959.578125,
+          "fairD3Mean": 312766.625
+        },
+        "stop": {
+          "reason": "plateau",
+          "movesTotal": 1600289700,
+          "gamesTotal": 18838964,
+          "wallSeconds": 1175.8,
+          "validationPoints": 8,
+          "plateauWindow": 3,
+          "recentWindowMean": 174445.52083333334,
+          "previousWindowMean": 179680.91927083334,
+          "bestMargin": 203192.953125
+        },
+        "validationPoints": [
+          {
+            "movesTrained": 200030322,
+            "pairedDeltaD3": 141881.60546875,
+            "bootstrapLower95": 103289.1462890625,
+            "ntupleD3Mean": 454648.23046875,
+            "directMean": 270047.203125
+          },
+          {
+            "movesTrained": 400061818,
+            "pairedDeltaD3": 177996.71875,
+            "bootstrapLower95": 134200.2763671875,
+            "ntupleD3Mean": 490763.34375,
+            "directMean": 283788.37109375
+          },
+          {
+            "movesTrained": 600097906,
+            "pairedDeltaD3": 177735.6796875,
+            "bootstrapLower95": 139164.4126953125,
+            "ntupleD3Mean": 490502.3046875,
+            "directMean": 291741.10546875
+          },
+          {
+            "movesTrained": 800135553,
+            "pairedDeltaD3": 180643.6640625,
+            "bootstrapLower95": 136012.34609375,
+            "ntupleD3Mean": 493410.2890625,
+            "directMean": 306541.35546875
+          },
+          {
+            "movesTrained": 1000173026,
+            "pairedDeltaD3": 180663.4140625,
+            "bootstrapLower95": 142053.4818359375,
+            "ntupleD3Mean": 493430.0390625,
+            "directMean": 300276.37109375
+          },
+          {
+            "movesTrained": 1200212497,
+            "pairedDeltaD3": 169871.296875,
+            "bootstrapLower95": 130476.356640625,
+            "ntupleD3Mean": 482637.921875,
+            "directMean": 311855.7421875
+          },
+          {
+            "movesTrained": 1400252568,
+            "pairedDeltaD3": 203192.953125,
+            "bootstrapLower95": 157108.0421875,
+            "ntupleD3Mean": 515959.578125,
+            "directMean": 316704.97265625
+          },
+          {
+            "movesTrained": 1600289700,
+            "pairedDeltaD3": 150272.3125,
+            "bootstrapLower95": 114342.4388671875,
+            "ntupleD3Mean": 463038.9375,
+            "directMean": 294769.7890625
+          }
+        ]
+      }
+    },
+    "edits": {
+      "format": "drop7-ntuple-scale-edits-v1",
+      "source": "/home/keshav/Developer/drop7-bench/runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/best-weights.bin",
+      "sourceSha256": "0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b",
+      "layout": "rows,cols,win23,win32,phase=all",
+      "entries": 1000000000,
+      "optimisticStart": 0.2702702581882477,
+      "untouchedEntries": 901259321,
+      "touchedEntries": 98740679,
+      "checkpoint": {
+        "path": "/home/keshav/Developer/drop7-bench/runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/checkpoint.bin",
+        "touchedEntriesAtStartValue": 20266847,
+        "neverUpdatedEntriesOffStartValue": 0,
+        "note": "the checkpoint is the end of training, not the candidate's point; an entry touched only after the candidate's point is untouched in the candidate and counted as such"
+      },
+      "classesWithNoTouchedEntry": 7,
+      "outputs": {
+        "zeroed": {
+          "path": "/home/keshav/Developer/drop7-bench/runs/RUN-20260906T201104Z-a96ea6c8/ntuple-scale/main/zeroed-weights.bin",
+          "sha256": "e9248b1a26f0b6e2d6cac121df9eda48c1adf1ea369287a60546a830b65c058e",
+          "entriesChanged": 901259321,
+          "entriesChangedOnlyWhereUntouched": true
+        },
+        "classmean": {
+          "path": "/home/keshav/Developer/drop7-bench/runs/RUN-20260906T201104Z-a96ea6c8/ntuple-scale/main/classmean-weights.bin",
+          "sha256": "c3f05eeebb6ed573ba176797e7cfa4bdab3b47e042c8877011dd6614ebb54450",
+          "entriesChanged": 877344474,
+          "entriesChangedOnlyWhereUntouched": true
+        }
+      },
+      "wallSeconds": 25.3
+    },
+    "tablesSha256": {
+      "prior": "0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b",
+      "candidate": "4f2e7ccf5c14fed8dd19563965e3937e8784b487f2de9eb70fe0e86830edae24",
+      "control": "92dd1cb2d2a74b026270606c18c5f0d6e4f4ccc74e64c3c4e0f0d2043cdddd90",
+      "zeroed": "e9248b1a26f0b6e2d6cac121df9eda48c1adf1ea369287a60546a830b65c058e",
+      "classmean": "c3f05eeebb6ed573ba176797e7cfa4bdab3b47e042c8877011dd6614ebb54450"
+    }
+  },
+  "gateChecks": [
+    {
+      "criterion": "All CHECK gates passed on the probe block for both fill layouts before any leased seed was read",
+      "passed": true,
+      "observed": "27 + 27 gate lines"
+    },
+    {
+      "criterion": "gate --weights passed on each of the four new table files before the screen lease opened",
+      "passed": true,
+      "observed": "{\"candidate\": true, \"control\": true, \"zeroed\": true, \"classmean\": true}"
+    },
+    {
+      "criterion": "screen artifact: illegalDecisions 0 and incompleteDecisions 0 in every arm",
+      "passed": true,
+      "observed": "null"
+    },
+    {
+      "criterion": "bootstrap 95% lower bound of fill-d3s7 minus prior-d3s7 > 0",
+      "passed": false,
+      "observed": "-16863.925097656247"
+    },
+    {
+      "criterion": "Student-t 95% lower bound > 0",
+      "passed": false,
+      "observed": "-16982.313672978897"
+    },
+    {
+      "criterion": "paired mean delta > 0 in both halves",
+      "passed": true,
+      "observed": "[6465.9375, 35612.62109375]"
+    },
+    {
+      "criterion": "fill-d3s7 Q25 >= prior-d3s7 Q25",
+      "passed": false,
+      "observed": "[229449.5, 230374.0]"
+    },
+    {
+      "criterion": "The prior arms are the exact frozen best-weights.bin of RUN-20260905T193006Z-4fbeb4e5 (SHA-256 verified before any stage read it); every other table file's SHA-256 was written before the screen lease opened",
+      "passed": true,
+      "observed": "{\"prior\": \"0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b\", \"candidate\": \"4f2e7ccf5c14fed8dd19563965e3937e8784b487f2de9eb70fe0e86830edae24\", \"control\": \"92dd1cb2d2a74b026270606c18c5f0d6e4f4ccc74e64c3c4e0f0d2043cdddd90\", \"zeroed\": \"e9248b1a26f0b6e2d6cac121df9eda48c1adf1ea369287a60546a830b65c058e\", \"classmean\": \"c3f05eeebb6ed573ba176797e7cfa4bdab3b47e042c8877011dd6614ebb54450\"}"
+    },
+    {
+      "criterion": "Beside the gate: conditioning verdict (fill-d3s7 vs control-d3s7): supported / refuted / inconclusive",
+      "passed": null,
+      "observed": "{\"verdict\": \"inconclusive\", \"meanDelta\": 15093.380859375, \"bootstrapLower95\": -22430.81123046875, \"bootstrapUpper95\": 52816.74423828125}"
+    },
+    {
+      "criterion": "Beside the gate: continuation reading (control-d3s7 vs prior-d3s7): supported / refuted / inconclusive",
+      "passed": null,
+      "observed": "{\"verdict\": \"inconclusive\", \"meanDelta\": 5945.8984375, \"bootstrapLower95\": -29890.52666015625, \"bootstrapUpper95\": 41989.1677734375}"
+    },
+    {
+      "criterion": "Beside the gate: zeroed edit verdict (vs prior-d3s7): supported / refuted / inconclusive",
+      "passed": null,
+      "observed": "{\"verdict\": \"supported\", \"meanDelta\": 29442.16796875, \"bootstrapLower95\": 5812.94228515625, \"bootstrapUpper95\": 54178.72646484375}"
+    },
+    {
+      "criterion": "Beside the gate: class-mean edit verdict (vs prior-d3s7): supported / refuted / inconclusive",
+      "passed": null,
+      "observed": "{\"verdict\": \"inconclusive\", \"meanDelta\": 930.701171875, \"bootstrapLower95\": -530.3950195312499, \"bootstrapUpper95\": 2954.373046875}"
+    },
+    {
+      "criterion": "Beside the gate: fill at depth 4 verdict (vs prior-d4s7): supported / refuted / inconclusive",
+      "passed": null,
+      "observed": "{\"verdict\": \"inconclusive\", \"meanDelta\": -22631.439453125, \"bootstrapLower95\": -57778.848046875, \"bootstrapUpper95\": 12805.626269531243}"
+    },
+    {
+      "criterion": "Beside the gate: zeroed at depth 4 verdict (vs prior-d4s7): supported / refuted / inconclusive",
+      "passed": null,
+      "observed": "{\"verdict\": \"inconclusive\", \"meanDelta\": -10591.814453125, \"bootstrapLower95\": -32044.523046875, \"bootstrapUpper95\": 11133.006640624997}"
+    },
+    {
+      "criterion": "Beside the gate: training-signal check (a fill arm's best validation margin exceeds the control arm's)",
+      "passed": null,
+      "observed": "{\"criterion\": \"a fill arm's best validation margin exceeds the control arm's best validation margin\", \"passed\": false}"
+    }
+  ],
+  "perGameArtifact": {
+    "path": "https://data.drop7.dev/runs/RUN-20260906T201104Z-a96ea6c8/ntuple-scale/screen/heldout.json#sha256=15031936e74f2304a8ba9ecd6626bef2c914195fbbafbdd5d17f3cf47571a39e",
+    "sha256": "15031936e74f2304a8ba9ecd6626bef2c914195fbbafbdd5d17f3cf47571a39e",
+    "recordCount": 5632
+  },
+  "machineProfileRefs": [
+    "research/system-profiles/MACH-20260906T201104Z-c51a782f.json"
+  ],
+  "artifactManifestRef": "artifacts/results/EX-20260906-ntuple-fill-conditioned-continuation-a9e5cbd3/RUN-20260906T201104Z-a96ea6c8/manifest.json",
+  "limitations": [
+    "Public-development SCREEN tier, 512 paired games opened once; nothing here is a qualification claim, and protected and final cohorts stay sealed.",
+    "The candidate and the control are each the best of their arm's validation points, and the candidate arm is the better of two, all chosen on the 256-game training-role validation block; the screen inherits that selection and measures what survives it.",
+    "The training arms are Hogwild (32 lock-free workers) and are not bit-reproducible; a re-run trains different tables from the same warm start and seeds.",
+    "Five buckets with fixed edges are the only conditioning tested; a different bucket count, different edges, or a bucket variable other than occupied cells and tallest column is a different configuration.",
+    "The depth-4 arms use the standing reference configuration (1M-entry table, seven strata, terminal utility -1,000,000); the fair-d3s7 arm is context, and the fair leaf at depth 4 was not played on this block.",
+    "Wall times were measured on a shared workstation with every arm run in sequence at 32 threads; logical work and the ratios between arms on the same seeds are the trustworthy cost quantities.",
+    "The per-game artifact is cited by its public archive reference (data.drop7.dev, immutable run-scoped key, digest in the fragment); a byte-identical copy remains under runs/RUN-20260906T201104Z-a96ea6c8/ntuple-scale/screen/heldout.json on the workstation and a promoted copy under artifacts/results/."
+  ],
+  "contributionIds": [
+    "CT-20260906T201547Z-705074a5"
+  ],
+  "recordedAt": "2026-09-07T00:04:08Z"
+}

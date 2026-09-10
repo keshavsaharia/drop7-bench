@@ -1,0 +1,46 @@
+layout rows,cols,win23,win32,phase=all entries 1000000000 has_tc 1 header 52
+
+== touched patterns by occupied cells (all tables, all phases); meanW in rise units (init 0.2703), meanA = accumulated |error|
+-- rows
+occ  patterns     touched   frac      meanW_touched  meanA_touched
+  0          35         34  0.97143         0.3339  51170605.18
+  1        2205       1014  0.45986         0.1909   1382279.15
+  2       59535      24939  0.41890         0.2884     42914.71
+  3      893025     326557  0.36568         0.2901      3277.45
+  4     8037225    2261452  0.28137         0.2718       468.65
+  5    43401015    9261601  0.21340         0.2687       120.50
+  6   130203045   21826212  0.16763         0.2755        66.75
+  7   167403915   22604056  0.13503         0.2699       173.45
+-- cols
+occ  patterns     touched   frac      meanW_touched  meanA_touched
+  0          35         35  1.00000        -0.3841   3642984.20
+  1         315        280  0.88889        -0.0485   5158687.87
+  2        2835       2225  0.78483         0.0491   1509549.51
+  3       25515      17289  0.67760         0.1455    300909.11
+  4      229635     115806  0.50430         0.2295     40215.43
+  5     2066715     537031  0.25985         0.2564      5002.15
+  6    18600435    1228036  0.06602         0.2580       771.48
+  7   167403915    1640995  0.00980         0.2430       126.41
+
+== touched by phase (moves until rise), rows+cols
+rows phase1: touched   12808981 of 70000000  (0.18299)
+rows phase2: touched   12149227 of 70000000  (0.17356)
+rows phase3: touched   11412047 of 70000000  (0.16303)
+rows phase4: touched   10554406 of 70000000  (0.15078)
+rows phase5: touched    9381204 of 70000000  (0.13402)
+cols phase1: touched     931927 of 37665880  (0.02474)
+cols phase2: touched     833335 of 37665880  (0.02212)
+cols phase3: touched     722638 of 37665880  (0.01919)
+cols phase4: touched     597524 of 37665880  (0.01586)
+cols phase5: touched     456273 of 37665880  (0.01211)
+
+== rows by row index (0 = top), all phases
+row0: touched     609660; patterns with >=5 discs touched    518327 of 48715425 (0.01064)
+row1: touched    5617356; patterns with >=5 discs touched   5304886 of 48715425 (0.10890)
+row2: touched    8830120; patterns with >=5 discs touched   8387595 of 48715425 (0.17218)
+row3: touched   12107298; patterns with >=5 discs touched  11569852 of 48715425 (0.23750)
+row4: touched   14223489; patterns with >=5 discs touched  13654317 of 48715425 (0.28029)
+row5: touched   12277923; patterns with >=5 discs touched  11782244 of 48715425 (0.24186)
+row6: touched    2640019; patterns with >=5 discs touched   2474648 of 48715425 (0.05080)
+
+== cols by height (occupied cells = height), all phases, legal patterns only

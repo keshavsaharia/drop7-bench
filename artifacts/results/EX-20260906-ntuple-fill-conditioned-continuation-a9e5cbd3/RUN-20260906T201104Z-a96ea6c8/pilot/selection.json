@@ -1,0 +1,38 @@
+{
+  "candidateArm": "occ5",
+  "candidateBestMargin": 203192.953125,
+  "candidateBestMoves": 1400252568,
+  "controlBestMargin": 210990.1796875,
+  "controlBestMoves": 600112060,
+  "arms": {
+    "occ5": {
+      "bestMargin": 203192.953125,
+      "finalMargin": 150272.3125,
+      "bestMoves": 1400252568,
+      "movesTotal": 1600289700,
+      "validationPoints": 8,
+      "stop": "plateau"
+    },
+    "hgt5": {
+      "bestMargin": 179759.7421875,
+      "finalMargin": 157845.90234375,
+      "bestMoves": 1600283262,
+      "movesTotal": 2000004221,
+      "validationPoints": 10,
+      "stop": "plateau"
+    },
+    "control": {
+      "bestMargin": 210990.1796875,
+      "finalMargin": 197769.33984375,
+      "bestMoves": 600112060,
+      "movesTotal": 1200228265,
+      "validationPoints": 6,
+      "stop": "plateau"
+    }
+  },
+  "trainingSignal": {
+    "criterion": "a fill arm's best validation margin exceeds the control arm's best validation margin",
+    "passed": false
+  },
+  "rule": "the fill arm (occ5 or hgt5) whose best validation point has the larger paired mean margin of ntuple-d3s7 over fair-d3s7 on the 256-game training-role block, ties to occ5; the control arm's best point is the control candidate"
+}

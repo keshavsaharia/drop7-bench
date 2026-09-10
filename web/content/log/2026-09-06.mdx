@@ -1,10 +1,10 @@
 ---
 date: 2026-09-06
-title: "Replicating the lookup-table leaf on fresh seeds, then playing it one ply deeper"
-summary: "Yesterday's lookup-table leaf replicated on 512 seeds nothing had read: 487,066 against 326,717 for the fair leaf in the same depth-3 search. A six-times-wider evaluator trained until its validation margin stopped rising passed the same gate and came out 5,196 behind the first tables, an inconclusive scale reading, while playing much better without any search. As a playground demonstration, the first tables also played the public global game's round, gauntlet-01, and scored 554,510 points in 160 moves. In the evening the same frozen tables played as the leaf of the depth-4 search on a fourth fresh block: 516,155 against 465,675 for the depth-3 leaf on 512 games, a fourth ply worth 50,479 points, the same as the fair leaf's fourth ply on the same games. The tables and the screens' per-game rows are now in the public research archive."
+title: "Replicating the lookup-table leaf on fresh seeds, playing it one ply deeper, and asking it how full the board is"
+summary: "Yesterday's lookup-table leaf replicated on 512 seeds nothing had read: 487,066 against 326,717 for the fair leaf in the same depth-3 search. A six-times-wider evaluator trained until its validation margin stopped rising passed the same gate and came out 5,196 behind the first tables, an inconclusive scale reading, while playing much better without any search. As a playground demonstration, the first tables also played the public global game's round, gauntlet-01, and scored 554,510 points in 160 moves. In the evening the same frozen tables played as the leaf of the depth-4 search on a fourth fresh block: 516,155 against 465,675 for the depth-3 leaf on 512 games, a fourth ply worth 50,479 points, the same as the fair leaf's fourth ply on the same games. The tables and the screens' per-game rows are now in the public research archive. Late in the day a fourth experiment gave every table five copies keyed to how full the board is, warm-started from the frozen tables, and tried two no-training edits of the never-updated entries on a fifth fresh block: the fill candidate was 21,039 ahead of the frozen tables at depth 3, inside the floor, and 22,631 behind at depth 4; zeroing the never-updated entries was worth 29,442 at depth 3 with a lower bound above zero and gave it back at depth 4."
 contributors: [claude-fable-5-1 (Claude Code)]
-tags: [n-tuple, temporal-difference, leaf, rust, replication, plateau, benchmark-playground, search-depth, artifact-archive]
-outcomes: { positive: 4, negative: 1, open: 2 }
+tags: [n-tuple, temporal-difference, leaf, rust, replication, plateau, benchmark-playground, search-depth, artifact-archive, fill-conditioning, weight-promotion, negative-result]
+outcomes: { positive: 5, negative: 3, open: 3 }
 ---
 
 ## Two questions from yesterday
@@ -300,4 +300,187 @@ tenths of the entries that training never touched; and the published tables
 as the teacher or warm start of a search-guided self-play loop. The
 [approach page](/approach/ntuple-rl/ntuple-scale) carries all three runs'
 figures and the full tables.
+</Direction>
+
+## Tables that know how full the board is
+
+The owner's next question was whether the leaf should change its mind as
+the board fills: play for throughput while there is room, play for survival
+when there is not. The frozen tables cannot, for a reason that is visible in
+their own training record. A seed-free pass over the first run's saved
+accumulators (`main/touched-by-fill.txt` of this run) counts, for every
+row and column table and every rise phase, how many patterns of each fill
+were ever updated.
+
+<Finding title="The frozen leaf is least trained on the fullest boards" kind="neutral" metric="0.98% of legal seven-high column patterns and 1.06% of five-or-more-disc top-row patterns ever updated">
+Legal column patterns of height 0 to 7 were touched 100%, 89%, 78%, 68%,
+50%, 26%, 6.6% and 0.98% of the time; row patterns with seven discs 13.5%;
+top-row patterns with five or more discs 1.06%. The touched entries of full
+lines average 0.24 to 0.27 rise units, which is the optimistic starting
+value of 20/74. In the frozen candidate file 901,259,321 of the billion
+entries still hold that starting value bit for bit (`main/edits.json`). A
+depth-3 search from a crowded board reads many of them, each worth a fresh
+board's share, so the leaf is most optimistic where the decision is about
+staying alive. And a sum of 74 lookups cannot give one pattern two values
+depending on the board around it.
+</Finding>
+
+Experiment
+`EX-20260906-ntuple-fill-conditioned-continuation-a9e5cbd3`, run
+`RUN-20260906T201104Z-a96ea6c8`, branch `claude/n-tuple-fill-conditioned`,
+tests two repairs against the frozen tables on one fresh 512-game block
+(`0xa52f2880`). The first trains nothing: every never-updated entry of the
+frozen file is replaced, by zero (an unfamiliar board is priced below a
+familiar one) or by the mean of the touched entries of the same table, rise
+phase and pattern occupancy (an unfamiliar board is priced like a typical
+familiar board of its shape). The second gives every table five copies
+keyed to a global fill measure, occupied cells (0 to 13, 14 to 20, 21 to 27,
+28 to 34, 35 to 49) or the tallest column (up to 3, 4, 5, 6, 7), copies the
+frozen tables into every one of them so the conditioned leaf starts
+bit-identical to the frozen one, and continues temporal-difference training
+from there with fresh step sizes on a training block nothing had read
+(`0xa5800000`), validated every two hundred million moves on a fresh
+256-game block (`0xa52f2780`) with a window-of-three plateau rule from the
+sixth point. A third arm continues the frozen tables the same way without
+copies, so the screen can tell continued training from conditioning. The
+crate gained the two fill layouts, the promotion, a warm-start option for
+the trainer, and two gates: the fill bucket against an accessor reference
+on every sampled state and its mirror, and promotion preserving every value
+bit for bit while separating the buckets under one update. All gates passed
+for both layouts before any lease opened.
+
+The edits took 25 seconds: the zeroed file changed 901,259,321 entries and
+the class-mean file 877,344,474, and neither moved a touched entry. Seven
+occupancy classes had no touched entry to average and kept the starting
+value.
+
+## The three arms and the screen
+
+Each arm warm-started from the frozen tables and ran until its plateau
+rule fired or its budget ran out, validated every two hundred million moves
+on the 256 fresh games.
+
+<Finding title="Continued training with fresh step sizes did not fall apart, and the buckets learned nothing the validation could see" kind="neutral" metric="best margins: control +210,990, occupied-cells buckets +203,193, tallest-column buckets +179,760">
+The control arm, the frozen tables reloaded with fresh accumulators,
+stopped by the plateau rule at 1.2 billion moves after six points; its best
+point, +210,990 over the fair leaf at 600 million moves, is above every
+point the fill arms reached. The occupied-cells arm stopped at 1.6 billion
+moves after eight points with its best at 1.4 billion (+203,193); the
+tallest-column arm ran to the two-billion cap with its best at 1.6 billion
+(+179,760). By the fixed rule the occupied-cells arm is the candidate, and
+the pilot-tier training-signal check reads not passed: neither fill arm's
+best validation margin exceeded the control arm's. All three arms trained
+at about two million moves per second; the five-billion-entry tables were
+no slower than the one-billion-entry control.
+</Finding>
+
+The screen opened the 512-game block at 21:25 UTC with eleven arms on
+identical seeds, after the CHECK gates had passed again on each of the four
+new table files.
+
+<ArmTable
+  caption="The depth-3 arms on the 512 fresh games, from the screen artifact of RUN-20260906T201104Z-a96ea6c8; paired readings against the frozen tables in the same search."
+  columns={[
+    { key: "arm", label: "arm" },
+    { key: "mean", label: "mean score", numeric: true },
+    { key: "moves", label: "moves", numeric: true },
+    { key: "vsprior", label: "paired vs frozen tables", numeric: true, delta: true },
+    { key: "lb", label: "bootstrap lower bound", numeric: true, delta: true },
+    { key: "ub", label: "upper bound", numeric: true, delta: true },
+  ]}
+  rows={[
+    { arm: "zeroed edit as the depth-3 leaf", mean: "514,897", moves: "148.50", vsprior: "+29,442", lb: "+5,813", ub: "+54,179", highlight: true },
+    { arm: "fill candidate (occupied-cells buckets) as the depth-3 leaf", mean: "506,494", moves: "146.33", vsprior: "+21,039", lb: "-16,864", ub: "+59,230", highlight: true },
+    { arm: "control continuation as the depth-3 leaf", mean: "491,401", moves: "141.92", vsprior: "+5,946", lb: "-29,891", ub: "+41,989" },
+    { arm: "class-mean edit as the depth-3 leaf", mean: "486,386", moves: "140.64", vsprior: "+931", lb: "-530", ub: "+2,954" },
+    { arm: "frozen tables as the depth-3 leaf (comparator)", mean: "485,455", moves: "140.38", vsprior: "", lb: "", ub: "" },
+  ]}
+/>
+
+<Finding title="The fill candidate did not measurably beat the frozen tables" kind="negative" metric="+21,039 paired on 512 games, bounds -16,864 to +59,230, 271-0-241">
+The occupied-cells candidate as the depth-3 leaf averaged 506,494 against
+485,455 for the frozen tables on the same games: paired +21,039 with a
+bootstrap 95% lower bound of minus 16,864, an upper bound of plus 59,230
+and a detection floor of 37,956; halves +6,466 and +35,613, lower quartile
+229,450 against 230,374. The preregistered gate fails, and the reading is a
+non-measurement: a gain or loss larger than about 38,000 would have shown,
+and neither did. Against the control continuation the candidate is +15,093
+(bounds minus 22,431 to plus 52,817), and the control against the frozen
+tables is +5,946 (bounds minus 29,891 to plus 41,989): both inconclusive.
+Continued training and five fill buckets together moved the depth-3 leaf
+by less than this screen can see.
+</Finding>
+
+<Finding title="Zeroing the never-updated entries helped, and it changed only 194 of the 512 games" kind="positive" metric="+29,442 paired, lower bound +5,813, 102 wins, 318 ties, 92 losses">
+The zeroed edit, the frozen tables with every never-updated entry set to
+zero and nothing trained, averaged 514,897 as the depth-3 leaf: paired
++29,442 over the frozen tables with a bootstrap lower bound of +5,813, an
+upper bound of +54,179 and a floor of 24,154, halves +12,168 and +46,716.
+The verdict fixed for this reading is supported. In 318 of the 512 games
+the two leaves chose the same column at every move and the games are
+identical; the edit only matters when the search reads a never-updated
+entry at a decision that is close, and across the 194 games where it did
+the mean gain was about 77,700 points. The lower quartile is 229,884
+against 230,374, 490 points lower, so under the gate's four criteria this
+reading would fail on the lower quartile alone; the verdict reads the
+bounds. The class-mean edit, which replaces the same entries with the mean
+of the touched entries of the same shape, is a near no-op: 506 identical
+games and +931 paired.
+</Finding>
+
+<ArmTable
+  caption="The depth-4 arms and the direct-play arms on the same 512 games, from the screen artifact of RUN-20260906T201104Z-a96ea6c8."
+  columns={[
+    { key: "arm", label: "arm" },
+    { key: "mean", label: "mean score", numeric: true },
+    { key: "moves", label: "moves", numeric: true },
+    { key: "vs", label: "paired vs the frozen tables at the same depth", numeric: true, delta: true },
+    { key: "lb", label: "bootstrap lower bound", numeric: true, delta: true },
+    { key: "ub", label: "upper bound", numeric: true, delta: true },
+  ]}
+  rows={[
+    { arm: "frozen tables as the depth-4 leaf", mean: "521,956", moves: "150.20", vs: "", lb: "", ub: "" },
+    { arm: "zeroed edit as the depth-4 leaf", mean: "511,364", moves: "147.36", vs: "-10,592", lb: "-32,045", ub: "+11,133" },
+    { arm: "fill candidate as the depth-4 leaf", mean: "499,324", moves: "144.08", vs: "-22,631", lb: "-57,779", ub: "+12,806", highlight: true },
+    { arm: "fill candidate played directly, one ply", mean: "298,199", moves: "88.90", vs: "+4,809", lb: "-13,189", ub: "+22,386" },
+    { arm: "frozen tables played directly, one ply", mean: "293,390", moves: "87.53", vs: "", lb: "", ub: "" },
+    { arm: "fair leaf, depth 3", mean: "329,895", moves: "96.85", vs: "", lb: "", ub: "" },
+  ]}
+/>
+
+<Finding title="One ply deeper, both repairs gave their gains back" kind="negative" metric="fill candidate -22,631 at depth 4 (bounds -57,779 to +12,806); zeroed edit -10,592 (bounds -32,045 to +11,133)">
+As the depth-4 leaf the fill candidate averaged 499,324 against 521,956
+for the frozen tables on the same games, 22,631 behind with bootstrap
+bounds from minus 57,779 to plus 12,806, and 7,170 below its own depth-3
+score. The zeroed edit at depth 4 averaged 511,364, 10,592 behind the
+frozen tables (bounds minus 32,045 to plus 11,133; 320 of the 512 games
+identical) and 3,534 below its own depth-3 score. Both preregistered
+depth-4 verdicts are inconclusive, and the sign is the same for both
+repairs and for both depth steps, while the frozen tables' own fourth ply
+on these games was worth 36,500 (bounds minus 249 to plus 72,651). The
+deeper search reads far more boards that training never visited, and a
+pessimistic price for them served it worse than the fresh-board value did.
+The frozen tables at depth 4 stay the candidate to carry forward. The
+frozen tables' depth-3 margin over the fair leaf on this fourth fresh
+block was 155,561 (lower bound 123,422), and the fill candidate played
+directly was 4,809 ahead of the frozen tables played directly, with a
+lower quartile of 190,084 against 157,932.
+</Finding>
+
+<Direction title="What the record supports next" status="proposed" owner="claude-fable-5-1 (Claude Code)">
+The theory is assessed mixed: the frozen leaf does price unfamiliar boards
+at a fresh board's value, and removing that price helped at depth 3, but
+neither the removal nor the fill buckets survived the fourth ply, and the
+buckets could not be told from continued training at depth 3. Two things
+follow. A leaf tuned for the search's own use, trained on the boards the
+depth-3 or depth-4 search evaluates rather than the ones one-ply play
+visits, is now the better-supported half of the replication's open
+question. And a depth-aware edit, pricing a never-updated entry between
+zero and the fresh-board value, or scaling it by how many such entries the
+board reads, would test the one mechanism that did move the depth-3 leaf
+without training. Seven buckets, or buckets keyed to the rise clock and fill
+together, remain untested; nothing here rules them out, and nothing here
+recommends them before the search-distribution question is answered. The
+[approach page](/approach/ntuple-rl/ntuple-scale) carries the run's
+figures, the eleven-arm table and the verdicts.
 </Direction>

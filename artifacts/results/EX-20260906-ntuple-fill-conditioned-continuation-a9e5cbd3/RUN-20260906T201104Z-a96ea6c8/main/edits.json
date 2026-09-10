@@ -1,0 +1,164 @@
+{
+  "format": "drop7-ntuple-scale-edits-v1",
+  "source": "/home/keshav/Developer/drop7-bench/runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/best-weights.bin",
+  "sourceSha256": "0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b",
+  "layout": "rows,cols,win23,win32,phase=all",
+  "entries": 1000000000,
+  "optimisticStart": 0.2702702581882477,
+  "untouchedEntries": 901259321,
+  "touchedEntries": 98740679,
+  "families": {
+    "rows": {
+      "tables": 7,
+      "patterns": 10000000,
+      "untouchedByOccupied": [
+        1,
+        1217,
+        35563,
+        588494,
+        6007340,
+        35435542,
+        112540548,
+        149937753
+      ],
+      "patternsByOccupied": [
+        1,
+        63,
+        1701,
+        25515,
+        229635,
+        1240029,
+        3720087,
+        4782969
+      ],
+      "touchedMeanByOccupied": [
+        0.31726950039977536,
+        0.17607499550469974,
+        0.27536354163602855,
+        0.282555946704271,
+        0.2694900624511739,
+        0.2688043116453142,
+        0.27294660081563815,
+        0.2695776162162157
+      ]
+    },
+    "cols": {
+      "tables": 7,
+      "patterns": 10000000,
+      "untouchedByOccupied": [
+        0,
+        1925,
+        57319,
+        876034,
+        7927743,
+        42946610,
+        129269242,
+        166241617
+      ],
+      "patternsByOccupied": [
+        1,
+        63,
+        1701,
+        25515,
+        229635,
+        1240029,
+        3720087,
+        4782969
+      ],
+      "touchedMeanByOccupied": [
+        -0.46578402258455753,
+        -0.11380635824586664,
+        0.009998958409908446,
+        0.13439191668150488,
+        0.23114951649354318,
+        0.2553722690399224,
+        0.25802261451709435,
+        0.2470479004864918
+      ]
+    },
+    "win23": {
+      "tables": 30,
+      "patterns": 1000000,
+      "untouchedByOccupied": [
+        0,
+        5843,
+        155851,
+        1896710,
+        13238811,
+        47551599,
+        66858607
+      ],
+      "patternsByOccupied": [
+        1,
+        54,
+        1215,
+        14580,
+        98415,
+        354294,
+        531441
+      ],
+      "touchedMeanByOccupied": [
+        0.31822626570860546,
+        0.27302533677314095,
+        0.26015555531225665,
+        0.23146419153913586,
+        0.26353272790142945,
+        0.2652286949433212,
+        0.26102811792955166
+      ]
+    },
+    "win32": {
+      "tables": 30,
+      "patterns": 1000000,
+      "untouchedByOccupied": [
+        1,
+        4852,
+        128416,
+        1728469,
+        11797825,
+        43800739,
+        62224650
+      ],
+      "patternsByOccupied": [
+        1,
+        54,
+        1215,
+        14580,
+        98415,
+        354294,
+        531441
+      ],
+      "touchedMeanByOccupied": [
+        0.407689370136808,
+        0.2774386553855365,
+        0.2118132298735943,
+        0.2636495220858255,
+        0.26337091965591186,
+        0.26971242468837797,
+        0.2644379473294395
+      ]
+    }
+  },
+  "checkpoint": {
+    "path": "/home/keshav/Developer/drop7-bench/runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/checkpoint.bin",
+    "touchedEntriesAtStartValue": 20266847,
+    "neverUpdatedEntriesOffStartValue": 0,
+    "note": "the checkpoint is the end of training, not the candidate's point; an entry touched only after the candidate's point is untouched in the candidate and counted as such"
+  },
+  "classesWithNoTouchedEntry": 7,
+  "outputs": {
+    "zeroed": {
+      "path": "/home/keshav/Developer/drop7-bench/runs/RUN-20260906T201104Z-a96ea6c8/ntuple-scale/main/zeroed-weights.bin",
+      "sha256": "e9248b1a26f0b6e2d6cac121df9eda48c1adf1ea369287a60546a830b65c058e",
+      "entriesChanged": 901259321,
+      "entriesChangedOnlyWhereUntouched": true
+    },
+    "classmean": {
+      "path": "/home/keshav/Developer/drop7-bench/runs/RUN-20260906T201104Z-a96ea6c8/ntuple-scale/main/classmean-weights.bin",
+      "sha256": "c3f05eeebb6ed573ba176797e7cfa4bdab3b47e042c8877011dd6614ebb54450",
+      "entriesChanged": 877344474,
+      "entriesChangedOnlyWhereUntouched": true
+    }
+  },
+  "wallSeconds": 25.3
+}

@@ -16,6 +16,26 @@
 // of a state is a distinct table entry by construction (one entry per table
 // per state), so the semi-gradient multiplicity is always one.
 //
+// FILL CONDITIONING (the fill-conditioned leaf experiment).  Every family
+// may additionally be conditioned on a global fill bucket of the board,
+// which multiplies every table by five again: fill=occ5 buckets the number
+// of occupied cells (0-13, 14-20, 21-27, 28-34, 35-49) and fill=hgt5 the
+// tallest column (0-3, 4, 5, 6, 7).  A line or window pattern sees only its
+// own cells; the bucket lets the same pattern carry a different number when
+// the board around it is nearly empty or nearly full.  The bucket is a
+// function of the public board alone.  Fill conditioning of the eight-cell
+// windows is refused (five copies of a hundred-million-entry family do not
+// fit beside the rest).  Within a table the slabs are ordered bucket-major,
+// then phase, then pattern.
+//
+// PROMOTION.  `Model::promote` builds a fill-conditioned model from an
+// unconditioned one of the same families by copying every table into every
+// bucket, so the promoted model values every board exactly as its source
+// did (bit-identical sums) until training moves the buckets apart.  The
+// coherence accumulators start fresh (every entry's first update runs at
+// full rate), which is the multi-stage weight promotion of the 2048 n-tuple
+// literature applied to a bucket that is not monotone in time.
+//
 // CANONICALISATION.  The board is reflected left-right when its mirror is
 // lexicographically smaller, exactly as the search canonicalises, so the same
 // position and its mirror share every table entry.  The value is therefore
@@ -51,6 +71,8 @@ const WIN42: usize = 5;
 /// One row rise, in points: the value unit of the tables.
 pub const VALUE_SCALE: f64 = 17_000.0;
 pub const PHASES: usize = 5;
+/// Fill buckets of a fill-conditioned family.
+pub const FILL_BUCKETS: usize = 5;
 
 const MAGIC: &[u8; 8] = b"D7NTUP01";
 
@@ -62,6 +84,54 @@ pub enum PhaseMode {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum FillMode {
+    None,
+    /// Occupied cells: 0-13, 14-20, 21-27, 28-34, 35-49.
+    Occupancy5,
+    /// Tallest column: 0-3, 4, 5, 6, 7.
+    Height5,
+}
+
+impl FillMode {
+    /// The bucket of a board (0..FILL_BUCKETS), or 0 for an unconditioned
+    /// layout.  Reads only the board.
+    #[inline]
+    pub fn bucket(self, board: &Board) -> usize {
+        match self {
+            FillMode::None => 0,
+            FillMode::Occupancy5 => {
+                let occupied: usize = (0..BOARD_SIZE).map(|c| board.height(c)).sum();
+                match occupied {
+                    0..=13 => 0,
+                    14..=20 => 1,
+                    21..=27 => 2,
+                    28..=34 => 3,
+                    _ => 4,
+                }
+            }
+            FillMode::Height5 => {
+                let tallest = (0..BOARD_SIZE).map(|c| board.height(c)).max().unwrap_or(0);
+                match tallest {
+                    0..=3 => 0,
+                    4 => 1,
+                    5 => 2,
+                    6 => 3,
+                    _ => 4,
+                }
+            }
+        }
+    }
+
+    pub fn buckets(self) -> usize {
+        if self == FillMode::None {
+            1
+        } else {
+            FILL_BUCKETS
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct Layout {
     pub rows: bool,
     pub cols: bool,
@@ -70,11 +140,13 @@ pub struct Layout {
     pub win24: bool,
     pub win42: bool,
     pub phase: PhaseMode,
+    pub fill: FillMode,
 }
 
 impl Layout {
-    /// Parse "rows,cols,win23,win32,win24,win42,phase=cols" (any subset of
-    /// the families, phase in {none, cols, all}; default none).
+    /// Parse "rows,cols,win23,win32,win24,win42,phase=cols,fill=occ5" (any
+    /// subset of the families, phase in {none, cols, all}, fill in {none,
+    /// occ5, hgt5}; both default none).
     pub fn parse(spec: &str) -> Result<Layout, String> {
         let mut layout = Layout {
             rows: false,
@@ -84,6 +156,7 @@ impl Layout {
             win24: false,
             win42: false,
             phase: PhaseMode::None,
+            fill: FillMode::None,
         };
         for item in spec.split(',').map(str::trim).filter(|s| !s.is_empty()) {
             match item {
@@ -96,13 +169,25 @@ impl Layout {
                 "phase=none" => layout.phase = PhaseMode::None,
                 "phase=cols" => layout.phase = PhaseMode::Columns,
                 "phase=all" => layout.phase = PhaseMode::All,
+                "fill=none" => layout.fill = FillMode::None,
+                "fill=occ5" => layout.fill = FillMode::Occupancy5,
+                "fill=hgt5" => layout.fill = FillMode::Height5,
                 other => return Err(format!("unknown layout item {other:?}")),
             }
         }
         if !(layout.rows || layout.cols || layout.win23 || layout.win32 || layout.win24 || layout.win42) {
             return Err("layout names no tuple family".into());
         }
+        if layout.fill != FillMode::None && (layout.win24 || layout.win42) {
+            return Err("fill conditioning is not supported for the eight-cell windows (win24, win42)".into());
+        }
         Ok(layout)
+    }
+
+    /// The same families and phase mode without fill conditioning: the
+    /// layout a fill-conditioned model is promoted from.
+    pub fn unconditioned(&self) -> Layout {
+        Layout { fill: FillMode::None, ..*self }
     }
 
     pub fn spec(&self) -> String {
@@ -130,6 +215,13 @@ impl Layout {
             PhaseMode::Columns => "phase=cols",
             PhaseMode::All => "phase=all",
         });
+        // Emitted only when set, so the spec of an unconditioned layout is
+        // byte-identical to the one the earlier table files carry.
+        match self.fill {
+            FillMode::None => {}
+            FillMode::Occupancy5 => parts.push("fill=occ5"),
+            FillMode::Height5 => parts.push("fill=hgt5"),
+        }
         parts.join(",")
     }
 
@@ -143,26 +235,34 @@ impl Layout {
         }
     }
 
-    /// (family, tables, entries per table).
+    /// Phase slabs of a family (1 or PHASES); public for the gate's
+    /// independent reference.
+    pub fn phase_slabs(&self, family: &str) -> usize {
+        self.phases_for(family)
+    }
+
+    /// (family, tables, entries per table).  A table holds
+    /// buckets x phase slabs x patterns entries, bucket-major.
     pub fn families(&self) -> Vec<(&'static str, usize, usize)> {
+        let buckets = self.fill.buckets();
         let mut out = Vec::new();
         if self.rows {
-            out.push(("rows", BOARD_SIZE, LINE_PATTERNS * self.phases_for("rows")));
+            out.push(("rows", BOARD_SIZE, LINE_PATTERNS * self.phases_for("rows") * buckets));
         }
         if self.cols {
-            out.push(("cols", BOARD_SIZE, LINE_PATTERNS * self.phases_for("cols")));
+            out.push(("cols", BOARD_SIZE, LINE_PATTERNS * self.phases_for("cols") * buckets));
         }
         if self.win23 {
-            out.push(("win23", WIN23_PLACEMENTS, WINDOW_PATTERNS * self.phases_for("win23")));
+            out.push(("win23", WIN23_PLACEMENTS, WINDOW_PATTERNS * self.phases_for("win23") * buckets));
         }
         if self.win32 {
-            out.push(("win32", WIN32_PLACEMENTS, WINDOW_PATTERNS * self.phases_for("win32")));
+            out.push(("win32", WIN32_PLACEMENTS, WINDOW_PATTERNS * self.phases_for("win32") * buckets));
         }
         if self.win24 {
-            out.push(("win24", WIN24_PLACEMENTS, WIDE_WINDOW_PATTERNS * self.phases_for("win24")));
+            out.push(("win24", WIN24_PLACEMENTS, WIDE_WINDOW_PATTERNS * self.phases_for("win24") * buckets));
         }
         if self.win42 {
-            out.push(("win42", WIN42_PLACEMENTS, WIDE_WINDOW_PATTERNS * self.phases_for("win42")));
+            out.push(("win42", WIN42_PLACEMENTS, WIDE_WINDOW_PATTERNS * self.phases_for("win42") * buckets));
         }
         out
     }
@@ -266,6 +366,60 @@ impl Model {
         }
     }
 
+    /// A fill-conditioned, trainable model whose every bucket is a copy of
+    /// `source` (an unconditioned model of the same families and phase mode):
+    /// multi-stage weight promotion.  The coherence accumulators start at
+    /// zero.  The promoted model's value of any board is bit-identical to the
+    /// source's, because each active entry is a copy of the source's entry and
+    /// the sum runs in the same order.
+    pub fn promote(source: &Model, layout: Layout) -> Result<Model, String> {
+        if layout.fill == FillMode::None {
+            return Err("promote needs a fill-conditioned target layout".into());
+        }
+        if source.layout != layout.unconditioned() {
+            return Err(format!(
+                "promote: source layout {} is not the unconditioned form of {}",
+                source.layout.spec(),
+                layout.spec()
+            ));
+        }
+        let model = Model::new(layout, 0.0, true);
+        let buckets = layout.fill.buckets();
+        let families = layout.families();
+        std::thread::scope(|scope| {
+            for (family, tables, dst_size) in &families {
+                let slot = match *family {
+                    "rows" => ROWS,
+                    "cols" => COLS,
+                    "win23" => WIN23,
+                    "win32" => WIN32,
+                    "win24" => WIN24,
+                    "win42" => WIN42,
+                    _ => unreachable!(),
+                };
+                // The source table is the (phases x patterns) slab that
+                // each bucket of the destination table repeats.
+                let src_size = source.size[slot];
+                debug_assert_eq!(src_size * buckets, *dst_size);
+                for t in 0..*tables {
+                    let src_start = source.off[slot] + t * src_size;
+                    let dst_start = model.off[slot] + t * dst_size;
+                    let model = &model;
+                    scope.spawn(move || {
+                        let src = &source.weights[src_start..src_start + src_size];
+                        for b in 0..buckets {
+                            let dst = &model.weights[dst_start + b * src_size..dst_start + (b + 1) * src_size];
+                            for (d, s) in dst.iter().zip(src.iter()) {
+                                d.store(s.load(Relaxed), Relaxed);
+                            }
+                        }
+                    });
+                }
+            }
+        });
+        Ok(model)
+    }
+
     pub fn entries(&self) -> usize {
         self.weights.len()
     }
@@ -300,10 +454,18 @@ impl Model {
         let cols = &canonical.cols;
         let phase = (moves_remaining.clamp(1, PHASES as i32) - 1) as usize;
         let layout = self.layout;
+        let bucket = layout.fill.bucket(&canonical);
+        // Slab of one table: bucket-major, then the phase slab (0 for an
+        // unconditioned family), then the pattern.
+        let slab = |conditioned: bool, patterns: usize| -> usize {
+            let phases = if conditioned { PHASES } else { 1 };
+            let p = if conditioned { phase } else { 0 };
+            (bucket * phases + p) * patterns
+        };
         let mut count = 0usize;
         if layout.rows {
             let rows = row_words(cols);
-            let phase_offset = if layout.phase == PhaseMode::All { phase * LINE_PATTERNS } else { 0 };
+            let phase_offset = slab(layout.phase == PhaseMode::All, LINE_PATTERNS);
             for (r, &word) in rows.iter().enumerate() {
                 out[count] = (self.off[ROWS] + r * self.size[ROWS] + phase_offset) as u64
                     + self.codec.line(word) as u64;
@@ -311,7 +473,7 @@ impl Model {
             }
         }
         if layout.cols {
-            let phase_offset = if layout.phase != PhaseMode::None { phase * LINE_PATTERNS } else { 0 };
+            let phase_offset = slab(layout.phase != PhaseMode::None, LINE_PATTERNS);
             for (c, &word) in cols.iter().enumerate() {
                 out[count] = (self.off[COLS] + c * self.size[COLS] + phase_offset) as u64
                     + self.codec.line(word) as u64;
@@ -319,7 +481,7 @@ impl Model {
             }
         }
         if layout.win23 {
-            let phase_offset = if layout.phase == PhaseMode::All { phase * WINDOW_PATTERNS } else { 0 };
+            let phase_offset = slab(layout.phase == PhaseMode::All, WINDOW_PATTERNS);
             let mut placement = 0usize;
             for c in 0..BOARD_SIZE - 1 {
                 let left = cols[c];
@@ -336,7 +498,7 @@ impl Model {
             }
         }
         if layout.win32 {
-            let phase_offset = if layout.phase == PhaseMode::All { phase * WINDOW_PATTERNS } else { 0 };
+            let phase_offset = slab(layout.phase == PhaseMode::All, WINDOW_PATTERNS);
             let mut placement = 0usize;
             for c in 0..BOARD_SIZE - 2 {
                 let a = cols[c];
@@ -575,6 +737,88 @@ mod tests {
         assert_eq!(small.total_entries(), 7 * LINE_PATTERNS);
         assert!(Layout::parse("phase=cols").is_err());
         assert_eq!(Layout::parse(&full.spec()).unwrap(), full);
+        let filled = Layout::parse("rows,cols,win23,win32,phase=all,fill=occ5").unwrap();
+        assert_eq!(filled.active_count(), 74);
+        assert_eq!(filled.total_entries(), 5 * (14 * 5 * LINE_PATTERNS + 60 * 5 * WINDOW_PATTERNS));
+        assert_eq!(filled.total_entries(), 5_000_000_000);
+        assert_eq!(filled.spec(), "rows,cols,win23,win32,phase=all,fill=occ5");
+        assert_eq!(Layout::parse(&filled.spec()).unwrap(), filled);
+        assert_eq!(filled.unconditioned(), Layout::parse("rows,cols,win23,win32,phase=all").unwrap());
+        assert_eq!(Layout::parse("rows,cols,win23,win32,phase=all").unwrap().spec(), "rows,cols,win23,win32,phase=all");
+        assert!(Layout::parse("rows,win24,fill=hgt5").is_err());
+    }
+
+    #[test]
+    fn fill_buckets_read_the_board() {
+        let mut board = Board { cols: [0u32; BOARD_SIZE] };
+        assert_eq!(FillMode::Occupancy5.bucket(&board), 0);
+        assert_eq!(FillMode::Height5.bucket(&board), 0);
+        for c in 0..BOARD_SIZE {
+            for _ in 0..2 {
+                board.place_disc(c, 3);
+            }
+        }
+        // 14 discs, tallest column 2.
+        assert_eq!(FillMode::Occupancy5.bucket(&board), 1);
+        assert_eq!(FillMode::Height5.bucket(&board), 0);
+        for _ in 0..4 {
+            board.place_disc(3, 4);
+        }
+        // 18 discs, tallest column 6.
+        assert_eq!(FillMode::Occupancy5.bucket(&board), 1);
+        assert_eq!(FillMode::Height5.bucket(&board), 3);
+        board.place_disc(3, 4);
+        assert_eq!(FillMode::Height5.bucket(&board), 4);
+        for c in 0..BOARD_SIZE {
+            while board.height(c) < 5 {
+                board.place_disc(c, 2);
+            }
+        }
+        // 35 discs.
+        assert_eq!(FillMode::Occupancy5.bucket(&board), 4);
+        assert_eq!(FillMode::None.bucket(&board), 0);
+    }
+
+    #[test]
+    fn promotion_preserves_values_and_separates_buckets() {
+        let source_layout = Layout::parse("rows,win32,phase=cols").unwrap();
+        let source = Model::new(source_layout, 3.0, true);
+        let mut scratch = [0u64; MAX_ACTIVE];
+        let mut stats = UpdateStats::default();
+        let mut board = Board::initial();
+        board.place_disc(2, 4);
+        let n = source.features(&board, 2, &mut scratch);
+        source.update(&scratch[..n], 7.0, 1.0, 100.0, &mut stats);
+        for fill in ["fill=occ5", "fill=hgt5"] {
+            let layout = Layout::parse(&format!("rows,win32,phase=cols,{fill}")).unwrap();
+            let promoted = Model::promote(&source, layout).unwrap();
+            assert_eq!(promoted.entries(), 5 * source.entries());
+            assert!(promoted.trainable());
+            assert_eq!(promoted.touched_entries(), 0);
+            let mut b2 = Board::initial();
+            for phase in 1..=5 {
+                assert_eq!(promoted.value(&board, phase, &mut scratch).to_bits(), source.value(&board, phase, &mut scratch).to_bits());
+                assert_eq!(promoted.value(&b2, phase, &mut scratch).to_bits(), source.value(&b2, phase, &mut scratch).to_bits());
+            }
+            // Fill a column so the board changes bucket; the two boards now
+            // read different buckets, and an update to one leaves the other.
+            for _ in 0..7 {
+                b2.place_disc(0, 1);
+            }
+            for c in 1..7 {
+                for _ in 0..5 {
+                    b2.place_disc(c, 1);
+                }
+            }
+            assert_ne!(layout.fill.bucket(&b2), layout.fill.bucket(&board));
+            let before = promoted.value(&board, 3, &mut scratch);
+            let n2 = promoted.features(&b2, 3, &mut scratch);
+            promoted.update(&scratch[..n2], 50.0, 1.0, 100.0, &mut stats);
+            assert_eq!(promoted.value(&board, 3, &mut scratch).to_bits(), before.to_bits());
+        }
+        assert!(Model::promote(&source, source_layout).is_err());
+        let other = Model::new(Layout::parse("rows,win23,phase=cols").unwrap(), 1.0, false);
+        assert!(Model::promote(&other, Layout::parse("rows,win32,phase=cols,fill=occ5").unwrap()).is_err());
     }
 
     #[test]
