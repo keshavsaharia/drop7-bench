@@ -217,10 +217,13 @@ test("bench replay import rejects another round, a changed choice, an inflated s
   const game = getCompetitionGame(COMPETITION_GAME_KEY);
   assert.ok(game);
   const { recorded } = recordedReplay(game);
+  // The catalog advances every month, so pick a round the current game is not on.
+  const otherRoundId =
+    game.manifest.roundId === "gauntlet-01" ? "gauntlet-02" : "gauntlet-01";
 
   assert.throws(
-    () => importBenchReplay(game, { ...recorded, roundId: "gauntlet-02" }),
-    /gauntlet-02/,
+    () => importBenchReplay(game, { ...recorded, roundId: otherRoundId }),
+    new RegExp(otherRoundId),
   );
   assert.throws(
     () => importBenchReplay(game, { ...recorded, score: recorded.score + 1 }),
