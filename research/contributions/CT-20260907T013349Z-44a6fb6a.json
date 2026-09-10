@@ -1,0 +1,101 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260907T013349Z-44a6fb6a",
+  "actor": {
+    "kind": "model",
+    "platform": "Claude Code",
+    "model": "claude-fable-5-1",
+    "agentId": "claude-code-ntuple-search-targets"
+  },
+  "level": "L3",
+  "roles": [
+    {
+      "role": "conceptualization",
+      "degree": "lead"
+    },
+    {
+      "role": "methodology",
+      "degree": "lead"
+    },
+    {
+      "role": "software",
+      "degree": "lead"
+    },
+    {
+      "role": "investigation",
+      "degree": "lead"
+    },
+    {
+      "role": "formal-analysis",
+      "degree": "lead"
+    },
+    {
+      "role": "visualization",
+      "degree": "lead"
+    },
+    {
+      "role": "writing",
+      "degree": "lead"
+    },
+    {
+      "role": "compute",
+      "degree": "lead"
+    }
+  ],
+  "summary": "Search-target (TreeStrap) experiment on the n-tuple leaf: a training-time fair expectimax that mirrors the engine's search bit for bit and returns score-only backups for every internal node (search_train.rs), the trainer's search actor with visited-state and tree targets and a warm-start validation point, a CHECK gate comparing the training search against the engine's column values and decisions; the theory, the preregistered experiment with three fresh leases and the stage driver; ran the gates, the smoke run, the two warm-started search-actor arms, the freeze and the one-shot 512-game screen; wrote the analysis, the result record, the approach page section, the web figures and the log entry.",
+  "theoryIds": [
+    "TH-20260907-ntuple-search-target-treestrap-leaf-b1c9989f"
+  ],
+  "experimentIds": [
+    "EX-20260907-ntuple-treestrap-warm-start-c33ba880"
+  ],
+  "runIds": [
+    "RUN-20260907T012358Z-a00ecdf0"
+  ],
+  "artifactPaths": [
+    "approaches/ntuple-rl/ntuple-scale/src/search_train.rs",
+    "approaches/ntuple-rl/ntuple-scale/src/lib.rs",
+    "approaches/ntuple-rl/ntuple-scale/src/bin/train.rs",
+    "approaches/ntuple-rl/ntuple-scale/src/bin/gate.rs",
+    "approaches/ntuple-rl/ntuple-scale/scripts/pipeline5.sh",
+    "approaches/ntuple-rl/ntuple-scale/scripts/analyze.py",
+    "research/theories/TH-20260907-ntuple-search-target-treestrap-leaf-b1c9989f.json",
+    "research/experiments/EX-20260907-ntuple-treestrap-warm-start-c33ba880.json",
+    "research/seeds/leases/SL-20260907T012358Z-ff502b09.json",
+    "research/seeds/leases/SL-20260907T012358Z-a93f439d.json",
+    "research/seeds/leases/SL-20260907T012358Z-74d0228f.json",
+    "research/runs/RUN-20260907T012358Z-a00ecdf0.json",
+    "research/system-profiles/MACH-20260907T012358Z-d6aa318d.json",
+    "approaches/ntuple-rl/ntuple-scale/scripts/write-tree-result-record.py",
+    "approaches/ntuple-rl/ntuple-scale/scripts/pipeline6.sh",
+    "research/results/RS-20260907T041853Z-27cb32a3.json",
+    "artifacts/results/EX-20260907-ntuple-treestrap-warm-start-c33ba880/RUN-20260907T012358Z-a00ecdf0/manifest.json",
+    "approaches/ntuple-rl/ntuple-scale/README.mdx",
+    "web/content/log/2026-09-07.mdx",
+    "web/content/figures/ntuple-scale/RUN-20260907T012358Z-a00ecdf0.json",
+    "web/lib/charts/ntuple-scale.ts",
+    "web/scripts/extract-ntuple-scale.ts",
+    "web/components/NTupleScale.tsx",
+    "web/components/charts/NTupleCharts.tsx",
+    "docs/research/status.md",
+    "docs/research/experiment-index.md",
+    "docs/exploratory/lease-map.md"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "cargo test --release (15 unit tests, including the training search matching the engine's column values bit for bit and collecting internal nodes)",
+    "gate binary on the frozen tables (gate --weights): all CHECK gates including train-search-vs-engine (gates.log), and gate --weights on each of the two new table files before the screen lease opened",
+    "make research-validate",
+    "analyze.py evaluated the preregistered gate and the readings beside it from the screen artifact; compare.py reports written for eighteen contrasts",
+    "npx tsc --noEmit, npm run lint, check-mdx, check-figures and check-tokens under web/",
+    "every compact artifact of the run and the two screened table files (zstd) were published to the public research archive and verified (runs/RUN-20260907T012358Z-a00ecdf0/published.jsonl)"
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed.",
+    "The owner asked for the leaf to be trained on the boards the search evaluates rather than only the one-ply visited ones, and for advice on whether the depth-aware n-tuple direction has run its course; the model designed the training-time search, the score-only backup semantics, the two arms, the gate and the protocol, and ran everything on the same workstation as the four earlier n-tuple experiments."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-09-07T06:31:11Z"
+}

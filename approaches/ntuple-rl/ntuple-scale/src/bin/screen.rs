@@ -12,8 +12,14 @@
 // screen is inspectable; the unchanged compare.py of the leaf-evolution
 // experiment computes the paired statistics.
 //
+// --games-d4 M (M <= N) plays every depth-4 arm on the first M seeds only,
+// so a large depth-3 cohort (a lower detection floor) can share one block
+// with an affordable depth-4 cohort; contrasts between arms of different
+// sizes are read on the seeds both played (compare.py and analyze.py align
+// arms by seed).
+//
 // Usage: screen [--candidate FILE] --seeds-start 0x... --games N --threads T
-//               --out FILE [--move-cap 2000] [--skip-d4] [--skip-direct]
+//               --out FILE [--move-cap 2000] [--skip-d4] [--skip-direct] [--games-d4 M]
 //               [--arm NAME=FILE]... [--arm-d3 NAME=FILE]... [--arm-d4 NAME=FILE]...
 //               [--experiment-id EX-...]
 
@@ -29,6 +35,7 @@ fn main() -> Result<(), String> {
     let mut candidate = None;
     let mut seeds_start = None;
     let mut games = 256usize;
+    let mut games_d4: Option<usize> = None;
     let mut threads = 32usize;
     let mut out = None;
     let mut move_cap = MOVE_CAP;
@@ -61,6 +68,7 @@ fn main() -> Result<(), String> {
                 seeds_start = Some(u32::from_str_radix(value.trim_start_matches("0x"), 16).map_err(|_| "bad --seeds-start")?)
             }
             "--games" => games = value.parse().map_err(|_| "bad --games")?,
+            "--games-d4" => games_d4 = Some(value.parse().map_err(|_| "bad --games-d4")?),
             "--threads" => threads = value.parse().map_err(|_| "bad --threads")?,
             "--move-cap" => move_cap = value.parse().map_err(|_| "bad --move-cap")?,
             "--out" => out = Some(value.to_string()),
@@ -83,6 +91,10 @@ fn main() -> Result<(), String> {
     let seeds_start = seeds_start.ok_or("--seeds-start required")?;
     let out = out.ok_or("--out required")?;
     let seeds: Vec<u32> = (0..games as u32).map(|g| seeds_start.wrapping_add(g)).collect();
+    let games_d4 = games_d4.unwrap_or(games);
+    if games_d4 == 0 || games_d4 > games {
+        return Err("--games-d4 must be between 1 and --games".into());
+    }
 
     let mut loaded: HashMap<String, Arc<Model>> = HashMap::new();
     let mut load = |path: &str| -> Result<Arc<Model>, String> {
@@ -142,17 +154,19 @@ fn main() -> Result<(), String> {
     // ones and is rewritten after each, so an interrupted screen leaves a
     // readable partial artifact (fewer individuals than config.arms).
     let config_json = format!(
-        "{{\"experiment\":\"{experiment_id}\",\"screen\":true,\"games\":{games},\"moveCap\":{move_cap},\"arms\":[{}]}}",
+        "{{\"experiment\":\"{experiment_id}\",\"screen\":true,\"games\":{games},\"gamesDepth4\":{games_d4},\"moveCap\":{move_cap},\"arms\":[{}]}}",
         arms.iter().map(|(name, _)| format!("\"{name}\"")).collect::<Vec<_>>().join(",")
     );
     let mut individuals: Vec<Individual> = Vec::new();
     for (name, arm) in &arms {
         let started = std::time::Instant::now();
-        let records = evaluate_arm(arm, &seeds, threads, move_cap);
+        let arm_seeds: &[u32] = if matches!(arm, Arm::NTupleD4(_) | Arm::FairD4) { &seeds[..games_d4] } else { &seeds };
+        let records = evaluate_arm(arm, arm_seeds, threads, move_cap);
         eprintln!(
-            "arm {name}: mean {:.0} / {:.2} moves over {games} games ({:.0} s)",
+            "arm {name}: mean {:.0} / {:.2} moves over {} games ({:.0} s)",
             mean_score(&records),
             mean_moves(&records),
+            records.len(),
             started.elapsed().as_secs_f64()
         );
         individuals.push(Individual { name: name.clone(), games: records });

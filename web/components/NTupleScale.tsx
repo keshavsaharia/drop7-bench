@@ -15,7 +15,7 @@
 import type { ReactNode } from "react";
 import { readRepoFile } from "@/lib/repo";
 import { formatSigned, formatValue } from "@/lib/charts/spec";
-import { SNAPSHOT_FORMAT, isFillSelection, type FillReading, type NTupleSnapshot, type TrainingRun } from "@/lib/charts/ntuple-scale";
+import { SNAPSHOT_FORMAT, isFillSelection, isTreeSelection, type FillReading, type NTupleSnapshot, type TrainingRun } from "@/lib/charts/ntuple-scale";
 import { ScreenPairs } from "./charts/EvolutionCharts";
 import { PilotArms, TrainingCurve } from "./charts/NTupleCharts";
 
@@ -36,6 +36,11 @@ const ARM_LABELS: Record<string, string> = {
   "zeroed-d3s7": "frozen tables with never-updated entries zeroed, depth-3 leaf",
   "zeroed-d4s7": "frozen tables with never-updated entries zeroed, depth-4 leaf",
   "classmean-d3s7": "frozen tables with never-updated entries at the class mean, depth-3 leaf",
+  "treestrap-d3s7": "search-trained tables (every tree node) as the depth-3 leaf",
+  "treestrap-1ply": "search-trained tables (every tree node) played directly, one ply",
+  "treestrap-d4s7": "search-trained tables (every tree node) as the depth-4 leaf",
+  "searchtd-d3s7": "search-trained tables (visited states only) as the depth-3 leaf",
+  "searchtd-d4s7": "search-trained tables (visited states only) as the depth-4 leaf",
 };
 
 const CONTRAST_LABELS: Record<string, string> = {
@@ -63,7 +68,26 @@ const CONTRAST_LABELS: Record<string, string> = {
   "fill-d3s7-vs-fair-d3s7": "fill-conditioned tables as the depth-3 leaf minus the fair leaf in the same search",
   "fill-1ply-vs-prior-1ply": "fill-conditioned tables played directly minus the frozen tables played directly",
   "fill-1ply-vs-fair-d3s7": "fill-conditioned tables played directly minus the fair leaf in the depth-3 search",
+  "treestrap-d3s7-vs-prior-d3s7": "tables trained on every search-tree node minus the frozen tables, both as the depth-3 leaf",
+  "treestrap-d3s7-vs-searchtd-d3s7": "tables trained on every tree node minus tables trained on visited states only, both as the depth-3 leaf",
+  "searchtd-d3s7-vs-prior-d3s7": "tables trained on visited states toward search values minus the frozen tables, both as the depth-3 leaf",
+  "treestrap-d3s7-vs-control-d3s7": "tables trained on every tree node minus the one-ply continuation, both as the depth-3 leaf",
+  "treestrap-d4s7-vs-prior-d4s7": "tables trained on every tree node minus the frozen tables, both as the depth-4 leaf",
+  "searchtd-d4s7-vs-prior-d4s7": "tables trained on visited states minus the frozen tables, both as the depth-4 leaf",
+  "treestrap-d4s7-vs-treestrap-d3s7": "search-trained tables as the depth-4 leaf minus the same tables as the depth-3 leaf",
+  "searchtd-d4s7-vs-searchtd-d3s7": "visited-state search-trained tables as the depth-4 leaf minus the same tables as the depth-3 leaf",
+  "treestrap-d3s7-vs-fair-d3s7": "search-trained tables as the depth-3 leaf minus the fair leaf in the same search",
+  "treestrap-1ply-vs-prior-1ply": "search-trained tables played directly minus the frozen tables played directly",
+  "treestrap-1ply-vs-fair-d3s7": "search-trained tables played directly minus the fair leaf in the depth-3 search",
 };
+
+const TREE_READING_LABELS: [string, string][] = [
+  ["offPathBoards", "off-path boards: every-tree-node tables minus visited-states-only tables, depth 3"],
+  ["ablation", "search targets at visited states only: searchtd minus the frozen tables, depth 3"],
+  ["vsOnePlyContinuation", "every-tree-node tables minus the one-ply continuation, depth 3"],
+  ["treestrapDepth4", "every-tree-node tables minus the frozen tables, depth 4"],
+  ["ablationDepth4", "visited-states-only tables minus the frozen tables, depth 4"],
+];
 
 const FILL_READING_LABELS: [keyof Pick<NonNullable<NTupleSnapshot["screen"]>["fill"] extends infer F ? (F extends null ? never : F) : never, "conditioning" | "continuation" | "zeroed" | "classmean" | "fillDepth4" | "zeroedDepth4">, string][] = [
   ["conditioning", "conditioning: fill-conditioned tables minus the unconditioned continuation, depth 3"],
@@ -181,6 +205,40 @@ export function NTupleStatus({ run }: { run: string }) {
   const pilotDone = pilotArms.filter((a) => a.done).length;
   const replication = !pilot && (smoke !== null || Boolean(screen?.replication) || Boolean(main?.stop));
   const depthOnly = !pilot && !smoke && !main && (Boolean(screen?.depth) || Boolean(freeze?.priorSha256));
+  const treeShaped = Boolean(pilot && ("treestrap" in pilot.arms || "searchtd" in pilot.arms));
+  if (treeShaped && pilot) {
+    const selection = isTreeSelection(pilot.selection) ? pilot.selection : null;
+    const armNames = Object.keys(pilot.arms);
+    const tree = screen?.tree ?? null;
+    const stages: { name: string; state: StageState; detail: string }[] = [
+      { name: "0 · CHECK gates", state: gates ? "done" : "pending", detail: gates ? (gates.passed ? `${gates.gates.length} gates passed on the probe block, on the frozen tables, including the training search against the engine` : "a gate failed") : "not run" },
+      {
+        name: "A · throughput smoke",
+        state: (smoke ? (smoke.done ? "done" : "running") : "pending") as StageState,
+        detail: smoke ? `${formatValue(smoke.movesTotal)} searched moves on the probe block at ${formatValue(Math.round(smoke.meanMovesPerSecond ?? 0))} moves per second; tables discarded` : "waits for the gates",
+      },
+      {
+        name: "B · two search-actor arms",
+        state: (pilotDone === armNames.length && pilotDone > 0 ? "done" : pilotDone > 0 || pilotArms.some((a) => a.chunks.length > 0) ? "running" : "pending") as StageState,
+        detail: `${pilotDone} of ${armNames.length} arms done${pilotArms.map((a) => ` · ${a.name}: ${a.validations.length} validation points${a.start ? `, warm start ${formatSigned(Math.round(a.start.pairedDeltaD3))}` : ""}${a.bestMargin !== null ? `, best ${formatSigned(Math.round(a.bestMargin))}` : ""}${a.stop ? ` (${a.stop.reason})` : ""}`).join("")}`,
+      },
+      {
+        name: "C · freeze",
+        state: freeze?.candidateSha256 ? "done" : selection ? "running" : "pending",
+        detail: selection ? `candidate ${selection.candidateArm}, best margin ${formatSigned(Math.round(selection.candidateBestMargin))}; ablation ${selection.ablationArm} ${formatSigned(Math.round(selection.ablationBestMargin))}; training-signal check ${selection.trainingSignal.passed === null ? "not read" : selection.trainingSignal.passed ? "passed" : "not passed"}${freeze?.candidateSha256 ? `; candidate SHA-256 ${freeze.candidateSha256.slice(0, 12)}…, gates re-run on both new files` : ""}` : "waits for the two arms",
+      },
+      {
+        name: "D · held-out screen, ten arms",
+        state: screen ? "done" : "pending",
+        detail: screen
+          ? screen.gate
+            ? `preregistered gate ${screen.gate.allPassed ? "passed" : "not passed"}${tree?.offPathBoards ? `; off-path boards ${tree.offPathBoards.verdict}` : ""}${tree?.ablation ? `; visited-only search targets ${tree.ablation.verdict}` : ""}${tree?.treestrapDepth4 ? `; at depth 4 ${tree.treestrapDepth4.verdict}` : ""}`
+            : "played; contrasts pending"
+          : "opens once, after every table file is hashed and gated",
+      },
+    ];
+    return <StatusFrame run={run} snapshot={snapshot} stages={stages} />;
+  }
   const fillShaped = Boolean(pilot && ("occ5" in pilot.arms || "hgt5" in pilot.arms || "control" in pilot.arms));
   if (fillShaped && pilot) {
     const selection = isFillSelection(pilot.selection) ? pilot.selection : null;
@@ -246,7 +304,7 @@ export function NTupleStatus({ run }: { run: string }) {
     : {
         name: "A · pilot arms",
         state: (pilot ? (pilotDone === 6 ? "done" : "running") : "pending") as StageState,
-        detail: pilot ? `${pilotDone} of 6 arms trained for ${formatValue(pilotArms[0]?.movesTotal ?? 0)} moves${pilot.selection && !isFillSelection(pilot.selection) ? `; arm ${pilot.selection.arm} selected` : ""}` : "waits for the gates",
+        detail: pilot ? `${pilotDone} of 6 arms trained for ${formatValue(pilotArms[0]?.movesTotal ?? 0)} moves${pilot.selection && !isFillSelection(pilot.selection) && !isTreeSelection(pilot.selection) ? `; arm ${pilot.selection.arm} selected` : ""}` : "waits for the gates",
       };
   const stages: { name: string; state: StageState; detail: string }[] = [
     { name: "0 · CHECK gates", state: gates ? "done" : "pending", detail: gates ? (gates.passed ? `${gates.gates.length} gates passed on the probe block` : "a gate failed") : "not run" },
@@ -357,7 +415,7 @@ export function NTuplePilotFigure({ run, caption }: { run: string; caption?: str
   if (!snapshot || !pilot || Object.values(pilot.arms).every((a) => a.validations.length === 0)) return <Absent run={run} stage="pilot" caption={caption} />;
   return (
     <Frame run={run} caption={caption} sources={snapshot.sources.filter((s) => s.includes("/pilot/") || s.endsWith("analysis.json"))}>
-      <h4 className="rchart-title">{isFillSelection(pilot.selection) || "control" in pilot.arms ? "Three warm-started arms, one rule each" : "Six configurations, one budget each"}</h4>
+      <h4 className="rchart-title">{isTreeSelection(pilot.selection) || "treestrap" in pilot.arms ? "Two search-actor arms, one rule each" : isFillSelection(pilot.selection) || "control" in pilot.arms ? "Three warm-started arms, one rule each" : "Six configurations, one budget each"}</h4>
       <PilotArms pilot={pilot} source={snapshot.runId} />
       <Stats
         items={[
@@ -366,7 +424,14 @@ export function NTuplePilotFigure({ run, caption }: { run: string; caption?: str
             value: a.finalMargin !== null ? `final ${formatSigned(Math.round(a.finalMargin))}${a.bestMargin !== null ? `, best ${formatSigned(Math.round(a.bestMargin))}${a.best ? ` at ${formatValue(a.best.moves)} moves` : ""}` : ""} after ${formatValue(a.movesTotal)} moves${a.done ? "" : " (running)"}` : "no validation point yet",
           })),
           ...(pilot.selection
-            ? isFillSelection(pilot.selection)
+            ? isTreeSelection(pilot.selection)
+              ? [
+                  { label: "candidate (by protocol)", value: `arm ${pilot.selection.candidateArm}, best margin ${formatSigned(Math.round(pilot.selection.candidateBestMargin))} at ${formatValue(pilot.selection.candidateBestMoves ?? 0)} searched moves` },
+                  { label: "ablation", value: `arm ${pilot.selection.ablationArm}, best margin ${formatSigned(Math.round(pilot.selection.ablationBestMargin))} at ${formatValue(pilot.selection.ablationBestMoves ?? 0)} searched moves` },
+                  ...Object.entries(pilot.selection.arms).filter(([, a]) => a.warmStartMargin !== null).map(([name, a]) => ({ label: `${name}: warm start on this block (point 0)`, value: formatSigned(Math.round(a.warmStartMargin as number)) })),
+                  { label: "training-signal check", value: pilot.selection.trainingSignal.passed === null ? "not read" : pilot.selection.trainingSignal.passed ? "passed: the candidate arm's best margin exceeds its warm start's" : "not passed: the candidate arm never beat its warm start on the validation block" },
+                ]
+              : isFillSelection(pilot.selection)
               ? [
                   { label: "selected fill candidate", value: `arm ${pilot.selection.candidateArm}, best margin ${formatSigned(Math.round(pilot.selection.candidateBestMargin))} at ${formatValue(pilot.selection.candidateBestMoves ?? 0)} moves` },
                   { label: "control candidate", value: `best margin ${formatSigned(Math.round(pilot.selection.controlBestMargin))} at ${formatValue(pilot.selection.controlBestMoves ?? 0)} moves` },
@@ -509,6 +574,46 @@ export function NTupleGateTable({ run }: { run: string }) {
               <tbody>
                 {FILL_READING_LABELS.map(([key, label]) => {
                   const r = screen.fill?.[key] as FillReading | null | undefined;
+                  if (!r) return null;
+                  return (
+                    <tr key={key}>
+                      <td>{label}</td>
+                      <td>
+                        <strong>{r.verdict}</strong>
+                        {r.allPassed !== undefined ? ` (four criteria ${r.allPassed ? "passed" : "not passed"})` : ""}
+                      </td>
+                      <td>{formatSigned(Math.round(r.meanDelta))}</td>
+                      <td>{formatSigned(Math.round(r.bootstrapLower95))}</td>
+                      <td>{formatSigned(Math.round(r.bootstrapUpper95))}</td>
+                      <td>{formatValue(Math.round(r.detectionFloor))}</td>
+                      <td>{r.wtl.join(" / ")}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+      {screen.tree && (
+        <>
+          <h4 className="rchart-title">The readings beside the gate, each with its preregistered verdict</h4>
+          <div className="evo-table-wrap">
+            <table className="evo-table">
+              <thead>
+                <tr>
+                  <th>reading</th>
+                  <th>verdict</th>
+                  <th>paired mean</th>
+                  <th>bootstrap lower bound</th>
+                  <th>upper bound</th>
+                  <th>detection floor</th>
+                  <th>wins / ties / losses</th>
+                </tr>
+              </thead>
+              <tbody>
+                {TREE_READING_LABELS.map(([key, label]) => {
+                  const r = (screen.tree as unknown as Record<string, FillReading | null>)[key];
                   if (!r) return null;
                   return (
                     <tr key={key}>

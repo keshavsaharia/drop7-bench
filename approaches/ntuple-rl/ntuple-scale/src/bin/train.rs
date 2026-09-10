@@ -34,6 +34,22 @@
 // exhausted (a training-role block may be re-read; the wrap count is
 // recorded).  Validation games read [--validate-start, +--validate-games).
 //
+// ACTOR AND TARGETS.  --actor oneply (the default) is the recipe above.
+// --actor search plays every training move with the training-time fair
+// expectimax over the current tables (search_train.rs, the deployed depth-3
+// seven-stratum search mirrored bit for bit) and updates the visited
+// afterstate toward the root's score-only search value instead of the
+// one-step sample (--targets visited); with --targets tree every internal
+// decision node of the search tree (the boards one and two imagined moves
+// from the root) is also updated toward its own score-only backup, which is
+// TreeStrap on the tables: the boards the deployed search evaluates become
+// training data.  The search actor plays about a thousand moves per second
+// on 32 threads against two million for one-ply play; --chunk-moves,
+// --validate-every and --quick-every are counted in visited moves either
+// way.  --validate-at-start plays the validation line-up on the warm start
+// before any training move (val-000000000000.json, start.json); that point
+// is a reference and never the candidate.
+//
 // WARM START.  --init-from FILE starts a fresh run from a frozen table file
 // instead of the optimistic constant: when --layout is the file's own layout
 // the weights are loaded as they are, and when --layout adds fill
@@ -51,10 +67,13 @@ use drop7_ntuple_scale::game::{
     atomic_write, evaluate_arm, mean_moves, mean_score, population_artifact_json, Arm, GameRecord,
     Individual, MOVE_CAP,
 };
+use drop7_ntuple_scale::deployment_params;
 use drop7_ntuple_scale::model::{Layout, Model, UpdateStats, MAX_ACTIVE, VALUE_SCALE};
 use drop7_ntuple_scale::policy::{choose, PolicyParams};
+use drop7_ntuple_scale::search_train::TrainSearch;
 use drop7_rs::engine::{play_headless_move, FullWaveSink, State};
 use drop7_rs::rng::Mulberry32;
+use drop7_rs::search::SearchParams;
 
 struct Config {
     layout: String,
@@ -90,6 +109,12 @@ struct Config {
     /// Warm start: a frozen table file to load or promote instead of the
     /// optimistic constant (fresh runs only).
     init_from: Option<PathBuf>,
+    /// "oneply" or "search".
+    actor: String,
+    /// "visited" or "tree" (search actor only).
+    targets: String,
+    search_depth: i32,
+    validate_at_start: bool,
 }
 
 fn parse_hex(text: &str, what: &str) -> Result<u32, String> {
@@ -124,6 +149,10 @@ fn parse_args() -> Result<Config, String> {
         plateau_window: 0,
         plateau_min_points: 8,
         init_from: None,
+        actor: "oneply".into(),
+        targets: "visited".into(),
+        search_depth: 3,
+        validate_at_start: false,
     };
     let args: Vec<String> = std::env::args().collect();
     let mut i = 1;
@@ -136,6 +165,11 @@ fn parse_args() -> Result<Config, String> {
         }
         if flag == "--no-checkpoint" {
             config.checkpoint = false;
+            i += 1;
+            continue;
+        }
+        if flag == "--validate-at-start" {
+            config.validate_at_start = true;
             i += 1;
             continue;
         }
@@ -165,6 +199,9 @@ fn parse_args() -> Result<Config, String> {
             "--plateau-window" => config.plateau_window = value.parse().map_err(|_| "bad --plateau-window")?,
             "--plateau-min-points" => config.plateau_min_points = value.parse().map_err(|_| "bad --plateau-min-points")?,
             "--init-from" => config.init_from = Some(PathBuf::from(value)),
+            "--actor" => config.actor = value.to_string(),
+            "--targets" => config.targets = value.to_string(),
+            "--search-depth" => config.search_depth = value.parse().map_err(|_| "bad --search-depth")?,
             other => return Err(format!("unknown argument {other}")),
         }
         i += 2;
@@ -184,12 +221,24 @@ fn parse_args() -> Result<Config, String> {
     if config.plateau_window > 0 && config.validate_every == 0 {
         return Err("--plateau-window needs validation".into());
     }
+    if !["oneply", "search"].contains(&config.actor.as_str()) {
+        return Err("--actor must be oneply or search".into());
+    }
+    if !["visited", "tree"].contains(&config.targets.as_str()) {
+        return Err("--targets must be visited or tree".into());
+    }
+    if config.targets == "tree" && config.actor != "search" {
+        return Err("--targets tree needs --actor search".into());
+    }
+    if config.validate_at_start && config.validate_every == 0 {
+        return Err("--validate-at-start needs validation".into());
+    }
     Ok(config)
 }
 
 fn config_json(config: &Config, layout: &Layout) -> String {
     format!(
-        "{{\"format\":\"drop7-ntuple-scale-train-config-v1\",\"experiment\":\"{}\",\"layout\":\"{}\",\"entries\":{},\"activePerState\":{},\"seedsStartHex\":\"0x{:08x}\",\"seedsCount\":{},\"moves\":{},\"chunkMoves\":{},\"threads\":{},\"alpha\":{},\"epsilon\":{},\"optimisticRiseUnits\":{},\"deltaClampRiseUnits\":{},\"revealSamples\":{},\"validateStartHex\":\"0x{:08x}\",\"validateGames\":{},\"validateEvery\":{},\"quickEvery\":{},\"wallSeconds\":{},\"moveCap\":{},\"trainSeedHex\":\"0x{:08x}\",\"valueUnitPoints\":{},\"checkpoint\":{},\"checkpointEvery\":{},\"plateauWindow\":{},\"plateauMinPoints\":{},\"initFrom\":{}}}\n",
+        "{{\"format\":\"drop7-ntuple-scale-train-config-v1\",\"experiment\":\"{}\",\"layout\":\"{}\",\"entries\":{},\"activePerState\":{},\"seedsStartHex\":\"0x{:08x}\",\"seedsCount\":{},\"moves\":{},\"chunkMoves\":{},\"threads\":{},\"alpha\":{},\"epsilon\":{},\"optimisticRiseUnits\":{},\"deltaClampRiseUnits\":{},\"revealSamples\":{},\"validateStartHex\":\"0x{:08x}\",\"validateGames\":{},\"validateEvery\":{},\"quickEvery\":{},\"wallSeconds\":{},\"moveCap\":{},\"trainSeedHex\":\"0x{:08x}\",\"valueUnitPoints\":{},\"checkpoint\":{},\"checkpointEvery\":{},\"plateauWindow\":{},\"plateauMinPoints\":{},\"initFrom\":{},\"actor\":\"{}\",\"targets\":\"{}\",\"searchDepth\":{},\"validateAtStart\":{}}}\n",
         config.experiment_id,
         layout.spec(),
         layout.total_entries(),
@@ -220,6 +269,10 @@ fn config_json(config: &Config, layout: &Layout) -> String {
             Some(path) => format!("\"{}\"", path.display().to_string().replace('\\', "\\\\").replace('"', "\\\"")),
             None => "null".to_string(),
         },
+        config.actor,
+        config.targets,
+        config.search_depth,
+        config.validate_at_start,
     )
 }
 
@@ -288,6 +341,12 @@ struct ChunkStats {
     clears: u64,
     reveals: u64,
     updates: UpdateStats,
+    /// Search actor: updates of the visited afterstate toward the root's
+    /// search value, updates of internal tree nodes, and leaf evaluations
+    /// the searches made.
+    root_updates: u64,
+    internal_updates: u64,
+    leaf_calls: u64,
 }
 
 struct Shared {
@@ -315,6 +374,9 @@ fn worker(
     let mut rng = Mulberry32::new(
         config.train_seed ^ (worker_index as u32).wrapping_mul(0x9e37_79b9),
     );
+    if config.actor == "search" {
+        return worker_search(model, config, params, shared, chunk_end);
+    }
     while shared.moves.load(Relaxed) < chunk_end {
         let index = shared.cursor.fetch_add(1, Relaxed);
         let seed = config.seeds_start.wrapping_add((index % config.seeds_count as u64) as u32);
@@ -359,6 +421,75 @@ fn worker(
             if !state.game_over {
                 std::mem::swap(&mut scratch_prev, &mut scratch_next);
                 n_prev = model.layout.active_count();
+            }
+            game_moves += 1;
+        }
+        shared.moves.fetch_add(game_moves, Relaxed);
+        shared.games.fetch_add(1, Relaxed);
+        stats.games += 1;
+        stats.moves += game_moves;
+        stats.score_sum += state.score as f64;
+        stats.max_score = stats.max_score.max(state.score);
+    }
+    stats
+}
+
+/// The search-actor worker: every move decided by the training-time fair
+/// expectimax over the current tables; the visited afterstate updated toward
+/// the root's score-only search value, and with --targets tree every
+/// internal node of the tree toward its own backup.
+fn worker_search(
+    model: &Model,
+    config: &Config,
+    _params: &PolicyParams,
+    shared: &Shared,
+    chunk_end: u64,
+) -> ChunkStats {
+    let mut stats = ChunkStats::default();
+    let mut scratch_prev = [0u64; MAX_ACTIVE];
+    let mut scratch_node = [0u64; MAX_ACTIVE];
+    let mut sink = FullWaveSink::new();
+    let search_params = SearchParams {
+        depth: config.search_depth,
+        ..deployment_params()
+    };
+    let mut search = TrainSearch::new(model, search_params);
+    let collect = config.targets == "tree";
+    while shared.moves.load(Relaxed) < chunk_end {
+        let index = shared.cursor.fetch_add(1, Relaxed);
+        let seed = config.seeds_start.wrapping_add((index % config.seeds_count as u64) as u32);
+        let mut state = State::initial_headless(seed);
+        let mut n_prev = model.features(&state.board, state.moves_remaining, &mut scratch_prev);
+        let mut game_moves = 0u64;
+        while !state.game_over && state.moves_played < config.move_cap {
+            let decision = search.decide(&state, collect);
+            if decision.action < 0 {
+                break;
+            }
+            stats.leaf_calls += decision.leaf_calls;
+            // The visited afterstate toward the search's own value of it
+            // (a one-sample estimate over the visible disc, as one-ply TD's
+            // target is over the realised move).
+            let target = (decision.root_score / VALUE_SCALE) as f32;
+            model.update(&scratch_prev[..n_prev], target, config.alpha, config.delta_clamp, &mut stats.updates);
+            stats.root_updates += 1;
+            if collect {
+                for t in search.targets.iter() {
+                    let n = model.features(&t.board, t.moves_remaining, &mut scratch_node);
+                    model.update(&scratch_node[..n], t.value, config.alpha, config.delta_clamp, &mut stats.updates);
+                }
+                stats.internal_updates += search.targets.len() as u64;
+            }
+            sink.clear();
+            let Some(_result) = play_headless_move(&mut state, seed, decision.action as usize, &mut sink) else {
+                break;
+            };
+            for wave in sink.waves.iter().take(sink.count) {
+                stats.clears += wave.cleared as u64;
+                stats.reveals += wave.revealed as u64;
+            }
+            if !state.game_over {
+                n_prev = model.features(&state.board, state.moves_remaining, &mut scratch_prev);
             }
             game_moves += 1;
         }
@@ -496,6 +627,23 @@ fn main() -> Result<(), String> {
         Vec::new()
     };
 
+    if config.validate_at_start && !config.resume && moves_total == 0 {
+        eprintln!("validation of the warm start before any training move...");
+        let mut unused = f64::INFINITY;
+        let start = validate(&config, &model, &validate_seeds, &fair_records, 0, &mut unused)?;
+        atomic_write(
+            &config.out.join("start.json"),
+            format!(
+                "{{\"moves\":0,\"artifact\":\"{}\",\"pairedDeltaD3\":{},\"ntupleD3Mean\":{},\"fairD3Mean\":{},\"directMean\":{},\"pairedDeltaDirect\":{}}}\n",
+                start.artifact, start.paired_delta_d3, start.ntuple_d3_mean, start.fair_d3_mean, start.direct_mean, start.paired_delta_direct
+            )
+            .as_bytes(),
+        )?;
+        eprintln!(
+            "[start] warm start on the validation block: ntuple-d3s7 {:.0} vs fair-d3s7 {:.0}: {:+.0} (W-L {}-{}), 1-ply {:.0}",
+            start.ntuple_d3_mean, start.fair_d3_mean, start.paired_delta_d3, start.wins_d3, start.losses_d3, start.direct_mean
+        );
+    }
     let mut next_validate = if config.validate_every > 0 {
         (moves_total / config.validate_every + 1) * config.validate_every
     } else {
@@ -557,6 +705,9 @@ fn main() -> Result<(), String> {
             total.updates.entry_updates += s.updates.entry_updates;
             total.updates.abs_delta_sum += s.updates.abs_delta_sum;
             total.updates.beta_sum += s.updates.beta_sum;
+            total.root_updates += s.root_updates;
+            total.internal_updates += s.internal_updates;
+            total.leaf_calls += s.leaf_calls;
         }
         moves_total = shared.moves.load(Relaxed);
         games_total = shared.games.load(Relaxed);
@@ -653,7 +804,7 @@ fn main() -> Result<(), String> {
         }
 
         let row = format!(
-            "{{\"chunk\":{},\"movesTotal\":{},\"gamesTotal\":{},\"wallSeconds\":{:.1},\"chunkMoves\":{},\"chunkGames\":{},\"chunkSeconds\":{:.1},\"movesPerSecond\":{:.0},\"trainMeanScore\":{:.1},\"trainMeanMoves\":{:.3},\"trainMaxScore\":{},\"trainClearsPerMove\":{:.4},\"trainRevealsPerMove\":{:.4},\"meanAbsDelta\":{:.5},\"meanBeta\":{:.5},\"seedCursor\":{},\"seedWraps\":{},\"quick\":{},\"validation\":{}}}\n",
+            "{{\"chunk\":{},\"movesTotal\":{},\"gamesTotal\":{},\"wallSeconds\":{:.1},\"chunkMoves\":{},\"chunkGames\":{},\"chunkSeconds\":{:.1},\"movesPerSecond\":{:.0},\"trainMeanScore\":{:.1},\"trainMeanMoves\":{:.3},\"trainMaxScore\":{},\"trainClearsPerMove\":{:.4},\"trainRevealsPerMove\":{:.4},\"meanAbsDelta\":{:.5},\"meanBeta\":{:.5},\"seedCursor\":{},\"seedWraps\":{},\"rootUpdates\":{},\"internalUpdates\":{},\"leafCalls\":{},\"quick\":{},\"validation\":{}}}\n",
             chunk_index,
             moves_total,
             games_total,
@@ -671,6 +822,9 @@ fn main() -> Result<(), String> {
             total.updates.beta_sum / total.updates.entry_updates.max(1) as f64,
             seed_cursor,
             seed_cursor / config.seeds_count as u64,
+            total.root_updates,
+            total.internal_updates,
+            total.leaf_calls,
             quick_json,
             validation_json,
         );

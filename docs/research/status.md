@@ -97,6 +97,57 @@ tables at depth 4 remain the candidate to carry forward, and the record now
 points at a leaf trained on the boards the search evaluates, and at a
 depth-aware price for never-updated entries, rather than at more buckets.
 
+On 2026-09-07 the other open half was tried: training the tables on the
+boards the search evaluates. A training-time copy of the deployed depth-3
+search (proven bit-identical to the engine's by a gate) played every
+training move, the visited afterstate was trained toward the root's
+score-only search value, and in the TreeStrap arm every internal node of
+the tree toward its own backup, both from the frozen tables with fresh step
+sizes at alpha 1.0
+([EX-20260907-ntuple-treestrap-warm-start-c33ba880](../../research/experiments/EX-20260907-ntuple-treestrap-warm-start-c33ba880.json)).
+Both arms fell below the warm start at their first validation point and
+never recovered (warm start +174,466 on the validation block; best points
++140,529 and +93,767). On a sixth never-read 512-game block the TreeStrap
+candidate scored **375,372 against 484,342** for the frozen tables at depth
+3, paired -108,970 with bounds from -139,543 to -78,715, and 431,020 against
+532,273 at depth 4 (-101,253); the visited-states ablation lost 73,150 at
+depth 3 and 77,543 at depth 4, and the candidate lost a further 35,819 to
+the ablation
+([RS-20260907T041853Z-27cb32a3](../../research/results/RS-20260907T041853Z-27cb32a3.json)).
+Every reading is a measurable loss, and the theory is not supported as
+tested. The validation curves show a step-size shock (full-strength first
+updates on every entry, delivered by an actor two thousand times slower per
+visited move than one-ply play), so the configuration rejected here is the
+warm start at the full step; a gentle-step successor is preregistered. The
+frozen tables at depth 4 remain the candidate to carry forward, and their
+depth-3 margin over the fair leaf replicated on a fifth block (+163,499,
+lower bound +133,843).
+
+A gentle-step successor
+([EX-20260907-ntuple-treestrap-gentle-step-087a3a63](../../research/experiments/EX-20260907-ntuple-treestrap-gentle-step-087a3a63.json))
+avoided the collapse: two TreeStrap arms at a twentieth and a fifth of the
+full step, plus a visited-states ablation, trained for six to seven
+validation points each without falling below their own warm start. Neither
+climbed above it either (warm start +188,854 on the validation block; best
+points +166,414 and +168,523). On a 2,048-game screen the alpha-0.2
+candidate scored **467,899 against 489,321** for the frozen tables at
+depth 3, paired -21,422 with bounds -38,785 to -4,294, a measured loss a
+fifth the size of the full-step run's
+([RS-20260907T170344Z-17af2044](../../research/results/RS-20260907T170344Z-17af2044.json)).
+One reading is a clear positive: the candidate beat the visited-states
+ablation by 85,394 (lower bound +70,489), so training the imagined tree
+nodes helps relative to training the visited board alone; it is not
+enough to close the gap to the frozen tables. The other step size came
+close to neutral (-3,978, inconclusive) and screened better than the
+selected candidate, so the best-single-validation-point selection rule
+picked the weaker arm by this screen's reading. At depth 4 the loss is
+inconclusive rather than clear (-25,344, bounds -64,719 to +14,253), and
+the candidate's own fourth ply is a real gain (+39,537). The theory is
+reassessed mixed. A depth-4-teacher, long-duration, checkpointed
+successor is specified at
+`approaches/ntuple-rl/ntuple-scale/prompts/treestrap-d4-continuation.md`
+but not yet run.
+
 The frozen tables of both training runs, the three screens' per-game rows
 and their analyses are published in the public research archive under their
 run ids (`https://data.drop7.dev/runs/<run-id>/ntuple-scale/...`, digests in

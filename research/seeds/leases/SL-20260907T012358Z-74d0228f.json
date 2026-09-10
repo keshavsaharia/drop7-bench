@@ -1,0 +1,26 @@
+{
+  "$schema": "../schemas/seed-lease-v1.schema.json",
+  "format": "drop7-seed-lease-v1",
+  "seedLeaseId": "SL-20260907T012358Z-74d0228f",
+  "experimentId": "EX-20260907-ntuple-treestrap-warm-start-c33ba880",
+  "rngAlgorithm": "mulberry32 with mix32 domain separation (src/core/native/engine.hpp); headless disc stream kNextDiscDomain, reveal stream kRevealDomain; Rust bitboard engine bit-identical (RS-20260824T075451Z-e89ea128)",
+  "domain": "environment",
+  "role": "public-development",
+  "rangeStartHex": "0xa52f2b80",
+  "rangeEndExclusiveHex": "0xa52f2d80",
+  "cohortManifestSha256": null,
+  "state": "opened",
+  "reservedAt": "2026-09-07T01:26:10Z",
+  "openedAt": "2026-09-07T04:10:44Z",
+  "closedAt": null,
+  "protocolSha256": "305ff6238bee4fa7e9641a75993c263c05c9de8d4c001d3c98775ce84e7b9d7a",
+  "runIds": [
+    "RUN-20260907T012358Z-a00ecdf0"
+  ],
+  "notes": [
+    "Conservative import 2026-09-07: every 8-hex-digit constant under docs/, approaches/, src/, research/, artifacts/, web/content/ and scripts/ was enumerated (grep -rhoE '0x[0-9a-fA-F]{8}'). Between 0xa52f2a80 and 0xa5300000 the only constants are 0xa52f2a80 itself (the exclusive end boundary of the fill-conditioned screen lease SL-20260906T201104Z-53350936, never read there) and 0xa52fffff (the allocator pool's end); no constant lies in 0xa5a00000-0xa6000000. The pool 0xa52c0000-0xa5300000 is used up to 0xa52f2a80 exclusive by earlier leases. The ranges reserved here overlap no existing lease record and no protected (0x7d) or final (0xd7) prefix, and are disjoint from every block the n-tuple experiments read (training 0xa5300000-0xa54f0000, 0xa5500000-0xa56f0000 and 0xa5800000-0xa59f0000; validation 0xa52f2240-0xa52f2280, 0xa52f2280-0xa52f2380 and 0xa52f2780-0xa52f2880; screens 0xa52f2140-0xa52f2240, 0xa52f2380-0xa52f2580, 0xa52f2580-0xa52f2780 and 0xa52f2880-0xa52f2a80) and from the historical block 0xa5700000-0xa571869f.",
+    "Held-out screen, 512 never-read public-development seeds, opened exactly once by scripts/pipeline5.sh screen after the SHA-256 of every table file the screen plays (the frozen tables 0ade9d4e..., the treestrap candidate, the searchtd ablation, the fill experiment's control continuation 92dd1cb2...) has been written under main/*.sha256 and the CHECK gates have passed on each new file, with ten arms on identical seeds: prior-d3s7, prior-1ply, prior-d4s7, treestrap-d3s7, treestrap-1ply, treestrap-d4s7, searchtd-d3s7, searchtd-d4s7, control-d3s7 and fair-d3s7. A second opening requires a new experiment record.",
+    "Opened 2026-09-07T04:10:44Z by run RUN-20260907T012358Z-a00ecdf0 for the one-shot screen (0xa52f2b80 to 0xa52f2d80 exclusive); candidate SHA-256 recorded beforehand in runs/RUN-20260907T012358Z-a00ecdf0/ntuple-scale/main/candidate-weights.sha256: 1a534b78f466725bde199e6ac1a7a27437c8a634b86451cb79a4c3f09ba1437c",
+    "Run RUN-20260907T012358Z-a00ecdf0 completed 2026-09-07T06:23:32Z: played once by the ten arms; the run's screen artifact heldout.json is the only read."
+  ]
+}

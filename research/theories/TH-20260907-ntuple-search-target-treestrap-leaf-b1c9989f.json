@@ -1,0 +1,48 @@
+{
+  "$schema": "../schemas/theory-v1.schema.json",
+  "format": "drop7-theory-v1",
+  "theoryId": "TH-20260907-ntuple-search-target-treestrap-leaf-b1c9989f",
+  "title": "Training the n-tuple leaf on the boards the search evaluates, toward the search's own backed-up values, beats the frozen tables inside the same depth-3 search",
+  "claim": "The frozen row-and-column n-tuple leaf (RUN-20260905T193006Z-4fbeb4e5, SHA-256 0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b) was trained only on boards that one-ply greedy play visits, toward one-step sampled returns; the deployed depth-3 search evaluates about a hundred and twenty thousand boards per move, most of them one to three imagined moves off that path, and reads never-updated entries for many of them (0.98% of legal full-column patterns touched; the fill-conditioned experiment). Claim: continuing temporal-coherence TD training of the frozen tables with the deployed depth-3 seven-stratum search as the actor, updating the visited afterstate toward the root's score-only search value and every internal decision node of the search tree (the boards one and two imagined moves from the root) toward its own score-only backup (TreeStrap on the tables), produces a leaf that scores a higher paired mean whole-game score than the unchanged frozen tables inside the identical depth-3 search on never-read public-development games, by more than the same search actor with search targets at the visited states only, because the off-path boards are where the frozen leaf is untrained and where the search's decisions are made.",
+  "mechanism": "(1) What one-ply training cannot reach. One-ply TD updates the afterstate the greedy policy just left, toward the reward plus the value of the afterstate it just reached: every update lands on a board the greedy policy visits. The deployed search values boards three moves ahead through every legal column and seven reveal strata at each ply; its decision at the root is a comparison among the values of depth-1 and depth-2 nodes, backed up from depth-3 leaves. The fill-conditioned experiment measured the coverage gap (about 90% of entries never updated, concentrated on full lines) and showed that replacing the never-updated entries' starting value by zero moved the depth-3 leaf by +29,442 without any training, while more one-ply training from the same warm start (the control arm, +5,946) and fill buckets (+21,039) did not measurably. Two things follow: the off-path boards matter, and the one-ply recipe does not reach them however long it runs. (2) TreeStrap. Veness et al. (2009) trained a linear chess evaluation by updating every node of the minimax tree toward its own search backup; the same construction applies to an expectimax tree with chance nodes, and the n-tuple tables have the capacity the linear leaf lacked (the site's TreeStrap-style refit of the eighteen-term fair leaf toward depth-4 root values, RS-20260903T013022Z-b0937bf9, lost 83,451 points: that fit absorbed four plies of expected score into eighteen weights and dropped death-dominated roots; here every node's target is its own expected remaining score under the search's play, in the same units the tables already carry, with no exclusion). The targets are expectations over seven strata rather than one-step samples, so their variance is lower, and they sit on exactly the boards whose values the deployed search compares. (3) Semantics. The search decides by a utility that adds -1,000,000 at death; training toward that number would fold the search's death penalty into the tables and double-count it at depth 4. The training search therefore returns two values per node, the utility that picks the move and the score-only value of the same decisions (zero at death), and trains toward the second, which is what one-ply TD trains toward (a terminal move's target is its reward alone). (4) Cost. The training search mirrors the engine bit for bit (a CHECK gate compares root column values against Searcher::column_values) and costs about the same as a deployed depth-3 decision, a thousand moves per second on 32 threads against two million for one-ply play; each move yields one root update and about 2,450 internal-node updates, so the node-update rate is about the same as one-ply training's and every update lands on a search-evaluated board. (5) The ablation. The searchtd arm uses the same actor and the same root target but no internal nodes: it separates the effect of a search-shaped visited distribution and lower-variance root targets from the effect of the off-path boards themselves. The one-ply continuation from the same warm start is already screened (the fill experiment's control, SHA-256 92dd1cb2...) and is replayed on the new block as the one-ply reference.",
+  "falsificationCriteria": [
+    "Primary falsifier (held-out screen, 512 paired never-read public-development games, every arm on identical seeds): the paired whole-game score delta treestrap-d3s7 minus prior-d3s7 (the TreeStrap candidate minus the unchanged frozen tables, both as the depth-3 leaf) has a one-sided 95% percentile-bootstrap upper bound below zero. A lower bound at or below zero with an upper bound above zero is a non-measurement at this cohort size (the detection floor is reported); the supported reading requires the bootstrap and Student-t 95% lower bounds above zero, both halves positive and no lower-quartile regression.",
+    "Second leg (the gain is the off-path boards): treestrap-d3s7 minus searchtd-d3s7 has a 95% bootstrap upper bound below zero; or the primary reading passes while treestrap-d3s7 minus searchtd-d3s7 is inconclusive and searchtd-d3s7 minus prior-d3s7 passes the same four criteria, in which case the gain is the search actor and its root targets rather than the internal nodes, and the off-path leg is unsupported.",
+    "Training-signal check (pilot tier, training-role validation block, read before the screen): the treestrap arm's best validation margin over the fair leaf does not exceed the warm start's own margin on the same block (validated at point 0 before any training move); training toward search backups then does not improve the leaf where the validation can see, and the mechanism is recorded as unsupported at pilot tier regardless of the screen.",
+    "Depth (compounding): treestrap-d4s7 minus prior-d4s7 has a 95% bootstrap upper bound below zero on the same seeds; the search-trained leaf then loses under the deeper search what it gained under the shallower one, as the fill buckets and the zeroed edit did, and the candidate to carry forward stays prior-d4s7.",
+    "Information boundary and integrity: the training search reads only the public state and the fixed policy seed (the gate proves it mirrors the engine's search bit for bit); any table that reads anything beyond the public board and the moves until the rise is disqualified; an illegal or incomplete decision in any arm voids the run rather than the claim."
+  ],
+  "informationClass": "public-policy",
+  "lifecycle": "assessed",
+  "assessment": "mixed",
+  "evidenceTier": "public-development",
+  "dependencies": [
+    "TH-20260905-ntuple-line-tuples-tc-td-leaf-bcb25133",
+    "TH-20260906-ntuple-fill-conditioned-leaf-28cb0ae2",
+    "TH-20260902-treestrap-linear-leaf-refit-4b984292"
+  ],
+  "evidenceRefs": [
+    "research/results/RS-20260906T234914Z-a3fae1a9.json",
+    "research/results/RS-20260906T171746Z-1623f833.json",
+    "research/results/RS-20260903T013022Z-b0937bf9.json",
+    "research/datasets/DS-20260906-ntuple-scale-frozen-tables-ff977178.json",
+    "approaches/ntuple-rl/ntuple-scale/README.mdx",
+    "docs/research/status.md",
+    "research/results/RS-20260907T041853Z-27cb32a3.json",
+    "research/runs/RUN-20260907T012358Z-a00ecdf0.json",
+    "research/experiments/EX-20260907-ntuple-treestrap-warm-start-c33ba880.json",
+    "artifacts/results/EX-20260907-ntuple-treestrap-warm-start-c33ba880/RUN-20260907T012358Z-a00ecdf0/manifest.json",
+    "web/content/log/2026-09-07.mdx",
+    "research/experiments/EX-20260907-ntuple-treestrap-gentle-step-087a3a63.json",
+    "research/results/RS-20260907T170344Z-17af2044.json",
+    "research/runs/RUN-20260907T041853Z-70c90dc9.json",
+    "artifacts/results/EX-20260907-ntuple-treestrap-gentle-step-087a3a63/RUN-20260907T041853Z-70c90dc9/manifest.json"
+  ],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5-1",
+    "agentId": "claude-code-ntuple-search-targets"
+  },
+  "createdAt": "2026-09-07T01:23:58Z",
+  "updatedAt": "2026-09-07T17:07:22Z"
+}

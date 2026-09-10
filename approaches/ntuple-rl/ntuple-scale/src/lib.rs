@@ -10,8 +10,10 @@
 // adds lives here: pattern indexing straight from the engine's packed column
 // words (tuples.rs), the lookup-table model and its temporal-coherence update
 // (model.rs), the one-ply chance-state policy that generates training play
-// (policy.rs), the complete-game harness and population artifacts (game.rs),
-// and the train / gate / screen binaries.
+// (policy.rs), the training-time search that mirrors the engine's fair
+// expectimax and collects its internal nodes as targets (search_train.rs),
+// the complete-game harness and population artifacts (game.rs), and the
+// train / gate / screen binaries.
 //
 // INFORMATION BOUNDARY.  The value reads only the public board and the moves
 // remaining until the rise; the visible next disc is deliberately not an
@@ -23,6 +25,7 @@
 pub mod game;
 pub mod model;
 pub mod policy;
+pub mod search_train;
 pub mod tuples;
 
 use drop7_rs::search::{work_bound_for, SearchParams};

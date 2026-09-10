@@ -1,0 +1,90 @@
+{
+  "$schema": "../schemas/contribution-v1.schema.json",
+  "format": "drop7-contribution-v1",
+  "contributionId": "CT-20260907T042316Z-08c32458",
+  "actor": {
+    "kind": "model",
+    "platform": "Claude Code",
+    "model": "claude-fable-5-1",
+    "agentId": "claude-code-ntuple-search-targets"
+  },
+  "level": "L3",
+  "roles": [
+    {
+      "role": "conceptualization",
+      "degree": "lead"
+    },
+    {
+      "role": "methodology",
+      "degree": "lead"
+    },
+    {
+      "role": "software",
+      "degree": "lead"
+    },
+    {
+      "role": "investigation",
+      "degree": "lead"
+    },
+    {
+      "role": "formal-analysis",
+      "degree": "lead"
+    },
+    {
+      "role": "visualization",
+      "degree": "lead"
+    },
+    {
+      "role": "writing",
+      "degree": "lead"
+    },
+    {
+      "role": "compute",
+      "degree": "lead"
+    }
+  ],
+  "summary": "Gentle-step TreeStrap experiment on the n-tuple leaf (the successor of the alpha-1.0 run in which both search-actor arms fell below the warm start): per-arm step sizes in the stage driver, a --games-d4 option in the screen binary so a 2,048-game depth-3 screen shares one block with a 512-game depth-4 cohort, seed-aligned pairing in the analysis, the selection rule between two TreeStrap step sizes; the preregistered experiment with three fresh leases; ran the three warm-started arms, the freeze and the one-shot screen; wrote the analysis, the result record, the approach page section, the web figures and the log entry.",
+  "theoryIds": [
+    "TH-20260907-ntuple-search-target-treestrap-leaf-b1c9989f"
+  ],
+  "experimentIds": [
+    "EX-20260907-ntuple-treestrap-gentle-step-087a3a63"
+  ],
+  "runIds": [
+    "RUN-20260907T041853Z-70c90dc9"
+  ],
+  "artifactPaths": [
+    "approaches/ntuple-rl/ntuple-scale/src/bin/screen.rs",
+    "approaches/ntuple-rl/ntuple-scale/scripts/pipeline6.sh",
+    "approaches/ntuple-rl/ntuple-scale/scripts/analyze.py",
+    "research/experiments/EX-20260907-ntuple-treestrap-gentle-step-087a3a63.json",
+    "research/seeds/leases/SL-20260907T041853Z-f6e4ab5c.json",
+    "research/seeds/leases/SL-20260907T041853Z-9a40ed51.json",
+    "research/seeds/leases/SL-20260907T041853Z-3b4f397d.json",
+    "research/runs/RUN-20260907T041853Z-70c90dc9.json",
+    "research/system-profiles/MACH-20260907T041853Z-b392b4a1.json",
+    "approaches/ntuple-rl/ntuple-scale/scripts/write-tree-result-record.py",
+    "research/results/RS-20260907T170344Z-17af2044.json",
+    "research/datasets/DS-20260907-ntuple-treestrap-gentle-candidate-tables-7000f60d.json",
+    "artifacts/results/EX-20260907-ntuple-treestrap-gentle-step-087a3a63/RUN-20260907T041853Z-70c90dc9/manifest.json",
+    "approaches/ntuple-rl/ntuple-scale/README.mdx",
+    "web/content/log/2026-09-07.mdx",
+    "web/content/figures/ntuple-scale/RUN-20260907T041853Z-70c90dc9.json",
+    "approaches/ntuple-rl/ntuple-scale/prompts/treestrap-d4-continuation.md"
+  ],
+  "commitShas": [],
+  "validationPerformed": [
+    "cargo test --release (15 unit tests) after the screen binary change",
+    "gate --weights on each of the three new table files before the screen lease opened",
+    "make research-validate",
+    "analyze.py evaluated the preregistered gate and the readings beside it (fixed a frozenGates scan that missed the treestrapalt/searchtd arm names, regression-checked against the fill and first-treestrap runs' shapes); compare.py reports written for eighteen contrasts",
+    "every compact artifact of the run and the candidate/alternate table files (zstd) were published and verified (runs/RUN-20260907T041853Z-70c90dc9/published.jsonl)"
+  ],
+  "limitations": [
+    "Self-reported contribution; not yet independently reviewed.",
+    "The step sizes 0.05 and 0.2 were chosen by the model from the first TreeStrap run's validation curves (the alpha-1.0 shock), not from a preregistered sweep; the owner had asked for the search-target direction to be pursued and for advice on whether it has run its course."
+  ],
+  "selfReported": true,
+  "reviewedBy": null,
+  "recordedAt": "2026-09-07T17:07:22Z"
+}

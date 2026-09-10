@@ -1,0 +1,172 @@
+0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b  /home/keshav/Developer/drop7-bench/runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/best-weights.bin
+[2026-09-07T07:44:23Z] train treestrap05: done ({"reason":"plateau","movesTotal":2120050,"gamesTotal":16041,"wallSeconds":4349.4,"validationPoints":7,"plateauWindow":3,"recentWindowMean":147122.20572916666,"previousWindowMean":150257.83984375,"bestMargin":166414.35546875})
+[2026-09-07T08:47:01Z] train treestrap20: done ({"reason":"plateau","movesTotal":1807768,"gamesTotal":13384,"wallSeconds":3758.0,"validationPoints":6,"plateauWindow":3,"recentWindowMean":137664.6796875,"previousWindowMean":144999.81510416666,"bestMargin":168522.5546875})
+[2026-09-07T09:35:05Z] train searchtd05: done ({"reason":"plateau","movesTotal":1821204,"gamesTotal":16579,"wallSeconds":2883.1,"validationPoints":6,"plateauWindow":3,"recentWindowMean":57055.395833333336,"previousWindowMean":60182.067708333336,"bestMargin":83875.33203125})
+{
+  "candidateArm": "treestrap20",
+  "candidateBestMargin": 168522.5546875,
+  "candidateBestMoves": 900377,
+  "alternateArm": "treestrap05",
+  "ablationArm": "searchtd05",
+  "ablationBestMargin": 83875.33203125,
+  "ablationBestMoves": 1521557,
+  "arms": {
+    "treestrap05": {
+      "bestMargin": 166414.35546875,
+      "finalMargin": 137067.5703125,
+      "bestMoves": 1802815,
+      "movesTotal": 2120050,
+      "validationPoints": 8,
+      "stop": "plateau",
+      "warmStartMargin": 188854.44140625,
+      "alpha": 0.05
+    },
+    "treestrap20": {
+      "bestMargin": 168522.5546875,
+      "finalMargin": 132604.30078125,
+      "bestMoves": 900377,
+      "movesTotal": 1807768,
+      "validationPoints": 7,
+      "stop": "plateau",
+      "warmStartMargin": 188854.44140625,
+      "alpha": 0.2
+    },
+    "searchtd05": {
+      "bestMargin": 83875.33203125,
+      "finalMargin": 40720.35546875,
+      "bestMoves": 1521557,
+      "movesTotal": 1821204,
+      "validationPoints": 7,
+      "stop": "plateau",
+      "warmStartMargin": 188854.44140625,
+      "alpha": 0.05
+    }
+  },
+  "trainingSignal": {
+    "criterion": "the candidate TreeStrap arm's best validation margin exceeds the warm start's own margin on the same block (point 0)",
+    "passed": false
+  },
+  "rule": "the TreeStrap arm (treestrap05 or treestrap20) whose best validation point has the larger paired mean margin of ntuple-d3s7 over fair-d3s7 on the 256-game training-role block is the candidate, ties to treestrap05; the other is screened at depth 3 as treestrapalt; searchtd05 is the ablation; each arm's point 0 is the warm start's own margin and is never a candidate"
+}
+[2026-09-07T09:35:06Z] select: {  "candidateArm": "treestrap20",  "candidateBestMargin": 168522.5546875,  "candidateBestMoves": 900377,  "alternateArm": "treestrap05",  "ablationArm": "searchtd05",  "ablationBestMargin": 83875.3320
+0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b  /home/keshav/Developer/drop7-bench/runs/RUN-20260905T193006Z-4fbeb4e5/ntuple-scale/main/best-weights.bin
+92dd1cb2d2a74b026270606c18c5f0d6e4f4ccc74e64c3c4e0f0d2043cdddd90  /home/keshav/Developer/drop7-bench/runs/RUN-20260906T201104Z-a96ea6c8/ntuple-scale/pilot/control/best-weights.bin
+03a63610934bb1e0aa2f83c1c0770a5b6761c51be8df082bf659552008364f5c  /home/keshav/Developer/drop7-bench/runs/RUN-20260907T041853Z-70c90dc9/ntuple-scale/pilot/treestrap20/best-weights.bin
+63e62f11bbd050ac6a861d7d75288744b5aa1d9b09a928416a2ecc41a56a7ab1  /home/keshav/Developer/drop7-bench/runs/RUN-20260907T041853Z-70c90dc9/ntuple-scale/pilot/treestrap05/best-weights.bin
+e94783ef0d0188cd51bb790a544f61fef773835450ae4f38f6195260ba71fa0e  /home/keshav/Developer/drop7-bench/runs/RUN-20260907T041853Z-70c90dc9/ntuple-scale/pilot/searchtd05/best-weights.bin
+[2026-09-07T09:40:35Z] freeze: candidate (treestrap20) 03a63610934bb1e0..., alternate (treestrap05) 63e62f11bbd050ac..., searchtd05 e94783ef0d0188cd..., control verified, gates passed on all three new files
+[2026-09-07T09:40:35Z] screen: opening the held-out lease
+opened research/seeds/leases/SL-20260907T041853Z-3b4f397d.json 2026-09-07T09:40:35Z
+[2026-09-07T11:37:08Z] screen: done
+treestrap-d3s7 - prior-d3s7 on 2048 paired games (seeds 0xa52f2e80+):
+  score       467899 vs     489321  delta    -21422  LB95    -38785  UB95     -4294  W-T-L 1005-0-1043  floor 17290
+  moves       135.61 vs     141.46  delta     -5.85  LB95    -10.65
+  halves     -24311 /    -18534   q25 delta    -10547   max 2627197 vs 2777773
+  flow    clears/move 2.1065 vs 2.1110  reveals/move 1.1905 vs 1.1940  occupancy 23.42 vs 23.13
+treestrap-d3s7 - searchtd-d3s7 on 2048 paired games (seeds 0xa52f2e80+):
+  score       467899 vs     382505  delta    +85394  LB95    +70489  UB95   +100318  W-T-L 1169-0-879  floor 14955
+  moves       135.61 vs     111.99  delta    +23.63  LB95    +19.50
+  halves     +82519 /    +88268   q25 delta     +6537   max 2627197 vs 2389633
+  flow    clears/move 2.1065 vs 2.0451  reveals/move 1.1905 vs 1.1434  occupancy 23.42 vs 23.70
+searchtd-d3s7 - prior-d3s7 on 2048 paired games (seeds 0xa52f2e80+):
+  score       382505 vs     489321  delta   -106816  LB95   -122276  UB95    -91479  W-T-L 851-0-1197  floor 15341
+  moves       111.99 vs     141.46  delta    -29.48  LB95    -33.76
+  halves    -106829 /   -106802   q25 delta    -17084   max 2389633 vs 2777773
+  flow    clears/move 2.0451 vs 2.1110  reveals/move 1.1434 vs 1.1940  occupancy 23.70 vs 23.13
+treestrap-d3s7 - control-d3s7 on 2048 paired games (seeds 0xa52f2e80+):
+  score       467899 vs     493481  delta    -25582  LB95    -43488  UB95     -7786  W-T-L 975-0-1073  floor 17711
+  moves       135.61 vs     142.65  delta     -7.04  LB95    -11.99
+  halves     -20394 /    -30770   q25 delta    -13583   max 2627197 vs 3400586
+  flow    clears/move 2.1065 vs 2.1130  reveals/move 1.1905 vs 1.1955  occupancy 23.42 vs 23.10
+control-d3s7 - prior-d3s7 on 2048 paired games (seeds 0xa52f2e80+):
+  score       493481 vs     489321  delta     +4160  LB95    -13667  UB95    +21862  W-T-L 1064-15-969  floor 17918
+  moves       142.65 vs     141.46  delta     +1.18  LB95     -3.75
+  halves      -3916 /    +12236   q25 delta     +3036   max 3400586 vs 2777773
+  flow    clears/move 2.1130 vs 2.1110  reveals/move 1.1955 vs 1.1940  occupancy 23.10 vs 23.13
+treestrapalt-d3s7 - prior-d3s7 on 2048 paired games (seeds 0xa52f2e80+):
+  score       485343 vs     489321  delta     -3978  LB95    -22126  UB95    +13794  W-T-L 1019-0-1029  floor 17909
+  moves       140.32 vs     141.46  delta     -1.14  LB95     -6.15
+  halves      -1805 /     -6152   q25 delta     -9400   max 3160928 vs 2777773
+  flow    clears/move 2.1149 vs 2.1110  reveals/move 1.1962 vs 1.1940  occupancy 23.45 vs 23.13
+treestrap-d3s7 - treestrapalt-d3s7 on 2048 paired games (seeds 0xa52f2e80+):
+  score       467899 vs     485343  delta    -17444  LB95    -35160  UB95       +56  W-T-L 1014-0-1034  floor 17527
+  moves       135.61 vs     140.32  delta     -4.71  LB95     -9.59
+  halves     -22506 /    -12382   q25 delta     -1147   max 2627197 vs 3160928
+  flow    clears/move 2.1065 vs 2.1149  reveals/move 1.1905 vs 1.1962  occupancy 23.42 vs 23.45
+treestrap-d4s7 - prior-d4s7 on 512 paired games (seeds 0xa52f2e80+):
+  score       509810 vs     535153  delta    -25344  LB95    -64719  UB95    +14253  W-T-L 253-0-259  floor 39492
+  moves       147.11 vs     153.99  delta     -6.88  LB95    -17.75
+  halves      +8011 /    -58698   q25 delta    +16834   max 2263528 vs 2965639
+  flow    clears/move 2.1282 vs 2.1368  reveals/move 1.2055 vs 1.2134  occupancy 23.20 vs 22.84
+Traceback (most recent call last):
+  File "/home/keshav/Developer/drop7-bench/approaches/lifetime-objective/leaf-evolution/compare.py", line 119, in <module>
+    main()
+    ~~~~^^
+  File "/home/keshav/Developer/drop7-bench/approaches/lifetime-objective/leaf-evolution/compare.py", line 95, in main
+    "pairedScore": paired(cand, ref, "score"),
+                   ~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/home/keshav/Developer/drop7-bench/approaches/lifetime-objective/leaf-evolution/compare.py", line 57, in paired
+    assert [g["seedHex"] for g in cand["games"]] == [g["seedHex"] for g in ref["games"]], "seed alignment"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: seed alignment
+[2026-09-07T11:37:12Z] compare treestrap-d4s7 vs treestrap-d3s7: skipped
+Traceback (most recent call last):
+  File "/home/keshav/Developer/drop7-bench/approaches/lifetime-objective/leaf-evolution/compare.py", line 119, in <module>
+    main()
+    ~~~~^^
+  File "/home/keshav/Developer/drop7-bench/approaches/lifetime-objective/leaf-evolution/compare.py", line 95, in main
+    "pairedScore": paired(cand, ref, "score"),
+                   ~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/home/keshav/Developer/drop7-bench/approaches/lifetime-objective/leaf-evolution/compare.py", line 57, in paired
+    assert [g["seedHex"] for g in cand["games"]] == [g["seedHex"] for g in ref["games"]], "seed alignment"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: seed alignment
+[2026-09-07T11:37:12Z] compare prior-d4s7 vs prior-d3s7: skipped
+prior-d3s7 - fair-d3s7 on 2048 paired games (seeds 0xa52f2e80+):
+  score       489321 vs     325904  delta   +163417  LB95   +148769  UB95   +178125  W-T-L 1345-0-703  floor 14821
+  moves       141.46 vs      95.65  delta    +45.81  LB95    +41.78
+  halves    +160869 /   +165966   q25 delta    +50892   max 2777773 vs 2329707
+  flow    clears/move 2.1110 vs 1.9961  reveals/move 1.1940 vs 1.1101  occupancy 23.13 vs 24.23
+treestrap-d3s7 - fair-d3s7 on 2048 paired games (seeds 0xa52f2e80+):
+  score       467899 vs     325904  delta   +141995  LB95   +127552  UB95   +156337  W-T-L 1282-0-766  floor 14395
+  moves       135.61 vs      95.65  delta    +39.96  LB95    +35.98
+  halves    +136558 /   +147432   q25 delta    +40344   max 2627197 vs 2329707
+  flow    clears/move 2.1065 vs 1.9961  reveals/move 1.1905 vs 1.1101  occupancy 23.42 vs 24.23
+searchtd-d3s7 - fair-d3s7 on 2048 paired games (seeds 0xa52f2e80+):
+  score       382505 vs     325904  delta    +56601  LB95    +45299  UB95    +67944  W-T-L 1180-0-868  floor 11443
+  moves       111.99 vs      95.65  delta    +16.34  LB95    +13.21
+  halves     +54039 /    +59164   q25 delta    +33807   max 2389633 vs 2329707
+  flow    clears/move 2.0451 vs 1.9961  reveals/move 1.1434 vs 1.1101  occupancy 23.70 vs 24.23
+control-d3s7 - fair-d3s7 on 2048 paired games (seeds 0xa52f2e80+):
+  score       493481 vs     325904  delta   +167577  LB95   +152675  UB95   +182553  W-T-L 1354-0-694  floor 14829
+  moves       142.65 vs      95.65  delta    +47.00  LB95    +42.88
+  halves    +156952 /   +178202   q25 delta    +53927   max 3400586 vs 2329707
+  flow    clears/move 2.1130 vs 1.9961  reveals/move 1.1955 vs 1.1101  occupancy 23.10 vs 24.23
+Traceback (most recent call last):
+  File "/home/keshav/Developer/drop7-bench/approaches/lifetime-objective/leaf-evolution/compare.py", line 119, in <module>
+    main()
+    ~~~~^^
+  File "/home/keshav/Developer/drop7-bench/approaches/lifetime-objective/leaf-evolution/compare.py", line 95, in main
+    "pairedScore": paired(cand, ref, "score"),
+                   ~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/home/keshav/Developer/drop7-bench/approaches/lifetime-objective/leaf-evolution/compare.py", line 57, in paired
+    assert [g["seedHex"] for g in cand["games"]] == [g["seedHex"] for g in ref["games"]], "seed alignment"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: seed alignment
+[2026-09-07T11:37:15Z] compare treestrap-d4s7 vs fair-d3s7: skipped
+treestrap-1ply - prior-1ply on 2048 paired games (seeds 0xa52f2e80+):
+  score       262406 vs     293770  delta    -31364  LB95    -38943  UB95    -23819  W-T-L 919-0-1129  floor 7636
+  moves        78.75 vs      87.74  delta     -8.99  LB95    -11.11
+  halves     -32074 /    -30653   q25 delta    -16363   max 1179524 vs 1253450
+  flow    clears/move 1.8903 vs 1.9319  reveals/move 1.0371 vs 1.0652  occupancy 24.81 vs 24.38
+treestrap-1ply - fair-d3s7 on 2048 paired games (seeds 0xa52f2e80+):
+  score       262406 vs     325904  delta    -63497  LB95    -72661  UB95    -54464  W-T-L 832-0-1216  floor 9208
+  moves        78.75 vs      95.65  delta    -16.90  LB95    -19.42
+  halves     -69001 /    -57994   q25 delta    -18112   max 1179524 vs 2329707
+  flow    clears/move 1.8903 vs 1.9961  reveals/move 1.0371 vs 1.1101  occupancy 24.81 vs 24.23
+prior-1ply - fair-d3s7 on 2048 paired games (seeds 0xa52f2e80+):
+  score       293770 vs     325904  delta    -32134  LB95    -41613  UB95    -22871  W-T-L 946-0-1102  floor 9313
+  moves        87.74 vs      95.65  delta     -7.91  LB95    -10.53
+  halves     -36927 /    -27341   q25 delta     -1749   max 1253450 vs 2329707
+  flow    clears/move 1.9319 vs 1.9961  reveals/move 1.0652 vs 1.1101  occupancy 24.38 vs 24.23
+[2026-09-07T11:37:22Z] analyze: written /home/keshav/Developer/drop7-bench/runs/RUN-20260907T041853Z-70c90dc9/ntuple-scale/analysis.md

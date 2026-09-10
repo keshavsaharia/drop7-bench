@@ -1,0 +1,46 @@
+{
+  "candidateArm": "treestrap20",
+  "candidateBestMargin": 168522.5546875,
+  "candidateBestMoves": 900377,
+  "alternateArm": "treestrap05",
+  "ablationArm": "searchtd05",
+  "ablationBestMargin": 83875.33203125,
+  "ablationBestMoves": 1521557,
+  "arms": {
+    "treestrap05": {
+      "bestMargin": 166414.35546875,
+      "finalMargin": 137067.5703125,
+      "bestMoves": 1802815,
+      "movesTotal": 2120050,
+      "validationPoints": 8,
+      "stop": "plateau",
+      "warmStartMargin": 188854.44140625,
+      "alpha": 0.05
+    },
+    "treestrap20": {
+      "bestMargin": 168522.5546875,
+      "finalMargin": 132604.30078125,
+      "bestMoves": 900377,
+      "movesTotal": 1807768,
+      "validationPoints": 7,
+      "stop": "plateau",
+      "warmStartMargin": 188854.44140625,
+      "alpha": 0.2
+    },
+    "searchtd05": {
+      "bestMargin": 83875.33203125,
+      "finalMargin": 40720.35546875,
+      "bestMoves": 1521557,
+      "movesTotal": 1821204,
+      "validationPoints": 7,
+      "stop": "plateau",
+      "warmStartMargin": 188854.44140625,
+      "alpha": 0.05
+    }
+  },
+  "trainingSignal": {
+    "criterion": "the candidate TreeStrap arm's best validation margin exceeds the warm start's own margin on the same block (point 0)",
+    "passed": false
+  },
+  "rule": "the TreeStrap arm (treestrap05 or treestrap20) whose best validation point has the larger paired mean margin of ntuple-d3s7 over fair-d3s7 on the 256-game training-role block is the candidate, ties to treestrap05; the other is screened at depth 3 as treestrapalt; searchtd05 is the ablation; each arm's point 0 is the warm start's own margin and is never a candidate"
+}

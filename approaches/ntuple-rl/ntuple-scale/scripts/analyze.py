@@ -80,9 +80,19 @@ def t_quantile_95(df: int) -> float:
 
 
 def paired(cand, ref, key="score"):
-    a = np.array([g[key] for g in cand["games"]], dtype=float)
-    b = np.array([g[key] for g in ref["games"]], dtype=float)
-    assert [g["seedHex"] for g in cand["games"]] == [g["seedHex"] for g in ref["games"]]
+    """Paired statistics on the seeds both arms played, in cohort order (a
+    depth-4 arm may have played only the first --games-d4 seeds of the
+    block; every other arm the whole block).  The seed lists must agree on
+    the shared prefix."""
+    cand_games = cand["games"]
+    ref_games = ref["games"]
+    if len(cand_games) != len(ref_games):
+        n = min(len(cand_games), len(ref_games))
+        cand_games = cand_games[:n]
+        ref_games = ref_games[:n]
+    assert [g["seedHex"] for g in cand_games] == [g["seedHex"] for g in ref_games]
+    a = np.array([g[key] for g in cand_games], dtype=float)
+    b = np.array([g[key] for g in ref_games], dtype=float)
     d = a - b
     n = len(d)
     rng = np.random.default_rng(BOOTSTRAP_SEED)
@@ -157,6 +167,9 @@ def training_summary(directory):
             "meanAbsDelta": row["meanAbsDelta"],
             "meanBeta": row["meanBeta"],
             "seedWraps": row.get("seedWraps"),
+            "rootUpdates": row.get("rootUpdates"),
+            "internalUpdates": row.get("internalUpdates"),
+            "leafCalls": row.get("leafCalls"),
             "quick": row.get("quick"),
             "validation": row.get("validation"),
         })
@@ -179,6 +192,7 @@ def training_summary(directory):
     incomplete = sum(sum(i["incompleteDecisions"] for i in load_json(p)["individuals"]) for p in glob.glob(os.path.join(directory, "val-*.json")))
     best = load_json_if_complete(os.path.join(directory, "best.json"))
     stop = load_json_if_complete(os.path.join(directory, "stop.json"))
+    start = load_json_if_complete(os.path.join(directory, "start.json"))
     plateau_by_moves = {}
     for row in rows:
         v = row.get("validation")
@@ -199,14 +213,17 @@ def training_summary(directory):
         "curve": curve,
         "validations": validations,
         "best": best,
+        "start": start,
         "artifactIntegrity": {"illegalDecisions": illegal, "incompleteDecisions": incomplete},
         "finalMargin": validations[-1]["pairedD3VsFair"]["meanDelta"] if validations and "pairedD3VsFair" in validations[-1] else None,
-        "bestMargin": max((v["pairedD3VsFair"]["meanDelta"] for v in validations if "pairedD3VsFair" in v), default=None),
+        "bestMargin": max((v["pairedD3VsFair"]["meanDelta"] for v in validations if "pairedD3VsFair" in v and v["movesTrained"] > 0), default=None),
         "anyPositiveMargin": any(v["pairedD3VsFair"]["meanDelta"] > 0 for v in validations if "pairedD3VsFair" in v),
     }
 
 
 FILL_ARMS = ("occ5", "hgt5")
+TREE_ARMS = ("searchtd", "treestrap")
+TREE_RULE = "the candidate is the treestrap arm's best validation point by protocol (no selection between arms); the searchtd arm's best point is the ablation; each arm's point 0 is the warm start's own margin on the same block and is never a candidate"
 FILL_RULE = "the fill arm (occ5 or hgt5) whose best validation point has the larger paired mean margin of ntuple-d3s7 over fair-d3s7 on the 256-game training-role block, ties to occ5; the control arm's best point is the control candidate"
 
 
@@ -235,10 +252,68 @@ def pilot_summary(out):
         return None
     selection_path = os.path.join(out, "pilot", "selection.json")
     fill_shaped = any(name in FILL_ARMS or name == "control" for name in arms)
+    tree_shaped = any(name in TREE_ARMS for name in arms)
+    gentle_shaped = any(name in ("treestrap05", "treestrap20", "searchtd05") for name in arms)
     return {
         "arms": arms,
         "selection": load_json_if_complete(selection_path),
-        "rule": FILL_RULE if fill_shaped else "the arm whose final validation point has the largest paired mean margin of ntuple-d3s7 over fair-d3s7; ties by fewer table entries",
+        "rule": GENTLE_RULE if gentle_shaped else TREE_RULE if tree_shaped else FILL_RULE if fill_shaped else "the arm whose final validation point has the largest paired mean margin of ntuple-d3s7 over fair-d3s7; ties by fewer table entries",
+    }
+
+
+GENTLE_RULE = "the TreeStrap arm (treestrap05 or treestrap20) whose best validation point has the larger paired mean margin of ntuple-d3s7 over fair-d3s7 on the 256-game training-role block is the candidate, ties to treestrap05; the other is screened at depth 3 as treestrapalt; searchtd05 is the ablation; each arm's point 0 is the warm start's own margin and is never a candidate"
+
+
+def select_gentle_arm(out):
+    """The gentle-step TreeStrap experiment's selection."""
+    pilot = pilot_summary(out)
+    if pilot is None:
+        raise SystemExit("no training arms found")
+    arms = pilot["arms"]
+    for name in ("treestrap05", "treestrap20", "searchtd05"):
+        if name not in arms or not arms[name]["done"] or arms[name]["bestMargin"] is None:
+            raise SystemExit(f"arm {name} is not complete with a validation point")
+    def start_margin(name):
+        start = load_json_if_complete(os.path.join(out, "pilot", name, "start.json"))
+        return start["pairedDeltaD3"] if start else None
+    ranked = sorted(("treestrap05", "treestrap20"), key=lambda n: (-arms[n]["bestMargin"], ("treestrap05", "treestrap20").index(n)))
+    candidate, alternate = ranked
+    return {
+        "candidateArm": candidate,
+        "candidateBestMargin": arms[candidate]["bestMargin"],
+        "candidateBestMoves": arms[candidate]["best"]["moves"] if arms[candidate]["best"] else None,
+        "alternateArm": alternate,
+        "ablationArm": "searchtd05",
+        "ablationBestMargin": arms["searchtd05"]["bestMargin"],
+        "ablationBestMoves": arms["searchtd05"]["best"]["moves"] if arms["searchtd05"]["best"] else None,
+        "arms": {n: {"bestMargin": arms[n]["bestMargin"], "finalMargin": arms[n]["finalMargin"], "bestMoves": arms[n]["best"]["moves"] if arms[n]["best"] else None, "movesTotal": arms[n]["movesTotal"], "validationPoints": len(arms[n]["validations"]), "stop": arms[n]["stop"]["reason"] if arms[n]["stop"] else None, "warmStartMargin": start_margin(n), "alpha": arms[n].get("alpha")} for n in ("treestrap05", "treestrap20", "searchtd05")},
+        "trainingSignal": {"criterion": "the candidate TreeStrap arm's best validation margin exceeds the warm start's own margin on the same block (point 0)", "passed": (arms[candidate]["bestMargin"] > start_margin(candidate)) if start_margin(candidate) is not None else None},
+        "rule": GENTLE_RULE,
+    }
+
+
+def select_tree_arm(out):
+    """The search-target experiment's fixed candidate, with both arms' best points and the warm start's point 0."""
+    pilot = pilot_summary(out)
+    if pilot is None:
+        raise SystemExit("no training arms found")
+    arms = pilot["arms"]
+    for name in TREE_ARMS:
+        if name not in arms or not arms[name]["done"] or arms[name]["bestMargin"] is None:
+            raise SystemExit(f"arm {name} is not complete with a validation point")
+    def start_margin(name):
+        start = load_json_if_complete(os.path.join(out, "pilot", name, "start.json"))
+        return start["pairedDeltaD3"] if start else None
+    return {
+        "candidateArm": "treestrap",
+        "candidateBestMargin": arms["treestrap"]["bestMargin"],
+        "candidateBestMoves": arms["treestrap"]["best"]["moves"] if arms["treestrap"]["best"] else None,
+        "ablationArm": "searchtd",
+        "ablationBestMargin": arms["searchtd"]["bestMargin"],
+        "ablationBestMoves": arms["searchtd"]["best"]["moves"] if arms["searchtd"]["best"] else None,
+        "arms": {n: {"bestMargin": arms[n]["bestMargin"], "finalMargin": arms[n]["finalMargin"], "bestMoves": arms[n]["best"]["moves"] if arms[n]["best"] else None, "movesTotal": arms[n]["movesTotal"], "validationPoints": len(arms[n]["validations"]), "stop": arms[n]["stop"]["reason"] if arms[n]["stop"] else None, "warmStartMargin": start_margin(n)} for n in TREE_ARMS},
+        "trainingSignal": {"criterion": "the treestrap arm's best validation margin exceeds the warm start's own margin on the same block (point 0)", "passed": (arms["treestrap"]["bestMargin"] > start_margin("treestrap")) if start_margin("treestrap") is not None else None},
+        "rule": TREE_RULE,
     }
 
 
@@ -310,6 +385,13 @@ def screen_summary(out):
         ("fill-d4s7", "prior-d4s7"), ("zeroed-d4s7", "prior-d4s7"), ("fill-d4s7", "fill-d3s7"), ("zeroed-d4s7", "zeroed-d3s7"),
         ("fill-d3s7", "fair-d3s7"), ("control-d3s7", "fair-d3s7"), ("zeroed-d3s7", "fair-d3s7"), ("classmean-d3s7", "fair-d3s7"),
         ("fill-1ply", "prior-1ply"), ("fill-1ply", "fair-d3s7"), ("fill-d4s7", "fair-d3s7"),
+        # The search-target (TreeStrap) experiment.
+        ("treestrap-d3s7", "prior-d3s7"), ("treestrap-d3s7", "searchtd-d3s7"), ("searchtd-d3s7", "prior-d3s7"),
+        ("treestrap-d3s7", "control-d3s7"), ("treestrap-d4s7", "prior-d4s7"), ("searchtd-d4s7", "prior-d4s7"),
+        ("treestrap-d4s7", "treestrap-d3s7"), ("searchtd-d4s7", "searchtd-d3s7"),
+        ("treestrap-d3s7", "fair-d3s7"), ("searchtd-d3s7", "fair-d3s7"), ("treestrap-d4s7", "fair-d3s7"),
+        ("treestrap-1ply", "prior-1ply"), ("treestrap-1ply", "fair-d3s7"),
+        ("treestrapalt-d3s7", "prior-d3s7"), ("treestrap-d3s7", "treestrapalt-d3s7"), ("treestrapalt-d3s7", "fair-d3s7"),
     ]
     for cand, ref in pairs:
         if cand in by and ref in by:
@@ -465,7 +547,68 @@ def screen_summary(out):
                 "depthCompounding": (fill_depth["verdict"] == "refuted") if fill_depth else None,
             },
         }
-    return {"config": art["config"], "seedStartHex": art["seedStartHex"], "games": art["config"].get("games"), "arms": arms, "contrasts": contrasts, "primaryContrast": primary_contrast, "gate": gate, "replication": replication, "scale": scale, "depth": depth, "fill": fill}
+    # The search-target experiment (EX-20260907-ntuple-treestrap-*): the gate
+    # reads the treestrap candidate against the frozen tables at depth 3;
+    # the readings beside it carry the fixed three-way verdict.
+    tree = None
+    primary_tree = contrasts.get("treestrap-d3s7-vs-prior-d3s7", {}).get("score")
+    if primary_tree:
+        primary_contrast = "treestrap-d3s7-vs-prior-d3s7"
+
+        def criteria(label, reference, contrast):
+            return [
+                {"criterion": "screen artifact: illegalDecisions 0 and incompleteDecisions 0 in every arm", "passed": integrity_ok},
+                {"criterion": f"bootstrap 95% lower bound of {label} minus {reference} > 0", "passed": contrast["bootstrapLower95"] > 0, "observed": contrast["bootstrapLower95"]},
+                {"criterion": "Student-t 95% lower bound > 0", "passed": contrast["studentTLower95"] > 0, "observed": contrast["studentTLower95"]},
+                {"criterion": "paired mean delta > 0 in both halves", "passed": contrast["firstHalfMeanDelta"] > 0 and contrast["secondHalfMeanDelta"] > 0, "observed": [contrast["firstHalfMeanDelta"], contrast["secondHalfMeanDelta"]]},
+                {"criterion": f"{label} Q25 >= {reference} Q25", "passed": contrast["candidateQ25"] >= contrast["referenceQ25"], "observed": [contrast["candidateQ25"], contrast["referenceQ25"]]},
+            ]
+
+        def verdict(contrast):
+            if contrast["bootstrapLower95"] > 0 and contrast["studentTLower95"] > 0:
+                return "supported"
+            if contrast["bootstrapUpper95"] < 0:
+                return "refuted"
+            return "inconclusive"
+
+        def reading(name):
+            c = contrasts.get(name, {}).get("score")
+            if not c:
+                return None
+            return {"contrast": name, "verdict": verdict(c), **{k: c[k] for k in ("meanDelta", "bootstrapLower95", "bootstrapUpper95", "studentTLower95", "detectionFloor", "wins", "ties", "losses", "firstHalfMeanDelta", "secondHalfMeanDelta", "candidateQ25", "referenceQ25")}}
+
+        checks = criteria("treestrap-d3s7", "prior-d3s7", primary_tree)
+        gate = {"checks": checks, "passed": all(c["passed"] for c in checks)}
+        ablation_c = contrasts.get("searchtd-d3s7-vs-prior-d3s7", {}).get("score")
+        ablation = None
+        if ablation_c:
+            achecks = criteria("searchtd-d3s7", "prior-d3s7", ablation_c)
+            ablation = {"checks": achecks, "passed": all(c["passed"] for c in achecks), **reading("searchtd-d3s7-vs-prior-d3s7")}
+        offpath = reading("treestrap-d3s7-vs-searchtd-d3s7")
+        vs_control = reading("treestrap-d3s7-vs-control-d3s7")
+        tree_depth = reading("treestrap-d4s7-vs-prior-d4s7")
+        ablation_depth = reading("searchtd-d4s7-vs-prior-d4s7")
+        tree = {
+            "primary": "treestrap-d3s7-vs-prior-d3s7",
+            "gate": gate,
+            "offPathBoards": offpath,
+            "ablation": ablation,
+            "vsOnePlyContinuation": vs_control,
+            "treestrapDepth4": tree_depth,
+            "ablationDepth4": ablation_depth,
+            "alternate": reading("treestrapalt-d3s7-vs-prior-d3s7"),
+            "candidateVsAlternate": reading("treestrap-d3s7-vs-treestrapalt-d3s7"),
+            "depthSteps": {n: reading(n) for n in ("treestrap-d4s7-vs-treestrap-d3s7", "searchtd-d4s7-vs-searchtd-d3s7", "prior-d4s7-vs-prior-d3s7") if n in contrasts},
+            "direct": {n: reading(n) for n in ("treestrap-1ply-vs-prior-1ply", "treestrap-1ply-vs-fair-d3s7", "prior-1ply-vs-fair-d3s7") if n in contrasts},
+            "replicationOfPrior": reading("prior-d3s7-vs-fair-d3s7"),
+            "theory": {
+                "primaryFalsifierUpperBoundBelowZero": primary_tree["bootstrapUpper95"] < 0,
+                "offPathUpperBoundBelowZero": (offpath["bootstrapUpper95"] < 0) if offpath else None,
+                "gainIsSearchTargetNotOffPath": bool(gate["passed"] and offpath and offpath["verdict"] == "inconclusive" and ablation and ablation["passed"]) if offpath and ablation else None,
+                "depthCompounding": (tree_depth["verdict"] == "refuted") if tree_depth else None,
+            },
+        }
+    return {"config": art["config"], "seedStartHex": art["seedStartHex"], "games": art["config"].get("games"), "arms": arms, "contrasts": contrasts, "primaryContrast": primary_contrast, "gate": gate, "replication": replication, "scale": scale, "depth": depth, "fill": fill, "tree": tree}
 
 
 def gates_summary(out, name="gates.log"):
@@ -509,10 +652,12 @@ def write_markdown(analysis, path):
         sel = p.get("selection")
         if sel and "arm" in sel:
             lines += ["", f"Selected: arm {sel['arm']} ({sel['layout']}, alpha {sel['alpha']}), rule: {p['rule']}"]
+        elif sel and "ablationArm" in sel:
+            lines += ["", f"Candidate: arm {sel['candidateArm']} (best margin {fmt(sel['candidateBestMargin'])} at {fmt(sel['candidateBestMoves'])} moves); ablation arm {sel['ablationArm']} best margin {fmt(sel['ablationBestMargin'])} at {fmt(sel['ablationBestMoves'])} moves; warm-start margins (point 0) {json.dumps({n: a['warmStartMargin'] for n, a in sel['arms'].items()})}; training-signal check passed: {sel['trainingSignal']['passed']}; rule: {p['rule']}"]
         elif sel and "candidateArm" in sel:
             lines += ["", f"Selected fill candidate: arm {sel['candidateArm']} (best margin {fmt(sel['candidateBestMargin'])} at {fmt(sel['candidateBestMoves'])} moves); control best margin {fmt(sel['controlBestMargin'])} at {fmt(sel['controlBestMoves'])} moves; training-signal check passed: {sel['trainingSignal']['passed']}; rule: {p['rule']}"]
         for name, arm in p["arms"].items():
-            if arm["validations"] and name in ("control", "occ5", "hgt5"):
+            if arm["validations"] and name in ("control", "occ5", "hgt5", "searchtd", "treestrap", "treestrap05", "treestrap20", "searchtd05"):
                 lines += ["", f"Validation curve of arm {name}:", "", "| point | moves | ntuple-d3s7 | fair-d3s7 | paired delta | LB95 | W-L | 1-ply | touched entries | plateau (last / previous window) |", "| ---: | ---: | ---: | ---: | ---: | ---: | --- | ---: | ---: | --- |"]
                 for index, v in enumerate(arm["validations"], start=1):
                     d = v.get("pairedD3VsFair", {})
@@ -568,6 +713,18 @@ def write_markdown(analysis, path):
                 for name, r in (f.get(group) or {}).items():
                     lines.append(f"- {group} {name}: {r['verdict']}: delta {fmt(r['meanDelta'])}, LB95 boot {fmt(r['bootstrapLower95'])}, UB95 {fmt(r['bootstrapUpper95'])}, W-T-L {r['wins']}-{r['ties']}-{r['losses']}")
             lines.append(f"Theory falsifiers: {json.dumps(f['theory'])}")
+        if s.get("tree"):
+            f = s["tree"]
+            lines += ["", "Search-target experiment readings (three-way verdicts: supported / refuted / inconclusive):", ""]
+            for key, label in (("offPathBoards", "off-path boards (treestrap-d3s7 vs searchtd-d3s7)"), ("ablation", "search targets at visited states only (searchtd-d3s7 vs prior-d3s7)"), ("vsOnePlyContinuation", "vs the one-ply continuation (treestrap-d3s7 vs control-d3s7)"), ("alternate", "the other TreeStrap step size (treestrapalt-d3s7 vs prior-d3s7)"), ("candidateVsAlternate", "candidate vs the other step size (treestrap-d3s7 vs treestrapalt-d3s7)"), ("treestrapDepth4", "treestrap at depth 4 (treestrap-d4s7 vs prior-d4s7)"), ("ablationDepth4", "searchtd at depth 4 (searchtd-d4s7 vs prior-d4s7)")):
+                r = f.get(key)
+                if r:
+                    extra = f"; four criteria passed: {r['passed']}" if "passed" in r else ""
+                    lines.append(f"- {label}: {r['verdict']}: delta {fmt(r['meanDelta'])}, LB95 boot {fmt(r['bootstrapLower95'])}, LB95 t {fmt(r['studentTLower95'])}, UB95 {fmt(r['bootstrapUpper95'])}, W-T-L {r['wins']}-{r['ties']}-{r['losses']}, halves {fmt(r['firstHalfMeanDelta'])} / {fmt(r['secondHalfMeanDelta'])}, floor {fmt(r['detectionFloor'])}{extra}")
+            for group in ("depthSteps", "direct"):
+                for name, r in (f.get(group) or {}).items():
+                    lines.append(f"- {group} {name}: {r['verdict']}: delta {fmt(r['meanDelta'])}, LB95 boot {fmt(r['bootstrapLower95'])}, UB95 {fmt(r['bootstrapUpper95'])}, W-T-L {r['wins']}-{r['ties']}-{r['losses']}")
+            lines.append(f"Theory falsifiers: {json.dumps(f['theory'])}")
         if s.get("replication"):
             lines += ["", f"Replication (prior-d3s7 vs fair-d3s7, the first experiment's frozen tables on this fresh block) passed: {s['replication']['passed']}", ""] + [f"- {'PASS' if c['passed'] else 'FAIL'} {c['criterion']}: {c.get('observed', '')}" for c in s["replication"]["checks"]]
         if s.get("scale"):
@@ -584,6 +741,8 @@ def main():
     parser.add_argument("--root", default=os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
     parser.add_argument("--select-arm", action="store_true")
     parser.add_argument("--select-fill-arm", action="store_true")
+    parser.add_argument("--select-tree-arm", action="store_true")
+    parser.add_argument("--select-gentle-arm", action="store_true")
     args = parser.parse_args()
     out = os.path.join(args.root, "runs", args.run, "ntuple-scale")
     if args.select_arm:
@@ -592,12 +751,18 @@ def main():
     if args.select_fill_arm:
         print(json.dumps(select_fill_arm(out), indent=2))
         return
+    if args.select_tree_arm:
+        print(json.dumps(select_tree_arm(out), indent=2))
+        return
+    if args.select_gentle_arm:
+        print(json.dumps(select_gentle_arm(out), indent=2))
+        return
     analysis = {
         "format": "drop7-ntuple-scale-analysis-v1",
         "runId": args.run,
         "gates": gates_summary(out),
         "gatesHgt5": gates_summary(out, "gates-hgt5.log"),
-        "frozenGates": {name: gates_summary(os.path.join(out, "main"), f"gates-{name}.log") for name in ("candidate", "control", "zeroed", "classmean") if os.path.exists(os.path.join(out, "main", f"gates-{name}.log"))} or None,
+        "frozenGates": {os.path.basename(p)[len("gates-"):-len(".log")]: gates_summary(os.path.join(out, "main"), os.path.basename(p)) for p in glob.glob(os.path.join(out, "main", "gates-*.log"))} or None,
         "edits": load_json_if_complete(os.path.join(out, "main", "edits.json")),
         "smoke": training_summary(os.path.join(out, "smoke")),
         "pilot": pilot_summary(out),

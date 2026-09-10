@@ -1,0 +1,106 @@
+{
+  "$schema": "../schemas/experiment-v1.schema.json",
+  "format": "drop7-experiment-v1",
+  "experimentId": "EX-20260907-ntuple-treestrap-gentle-step-087a3a63",
+  "theoryIds": [
+    "TH-20260907-ntuple-search-target-treestrap-leaf-b1c9989f"
+  ],
+  "title": "TreeStrap on the n-tuple leaf at a gentle step size: alpha 0.05 and 0.2 from the frozen warm start, beside a visited-states ablation at 0.05, screened once on a fresh block of 2,048 games at depth 3 with the depth-4 arms on its first 512",
+  "classification": "algorithmic",
+  "hypothesis": "The first TreeStrap experiment (EX-20260907-ntuple-treestrap-warm-start-c33ba880, run RUN-20260907T012358Z-a00ecdf0) warm-started the frozen tables with fresh coherence accumulators at alpha 1.0, and both search-actor arms fell below the warm start at their first validation point (warm start +174,466 over the fair leaf on the validation block; visited-states arm best +140,529, every-tree-node arm first point +10,059 and best +93,767): every entry's first update ran at the full step, the internal-node targets differed from the tables by about eleven rise units at the start, and the search actor makes about two thousand times fewer visited-state updates per second than the one-ply continuation whose shock healed in seconds. This experiment tests the same theory with a gentle step. Candidate treestrap-d3s7: the stock fair expectimax search at depth 3, seven chance strata, terminal utility -1,000,000, policy seed 0xd7075eed, work bound work_bound_for(3,7)+1, 64k-entry direct-mapped table (deployment_params, unchanged), with the n-tuple leaf of the first experiment's layout (rows,cols,win23,win32,phase=all, 10^9 f32 entries in rise units) whose weights are the frozen tables of RUN-20260905T193006Z-4fbeb4e5 (SHA-256 0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b) reloaded with zeroed coherence accumulators and trained on by TreeStrap exactly as in EX-20260907-ntuple-treestrap-warm-start-c33ba880 (search_train.rs: the deployed search mirrored bit for bit, the visited afterstate toward the root's score-only search value and every internal decision node of the tree toward its own score-only backup, temporal-coherence semi-gradient steps with the error clamped to +-30 rise units, 32 lock-free workers), at alpha 0.05 (arm treestrap05) and alpha 0.2 (arm treestrap20) instead of 1.0; validation at point 0 (the warm start, never a candidate) and every 3 x 10^5 visited moves on the 256-game training-role block; stop at the first training point k >= 6 at which the mean margin of the last three points is not above the mean of the three before, or at 6 x 10^6 visited moves, or at 5,400 s of wall time; each arm's best training point is its frozen file. Selection rule, fixed here: the candidate is the TreeStrap arm whose best validation margin is larger, ties to treestrap05; the other TreeStrap arm's best point is screened at depth 3 as treestrapalt. Comparator prior-d3s7: the unchanged frozen tables (SHA-256 0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b) as the leaf of the identical search. Beside them on the same seeds: searchtd-d3s7, the ablation, the same actor and root target with no internal-node updates at alpha 0.05 (arm searchtd05), frozen under the identical rule; treestrapalt-d3s7; control-d3s7, the fill experiment's one-ply continuation from the same warm start (SHA-256 92dd1cb2d2a74b026270606c18c5f0d6e4f4ccc74e64c3c4e0f0d2043cdddd90), replayed as the one-ply reference; prior-d4s7 and treestrap-d4s7, the frozen tables and the candidate as the leaf of the reference depth-4 search (reference_d4_params) on the first 512 seeds of the block only (screen --games-d4 512); prior-1ply and treestrap-1ply, played directly one ply; and fair-d3s7. The depth-3 and direct arms play 2,048 seeds, so the depth-3 contrasts have about half the detection floor of a 512-game screen; contrasts between arms of different cohort sizes are read on the seeds both played (analyze.py aligns arms by seed). Stage 0 (CHECK, no leased seed): the first experiment's gates on the frozen tables (28 gates including train-search-vs-engine, all passed on the probe block on 2026-09-07 at 01:32Z) stand for the unchanged code; gate --weights on each of the three new table files before the screen lease opens. Hypothesis: treestrap-d3s7 beats prior-d3s7 in paired mean whole-game score on 2,048 never-read public-development games, and beats searchtd-d3s7 on the same games.",
+  "candidate": {
+    "name": "treestrap-d3s7",
+    "entryPoint": "approaches/ntuple-rl/ntuple-scale/src/search_train.rs",
+    "manifestRef": null
+  },
+  "comparator": {
+    "name": "prior-d3s7",
+    "entryPoint": "approaches/ntuple-rl/ntuple-scale/src/game.rs",
+    "manifestRef": null
+  },
+  "informationBoundary": "public-policy",
+  "benchmarkTier": "SCREEN",
+  "data": {
+    "role": "public-development",
+    "seedLeaseRefs": [
+      "SL-20260907T041853Z-f6e4ab5c",
+      "SL-20260907T041853Z-9a40ed51",
+      "SL-20260907T041853Z-3b4f397d"
+    ],
+    "datasetRefs": [
+      "DS-20260906-ntuple-scale-frozen-tables-ff977178",
+      "DS-20260906-ntuple-fill-conditioned-candidate-tables-860c310b"
+    ],
+    "wholeOriginSplit": true,
+    "reuseDisclosure": "CHECK gates read only the already-opened development probe block 0xa5277000 (SEEDLEASE-A52-FAST); the code is unchanged from the first TreeStrap experiment except the --games-d4 option of the screen binary and the seed-aligned pairing in analyze.py, and the gates are re-run on each new table file. Training reads the never-read training block 0xa5c00000-0xa5df0000 (training role, in order) and the never-read 256-game validation block 0xa52f2d80-0xa52f2e80 (training role, read once per arm by the warm start at point 0 and re-read at every validation point; it selects each arm's best point and the candidate arm, so it can confirm nothing). The held-out screen opens 0xa52f2e80-0xa52f3680 (2,048 games; the depth-4 arms play the first 512) exactly once, after the SHA-256 of every table file it plays is on disk and the gates have passed on each new file. All three blocks are disjoint from every block the earlier n-tuple experiments read (training 0xa5300000-0xa54f0000, 0xa5500000-0xa56f0000, 0xa5800000-0xa59f0000, 0xa5a00000-0xa5bf0000; validation 0xa52f2240-0xa52f2280, 0xa52f2280-0xa52f2380, 0xa52f2780-0xa52f2880, 0xa52f2a80-0xa52f2b80; screens 0xa52f2140-0xa52f2240, 0xa52f2380-0xa52f2580, 0xa52f2580-0xa52f2780, 0xa52f2880-0xa52f2a80, 0xa52f2b80-0xa52f2d80) and from the historical block 0xa5700000-0xa571869f. Selection bias: the candidate is the better of two TreeStrap arms and each candidate the best of up to about twenty validation points, all on the training-role validation block; the screen measures what survives that selection."
+  },
+  "metrics": {
+    "primary": "paired mean whole-game score delta, treestrap-d3s7 minus prior-d3s7 (the selected gentle-step TreeStrap candidate minus the unchanged frozen tables, both as the depth-3 leaf), 2,048 held-out games",
+    "secondary": [
+      "off-path boards: treestrap-d3s7 minus searchtd-d3s7 (2,048 games), fixed three-way verdict supported (bootstrap and Student-t 95% lower bounds > 0) / refuted (bootstrap 95% upper bound < 0) / inconclusive, floor reported",
+      "ablation: searchtd-d3s7 minus prior-d3s7 under the same four criteria as the gate and the three-way verdict; the other step size: treestrapalt-d3s7 minus prior-d3s7 and treestrap-d3s7 minus treestrapalt-d3s7 (three-way verdicts)",
+      "one-ply reference: treestrap-d3s7 minus control-d3s7 and control-d3s7 minus prior-d3s7 (three-way verdicts)",
+      "depth: treestrap-d4s7 minus prior-d4s7 on the first 512 seeds (three-way verdict); the depth steps treestrap-d4s7 minus treestrap-d3s7 and prior-d4s7 minus prior-d3s7 on those seeds",
+      "direct play: treestrap-1ply minus prior-1ply, treestrap-1ply minus fair-d3s7, prior-1ply minus fair-d3s7 (diagnostic)",
+      "replication context: prior-d3s7 minus fair-d3s7 on this seventh block (2,048 games); treestrap-d3s7 and searchtd-d3s7 minus fair-d3s7",
+      "training-signal check (pilot tier): each arm's validation curve including point 0, best point, plateau reading, root and internal updates, leaf calls, moves per second; whether the candidate arm's best margin exceeds its point-0 margin",
+      "paired mean moves delta; numbered clears per move and cover reveals per move; mean occupied cells; lower quartile, median, maximum score; first-half and second-half paired mean deltas; per-arm logical work and wall seconds per game",
+      "resource observations: per-stage wall, CPU and peak resident set (rusage.jsonl)"
+    ],
+    "statisticalUnit": "whole-game",
+    "uncertaintyMethod": "one-sided 95% percentile bootstrap over whole games, 20,000 resamples, RNG seed 0xb0071eaf (the unchanged compare.py of the leaf-evolution screen; analyze.py's identical paired(), aligned on the seeds both arms played), plus a one-sided 95% Student-t lower bound; detection floor 1.645*sd/sqrt(n) reported for every contrast"
+  },
+  "gate": {
+    "fixedBeforeControlledData": true,
+    "passCriteria": [
+      "The first TreeStrap experiment's CHECK gates on the frozen tables stand (unchanged training code), and gate --weights passed on each of the three new table files (candidate, treestrapalt, searchtd) before the screen lease opened (main/gates-*.log).",
+      "The screen artifact has illegalDecisions 0 and incompleteDecisions 0 in every arm; censored games are reported as censored.",
+      "Held-out screen, 2,048 paired games on 0xa52f2e80-0xa52f367f, treestrap-d3s7 vs prior-d3s7: bootstrap 95% lower bound of the paired score delta > 0 AND Student-t 95% lower bound > 0.",
+      "Held-out screen: treestrap-d3s7 minus prior-d3s7 paired mean score delta > 0 in both halves (seeds 0-1023 and 1024-2047).",
+      "Held-out screen: treestrap-d3s7 lower-quartile score >= prior-d3s7 lower-quartile score.",
+      "The prior arms are the exact frozen best-weights.bin of RUN-20260905T193006Z-4fbeb4e5 (SHA-256 0ade9d4e4080ebdd52a1474b1a13410dc8dfb77f5eba24b078aa7703c92ace0b) and the control arm the exact fill-experiment control file (SHA-256 92dd1cb2d2a74b026270606c18c5f0d6e4f4ccc74e64c3c4e0f0d2043cdddd90), both verified before any stage reads them; the candidate, treestrapalt and searchtd files have their SHA-256 written to main/*.sha256 before the screen lease opens; the candidate arm is the one selection.json names by the fixed rule.",
+      "Reported beside the gate, not part of it: the off-path verdict (treestrap-d3s7 vs searchtd-d3s7), the ablation reading (searchtd-d3s7 vs prior-d3s7 under the same four criteria), the other step size's readings, the one-ply reference readings, the depth-4 verdict (treestrap-d4s7 vs prior-d4s7 on 512 seeds), each 'supported' when the bootstrap and Student-t 95% lower bounds are > 0, 'refuted' when the bootstrap 95% upper bound is < 0, 'inconclusive' otherwise (floor reported); and the pilot-tier training-signal check."
+    ],
+    "failureAction": "Record a valid run with scientific outcome fail for this exact configuration (TreeStrap from the frozen warm start at alpha 0.05 or 0.2); keep prior-d4s7 as the candidate to carry forward; report the off-path, ablation, alternate, one-ply and depth readings as recorded; mark the theory not supported as tested (refuted if the primary falsifier's upper bound is below zero, inconclusive if the bounds straddle zero). If neither TreeStrap arm's best validation margin exceeds its warm start and the screen fails, record that training toward the search's own backups from this warm start has been tested at three step sizes without a gain the validation or a 2,048-game screen can see, and that the n-tuple leaf's training-target axis joins scale and fill conditioning as tested at this budget.",
+    "passAction": "Adopt treestrap-d3s7 as the candidate to carry forward at depth 3, and treestrap-d4s7 at depth 4 when its depth-4 verdict is 'supported'; record the off-path verdict; register as successors a longer TreeStrap run from the candidate at the winning step size and a depth-4 training search; do not open protected or final seeds."
+  },
+  "resources": {
+    "wallSeconds": 43200,
+    "cpuThreads": 32,
+    "maxHostBytes": 51539607552,
+    "maxGpuBytes": null,
+    "gpuDevices": []
+  },
+  "stopConditions": [
+    "Stop on any rules, information-boundary, legality, determinism, or parity failure.",
+    "Each training arm stops at its plateau rule (window 3 from the sixth training point, point 0 excluded), at 6 x 10^6 visited moves, or at 5,400 s of wall time, whichever comes first; an arm stopped by wall time keeps its best point and the fact is recorded.",
+    "A screen artifact with any illegal or incomplete decision voids the run (invalid), not the candidate.",
+    "The screen is evaluated exactly once; no re-run on the same or a different held-out block without a new experiment record. The screen binary rewrites the artifact after every completed arm; an interrupted screen is recorded as interrupted with the arms that completed, and the gate is not evaluated on a partial artifact.",
+    "The whole run is stopped at 43,200 s of wall time; such a run is recorded as interrupted with whatever stages completed.",
+    "Host memory above the declared bound (48 GiB resident) aborts the stage through the operating system or the operator; such a run is recorded as interrupted with its artifacts. A STOP file in a training arm's directory ends that arm at the next chunk (recorded as stop-file)."
+  ],
+  "expectedArtifacts": [
+    "runs/<run-id>/ntuple-scale/pilot/{treestrap05,treestrap20,searchtd05}/{config.json,progress.jsonl,start.json,val-*.json,best.json,best-weights.bin,stop.json,train.log,train.err,DONE} (the three arms; table files not committed)",
+    "runs/<run-id>/ntuple-scale/pilot/selection.json (the fixed selection rule's output)",
+    "runs/<run-id>/ntuple-scale/main/{prior,control,candidate,treestrapalt,searchtd}-weights.sha256 and main/gates-{candidate,treestrapalt,searchtd}.log (freeze)",
+    "runs/<run-id>/ntuple-scale/screen/heldout.json + compare-*.json (the one-shot screen, 2,048 games for the depth-3 and direct arms, 512 for the depth-4 arms)",
+    "runs/<run-id>/ntuple-scale/{pipeline.log,rusage.jsonl,screen.log,screen.err,analysis.json,analysis.md}",
+    "artifacts emitted by the trainer and the screen carry this experiment id in their config field; the candidate table file (4 GB) is retained on the workstation with its SHA-256 in the result record and published compressed to the research archive"
+  ],
+  "lifecycle": "completed",
+  "protocolSha256": "2e46385ce884a1e663fdac49317ae2cce9f251baf39c556274bf1b5ceef11076",
+  "amendments": [
+    {
+      "timestamp": "2026-09-07T17:07:22Z",
+      "beforeControlledData": false,
+      "reason": "lifecycle advanced preregistered -> completed after run RUN-20260907T041853Z-70c90dc9 and result RS-20260907T170344Z-17af2044 were written; protocol content otherwise unchanged (frozen protocol SHA-256 a880e8f091be35f7452517c0908ff1ee82e0fa08c783917deb6dc92574dad1d5)"
+    }
+  ],
+  "createdBy": {
+    "platform": "Claude Code",
+    "model": "claude-fable-5-1",
+    "agentId": "claude-code-ntuple-search-targets"
+  },
+  "createdAt": "2026-09-07T04:18:53Z",
+  "updatedAt": "2026-09-07T17:07:22Z"
+}

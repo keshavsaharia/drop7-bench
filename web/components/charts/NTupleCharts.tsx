@@ -10,7 +10,7 @@
  * line names the run.
  */
 import type { FigureSpec } from "@/lib/charts/spec";
-import { isFillSelection, type PilotStage, type TrainingRun } from "@/lib/charts/ntuple-scale";
+import { isFillSelection, isTreeSelection, type PilotStage, type TrainingRun } from "@/lib/charts/ntuple-scale";
 import { LineChart } from "./kinds/LineChart";
 import { ResearchChart } from "./ResearchChart";
 import { SERIES } from "./tokens";
@@ -79,7 +79,7 @@ export function TrainingCurve({ run, source = FALLBACK_SOURCE }: { run: Training
 export function PilotArms({ pilot, source = FALLBACK_SOURCE }: { pilot: PilotStage; source?: string }) {
   const rows = Object.entries(pilot.arms).filter(([, arm]) => arm.validations.length > 0);
   const games = rows[0]?.[1].validateGames ?? 64;
-  const selectedArm = pilot.selection ? (isFillSelection(pilot.selection) ? pilot.selection.candidateArm : pilot.selection.arm) : null;
+  const selectedArm = pilot.selection ? (isTreeSelection(pilot.selection) || isFillSelection(pilot.selection) ? pilot.selection.candidateArm : pilot.selection.arm) : null;
   const spec: FigureSpec = {
     title: "Training arms: paired margin over the fair leaf at the final validation point",
     kind: "delta",
