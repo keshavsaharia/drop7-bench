@@ -11,6 +11,10 @@ import {
   parseIosDashboardResult,
 } from "@/lib/analytics/queries";
 import { readLimitedJson } from "@/lib/request-body";
+import {
+  buildNavigationSql,
+  parseNavigationResult,
+} from "@/lib/analytics/navigation-query";
 
 export const runtime = "nodejs";
 export const maxDuration = 20;
@@ -24,6 +28,12 @@ interface QueryBody {
 
 export async function POST(request: Request) {
   const session = await auth();
+  if (!session?.user) {
+    return Response.json(
+      { error: "Your session expired. Sign in again to view analytics." },
+      { status: 401 },
+    );
+  }
   if (!isAnalyticsAdmin(session?.user)) {
     return Response.json({ error: "not-found" }, { status: 404 });
   }
@@ -39,24 +49,58 @@ export async function POST(request: Request) {
     return Response.json({ error: parsed.error }, { status: parsed.status });
   }
   const body = parsed.value as QueryBody;
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return Response.json({ error: "invalid-query" }, { status: 400 });
+  }
 
   try {
-    if (body.mode === "dashboard") {
-      if (!isAnalyticsRange(body.range) || !isAnalyticsAudience(body.audience)) {
-        return Response.json({ error: "invalid-dashboard-query" }, { status: 400 });
+    const now = new Date();
+    if (body.mode === "navigation") {
+      if (
+        !isAnalyticsRange(body.range) ||
+        !isAnalyticsAudience(body.audience)
+      ) {
+        return Response.json(
+          { error: "invalid-navigation-query" },
+          { status: 400 },
+        );
       }
       const result = await runAthenaQuery(
-        buildDashboardSql(body.range, body.audience),
+        buildNavigationSql(body.range, body.audience, now),
       );
-      return Response.json({ data: parseDashboardResult(result) });
+      return Response.json({ data: parseNavigationResult(result) });
+    }
+    if (body.mode === "dashboard") {
+      if (
+        !isAnalyticsRange(body.range) ||
+        !isAnalyticsAudience(body.audience)
+      ) {
+        return Response.json(
+          { error: "invalid-dashboard-query" },
+          { status: 400 },
+        );
+      }
+      const result = await runAthenaQuery(
+        buildDashboardSql(body.range, body.audience, now),
+      );
+      return Response.json({
+        data: parseDashboardResult(result, body.range, now),
+      });
     }
 
     if (body.mode === "ios-dashboard") {
       if (!isAnalyticsRange(body.range)) {
-        return Response.json({ error: "invalid-ios-dashboard-query" }, { status: 400 });
+        return Response.json(
+          { error: "invalid-ios-dashboard-query" },
+          { status: 400 },
+        );
       }
-      const result = await runAthenaQuery(buildIosDashboardSql(body.range));
-      return Response.json({ data: parseIosDashboardResult(result) });
+      const result = await runAthenaQuery(
+        buildIosDashboardSql(body.range, now),
+      );
+      return Response.json({
+        data: parseIosDashboardResult(result, body.range, now),
+      });
     }
 
     if (body.mode === "custom" && typeof body.sql === "string") {
@@ -66,8 +110,11 @@ export async function POST(request: Request) {
 
     return Response.json({ error: "invalid-query" }, { status: 400 });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Analytics query failed.";
-    const status = /allowed|characters|configured|statement/i.test(message) ? 400 : 502;
+    const message =
+      error instanceof Error ? error.message : "Analytics query failed.";
+    const status = /allowed|characters|configured|statement/i.test(message)
+      ? 400
+      : 502;
     console.warn(JSON.stringify({ event: "analytics_query_failed", message }));
     return Response.json({ error: message }, { status });
   }
