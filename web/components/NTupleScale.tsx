@@ -380,16 +380,22 @@ export function NTuplePilotFigure({ run, caption }: { run: string; caption?: str
   );
 }
 
-export function NTupleScreenFigure({ run, contrast = "candidate-d3s7-vs-fair-d3s7", caption }: { run: string; contrast?: string; caption?: string }) {
+export function NTupleScreenFigure({ run, contrast, caption }: { run: string; contrast?: string; caption?: string }) {
   const snapshot = loadSnapshot(run);
   const screen = snapshot?.screen;
-  const paired = screen?.paired[contrast];
+  /*
+   * Each experiment gates a different pair, so an unqualified figure follows the
+   * contrast the run itself recorded as primary. The literal is the fallback for
+   * the first two runs, whose snapshots predate the recorded field.
+   */
+  const key = contrast ?? screen?.primaryContrast ?? "candidate-d3s7-vs-fair-d3s7";
+  const paired = screen?.paired[key];
   if (!snapshot || !screen || !paired) return <Absent run={run} stage="held-out screen" caption={caption} />;
   const candidateLabel = ARM_LABELS[paired.candidateArm] ?? paired.candidateArm;
   const referenceLabel = ARM_LABELS[paired.referenceArm] ?? paired.referenceArm;
   return (
     <Frame run={run} caption={caption} sources={snapshot.sources.filter((s) => s.includes("screen"))}>
-      <h4 className="rchart-title">Held-out screen: {CONTRAST_LABELS[contrast] ?? contrast}</h4>
+      <h4 className="rchart-title">Held-out screen: {CONTRAST_LABELS[key] ?? key}</h4>
       {paired.perSeed.length > 0 ? (
         <ScreenPairs contrast={paired} arms={screen.arms} candidateLabel={candidateLabel} referenceLabel={referenceLabel} source={snapshot.runId} />
       ) : (

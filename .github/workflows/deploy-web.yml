@@ -60,8 +60,16 @@ jobs:
       - name: Lint frontend
         run: npm run lint --prefix web
 
-      - name: Generate AI scores for the global competition game
-        run: npm run bench -- --rounds gauntlet-01 --out web/data
+      - name: Select the catalogued competition rounds
+        id: rounds
+        shell: bash
+        run: |
+          rounds="$(node --experimental-strip-types web/scripts/competition-rounds.ts)"
+          echo "list=${rounds}" >> "${GITHUB_OUTPUT}"
+          echo "Benching catalogued competition rounds: ${rounds}"
+
+      - name: Generate AI scores for the catalogued competition games
+        run: npm run bench -- --rounds "${{ steps.rounds.outputs.list }}" --out web/data
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6.2.3
