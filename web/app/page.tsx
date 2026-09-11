@@ -132,7 +132,7 @@ export default async function HomePage() {
             The goal of this research is to find an autonomous strategy for playing the game as well as a human can.
           </p>
           <p className="home-hero-lead">
-            An experienced human player can score a million points in this game with the right long-term strategic thinking. The strongest research reference so far (<Link href="/approach/fair-expectimax/reference">depth-4 expectimax</Link>) averages about 300k points, so the research problem is very much still open.
+            An experienced human player can score a million points in this game with the right long-term strategic thinking. The strongest research candidate so far (<Link href="/approach/ntuple-rl/ntuple-scale">learned lookup tables inside a depth-4 search</Link>) averaged 516,155 points over 512 games it had never seen, where the same <Link href="/approach/fair-expectimax/reference">depth-4 expectimax</Link> with its hand-written leaf averaged 382,567 on those same games. Both are well under a million, so the research problem is very much still open.
           </p>
           <div className="home-hero-actions">
             <Button href="/play">Play the game</Button>
@@ -151,7 +151,7 @@ export default async function HomePage() {
       </section>
 
       <section className="home-stats" aria-label="Where things stand">
-        <Stat label="Reference mean" value="308,296" hint="fair D4, 64 games (ledger)" />
+        <Stat label="Best candidate mean" value="516,155" hint="n-tuple tables at fair D4, 512 games (screen)" />
         <Stat label="Target mean" value="1,000,000+" hint="frozen qualification bar" />
         <Stat label="Approaches" value={String(approachCount)} hint={`${families.length} families`} />
         <Stat label="Theories" value={String(theories.length)} hint="registered claims" />
