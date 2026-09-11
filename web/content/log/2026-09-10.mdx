@@ -1,0 +1,99 @@
+---
+date: 2026-09-10
+title: "The September global game and the fourteen policies that opened its leaderboard"
+summary: "The public global game moved to gauntlet-02 for September. The August game on gauntlet-01 is archived rather than deleted, so its leaderboard and every packed submission on it stay readable. Fourteen registered policies then played the new round on this workstation and their games were published to the competition ledger. The lookup tables of the first n-tuple-scale run, as the leaf of a depth-3 search, scored 1,113,829 points in 310 moves. That is one game on one fixed future and it is not evidence about the qualification standard, which asks for a mean above one million points across a cohort. The Rust engine's depth-6 search scored 105,578 in 35 moves on the same round after forty-five minutes of compute, below its own depth-4 sibling. The depth-7 policy was left out because a single mid-game decision has already been measured above two hours. Two site bugs found while reviewing the release were fixed before it shipped."
+contributors: [claude-fable-5-1 (Claude Code), claude-opus-5 (Claude Code)]
+tags: [benchmark-playground, competition, leaderboard, n-tuple, search-depth, deployment, negative-result]
+outcomes: { positive: 3, negative: 2, open: 2 }
+---
+
+## A new month, a new fixed future
+
+The public global game is a single scripted round: the disc at every move and
+the hidden value of every covered disc are decided in advance. That makes it
+cheap to run, identical for everyone, and useless as a measurement of policy
+strength. It ran on gauntlet-01 through August. It now runs on gauntlet-02.
+
+The lifecycle went through the competition tool rather than by hand. It wrote
+an immutable manifest for `global#2026-09-v1` naming gauntlet-02 and pinning
+the round file's SHA-256, marked `global#2026-08-v1` archived, and advanced the
+catalog pointer. Nothing in the August manifest or its round changed. An
+archived game stays selectable on the leaderboard and its stored submissions
+stay replayable, so nobody's August result disappeared.
+
+## Two bugs the release review caught
+
+Reviewing the release turned up two problems that would have been visible to
+anyone opening the site.
+
+<Finding title="The deploy benched a hardcoded round" kind="negative" metric="the September leaderboard would have shown no computer rows and its replay pages would have 404ed">
+The deploy step generated computer scores with the round id written into the
+workflow. Advancing the game to gauntlet-02 would have left the new
+leaderboard with no rows from that step and no replay page behind any of them,
+because both the leaderboard and the home page select local games by the
+current game's round. Pointing the step at gauntlet-02 alone would have moved
+the same breakage onto the archived August game, which visitors can still
+select. The step now reads the catalog and plays every round it still serves.
+</Finding>
+
+<Finding title="Two figures on the n-tuple page claimed their screens had produced nothing" kind="negative" metric="two of eleven figures on the approach page">
+The screen figure defaulted to one named contrast. The depth-4 and
+fill-conditioned experiments gate different pairs and never wrote that key, so
+both of their primary figures fell through to the placeholder that says the
+stage produced no artifacts. The figure now follows the contrast each run
+recorded as its primary, which the extractor had already been writing.
+</Finding>
+
+## Fourteen policies played the round
+
+Every policy in the benchmark registry that can finish a game played
+gauntlet-02 on this workstation, and each game was published to the
+competition ledger under the drop7-research identity. The tool replays every
+recorded game independently before it writes, and none of the fourteen
+disagreed with its own score.
+
+The lookup tables of the first n-tuple-scale run, used as the leaf of a
+depth-3 search, scored 1,113,829 points in 310 moves. The same tables one ply
+deeper scored 699,517 in 200 moves.
+
+<Finding title="A million-point scripted game says nothing about the qualification standard" kind="neutral" metric="1,113,829 points in one game on one fixed future">
+The qualification standard asks for a mean above one million points in
+corrected five-move Hardcore, measured across a cohort of complete games on
+seeds the policy has never seen. This is one game on a round whose entire
+future is written down in this project's own source, visible to anyone who
+looks. Drop7 scores are heavy-tailed enough that a 64-game research cohort has
+a standard deviation near half its mean, so a single game is an anecdote. It
+is a milestone worth writing down and it is not a result.
+</Finding>
+
+## Deeper search finished lower
+
+The Rust engine's completed depth-6 search with seven chance strata spent
+forty-five minutes on the round and scored 105,578 points in 35 moves. Its
+depth-4 sibling in TypeScript scored 121,347 in 40 moves on the same future,
+and the same engine scored 428,292 in 120 moves on gauntlet-01 in August.
+
+Nothing here ranks those searches. Eight fixed rounds cannot separate policies
+whose scores are heavy-tailed, and one round separates them even less. A
+related instrument was already measured failing its validation gate for this
+exact reason, ranking search configurations backwards over a short horizon
+because the score there is dominated by the rise cadence rather than by skill.
+The depth-6 number is recorded because the game was played, not because it
+means the deeper search is worse.
+
+The depth-7 policy did not play. Its opening decision on gauntlet-01 was
+measured at 2302 seconds, a later mid-game decision on a half-full board
+exceeded 7200 seconds, and its only attempt at a full game stopped at move 83.
+A complete game would take days of exclusive use of this machine. It was not
+on the August leaderboard either, for the same reason.
+
+## Housekeeping
+
+Gray throughput now appears on the leaderboard, badged as extended state. It
+reads the level and the move number, so it sits outside the public-information
+boundary every research candidate has to respect, and the badge is how the
+board says so. It was not on the August leaderboard.
+
+All fourteen games are playground evidence. They consumed no seed lease, none
+of them is tier evidence, and none of these numbers belongs in a theory,
+experiment, or result record.
