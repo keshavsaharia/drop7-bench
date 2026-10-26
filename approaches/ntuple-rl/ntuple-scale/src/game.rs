@@ -10,8 +10,8 @@ use drop7_rs::board::BOARD_SIZE;
 use drop7_rs::engine::{play_headless_move, FullWaveSink, State};
 use drop7_rs::search::{DepthTable, FairLeaf, Searcher, SearchParams};
 
-use crate::model::{Model, MAX_ACTIVE};
-use crate::policy::{choose, NTupleLeaf, PolicyParams};
+use crate::model::{CalibrationConfig, Model, MAX_ACTIVE};
+use crate::policy::{choose, HybridLeaf, NTupleLeaf, PolicyParams};
 use crate::{deployment_params, reference_d4_params, DEPLOYMENT_TABLE, REFERENCE_TABLE};
 
 pub const MOVE_CAP: i32 = 2_000;
@@ -33,7 +33,7 @@ pub struct SearchPlayer<L: drop7_rs::search::Leaf> {
 impl<L: drop7_rs::search::Leaf> Player for SearchPlayer<L> {
     #[inline]
     fn decide(&mut self, state: &State) -> (i32, u64, i32) {
-        let (action, metrics) = self.searcher.choose_action(state);
+        let (action, metrics) = self.searcher.choose_action_fixed_depth(state);
         (action, metrics.work, metrics.completed_depth)
     }
     fn depth(&self) -> i32 {
@@ -70,6 +70,10 @@ pub enum Arm {
     /// The tables inside the reference search (d4s7): the same frozen tables
     /// one completed ply deeper, otherwise the fair-d4s7 configuration.
     NTupleD4(Arc<Model>),
+    /// Calibrated/hybrid N-tuple leaf inside the deployment search (d3s7).
+    HybridD3(Arc<Model>, CalibrationConfig),
+    /// Calibrated/hybrid N-tuple leaf inside the reference search (d4s7).
+    HybridD4(Arc<Model>, CalibrationConfig),
     /// The tables played directly, one ply, seven reveal strata.
     Direct(Arc<Model>),
 }
@@ -101,6 +105,22 @@ impl Arm {
                 ),
                 depth: 4,
             }),
+            Arm::HybridD3(model, cfg) => Box::new(SearchPlayer {
+                searcher: Searcher::new(
+                    deployment_params(),
+                    HybridLeaf::new(model.clone(), *cfg),
+                    DepthTable::new(DEPLOYMENT_TABLE, 1),
+                ),
+                depth: 3,
+            }),
+            Arm::HybridD4(model, cfg) => Box::new(SearchPlayer {
+                searcher: Searcher::new(
+                    reference_d4_params(),
+                    HybridLeaf::new(model.clone(), *cfg),
+                    DepthTable::new(REFERENCE_TABLE, 1),
+                ),
+                depth: 4,
+            }),
             Arm::Direct(model) => Box::new(DirectPlayer {
                 model: model.clone(),
                 params: PolicyParams::default(),
@@ -111,8 +131,8 @@ impl Arm {
 
     pub fn search_params(&self) -> Option<SearchParams> {
         match self {
-            Arm::FairD3 | Arm::NTupleD3(_) => Some(deployment_params()),
-            Arm::FairD4 | Arm::NTupleD4(_) => Some(reference_d4_params()),
+            Arm::FairD3 | Arm::NTupleD3(_) | Arm::HybridD3(_, _) => Some(deployment_params()),
+            Arm::FairD4 | Arm::NTupleD4(_) | Arm::HybridD4(_, _) => Some(reference_d4_params()),
             Arm::Direct(_) => None,
         }
     }

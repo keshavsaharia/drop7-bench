@@ -20,9 +20,9 @@ use std::sync::Arc;
 use drop7_rs::board::EMPTY;
 use drop7_rs::engine::{play_move_sampled, State, Wave, WaveSink};
 use drop7_rs::rng::{scenario_seed_for_state, StratifiedRandom};
-use drop7_rs::search::{canonical_state, Leaf, COLUMN_ORDER};
+use drop7_rs::search::{canonical_state, FairLeaf, Leaf, COLUMN_ORDER};
 
-use crate::model::{Model, MAX_ACTIVE, VALUE_SCALE};
+use crate::model::{CalibrationConfig, Model, MAX_ACTIVE, VALUE_SCALE};
 
 #[derive(Clone, Copy, Debug)]
 pub struct PolicyParams {
@@ -180,6 +180,55 @@ impl Leaf for NTupleLeaf {
     #[inline]
     fn value(&mut self, state: &State) -> f64 {
         VALUE_SCALE * self.model.value(&state.board, state.moves_remaining, &mut self.scratch) as f64
+    }
+
+    #[inline(always)]
+    fn value_for_next_disc(&mut self, _state: &State, first_value: f64) -> f64 {
+        first_value
+    }
+}
+
+/// Calibrated N-tuple leaf with optional FairLeaf tactical & next-disc blending.
+pub struct HybridLeaf {
+    pub model: Arc<Model>,
+    pub cfg: CalibrationConfig,
+    fair: FairLeaf,
+    last_ntuple_val: f64,
+}
+
+impl HybridLeaf {
+    pub fn new(model: Arc<Model>, cfg: CalibrationConfig) -> HybridLeaf {
+        HybridLeaf {
+            model,
+            cfg,
+            fair: FairLeaf::default(),
+            last_ntuple_val: 0.0,
+        }
+    }
+}
+
+impl Leaf for HybridLeaf {
+    #[inline]
+    fn value(&mut self, state: &State) -> f64 {
+        let nt = VALUE_SCALE
+            * self
+                .model
+                .value_calibrated(&state.board, state.moves_remaining, &self.cfg) as f64;
+        self.last_ntuple_val = nt;
+        if self.cfg.fair_w != 0.0 {
+            nt + self.cfg.fair_w * self.fair.value(state)
+        } else {
+            nt
+        }
+    }
+
+    #[inline(always)]
+    fn value_for_next_disc(&mut self, state: &State, _first_value: f64) -> f64 {
+        if self.cfg.fair_w != 0.0 {
+            self.last_ntuple_val + self.cfg.fair_w * self.fair.value_for_next_disc(state, 0.0)
+        } else {
+            self.last_ntuple_val
+        }
     }
 }
 

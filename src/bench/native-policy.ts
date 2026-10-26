@@ -131,10 +131,12 @@ export interface NTupleQueryOptions {
   weights?: string;
   /**
    * "ntuple-d3" (the tables as the d3s7 leaf), "ntuple-d4" (the same tables as
-   * the leaf of the reference d4s7 search, about forty times the work) or
-   * "direct" (one ply, no search).
+   * the leaf of the reference d4s7 search, about forty times the work),
+   * "hybrid-d3" / "hybrid-d4" (calibrated leaf evaluation), or "direct" (one ply, no search).
    */
-  arm?: "ntuple-d3" | "ntuple-d4" | "direct";
+  arm?: "ntuple-d3" | "ntuple-d4" | "hybrid-d3" | "hybrid-d4" | "direct";
+  /** Optional calibration specification string passed via `--cal`. */
+  cal?: string;
   binary?: string;
   timeoutMs?: number;
 }
@@ -166,15 +168,19 @@ export function ntupleDecide(
       `n-tuple policy needs its frozen tables at ${weights} (a run artifact under runs/, not committed); set DROP7_NTUPLE_WEIGHTS to a Model::save file`,
     );
   }
+  const args = [
+    "--arm", options.arm ?? "ntuple-d3",
+    "--weights", weights,
+    "--board", serializeBoard(state.board),
+    "--next", String(state.nextDisc),
+    "--rise", String(state.movesRemaining),
+  ];
+  if (options.cal) {
+    args.push("--cal", options.cal);
+  }
   const output = execFileSync(
     binary,
-    [
-      "--arm", options.arm ?? "ntuple-d3",
-      "--weights", weights,
-      "--board", serializeBoard(state.board),
-      "--next", String(state.nextDisc),
-      "--rise", String(state.movesRemaining),
-    ],
+    args,
     { encoding: "utf8", timeout: options.timeoutMs ?? DEFAULT_TIMEOUT_MS },
   );
   const column = Number.parseInt(output.trim(), 10);

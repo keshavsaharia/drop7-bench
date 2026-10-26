@@ -21,7 +21,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 use drop7_ntuple_scale::game::{atomic_write, evaluate_arm, mean_moves, mean_score, population_artifact_json, Arm, Individual, MOVE_CAP};
-use drop7_ntuple_scale::model::Model;
+use drop7_ntuple_scale::model::{CalibrationConfig, Model};
 
 const DEFAULT_EXPERIMENT_ID: &str = "EX-20260905-ntuple-scale-tc-td-leaf-d3-535b2620";
 
@@ -34,9 +34,13 @@ fn main() -> Result<(), String> {
     let mut move_cap = MOVE_CAP;
     let mut skip_d4 = false;
     let mut skip_direct = false;
+    let mut skip_fair = false;
     let mut extra: Vec<(String, String)> = Vec::new();
     let mut extra_d3: Vec<(String, String)> = Vec::new();
     let mut extra_d4: Vec<(String, String)> = Vec::new();
+    let mut hybrid_d3: Vec<(String, String, CalibrationConfig)> = Vec::new();
+    let mut hybrid_d4: Vec<(String, String, CalibrationConfig)> = Vec::new();
+    let mut blend_controls: Vec<(String, String, f32, f32)> = Vec::new();
     let mut experiment_id = DEFAULT_EXPERIMENT_ID.to_string();
     let args: Vec<String> = std::env::args().collect();
     let mut i = 1;
@@ -49,6 +53,11 @@ fn main() -> Result<(), String> {
             }
             "--skip-direct" => {
                 skip_direct = true;
+                i += 1;
+                continue;
+            }
+            "--skip-fair" => {
+                skip_fair = true;
                 i += 1;
                 continue;
             }
@@ -75,6 +84,25 @@ fn main() -> Result<(), String> {
                     _ => extra_d4.push((name.to_string(), path.to_string())),
                 }
             }
+            "--hybrid-d3" | "--hybrid-d4" => {
+                let (name, rest) = value.split_once('=').ok_or("--hybrid expects NAME=FILE[:SPEC]")?;
+                let (path, spec) = rest.split_once(':').unwrap_or((rest, ""));
+                let cfg = CalibrationConfig::parse(spec)?;
+                if args[i].as_str() == "--hybrid-d3" {
+                    hybrid_d3.push((name.to_string(), path.to_string(), cfg));
+                } else {
+                    hybrid_d4.push((name.to_string(), path.to_string(), cfg));
+                }
+            }
+            "--blend-control" => {
+                let parts: Vec<&str> = value.split(':').collect();
+                if parts.len() != 4 {
+                    return Err("--blend-control expects BASE_FILE:CONTROL_FILE:W_SHARED:W_NEW".into());
+                }
+                let w_s: f32 = parts[2].parse().map_err(|_| "bad W_SHARED")?;
+                let w_n: f32 = parts[3].parse().map_err(|_| "bad W_NEW")?;
+                blend_controls.push((parts[0].to_string(), parts[1].to_string(), w_s, w_n));
+            }
             "--experiment-id" => experiment_id = value.to_string(),
             other => return Err(format!("unknown argument {other}")),
         }
@@ -90,6 +118,12 @@ fn main() -> Result<(), String> {
             return Ok(model.clone());
         }
         let model = Arc::new(Model::load(std::path::Path::new(path), false)?);
+        for (base, ctrl, w_s, w_n) in &blend_controls {
+            if base == path {
+                eprintln!("blending control {ctrl} into {base} (w_shared={w_s}, w_new={w_n})...");
+                model.blend_control(std::path::Path::new(ctrl), *w_s, *w_n)?;
+            }
+        }
         loaded.insert(path.to_string(), model.clone());
         Ok(model)
     };
@@ -125,6 +159,14 @@ fn main() -> Result<(), String> {
         let model = load(path)?;
         arms.push((format!("{name}-d4s7"), Arm::NTupleD4(model)));
     }
+    for (name, path, cfg) in &hybrid_d3 {
+        let model = load(path)?;
+        arms.push((format!("{name}-d3s7"), Arm::HybridD3(model, *cfg)));
+    }
+    for (name, path, cfg) in &hybrid_d4 {
+        let model = load(path)?;
+        arms.push((format!("{name}-d4s7"), Arm::HybridD4(model, *cfg)));
+    }
     {
         let mut names: Vec<&str> = arms.iter().map(|(n, _)| n.as_str()).collect();
         names.sort_unstable();
@@ -133,9 +175,11 @@ fn main() -> Result<(), String> {
             return Err("an arm name is used twice".into());
         }
     }
-    arms.push(("fair-d3s7".into(), Arm::FairD3));
-    if !skip_d4 {
-        arms.push(("fair-d4s7".into(), Arm::FairD4));
+    if !skip_fair {
+        arms.push(("fair-d3s7".into(), Arm::FairD3));
+        if !skip_d4 {
+            arms.push(("fair-d4s7".into(), Arm::FairD4));
+        }
     }
 
     // The config names every planned arm; the artifact lists the completed

@@ -315,3 +315,29 @@ test(
     assert.equal(policy.chooseColumn({ ...state, gameOver: true }), null);
   },
 );
+
+test(
+  "the calibrated depth-3 n-tuple registry policy is legal, deterministic, and public-information",
+  {
+    skip:
+      !ntupleAvailable() &&
+      `${NTUPLE_QUERY_BINARY} is not built or ${ntupleWeightsPath()} is absent`,
+  },
+  () => {
+    const state: GameState = stateFromPosition(
+      parsePosition(["startpos", "next", "4", "rise", "5"]),
+    );
+    const policy = getPolicy("ntuple-scale-cal-d3s7");
+    const first = policy.chooseColumn(state);
+    assert.equal(policy.chooseColumn(state), first, "same public state, same column");
+    assert.ok(
+      first !== null && first >= 0 && first < BOARD_SIZE,
+      "calibrated depth-3 n-tuple policy answered with a column",
+    );
+    assert.equal(policy.publicInformation, true);
+    assert.equal(policy.family, "ntuple-rl");
+    assert.equal(policy.slow, true);
+    assert.equal(policy.researchPath, getPolicy("ntuple-scale-d3s7").researchPath);
+    assert.equal(policy.chooseColumn({ ...state, gameOver: true }), null);
+  },
+);

@@ -304,6 +304,21 @@ export const BENCH_POLICIES: readonly BenchPolicy[] = [
         timeoutMs: 3_600_000,
       }),
   }),
+  define({
+    id: "ntuple-scale-cal-d3s7",
+    name: "Calibrated N-tuple tables (stem backoff + next_disc pop coverage), fair D3, 7 strata",
+    family: "ntuple-rl",
+    description:
+      "Zero-retraining surgical leaf calibration on the frozen n-tuple-scale tables: untouched optimism correction, top-row additive survival penalties, buried-7 depth penalty, phase-aware height-7 column stem backoff, and bitwise Rao-Blackwellized next_disc wave-1 pop coverage and overlap evaluation inside the depth-3 seven-stratum fair search.",
+    researchPath: "/approach/ntuple-rl/ntuple-scale",
+    publicInformation: true,
+    slow: true,
+    chooseColumn: (state) =>
+      ntupleDecide(publicOnly(state), {
+        arm: "hybrid-d3",
+        cal: "ut_mode=2,ut_rows=2,ut_col_h=0,ut_w23=4,ut_w32=5,row0_add=1.0,row1_add=1.0,buried7=0.5,b7_all_k=1,col_h7_zero=1,col_stem=1.0,col_h7_shift=0.15,col_h7_mr1=0.3,col_h6_mr1=0.15,nd_min_h=6,nd_pop=0.15,nd_ovlp=0.05,nd_low_scale=0.25,nd_h5_scale=0.4",
+      }),
+  }),
 ];
 
 export const DEFAULT_POLICY_IDS = BENCH_POLICIES.filter(

@@ -310,6 +310,176 @@ fn atomic_vec(len: usize, value: f32) -> Vec<AtomicU32> {
     out
 }
 
+/// Optimistic per-entry initialization for the 74-tuple layout (`20.0 / 74.0`).
+pub const INIT_VAL: f32 = 20.0f32 / 74.0f32;
+pub const INIT_BITS: u32 = INIT_VAL.to_bits();
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct CalibrationConfig {
+    /// 0 = raw (none), 1 = all tuples (Keshav's zeroed), 2 = selective high-elevation only.
+    pub ut_mode: u8,
+    pub ut_val: f32,
+    pub ut_rows: usize,
+    pub ut_col_h: usize,
+    pub ut_w23: usize,
+    pub ut_w32: usize,
+    /// Additive singleton marginal cap on `row 0` (height 7 death row) when occupied.
+    pub row0_add: f32,
+    /// Additive singleton marginal cap on `row 1` (height 6 row) when k >= 2.
+    pub row1_add: f32,
+    /// Smooth downward shift subtracted from `cols[c]` when column height == 7.
+    pub col_h7_shift: f32,
+    /// Smooth downward shift subtracted from `cols[c]` when column height == 6.
+    pub col_h6_shift: f32,
+    /// Mirror-baseline cap on `win23(top == 0)` when `pattern != 0`.
+    pub w23_top0_sym: f32,
+    /// Mirror-baseline cap on `win32(top == 0)` when `pattern != 0`.
+    pub w32_top0_sym: f32,
+    /// If 1, uses `w0.min(0.0)` as base in `w23_top0_sym` / `w32_top0_sym`; if 0, uses `w0`.
+    pub top0_zero: u8,
+    /// Bonus scaling in `row 1` when a height-6 column has a buried `7` in rows 2..6.
+    pub buried7: f32,
+    /// If 1, applies `buried7` across all k >= 1 and decouples `row1_add` sum_delta.
+    pub b7_all_k: u8,
+    /// Bonus scaling in `row 2` when a height-5 column has a buried `6` in rows 3..6.
+    pub buried6: f32,
+    /// Additive singleton marginal cap on `row 2` (height 5 row) when k >= 2.
+    pub row2_add: f32,
+    /// Band around INIT_VAL treated as under-visited in ut_mode=2 (for non-empty patterns).
+    pub ut_eps: f32,
+    /// If 1, caps height-7 columns in `cols[c]` at <= 0.0 (eliminating 1-visit +0.27 landmines).
+    pub col_h7_zero: u8,
+    /// Blending weight toward lower-height stem (`word & 0x00FF_FFFF` / `0x000F_FFFF`) for height-7 cols.
+    pub col_stem: f32,
+    /// Blending weight toward 5-high stem (`word & 0x000F_FFFF`) for height-6 cols without a 7.
+    pub col_h6_stem: f32,
+    /// Extra downward shift on height-7 `cols[c]` when `moves_remaining == 1` (half when `== 2`).
+    pub col_h7_mr1: f32,
+    /// Extra downward shift on height-6 `cols[c]` (without a 7) when `moves_remaining == 1`.
+    pub col_h6_mr1: f32,
+    /// Iteration 2: Rao-Blackwellized next_disc wave-1 pop coverage bonus (`union_pop / 7`).
+    pub nd_pop: f32,
+    /// Iteration 2: Redundant cross-column next_disc pop overlap penalty (`overlap / 7`).
+    pub nd_ovlp: f32,
+    /// Iteration 2: Wave-1 cover-crack next_disc coverage bonus (`crack_pop / 7`).
+    pub nd_crack: f32,
+    /// Iteration 2: Exact ply-4 row-rise death fraction penalty when `moves_remaining == 1`.
+    pub nd_mr1_dead: f32,
+    /// Iteration 2: Minimum board max_height required for nd_pop/nd_ovlp/nd_tall_pop to apply.
+    pub nd_min_h: u8,
+    /// Iteration 2: Wave-1 pop coverage restricted to tall columns (h >= 4 or spanning h >= 5).
+    pub nd_tall_pop: f32,
+    /// Iteration 3: Stem backoff in `win23(top=0)` and `win32(top=0)` when height 7 is reached.
+    pub win_stem: f32,
+    /// Iteration 3: Untouched stem backoff in `win23(top=0..1)` and `win32(top=1)` when height 6 is reached.
+    pub win_top1_stem: f32,
+    /// Iteration 3: Neutral baseline count (out of 7) subtracted from `union_pop` in `nd_pop`.
+    pub nd_base: f32,
+    /// Iteration 3: Scale factor in [0, 1] applied to `nd_pop`/`nd_ovlp` when `max_h < nd_min_h`.
+    pub nd_low_scale: f32,
+    /// Iteration 3: Scale factor in [0, 1] applied at `max_h == 5` (smooth geometric ramp `low -> h5 -> 1.0`).
+    pub nd_h5_scale: f32,
+    /// Weight of FairLeaf (in points) blended in HybridLeaf.
+    pub fair_w: f64,
+}
+
+impl Default for CalibrationConfig {
+    fn default() -> Self {
+        CalibrationConfig {
+            ut_mode: 0,
+            ut_val: 0.0,
+            ut_rows: 1,
+            ut_col_h: 6,
+            ut_w23: 0,
+            ut_w32: 0,
+            row0_add: 0.0,
+            row1_add: 0.0,
+            col_h7_shift: 0.0,
+            col_h6_shift: 0.0,
+            w23_top0_sym: 0.0,
+            w32_top0_sym: 0.0,
+            top0_zero: 0,
+            buried7: 0.0,
+            b7_all_k: 0,
+            buried6: 0.0,
+            row2_add: 0.0,
+            ut_eps: 0.0,
+            col_h7_zero: 0,
+            col_stem: 0.0,
+            col_h6_stem: 0.0,
+            col_h7_mr1: 0.0,
+            col_h6_mr1: 0.0,
+            nd_pop: 0.0,
+            nd_ovlp: 0.0,
+            nd_crack: 0.0,
+            nd_mr1_dead: 0.0,
+            nd_min_h: 0,
+            nd_tall_pop: 0.0,
+            win_stem: 0.0,
+            win_top1_stem: 0.0,
+            nd_base: 0.0,
+            nd_low_scale: 0.0,
+            nd_h5_scale: 0.0,
+            fair_w: 0.0,
+        }
+    }
+}
+
+impl CalibrationConfig {
+    pub fn parse(spec: &str) -> Result<Self, String> {
+        let mut cfg = Self::default();
+        if spec.is_empty() {
+            return Ok(cfg);
+        }
+        for part in spec.split(',') {
+            let part = part.trim();
+            if part.is_empty() {
+                continue;
+            }
+            let (k, v) = part.split_once('=').ok_or_else(|| format!("bad calibration kv: {part}"))?;
+            match k {
+                "ut_mode" => cfg.ut_mode = v.parse().map_err(|_| format!("bad ut_mode: {v}"))?,
+                "ut_val" => cfg.ut_val = v.parse().map_err(|_| format!("bad ut_val: {v}"))?,
+                "ut_rows" => cfg.ut_rows = v.parse().map_err(|_| format!("bad ut_rows: {v}"))?,
+                "ut_col_h" => cfg.ut_col_h = v.parse().map_err(|_| format!("bad ut_col_h: {v}"))?,
+                "ut_w23" => cfg.ut_w23 = v.parse().map_err(|_| format!("bad ut_w23: {v}"))?,
+                "ut_w32" => cfg.ut_w32 = v.parse().map_err(|_| format!("bad ut_w32: {v}"))?,
+                "row0_add" => cfg.row0_add = v.parse().map_err(|_| format!("bad row0_add: {v}"))?,
+                "row1_add" => cfg.row1_add = v.parse().map_err(|_| format!("bad row1_add: {v}"))?,
+                "col_h7_shift" => cfg.col_h7_shift = v.parse().map_err(|_| format!("bad col_h7_shift: {v}"))?,
+                "col_h6_shift" => cfg.col_h6_shift = v.parse().map_err(|_| format!("bad col_h6_shift: {v}"))?,
+                "w23_top0_sym" => cfg.w23_top0_sym = v.parse().map_err(|_| format!("bad w23_top0_sym: {v}"))?,
+                "w32_top0_sym" => cfg.w32_top0_sym = v.parse().map_err(|_| format!("bad w32_top0_sym: {v}"))?,
+                "top0_zero" => cfg.top0_zero = v.parse().map_err(|_| format!("bad top0_zero: {v}"))?,
+                "buried7" => cfg.buried7 = v.parse().map_err(|_| format!("bad buried7: {v}"))?,
+                "b7_all_k" => cfg.b7_all_k = v.parse().map_err(|_| format!("bad b7_all_k: {v}"))?,
+                "buried6" => cfg.buried6 = v.parse().map_err(|_| format!("bad buried6: {v}"))?,
+                "row2_add" => cfg.row2_add = v.parse().map_err(|_| format!("bad row2_add: {v}"))?,
+                "ut_eps" => cfg.ut_eps = v.parse().map_err(|_| format!("bad ut_eps: {v}"))?,
+                "col_h7_zero" => cfg.col_h7_zero = v.parse().map_err(|_| format!("bad col_h7_zero: {v}"))?,
+                "col_stem" => cfg.col_stem = v.parse().map_err(|_| format!("bad col_stem: {v}"))?,
+                "col_h6_stem" => cfg.col_h6_stem = v.parse().map_err(|_| format!("bad col_h6_stem: {v}"))?,
+                "col_h7_mr1" => cfg.col_h7_mr1 = v.parse().map_err(|_| format!("bad col_h7_mr1: {v}"))?,
+                "col_h6_mr1" => cfg.col_h6_mr1 = v.parse().map_err(|_| format!("bad col_h6_mr1: {v}"))?,
+                "nd_pop" => cfg.nd_pop = v.parse().map_err(|_| format!("bad nd_pop: {v}"))?,
+                "nd_ovlp" => cfg.nd_ovlp = v.parse().map_err(|_| format!("bad nd_ovlp: {v}"))?,
+                "nd_crack" => cfg.nd_crack = v.parse().map_err(|_| format!("bad nd_crack: {v}"))?,
+                "nd_mr1_dead" => cfg.nd_mr1_dead = v.parse().map_err(|_| format!("bad nd_mr1_dead: {v}"))?,
+                "nd_min_h" => cfg.nd_min_h = v.parse().map_err(|_| format!("bad nd_min_h: {v}"))?,
+                "nd_tall_pop" => cfg.nd_tall_pop = v.parse().map_err(|_| format!("bad nd_tall_pop: {v}"))?,
+                "win_stem" => cfg.win_stem = v.parse().map_err(|_| format!("bad win_stem: {v}"))?,
+                "win_top1_stem" => cfg.win_top1_stem = v.parse().map_err(|_| format!("bad win_top1_stem: {v}"))?,
+                "nd_base" => cfg.nd_base = v.parse().map_err(|_| format!("bad nd_base: {v}"))?,
+                "nd_low_scale" => cfg.nd_low_scale = v.parse().map_err(|_| format!("bad nd_low_scale: {v}"))?,
+                "nd_h5_scale" => cfg.nd_h5_scale = v.parse().map_err(|_| format!("bad nd_h5_scale: {v}"))?,
+                "fair_w" => cfg.fair_w = v.parse().map_err(|_| format!("bad fair_w: {v}"))?,
+                _ => return Err(format!("unknown calibration key: {k}")),
+            }
+        }
+        Ok(cfg)
+    }
+}
+
 #[derive(Default, Clone, Copy, Debug)]
 pub struct UpdateStats {
     pub updates: u64,
@@ -482,13 +652,20 @@ impl Model {
         }
         if layout.win23 {
             let phase_offset = slab(layout.phase == PhaseMode::All, WINDOW_PATTERNS);
+            let mut n3 = [[0u32; 5]; BOARD_SIZE];
+            for (c, &word) in cols.iter().enumerate() {
+                if word != 0 {
+                    for top in 0..=4usize {
+                        n3[c][top] = self.codec.nib3(chunk3(word, top));
+                    }
+                }
+            }
             let mut placement = 0usize;
             for c in 0..BOARD_SIZE - 1 {
-                let left = cols[c];
-                let right = cols[c + 1];
+                let left = &n3[c];
+                let right = &n3[c + 1];
                 for top in 0..=4usize {
-                    let pattern = self.codec.nib3(chunk3(left, top))
-                        + 1000 * self.codec.nib3(chunk3(right, top));
+                    let pattern = left[top] + 1000 * right[top];
                     out[count] = (self.off[WIN23] + placement * self.size[WIN23] + phase_offset)
                         as u64
                         + pattern as u64;
@@ -499,15 +676,21 @@ impl Model {
         }
         if layout.win32 {
             let phase_offset = slab(layout.phase == PhaseMode::All, WINDOW_PATTERNS);
+            let mut n2 = [[0u32; 6]; BOARD_SIZE];
+            for (c, &word) in cols.iter().enumerate() {
+                if word != 0 {
+                    for top in 0..=5usize {
+                        n2[c][top] = self.codec.nib2(chunk2(word, top));
+                    }
+                }
+            }
             let mut placement = 0usize;
             for c in 0..BOARD_SIZE - 2 {
-                let a = cols[c];
-                let b = cols[c + 1];
-                let d = cols[c + 2];
+                let a = &n2[c];
+                let b = &n2[c + 1];
+                let d = &n2[c + 2];
                 for top in 0..=5usize {
-                    let pattern = self.codec.nib2(chunk2(a, top))
-                        + 100 * self.codec.nib2(chunk2(b, top))
-                        + 10_000 * self.codec.nib2(chunk2(d, top));
+                    let pattern = a[top] + 100 * b[top] + 10_000 * d[top];
                     out[count] = (self.off[WIN32] + placement * self.size[WIN32] + phase_offset)
                         as u64
                         + pattern as u64;
@@ -567,6 +750,575 @@ impl Model {
     pub fn value(&self, board: &Board, moves_remaining: i32, scratch: &mut [u64; MAX_ACTIVE]) -> f32 {
         let n = self.features(board, moves_remaining, scratch);
         self.value_of(&scratch[..n])
+    }
+
+    /// Calibrated N-tuple evaluation that corrects multi-column dilution in
+    /// `row 0` and `row 1`, left-right mirror baseline inversion in `top == 0`
+    /// windows, and the 0-visit vs 1-visit cliff in high-elevation tuples,
+    /// without mutating or duplicating the 4.0 GB table in memory.
+    #[inline]
+    pub fn value_calibrated(
+        &self,
+        board: &Board,
+        moves_remaining: i32,
+        cfg: &CalibrationConfig,
+    ) -> f32 {
+        const POW10: [usize; 7] = [1, 10, 100, 1_000, 10_000, 100_000, 1_000_000];
+        let canonical = if board.mirrored_is_smaller() {
+            board.mirrored()
+        } else {
+            *board
+        };
+        let cols = &canonical.cols;
+        let phase = (moves_remaining.clamp(1, PHASES as i32) - 1) as usize;
+        let layout = self.layout;
+        let bucket = layout.fill.bucket(&canonical);
+        let slab = |conditioned: bool, patterns: usize| -> usize {
+            let phases = if conditioned { PHASES } else { 1 };
+            let p = if conditioned { phase } else { 0 };
+            (bucket * phases + p) * patterns
+        };
+        let is_ut = |raw_bits: u32, non_empty: bool| -> bool {
+            raw_bits == INIT_BITS
+                || (non_empty
+                    && cfg.ut_eps > 0.0
+                    && (f32::from_bits(raw_bits) - INIT_VAL).abs() <= cfg.ut_eps)
+        };
+        let mut sum = 0.0f32;
+        if layout.rows {
+            let rows = row_words(cols);
+            let phase_offset = slab(layout.phase == PhaseMode::All, LINE_PATTERNS);
+            for (r, &word) in rows.iter().enumerate() {
+                let table_base = self.off[ROWS] + r * self.size[ROWS] + phase_offset;
+                let pattern = self.codec.line(word) as usize;
+                let raw_bits = self.weights[table_base + pattern].load(Relaxed);
+                let mut w = if is_ut(raw_bits, word != 0)
+                    && (cfg.ut_mode == 1 || (cfg.ut_mode == 2 && r <= cfg.ut_rows))
+                {
+                    cfg.ut_val
+                } else {
+                    f32::from_bits(raw_bits)
+                };
+                if r == 0 && word != 0 && cfg.row0_add > 0.0 {
+                    let w0 = load(&self.weights[table_base]);
+                    let mut sum_delta = 0.0f32;
+                    for c in 0..BOARD_SIZE {
+                        let d = ((word >> (4 * c)) & 0xF) as usize;
+                        if d != 0 {
+                            let cm = c.max(BOARD_SIZE - 1 - c);
+                            let mut s_bits = self.weights[table_base + d * POW10[cm]].load(Relaxed);
+                            if s_bits == INIT_BITS {
+                                let d_eff = if d == 1 || d == 7 { 3 } else { d };
+                                s_bits = self.weights[table_base + d_eff * POW10[cm]].load(Relaxed);
+                                if s_bits == INIT_BITS {
+                                    s_bits = self.weights[table_base + d_eff * POW10[4]].load(Relaxed);
+                                }
+                            }
+                            sum_delta += (f32::from_bits(s_bits) - w0).min(0.0);
+                        }
+                    }
+                    let w_add = w0 + sum_delta;
+                    if w_add < w {
+                        w += cfg.row0_add * (w_add - w);
+                    }
+                } else if r == 1 && word != 0 && (cfg.row1_add > 0.0 || cfg.buried7 > 0.0) {
+                    let w0 = load(&self.weights[table_base]);
+                    let mut sum_delta = 0.0f32;
+                    let mut buried_bonus = 0.0f32;
+                    let mut k = 0u32;
+                    for c in 0..BOARD_SIZE {
+                        let d = ((word >> (4 * c)) & 0xF) as usize;
+                        if d != 0 {
+                            k += 1;
+                            let cm = c.max(BOARD_SIZE - 1 - c);
+                            let low5 = cols[c] & 0x000F_FFFF;
+                            let has_b7 = (cols[c] >> 24) == 0
+                                && (low5 & (low5 >> 1) & (low5 >> 2) & 0x0001_1111) != 0;
+                            if cfg.b7_all_k != 0 {
+                                let d_cur = if d == 1 || d == 6 { 3 } else { d };
+                                let s_cur = load(&self.weights[table_base + d_cur * POW10[cm]]);
+                                sum_delta += (s_cur - w0).min(0.0);
+                                if has_b7 && cfg.buried7 > 0.0 && d != 7 {
+                                    let s_7 = load(&self.weights[table_base + 7 * POW10[cm]]);
+                                    buried_bonus += cfg.buried7 * (s_7 - s_cur).max(0.0);
+                                }
+                            } else {
+                                let d_eff = if has_b7 && cfg.buried7 > 0.0 {
+                                    7
+                                } else if d == 1 {
+                                    3
+                                } else {
+                                    d
+                                };
+                                let s_eff = load(&self.weights[table_base + d_eff * POW10[cm]]);
+                                sum_delta += s_eff - w0;
+                                if has_b7 && cfg.buried7 > 0.0 && d != 7 {
+                                    let d_cur = if d == 1 { 3 } else { d };
+                                    let s_cur = load(&self.weights[table_base + d_cur * POW10[cm]]);
+                                    buried_bonus += cfg.buried7 * (s_eff - s_cur).max(0.0);
+                                }
+                            }
+                        }
+                    }
+                    if cfg.b7_all_k != 0 {
+                        if k >= 2 && cfg.row1_add > 0.0 {
+                            let w_add = w0 + sum_delta;
+                            if w_add < w {
+                                w += cfg.row1_add * (w_add - w);
+                            }
+                        }
+                        w += buried_bonus;
+                    } else if k >= 2 && cfg.row1_add > 0.0 {
+                        let w_add = w0 + sum_delta;
+                        if w_add < w {
+                            w += cfg.row1_add * (w_add - w);
+                        }
+                    } else if k == 1 && buried_bonus > 0.0 {
+                        w += buried_bonus;
+                    }
+                } else if r == 2 && word != 0 && (cfg.row2_add > 0.0 || cfg.buried6 > 0.0) {
+                    if cfg.row2_add > 0.0 {
+                        let w0 = load(&self.weights[table_base]);
+                        let mut sum_delta = 0.0f32;
+                        let mut k = 0u32;
+                        for c in 0..BOARD_SIZE {
+                            let d = ((word >> (4 * c)) & 0xF) as usize;
+                            if d != 0 {
+                                k += 1;
+                                let cm = c.max(BOARD_SIZE - 1 - c);
+                                let mut s_bits = self.weights[table_base + d * POW10[cm]].load(Relaxed);
+                                if s_bits == INIT_BITS {
+                                    let d_eff = if d == 1 || d == 5 { 3 } else { d };
+                                    s_bits = self.weights[table_base + d_eff * POW10[cm]].load(Relaxed);
+                                }
+                                sum_delta += (f32::from_bits(s_bits) - w0).min(0.0);
+                            }
+                        }
+                        if k >= 2 {
+                            let w_add = w0 + sum_delta;
+                            if w_add < w {
+                                w += cfg.row2_add * (w_add - w);
+                            }
+                        }
+                    }
+                    if cfg.buried6 > 0.0 {
+                        for c in 0..BOARD_SIZE {
+                            let d = ((word >> (4 * c)) & 0xF) as usize;
+                            if d != 0 && d != 6 && (cols[c] >> 20) == 0 {
+                                let low4 = cols[c] & 0x0000_FFFF;
+                                if ((!low4) & (low4 >> 1) & (low4 >> 2) & 0x0000_1111) != 0 {
+                                    let cm = c.max(BOARD_SIZE - 1 - c);
+                                    let d_cur = if d == 1 || d == 5 { 3 } else { d };
+                                    let s_cur = load(&self.weights[table_base + d_cur * POW10[cm]]);
+                                    let s_6 = load(&self.weights[table_base + 6 * POW10[cm]]);
+                                    w += cfg.buried6 * (s_6 - s_cur).max(0.0);
+                                }
+                            }
+                        }
+                    }
+                }
+                sum += w;
+            }
+        }
+        if layout.cols {
+            let phase_offset = slab(layout.phase != PhaseMode::None, LINE_PATTERNS);
+            for (c, &word) in cols.iter().enumerate() {
+                let table_base = self.off[COLS] + c * self.size[COLS] + phase_offset;
+                let pattern = self.codec.line(word) as usize;
+                let raw_bits = self.weights[table_base + pattern].load(Relaxed);
+                let h_ge_min = cfg.ut_col_h == 0 || (cfg.ut_col_h <= 7 && word >= (1u32 << (4 * (cfg.ut_col_h - 1))));
+                let mut w = if is_ut(raw_bits, word != 0)
+                    && (cfg.ut_mode == 1 || (cfg.ut_mode == 2 && h_ge_min))
+                {
+                    cfg.ut_val
+                } else {
+                    f32::from_bits(raw_bits)
+                };
+                if word >= 0x0100_0000 {
+                    if cfg.col_h7_zero != 0 {
+                        w = w.min(0.0);
+                    }
+                    if cfg.col_stem > 0.0 {
+                        let w6_word = word & 0x00FF_FFFF;
+                        let raw6 = self.weights[table_base + self.codec.line(w6_word) as usize].load(Relaxed);
+                        let mut w_stem = if !is_ut(raw6, true) {
+                            f32::from_bits(raw6)
+                        } else {
+                            let w5_word = word & 0x000F_FFFF;
+                            let raw5 = self.weights[table_base + self.codec.line(w5_word) as usize].load(Relaxed);
+                            if !is_ut(raw5, true) {
+                                f32::from_bits(raw5)
+                            } else {
+                                cfg.ut_val
+                            }
+                        };
+                        if cfg.col_h7_zero != 0 {
+                            w_stem = w_stem.min(0.0);
+                        }
+                        if w_stem < w {
+                            w += cfg.col_stem * (w_stem - w);
+                        }
+                    }
+                    if cfg.col_h7_shift != 0.0 {
+                        w -= cfg.col_h7_shift;
+                    }
+                    if cfg.col_h7_mr1 != 0.0 {
+                        if phase == 0 {
+                            w -= cfg.col_h7_mr1;
+                        } else if phase == 1 {
+                            w -= 0.5 * cfg.col_h7_mr1;
+                        }
+                    }
+                } else if word >= 0x0010_0000 && word < 0x0100_0000 {
+                    let has_7 = (word & (word >> 1) & (word >> 2) & 0x0011_1111) != 0;
+                    if !has_7 {
+                        if cfg.col_h6_stem > 0.0 {
+                            let w5_word = word & 0x000F_FFFF;
+                            let raw5 = self.weights[table_base + self.codec.line(w5_word) as usize].load(Relaxed);
+                            let w5 = if !is_ut(raw5, true) {
+                                f32::from_bits(raw5)
+                            } else {
+                                cfg.ut_val
+                            };
+                            if w5 < w {
+                                w += cfg.col_h6_stem * (w5 - w);
+                            }
+                        }
+                        if cfg.col_h6_shift != 0.0 {
+                            w -= cfg.col_h6_shift;
+                        }
+                        if cfg.col_h6_mr1 != 0.0 && phase == 0 {
+                            w -= cfg.col_h6_mr1;
+                        }
+                    }
+                }
+                sum += w;
+            }
+        }
+        if layout.win23 {
+            let phase_offset = slab(layout.phase == PhaseMode::All, WINDOW_PATTERNS);
+            let mut n3 = [[0u32; 5]; BOARD_SIZE];
+            for (c, &word) in cols.iter().enumerate() {
+                if word != 0 {
+                    for top in 0..=4usize {
+                        n3[c][top] = self.codec.nib3(chunk3(word, top));
+                    }
+                }
+            }
+            let mut placement = 0usize;
+            for c in 0..BOARD_SIZE - 1 {
+                let left = &n3[c];
+                let right = &n3[c + 1];
+                for top in 0..=4usize {
+                    let pattern = (left[top] + 1000 * right[top]) as usize;
+                    let table_base = self.off[WIN23] + placement * self.size[WIN23] + phase_offset;
+                    let raw_bits = self.weights[table_base + pattern].load(Relaxed);
+                    let pat_ut = is_ut(raw_bits, pattern != 0)
+                        && (cfg.ut_mode == 1 || (cfg.ut_mode == 2 && top <= cfg.ut_w23));
+                    let mut w = if pat_ut {
+                        cfg.ut_val
+                    } else {
+                        f32::from_bits(raw_bits)
+                    };
+                    if top == 0 && (left[0] >= 10 || right[0] >= 10) && cfg.w23_top0_sym > 0.0 {
+                        let p_h5 = ((left[0] % 10) + 1000 * (right[0] % 10)) as usize;
+                        let w_h5 = load(&self.weights[table_base + p_h5]);
+                        let base = if cfg.top0_zero != 0 { w_h5.min(0.0) } else { w_h5 };
+                        let bound = base + (f32::from_bits(raw_bits) - INIT_VAL).min(0.0);
+                        if bound < w {
+                            w += cfg.w23_top0_sym * (bound - w);
+                        }
+                    }
+                    if top == 0 && (left[0] >= 100 || right[0] >= 100) && cfg.win_stem > 0.0 {
+                        if (left[0] / 100) != 7 && (right[0] / 100) != 7 {
+                            let eval_p = |p: usize| -> f32 {
+                                let b = self.weights[table_base + p].load(Relaxed);
+                                if is_ut(b, p != 0) && (cfg.ut_mode == 1 || (cfg.ut_mode == 2 && top <= cfg.ut_w23)) {
+                                    cfg.ut_val
+                                } else {
+                                    f32::from_bits(b)
+                                }
+                            };
+                            let p6 = ((left[0] % 100) + 1000 * (right[0] % 100)) as usize;
+                            let p5 = ((left[0] % 10) + 1000 * (right[0] % 10)) as usize;
+                            let bound = eval_p(p6).min(eval_p(p5)).min(0.0);
+                            if bound < w {
+                                w += cfg.win_stem * (bound - w);
+                            }
+                        }
+                    } else if pat_ut && cfg.win_top1_stem > 0.0 {
+                        if top == 0 && (left[0] >= 10 || right[0] >= 10) {
+                            let p5 = ((left[0] % 10) + 1000 * (right[0] % 10)) as usize;
+                            let b5 = self.weights[table_base + p5].load(Relaxed);
+                            let w5 = if is_ut(b5, p5 != 0) { cfg.ut_val } else { f32::from_bits(b5) };
+                            let bound = w5.min(0.0);
+                            if bound < w {
+                                w += cfg.win_top1_stem * (bound - w);
+                            }
+                        } else if top == 1 && (left[1] >= 100 || right[1] >= 100) {
+                            let p5 = ((left[1] % 100) + 1000 * (right[1] % 100)) as usize;
+                            let b5 = self.weights[table_base + p5].load(Relaxed);
+                            let w5 = if is_ut(b5, p5 != 0) { cfg.ut_val } else { f32::from_bits(b5) };
+                            let bound = w5.min(0.0);
+                            if bound < w {
+                                w += cfg.win_top1_stem * (bound - w);
+                            }
+                        }
+                    }
+                    sum += w;
+                    placement += 1;
+                }
+            }
+        }
+        if layout.win32 {
+            let phase_offset = slab(layout.phase == PhaseMode::All, WINDOW_PATTERNS);
+            let mut n2 = [[0u32; 6]; BOARD_SIZE];
+            for (c, &word) in cols.iter().enumerate() {
+                if word != 0 {
+                    for top in 0..=5usize {
+                        n2[c][top] = self.codec.nib2(chunk2(word, top));
+                    }
+                }
+            }
+            let mut placement = 0usize;
+            for c in 0..BOARD_SIZE - 2 {
+                let a = &n2[c];
+                let b = &n2[c + 1];
+                let d = &n2[c + 2];
+                for top in 0..=5usize {
+                    let pattern = (a[top] + 100 * b[top] + 10_000 * d[top]) as usize;
+                    let table_base = self.off[WIN32] + placement * self.size[WIN32] + phase_offset;
+                    let raw_bits = self.weights[table_base + pattern].load(Relaxed);
+                    let pat_ut = is_ut(raw_bits, pattern != 0)
+                        && (cfg.ut_mode == 1 || (cfg.ut_mode == 2 && top <= cfg.ut_w32));
+                    let mut w = if pat_ut {
+                        cfg.ut_val
+                    } else {
+                        f32::from_bits(raw_bits)
+                    };
+                    if top == 0 && pattern != 0 && cfg.w32_top0_sym > 0.0 {
+                        let w0 = load(&self.weights[table_base]);
+                        let base = if cfg.top0_zero != 0 { w0.min(0.0) } else { w0 };
+                        let bound = base + (f32::from_bits(raw_bits) - INIT_VAL).min(0.0);
+                        if bound < w {
+                            w += cfg.w32_top0_sym * (bound - w);
+                        }
+                    }
+                    if top == 0 && (a[0] >= 10 || b[0] >= 10 || d[0] >= 10) && cfg.win_stem > 0.0 {
+                        if (a[0] / 10) != 7 && (b[0] / 10) != 7 && (d[0] / 10) != 7 {
+                            let p6 = ((a[0] % 10) + 100 * (b[0] % 10) + 10_000 * (d[0] % 10)) as usize;
+                            let b6 = self.weights[table_base + p6].load(Relaxed);
+                            let w6 = if is_ut(b6, p6 != 0) && (cfg.ut_mode == 1 || (cfg.ut_mode == 2 && top <= cfg.ut_w32)) {
+                                cfg.ut_val
+                            } else {
+                                f32::from_bits(b6)
+                            };
+                            let bound = w6.min(0.0);
+                            if bound < w {
+                                w += cfg.win_stem * (bound - w);
+                            }
+                        }
+                    } else if pat_ut && top == 1 && (a[1] >= 10 || b[1] >= 10 || d[1] >= 10) && cfg.win_top1_stem > 0.0 {
+                        let p5 = ((a[1] % 10) + 100 * (b[1] % 10) + 10_000 * (d[1] % 10)) as usize;
+                        let b5 = self.weights[table_base + p5].load(Relaxed);
+                        let w5 = if is_ut(b5, p5 != 0) { cfg.ut_val } else { f32::from_bits(b5) };
+                        let bound = w5.min(0.0);
+                        if bound < w {
+                            w += cfg.win_top1_stem * (bound - w);
+                        }
+                    }
+                    sum += w;
+                    placement += 1;
+                }
+            }
+        }
+        if cfg.nd_pop != 0.0
+            || cfg.nd_ovlp != 0.0
+            || cfg.nd_crack != 0.0
+            || cfg.nd_mr1_dead != 0.0
+            || cfg.nd_tall_pop != 0.0
+        {
+            let mut heights = [0u8; BOARD_SIZE];
+            let mut h7_mask = 0u8;
+            let mut h5_mask = 0u8;
+            let mut min_h = 7u8;
+            let mut max_h = 0u8;
+            for c in 0..BOARD_SIZE {
+                let w = cols[c];
+                let nz = (w | (w >> 1) | (w >> 2) | (w >> 3)) & 0x0111_1111;
+                let h = nz.count_ones() as u8;
+                heights[c] = h;
+                if h == 7 {
+                    h7_mask |= 1u8 << c;
+                }
+                if h >= 5 {
+                    h5_mask |= 1u8 << c;
+                }
+                if h < min_h {
+                    min_h = h;
+                }
+                if h > max_h {
+                    max_h = h;
+                }
+            }
+            let h_scale = if max_h >= cfg.nd_min_h {
+                1.0f32
+            } else if max_h == 5 && cfg.nd_h5_scale > 0.0 {
+                cfg.nd_h5_scale
+            } else {
+                cfg.nd_low_scale
+            };
+            if h_scale > 0.0 {
+                let mut union_pop = 0u8;
+                let mut tall_union_pop = 0u8;
+                let mut crack_pop = 0u8;
+                let mut sum_col_pops = 0u32;
+                let mut h7_rescue = 0u8;
+                for c in 0..BOARD_SIZE {
+                    let h = heights[c] as usize;
+                    if h >= 7 {
+                        continue;
+                    }
+                    let h_new = (h + 1) as u32;
+                    let sh = 4 * h;
+                    let col = cols[c];
+                    let xor = col ^ (h_new * 0x0111_1111);
+                    let col_has_hnew =
+                        ((xor | (xor >> 1) | (xor >> 2) | (xor >> 3)) & 0x0111_1111) != 0x0111_1111;
+                    let v_mask: u8 = if col_has_hnew { 0xFE } else { 1u8 << h_new };
+
+                    let mut left = c;
+                    while left > 0 && heights[left - 1] as usize > h {
+                        left -= 1;
+                    }
+                    let mut right = c;
+                    while right + 1 < BOARD_SIZE && heights[right + 1] as usize > h {
+                        right += 1;
+                    }
+                    let run_len = (right - left + 1) as u32;
+                    let mut row_has_len = false;
+                    for k in left..=right {
+                        if k != c && ((cols[k] >> sh) & 0xF) == run_len {
+                            row_has_len = true;
+                            break;
+                        }
+                    }
+                    let h_mask: u8 = if row_has_len { 0xFE } else { 1u8 << run_len };
+                    let col_pop = v_mask | h_mask;
+                    union_pop |= col_pop;
+                    sum_col_pops += col_pop.count_ones();
+
+                    let span_mask = ((1u16 << (right + 1)) - (1u16 << left)) as u8;
+                    if h >= 4 {
+                        tall_union_pop |= col_pop;
+                    } else if (span_mask & h5_mask) != 0 {
+                        tall_union_pop |= h_mask;
+                    }
+
+                    let adj_cover = (h > 0 && ((col >> (sh - 4)) & 8) != 0)
+                        || (c > 0 && ((cols[c - 1] >> sh) & 8) != 0)
+                        || (c + 1 < BOARD_SIZE && ((cols[c + 1] >> sh) & 8) != 0);
+                    if adj_cover {
+                        crack_pop |= (1u8 << h_new) | (1u8 << run_len);
+                    }
+                    if col_has_hnew && (col & 0x0888_8888) != 0 {
+                        crack_pop |= 0xFE;
+                    }
+                    if h7_mask != 0 {
+                        if (span_mask & h7_mask) != 0 {
+                            h7_rescue |= h_mask;
+                        }
+                        if (c > 0 && (h7_mask & (1u8 << (c - 1))) != 0)
+                            || (c + 1 < BOARD_SIZE && (h7_mask & (1u8 << (c + 1))) != 0)
+                        {
+                            h7_rescue |= col_pop;
+                        }
+                    }
+                }
+                let u_cnt = union_pop.count_ones() as f32;
+                if cfg.nd_pop != 0.0 {
+                    sum += h_scale * cfg.nd_pop * ((u_cnt - cfg.nd_base) / 7.0);
+                }
+                if cfg.nd_tall_pop != 0.0 {
+                    sum += h_scale * cfg.nd_tall_pop * (tall_union_pop.count_ones() as f32 / 7.0);
+                }
+                if cfg.nd_ovlp != 0.0 && sum_col_pops > union_pop.count_ones() {
+                    let ovlp = (sum_col_pops - union_pop.count_ones()) as f32;
+                    sum -= h_scale * cfg.nd_ovlp * (ovlp / 7.0);
+                }
+                if cfg.nd_crack != 0.0 {
+                    sum += h_scale * cfg.nd_crack * (crack_pop.count_ones() as f32 / 7.0);
+                }
+                if cfg.nd_mr1_dead != 0.0 && phase == 0 {
+                    if h7_mask != 0 {
+                        let dead_no_pop = (7 - union_pop.count_ones()) as f32;
+                        let dead_no_rescue = (7 - h7_rescue.count_ones()) as f32;
+                        sum -= h_scale * cfg.nd_mr1_dead * ((0.5 * dead_no_pop + 0.5 * dead_no_rescue) / 7.0);
+                    } else if min_h >= 6 {
+                        let dead = (7 - union_pop.count_ones()) as f32;
+                        sum -= h_scale * cfg.nd_mr1_dead * (dead / 7.0);
+                    }
+                }
+            }
+        }
+        sum
+    }
+
+    /// Stream a second weight file (`control`) in 256 KB chunks and blend into
+    /// `self.weights` in place with zero extra memory allocation.
+    pub fn blend_control(
+        &self,
+        path: &std::path::Path,
+        w_shared: f32,
+        w_new: f32,
+    ) -> Result<(), String> {
+        let file = std::fs::File::open(path).map_err(|e| format!("{}: {e}", path.display()))?;
+        let mut input = std::io::BufReader::with_capacity(1 << 20, file);
+        let mut magic = [0u8; 8];
+        input.read_exact(&mut magic).map_err(|e| e.to_string())?;
+        if &magic != MAGIC {
+            return Err(format!("{}: not a D7NTUP01 file", path.display()));
+        }
+        let mut len = [0u8; 4];
+        input.read_exact(&mut len).map_err(|e| e.to_string())?;
+        let mut spec = vec![0u8; u32::from_le_bytes(len) as usize];
+        input.read_exact(&mut spec).map_err(|e| e.to_string())?;
+        let layout = Layout::parse(std::str::from_utf8(&spec).map_err(|e| e.to_string())?)?;
+        if layout != self.layout {
+            return Err(format!("{}: layout mismatch", path.display()));
+        }
+        let mut count = [0u8; 8];
+        input.read_exact(&mut count).map_err(|e| e.to_string())?;
+        let count = u64::from_le_bytes(count) as usize;
+        if count != self.weights.len() {
+            return Err(format!("{}: entry count mismatch", path.display()));
+        }
+        let mut flag = [0u8; 1];
+        input.read_exact(&mut flag).map_err(|e| e.to_string())?;
+        let mut buffer = vec![0u8; 1 << 18];
+        for chunk in self.weights.chunks(1 << 16) {
+            let bytes = chunk.len() * 4;
+            input.read_exact(&mut buffer[..bytes]).map_err(|e| e.to_string())?;
+            for (cell, word) in chunk.iter().zip(buffer[..bytes].chunks_exact(4)) {
+                let p_bits = cell.load(Relaxed);
+                let c_bits = u32::from_le_bytes([word[0], word[1], word[2], word[3]]);
+                if p_bits == c_bits {
+                    continue;
+                }
+                let blended = if p_bits == INIT_BITS {
+                    let c = f32::from_bits(c_bits);
+                    INIT_VAL + w_new * (c - INIT_VAL)
+                } else if c_bits == INIT_BITS {
+                    f32::from_bits(p_bits)
+                } else {
+                    let p = f32::from_bits(p_bits);
+                    let c = f32::from_bits(c_bits);
+                    (1.0 - w_shared) * p + w_shared * c
+                };
+                cell.store(blended.to_bits(), Relaxed);
+            }
+        }
+        Ok(())
     }
 
     /// Temporal-coherence semi-gradient step toward `target` for the state
